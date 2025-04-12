@@ -1,0 +1,38 @@
+@Component
+script Tower extends Component
+
+	@Sync
+	property number MaxHp = 100
+
+	@Sync
+	property boolean IsDestroyed = false
+
+	@Sync
+	property number Hp = 0
+
+	property Entity healthBarEntity = nil
+
+	method void OnBeginPlay()
+		self.Hp = self.MaxHp
+		
+		if self:IsClient() then 
+			local healthbarPrefab = 'model://16209410-ef40-4633-977c-c4c896e988d7'
+			local healthbarEntity = _SpawnService:SpawnByModelId(healthbarPrefab, 'healthbar', Vector3.up, self.Entity)
+			healthbarEntity:GetChildByName('Healthbar').SpriteGUIRendererComponent.FillAmount = 1
+			self.healthBarEntity = healthbarEntity
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnSyncProperty(string name, any value)
+		if name == "Hp" then
+			if isvalid(self.healthBarEntity) then
+				local currentHp = tonumber(value)
+				local ratio = currentHp / self.MaxHp
+				
+				self.healthBarEntity:GetChildByName('Healthbar').SpriteGUIRendererComponent.FillAmount = ratio
+			end
+		end
+	end
+
+end
