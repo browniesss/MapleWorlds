@@ -11,6 +11,9 @@ script Unit extends Component
 	property number moveSpeed = 1
 
 	@Sync
+	property number originMoveSpeed = 0
+
+	@Sync
 	property number maxHP = 0
 
 	@Sync
@@ -129,9 +132,13 @@ script Unit extends Component
 	@Sync
 	property integer damageTimerID = 0
 
+	@Sync
+	property integer moveSpeedTimerID = 0
+
 	@ExecSpace("Server")
 	method void Spawn(table unitData, table skillData)
 		self.moveSpeed = unitData["moveSpeed"]
+		self.originMoveSpeed = unitData["moveSpeed"]
 		self.hp = unitData["hp"]
 		self.maxHP = unitData["hp"]
 		self.originMaxHP = unitData["hp"]
@@ -673,8 +680,22 @@ script Unit extends Component
 		
 				self.damageTimerID = _TimerService:SetTimerOnce(deleteFunction, buffTime) 
 			end
+		elseif buffType == _eBuffType.MoveSpeedBuff then
+			self.moveSpeed += buffAmount
+			
+			if self.moveSpeedTimerID ~= 0 then
+				_TimerService:ClearTimer(self.moveSpeedTimerID)
+			end
+			
+			if buffTime ~= 0 then
+				deleteFunction = function()
+					self.moveSpeedTimerID = 0
+					self.moveSpeed = self.originMoveSpeed
+				end
+				
+				self.moveSpeedTimerID = _TimerService:SetTimerOnce(deleteFunction, buffTime)
+			end
 		end
-		
 	end
 
 	method void OnHit(Entity attacker, number damage, boolean isCritical, number attackCount)
@@ -786,6 +807,7 @@ script Unit extends Component
 
 	method void SpawnEnemy(table unitData, table skillData)
 		self.moveSpeed = unitData["moveSpeed"]
+		self.originMoveSpeed = unitData["moveSpeed"]
 		self.hp = unitData["hp"]
 		self.maxHP = unitData["hp"]
 		self.originMaxHP = unitData["hp"]
