@@ -11,16 +11,13 @@ script OurHealthBar extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnUpdate(number delta)
-		if _EntityService:GetEntity('8ed350f6-5d33-4488-8b83-92ccd146450b') == nil then
+		local tower = _EntityService:GetEntity(_GameManager:GetGameMapName().."/PlayerTower")
+		
+		if tower == nil then
 			return 
 		end
 		
-		local playerTower = _EntityService:GetEntity('8ed350f6-5d33-4488-8b83-92ccd146450b')
-		if playerTower == nil then 
-			return
-		end
-		
-		self.myHP.Value = playerTower.Unit.hp / playerTower.Unit.maxHP
+		self.myHP.Value = tower.Unit.hp / tower.Unit.maxHP
 	end
 
 end

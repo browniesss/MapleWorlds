@@ -12,16 +12,13 @@ script EnemyHealthBar extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnUpdate(number delta)
-		if _EntityService:GetEntity('f5af730d-fbdb-40ee-adeb-57c1caeda316') == nil then
+		local tower = _EntityService:GetEntity(_GameManager:GetGameMapName().."/EnemyTower")
+		
+		if tower == nil then
 			return 
 		end
 		
-		local enemyTower = _EntityService:GetEntity('f5af730d-fbdb-40ee-adeb-57c1caeda316')
-		if enemyTower == nil then 
-			return
-		end
-		
-		self.myHP.Value = enemyTower.Unit.hp / enemyTower.Unit.maxHP
+		self.myHP.Value = tower.Unit.hp / tower.Unit.maxHP
 	end
 
 end
