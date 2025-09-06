@@ -1,12 +1,7 @@
 @Component
-script StageSelectorClickHandler extends Component
+script CallBackButton extends Component
 
-	property table clickEventCallbackList = {}
-
-	method void AddCallback(any callback)
-		self.clickEventCallbackList = {}
-		self.clickEventCallbackList[#self.clickEventCallbackList + 1] = callback
-	end
+	property any callback = nil
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
@@ -18,11 +13,11 @@ script StageSelectorClickHandler extends Component
 		-- Parameters
 		-- local Entity = event.Entity
 		---------------------------------------------------------
-		
-		
-		for index, callback in ipairs(self.clickEventCallbackList) do
-		    callback()
+		if self.callback == nil then
+			return
 		end
+		
+		self.callback()
 	end
 
 end

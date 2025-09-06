@@ -3,6 +3,8 @@ script StageService extends Logic
 
 	property table data = {}
 
+	property table idMap = {}
+
 	@ExecSpace("Client")
 	method table GetAllStage()
 		return self.data
@@ -24,15 +26,17 @@ script StageService extends Logic
 	end
 
 	@ExecSpace("Client")
-	method table GetStageById(integer id)
-		local target = self.data[id]
+	method table GetStageById(string id)
+		local index = self.idMap[id]
+		local target = self.data[index]
 		
 		return target
 	end
 
 	@ExecSpace("Server")
-	method table GetStageByIdFromServer(integer id)
-		local target = self.data[id]
+	method table GetStageByIdFromServer(string id)
+		local index = self.idMap[id]
+		local target = self.data[index]
 		
 		return target
 	end
@@ -45,14 +49,36 @@ script StageService extends Logic
 		for i = 1, stageCount do
 			local stage = {}
 			
-			stage["id"] = tonumber(dataSet:GetCell(i,"id"))
+			stage["id"] = tostring(dataSet:GetCell(i,"id"))
 			stage["chapter"] = tonumber(dataSet:GetCell(i,"chapter"))
+			stage["stage"] = tonumber(dataSet:GetCell(i,"stage"))
 			stage["info"] = tostring(dataSet:GetCell(i,"ruid_info"))
 			stage["button"] = tostring(dataSet:GetCell(i,"ruid_button"))
 			stage["enemy_tower_hp"] = tonumber(dataSet:GetCell(i,"enemy_tower_hp"))
 			
-			self.data[stage.id] = stage 
+			self.data[i] = stage
+			self.idMap[stage.id] = i
 		end
+	end
+
+	@ExecSpace("Client")
+	method table GetNextOpenStageId(integer chapter, integer stage)
+		local id = tostring(stage + 100 * chapter)
+		local index = self.idMap[id]
+		
+		if index < #self.data then
+			local nextStage = self.data[index + 1]
+			
+			return {
+				chapter=nextStage.chapter,
+				stage=nextStage.stage
+			}
+		end
+		
+		return {
+			chapter=chapter,
+			stage=stage
+		}
 	end
 
 end

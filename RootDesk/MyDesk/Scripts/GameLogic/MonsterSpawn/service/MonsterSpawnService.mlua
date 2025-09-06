@@ -107,20 +107,22 @@ script MonsterSpawnService extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnMapEnter(Entity enteredMap)
-		if enteredMap.Name ~= "Chapter1" then
+		if string.find(enteredMap.Name, "Stage") == nil then
 			return
 		end
 		
 		local userStage = _UserService.LocalPlayer.UserStage
 		
-		self:SetStage(userStage.selectStage)
+		self:SetStage(userStage.selectChapter, userStage.selectStage)
 	end
 
-	method void SetStage(integer targetStage)
-		log("current stage is " .. targetStage)
+	method void SetStage(integer targetChapter, integer targetStage)
+		local target = tostring(targetStage + 100 * targetChapter)
+		
+		log("current stage is " .. target)
 		
 		local settingFunction = function() 
-			local patterns = _patternRepo:GetPatternByStage(targetStage)
+			local patterns = _patternRepo:GetPatternByStage(target)
 			self.curTimeTs = 0
 		
 			for i, pattern in ipairs(patterns) do

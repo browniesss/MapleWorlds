@@ -8,6 +8,10 @@ script StageSelectorUI extends Component
 	@Sync
 	property UserStage userStage = nil
 
+	property Entity nextButton = "8574a53d-397d-40b1-800c-8ece798f5108"
+
+	property Entity prevButton = "054fd667-8cb8-4012-b703-28b84f55b65e"
+
 	method void UpdateData()
 		local path = self.Entity.Path
 		
@@ -21,7 +25,7 @@ script StageSelectorUI extends Component
 		
 		self.StageInfoPanel = _EntityService:GetEntityByPath(path .. "/StageInfoPanel/panel")
 		
-		for i = 1, 5 do
+		for i = 1, 6 do
 			local entity = _EntityService:GetEntityByPath(path .. "/StageSelectScroll/Select_" .. tostring(i))
 			if i > stageCount then
 				entity:SetEnable(false)
@@ -37,11 +41,11 @@ script StageSelectorUI extends Component
 			
 			entity.StageSelectItemUI:SetImage(stageDataList[i].button)
 			
-			if i <= openStage then
+			if i <= openStage or selectChapter ~= openChapter then
 				entity.StageSelectItemUI:SetNotSelected()
 			end
 			
-			if i > openStage then
+			if i > openStage and selectChapter == openChapter then
 				entity.StageSelectItemUI:SetLocked()
 			end
 			
@@ -51,6 +55,8 @@ script StageSelectorUI extends Component
 			end
 		end
 		
+		self.nextButton:SetEnable(selectChapter < openChapter)
+		self.prevButton:SetEnable(selectChapter > 1)
 		
 	end
 
@@ -62,15 +68,16 @@ script StageSelectorUI extends Component
 		
 		local stageDataList = _StageService:GetStageByChapter(selectChapter)
 		
+		
 		for i, entity in ipairs(self.SelectButtonList) do
-			if i > openStage then
+			if i > openStage and selectChapter == openChapter then
 				continue
 			end
 			entity.StageSelectItemUI:SetNotSelected()
 			if i == id then
 				entity.StageSelectItemUI:SetSelected()
 				self.StageInfoPanel.SpriteGUIRendererComponent.ImageRUID = stageDataList[i].info
-				self.userStage.selectStage = stageDataList[i].id
+				self.userStage.selectStage = stageDataList[i].stage
 			end
 			
 			local rankingListUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI/StageInfoPanel/RankingListUI")
@@ -85,6 +92,26 @@ script StageSelectorUI extends Component
 	method void SetUserStageComp(UserStage newComp)
 		self.userStage = newComp
 		newComp.updateList[#newComp.updateList + 1] = function() self:UpdateData() end
+		
+		self.nextButton.CallBackButton.callback = function() 
+			if self.userStage.selectChapter >= self.userStage.openChapter then
+				return
+			end
+			
+			self.userStage.selectChapter += 1
+			self.userStage.selectStage = 1
+			self:UpdateData()
+		end
+		
+		self.prevButton.CallBackButton.callback = function() 
+			if self.userStage.selectChapter <= 1 then
+				return
+			end
+			
+			self.userStage.selectChapter -=1
+			self.userStage.selectStage = 1
+			self:UpdateData()
+		end
 	end
 
 end

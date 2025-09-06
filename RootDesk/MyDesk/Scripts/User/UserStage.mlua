@@ -67,27 +67,11 @@ script UserStage extends Component
 	end
 
 	@ExecSpace("Server")
-	method void SetClearStage(integer selectStage)
-		if selectStage < self.openStage then
-			self:SAVE()
-			return
-		end
-		
-		if self.openStage > 5 then
-			self:SAVE()
-			return
-		end
-		
-		local nextOpenStage = self.openStage + 1
-		
-		if self.openStage == selectStage then
-			self.selectStage = nextOpenStage
-			if self.selectStage > 5 then
-				self.selectStage = 5
-			end
-		end
-		
-		self.openStage = nextOpenStage
+	method void SetClearStage(integer selectChapter, integer selectStage)
+		self.openChapter = selectChapter
+		self.openStage = selectStage
+		self.selectChapter = selectChapter
+		self.selectStage = selectStage
 		self:SAVE()
 	end
 
@@ -98,6 +82,18 @@ script UserStage extends Component
 				cb()
 			end
 		end
+	end
+
+	method boolean isLastStageSelected()
+		if self.openChapter ~= self.selectChapter then
+			return false
+		end
+		
+		if self.openStage ~= self.selectStage then
+			return false
+		end
+		
+		return true
 	end
 
 end

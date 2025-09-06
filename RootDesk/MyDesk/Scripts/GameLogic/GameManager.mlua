@@ -134,7 +134,7 @@ script GameManager extends Logic
 		
 		self:SetTimer()
 		
-		local stageData = _StageService:GetStageByIdFromServer(self.mapIndex)
+		local stageData = _StageService:GetStageByIdFromServer(tostring(mapIndex + 100 * chapterIndex))
 		local enemyTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/EnemyTower")
 		
 		enemyTower.Unit.originMaxHP = stageData["enemy_tower_hp"]
@@ -318,7 +318,11 @@ script GameManager extends Logic
 		
 		local userAvatar = _EntityService:GetEntityByPath("/ui/GameClearUI/Frame/UserAvatar/UnitAvartar")
 		
-		userStage:SetClearStage(userStage.selectStage)
+		if userStage:isLastStageSelected() then
+			local nextStage = _StageService:GetNextOpenStageId(userStage.openChapter, userStage.openStage)
+			
+			userStage:SetClearStage(nextStage.chapter, nextStage.stage)
+		end
 		
 		local key = _RankingService:GetRankKeyByTable({chapter=userStage.selectChapter, stage=userStage.selectStage})
 		_RankingService:AddPoint(key, userName, playTime)

@@ -10,7 +10,7 @@ script patternRepo extends Logic
 		    local item = {
 				id = tonumber(dataSet:GetCell(index, 'id')),
 				group = tonumber(dataSet:GetCell(index, 'group')),
-				stage = tonumber(dataSet:GetCell(index, 'stage')),
+				stage = tostring(dataSet:GetCell(index, 'stage')),
 				type = tostring(dataSet:GetCell(index, 'type')),
 				setting = tonumber(dataSet:GetCell(index, 'setting')),
 			}
@@ -24,7 +24,7 @@ script patternRepo extends Logic
 		
 	end
 
-	method table GetPatternByStage(number stage)
+	method table GetPatternByStage(string stage)
 		return self.patternRepo[stage]
 	end
 
