@@ -5,6 +5,10 @@ script StageService extends Logic
 
 	property table idMap = {}
 
+	property integer lastChapter = 0
+
+	property integer lastStageIndex = 0
+
 	@ExecSpace("Client")
 	method table GetAllStage()
 		return self.data
@@ -52,12 +56,19 @@ script StageService extends Logic
 			stage["id"] = tostring(dataSet:GetCell(i,"id"))
 			stage["chapter"] = tonumber(dataSet:GetCell(i,"chapter"))
 			stage["stage"] = tonumber(dataSet:GetCell(i,"stage"))
+			stage["name"] = tonumber(dataSet:GetCell(i,"name"))
 			stage["info"] = tostring(dataSet:GetCell(i,"ruid_info"))
 			stage["button"] = tostring(dataSet:GetCell(i,"ruid_button"))
 			stage["enemy_tower_hp"] = tonumber(dataSet:GetCell(i,"enemy_tower_hp"))
 			
 			self.data[i] = stage
 			self.idMap[stage.id] = i
+			
+			if self.lastChapter < stage.chapter then
+				self.lastChapter = stage.chapter
+			end
+			
+			self.lastStageIndex = i
 		end
 	end
 

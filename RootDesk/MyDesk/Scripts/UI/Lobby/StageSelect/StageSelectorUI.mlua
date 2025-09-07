@@ -45,17 +45,21 @@ script StageSelectorUI extends Component
 				entity.StageSelectItemUI:SetNotSelected()
 			end
 			
-			if i > openStage and selectChapter == openChapter then
+			if (i > openStage and selectChapter == openChapter) or selectChapter > openChapter then
 				entity.StageSelectItemUI:SetLocked()
 			end
 			
-			if i == selectStage then
+			if i == selectStage and selectChapter <= openChapter then
 				entity.StageSelectItemUI:SetSelected()
 				self.StageInfoPanel.SpriteGUIRendererComponent.ImageRUID = stageDataList[i].info
 			end
 		end
+			
+		if selectChapter > openChapter then
+			self.StageInfoPanel.SpriteGUIRendererComponent.ImageRUID = stageDataList[1].info
+		end
 		
-		self.nextButton:SetEnable(selectChapter < openChapter)
+		self.nextButton:SetEnable(selectChapter < _StageService.lastChapter)
 		self.prevButton:SetEnable(selectChapter > 1)
 		
 	end
@@ -94,7 +98,7 @@ script StageSelectorUI extends Component
 		newComp.updateList[#newComp.updateList + 1] = function() self:UpdateData() end
 		
 		self.nextButton.CallBackButton.callback = function() 
-			if self.userStage.selectChapter >= self.userStage.openChapter then
+			if self.userStage.selectChapter >= _StageService.lastChapter then
 				return
 			end
 			
