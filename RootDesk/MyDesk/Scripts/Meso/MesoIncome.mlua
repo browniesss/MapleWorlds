@@ -44,6 +44,7 @@ script MesoIncome extends Component
 	@ExecSpace("ServerOnly")
 	method void OnUpdate(number delta)
 		if not _GameManager.isPlaying then
+			self.UserWallet:SetMeso(0)
 			return
 		end
 		
@@ -60,7 +61,6 @@ script MesoIncome extends Component
 		self.UserWallet:AddMeso(self.incomeData[1]["income"])
 	end
 
-	@ExecSpace("ClientOnly")
 	method void OnMapEnter(Entity enteredMap)
 		local dataSet = _DataService:GetTable("meso")
 		for i = 1, dataSet:GetRowCount() do
@@ -79,6 +79,15 @@ script MesoIncome extends Component
 		
 		self.nextUpdateTs = self.incomeCooltime
 		self.currentTs = 0
+	end
+
+	method void OnMapLeave(Entity leftMap)
+		self.incomeData = {}
+		self.incomeData[1] = {
+			id=1,
+			init=0,
+			income=0
+		}
 	end
 
 end

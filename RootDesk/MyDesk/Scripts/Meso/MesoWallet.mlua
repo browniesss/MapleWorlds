@@ -32,6 +32,7 @@ script MesoWallet extends Component
 		self.UIController:UpdateCurrentMeso(self.CurrentMeso)
 	end
 
+	@ExecSpace("Server")
 	method integer SetMeso(integer newMeso)
 		if newMeso < 0 then
 			return -1
