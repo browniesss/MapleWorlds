@@ -1,24 +1,23 @@
 @Component
 script EnemyHealthBar extends Component
 
+	@Sync
 	property SliderComponent myHP = nil
 
-	@ExecSpace("ClientOnly")
+	@Sync
+	property Entity tower = nil
+
 	method void OnBeginPlay()
-		local currentPath = self.Entity.Path
-		self.myHP = _EntityService:GetEntityByPath(currentPath .. "/HP_bar").SliderComponent
+		self.myHP = self.Entity.Children[1].SliderComponent
 		self.myHP.Value = 1
 	end
 
-	@ExecSpace("ClientOnly")
 	method void OnUpdate(number delta)
-		local tower = _EntityService:GetEntity(_GameManager:GetGameMapName().."/EnemyTower")
-		
-		if tower == nil then
+		if self.tower == nil then
 			return 
 		end
 		
-		self.myHP.Value = tower.Unit.hp / tower.Unit.maxHP
+		self.myHP.Value = self.tower.Unit.hp / self.tower.Unit.maxHP
 	end
 
 end
