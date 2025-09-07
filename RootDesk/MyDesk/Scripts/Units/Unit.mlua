@@ -331,7 +331,7 @@ script Unit extends Component
 
 	@ExecSpace("Client")
 	method void MoveToTarget(number delta)
-		if self.curTarget == nil or not isvalid(self.curTarget) or self.Entity.RigidbodyComponent:IsOnGround() == false then
+		if self.curTarget == nil or not isvalid(self.curTarget) then
 			self:SetState("stand")
 			return
 		end
@@ -339,6 +339,10 @@ script Unit extends Component
 		if self:GetDistance() <= self.attackRange then
 			self:SetState("attack")
 			self:SetAnimationState("stand")
+			return
+		end
+		
+		if self.Entity.RigidbodyComponent:IsOnGround() == false then
 			return
 		end
 		
