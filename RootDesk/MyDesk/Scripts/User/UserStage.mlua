@@ -78,6 +78,13 @@ script UserStage extends Component
 	@ExecSpace("ClientOnly")
 	method void OnSyncProperty(string name, any value)
 		if name == "openStage" or name == "openChapter" or name == "selectStage" or name == "selectChapter" then
+			local chapterData = _StageService:GetStageByChapter(self.openChapter)
+			local lastStage = chapterData[#chapterData]
+			
+			if self.openStage > lastStage.stage then
+				self.openStage = lastStage.stage
+			end
+			
 			for i, cb in ipairs(self.updateList) do
 				cb()
 			end
