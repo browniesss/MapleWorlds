@@ -111,6 +111,11 @@ script MonsterSpawnService extends Component
 			return
 		end
 		
+		self.loopGroup = {}
+		self.eventGroup = {}
+		self.timerIdList = {}
+		self.curTimeTs = 0
+		
 		local userStage = _UserService.LocalPlayer.UserStage
 		
 		self:SetStage(userStage.selectChapter, userStage.selectStage)
@@ -170,6 +175,18 @@ script MonsterSpawnService extends Component
 		end
 		
 		_TimerService:SetTimerOnce(settingFunction, 1)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnMapLeave(Entity leftMap)
+		for i, id in ipairs(self.timerIdList) do
+			_TimerService:ClearTimer(id)
+		end
+		
+		self.loopGroup = {}
+		self.eventGroup = {}
+		self.timerIdList = {}
+		self.curTimeTs = 0
 	end
 
 end

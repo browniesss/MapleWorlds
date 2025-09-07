@@ -60,6 +60,7 @@ script MesoIncome extends Component
 		self.UserWallet:AddMeso(self.incomeData[1]["income"])
 	end
 
+	@ExecSpace("ClientOnly")
 	method void OnMapEnter(Entity enteredMap)
 		local dataSet = _DataService:GetTable("meso")
 		for i = 1, dataSet:GetRowCount() do
