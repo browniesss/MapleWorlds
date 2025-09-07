@@ -133,13 +133,30 @@ script GameManager extends Logic
 		self:EnableUI()
 		
 		self:SetTimer()
+		self:GameStartDataInClient()
 		
 		local stageData = _StageService:GetStageByIdFromServer(tostring(mapIndex + 100 * chapterIndex))
+		local playerTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/PlayerTower")
 		local enemyTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/EnemyTower")
+		local ourHealthBar = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/Player_HP_bar")
+		local enemyHealthBar = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/EnemyHealthBar")
 		
 		enemyTower.Unit.originMaxHP = stageData["enemy_tower_hp"]
 		enemyTower.Unit.maxHP = stageData["enemy_tower_hp"]
 		enemyTower.Unit.hp = stageData["enemy_tower_hp"]
+	end
+
+	@ExecSpace("Client")
+	method void GameStartDataInClient()
+		local mapNameTextUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/UserInfo/MapText")
+		local ourHealthBarUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/Player_HP_bar")
+		local enemyHealthBarUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/EnemyHealthBar")
+		local playerTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/PlayerTower")
+		local enemyTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/EnemyTower")
+		
+		ourHealthBarUI.OurHealthBar.tower = playerTower
+		enemyHealthBarUI.EnemyHealthBar.tower = enemyTower
+		mapNameTextUI.TextComponent.Text = _StageService:GetStageById(tostring(self.chapterIndex * 100 + self.mapIndex)).name
 	end
 
 	method void GameEnd()

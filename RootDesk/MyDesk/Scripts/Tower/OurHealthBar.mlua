@@ -3,21 +3,20 @@ script OurHealthBar extends Component
 
 	property SliderComponent myHP = nil
 
-	@ExecSpace("ClientOnly")
+	@Sync
+	property Entity tower = nil
+
 	method void OnBeginPlay()
 		self.myHP = self.Entity.SliderComponent
 		self.myHP.Value = 1
 	end
 
-	@ExecSpace("ClientOnly")
 	method void OnUpdate(number delta)
-		local tower = _EntityService:GetEntity(_GameManager:GetGameMapName().."/PlayerTower")
-		
-		if tower == nil then
+		if self.tower == nil then
 			return 
 		end
 		
-		self.myHP.Value = tower.Unit.hp / tower.Unit.maxHP
+		self.myHP.Value = self.tower.Unit.hp / self.tower.Unit.maxHP
 	end
 
 end
