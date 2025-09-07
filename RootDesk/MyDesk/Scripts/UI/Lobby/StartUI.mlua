@@ -8,7 +8,7 @@ script StartUI extends Component
 			return
 		end
 		
-		if userStage.openStage < userStage.selectStage then
+		if userStage.openChapter == userStage.selectChapter and userStage.openStage < userStage.selectStage then
 			return
 		end
 		
