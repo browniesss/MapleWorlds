@@ -342,6 +342,10 @@ script Unit extends Component
 			return
 		end
 		
+		if self.Entity.RigidbodyComponent:IsOnGround() == false then
+			return
+		end
+		
 		self:Move(delta)
 		self:SetState("move")
 	end
@@ -374,7 +378,6 @@ script Unit extends Component
 		
 		local myPos = self.Entity.TransformComponent.WorldPosition
 		local targetPos = self.curTarget.TransformComponent.WorldPosition
-		
 		local direction = Vector2(targetPos.x - myPos.x, 0):Normalize()
 		local newX = myPos.x + (direction.x * self.moveSpeed * delta)
 		
