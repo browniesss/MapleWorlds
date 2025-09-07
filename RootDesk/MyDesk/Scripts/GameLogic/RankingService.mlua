@@ -6,6 +6,8 @@ script RankingService extends Logic
 
 	property any fetchCallback = nil
 
+	property table rankList = {}
+
 	@ExecSpace("Server")
 	method void AddPoint(string storageKey, string userName, integer userScore)
 		local ds = _DataStorageService:GetSortableDataStorage(storageKey)
@@ -41,32 +43,33 @@ script RankingService extends Logic
 			return
 		end
 		
-		local items = itemPages:GetCurrentPageDatas()
-		
-		for i, item in pairs(items) do
-		-- SortableDataStorageItem을 통해 Key값과 Value값을 조회할 수 있습니다.
-			self.RankData[i] = _HttpService:JSONEncode({name=item.KeyInfo.Key, score=item.Value})
-		end
-	end
-
-	@ExecSpace("ClientOnly")
-	method table GetTop3RankTable()
-		local table = {}
-		
-		for rank = 1, 4 do
-			if rank > #self.RankData then
-				table[rank] = {name="NONE", score=9999999}
-				continue
+		local rank = 1
+		local rankList = {}
+		while true do
+		    -- GetCurrentPageDatas()로 현재 페이지의 목록을 가져올 수 있습니다.
+		    local items = itemPages:GetCurrentPageDatas()
+		    for _, item in pairs(items) do
+		         -- SortableDataStorageItem을 통해 Key값과 Value값을 조회할 수 있습니다.
+				self.RankData[rank] = _HttpService:JSONEncode({name=item.KeyInfo.Key, score=item.Value})
+				log(rank .. " -> " .. item.KeyInfo.Key)
+				rankList[#rankList + 1] = {name=item.KeyInfo.Key, score=item.Value}
+				rank += 1
+		    end
+			
+			if #rankList > 50 then
+				break
 			end
-			
-			local jsonData = self.RankData[rank]
-			
-			local info  = _HttpService:JSONDecode(jsonData)
-			
-			table[rank] = info
+		     
+		    -- IsLastPage 프로퍼티를 통해 현재 페이지가 마지막 페이지인지 확인할 수 있습니다.
+		    if itemPages.IsLastPage == true then
+		        break
+		    end
+		     
+		    -- MoveToNextPageAndWait()로 다음 페이지로 넘어갈 수 있습니다.
+		    itemPages:MoveToNextPageAndWait()
 		end
 		
-		return table
+		self:UpdateData(rankList)
 	end
 
 	method string GetRankKeyByTable(table data)
@@ -80,20 +83,32 @@ script RankingService extends Logic
 	end
 
 	@ExecSpace("ClientOnly")
-	method table GetTop50RankTable()
+	method table GetTop3RankTable()
 		local table = {}
 		
-		for rank = 1, 50 do
-			if rank > #self.RankData then
+		for rank = 1, 4 do
+			if rank > #self.rankList then
 				table[rank] = {name="NONE", score=9999999}
 				continue
 			end
 			
-			local jsonData = self.RankData[rank]
+			table[rank] = self.rankList[rank]
+		end
+		
+		return table
+	end
+
+	@ExecSpace("ClientOnly")
+	method table GetTop50RankTable()
+		local table = {}
+		
+		for rank = 1, 50 do
+			if rank > #self.rankList then
+				table[rank] = {name="NONE", score=9999999}
+				continue
+			end
 			
-			local info  = _HttpService:JSONDecode(jsonData)
-			
-			table[rank] = info
+			table[rank] = self.rankList[rank]
 		end
 		
 		return table
@@ -106,15 +121,26 @@ script RankingService extends Logic
 
 	@ExecSpace("ClientOnly")
 	method void OnSyncProperty(string name, any value)
-		log("온싱크"..name.."밸류:"..tostring(value))
-		self.fetchCallback()
+		--log("온싱크"..name.."밸류:"..tostring(value))
+		--self.fetchCallback()
 	end
 
 	@ExecSpace("Server")
 	method void DeleteData()
-		for i = 1, 50 do	
-			self.RankData[i] = nil
+		--for i = 1, 50 do	
+		--    self.RankData[i] = nil
+		--end
+	end
+
+	@ExecSpace("Client")
+	method void UpdateData(table list)
+		if list == nil or #list == 0 then
+			self.rankList = {}
+			return
 		end
+		
+		self.rankList = list
+		self.fetchCallback()
 	end
 
 end

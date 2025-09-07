@@ -13,8 +13,6 @@ script StageRankingListUI extends Component
 	method void Init()
 		self.Entity.Children[1].Visible = false
 		self.Entity.Children[4].Visible = true
-		
-		self:Fetch()
 	end
 
 	@ExecSpace("Client")

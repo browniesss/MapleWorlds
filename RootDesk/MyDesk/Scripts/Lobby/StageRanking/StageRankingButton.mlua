@@ -10,8 +10,8 @@ script StageRankingButton extends Component
 		local key = _RankingService:GetRankKeyByTable({chapter=player.UserStage.selectChapter, stage=player.UserStage.selectStage})
 		
 		_RankingService:FETCH(key)
-		
-		rankingUI.StageRankingListUI:Init(player.UserStage.selectChapter, player.UserStage.selectStage)
+		rankingUI.StageRankingListUI:Fetch()
+		rankingUI.StageRankingListUI:Init()
 		rankingUI.Enable = true
 		rankingUI.Visible = true
 	end
