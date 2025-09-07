@@ -4,6 +4,13 @@ script StartUI extends Component
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
 		local userStage = _UserService.LocalPlayer.UserStage
+		if userStage.openChapter < userStage.selectChapter then
+			return
+		end
+		
+		if userStage.openStage < userStage.selectStage then
+			return
+		end
 		
 		_GameManager:ShowLoadingScreen()
 		
