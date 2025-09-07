@@ -60,4 +60,24 @@ script MesoIncome extends Component
 		self.UserWallet:AddMeso(self.incomeData[1]["income"])
 	end
 
+	method void OnMapEnter(Entity enteredMap)
+		local dataSet = _DataService:GetTable("meso")
+		for i = 1, dataSet:GetRowCount() do
+			local item = {}
+			
+			item["id"] = tonumber(dataSet:GetCell(i,"id"))
+			item["init"] = tonumber(dataSet:GetCell(i,"init"))
+			item["income"] = tonumber(dataSet:GetCell(i,"income"))
+			
+			self.incomeData[item["id"]] = item
+		end        
+		
+		self.UIController:UpdateMesoIncome(self.incomeData[1]["income"])
+		
+		self.UserWallet:SetMeso(self.incomeData[1]["init"])
+		
+		self.nextUpdateTs = self.incomeCooltime
+		self.currentTs = 0
+	end
+
 end
