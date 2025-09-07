@@ -144,6 +144,9 @@ script GameManager extends Logic
 		enemyTower.Unit.originMaxHP = stageData["enemy_tower_hp"]
 		enemyTower.Unit.maxHP = stageData["enemy_tower_hp"]
 		enemyTower.Unit.hp = stageData["enemy_tower_hp"]
+		playerTower.Unit.originMaxHP = 500
+		playerTower.Unit.maxHP = 500
+		playerTower.Unit.hp = 500
 	end
 
 	@ExecSpace("Client")
