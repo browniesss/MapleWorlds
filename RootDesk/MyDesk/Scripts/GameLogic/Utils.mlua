@@ -1,6 +1,15 @@
 @Logic
 script Utils extends Logic
 
+	@Sync
+	property number steps = 0
+
+	@Sync
+	property number timerStep = 0
+
+	@Sync
+	property number fadeInTimer = 0
+
 	method number GetRUIDTime(string ruid)
 		if _UtilLogic:IsNilorEmptyString(ruid) then
 		    return 0
@@ -36,6 +45,33 @@ script Utils extends Logic
 		end
 		
 		return 1
+	end
+
+	method void FadeIn(Entity target, number duration)
+		local canvas = target.CanvasGroupComponent
+		duration = duration or 0.35  -- 기본 0.35초
+		
+		local t, tick = 0, 1/60
+		
+		self.steps = math.ceil(duration / tick)
+		self.timerStep = 0
+		
+		if canvas == nil then 
+			return 
+		end
+		    
+		canvas.Enable = true
+		canvas.GroupAlpha = 0
+		
+		self.fadeInTimer = _TimerService:SetTimerRepeat(function()
+		    self.timerStep = self.timerStep + 1
+		    local progress = math.min(self.timerStep / self.steps, 1.0)
+		    canvas.GroupAlpha = progress
+		
+		    if t >= 1 then
+		        _TimerService:ClearTimer(self.fadeInTimer)
+		    end
+		end, tick, 0)
 	end
 
 end
