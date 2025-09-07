@@ -331,7 +331,7 @@ script Unit extends Component
 
 	@ExecSpace("Client")
 	method void MoveToTarget(number delta)
-		if self.curTarget == nil or not isvalid(self.curTarget) then
+		if self.curTarget == nil or not isvalid(self.curTarget) or self.Entity.RigidbodyComponent:IsOnGround() == false then
 			self:SetState("stand")
 			return
 		end
@@ -374,7 +374,6 @@ script Unit extends Component
 		
 		local myPos = self.Entity.TransformComponent.WorldPosition
 		local targetPos = self.curTarget.TransformComponent.WorldPosition
-		
 		local direction = Vector2(targetPos.x - myPos.x, 0):Normalize()
 		local newX = myPos.x + (direction.x * self.moveSpeed * delta)
 		
