@@ -724,10 +724,16 @@ script Unit extends Component
 			
 			return
 		elseif self.Entity.TagComponent.Tags[2] == "Tower" and not self.isEnemy then -- 아군 타워 무너진 경우
-			local failPopup = _GameManager.failPopupUI
-			failPopup.Enable = true
-			failPopup.Visible = true
-			failPopup.FailPopup:PlayAnimation()
+			local shopUI = _GameManager.shopUI
+			local failPopupUI = _GameManager.failPopupUI
+			local infoUI = _GameManager.infoUI
+			infoUI.Enable = false
+			infoUI.Visible = false
+			shopUI.Enable = false
+			shopUI.Visible = false
+			failPopupUI.Enable = true
+			failPopupUI.Visible = true
+			_Utils:FadeIn(failPopupUI, 0.5)
 			return
 		end
 		
