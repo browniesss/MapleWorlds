@@ -37,7 +37,7 @@ script GameManager extends Logic
 
 	property RankUI rankUI = "daa5b02b-f478-4f97-a216-d17e6b71634a"
 
-	property Entity failPopupUI = "60300db6-e074-4ae3-9db1-9142f3a47a24"
+	property Entity failPopupUI = "6f1b960c-08f8-41f2-93e4-3e585ec70ab8"
 
 	property Entity joystick = "02c6fd20-fdb0-4b80-bbd3-2241e929c46d"
 
@@ -348,6 +348,8 @@ script GameManager extends Logic
 		
 		self.gameClearResult.Enable = true
 		self.gameClearResult.Visible = true
+		
+		_Utils:FadeIn(self.gameClearResult, 0.5)
 		
 		userAvatar.AvatarGUIRendererComponent:PlayEmotion(EmotionalType.Love, 100)
 	end

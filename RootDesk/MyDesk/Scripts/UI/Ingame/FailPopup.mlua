@@ -1,10 +1,6 @@
 @Component
 script FailPopup extends Component
 
-	method void PlayAnimation()
-		self.Entity.Children[2].Children[2].AvatarGUIRendererComponent:PlayEmotion(EmotionalType.Cry, 100)
-	end
-
 	@EventSender("Entity", "1f484923-d2fb-4d76-9339-8f53fb8450fd")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
 		_GameManager:GameEnd()
