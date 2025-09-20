@@ -1,0 +1,28 @@
+@Component
+script DropItem extends Component
+
+	method void MoveTween(Entity target)
+		-- 메소 아이템의 시작 위치
+		local startPosition = self.Entity.TransformComponent.Position
+		local playerPosition = target.TransformComponent.Position
+		
+		-- Tween 설정: 메소 아이템이 유저 캐릭터 위치로 이동
+		local tweenTime = 0.8 -- 이동 시간
+		local tween = _TweenLogic:MoveTo(self.Entity, Vector2(playerPosition.x, playerPosition.y + 0.25), tweenTime, EaseType.QuadEaseOut)
+		
+		-- Tween 완료 후 TriggerComponent 활성화
+		tween:SetOnEndCallback(function()
+		    self.Entity.TriggerComponent.Enable = true
+		end)
+	end
+
+	@EventSender("Self")
+	handler HandleTriggerEnterEvent(TriggerEnterEvent event)
+		if event.TriggerBodyEntity.PlayerCharacter == nil then
+			return
+		end
+		
+		self:MoveTween(event.TriggerBodyEntity)
+	end
+
+end
