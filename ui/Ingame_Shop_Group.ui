@@ -4885,7 +4885,7 @@
           "path": "/ui/Ingame_Shop_Group/UnitInfo",
           "nameEditable": true,
           "enable": true,
-          "visible": true,
+          "visible": false,
           "localize": true,
           "displayOrder": 5,
           "pathConstraints": "///",
@@ -4910,12 +4910,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 460.0,
-                "y": 200.999939
+                "x": 350.0,
+                "y": 363.7054
               },
               "OffsetMin": {
-                "x": -240.0,
-                "y": 0.999938965
+                "x": -350.0,
+                "y": 163.705414
               },
               "Pivot": {
                 "x": 0.5,
@@ -4928,12 +4928,12 @@
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 110.0,
-                "y": 100.999939
+                "x": 0.0,
+                "y": 263.7054
               },
               "Position": {
-                "x": 110.0,
-                "y": 100.999939,
+                "x": 0.0,
+                "y": 263.7054,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -5106,11 +5106,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 63.0,
+                "x": 320.0,
                 "y": 72.5
               },
               "OffsetMin": {
-                "x": -83.0,
+                "x": -80.0,
                 "y": 27.5
               },
               "Pivot": {
@@ -5118,7 +5118,7 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 146.0,
+                "x": 400.0,
                 "y": 45.0
               },
               "UIMode": 1,
@@ -5129,7 +5129,7 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -10.0,
+                "x": 120.0,
                 "y": 50.0
               },
               "Rotation": {
@@ -5138,7 +5138,7 @@
                 "z": 0.0
               },
               "Position": {
-                "x": -10.0,
+                "x": 120.0,
                 "y": 50.0,
                 "z": 0.0
               },
@@ -5163,6 +5163,7 @@
             },
             {
               "@type": "MOD.Core.TextComponent",
+              "Alignment": 3,
               "BestFit": true,
               "ConstraintX": 146.0,
               "ConstraintY": 45.0,
@@ -5318,6 +5319,335 @@
               "OverrideSorting": false,
               "SizeFit": false,
               "Text": "MP를 소비하여 전방의 적들을 연속 공격한다.",
+              "UseConstraintX": false,
+              "UseConstraintY": false,
+              "UseOutLine": true,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "e05042af-bc60-4611-8e08-b2dd32ffc001",
+        "path": "/ui/Ingame_Shop_Group/UnitInfo/UnitSprite",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "jsonString": {
+          "name": "UnitSprite",
+          "path": "/ui/Ingame_Shop_Group/UnitInfo/UnitSprite",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 3,
+          "pathConstraints": "////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uisprite",
+            "sub_entity_id": null
+          },
+          "modelId": "uisprite",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": -230.0,
+                "y": 65.0
+              },
+              "OffsetMin": {
+                "x": -330.0,
+                "y": -35.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 100.0,
+                "y": 100.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": -280.0,
+                "y": 15.0
+              },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "Position": {
+                "x": -280.0,
+                "y": 15.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": -1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "a1a253716b3549b39841dc0c33bb80d1"
+              },
+              "LocalScale": {
+                "x": 0.8,
+                "y": 0.8
+              },
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Type": 0,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "a1c2bacc-480b-4504-8e60-e718c6daa054",
+        "path": "/ui/Ingame_Shop_Group/UnitInfo/UnitAvartar",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.AvatarGUIRendererComponent,MOD.Core.CostumeManagerComponent",
+        "jsonString": {
+          "name": "UnitAvartar",
+          "path": "/ui/Ingame_Shop_Group/UnitInfo/UnitAvartar",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 4,
+          "pathConstraints": "////",
+          "revision": 1,
+          "modelId": null,
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": -230.0,
+                "y": 65.0
+              },
+              "OffsetMin": {
+                "x": -330.0,
+                "y": -35.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 100.0,
+                "y": 100.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": -280.0,
+                "y": 15.0
+              },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "Position": {
+                "x": -280.0,
+                "y": 15.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": -1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.AvatarGUIRendererComponent",
+              "Color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "PreserveAvatar": 1,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.CostumeManagerComponent",
+              "DefaultEquipUserId": "",
+              "UseCustomEquipOnly": false,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "6456c6e2-0a2d-420f-a8ac-a891d9ccb73d",
+        "path": "/ui/Ingame_Shop_Group/UnitInfo/UnitName",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "UnitName",
+          "path": "/ui/Ingame_Shop_Group/UnitInfo/UnitName",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 5,
+          "pathConstraints": "////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": -231.017212,
+                "y": -55.5
+              },
+              "OffsetMin": {
+                "x": -331.0172,
+                "y": -80.5
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 100.0,
+                "y": 25.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": -281.0172,
+                "y": -68.0
+              },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "Position": {
+                "x": -281.0172,
+                "y": -68.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": -1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "BestFit": true,
+              "ConstraintX": 146.0,
+              "ConstraintY": 45.0,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 15,
+              "MaxSize": 20,
+              "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "OverrideSorting": false,
+              "SizeFit": false,
+              "Text": "슬라임",
               "UseConstraintX": false,
               "UseConstraintY": false,
               "UseOutLine": true,

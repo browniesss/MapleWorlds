@@ -129,8 +129,8 @@ script DeckItem extends Component
 		local iconTransform = self.Entity.UITransformComponent
 		local iconPos = iconTransform.anchoredPosition
 		
-		self.unitInfoUI.UITransformComponent.anchoredPosition = Vector2(iconPos.x + 300, iconPos.y + 150)
-		self.unitInfoUI.UnitInfo:UpdateInfo(self.skillData)
+		-- self.unitInfoUI.UITransformComponent.anchoredPosition = Vector2(iconPos.x + 300, iconPos.y + 150)
+		self.unitInfoUI.UnitInfo:UpdateInfo(self.skillData, self.unitData)
 		
 		self.unitInfoUI.Visible = true
 	end

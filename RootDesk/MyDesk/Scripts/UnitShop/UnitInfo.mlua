@@ -7,18 +7,126 @@ script UnitInfo extends Component
 
 	property Entity skillDesc = "daecdffa-9216-47c8-bd8b-b7c1a61cb879"
 
+	property Entity unitSprite = nil
+
+	property Entity unitAvartarRenderer = nil
+
+	property Entity unitName = nil
+
+	property table unitData = {}
+
+	property table skillData = {}
+
 	method void OnBeginPlay()
 		self.skillIcon = self.Entity.Children[1]
 		self.skillName = self.Entity.Children[2]
-		self.skillDesc = self.Entity.Children[4]
+		self.skillDesc = self.Entity.Children[3]
+		self.unitSprite = self.Entity.Children[4]
+		self.unitAvartarRenderer = self.Entity.Children[5]
+		self.unitName = self.Entity.Children[6]
 	end
 
-	method void UpdateInfo(table skillData)
+	@ExecSpace("Client")
+	method void UpdateInfo(table skillData, table unitData)
+		self.unitData = unitData
+		self.skillData = skillData
+		
 		if skillData ~= nil then
 			self.skillIcon.SpriteGUIRendererComponent.ImageRUID = skillData['skillIcon']
 			self.skillDesc.TextComponent.Text = skillData['desc']
 			self.skillName.TextComponent.Text = skillData['skillName']
 		end
+		
+		self.unitSprite.Visible = true
+		self.unitAvartarRenderer.Visible = true
+		self.unitName.Visible = true
+		
+		self:SetSprite()
+		self:SetLabel()
+	end
+
+	@ExecSpace("Client")
+	method void UpdateInfoSkillData(table skillData)
+		self.skillData = skillData
+		
+		if self.skillData ~= nil then
+			self.skillIcon.SpriteGUIRendererComponent.ImageRUID = self.skillData['skillIcon']
+			self.skillDesc.TextComponent.Text = self.skillData['desc']
+			self.skillName.TextComponent.Text = self.skillData['skillName']
+		end
+		
+		self.unitSprite.Visible = false
+		self:SetPlayerCostume()
+	end
+
+	@ExecSpace("Client")
+	method void SetSprite()
+		if self.unitData['isUsableCharacter'] == 0 then
+			self.unitAvartarRenderer.Visible = false
+			self.unitSprite.Visible = true
+			self.unitSprite.SpriteGUIRendererComponent.ImageRUID = self.unitData['ImageRUID']
+		else
+			self.unitSprite.Visible = false
+			self.unitAvartarRenderer.Visible = true
+			self:SetCostume()
+		end
+		
+	end
+
+	@ExecSpace("Client")
+	method void SetCostume()
+		local entity = _SpawnService:SpawnByModelId(self.unitData['id'], "Avatar", Vector3.zero, self.Entity)
+		entity.Visible = false
+		entity.Enable = false
+		
+		self.unitAvartarRenderer.CostumeManagerComponent.UseCustomEquipOnly = true
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomBodyEquip = entity.CostumeManagerComponent.CustomBodyEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomCapEquip = entity.CostumeManagerComponent.CustomCapEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomCapeEquip = entity.CostumeManagerComponent.CustomCapeEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomCoatEquip = entity.CostumeManagerComponent.CustomCoatEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomEarAccessoryEquip = entity.CostumeManagerComponent.CustomEarAccessoryEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomEarEquip = entity.CostumeManagerComponent.CustomEarEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomEyeAccessoryEquip = entity.CostumeManagerComponent.CustomEyeAccessoryEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomFaceAccessoryEquip = entity.CostumeManagerComponent.CustomFaceAccessoryEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomFaceEquip = entity.CostumeManagerComponent.CustomFaceEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomGloveEquip = entity.CostumeManagerComponent.CustomGloveEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomHairEquip = entity.CostumeManagerComponent.CustomHairEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomLongcoatEquip = entity.CostumeManagerComponent.CustomLongcoatEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomOneHandedWeaponEquip = entity.CostumeManagerComponent.CustomOneHandedWeaponEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomPantsEquip = entity.CostumeManagerComponent.CustomPantsEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomShoesEquip = entity.CostumeManagerComponent.CustomShoesEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomSubWeaponEquip = entity.CostumeManagerComponent.CustomSubWeaponEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomTwoHandedWeaponEquip = entity.CostumeManagerComponent.CustomTwoHandedWeaponEquip
+	end
+
+	@ExecSpace("Client")
+	method void SetLabel()
+		self.unitName.TextComponent.Text = self.unitData['name'] 
+	end
+
+	method void SetPlayerCostume()
+		local playerEntity = _UserService.LocalPlayer
+		
+		self.unitAvartarRenderer.CostumeManagerComponent.UseCustomEquipOnly = false
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomBodyEquip = playerEntity.CostumeManagerComponent.CustomBodyEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomCapEquip = playerEntity.CostumeManagerComponent.CustomCapEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomCapeEquip = playerEntity.CostumeManagerComponent.CustomCapeEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomCoatEquip = playerEntity.CostumeManagerComponent.CustomCoatEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomEarAccessoryEquip = playerEntity.CostumeManagerComponent.CustomEarAccessoryEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomEarEquip = playerEntity.CostumeManagerComponent.CustomEarEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomEyeAccessoryEquip = playerEntity.CostumeManagerComponent.CustomEyeAccessoryEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomFaceAccessoryEquip = playerEntity.CostumeManagerComponent.CustomFaceAccessoryEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomFaceEquip = playerEntity.CostumeManagerComponent.CustomFaceEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomGloveEquip = playerEntity.CostumeManagerComponent.CustomGloveEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomHairEquip = playerEntity.CostumeManagerComponent.CustomHairEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomLongcoatEquip = playerEntity.CostumeManagerComponent.CustomLongcoatEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomOneHandedWeaponEquip = playerEntity.CostumeManagerComponent.CustomOneHandedWeaponEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomPantsEquip = playerEntity.CostumeManagerComponent.CustomPantsEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomShoesEquip = playerEntity.CostumeManagerComponent.CustomShoesEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomSubWeaponEquip = playerEntity.CostumeManagerComponent.CustomSubWeaponEquip
+		self.unitAvartarRenderer.CostumeManagerComponent.CustomTwoHandedWeaponEquip = playerEntity.CostumeManagerComponent.CustomTwoHandedWeaponEquip
+		
+		self.unitName.TextComponent.Text = playerEntity.PlayerComponent.Nickname
 	end
 
 end

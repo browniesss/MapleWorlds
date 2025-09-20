@@ -104,8 +104,8 @@ script SkillSlot extends Component
 		end
 		
 		
-		self.unitInfoUI.UITransformComponent.anchoredPosition = Vector2(iconPos.x, iconPos.y + 150)
-		self.unitInfoUI.UnitInfo:UpdateInfo(skillData)
+		-- self.unitInfoUI.UITransformComponent.anchoredPosition = Vector2(iconPos.x, iconPos.y + 150)
+		self.unitInfoUI.UnitInfo:UpdateInfoSkillData(skillData)
 	end
 
 	@EventSender("Self")

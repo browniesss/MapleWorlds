@@ -101,8 +101,8 @@ script UnitListItem extends Component
 		local iconPos = iconTransform.anchoredPosition
 		local pos = event.TouchPoint
 		
-		self.unitInfoUI.UITransformComponent.anchoredPosition = Vector2(pos.x - 750, pos.y - 450)
-		self.unitInfoUI.UnitInfo:UpdateInfo(self.skillData)
+		-- self.unitInfoUI.UITransformComponent.anchoredPosition = Vector2(pos.x - 750, pos.y - 450)
+		self.unitInfoUI.UnitInfo:UpdateInfo(self.skillData, self.unitData)
 		
 		self.unitInfoUI.Visible = true
 	end
