@@ -8,7 +8,7 @@ script EnemyHealthBar extends Component
 	property Entity tower = nil
 
 	method void OnBeginPlay()
-		self.myHP = self.Entity.Children[1].SliderComponent
+		self.myHP = self.Entity.SliderComponent
 		self.myHP.Value = 1
 	end
 
