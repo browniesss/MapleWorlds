@@ -135,6 +135,12 @@ script Unit extends Component
 	@Sync
 	property integer moveSpeedTimerID = 0
 
+	@Sync
+	property integer fearTimerID = 0
+
+	@Sync
+	property integer debuffEffectID = 0
+
 	@ExecSpace("Server")
 	method void Spawn(table unitData, table skillData)
 		self.moveSpeed = unitData["moveSpeed"]
@@ -287,6 +293,8 @@ script Unit extends Component
 			
 		elseif self.curState == "die" then
 			
+		elseif self.curState == "fear" then
+			self:OnFear(delta)
 		end
 	end
 
@@ -768,6 +776,31 @@ script Unit extends Component
 		if debuffType == _eDebuffType.Stun then
 			self.curState = "stun"
 			self.stunTime = debuffTime
+		elseif debuffType == _eDebuffType.Fear then
+			self:SetState("fear")
+			self:SetAnimationState("move")
+			self.curTarget = nil
+			self.debuffEffectID = _EffectService:PlayEffectAttached("6875d10d332d42baa81c73347dd981f9", self.Entity, Vector3(0, self.imageSize.y, 0) , 0, Vector3.one, true)
+		
+			if self.fearTimerID ~= 0 then
+				_TimerService:ClearTimer(self.fearTimerID)
+			end
+			
+			if debuffTime ~= 0 then
+				deleteFunction = function()
+					self.fearTimerID = 0
+					self:SetState("stand")
+					_EffectService:RemoveEffect(self.debuffEffectID)
+		
+					if self.isEnemy then
+						self.Entity.SpriteRendererComponent.FlipX = false
+					else
+						self.Entity.SpriteRendererComponent.FlipX = true
+					end
+				end
+				
+				self.moveSpeedTimerID = _TimerService:SetTimerOnce(deleteFunction, debuffTime)
+			end
 		end
 	end
 
@@ -780,6 +813,30 @@ script Unit extends Component
 		
 		if self.stunTimeCounter >= self.stunTime then
 			self.curState = "stand"
+		end
+	end
+
+	method void OnFear(number delta)
+		local myPos = self.Entity.TransformComponent.WorldPosition
+		local targetPos
+		local direction
+		local newX 
+		
+		-- 적 몬스터라면 적 방향으로
+		if self.isEnemy then
+			direction = Vector2(11 - myPos.x, 0):Normalize()
+			newX = myPos.x + (direction.x * self.moveSpeed * delta)
+			
+			self.Entity.TransformComponent.WorldPosition = Vector3(newX, myPos.y, myPos.z)
+			self.originPos = self.Entity.TransformComponent.WorldPosition
+			self.Entity.SpriteRendererComponent.FlipX = true
+		else -- 아군 몬스터라면 아군 방향으로 이동 필요
+			direction = Vector2(-5 - myPos.x, 0):Normalize()
+			newX = myPos.x + (direction.x * self.moveSpeed * delta)
+			
+			self.Entity.TransformComponent.WorldPosition = Vector3(newX, myPos.y, myPos.z)
+			self.originPos = self.Entity.TransformComponent.WorldPosition
+			self.Entity.SpriteRendererComponent.FlipX = false
 		end
 	end
 

@@ -1,0 +1,16 @@
+@Component
+script Faust_Fear extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		-- self:CallAnimation("skill")
+		
+		_TimerService:SetTimerOnce(function()
+			self.caster.Unit.curTarget.Unit:GetDebuff(_eDebuffType.Fear, self.skillAmount, self.skillTime)
+			self:SkillEnd()
+		end, self.skillAttackTiming)
+	end
+
+end
