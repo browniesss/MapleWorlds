@@ -1,7 +1,7 @@
 @Component
 script StageSelectorUI extends Component
 
-	property Entity StageInfoPanel = nil
+	property Entity StageInfoPanel = "6f2a3df5-46e0-4b1b-a96d-923a3a4a4cb4"
 
 	property table SelectButtonList = {}
 
@@ -26,7 +26,7 @@ script StageSelectorUI extends Component
 		self.StageInfoPanel = _EntityService:GetEntityByPath(path .. "/StageInfoPanel/panel")
 		
 		for i = 1, 6 do
-			local entity = _EntityService:GetEntityByPath(path .. "/StageSelectScroll/Select_" .. tostring(i))
+			local entity = _EntityService:GetEntityByPath(path .. "/SelectPanel/StageSelectScroll/Select_" .. tostring(i))
 			if i > stageCount then
 				entity:SetEnable(false)
 				continue

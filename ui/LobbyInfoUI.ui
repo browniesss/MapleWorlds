@@ -98,11 +98,11 @@
       },
       {
         "id": "9fab3852-a065-42b0-a6b1-4321fc15780e",
-        "path": "/ui/LobbyInfoUI/MoneyUI",
+        "path": "/ui/LobbyInfoUI/TopBar",
         "componentNames": "MOD.Core.UITransformComponent,script.UICoinInfo",
         "jsonString": {
-          "name": "MoneyUI",
-          "path": "/ui/LobbyInfoUI/MoneyUI",
+          "name": "TopBar",
+          "path": "/ui/LobbyInfoUI/TopBar",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -119,31 +119,31 @@
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 0,
+              "AlignmentOption": 3,
               "AnchorsMax": {
                 "x": 0.5,
-                "y": 0.5
+                "y": 1.0
               },
               "AnchorsMin": {
                 "x": 0.5,
-                "y": 0.5
+                "y": 1.0
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 619.6571,
-                "y": 508.0
+                "x": 960.0,
+                "y": 0.0
               },
               "OffsetMin": {
-                "x": -319.6571,
-                "y": 408.0
+                "x": -960.0,
+                "y": -135.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 939.3142,
-                "y": 100.0
+                "x": 1920.0,
+                "y": 135.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -153,12 +153,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 150.0,
-                "y": 458.0
+                "x": 0.0,
+                "y": -67.5
               },
               "Position": {
-                "x": 150.0,
-                "y": 458.0,
+                "x": 0.0,
+                "y": 472.5,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -183,17 +183,113 @@
         }
       },
       {
-        "id": "476d94ed-a86b-47d2-8524-7309848ac4ab",
-        "path": "/ui/LobbyInfoUI/MoneyUI/UIPlayCoinPanel",
+        "id": "f2dc231a-7c4f-4ca6-a6ab-b085c0e7b7a7",
+        "path": "/ui/LobbyInfoUI/TopBar/UISprite",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
-          "name": "UIPlayCoinPanel",
-          "path": "/ui/LobbyInfoUI/MoneyUI/UIPlayCoinPanel",
+          "name": "UISprite",
+          "path": "/ui/LobbyInfoUI/TopBar/UISprite",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
+          "pathConstraints": "////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uisprite",
+            "sub_entity_id": null
+          },
+          "modelId": "uisprite",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 15,
+              "AnchorsMax": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "AnchorsMin": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "OffsetMin": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 1920.0,
+                "y": 135.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": -1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "55b65231e7154cf59eb41b773833841b"
+              },
+              "OverrideSorting": false,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "476d94ed-a86b-47d2-8524-7309848ac4ab",
+        "path": "/ui/LobbyInfoUI/TopBar/UIPlayCoinPanel",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "jsonString": {
+          "name": "UIPlayCoinPanel",
+          "path": "/ui/LobbyInfoUI/TopBar/UIPlayCoinPanel",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 1,
           "pathConstraints": "////",
           "revision": 0,
           "origin": {
@@ -329,11 +425,11 @@
       },
       {
         "id": "cd189c5f-dc67-4fc9-827a-af573b981cbe",
-        "path": "/ui/LobbyInfoUI/MoneyUI/UIPlayCoinPanel/TextCoin",
+        "path": "/ui/LobbyInfoUI/TopBar/UIPlayCoinPanel/TextCoin",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
           "name": "TextCoin",
-          "path": "/ui/LobbyInfoUI/MoneyUI/UIPlayCoinPanel/TextCoin",
+          "path": "/ui/LobbyInfoUI/TopBar/UIPlayCoinPanel/TextCoin",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -515,16 +611,16 @@
       },
       {
         "id": "b21b8426-bcca-47fa-bb8f-5fad9a31e03f",
-        "path": "/ui/LobbyInfoUI/MoneyUI/UIFirstCoinPanel",
+        "path": "/ui/LobbyInfoUI/TopBar/UIFirstCoinPanel",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
           "name": "UIFirstCoinPanel",
-          "path": "/ui/LobbyInfoUI/MoneyUI/UIFirstCoinPanel",
+          "path": "/ui/LobbyInfoUI/TopBar/UIFirstCoinPanel",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 1,
+          "displayOrder": 2,
           "pathConstraints": "////",
           "revision": 0,
           "origin": {
@@ -660,11 +756,11 @@
       },
       {
         "id": "a1c8e15d-ddae-4eef-8d87-b16fd8e8116b",
-        "path": "/ui/LobbyInfoUI/MoneyUI/UIFirstCoinPanel/TextCoin",
+        "path": "/ui/LobbyInfoUI/TopBar/UIFirstCoinPanel/TextCoin",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
           "name": "TextCoin",
-          "path": "/ui/LobbyInfoUI/MoneyUI/UIFirstCoinPanel/TextCoin",
+          "path": "/ui/LobbyInfoUI/TopBar/UIFirstCoinPanel/TextCoin",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -846,16 +942,16 @@
       },
       {
         "id": "d5cbc892-cf49-4ae4-9f34-ef33a4f3dbd3",
-        "path": "/ui/LobbyInfoUI/MoneyUI/UISecondCoinPanel",
+        "path": "/ui/LobbyInfoUI/TopBar/UISecondCoinPanel",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
           "name": "UISecondCoinPanel",
-          "path": "/ui/LobbyInfoUI/MoneyUI/UISecondCoinPanel",
+          "path": "/ui/LobbyInfoUI/TopBar/UISecondCoinPanel",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 2,
+          "displayOrder": 3,
           "pathConstraints": "////",
           "revision": 0,
           "origin": {
@@ -991,11 +1087,11 @@
       },
       {
         "id": "399b1d9b-b187-4780-858f-cff2b64af439",
-        "path": "/ui/LobbyInfoUI/MoneyUI/UISecondCoinPanel/TextCoin",
+        "path": "/ui/LobbyInfoUI/TopBar/UISecondCoinPanel/TextCoin",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
           "name": "TextCoin",
-          "path": "/ui/LobbyInfoUI/MoneyUI/UISecondCoinPanel/TextCoin",
+          "path": "/ui/LobbyInfoUI/TopBar/UISecondCoinPanel/TextCoin",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -1176,12 +1272,12 @@
         }
       },
       {
-        "id": "74993b66-4341-412a-a880-d35ed90464c9",
-        "path": "/ui/LobbyInfoUI/UserDeckUI",
-        "componentNames": "MOD.Core.UITransformComponent",
+        "id": "27ff1052-c8b4-41b5-b5d1-23e324320eeb",
+        "path": "/ui/LobbyInfoUI/StageSelectUI",
+        "componentNames": "MOD.Core.UITransformComponent,script.StageSelectorUI",
         "jsonString": {
-          "name": "UserDeckUI",
-          "path": "/ui/LobbyInfoUI/UserDeckUI",
+          "name": "StageSelectUI",
+          "path": "/ui/LobbyInfoUI/StageSelectUI",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -1198,113 +1294,41 @@
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 0,
+              "AlignmentOption": 6,
               "AnchorsMax": {
                 "x": 0.5,
-                "y": 0.5
+                "y": 0.0
               },
               "AnchorsMin": {
                 "x": 0.5,
-                "y": 0.5
+                "y": 0.0
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 50.0,
-                "y": 50.0000153
+                "x": 960.0,
+                "y": 945.0
               },
               "OffsetMin": {
-                "x": -50.0,
-                "y": -49.9999847
+                "x": -960.0,
+                "y": 0.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 100.0,
-                "y": 100.0
+                "x": 1920.0,
+                "y": 945.0
               },
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": 0.0,
-                "y": 1.70620879E-05
+                "y": 472.5
               },
               "Position": {
                 "x": 0.0,
-                "y": 1.70620879E-05,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "27ff1052-c8b4-41b5-b5d1-23e324320eeb",
-        "path": "/ui/LobbyInfoUI/StageSelectUI",
-        "componentNames": "MOD.Core.UITransformComponent,script.StageSelectorUI",
-        "jsonString": {
-          "name": "StageSelectUI",
-          "path": "/ui/LobbyInfoUI/StageSelectUI",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 2,
-          "pathConstraints": "///",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uiempty",
-            "sub_entity_id": null
-          },
-          "modelId": "uiempty",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 15,
-              "AnchorsMax": {
-                "x": 1.0,
-                "y": 1.0
-              },
-              "AnchorsMin": {
-                "x": 0.0,
-                "y": 0.0
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": -200.0,
-                "y": -200.0
-              },
-              "OffsetMin": {
-                "x": 200.0,
-                "y": 200.0
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 1520.0,
-                "y": 680.0
-              },
-              "UIMode": 1,
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": 0.0,
-                "y": 0.0
-              },
-              "Position": {
-                "x": 0.0,
-                "y": 0.0,
+                "y": -67.5,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -1324,18 +1348,347 @@
         }
       },
       {
-        "id": "4d40b9ff-cdef-419f-99dd-452137132cfe",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ScrollLayoutGroupComponent",
+        "id": "0a6ae511-5611-4c17-9ab3-f80f277dbc8c",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
-          "name": "StageSelectScroll",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll",
+          "name": "SelectPanel",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
           "pathConstraints": "////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uisprite",
+            "sub_entity_id": null
+          },
+          "modelId": "uisprite",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 15,
+              "AnchorsMax": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "AnchorsMin": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": -10.0,
+                "y": -10.0
+              },
+              "OffsetMin": {
+                "x": 1450.0,
+                "y": 10.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 460.0,
+                "y": 925.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 720.0,
+                "y": 0.0
+              },
+              "Position": {
+                "x": 720.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "0807478c61b3487e8e22cdabb43a3d0e"
+              },
+              "OverrideSorting": false,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "a7b325d6-3cb5-4370-a63a-9f93d87c13e1",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StartButton",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.StartUI",
+        "jsonString": {
+          "name": "StartButton",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StartButton",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "/////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uibutton",
+            "sub_entity_id": null
+          },
+          "modelId": "uibutton",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 15,
+              "AnchorsMax": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "AnchorsMin": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 0.0,
+                "y": -810.0
+              },
+              "OffsetMin": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 460.0,
+                "y": 115.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": -405.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": -405.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -3.89414367E-07,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "89affd8562494dbf9c230b3055c7a12e"
+              },
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ButtonComponent",
+              "Colors": {
+                "NormalColor": {
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                },
+                "HighlightedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "PressedColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 1.0
+                },
+                "SelectedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "DisabledColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 0.5019608
+                },
+                "ColorMultiplier": 1.0,
+                "FadeDuration": 0.1
+              },
+              "ImageRUIDs": {
+                "HighlightedSprite": null,
+                "PressedSprite": null,
+                "SelectedSprite": null,
+                "DisabledSprite": null
+              },
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "script.StartUI",
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "98884179-c7dd-4216-9498-537cf7b6f316",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StartButton/UIText",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "UIText",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StartButton/UIText",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "//////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 15,
+              "AnchorsMax": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "AnchorsMin": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "OffsetMin": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 460.0,
+                "y": 115.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "BestFit": true,
+              "Bold": false,
+              "Font": 1,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 20,
+              "MaxSize": 60,
+              "MinSize": 2,
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "Overflow": 1,
+              "OverrideSorting": false,
+              "Text": "Play",
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "4d40b9ff-cdef-419f-99dd-452137132cfe",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ScrollLayoutGroupComponent",
+        "jsonString": {
+          "name": "StageSelectScroll",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 1,
+          "pathConstraints": "/////",
           "revision": 0,
           "origin": {
             "type": "Model",
@@ -1346,31 +1699,31 @@
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 1,
+              "AlignmentOption": 15,
               "AnchorsMax": {
-                "x": 0.0,
-                "y": 0.5
+                "x": 1.0,
+                "y": 1.0
               },
               "AnchorsMin": {
                 "x": 0.0,
-                "y": 0.5
+                "y": 0.0
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 480.0,
-                "y": 340.0
+                "x": 0.0,
+                "y": -135.0
               },
               "OffsetMin": {
                 "x": 0.0,
-                "y": -340.0
+                "y": 135.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 480.0,
-                "y": 680.0
+                "x": 460.0,
+                "y": 655.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -1380,16 +1733,11 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 240.0,
+                "x": 0.0,
                 "y": 0.0
               },
-              "Rotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-              },
               "Position": {
-                "x": -520.0,
+                "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
               },
@@ -1397,14 +1745,13 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0,
-                "w": -1.0
+                "w": 1.0
               },
               "Scale": {
                 "x": 1.0,
                 "y": 1.0,
                 "z": 1.0
               },
-              "ZRotation": 0.0,
               "Enable": true
             },
             {
@@ -1412,7 +1759,7 @@
               "AnimClipPlayType": 0,
               "EndFrameIndex": 2147483647,
               "ImageRUID": {
-                "DataId": "adf619e2efc84d4ab93e5236b73771c7"
+                "DataId": ""
               },
               "LocalPosition": {
                 "x": 0.0,
@@ -1429,7 +1776,7 @@
                 "r": 1.0,
                 "g": 1.0,
                 "b": 1.0,
-                "a": 1.0
+                "a": 0.0
               },
               "DropShadow": false,
               "DropShadowAngle": 30.0,
@@ -1446,7 +1793,7 @@
               "FillMethod": 0,
               "FillOrigin": 0,
               "FlipX": false,
-              "FlipY": false,
+              "FlipY": true,
               "FrameColumn": 1,
               "FrameRate": 0,
               "FrameRow": 1,
@@ -1468,6 +1815,7 @@
                 "x": 600.0,
                 "y": 100.0
               },
+              "ChildAlignment": 1,
               "Constraint": 0,
               "ConstraintCount": 1,
               "GridSpacing": {
@@ -1477,27 +1825,30 @@
               "HorizontalScrollBarDirection": 0,
               "OverrideSorting": false,
               "Padding": {
-                "left": 20,
-                "right": 20,
-                "top": 20,
-                "bottom": 20
+                "left": 0,
+                "right": 0,
+                "top": 0,
+                "bottom": 0
               },
               "ReverseArrangement": false,
               "ScrollBarBackgroundColor": {
                 "r": 1.0,
                 "g": 1.0,
                 "b": 1.0,
-                "a": 0.4
+                "a": 0.0
               },
               "ScrollBarHandleColor": {
-                "r": 0.5,
-                "g": 0.5,
-                "b": 0.5,
-                "a": 1.0
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 0.0
+              },
+              "ScrollBarHandleImageRUID": {
+                "DataId": ""
               },
               "ScrollBarThickness": 20.0,
-              "ScrollBarVisible": 1,
-              "Spacing": 5.0,
+              "ScrollBarVisible": 2,
+              "Spacing": 15.0,
               "StartAxis": 0,
               "StartCorner": 0,
               "Type": 1,
@@ -1511,17 +1862,17 @@
       },
       {
         "id": "5dca8530-bb4e-46ae-b582-a620fb2f5ee3",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_1",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_1",
         "componentNames": "MOD.Core.UITransformComponent,script.StageSelectItemUI",
         "jsonString": {
           "name": "Select_1",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_1",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_1",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
-          "pathConstraints": "/////",
+          "pathConstraints": "//////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -1543,20 +1894,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 460.0,
-                "y": -20.0
+                "x": 440.0,
+                "y": 0.0
               },
               "OffsetMin": {
                 "x": 20.0,
-                "y": -88.0
+                "y": -115.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -1566,12 +1917,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 240.0,
-                "y": -54.0
+                "x": 230.0,
+                "y": -57.5
               },
               "Position": {
-                "x": 240.0,
-                "y": -54.0,
+                "x": 230.0,
+                "y": -57.5,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -1597,17 +1948,17 @@
       },
       {
         "id": "99ff3b6b-67c7-47cc-aad5-de70d5cdf0d0",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_1/SelectImage",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_1/SelectImage",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
           "name": "SelectImage",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_1/SelectImage",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_1/SelectImage",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -1629,20 +1980,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 1.0,
-                "y": 1.0
+                "x": 0.0,
+                "y": 0.0
               },
               "OffsetMin": {
-                "x": -1.0,
-                "y": -1.0
+                "x": 0.0,
+                "y": 0.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 442.0,
-                "y": 70.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -1700,17 +2051,17 @@
       },
       {
         "id": "9c2734e8-4bb4-4be4-b217-d01baa289ba3",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_1/LockImage",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_1/LockImage",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
           "name": "LockImage",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_1/LockImage",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_1/LockImage",
           "nameEditable": true,
           "enable": true,
           "visible": false,
           "localize": true,
           "displayOrder": 1,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 0,
           "origin": {
             "type": "Model",
@@ -1744,8 +2095,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -1844,17 +2195,17 @@
       },
       {
         "id": "a2d59a74-c95a-4e3d-acf5-6ae8992ac453",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_1/SelectButtonEnable",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_1/SelectButtonEnable",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.StageSelectorClickHandler",
         "jsonString": {
           "name": "SelectButtonEnable",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_1/SelectButtonEnable",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_1/SelectButtonEnable",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 2,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -1888,8 +2239,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -1980,17 +2331,17 @@
       },
       {
         "id": "bd8d96bd-5823-46b5-9915-f653a073f15f",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_1/SelectButtonDisable",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_1/SelectButtonDisable",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
         "jsonString": {
           "name": "SelectButtonDisable",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_1/SelectButtonDisable",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_1/SelectButtonDisable",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 3,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -2024,8 +2375,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -2111,18 +2462,18 @@
         }
       },
       {
-        "id": "814ddf52-df37-42b7-9e9e-456632c70f49",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_2",
+        "id": "4b655b49-efb4-47e5-8cd6-009a8ed8582a",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_2",
         "componentNames": "MOD.Core.UITransformComponent,script.StageSelectItemUI",
         "jsonString": {
           "name": "Select_2",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_2",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_2",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 1,
-          "pathConstraints": "/////",
+          "pathConstraints": "//////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -2144,20 +2495,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 460.0,
-                "y": -93.0
+                "x": 440.0,
+                "y": -130.0
               },
               "OffsetMin": {
                 "x": 20.0,
-                "y": -161.0
+                "y": -245.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -2167,12 +2518,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 240.0,
-                "y": -127.0
+                "x": 230.0,
+                "y": -187.5
               },
               "Position": {
-                "x": 240.0,
-                "y": -127.0,
+                "x": 230.0,
+                "y": -187.5,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -2197,18 +2548,18 @@
         }
       },
       {
-        "id": "9bc463fe-d530-4512-a4c4-4eabc6b7cd37",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_2/SelectImage",
+        "id": "4cd5aeab-2bc1-43bb-b125-bb2a3c60a85c",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_2/SelectImage",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
           "name": "SelectImage",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_2/SelectImage",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_2/SelectImage",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -2230,20 +2581,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 1.0,
-                "y": 1.0
+                "x": 0.0,
+                "y": 0.0
               },
               "OffsetMin": {
-                "x": -1.0,
-                "y": -1.0
+                "x": 0.0,
+                "y": 0.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 442.0,
-                "y": 70.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -2301,18 +2652,18 @@
         }
       },
       {
-        "id": "0e0004e2-6178-42c0-bb92-7deaf7323a3e",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_2/LockImage",
+        "id": "5a97f062-273a-4abd-bda2-602d68ff9864",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_2/LockImage",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
           "name": "LockImage",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_2/LockImage",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_2/LockImage",
           "nameEditable": true,
           "enable": true,
           "visible": false,
           "localize": true,
           "displayOrder": 1,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 0,
           "origin": {
             "type": "Model",
@@ -2346,8 +2697,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -2445,18 +2796,18 @@
         }
       },
       {
-        "id": "7c1a3d66-3126-41de-9259-6ad836be52dd",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_2/SelectButtonEnable",
+        "id": "0a1abe92-31c3-4adb-afe0-68f23df97fcc",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_2/SelectButtonEnable",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.StageSelectorClickHandler",
         "jsonString": {
           "name": "SelectButtonEnable",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_2/SelectButtonEnable",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_2/SelectButtonEnable",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 2,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -2490,8 +2841,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -2581,18 +2932,18 @@
         }
       },
       {
-        "id": "a9c5f1bf-05f4-46c3-bc47-ccfdc1042a35",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_2/SelectButtonDisable",
+        "id": "9ddc5846-6121-4fcb-b039-f813edf904fd",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_2/SelectButtonDisable",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
         "jsonString": {
           "name": "SelectButtonDisable",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_2/SelectButtonDisable",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_2/SelectButtonDisable",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 3,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -2626,8 +2977,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -2713,18 +3064,18 @@
         }
       },
       {
-        "id": "6e20326b-17bd-45c4-a0f0-ecad93a93862",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_3",
+        "id": "51590c4e-0c69-4064-8161-5819b788ce73",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_3",
         "componentNames": "MOD.Core.UITransformComponent,script.StageSelectItemUI",
         "jsonString": {
           "name": "Select_3",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_3",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_3",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 2,
-          "pathConstraints": "/////",
+          "pathConstraints": "//////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -2746,20 +3097,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 460.0,
-                "y": -166.0
+                "x": 440.0,
+                "y": -260.0
               },
               "OffsetMin": {
                 "x": 20.0,
-                "y": -234.0
+                "y": -375.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -2769,12 +3120,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 240.0,
-                "y": -200.0
+                "x": 230.0,
+                "y": -317.5
               },
               "Position": {
-                "x": 240.0,
-                "y": -200.0,
+                "x": 230.0,
+                "y": -317.5,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -2799,18 +3150,18 @@
         }
       },
       {
-        "id": "983c08f4-0556-482a-8e6c-3033377cefd2",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_3/SelectImage",
+        "id": "d8d6270b-3373-4585-8983-d97293ee9fd8",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_3/SelectImage",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
           "name": "SelectImage",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_3/SelectImage",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_3/SelectImage",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -2832,20 +3183,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 1.0,
-                "y": 1.0
+                "x": 0.0,
+                "y": 0.0
               },
               "OffsetMin": {
-                "x": -1.0,
-                "y": -1.0
+                "x": 0.0,
+                "y": 0.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 442.0,
-                "y": 70.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -2903,18 +3254,18 @@
         }
       },
       {
-        "id": "d170a968-5190-4f67-b95e-344ce743c51d",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_3/LockImage",
+        "id": "e684dd90-8c29-43e3-9c72-4431c674a972",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_3/LockImage",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
           "name": "LockImage",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_3/LockImage",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_3/LockImage",
           "nameEditable": true,
           "enable": true,
           "visible": false,
           "localize": true,
           "displayOrder": 1,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 0,
           "origin": {
             "type": "Model",
@@ -2948,8 +3299,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -3047,18 +3398,18 @@
         }
       },
       {
-        "id": "94027181-498e-483f-b5ee-1163ac874439",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_3/SelectButtonEnable",
+        "id": "113fde03-fbaf-49d5-ac97-a0fc8d72f6ff",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_3/SelectButtonEnable",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.StageSelectorClickHandler",
         "jsonString": {
           "name": "SelectButtonEnable",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_3/SelectButtonEnable",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_3/SelectButtonEnable",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 2,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -3092,8 +3443,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -3183,18 +3534,18 @@
         }
       },
       {
-        "id": "21013d5f-2798-4db5-ac73-bcdbf23a870b",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_3/SelectButtonDisable",
+        "id": "976c942d-83f0-48dd-b0a2-740388b7de86",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_3/SelectButtonDisable",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
         "jsonString": {
           "name": "SelectButtonDisable",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_3/SelectButtonDisable",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_3/SelectButtonDisable",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 3,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -3228,8 +3579,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -3315,18 +3666,18 @@
         }
       },
       {
-        "id": "123a3da6-db17-45b0-9045-9cd66292d281",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_4",
+        "id": "f11489d1-c828-4416-af7e-26267b292ef4",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_4",
         "componentNames": "MOD.Core.UITransformComponent,script.StageSelectItemUI",
         "jsonString": {
           "name": "Select_4",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_4",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_4",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 3,
-          "pathConstraints": "/////",
+          "pathConstraints": "//////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -3348,20 +3699,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 460.0,
-                "y": -239.0
+                "x": 440.0,
+                "y": -390.0
               },
               "OffsetMin": {
                 "x": 20.0,
-                "y": -307.0
+                "y": -505.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -3371,12 +3722,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 240.0,
-                "y": -273.0
+                "x": 230.0,
+                "y": -447.5
               },
               "Position": {
-                "x": 240.0,
-                "y": -273.0,
+                "x": 230.0,
+                "y": -447.5,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -3401,18 +3752,18 @@
         }
       },
       {
-        "id": "ba593bde-3c62-4ccb-ac34-02fe975ea75d",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_4/SelectImage",
+        "id": "aa540605-1429-41cd-bf39-40ce39d82c48",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_4/SelectImage",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
           "name": "SelectImage",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_4/SelectImage",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_4/SelectImage",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -3434,20 +3785,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 1.0,
-                "y": 1.0
+                "x": 0.0,
+                "y": 0.0
               },
               "OffsetMin": {
-                "x": -1.0,
-                "y": -1.0
+                "x": 0.0,
+                "y": 0.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 442.0,
-                "y": 70.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -3505,18 +3856,18 @@
         }
       },
       {
-        "id": "bb208272-98d5-4a52-ada3-63656fc33fd5",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_4/LockImage",
+        "id": "63b92f1f-b2bf-4318-8bff-54aee72dd9c3",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_4/LockImage",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
           "name": "LockImage",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_4/LockImage",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_4/LockImage",
           "nameEditable": true,
           "enable": true,
           "visible": false,
           "localize": true,
           "displayOrder": 1,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 0,
           "origin": {
             "type": "Model",
@@ -3550,8 +3901,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -3649,18 +4000,18 @@
         }
       },
       {
-        "id": "b05e69cb-775f-4078-a9b4-9793f167d38d",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_4/SelectButtonEnable",
+        "id": "66f247e9-e698-4e9a-a312-2013b401c793",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_4/SelectButtonEnable",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.StageSelectorClickHandler",
         "jsonString": {
           "name": "SelectButtonEnable",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_4/SelectButtonEnable",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_4/SelectButtonEnable",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 2,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -3694,8 +4045,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -3785,18 +4136,18 @@
         }
       },
       {
-        "id": "65da1ca7-ef8a-40e3-9f4f-0a96bbd58683",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_4/SelectButtonDisable",
+        "id": "7c2c1329-bde3-47a9-80c6-1a397c314d6f",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_4/SelectButtonDisable",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
         "jsonString": {
           "name": "SelectButtonDisable",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_4/SelectButtonDisable",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_4/SelectButtonDisable",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 3,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -3830,8 +4181,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -3917,18 +4268,18 @@
         }
       },
       {
-        "id": "520c1a7e-476e-48c6-bd17-18dc219c452c",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_5",
+        "id": "23920dd1-1c9f-4e13-91a3-fe9df1abdec2",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_5",
         "componentNames": "MOD.Core.UITransformComponent,script.StageSelectItemUI",
         "jsonString": {
           "name": "Select_5",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_5",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_5",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 4,
-          "pathConstraints": "/////",
+          "pathConstraints": "//////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -3950,20 +4301,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 460.0,
-                "y": -312.0
+                "x": 440.0,
+                "y": -520.0
               },
               "OffsetMin": {
                 "x": 20.0,
-                "y": -380.0
+                "y": -635.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -3973,12 +4324,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 240.0,
-                "y": -346.0
+                "x": 230.0,
+                "y": -577.5
               },
               "Position": {
-                "x": 240.0,
-                "y": -346.0,
+                "x": 230.0,
+                "y": -577.5,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -4003,18 +4354,18 @@
         }
       },
       {
-        "id": "ae58d482-48d8-44c0-ad83-ba1f8ff9151b",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_5/SelectImage",
+        "id": "24dd6516-6cc6-4780-a795-6b6685762c4f",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_5/SelectImage",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
           "name": "SelectImage",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_5/SelectImage",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_5/SelectImage",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -4036,20 +4387,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 1.0,
-                "y": 1.0
+                "x": 0.0,
+                "y": 0.0
               },
               "OffsetMin": {
-                "x": -1.0,
-                "y": -1.0
+                "x": 0.0,
+                "y": 0.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 442.0,
-                "y": 70.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -4107,18 +4458,18 @@
         }
       },
       {
-        "id": "e3c79a54-3826-4fd8-af48-b82532f88d38",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_5/LockImage",
+        "id": "987da63b-4667-403c-8fb0-3682e17a40aa",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_5/LockImage",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
           "name": "LockImage",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_5/LockImage",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_5/LockImage",
           "nameEditable": true,
           "enable": true,
           "visible": false,
           "localize": true,
           "displayOrder": 1,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 0,
           "origin": {
             "type": "Model",
@@ -4152,8 +4503,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -4251,18 +4602,18 @@
         }
       },
       {
-        "id": "22e2d572-3be8-46e5-80e4-b6d3c51f9b6f",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_5/SelectButtonEnable",
+        "id": "853ad7b2-afe1-4938-ab91-21771b02fa7b",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_5/SelectButtonEnable",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.StageSelectorClickHandler",
         "jsonString": {
           "name": "SelectButtonEnable",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_5/SelectButtonEnable",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_5/SelectButtonEnable",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 2,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -4296,8 +4647,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -4387,18 +4738,18 @@
         }
       },
       {
-        "id": "11fa8365-6b0f-4d75-bf2d-387fbcd75a04",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_5/SelectButtonDisable",
+        "id": "2133d89b-066c-4a92-94b9-57831bb57879",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_5/SelectButtonDisable",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
         "jsonString": {
           "name": "SelectButtonDisable",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_5/SelectButtonDisable",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_5/SelectButtonDisable",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 3,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -4432,8 +4783,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -4519,18 +4870,18 @@
         }
       },
       {
-        "id": "b9047e46-9d59-4ef3-9f1d-0ccae184796a",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_6",
+        "id": "f9f0ae4c-44a1-4c1d-a5e3-3e9cc77ecbe3",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_6",
         "componentNames": "MOD.Core.UITransformComponent,script.StageSelectItemUI",
         "jsonString": {
           "name": "Select_6",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_6",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_6",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 5,
-          "pathConstraints": "/////",
+          "pathConstraints": "//////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -4552,20 +4903,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 460.0,
-                "y": -385.0
+                "x": 440.0,
+                "y": -650.0
               },
               "OffsetMin": {
                 "x": 20.0,
-                "y": -453.0
+                "y": -765.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -4575,12 +4926,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 240.0,
-                "y": -419.0
+                "x": 230.0,
+                "y": -707.5
               },
               "Position": {
-                "x": 240.0,
-                "y": -419.0,
+                "x": 230.0,
+                "y": -707.5,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -4605,18 +4956,18 @@
         }
       },
       {
-        "id": "1c492b1b-15f4-4ed8-b131-ecafc4fe7e13",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_6/SelectImage",
+        "id": "449e1e85-95ea-4f3c-9590-11571dac4289",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_6/SelectImage",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
           "name": "SelectImage",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_6/SelectImage",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_6/SelectImage",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -4638,20 +4989,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 1.0,
-                "y": 1.0
+                "x": 0.0,
+                "y": 0.0
               },
               "OffsetMin": {
-                "x": -1.0,
-                "y": -1.0
+                "x": 0.0,
+                "y": 0.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 442.0,
-                "y": 70.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -4709,18 +5060,18 @@
         }
       },
       {
-        "id": "13af9f69-90a6-457a-8d44-fe76a2fe080c",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_6/LockImage",
+        "id": "58495a37-e558-4c80-baa1-2c5272139887",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_6/LockImage",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
           "name": "LockImage",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_6/LockImage",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_6/LockImage",
           "nameEditable": true,
           "enable": true,
           "visible": false,
           "localize": true,
           "displayOrder": 1,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 0,
           "origin": {
             "type": "Model",
@@ -4754,8 +5105,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -4853,18 +5204,18 @@
         }
       },
       {
-        "id": "d11f6368-6e52-4f4c-a897-fb50425881f7",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_6/SelectButtonEnable",
+        "id": "251539f5-64fb-4941-a789-be478f68c6ec",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_6/SelectButtonEnable",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.StageSelectorClickHandler",
         "jsonString": {
           "name": "SelectButtonEnable",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_6/SelectButtonEnable",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_6/SelectButtonEnable",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 2,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -4898,8 +5249,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -4989,18 +5340,18 @@
         }
       },
       {
-        "id": "8d7f50fb-95ba-455a-84d4-d5d07388a6b8",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_6/SelectButtonDisable",
+        "id": "65495f95-b6ed-460f-92c7-d3b1616b4bc4",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_6/SelectButtonDisable",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
         "jsonString": {
           "name": "SelectButtonDisable",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StageSelectScroll/Select_6/SelectButtonDisable",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/StageSelectScroll/Select_6/SelectButtonDisable",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 3,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -5034,8 +5385,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 440.0,
-                "y": 68.0
+                "x": 420.0,
+                "y": 115.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -5115,6 +5466,369 @@
               },
               "OverrideSorting": false,
               "Enable": false
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "ad96289a-a8ee-4e47-b2bd-278a263b8dad",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/ChapterSelect",
+        "componentNames": "MOD.Core.UITransformComponent",
+        "jsonString": {
+          "name": "ChapterSelect",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/ChapterSelect",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 2,
+          "pathConstraints": "/////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uiempty",
+            "sub_entity_id": null
+          },
+          "modelId": "uiempty",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 15,
+              "AnchorsMax": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "AnchorsMin": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "OffsetMin": {
+                "x": 0.0,
+                "y": 810.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 460.0,
+                "y": 115.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 405.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 405.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "054fd667-8cb8-4012-b703-28b84f55b65e",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/ChapterSelect/PrevButton",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.CallBackButton",
+        "jsonString": {
+          "name": "PrevButton",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/ChapterSelect/PrevButton",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "//////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uibutton",
+            "sub_entity_id": null
+          },
+          "modelId": "uibutton",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 1,
+              "AnchorsMax": {
+                "x": 0.0,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.0,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 70.0,
+                "y": 30.0
+              },
+              "OffsetMin": {
+                "x": 10.0,
+                "y": -30.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 60.0,
+                "y": 60.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 40.0,
+                "y": 0.0
+              },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "Position": {
+                "x": -190.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": -1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "9a74d22fcbbe458ca5f74c542a5254cd"
+              },
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ButtonComponent",
+              "Colors": {
+                "NormalColor": {
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                },
+                "HighlightedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "PressedColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 1.0
+                },
+                "SelectedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "DisabledColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 0.5019608
+                },
+                "ColorMultiplier": 1.0,
+                "FadeDuration": 0.1
+              },
+              "ImageRUIDs": {
+                "HighlightedSprite": null,
+                "PressedSprite": null,
+                "SelectedSprite": null,
+                "DisabledSprite": null
+              },
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "script.CallBackButton",
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "8574a53d-397d-40b1-800c-8ece798f5108",
+        "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/ChapterSelect/NextButton",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.CallBackButton",
+        "jsonString": {
+          "name": "NextButton",
+          "path": "/ui/LobbyInfoUI/StageSelectUI/SelectPanel/ChapterSelect/NextButton",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 1,
+          "pathConstraints": "//////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uibutton",
+            "sub_entity_id": null
+          },
+          "modelId": "uibutton",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 2,
+              "AnchorsMax": {
+                "x": 1.0,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 1.0,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": -10.0,
+                "y": 30.0
+              },
+              "OffsetMin": {
+                "x": -70.0,
+                "y": -30.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 60.0,
+                "y": 60.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": -40.0,
+                "y": 0.0
+              },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "Position": {
+                "x": 190.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": -1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "8c26577e46e04948afad102415547669"
+              },
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ButtonComponent",
+              "Colors": {
+                "NormalColor": {
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                },
+                "HighlightedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "PressedColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 1.0
+                },
+                "SelectedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "DisabledColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 0.5019608
+                },
+                "ColorMultiplier": 1.0,
+                "FadeDuration": 0.1
+              },
+              "ImageRUIDs": {
+                "HighlightedSprite": null,
+                "PressedSprite": null,
+                "SelectedSprite": null,
+                "DisabledSprite": null
+              },
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "script.CallBackButton",
+              "Enable": true
             }
           ],
           "@version": 1
@@ -5143,40 +5857,40 @@
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 2,
+              "AlignmentOption": 15,
               "AnchorsMax": {
                 "x": 1.0,
-                "y": 0.5
+                "y": 1.0
               },
               "AnchorsMin": {
-                "x": 1.0,
-                "y": 0.5
+                "x": 0.0,
+                "y": 0.0
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 0.0,
-                "y": 340.0
+                "x": -490.0,
+                "y": -10.0
               },
               "OffsetMin": {
-                "x": -1020.0,
-                "y": -340.0
+                "x": 10.0,
+                "y": 10.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 1020.0,
-                "y": 680.0
+                "x": 1420.0,
+                "y": 925.0
               },
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -510.0,
+                "x": -240.0,
                 "y": 0.0
               },
               "Position": {
-                "x": 250.0,
+                "x": -240.0,
                 "y": 0.0,
                 "z": 0.0
               },
@@ -5247,8 +5961,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 1020.0,
-                "y": 680.0
+                "x": 1420.0,
+                "y": 925.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -23196,408 +23910,6 @@
         }
       },
       {
-        "id": "a7b325d6-3cb5-4370-a63a-9f93d87c13e1",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StartButton",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.StartUI",
-        "jsonString": {
-          "name": "StartButton",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StartButton",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 2,
-          "pathConstraints": "////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uibutton",
-            "sub_entity_id": null
-          },
-          "modelId": "uibutton",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 0,
-              "AnchorsMax": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "AnchorsMin": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": 313.0876,
-                "y": -370.3546
-              },
-              "OffsetMin": {
-                "x": -206.8684,
-                "y": -511.9182
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 519.956,
-                "y": 141.563583
-              },
-              "UIMode": 1,
-              "UIScale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": 53.1096,
-                "y": -441.1364
-              },
-              "Rotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": -4.46236E-05
-              },
-              "Position": {
-                "x": 53.1096,
-                "y": -441.1364,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 3.89414367E-07,
-                "w": -1.0
-              },
-              "Scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "ZRotation": -4.46236E-05,
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "ImageRUID": {
-                "DataId": "978d499c28d74b469941c4a95378945c"
-              },
-              "OverrideSorting": false,
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.ButtonComponent",
-              "Colors": {
-                "NormalColor": {
-                  "r": 1.0,
-                  "g": 1.0,
-                  "b": 1.0,
-                  "a": 1.0
-                },
-                "HighlightedColor": {
-                  "r": 0.9607843,
-                  "g": 0.9607843,
-                  "b": 0.9607843,
-                  "a": 1.0
-                },
-                "PressedColor": {
-                  "r": 0.784313738,
-                  "g": 0.784313738,
-                  "b": 0.784313738,
-                  "a": 1.0
-                },
-                "SelectedColor": {
-                  "r": 0.9607843,
-                  "g": 0.9607843,
-                  "b": 0.9607843,
-                  "a": 1.0
-                },
-                "DisabledColor": {
-                  "r": 0.784313738,
-                  "g": 0.784313738,
-                  "b": 0.784313738,
-                  "a": 0.5019608
-                },
-                "ColorMultiplier": 1.0,
-                "FadeDuration": 0.1
-              },
-              "ImageRUIDs": {
-                "HighlightedSprite": null,
-                "PressedSprite": null,
-                "SelectedSprite": null,
-                "DisabledSprite": null
-              },
-              "OverrideSorting": false,
-              "Enable": true
-            },
-            {
-              "@type": "script.StartUI",
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "98884179-c7dd-4216-9498-537cf7b6f316",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StartButton/UIText",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
-        "jsonString": {
-          "name": "UIText",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StartButton/UIText",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 0,
-          "pathConstraints": "/////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uitext",
-            "sub_entity_id": null
-          },
-          "modelId": "uitext",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 0,
-              "AnchorsMax": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "AnchorsMin": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": 64.66711,
-                "y": 51.9001274
-              },
-              "OffsetMin": {
-                "x": -205.9501,
-                "y": -50.0001259
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 270.617218,
-                "y": 101.900253
-              },
-              "UIMode": 1,
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": -70.6415,
-                "y": 0.95
-              },
-              "Position": {
-                "x": -70.6415,
-                "y": 0.95,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "OverrideSorting": false,
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.TextComponent",
-              "BestFit": true,
-              "Font": 1,
-              "FontColor": {
-                "r": 1.0,
-                "g": 1.0,
-                "b": 1.0,
-                "a": 1.0
-              },
-              "FontSize": 60,
-              "MaxSize": 218,
-              "MinSize": 2,
-              "OutlineDistance": {
-                "x": 1.0,
-                "y": -1.0
-              },
-              "Overflow": 1,
-              "OverrideSorting": false,
-              "Text": "게임 시작",
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "b0cb8f52-11f1-4fe8-a314-df2136430365",
-        "path": "/ui/LobbyInfoUI/StageSelectUI/StartButton/UISprite",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
-        "jsonString": {
-          "name": "UISprite",
-          "path": "/ui/LobbyInfoUI/StageSelectUI/StartButton/UISprite",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 1,
-          "pathConstraints": "/////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uisprite",
-            "sub_entity_id": null
-          },
-          "modelId": "uisprite",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 0,
-              "AnchorsMax": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "AnchorsMin": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": 218.4955,
-                "y": 35.86979
-              },
-              "OffsetMin": {
-                "x": 63.12529,
-                "y": -31.85199
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 155.370209,
-                "y": 67.72178
-              },
-              "UIMode": 1,
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": 140.8104,
-                "y": 2.0089
-              },
-              "Position": {
-                "x": 140.8104,
-                "y": 2.0089,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "ImageRUID": {
-                "DataId": "978d499c28d74b469941c4a95378945c"
-              },
-              "OverrideSorting": false,
-              "Color": {
-                "r": 0.0,
-                "g": 0.0,
-                "b": 0.0,
-                "a": 0.5253906
-              },
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "cc66e4c4-8f3a-4745-afb5-d316845c068e",
-        "path": "/ui/LobbyInfoUI/ChapterSelectUI",
-        "componentNames": "MOD.Core.UITransformComponent",
-        "jsonString": {
-          "name": "ChapterSelectUI",
-          "path": "/ui/LobbyInfoUI/ChapterSelectUI",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 3,
-          "pathConstraints": "///",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uiempty",
-            "sub_entity_id": null
-          },
-          "modelId": "uiempty",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 0,
-              "AnchorsMax": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "AnchorsMin": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": 50.0,
-                "y": 50.0000153
-              },
-              "OffsetMin": {
-                "x": -50.0,
-                "y": -49.9999847
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 100.0,
-                "y": 100.0
-              },
-              "UIMode": 1,
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": 0.0,
-                "y": 1.70620879E-05
-              },
-              "Position": {
-                "x": 0.0,
-                "y": 1.70620879E-05,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
         "id": "4a46fd93-577e-40f5-92ca-fb6cd2d33c2d",
         "path": "/ui/LobbyInfoUI/UserDeckButton",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.UserDeckButton",
@@ -23608,7 +23920,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 4,
+          "displayOrder": 2,
           "pathConstraints": "///",
           "revision": 1,
           "origin": {
@@ -23846,7 +24158,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 5,
+          "displayOrder": 3,
           "pathConstraints": "///",
           "revision": 1,
           "origin": {
@@ -24057,265 +24369,6 @@
               },
               "OverrideSorting": false,
               "Text": "스킬 세팅",
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "8574a53d-397d-40b1-800c-8ece798f5108",
-        "path": "/ui/LobbyInfoUI/NextButton",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.CallBackButton",
-        "jsonString": {
-          "name": "NextButton",
-          "path": "/ui/LobbyInfoUI/NextButton",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 6,
-          "pathConstraints": "///",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uibutton",
-            "sub_entity_id": null
-          },
-          "modelId": "uibutton",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 2,
-              "AnchorsMax": {
-                "x": 1.0,
-                "y": 0.5
-              },
-              "AnchorsMin": {
-                "x": 1.0,
-                "y": 0.5
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": -82.61621,
-                "y": 80.87404
-              },
-              "OffsetMin": {
-                "x": -171.083984,
-                "y": -43.69584
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 88.46777,
-                "y": 124.569878
-              },
-              "UIMode": 1,
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": -126.8501,
-                "y": 18.5891
-              },
-              "Position": {
-                "x": 833.1499,
-                "y": 18.5891,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "ImageRUID": {
-                "DataId": "8c26577e46e04948afad102415547669"
-              },
-              "OverrideSorting": false,
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.ButtonComponent",
-              "Colors": {
-                "NormalColor": {
-                  "r": 1.0,
-                  "g": 1.0,
-                  "b": 1.0,
-                  "a": 1.0
-                },
-                "HighlightedColor": {
-                  "r": 0.9607843,
-                  "g": 0.9607843,
-                  "b": 0.9607843,
-                  "a": 1.0
-                },
-                "PressedColor": {
-                  "r": 0.784313738,
-                  "g": 0.784313738,
-                  "b": 0.784313738,
-                  "a": 1.0
-                },
-                "SelectedColor": {
-                  "r": 0.9607843,
-                  "g": 0.9607843,
-                  "b": 0.9607843,
-                  "a": 1.0
-                },
-                "DisabledColor": {
-                  "r": 0.784313738,
-                  "g": 0.784313738,
-                  "b": 0.784313738,
-                  "a": 0.5019608
-                },
-                "ColorMultiplier": 1.0,
-                "FadeDuration": 0.1
-              },
-              "ImageRUIDs": {
-                "HighlightedSprite": null,
-                "PressedSprite": null,
-                "SelectedSprite": null,
-                "DisabledSprite": null
-              },
-              "OverrideSorting": false,
-              "Enable": true
-            },
-            {
-              "@type": "script.CallBackButton",
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "054fd667-8cb8-4012-b703-28b84f55b65e",
-        "path": "/ui/LobbyInfoUI/PrevButton",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.CallBackButton",
-        "jsonString": {
-          "name": "PrevButton",
-          "path": "/ui/LobbyInfoUI/PrevButton",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 7,
-          "pathConstraints": "///",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uibutton",
-            "sub_entity_id": null
-          },
-          "modelId": "uibutton",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 1,
-              "AnchorsMax": {
-                "x": 0.0,
-                "y": 0.5
-              },
-              "AnchorsMin": {
-                "x": 0.0,
-                "y": 0.5
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": 155.051056,
-                "y": 80.87394
-              },
-              "OffsetMin": {
-                "x": 66.58334,
-                "y": -43.69594
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 88.46771,
-                "y": 124.569878
-              },
-              "UIMode": 1,
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": 110.8172,
-                "y": 18.589
-              },
-              "Position": {
-                "x": -849.1828,
-                "y": 18.589,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "ImageRUID": {
-                "DataId": "9a74d22fcbbe458ca5f74c542a5254cd"
-              },
-              "OverrideSorting": false,
-              "SortingLayer": "MapLayer0",
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.ButtonComponent",
-              "Colors": {
-                "NormalColor": {
-                  "r": 1.0,
-                  "g": 1.0,
-                  "b": 1.0,
-                  "a": 1.0
-                },
-                "HighlightedColor": {
-                  "r": 0.9607843,
-                  "g": 0.9607843,
-                  "b": 0.9607843,
-                  "a": 1.0
-                },
-                "PressedColor": {
-                  "r": 0.784313738,
-                  "g": 0.784313738,
-                  "b": 0.784313738,
-                  "a": 1.0
-                },
-                "SelectedColor": {
-                  "r": 0.9607843,
-                  "g": 0.9607843,
-                  "b": 0.9607843,
-                  "a": 1.0
-                },
-                "DisabledColor": {
-                  "r": 0.784313738,
-                  "g": 0.784313738,
-                  "b": 0.784313738,
-                  "a": 0.5019608
-                },
-                "ColorMultiplier": 1.0,
-                "FadeDuration": 0.1
-              },
-              "ImageRUIDs": {
-                "HighlightedSprite": null,
-                "PressedSprite": null,
-                "SelectedSprite": null,
-                "DisabledSprite": null
-              },
-              "OverrideSorting": false,
-              "Enable": true
-            },
-            {
-              "@type": "script.CallBackButton",
               "Enable": true
             }
           ],
