@@ -44,7 +44,7 @@ script Unit extends Component
 	property number originAttackSpeed = 0
 
 	@Sync
-	property number AttackTimer = 0
+	property number attackTimer = 10
 
 	@Sync
 	property string curState = "stand"
@@ -407,14 +407,14 @@ script Unit extends Component
 			return
 		end
 		
-		self.AttackTimer += delta;
+		self.attackTimer += delta;
 		
-		if self.AttackTimer >= self.attackSpeed and self.attackRange == 1 then
+		if self.attackTimer >= self.attackSpeed and self.attackRange == 1 then
 			self:Melee_Attack()
-			self.AttackTimer = 0
-		elseif self.AttackTimer >= self.attackSpeed and self.attackRange > 1 then
+			self.attackTimer = 0
+		elseif self.attackTimer >= self.attackSpeed and self.attackRange > 1 then
 			self:Range_Attack()
-			self.AttackTimer = 0
+			self.attackTimer = 0
 		end
 	end
 
@@ -550,20 +550,29 @@ script Unit extends Component
 			
 			_TimerService:SetTimerOnce(attackFunction, timerTiming)
 		else
-			local projectile = _SpawnService:SpawnByModelId("model://cd38ad89-1c52-45f2-8d86-d6be27475ba9",
+			if self.passiveSkill ~= nil and self.passiveSkill.PassiveSkillParent.passiveType == _ePassiveType.OnAttack then
+				self.passiveSkill.PassiveSkillParent:OnAttack()
+			end
+			
+			local animationPlaySpeed = self.attackAnimationPlayingTime / (self.attackSpeed)
+			self.Entity.SpriteRendererComponent.PlayRate = animationPlaySpeed
+		
+			local timerTiming = self.attackTiming / animationPlaySpeed
+			
+			local attackFunction = function()
+				local projectile = _SpawnService:SpawnByModelId("model://cd38ad89-1c52-45f2-8d86-d6be27475ba9",
 					"Projectile",
 					self.Entity.TransformComponent.WorldPosition + (Vector3.up * 0.3),
 					self._T.projectileParent)
 				projectile.Projectile:SetCaster(self.Entity)
-		
-			if self.passiveSkill ~= nil and self.passiveSkill.PassiveSkillParent.passiveType == _ePassiveType.OnAttack then
-				self.passiveSkill.PassiveSkillParent:OnAttack()
-			end
-		
-			projectile.Projectile:SetShoot(self.projectileSpriteRUID, 1, self.projectileSpeed, self.curTarget, true,self.damage)
+				projectile.Projectile:SetShoot(self.projectileSpriteRUID, 1, self.projectileSpeed, self.curTarget, true,self.damage)
 				
 				-- 마나 충전
-			self:IncreaseMp()
+				self:IncreaseMp()
+			end
+			
+			_TimerService:SetTimerOnce(attackFunction, timerTiming)		
+			
 		end
 	end
 
@@ -668,6 +677,7 @@ script Unit extends Component
 				deleteFunction = function()
 					self.maxHPTimerID = 0
 					self.maxHP = self.originMaxHP
+		
 					
 					if self.hp >= self.maxHP then
 						self.hp = self.maxHP
@@ -1015,7 +1025,7 @@ script Unit extends Component
 			entity.Unit.curTarget = nil
 			if entity.Unit.curState ~= "useSkill" then
 				entity.Unit:SetState("stand")
-				entity.Unit.AttackTimer = 0
+				entity.Unit.attackTimer = 0
 				
 				if entity.Unit.isUsableCharacter then
 					entity.AvatarRendererComponent.PlayRate = 1
