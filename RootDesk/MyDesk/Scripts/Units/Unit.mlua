@@ -153,6 +153,9 @@ script Unit extends Component
 	@Sync
 	property number debuffState = 0
 
+	@Sync
+	property integer attackSpeedDecreaseTimerID = 0
+
 	@ExecSpace("Server")
 	method void Spawn(table unitData, table skillData)
 		self.moveSpeed = unitData["moveSpeed"]
@@ -837,6 +840,7 @@ script Unit extends Component
 		
 			if self.fearTimerID ~= 0 then
 				_TimerService:ClearTimer(self.fearTimerID)
+				_EffectService:RemoveEffect(self.debuffEffectID)
 			end
 			
 			if debuffTime ~= 0 then
@@ -860,6 +864,7 @@ script Unit extends Component
 		
 			if self.silenceTimerID ~= 0 then
 				_TimerService:ClearTimer(self.silenceTimerID)
+				_EffectService:RemoveEffect(self.debuffEffectID)
 			end
 			
 			if debuffTime ~= 0 then
@@ -869,6 +874,24 @@ script Unit extends Component
 				end
 				
 				self.silenceTimerID = _TimerService:SetTimerOnce(deleteFunction, debuffTime)
+			end
+		elseif debuffType == _eDebuffType.AttackSpeedDecrease then
+			self.debuffEffectID = _EffectService:PlayEffectAttached("30e52f2d5dd04f96bdb41e9eb5c028e7", self.Entity, Vector3(0, 0, 0) , 0, Vector3.one, true)	
+			self.attackSpeed += debuffAmount
+			
+			if self.attackSpeedDecreaseTimerID ~= 0 then
+				_TimerService:ClearTimer(self.attackSpeedDecreaseTimerID)
+				_EffectService:RemoveEffect(self.debuffEffectID)
+			end
+			
+			if debuffTime ~= 0 then
+				deleteFunction = function()
+					self.attackSpeedDecreaseTimerID = 0
+					self.attackSpeed = self.originAttackSpeed
+					_EffectService:RemoveEffect(self.debuffEffectID)
+				end
+				
+				self.attackSpeedDecreaseTimerID = _TimerService:SetTimerOnce(deleteFunction, debuffTime)
 			end
 		end
 	end
