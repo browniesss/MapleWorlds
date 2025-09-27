@@ -141,6 +141,12 @@ script Unit extends Component
 	@Sync
 	property integer debuffEffectID = 0
 
+	@Sync
+	property integer silenceTimerID = 0
+
+	@Sync
+	property number debuffState = 0
+
 	@ExecSpace("Server")
 	method void Spawn(table unitData, table skillData)
 		self.moveSpeed = unitData["moveSpeed"]
@@ -402,7 +408,7 @@ script Unit extends Component
 			return
 		end
 		
-		if self.mp >= self.maxMP and self.curTarget.TagComponent.Tags[2] ~= "Tower" then
+		if self.mp >= self.maxMP and self.curTarget.TagComponent.Tags[2] ~= "Tower" and self.debuffState ~= _eDebuffType.Silence then
 			self:SetState("useSkill")
 			return
 		end
@@ -555,9 +561,17 @@ script Unit extends Component
 			end
 			
 			local animationPlaySpeed = self.attackAnimationPlayingTime / (self.attackSpeed)
-			self.Entity.SpriteRendererComponent.PlayRate = animationPlaySpeed
+			if animationPlaySpeed ~= 0 then
+				self.Entity.SpriteRendererComponent.PlayRate = animationPlaySpeed
+			end
 		
-			local timerTiming = self.attackTiming / animationPlaySpeed
+			local timerTiming
+			
+			if animationPlaySpeed == 0 then
+				timerTiming = self.attackSpeed
+			else
+				timerTiming = self.attackTiming / animationPlaySpeed
+			end
 			
 			local attackFunction = function()
 				local projectile = _SpawnService:SpawnByModelId("model://cd38ad89-1c52-45f2-8d86-d6be27475ba9",
@@ -572,7 +586,6 @@ script Unit extends Component
 			end
 			
 			_TimerService:SetTimerOnce(attackFunction, timerTiming)		
-			
 		end
 	end
 
@@ -809,7 +822,23 @@ script Unit extends Component
 					end
 				end
 				
-				self.moveSpeedTimerID = _TimerService:SetTimerOnce(deleteFunction, debuffTime)
+				self.fearTimerID = _TimerService:SetTimerOnce(deleteFunction, debuffTime)
+			end
+		elseif debuffType == _eDebuffType.Silence then
+			self.debuffState = debuffType
+			self.debuffEffectID = _EffectService:PlayEffectAttached("2dfb3187bc8f447f97ee6eeb51bbe039", self.Entity, Vector3(0, self.imageSize.y, 0) , 0, Vector3.one, true)
+		
+			if self.silenceTimerID ~= 0 then
+				_TimerService:ClearTimer(self.silenceTimerID)
+			end
+			
+			if debuffTime ~= 0 then
+				deleteFunction = function()
+					self.silenceTimerID = 0
+					_EffectService:RemoveEffect(self.debuffEffectID)
+				end
+				
+				self.silenceTimerID = _TimerService:SetTimerOnce(deleteFunction, debuffTime)
 			end
 		end
 	end
@@ -851,7 +880,7 @@ script Unit extends Component
 	end
 
 	method void IncreaseMp()
-		if self.curState == "useSkill" or self.curTarget.TagComponent.Tags[2] == "Tower" then
+		if self.curState == "useSkill" or self.curTarget.TagComponent.Tags[2] == "Tower" or self.debuffState == _eDebuffType.Silence then
 			return
 		end
 		
@@ -1075,6 +1104,8 @@ script Unit extends Component
 
 	@EventSender("Self")
 	handler HandleSpriteAnimPlayerEndFrameEvent(SpriteAnimPlayerEndFrameEvent event)
+		log("네이밍: "..self.unitName.."   스테이트 :"..self.curState)
+		
 		if self.curState == "die" then
 			self:DestroyAction()
 		end
