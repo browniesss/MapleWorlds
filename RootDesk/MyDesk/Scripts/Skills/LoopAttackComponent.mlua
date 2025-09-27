@@ -21,18 +21,23 @@ script LoopAttackComponent extends Component
 
 	property table insideUnit = {}
 
-	method void Init(number attackDamage, number loopCount, number loopInterval, Entity caster)
+	method void Init(number attackDamage, number loopCount, number loopInterval, Entity caster, any activeFunc)
 		self.attackDamage = attackDamage
 		self.loopCount = loopCount
 		self.loopInterval = loopInterval
 		self.caster = caster
 		
 		self.timerHandle = _TimerService:SetTimerRepeat(function()
-		    self:Active()
+		    self:Active(activeFunc)
 		end, self.loopInterval)
+		
+		-- Rotation이 아닌 FlipX로 뒤집기에, 콜라이더도 뒤집어주는 처리
+		if caster.Unit.isEnemy == false then
+		    self.Entity.TriggerComponent.ColliderOffset.x = self.Entity.TriggerComponent.ColliderOffset.x * -1
+		end
 	end
 
-	method void Active()
+	method void Active(any activeFunc)
 		self.count = self.count + 1
 		
 		local removeList = {}
@@ -41,6 +46,10 @@ script LoopAttackComponent extends Component
 		        removeList[#removeList+1] = target
 		    else
 				target.Unit:OnHit(self.caster, self.attackDamage, false, 1)
+				
+				if activeFunc ~= nil then
+					activeFunc(target)
+				end
 		    end
 		end
 		
