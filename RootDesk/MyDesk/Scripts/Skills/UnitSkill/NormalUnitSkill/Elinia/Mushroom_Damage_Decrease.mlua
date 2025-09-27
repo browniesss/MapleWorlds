@@ -1,0 +1,13 @@
+@Component
+script Mushroom_Damage_Decrease extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		_EffectService:PlayEffectAttached("4ea97a3248b1412198ad58ccefbeeefa", self.caster, Vector3(0, self.caster.Unit.imageSize.y - 0.5, 0) , 0, Vector3.one)
+		self.caster.Unit:GetBuff(_eBuffType.DamageDecreaseBuff, self.skillAmount, self.skillTime)
+		self:SkillEnd()
+	end
+
+end

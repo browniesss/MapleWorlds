@@ -145,6 +145,12 @@ script Unit extends Component
 	property integer silenceTimerID = 0
 
 	@Sync
+	property integer damageDecreaseTimerID = 0
+
+	@Sync
+	property number damageDecreaseAmount = 0
+
+	@Sync
 	property number debuffState = 0
 
 	@ExecSpace("Server")
@@ -729,12 +735,36 @@ script Unit extends Component
 				
 				self.moveSpeedTimerID = _TimerService:SetTimerOnce(deleteFunction, buffTime)
 			end
+		elseif buffType == _eBuffType.DamageDecreaseBuff then
+			self.damageDecreaseAmount += buffAmount
+			
+			if self.damageDecreaseTimerID ~= 0 then
+				_TimerService:ClearTimer(self.damageDecreaseTimerID)
+			end
+			
+			if buffTime ~= 0 then
+				deleteFunction = function()
+					self.damageDecreaseTimerID = 0
+					self.damageDecreaseAmount = 0
+		
+				end
+				
+				self.damageDecreaseTimerID = _TimerService:SetTimerOnce(deleteFunction, buffTime)
+			end
 		end
 	end
 
 	method void OnHit(Entity attacker, number damage, boolean isCritical, number attackCount)
 		if self.hp <= 0 then
 			return
+		end
+		
+		if self.damageDecreaseAmount > 0 then
+			damage -= self.damageDecreaseAmount
+			
+			if damage <= 1 then
+				damage = 1
+			end
 		end
 		
 		self.Entity.HitComponent:OnHit(attacker, damage, isCritical, "", attackCount)
