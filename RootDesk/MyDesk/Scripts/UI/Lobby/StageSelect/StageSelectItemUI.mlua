@@ -9,6 +9,11 @@ script StageSelectItemUI extends Component
 
 	property Entity DisabledButton = nil
 
+	@Sync
+	property Entity StageIdText = nil
+
+	property Entity StageNameText = nil
+
 	method void SetImage(string newImageRUID)
 		self.EnabledButton.SpriteGUIRendererComponent.ImageRUID = newImageRUID
 		self.DisabledButton.SpriteGUIRendererComponent.ImageRUID = newImageRUID
@@ -45,6 +50,16 @@ script StageSelectItemUI extends Component
 		self.SelectImage = _EntityService:GetEntityByPath(selfPath .. "/SelectImage")
 		self.EnabledButton = _EntityService:GetEntityByPath(selfPath .. "/SelectButtonEnable")
 		self.DisabledButton = _EntityService:GetEntityByPath(selfPath .. "/SelectButtonDisable")
+		self.StageNameText = _EntityService:GetEntityByPath(selfPath .. "/StageName")
+		self.StageIdText = _EntityService:GetEntityByPath(selfPath .. "/StageId")
+	end
+
+	method void SetName(string name)
+		self.StageNameText.TextComponent.Text = name
+	end
+
+	method void SetId(integer id)
+		self.StageIdText.TextComponent.Text = "STAGE " .. tostring(id) 
 	end
 
 end

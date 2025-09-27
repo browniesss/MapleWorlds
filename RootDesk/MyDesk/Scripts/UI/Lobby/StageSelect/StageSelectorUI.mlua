@@ -12,6 +12,14 @@ script StageSelectorUI extends Component
 
 	property Entity prevButton = "054fd667-8cb8-4012-b703-28b84f55b65e"
 
+	property Entity StageDescText = "9101cc5f-b84f-43e5-ae2b-e8cdd7699422"
+
+	property Entity StageNameText = "f5f61aab-cb7c-48c1-9231-d95de1be9059"
+
+	property Entity ChapterNameText = "13f8ea0f-9b9a-4a1b-bbcc-cd488fc9838c"
+
+	property Entity ChapterNumberText = "1e8431b8-0f5b-4005-815d-83973e0c8c7d"
+
 	method void UpdateData()
 		local path = self.Entity.Path
 		
@@ -40,6 +48,8 @@ script StageSelectorUI extends Component
 			end)
 			
 			entity.StageSelectItemUI:SetImage(stageDataList[i].button)
+			entity.StageSelectItemUI:SetId(stageDataList[i].stage)
+			entity.StageSelectItemUI:SetName(stageDataList[i].stage_name)
 			
 			if i <= openStage or selectChapter ~= openChapter then
 				entity.StageSelectItemUI:SetNotSelected()
@@ -52,15 +62,23 @@ script StageSelectorUI extends Component
 			if i == selectStage and selectChapter <= openChapter then
 				entity.StageSelectItemUI:SetSelected()
 				self.StageInfoPanel.SpriteGUIRendererComponent.ImageRUID = stageDataList[i].info
+				self.StageDescText.TextComponent.Text = stageDataList[i].stage_desc
+				self.StageNameText.TextComponent.Text = stageDataList[i].stage_name
+				self.ChapterNameText.TextComponent.Text = stageDataList[i].chapter_name
+				self.ChapterNumberText.TextComponent.Text = "CHAPTER " .. tostring(selectChapter)
 			end
 		end
 			
 		if selectChapter > openChapter then
 			self.StageInfoPanel.SpriteGUIRendererComponent.ImageRUID = stageDataList[1].info
+			self.StageDescText.TextComponent.Text = stageDataList[1].stage_desc
+			self.StageNameText.TextComponent.Text = stageDataList[1].stage_name
+				self.ChapterNameText.TextComponent.Text = stageDataList[1].chapter_name
+				self.ChapterNumberText.TextComponent.Text = "CHAPTER " .. tostring(selectChapter)
 		end
 		
-		self.nextButton:SetEnable(selectChapter < _StageService.lastChapter)
-		self.prevButton:SetEnable(selectChapter > 1)
+		self.nextButton.ButtonComponent.Enable = (selectChapter < _StageService.lastChapter)
+		self.prevButton.ButtonComponent.Enable = (selectChapter > 1)
 		
 	end
 
@@ -81,10 +99,14 @@ script StageSelectorUI extends Component
 			if i == id then
 				entity.StageSelectItemUI:SetSelected()
 				self.StageInfoPanel.SpriteGUIRendererComponent.ImageRUID = stageDataList[i].info
+				self.StageDescText.TextComponent.Text = stageDataList[i].stage_desc
+				self.StageNameText.TextComponent.Text = stageDataList[i].stage_name
+				self.ChapterNameText.TextComponent.Text = stageDataList[i].chapter_name
+				self.ChapterNumberText.TextComponent.Text = "CHAPTER " .. tostring(selectChapter)
 				self.userStage.selectStage = stageDataList[i].stage
 			end
 			
-			local rankingListUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI/StageInfoPanel/RankingListUI")
+			local rankingListUI =  _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
 			rankingListUI.Enable = false
 			rankingListUI.Visible = false
 			
