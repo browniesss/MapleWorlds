@@ -658,8 +658,13 @@ script Unit extends Component
 
 	@ExecSpace("Server")
 	method void SetAnimationState(string state)
+		if self.isUsableCharacter then
+			if self.curState == "die" or self.curState == "move" then
+				self.Entity.AvatarAnimationComponent:AnimationEnd()
+			end
+		end
+		
 		self.Entity.StateComponent:ChangeState(state)
-		log("유닛 네임"..self.unitName.."    상태:"..state)
 	end
 
 	@ExecSpace("Client")
@@ -1157,8 +1162,6 @@ script Unit extends Component
 
 	@EventSender("Self")
 	handler HandleSpriteAnimPlayerEndFrameEvent(SpriteAnimPlayerEndFrameEvent event)
-		log("네이밍: "..self.unitName.."   스테이트 :"..self.curState)
-		
 		if self.curState == "die" then
 			self:DestroyAction()
 		end

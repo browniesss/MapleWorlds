@@ -136,6 +136,14 @@ script AvatarAnimationComponent extends Component
 		end
 	end
 
+	@ExecSpace("Client")
+	method void AnimationEnd()
+		if self._T.serial then
+			_TimerService:ClearTimer(self._T.serial)
+			self._T.serial = nil
+		end
+	end
+
 	@ExecSpace("ClientOnly")
 	@EventSender("Self")
 	handler actionStart(ActionStart event)
