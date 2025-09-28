@@ -653,6 +653,12 @@ script Unit extends Component
 			return
 		end
 		
+		if self.isUsableCharacter then
+			if self.curState == "die" or self.curState == "move" then
+				self.Entity.AvatarAnimationComponent:AnimationEnd()
+			end
+		end
+		
 		self:SetAnimationState(state)
 	end
 
