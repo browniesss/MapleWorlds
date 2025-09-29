@@ -1,12 +1,11 @@
 @Logic
 script RankingService extends Logic
 
-	@Sync
-	property SyncTable<string> RankData
-
 	property any fetchCallback = nil
 
 	property table rankList = {}
+
+	property table cacheRankList = {}
 
 	@ExecSpace("Server")
 	method void AddPoint(string storageKey, string userName, integer userScore)
@@ -34,6 +33,18 @@ script RankingService extends Logic
 
 	@ExecSpace("Server")
 	method void FETCH(string storageKey)
+		local nowTs = DateTime.UtcNow.Elapsed
+		
+		local targetList = self.cacheRankList[storageKey]
+		if targetList ~= nil then
+			self:UpdateData(storageKey, self.cacheRankList[storageKey].list)
+		end
+		
+		if targetList ~= nil and nowTs < targetList.expireTs and #targetList.list > 0 then
+			return
+		end
+		
+		-- 캐시가 만료된 경우
 		local ds = _DataStorageService:GetSortableDataStorage(storageKey)
 		 
 		-- 데이터들을 정렬된 순서로 가져옵니다.
@@ -50,7 +61,6 @@ script RankingService extends Logic
 		    local items = itemPages:GetCurrentPageDatas()
 		    for _, item in pairs(items) do
 		         -- SortableDataStorageItem을 통해 Key값과 Value값을 조회할 수 있습니다.
-				self.RankData[rank] = _HttpService:JSONEncode({name=item.KeyInfo.Key, score=item.Value})
 				log(rank .. " -> " .. item.KeyInfo.Key)
 				rankList[#rankList + 1] = {name=item.KeyInfo.Key, score=item.Value}
 				rank += 1
@@ -69,7 +79,14 @@ script RankingService extends Logic
 		    itemPages:MoveToNextPageAndWait()
 		end
 		
-		self:UpdateData(rankList)
+		self.cacheRankList[storageKey] = {
+			expireTs=nowTs + 600000,
+			list=rankList
+		}
+		
+		if targetList == nil or #targetList.list == 0then
+			self:UpdateData(storageKey, self.cacheRankList[storageKey].list)
+		end
 	end
 
 	method string GetRankKeyByTable(table data)
@@ -90,64 +107,79 @@ script RankingService extends Logic
 	end
 
 	@ExecSpace("ClientOnly")
-	method table GetTop3RankTable()
+	method table GetTop3RankTable(string key)
 		local table = {}
 		
 		for rank = 1, 4 do
-			if rank > #self.rankList then
+			if rank > #self.rankList[key] then
 				table[rank] = {name="NONE", score=9999999}
 				continue
 			end
 			
-			table[rank] = self.rankList[rank]
+			table[rank] = self.rankList[key][rank]
 		end
+		
+		local thread = function () self:FETCH(key) end
+		thread()
 		
 		return table
 	end
 
 	@ExecSpace("ClientOnly")
-	method table GetTop50RankTable()
+	method table GetTop50RankTable(string key)
 		local table = {}
 		
 		for rank = 1, 50 do
-			if rank > #self.rankList then
+			if rank > #self.rankList[key] then
 				table[rank] = {name="NONE", score=9999999}
 				continue
 			end
 			
-			table[rank] = self.rankList[rank]
+			table[rank] = self.rankList[key][rank]
 		end
+		
+		local thread = function () self:FETCH(key) end
+		thread()
 		
 		return table
 	end
 
 	@ExecSpace("Client")
-	method void RefreshRankListUI()
+	method void UpdateData(string key, table list)
+		log("update " .. key)
+		if self.rankList[key] == nil then
+			self.rankList[key] = {}
+		end
+		
+		if list == nil then
+			list = {}
+		end
+		
+		self.rankList[key] = list
+		
+		log(key .. " -> " .. #list)
+		if self.fetchCallback == nil then
+			return
+		end
 		self.fetchCallback()
 	end
 
 	@ExecSpace("ClientOnly")
-	method void OnSyncProperty(string name, any value)
-		--log("온싱크"..name.."밸류:"..tostring(value))
-		--self.fetchCallback()
-	end
-
-	@ExecSpace("Server")
-	method void DeleteData()
-		--for i = 1, 50 do	
-		--    self.RankData[i] = nil
-		--end
-	end
-
-	@ExecSpace("Client")
-	method void UpdateData(table list)
-		if list == nil or #list == 0 then
-			self.rankList = {}
-			return
-		end
+	method void OnBeginPlay()
+		local dataSet = _DataService:GetTable("stage")
 		
-		self.rankList = list
-		self.fetchCallback()
+		local stageCount = dataSet:GetRowCount()
+		
+		for i = 1, stageCount do
+			
+			local chapter = tonumber(dataSet:GetCell(i,"chapter"))
+			local stage = tonumber(dataSet:GetCell(i,"stage"))
+			
+			
+			local key = _RankingService:GetRankKeyByTable({chapter=chapter, stage=stage})
+			local thread = function () self:FETCH(key) end
+			thread()
+		end
 	end
 
 end

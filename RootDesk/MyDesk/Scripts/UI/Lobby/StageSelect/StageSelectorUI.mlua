@@ -90,6 +90,9 @@ script StageSelectorUI extends Component
 		
 		local stageDataList = _StageService:GetStageByChapter(selectChapter)
 		
+		local rankingListUI =  _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
+		rankingListUI.Enable = false
+		rankingListUI.Visible = false
 		
 		for i, entity in ipairs(self.SelectButtonList) do
 			if i > openStage and selectChapter == openChapter then
@@ -104,14 +107,12 @@ script StageSelectorUI extends Component
 				self.ChapterNameText.TextComponent.Text = stageDataList[i].chapter_name
 				self.ChapterNumberText.TextComponent.Text = "CHAPTER " .. tostring(selectChapter)
 				self.userStage.selectStage = stageDataList[i].stage
+				
+				local key = _RankingService:GetRankKeyByTable({chapter=selectChapter, stage=stageDataList[i].stage})
+			
+				-- _RankingService:DeleteData()
+				rankingListUI.StageRankingListUI:RefreshRankListItem(key)
 			end
-			
-			local rankingListUI =  _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
-			rankingListUI.Enable = false
-			rankingListUI.Visible = false
-			
-			_RankingService:DeleteData()
-			rankingListUI.StageRankingListUI:RefreshRankListItem()
 		end
 	end
 
