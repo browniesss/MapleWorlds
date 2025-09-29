@@ -75,8 +75,15 @@ script RankingService extends Logic
 	method string GetRankKeyByTable(table data)
 		local storageKey = "RANK"
 		
-		for key, value in pairs(data) do
-			storageKey = storageKey .. "_" .. string.upper(key) .. "_" .. string.upper(tostring(value))
+		local keys = {}
+		for key in pairs(data) do
+			table.insert(keys, key)
+		end
+		
+		table.sort(keys)
+		
+		for _, key in ipairs(keys) do
+			storageKey = storageKey .. "_" .. string.upper(key) .. "_" .. string.upper(tostring(data[key]))
 		end
 		
 		return storageKey
