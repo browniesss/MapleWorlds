@@ -2,8 +2,8 @@
 script RankUI extends Component
 
 	@ExecSpace("ClientOnly")
-	method void UpdateRankData(string userName, integer userScore)
-		local currentRankTable = _RankingService:GetTop3RankTable()
+	method void UpdateRankData(string userName, integer userScore, string rankKey)
+		local currentRankTable = _RankingService:GetTop3RankTable(rankKey)
 		local path = self.Entity.Path
 		
 		local rankTable = {}

@@ -127,7 +127,7 @@ script GameManager extends Logic
 		
 		
 		local key = _RankingService:GetRankKeyByTable({chapter=chapterIndex, stage=mapIndex})
-		_RankingService:FETCH(key)
+		-- _RankingService:FETCH(key)
 		
 		self:SetPlayerCharacter()
 		self:EnableUI()
@@ -341,6 +341,7 @@ script GameManager extends Logic
 		
 		local key = _RankingService:GetRankKeyByTable({chapter=userStage.selectChapter, stage=userStage.selectStage})
 		_RankingService:AddPoint(key, userName, playTime)
+		self.rankUI:UpdateRankData(userName, playTime, key)
 		
 		if userStage:isLastStageSelected() then
 			local nextStage = _StageService:GetNextOpenStageId(userStage.openChapter, userStage.openStage)
@@ -348,7 +349,6 @@ script GameManager extends Logic
 			userStage:SetClearStage(nextStage.chapter, nextStage.stage)
 		end
 		
-		self.rankUI:UpdateRankData(userName, playTime)
 		
 		self.gameClearResult.Enable = true
 		self.gameClearResult.Visible = true

@@ -18,7 +18,7 @@ script StageRankingListUI extends Component
 	@ExecSpace("Client")
 	method void Fetch()
 		_RankingService.fetchCallback = function()
-			self:RefreshRankListItem()
+			-- self:RefreshRankListItem()
 				
 			self.Entity.Children[4].Visible = false
 			self.Entity.Children[1].Visible = true
@@ -26,21 +26,25 @@ script StageRankingListUI extends Component
 	end
 
 	@ExecSpace("Client")
-	method void RefreshRankListItem()
-		local currentRankTable = _RankingService:GetTop50RankTable()
+	method void RefreshRankListItem(string key)
+		local currentRankTable = _RankingService:GetTop50RankTable(key)
+		
+		log("Refresh by " .. key)
 		
 		for i = 1, 50 do
 			self.rankItems[i].StageRankingItem:Init(currentRankTable[i].name, currentRankTable[i].score, i)
 		end
 	end
 
+	method void ShowRank()
+		self.Entity.Children[4].Visible = false
+		self.Entity.Children[1].Visible = true
+	end
+
 	@EventSender("Entity", "763512f0-58e6-4c2c-ad79-64a76be4eafe")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
 		self.Entity.Enable = false
 		self.Entity.Visible = false
-		
-		_RankingService:DeleteData()
-		self:RefreshRankListItem()
 	end
 
 end
