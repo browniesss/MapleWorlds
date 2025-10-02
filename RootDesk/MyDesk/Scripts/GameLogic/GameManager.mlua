@@ -287,11 +287,12 @@ script GameManager extends Logic
 			end
 	end
 
-	@ExecSpace("Client")
+	@ExecSpace("Server")
 	method void SetTimer()
 		self.timer = _TimerService:SetTimerRepeat(function()
 			local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
-			self.timeText.TextComponent.Text = self:FormatMMSS(playTime / 1000)
+			
+			self:SetTimeText(playTime)
 		end, 1.0, 0)
 	end
 
@@ -299,6 +300,11 @@ script GameManager extends Logic
 	method void ClearTimer()
 		self.playStartTs = 0
 		_TimerService:ClearTimer(self.timer)
+	end
+
+	@ExecSpace("Client")
+	method void SetTimeText(integer playTime)
+		self.timeText.TextComponent.Text = self:FormatMMSS(playTime / 1000)
 	end
 
 	@ExecSpace("Server")
