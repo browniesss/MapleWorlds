@@ -1,0 +1,47 @@
+@Component
+script Toggle extends Component
+
+	property boolean isOn = false
+
+	property Entity ButtonEntity = nil
+
+	property Entity ImageEntity = nil
+
+	property string ButtonName = ""
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		
+	end
+
+	method void Toggle()
+		self.isOn = not self.isOn
+		self:SetState(self.isOn)
+	end
+
+	method void SetState(boolean state)
+		self.isOn = state
+		
+		local test
+		
+		if self.isOn == true then
+			test = "_on"
+		else 
+			test = "_off" 
+		end
+		
+		local ToggleRuid = self.ButtonName .. test
+		
+		self.ImageEntity.SpriteGUIRendererComponent.ImageRUID = _EntityService:GetEntityByPath(self.Entity.Path .. ToggleRuid)
+		
+		log("SetState", ToggleRuid)
+	end
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		
+		self:Toggle()
+		
+	end
+
+end

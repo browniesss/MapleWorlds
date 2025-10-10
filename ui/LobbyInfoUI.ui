@@ -1274,7 +1274,7 @@
       {
         "id": "a10e2832-2d7b-46fc-a583-2b4936cf1d36",
         "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle",
-        "componentNames": "MOD.Core.UITransformComponent",
+        "componentNames": "MOD.Core.UITransformComponent,script.ToggleGroup",
         "jsonString": {
           "name": "LobbyToggle",
           "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle",
@@ -1338,6 +1338,11 @@
                 "w": 1.0
               },
               "Enable": true
+            },
+            {
+              "@type": "script.ToggleGroup",
+              "Enable": true,
+              "IsRadioButton": true
             }
           ],
           "@version": 1
@@ -1346,7 +1351,7 @@
       {
         "id": "a94916ab-1589-4648-8763-5b25011de432",
         "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/MainButton",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.Toggle",
         "jsonString": {
           "name": "MainButton",
           "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/MainButton",
@@ -1433,6 +1438,12 @@
                 "DataId": "6c4bb13526684cfb97593a55b71009c8"
               },
               "OverrideSorting": false,
+              "Color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
               "Enable": true
             },
             {
@@ -1479,15 +1490,238 @@
               },
               "OverrideSorting": false,
               "Enable": true
+            },
+            {
+              "@type": "script.Toggle",
+              "Enable": true,
+              "ButtonEntity": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "a94916ab-1589-4648-8763-5b25011de432"
+              },
+              "ImageEntity": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "a94916ab-1589-4648-8763-5b25011de432"
+              },
+              "ButtonName": "icon_shop"
             }
           ],
           "@version": 1
         }
       },
       {
-        "id": "8bd18720-5dde-4284-9ddd-06929e40a7ab",
+        "id": "a7e0c4ff-1bf4-4b5a-83db-49bdd0a5b428",
+        "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/MainButton/Mask",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "jsonString": {
+          "name": "Mask",
+          "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/MainButton/Mask",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "//////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uisprite",
+            "sub_entity_id": null
+          },
+          "modelId": "uisprite",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 100.0,
+                "y": 34.75
+              },
+              "OffsetMin": {
+                "x": -100.0,
+                "y": -27.75
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 200.0,
+                "y": 62.5
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 3.5
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 3.5,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "804eaa8323b74f44a48861cc98582376"
+              },
+              "OverrideSorting": false,
+              "Color": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "2220c321-3980-43e2-b4ec-fcf85dae80aa",
+        "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/MainButton/Mask/UIText",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "UIText",
+          "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/MainButton/Mask/UIText",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "///////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 100.0,
+                "y": 31.25
+              },
+              "OffsetMin": {
+                "x": -100.0,
+                "y": -31.25
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 200.0,
+                "y": 62.5
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": -1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 42,
+              "MaxSize": 44,
+              "MinSize": 10,
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "OverrideSorting": false,
+              "Text": "메인",
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "da1ec2ed-18d5-479f-b7de-6875a62af5d0",
         "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/ShopButton",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.Toggle",
         "jsonString": {
           "name": "ShopButton",
           "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/ShopButton",
@@ -1571,10 +1805,15 @@
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
               "ImageRUID": {
-                "DataId": "f5cb9a5404eb4bfdb26c9d3f76e313ad"
+                "DataId": "6c4bb13526684cfb97593a55b71009c8"
               },
               "OverrideSorting": false,
-              "SortingLayer": "MapLayer0",
+              "Color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
               "Enable": true
             },
             {
@@ -1620,6 +1859,231 @@
                 "DisabledSprite": null
               },
               "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "script.Toggle",
+              "Enable": true,
+              "ButtonEntity": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "da1ec2ed-18d5-479f-b7de-6875a62af5d0"
+              },
+              "ImageEntity": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "da1ec2ed-18d5-479f-b7de-6875a62af5d0"
+              },
+              "ButtonName": "icon_shop"
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "1565f4eb-d6c4-4efb-88f1-923b48b23950",
+        "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/ShopButton/Mask",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "jsonString": {
+          "name": "Mask",
+          "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/ShopButton/Mask",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "//////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uisprite",
+            "sub_entity_id": null
+          },
+          "modelId": "uisprite",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 100.0,
+                "y": 34.75
+              },
+              "OffsetMin": {
+                "x": -100.0,
+                "y": -27.75
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 200.0,
+                "y": 62.5
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 3.5
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 3.5,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "804eaa8323b74f44a48861cc98582376"
+              },
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Color": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "33381e15-50ee-4405-ad01-a27724fd5df8",
+        "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/ShopButton/Mask/UIText",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "UIText",
+          "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/ShopButton/Mask/UIText",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "///////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 100.0,
+                "y": 31.25
+              },
+              "OffsetMin": {
+                "x": -100.0,
+                "y": -31.25
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 200.0,
+                "y": 62.5
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": -1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 42,
+              "MaxSize": 44,
+              "MinSize": 10,
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "OverrideSorting": false,
+              "Text": "상점",
               "Enable": true
             }
           ],

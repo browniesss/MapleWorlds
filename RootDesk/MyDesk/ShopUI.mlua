@@ -1,0 +1,31 @@
+@Component
+script ShopUI extends Component
+
+	property Entity shopUI = "bfdb5446-a938-401f-9399-dd4b1a77b79f"
+
+	property Entity shopText = "9ef6b13b-a89d-48b5-b88d-ea04add4e7f6"
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		local lobbyInfoUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI")
+		
+		if self.shopUI.Enable then
+			lobbyInfoUI.Enable = true
+			lobbyInfoUI.Visible = true
+		
+			self.shopUI.Enable = false
+			self.shopUI.Visible = false
+			
+			self.shopText.TextComponent.Text = "로비"
+		else
+			lobbyInfoUI.Enable = false
+			lobbyInfoUI.Visible = false
+		
+			self.shopUI.Enable = true
+			self.shopUI.Visible = true
+			
+			self.shopText.TextComponent.Text = "상점"
+			end
+	end
+
+end
