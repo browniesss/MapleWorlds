@@ -1,47 +1,90 @@
 @Component
 script Toggle extends Component
 
-	property boolean isOn = false
-
-	property Entity ButtonEntity = nil
+	property Entity ToggleGroupEntity = nil
 
 	property Entity ImageEntity = nil
 
-	property string ButtonName = ""
+	property string OnRUID = ""
+
+	@Sync
+	property string OffRUID = ""
+
+	property boolean isOn = false
+
+	property ToggleAction ActionTargetEntity = nil
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
-		
+		self:SetState(self.isOn)
+	end
+
+	method void SetGroupController(Entity groupEntity)
+		self.ToggleGroupEntity = groupEntity
 	end
 
 	method void Toggle()
-		self.isOn = not self.isOn
-		self:SetState(self.isOn)
+		local nextState = not self.isOn
+		self:SetState(nextState)
+		
+		-- ON이 되었을 때, 그리고 그룹이 설정되어 있을 때
+		if self.isOn == true and self.ToggleGroupEntity and self.ToggleGroupEntity.ToggleGroup then
+			-- 부모 ToggleGroup 컴포넌트의 NotifyToggleOn 메서드를 직접 호출합니다.
+			-- 이때 'self' (자신인 Toggle 컴포넌트)를 인수로 전달합니다.
+			self.ToggleGroupEntity.ToggleGroup:NotifyToggleOn(self)
+		end
 	end
 
 	method void SetState(boolean state)
 		self.isOn = state
 		
-		local test
+		-- 1. 시각적 업데이트 로직 (RUID)
+		self:SetToggleImage()
 		
+		-- 2. [추가된 로직]: ActionTargetEntity에 상태별 로직 실행 요청
+		if self.ActionTargetEntity then
+			-- ActionTargetEntity에 붙은 스크립트 컴포넌트를 찾아 호출합니다.
+			-- 여기서는 해당 엔티티에 'ToggleActionScript'라는 스크립트가 붙어있다고 가정합니다.
+			local targetScript = self.ActionTargetEntity.Entity.ToggleAction
+		
+			if targetScript then
+				if self.isOn then
+					-- ON 상태일 때: ExecuteOnLogic 메서드 호출
+					-- 자신(Toggle 컴포넌트 인스턴스)을 인수로 전달하여, 대상 스크립트가
+					-- 어떤 버튼이 ON 되었는지 알 수 있도록 합니다.
+					targetScript:ExecuteOnLogic(self)
+				else
+					-- OFF 상태일 때: ExecuteOffLogic 메서드 호출
+					targetScript:ExecuteOffLogic(self)
+				end
+			end
+		end
+	end
+
+	method void SetToggleImage()
+		local targetRuid = self.OffRUID
 		if self.isOn == true then
-			test = "_on"
-		else 
-			test = "_off" 
+			targetRuid = self.OnRUID
 		end
 		
-		local ToggleRuid = self.ButtonName .. test
+		if self.ImageEntity and self.ImageEntity.SpriteGUIRendererComponent then
+			self.ImageEntity.SpriteGUIRendererComponent.ImageRUID = targetRuid 
+		end
 		
-		self.ImageEntity.SpriteGUIRendererComponent.ImageRUID = _EntityService:GetEntityByPath(self.Entity.Path .. ToggleRuid)
-		
-		log("SetState", ToggleRuid)
+		log("Toggle SetState: ", targetRuid)
 	end
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
+		local toggleGroup = self.ToggleGroupEntity and self.ToggleGroupEntity.ToggleGroup
 		
+		-- 라디오 모드 확인: 그룹이 존재하고, 라디오 모드이며, 이미 ON 상태면 클릭을 무시합니다.
+		if toggleGroup and toggleGroup.UseRadioMode and self.isOn == true then
+			return 
+		end
+		
+		-- 상태 변경 로직 실행
 		self:Toggle()
-		
 	end
 
 end

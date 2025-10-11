@@ -1341,8 +1341,7 @@
             },
             {
               "@type": "script.ToggleGroup",
-              "Enable": true,
-              "IsRadioButton": true
+              "Enable": true
             }
           ],
           "@version": 1
@@ -1351,7 +1350,7 @@
       {
         "id": "a94916ab-1589-4648-8763-5b25011de432",
         "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/MainButton",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.Toggle",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.Toggle,script.ExtendToggleUIPanel",
         "jsonString": {
           "name": "MainButton",
           "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/MainButton",
@@ -1494,17 +1493,27 @@
             {
               "@type": "script.Toggle",
               "Enable": true,
-              "ButtonEntity": {
-                "tempEntityId": null,
-                "IsRelative": false,
-                "EntityId": "a94916ab-1589-4648-8763-5b25011de432"
-              },
               "ImageEntity": {
                 "tempEntityId": null,
                 "IsRelative": false,
                 "EntityId": "a94916ab-1589-4648-8763-5b25011de432"
               },
-              "ButtonName": "icon_shop"
+              "OnRUID": "6c4bb13526684cfb97593a55b71009c8",
+              "OffRUID": "a1c2157ee8bc4733a92dc608d3c9c9a4",
+              "ActionTargetEntity": {
+                "IsRelative": false,
+                "ComponentId": "a94916ab-1589-4648-8763-5b25011de432:ToggleAction"
+              }
+            },
+            {
+              "@type": "script.ExtendToggleUIPanel",
+              "Enable": true,
+              "TargetPanelEntity": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "701c6938-68d9-499a-b153-57f6aee2bcaf"
+              },
+              "panelIndex": 1.0
             }
           ],
           "@version": 1
@@ -1721,7 +1730,7 @@
       {
         "id": "da1ec2ed-18d5-479f-b7de-6875a62af5d0",
         "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/ShopButton",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.Toggle",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.Toggle,script.ExtendToggleUIPanel",
         "jsonString": {
           "name": "ShopButton",
           "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/ShopButton",
@@ -1805,7 +1814,7 @@
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
               "ImageRUID": {
-                "DataId": "6c4bb13526684cfb97593a55b71009c8"
+                "DataId": "a1c2157ee8bc4733a92dc608d3c9c9a4"
               },
               "OverrideSorting": false,
               "Color": {
@@ -1864,17 +1873,27 @@
             {
               "@type": "script.Toggle",
               "Enable": true,
-              "ButtonEntity": {
-                "tempEntityId": null,
-                "IsRelative": false,
-                "EntityId": "da1ec2ed-18d5-479f-b7de-6875a62af5d0"
-              },
               "ImageEntity": {
                 "tempEntityId": null,
                 "IsRelative": false,
                 "EntityId": "da1ec2ed-18d5-479f-b7de-6875a62af5d0"
               },
-              "ButtonName": "icon_shop"
+              "OnRUID": "6c4bb13526684cfb97593a55b71009c8",
+              "OffRUID": "a1c2157ee8bc4733a92dc608d3c9c9a4",
+              "ActionTargetEntity": {
+                "IsRelative": false,
+                "ComponentId": "da1ec2ed-18d5-479f-b7de-6875a62af5d0:ToggleAction"
+              }
+            },
+            {
+              "@type": "script.ExtendToggleUIPanel",
+              "Enable": true,
+              "TargetPanelEntity": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "bfdb5446-a938-401f-9399-dd4b1a77b79f"
+              },
+              "panelIndex": 2.0
             }
           ],
           "@version": 1

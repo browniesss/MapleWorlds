@@ -1,34 +1,83 @@
 @Component
 script ToggleGroup extends Component
 
-	property SyncTable<Toggle> ToggleList
+	property boolean UseRadioMode = true
 
-	property boolean IsRadioButton = false
+	property table ToggleButtons = {}
 
 	@ExecSpace("ClientOnly")
-	method void OnInitialize()
-		local children = self.Entity.Children()
-		
-		for i, child in ipairs(children) do
-			local toggleScript = child:GetScrpt("Toggle")
-			
-			if toggleScript ~= nil then
-				table.insert(self.ToggleList, toggleScript)
-			end
-			
+	method void OnBeginPlay()
+		-- 1. 자신의 모든 자식 엔티티들을 검색합니다.
+		local children = self.Entity.Children
+		      
+		-- 2. 자식들 중 Toggle 컴포넌트를 가진 엔티티만 필터링하여 리스트를 구성합니다.
+		for _, child in pairs(children) do
+		    -- child:GetComponent() 대신, 컴포넌트명으로 직접 접근하여 Toggle 컴포넌트를 찾습니다.
+		    if child.Toggle then
+		        table.insert(self.ToggleButtons, child.Toggle)
+		        -- 자식 Toggle에게 부모 ToggleGroup을 알려줍니다.
+		        child.Toggle:SetGroupController(self.Entity)
+		    end
 		end
+		        
+		log("ToggleGroup found " .. #self.ToggleButtons .. " child Toggle buttons.")
 		
-		for i, t in ipairs(self.ToggleList) do
-			t:SetState(false)
-			end
-		
-		if (self.IsRadioButton)
-			then self:SetRadioToggle()
+		-- 라디오 모드 초기화 로직 (구성된 내부 리스트를 사용)
+		if self.UseRadioMode and #self.ToggleButtons > 0 then
+		    self:InitializeRadioMode()
 		end
 	end
 
-	method void SetRadioToggle()
+	method void InitializeRadioMode()
+		local firstToggle = self.ToggleButtons[1] 
+				
+		if firstToggle then
+			-- 첫 번째 버튼만 강제로 ON 상태로 설정합니다.
+			firstToggle:SetState(true)
+			
+			-- 나머지 버튼들을 OFF 상태로 설정합니다.
+			for i = 2, #self.ToggleButtons do
+				local otherToggle = self.ToggleButtons[i]
+				otherToggle:SetState(false)
+			end
+		end
+	end
+
+	method void NotifyToggleOn(Toggle senderToggle)
+		if self.UseRadioMode then
+			-- [라디오 모드 로직]: 전송자(senderToggle)를 제외한 모든 버튼을 OFF 합니다.
+			for _, toggle in pairs(self.ToggleButtons) do
+				-- 전송자 자신이 아니면서, 현재 ON 상태인 경우에만 OFF로 설정
+				if toggle ~= senderToggle and toggle.isOn then
+					toggle:SetState(false)
+				end
+			end
+		end
+	end
+
+	method void ActivateButtonByIndex(number index)
+		-- Lua table 인덱스는 1부터 시작하므로 유효성 검사를 합니다.
+		if index < 1 or index > #self.ToggleButtons then
+			log("ActivateButtonByIndex 실패: 유효하지 않은 인덱스 " .. index)
+			return
+		end
 		
+		local targetToggle = self.ToggleButtons[index]
+		
+		-- 이미 ON 상태인 버튼을 다시 활성화할 필요는 없습니다.
+		if targetToggle.isOn then
+			 log("ActivateButtonByIndex: 인덱스 " .. index .. "의 버튼이 이미 활성화되어 있습니다.")
+			 return
+		end
+		
+		-- 1. 대상 버튼을 ON 상태로 설정하고 시각적/액션 로직을 실행합니다.
+		targetToggle:SetState(true) 
+		
+		-- 2. 그룹 컨트롤러에 알림을 보내 Radio Mode 로직을 실행하도록 합니다.
+		-- (Radio Mode가 아닐 경우 NotifyToggleOn 내부에서 로직이 실행되지 않습니다.)
+		self:NotifyToggleOn(targetToggle) 
+		
+		log("ActivateButtonByIndex: 인덱스 " .. index .. "의 버튼을 활성화했습니다.")
 	end
 
 end
