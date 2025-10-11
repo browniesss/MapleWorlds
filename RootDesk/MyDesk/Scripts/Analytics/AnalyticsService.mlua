@@ -1,0 +1,80 @@
+@Logic
+script AnalyticsService extends Logic
+
+	property string host = ""
+
+	property string endpoint = ""
+
+	property string measurement_id = ""
+
+	@Sync
+	property string api_secret = ""
+
+	@ExecSpace("ServerOnly")
+	method void SendAnalyticsLog(string userId, table logData)
+		if userId == nil then
+			log("invalid analytics request: userId is nil")
+			return
+		end
+		
+		if logData["name"] == nil then
+			log("invalid analytics request: userId is nil")
+			return
+		end
+		
+		local params = {}
+		for key, value in pairs(logData) do
+			if key == "name" then
+				continue
+			end
+			
+			params[key] = value
+		end
+		
+		local events = {name=logData["name"], params=params}
+		
+		local content = {
+			client_id= userId,
+			events=events
+		}
+		
+		local header = {}
+		header["User-Agent"]="GameServer/1.0"
+		
+		
+		_HttpService:PostAndWait(self:GetUrl(), _HttpService:JSONEncode(content), HttpContentType.ApplicationJson, header)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		local dataSet = _DataService:GetTable("AnalygicsConfig")    
+		
+		local index = 1
+		
+		self.host = tostring(dataSet:GetCell(index, 'host'))
+		self.endpoint = tostring(dataSet:GetCell(index, 'endpoint'))
+		self.measurement_id = tostring(dataSet:GetCell(index, 'measurement_id'))
+		self.api_secret = tostring(dataSet:GetCell(index, 'api_secret'))
+	end
+
+	@ExecSpace("ServerOnly")
+	method string GetUrl()
+		local query = string.format("?measurement_id=%s&api_secret=%s", self.measurement_id, self.api_secret)
+		
+		return string.format("https://%s%s%s", self.host, self.endpoint, query)
+	end
+
+	@ExecSpace("Server")
+	method void GameClear(string userId, integer playTs, integer stage, table monsterList, table skillList)
+		local logData = {name="NORMAL_STAGE_CLEAR"}
+		
+		logData["stage"] = tostring(stage)
+		logData["play_time"] = tostring(playTs)
+		logData["monster"] = _HttpService:JSONEncode(monsterList)
+		logData["skill"] = _HttpService:JSONEncode(skillList)
+		
+		
+		self:SendAnalyticsLog(userId, logData)
+	end
+
+end
