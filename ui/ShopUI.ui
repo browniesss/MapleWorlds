@@ -1711,6 +1711,7 @@
             },
             {
               "@type": "MOD.Core.TextComponent",
+              "Font": 3,
               "FontColor": {
                 "r": 1.0,
                 "g": 1.0,
@@ -2094,6 +2095,7 @@
             },
             {
               "@type": "MOD.Core.TextComponent",
+              "Font": 3,
               "FontColor": {
                 "r": 1.0,
                 "g": 1.0,
@@ -2165,6 +2167,11 @@
                 "x": 0.0,
                 "y": -65.5
               },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
               "Position": {
                 "x": -960.0,
                 "y": -65.5,
@@ -2176,6 +2183,104 @@
                 "z": 0.0,
                 "w": 1.0
               },
+              "ZRotation": 0.0,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "68674167-a95d-4c63-ad03-098347502dff",
+        "path": "/ui/ShopUI/UIText",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "UIText",
+          "path": "/ui/ShopUI/UIText",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 2,
+          "pathConstraints": "///",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 500.000061,
+                "y": 150.0
+              },
+              "OffsetMin": {
+                "x": -499.999939,
+                "y": -150.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 1000.0,
+                "y": 300.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 6.781684E-05,
+                "y": 0.0
+              },
+              "Position": {
+                "x": 6.781684E-05,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 100,
+              "MaxSize": 100,
+              "MinSize": 10,
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "OverrideSorting": false,
+              "Text": "상점이 곧 오픈됩니다 !",
               "Enable": true
             }
           ],
