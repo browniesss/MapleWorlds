@@ -2,22 +2,40 @@
 script StageRankingItem extends Component
 
 	@Sync
+	property Entity Frame = nil
+
+	@Sync
 	property Entity userName = nil
 
+	@Sync
+	property Entity userRank = nil
+
+	property boolean isNormalFrame = false
+
 	method void OnBeginPlay()
+		self.Frame = self.Entity.Children[1]
 		self.userName = self.Entity.Children[2]
+		self.userRank = self.Entity.Children[3]
 	end
 
 	method void Init(string name, integer userScore, integer userRank)
-		if name == "NONE" then
-			self.Entity.Visible = false
-		else
-			self.Entity.Visible = true
-		end
-		
+		self.Entity.Visible = true
 		local strRank = tostring(userRank)
 		
-		self.userName.TextComponent.Text = "#" .. strRank .." [" ..   name .. "] " .. tostring(userScore / 1000)
+		self.userName.TextComponent.Text = name .. " " .. tostring(userScore / 1000)
+		self.userRank.TextComponent.Text = strRank
+	end
+
+	method void toggleFrame()
+		self.isNormalFrame = (self.isNormalFrame ~= true)
+		
+		if self.isNormalFrame then
+			self.Frame.SpriteRendererComponent.SpriteRUID = "1af2483d995549cfb457586797df8f88"
+			return
+		end
+		
+		
+		self.Frame.SpriteRendererComponent.SpriteRUID = "32df20aa0c2943f3b9b8861f010cf394"
 	end
 
 end

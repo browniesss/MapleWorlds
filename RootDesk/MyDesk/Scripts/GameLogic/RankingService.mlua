@@ -61,7 +61,6 @@ script RankingService extends Logic
 		    local items = itemPages:GetCurrentPageDatas()
 		    for _, item in pairs(items) do
 		         -- SortableDataStorageItem을 통해 Key값과 Value값을 조회할 수 있습니다.
-				log(rank .. " -> " .. item.KeyInfo.Key)
 				rankList[#rankList + 1] = {name=item.KeyInfo.Key, score=item.Value}
 				rank += 1
 		    end
@@ -131,8 +130,7 @@ script RankingService extends Logic
 		
 		for rank = 1, 50 do
 			if rank > #self.rankList[key] then
-				table[rank] = {name="NONE", score=9999999}
-				continue
+				break
 			end
 			
 			table[rank] = self.rankList[key][rank]
@@ -146,7 +144,6 @@ script RankingService extends Logic
 
 	@ExecSpace("Client")
 	method void UpdateData(string key, table list)
-		log("update " .. key)
 		if self.rankList[key] == nil then
 			self.rankList[key] = {}
 		end
@@ -157,7 +154,6 @@ script RankingService extends Logic
 		
 		self.rankList[key] = list
 		
-		log(key .. " -> " .. #list)
 		if self.fetchCallback == nil then
 			return
 		end
@@ -180,6 +176,19 @@ script RankingService extends Logic
 			local thread = function () self:FETCH(key) end
 			thread()
 		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method integer CountRankTable(string key)
+		if self.rankList == nil then
+			return -1
+		end
+		
+		if self.rankList[key] == nil then
+			return -1
+		end
+		
+		return #self.rankList[key]
 	end
 
 end

@@ -4,12 +4,25 @@ script StageRankingListUI extends Component
 	@Sync
 	property SyncTable<Entity> rankItems
 
+	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
-		for i = 1, 50 do
-			self.rankItems[i] = self.Entity.Children[1].Children[i]
+		local targetEntity = self.Entity.Children[1].Children[1]
+		self.rankItems[1] = targetEntity
+		
+		for i = 2, 50 do
+			local rankItem = _SpawnService:SpawnByEntity(
+				targetEntity, 
+				string.format("RankItem_%d",i) , 
+				targetEntity.TransformComponent.Position,
+				self.Entity.Children[1],
+				true
+			)
+			
+			self.rankItems[i] = rankItem
 		end
 	end
 
+	@ExecSpace("ClientOnly")
 	method void Init()
 		self.Entity.Children[1].Visible = false
 		self.Entity.Children[4].Visible = true
@@ -29,16 +42,43 @@ script StageRankingListUI extends Component
 	method void RefreshRankListItem(string key)
 		local currentRankTable = _RankingService:GetTop50RankTable(key)
 		
-		log("Refresh by " .. key)
+		for i, rankItem in pairs(self.rankItems) do
+			if i > #currentRankTable then
+				rankItem.Visible = false
+				continue
+			end
+			
+			rankItem.StageRankingItem:Init(currentRankTable[i].name, currentRankTable[i].score, i)
+		end
 		
-		for i = 1, 50 do
-			self.rankItems[i].StageRankingItem:Init(currentRankTable[i].name, currentRankTable[i].score, i)
+		if #currentRankTable == 0 then
+			self.rankItems[1].StageRankingItem:Init("YOUR NAME HERE", 999999, 1)
 		end
 	end
 
 	method void ShowRank()
 		self.Entity.Children[4].Visible = false
 		self.Entity.Children[1].Visible = true
+	end
+
+	@ExecSpace("Client")
+	method void InitCheckRankData(string key, integer count)
+		if count > 5 then
+			self:RefreshRankListItem(key)
+			return
+		end
+		
+		if _RankingService:CountRankTable(key) < 0 then
+			_TimerService:SetTimerOnce(
+				function()
+					self:InitCheckRankData(key, count + 1)
+				end,
+				0.2
+			)
+			return
+		end
+		
+		self:RefreshRankListItem(key)
 	end
 
 	@EventSender("Entity", "763512f0-58e6-4c2c-ad79-64a76be4eafe")

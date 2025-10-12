@@ -33,6 +33,11 @@ script StageSelectorUI extends Component
 		
 		self.StageInfoPanel = _EntityService:GetEntityByPath(path .. "/StageInfoPanel/panel")
 		
+		local key = _RankingService:GetRankKeyByTable({chapter=selectChapter, stage=selectStage})
+		
+		local rankingListUI =  _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
+		rankingListUI.StageRankingListUI:InitCheckRankData(key, 0)
+		
 		for i = 1, 6 do
 			local entity = _EntityService:GetEntityByPath(path .. "/SelectPanel/StageSelectScroll/Select_" .. tostring(i))
 			if i > stageCount then
@@ -91,8 +96,8 @@ script StageSelectorUI extends Component
 		local stageDataList = _StageService:GetStageByChapter(selectChapter)
 		
 		local rankingListUI =  _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
-		rankingListUI.Enable = false
-		rankingListUI.Visible = false
+		--rankingListUI.Enable = false
+		--rankingListUI.Visible = false
 		
 		for i, entity in ipairs(self.SelectButtonList) do
 			if i > openStage and selectChapter == openChapter then
@@ -139,6 +144,10 @@ script StageSelectorUI extends Component
 			self.userStage.selectStage = 1
 			self:UpdateData()
 		end
+		
+		local key = _RankingService:GetRankKeyByTable({chapter=self.userStage.selectChapter, stage=self.userStage.selectStage})
+		local rankingListUI =  _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
+		rankingListUI.StageRankingListUI:InitCheckRankData(key, 0)
 	end
 
 end
