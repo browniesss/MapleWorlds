@@ -13,6 +13,9 @@ script UIMain extends Component
 			local oldUIEntity = _EntityService:GetEntityByPath("/ui/Lobby_UI")
 			oldUIEntity:SetEnable(false)
 			
+			local userName = self.Entity.PlayerComponent.Nickname
+			_RankingService:InitUserPointMap(userName)
+			
 			local stageSelectUIEntity = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI")
 			stageSelectUIEntity.StageSelectorUI:SetUserStageComp(self.Entity.UserStage)
 			

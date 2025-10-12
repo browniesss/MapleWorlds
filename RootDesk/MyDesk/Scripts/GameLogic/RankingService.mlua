@@ -7,6 +7,8 @@ script RankingService extends Logic
 
 	property table cacheRankList = {}
 
+	property table userPointMap = {}
+
 	@ExecSpace("Server")
 	method void AddPoint(string storageKey, string userName, integer userScore)
 		local ds = _DataStorageService:GetSortableDataStorage(storageKey)
@@ -29,6 +31,8 @@ script RankingService extends Logic
 		if setCode ~= 0 then
 			log("AddPoint set err: " .. setCode)
 		end
+		
+		self:UpdaetUserPointMap(storageKey, userScore)
 	end
 
 	@ExecSpace("Server")
@@ -189,6 +193,89 @@ script RankingService extends Logic
 		end
 		
 		return #self.rankList[key]
+	end
+
+	@ExecSpace("Server")
+	method void FetchUserPoint(string storageKey, string userName)
+		local ds = _DataStorageService:GetSortableDataStorage(storageKey)
+		
+		local getCode, lastScore = ds:GetAndWait(userName)
+		if getCode ~= 0 then
+			log("AddPoint get err: " .. getCode)
+			return
+		end
+		
+		if lastScore == nil or lastScore == 0 then
+			lastScore = 9999999
+		end
+		
+		self:UpdaetUserPointMap(storageKey, lastScore)
+	end
+
+	@ExecSpace("Client")
+	method void UpdaetUserPointMap(string storageKey, integer score)
+		self.userPointMap[storageKey] = score
+		log("update user point mape: " .. storageKey .. " = " .. score)
+	end
+
+	@ExecSpace("Client")
+	method void InitUserPointMap(string userName)
+		local dataSet = _DataService:GetTable("stage")
+		
+		local stageCount = dataSet:GetRowCount()
+		
+		for i = 1, stageCount do
+			local chapter = tonumber(dataSet:GetCell(i,"chapter"))
+			local stage = tonumber(dataSet:GetCell(i,"stage"))
+			
+			
+			local key = _RankingService:GetRankKeyByTable({chapter=chapter, stage=stage})
+			self.userPointMap[key] = 999999
+			
+			local thread = function () self:FetchUserPoint(key, userName) end
+			thread()
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method table AddUserScore(string key, string userName, table rankTable)
+		local userScore = self.userPointMap[key]
+		if userScore == nil then
+			return rankTable
+		end
+		
+		if userScore >= 999999 then
+			return rankTable
+		end
+		
+		local newTable = {}
+		
+		local isUserInTable = false
+		
+		for rank, data in ipairs(rankTable) do
+			local newData = {
+				name=data.name, score=data.score
+			}
+			
+			if data.name == userName then
+				if userScore >= data.score then
+					return rankTable
+				end
+				
+				newData.score = userScore
+				isUserInTable = true
+			end
+			
+			newTable[rank] = newData
+		end
+		
+		if isUserInTable == false  then
+			newTable[#newTable + 1] = {name=userName, score=userScore}
+		end
+		
+		table.sort(newTable, function(a,b) return a.score < b.score end)
+		
+		return newTable
 	end
 
 end

@@ -4,6 +4,8 @@ script StageRankingListUI extends Component
 	@Sync
 	property SyncTable<Entity> rankItems
 
+	property Entity userRankItem = "d7bc729b-75e1-46aa-b575-ca4d546618ab"
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		local targetEntity = self.Entity.Children[1].Children[1]
@@ -22,25 +24,18 @@ script StageRankingListUI extends Component
 		end
 	end
 
-	@ExecSpace("ClientOnly")
-	method void Init()
-		self.Entity.Children[1].Visible = false
-		self.Entity.Children[4].Visible = true
-	end
-
-	@ExecSpace("Client")
-	method void Fetch()
-		_RankingService.fetchCallback = function()
-			-- self:RefreshRankListItem()
-				
-			self.Entity.Children[4].Visible = false
-			self.Entity.Children[1].Visible = true
-		end
-	end
-
 	@ExecSpace("Client")
 	method void RefreshRankListItem(string key)
+		local userName = _UserService.LocalPlayer.PlayerComponent.Nickname
 		local currentRankTable = _RankingService:GetTop50RankTable(key)
+		currentRankTable = _RankingService:AddUserScore(key, userName, currentRankTable)
+		
+		local userRankItem = {
+			name=userName,
+			score=999999,
+			isUser=true
+		}
+		local userRank = "50+"
 		
 		for i, rankItem in pairs(self.rankItems) do
 			if i > #currentRankTable then
@@ -48,11 +43,24 @@ script StageRankingListUI extends Component
 				continue
 			end
 			
-			rankItem.StageRankingItem:Init(currentRankTable[i].name, currentRankTable[i].score, i)
+			rankItem.StageRankingItem:Init(currentRankTable[i].name, currentRankTable[i].score, tostring(i))
+			
+			if currentRankTable[i].name == userName then
+				rankItem.StageRankingItem:setUserFrame()
+				userRank = tostring(i)
+				userRankItem = currentRankTable[i]
+			end
 		end
 		
+		
+		self.userRankItem.Visible = true
+		self.userRankItem.Children[3].StageRankingItem:Init(userRankItem.name, userRankItem.score, userRank)
+		self.userRankItem.Children[3].StageRankingItem:setUserFrame()
+		
 		if #currentRankTable == 0 then
-			self.rankItems[1].StageRankingItem:Init("YOUR NAME HERE", 999999, 1)
+			self.rankItems[1].StageRankingItem:Init("YOUR NAME HERE", 999999, "1")
+			self.rankItems[1].StageRankingItem:setUserFrame()
+			self.userRankItem.Visible = false
 		end
 	end
 
