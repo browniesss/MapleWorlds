@@ -40,9 +40,12 @@ script StageRankingListUI extends Component
 		for i, rankItem in pairs(self.rankItems) do
 			if i > #currentRankTable then
 				rankItem.Visible = false
+				rankItem.Enable = false
 				continue
 			end
 			
+			rankItem.Visible = true
+			rankItem.Enable = true
 			rankItem.StageRankingItem:Init(currentRankTable[i].name, currentRankTable[i].score, tostring(i))
 			
 			if currentRankTable[i].name == userName then
