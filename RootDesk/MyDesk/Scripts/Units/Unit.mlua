@@ -156,6 +156,9 @@ script Unit extends Component
 	@Sync
 	property integer attackSpeedDecreaseTimerID = 0
 
+	@Sync
+	property number damageAvoidAmount = 0
+
 	@ExecSpace("Server")
 	method void Spawn(table unitData, table skillData)
 		self.moveSpeed = unitData["moveSpeed"]
@@ -770,6 +773,23 @@ script Unit extends Component
 
 	method void OnHit(Entity attacker, number damage, boolean isCritical, number attackCount)
 		if self.hp <= 0 then
+			return
+		end
+		
+		if self.damageAvoidAmount > 0 then
+			local damageSkin
+			if self.isEnemy then
+				-- 빨간 데미지 스킨
+				damageSkin = "436ac27fca8c448ba4bcd31bbed3ba15"
+			else
+				-- 파란 데미지 스킨
+				damageSkin = "7e39645af9454fffb17a5451e9194dda"
+			end
+			
+			self.damageAvoidAmount -= 1
+			
+			_DamageSkinService:PlayTextDamage(self.Entity, damageSkin,
+				 DamageSkinTextType.Miss, DamageSkinTweenType.Default)
 			return
 		end
 		

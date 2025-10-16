@@ -1,0 +1,14 @@
+@Component
+script Octopus_Avoid extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		_EffectService:PlayEffectAttached("05608f815f23407382e83892eb8515a2", self.caster, Vector3(0, 0, 0) , 0, Vector3.one)
+		
+		self.caster.Unit.damageAvoidAmount += self.skillAmount
+		self:SkillEnd()
+	end
+
+end
