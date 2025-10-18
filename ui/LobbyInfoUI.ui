@@ -131,15 +131,15 @@
               "MobileOnly": false,
               "OffsetMax": {
                 "x": 960.0,
-                "y": -0.5
+                "y": 0.0
               },
               "OffsetMin": {
                 "x": -960.0,
-                "y": -130.5
+                "y": -130.0
               },
               "Pivot": {
                 "x": 0.5,
-                "y": 0.5
+                "y": 1.0
               },
               "RectSize": {
                 "x": 1920.0,
@@ -154,11 +154,11 @@
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": 0.0,
-                "y": -65.5
+                "y": 0.0
               },
               "Position": {
                 "x": 0.0,
-                "y": 474.5,
+                "y": 540.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -249,7 +249,7 @@
               },
               "Position": {
                 "x": 0.0,
-                "y": 0.0,
+                "y": -65.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -345,7 +345,7 @@
               },
               "Position": {
                 "x": 207.9999,
-                "y": -0.9058,
+                "y": -65.9058,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -676,7 +676,7 @@
               },
               "Position": {
                 "x": 430.926,
-                "y": -0.3484,
+                "y": -65.3484,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -1007,7 +1007,7 @@
               },
               "Position": {
                 "x": 654.2595,
-                "y": -0.9059,
+                "y": -65.9059,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -1328,7 +1328,7 @@
               },
               "Position": {
                 "x": -645.0,
-                "y": -15.0,
+                "y": -80.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -2105,6 +2105,389 @@
               },
               "OverrideSorting": false,
               "Text": "상점",
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "aa739064-9c01-4e3d-86b2-513dc7224a3f",
+        "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/GachaButton",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.Toggle,script.ExtendToggleUIPanel",
+        "jsonString": {
+          "name": "GachaButton",
+          "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/GachaButton",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 2,
+          "pathConstraints": "/////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uibutton",
+            "sub_entity_id": null
+          },
+          "modelId": "uibutton",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 12,
+              "AnchorsMax": {
+                "x": 0.0,
+                "y": 1.0
+              },
+              "AnchorsMin": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 600.0,
+                "y": 0.0
+              },
+              "OffsetMin": {
+                "x": 400.0,
+                "y": 0.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 200.0,
+                "y": 70.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 500.0,
+                "y": 0.0
+              },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "Position": {
+                "x": 200.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": -1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "a1c2157ee8bc4733a92dc608d3c9c9a4"
+              },
+              "OverrideSorting": false,
+              "Color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ButtonComponent",
+              "Colors": {
+                "NormalColor": {
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                },
+                "HighlightedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "PressedColor": {
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                },
+                "SelectedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "DisabledColor": {
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                },
+                "ColorMultiplier": 1.0,
+                "FadeDuration": 0.1
+              },
+              "ImageRUIDs": {
+                "HighlightedSprite": null,
+                "PressedSprite": null,
+                "SelectedSprite": null,
+                "DisabledSprite": null
+              },
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "script.Toggle",
+              "Enable": true,
+              "ImageEntity": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "aa739064-9c01-4e3d-86b2-513dc7224a3f"
+              },
+              "OnRUID": "6c4bb13526684cfb97593a55b71009c8",
+              "OffRUID": "a1c2157ee8bc4733a92dc608d3c9c9a4",
+              "ActionTargetEntity": {
+                "IsRelative": false,
+                "ComponentId": "aa739064-9c01-4e3d-86b2-513dc7224a3f:ToggleAction"
+              }
+            },
+            {
+              "@type": "script.ExtendToggleUIPanel",
+              "Enable": true,
+              "TargetPanelEntity": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "1c801a28-6e22-4b4c-9db9-fa27a84a9a02"
+              },
+              "panelIndex": 3.0
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "3aeef0d9-dd33-494c-a6f1-a1e95849002b",
+        "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/GachaButton/Mask",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "jsonString": {
+          "name": "Mask",
+          "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/GachaButton/Mask",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "//////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uisprite",
+            "sub_entity_id": null
+          },
+          "modelId": "uisprite",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 100.0,
+                "y": 34.75
+              },
+              "OffsetMin": {
+                "x": -100.0,
+                "y": -27.75
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 200.0,
+                "y": 62.5
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 3.5
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 3.5,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "804eaa8323b74f44a48861cc98582376"
+              },
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Color": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "07c48da5-98a2-4cb3-ae37-b7c56081cee6",
+        "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/GachaButton/Mask/UIText",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "UIText",
+          "path": "/ui/LobbyInfoUI/TopBar/LobbyToggle/GachaButton/Mask/UIText",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "///////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 100.0,
+                "y": 31.25
+              },
+              "OffsetMin": {
+                "x": -100.0,
+                "y": -31.25
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 200.0,
+                "y": 62.5
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": -1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 42,
+              "MaxSize": 44,
+              "MinSize": 10,
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "OverrideSorting": false,
+              "Text": "뽑기",
               "Enable": true
             }
           ],
