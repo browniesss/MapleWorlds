@@ -156,6 +156,12 @@ script Unit extends Component
 	@Sync
 	property integer attackSpeedDecreaseTimerID = 0
 
+	@Sync
+	property number damageAvoidAmount = 0
+
+	@Sync
+	property string dieAudioClip = ""
+
 	@ExecSpace("Server")
 	method void Spawn(table unitData, table skillData)
 		self.moveSpeed = unitData["moveSpeed"]
@@ -179,6 +185,7 @@ script Unit extends Component
 		self.unitScale = unitData["unitScale"]
 		local isUsableCharacter = unitData["isUsableCharacter"]
 		self.isUsableCharacter = isUsableCharacter == 1
+		self.dieAudioClip = unitData["dieAudioClip"]
 		
 		self.skillID = skillData['id']
 		self.skillDesc = skillData['desc']
@@ -773,6 +780,23 @@ script Unit extends Component
 			return
 		end
 		
+		if self.damageAvoidAmount > 0 then
+			local damageSkin
+			if self.isEnemy then
+				-- 빨간 데미지 스킨
+				damageSkin = "436ac27fca8c448ba4bcd31bbed3ba15"
+			else
+				-- 파란 데미지 스킨
+				damageSkin = "7e39645af9454fffb17a5451e9194dda"
+			end
+			
+			self.damageAvoidAmount -= 1
+			
+			_DamageSkinService:PlayTextDamage(self.Entity, damageSkin,
+				 DamageSkinTextType.Miss, DamageSkinTweenType.Default)
+			return
+		end
+		
 		if self.damageDecreaseAmount > 0 then
 			damage -= self.damageDecreaseAmount
 			
@@ -813,6 +837,12 @@ script Unit extends Component
 			failPopupUI.Visible = true
 			_Utils:FadeIn(failPopupUI, 0.5)
 			return
+		end
+		
+		if self.dieAudioClip ~= "" then
+			_SoundService:PlaySound(self.dieAudioClip, 1)
+		elseif self.dieAudioClip == "" and self.isUsableCharacter then
+			_SoundService:PlaySound("8727e134756141c58bf2f525a1598eee", 1)
 		end
 		
 		-- 맵마다 Path 다르게 설정 필요
@@ -995,6 +1025,7 @@ script Unit extends Component
 		self.unitScale = unitData["unitScale"]
 		local isUsableCharacter = unitData["isUsableCharacter"]
 		self.isUsableCharacter = isUsableCharacter == 1
+		self.dieAudioClip = unitData["dieAudioClip"]
 		
 		self.skillID = skillData['id']
 		self.skillDesc = skillData['desc']

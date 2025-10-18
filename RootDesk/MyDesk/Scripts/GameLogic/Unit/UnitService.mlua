@@ -28,6 +28,7 @@ script UnitService extends Logic
 			item['name'] = tostring(dataSet:GetCell(index, 'name'))
 			item['animationName'] = tostring(dataSet:GetCell(index, 'animationName'))
 			item['unitScale'] = tonumber(dataSet:GetCell(index, 'unitScale'))
+			item['dieAudioClip'] = tostring(dataSet:GetCell(index, 'dieAudioClip'))
 			
 			
 			self.UnitTable[item['id']] = item
