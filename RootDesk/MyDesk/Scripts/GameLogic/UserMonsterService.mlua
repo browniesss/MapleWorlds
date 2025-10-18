@@ -1,0 +1,134 @@
+@Logic
+script UserMonsterService extends Logic
+
+	@ExecSpace("Server")
+	method void Save(string uid, table req)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local data = {}
+		
+		local monsterList = req.monsterList
+		for monsterId, monsterInfo in pairs(monsterList) do
+			data[monsterId] = _HttpService:JSONEncode(monsterInfo)
+		end
+		
+		local code, keys = ds:BatchSetAndWait(data)
+		
+		local res = {
+			code=code,
+			body=keys
+		}
+		
+		if req.callback ~= nil then
+			req.callback(res)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void GetAll(string uid, table req)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local allUnit = _UnitService:GetUnitList()
+		local keyList = {}
+		for i, v in ipairs(allUnit) do
+			keyList[#keyList + 1] = v.id
+		end
+		
+		local errCode, userAnimalPages = ds:BatchGetAndWait(keyList)
+		if errCode ~= 0 then
+			return
+		end
+		
+		local userMosnterList = {}
+		
+		while true do
+			-- 현재 페이지의 목록을 가져옵니다.
+			local datas = userAnimalPages:GetCurrentPageDatas()
+			for _, data in pairs(datas) do
+				if data.Value == nil then
+					continue
+				end
+				
+				local info = _HttpService:JSONDecode(data.Value)
+				
+				userMosnterList[info.id] = info
+			end
+			     
+			-- 현재 페이지가 마지막 페이지인지 확인합니다.
+			if userAnimalPages.IsLastPage == true then
+				break
+			end
+			     
+			-- 다음 페이지의 데이터를 미리 불러오고 다음 페이지가 유효하지 않은 경우 조회를 마칩니다.
+			local loadResultCode = userAnimalPages:LoadNextPageAndWait()
+			if loadResultCode ~= 0 then
+				return
+			end
+			     
+			-- 다음 페이지로 이동합니다.
+			userAnimalPages:MoveToNextPageAndWait()
+		end
+		
+		if #userMosnterList < #allUnit then
+			for i, unit in ipairs(allUnit) do
+				if userMosnterList[unit.id] ~= nil then
+					continue
+				end
+				
+				local userMonster = {
+					level=1,
+					count=1
+				}
+				
+				userMosnterList[unit.id] = userMonster
+				
+				local save = _HttpService:JSONEncode(userMonster)
+				
+				ds:SetAsync("beta_".. unit.id, save, function() end)
+			end
+		end
+		
+		if req.callback ~= nil then
+			local res = {
+				code=0,
+				body=userMosnterList
+			}
+			
+			req.callback(res)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void GetOne(string uid, table req)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		
+		local userMonster = {
+			level=1,
+			count=1
+		}
+		
+		local errCode, monsterSave = ds:GetAndWait(req.monsterId)
+		if errCode ~= 0 then
+			return
+		end
+		
+		if monsterSave == nil then
+			monsterSave = _HttpService:JSONEncode(userMonster)
+			
+			ds:SetAsync("beta_".. req.monsterId, monsterSave, function() end)
+		end
+		
+		userMonster = _HttpService:JSONDecode(monsterSave)
+		
+		if req.callback ~= nil then
+			local res = {
+				code=0,
+				body=userMonster
+			}
+			
+			req.callback(res)
+		end
+	end
+
+end
