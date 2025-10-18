@@ -1,0 +1,32 @@
+@Component
+script Dile_Bite extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		-- model://52e4278c-19db-4cd8-b5f9-f2d1ea27b7a8
+		
+		local laser = _SpawnService:SpawnByModelId("model://52e4278c-19db-4cd8-b5f9-f2d1ea27b7a8", "Dile_Bite_Object", Vector3(-0.05, 0.4, 0), self.caster)
+		local deleteTime = _Utils:GetRUIDTime(laser.SpriteRendererComponent.SpriteRUID)
+		
+		laser.SpriteRendererComponent.FlipX = self.caster.Unit.isEnemy == false
+		laser.DelayAttackComponent:Init(self.skillAmount, self.caster, self.caster.Unit.isEnemy == false)
+		
+		local damageFunction = function()
+			laser.TriggerComponent.Enable = true
+		end
+		
+		local deleteFunction = function()
+			-- 스킬 사용 종료 처리
+			_EntityService:Destroy(laser)
+			self:SkillEnd()
+		end
+		
+		-- 레이저 발사 타이밍에 데미지 입히는 처리
+		_TimerService:SetTimerOnce(damageFunction, self.skillAttackTiming)
+		-- 스킬 사용 종료 처리
+		_TimerService:SetTimerOnce(deleteFunction, deleteTime)
+	end
+
+end
