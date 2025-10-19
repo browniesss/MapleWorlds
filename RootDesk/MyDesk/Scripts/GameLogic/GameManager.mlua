@@ -422,57 +422,20 @@ script GameManager extends Logic
 	end
 
 	method table GetPreLoadAssetRuid()
-		local ruids = {
-			-- 스킬 이펙트
-			"ecb14916022b462280c1bad3ca065037",
-			"dac3d68cd9ba4140b99f373af6902f35",
-			"288b2ca13ae34efc987c49ac0bb22f79",
-			"cba42a77a12e48059240908f043a86d8",
-			"b803d7da0da346f0bec889ff7237f577",
-			"367e8d056ca645609c1cf3644c1701cc",
-			"17e2069a32664309bae1ded3231b08c3",
-			"367e8d056ca645609c1cf3644c1701cc",
-			"2ed6be9152eb4bf0b22f4ca6e6fff9fe",
-			"5c2c13c481ba476294bff7e9e04df837",
-			"ee5acf09f4a24ea2b3e4d1a75133efde",
-			"21d3f2eb72284632b9916896cbf8aaf6",
-			"32eff4d4e0fe4abb92415cbafac88463",
-			"5468cadd2f60428e925bc368968e1a1e",
-			"01c803531e2c4e5aa3c3ef66f14711b8",
-			"b104c97432904f1e8454fec526910e7e",
-			"8a8c9a735036433c9f63d4ff4328b7d9",
-			"92f5e05881614a50a58ea58b59fc7752",
-			"9ecf53652b4a437da81417bcd8fb58ca",
-			"5b382e3dd14b430480b729cc3cb56c82",
-			"cf9c9a3f22b744e1a8093c3e5b58275b",
-			"a5cf9699c4884016b08da58213ad82a7",
-			"64096440f11f4c9b9c96df38e0e3852e",
-			"288b2ca13ae34efc987c49ac0bb22f79",
-			"42b6deb653a84c06abd29d667370bd81",
-			"aae5027da69747d3b2cd2bd0f26987e0",
-			"88a17d40d6e34abd948cac09724b22fa",
-			"68fc685a9b9d41e796a5527a0eeb2ed9",
-			"d577178a8212489e8319a4c5b16e897b",
-			"895ac1e384ea42ca8dd084f54ff3346b",
-			"f342e1d9953f46e9ab003ba0e363ee2a",
-			"e7d59b726e2e40bc83b1e45784d483d7",
-			"b43ff36b9c8544b88acee9ce595bfaf2",
-			"ce6326eea3ce460dae93974f0196802e",
-			"c763524d44514af5a97687eaea121a0a",
-			"a59b9339cc7e4d579e8d3389e1c95149",
-			"5ea66e0bd8e0441aac5960fb07f33b74",
-			"a9b96bc94f514d00841324fc109aef46",
-			"380e3a973b1b4d92902ccba71e154416",
-			"bbe813c49cd84df9b59feeedb8dcba84",
-			"bbe813c49cd84df9b59feeedb8dcba84",
-			"57ed09e2b50a440cbf37c07ec7a7551e",
-			"2196093c814147f284f87cdab417a7c2",
-			"c70059c7bed2422ebd10392459245ce9",
-			"b4c0d437b75d4c819df324e91dfe77a5",
-			"89dc8084a49143eeaaefd7c9969aa9b8",
-			"8de7ae7682434774b20a229194dbf8fb",
+		local ruids = {}
+		local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
+		
+		for i = 1, 8 do
+			local unitData = _UnitService:GetUnitByIDFromServer(playerDeck.userDeck[i])
+			local skillData = _SkillService:GetSkillByIDFromServer(unitData["skillID"])
 			
-		}
+			local ruidString = skillData["ruids"] or ""
+		    
+		    -- 쉼표로 분리된 string을 table로 변환
+		    for ruid in string.gmatch(ruidString, "([^,]+)") do
+		        table.insert(ruids, ruid)
+		    end
+		end
 		
 		return ruids
 	end

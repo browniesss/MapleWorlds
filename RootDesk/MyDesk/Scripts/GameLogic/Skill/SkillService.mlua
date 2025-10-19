@@ -18,6 +18,7 @@ script SkillService extends Logic
 			item['skillAttackTiming'] = tonumber(dataSet:GetCell(index, 'skillAttackTiming'))
 			item['coolTime'] = tonumber(dataSet:GetCell(index, 'coolTime'))
 			item['skillIcon'] = tostring(dataSet:GetCell(index, 'skillIcon'))
+			item['ruids'] = tostring(dataSet:GetCell(index, 'ruids'))
 			
 			self.skillTable[item['id']] = item
 		end
