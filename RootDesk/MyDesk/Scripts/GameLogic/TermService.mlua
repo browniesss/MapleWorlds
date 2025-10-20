@@ -1,0 +1,46 @@
+@Logic
+script TermService extends Logic
+
+	@ExecSpace("Server")
+	method integer SAVE(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local data = {}
+		
+		data["isTermAgree"] = 1
+		
+		local save =  _HttpService:JSONEncode(data)
+		
+		return ds:SetAndWait("TERM_AGREE",save)
+		
+	end
+
+	@ExecSpace("Server")
+	method integer LOAD(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local errCode, res = ds:GetAndWait("TERM_AGREE")
+		if errCode ~= 0 then
+			return errCode
+		end
+		
+		if res == nil then
+			return 0
+		end
+		
+		local resTable = _HttpService:JSONDecode(res)
+		
+		log(resTable)
+		
+		return resTable["isTermAgree"]
+	end
+
+	@ExecSpace("Client")
+	method void AgreePopupOn()
+		local ui = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/TermUI")
+			
+		ui.Enable = true
+		ui.Visible = true
+	end
+
+end

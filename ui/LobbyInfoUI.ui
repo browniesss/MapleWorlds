@@ -11993,7 +11993,7 @@
           "path": "/ui/LobbyInfoUI/TermUI",
           "nameEditable": true,
           "enable": true,
-          "visible": true,
+          "visible": false,
           "localize": true,
           "displayOrder": 2,
           "pathConstraints": "///",
@@ -12628,6 +12628,252 @@
               "Text": "TEXT\\nTEXTTEXT\\nTEXTTEXT\\nTEXTTEXT\\nTEXTTEXT\\nTEXTTEXT\\nTEXTTEXT\\nTEXTTEXT\\nTEXTTEXT\\nTEXTTEXT\\nTEXTTEXT\\nTEXTTEXT\\nTEXTTEXT\\nTEXTTEXT\\nTEXTTEXT\\nTEXTTEXT\\nTEXT",
               "UseConstraintX": false,
               "UseConstraintY": false,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "1157ccd3-e11f-470b-8809-202ca2f5e2c7",
+        "path": "/ui/LobbyInfoUI/TermUI/Frame/AgreeButton",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.TermAgreeButton",
+        "jsonString": {
+          "name": "AgreeButton",
+          "path": "/ui/LobbyInfoUI/TermUI/Frame/AgreeButton",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 2,
+          "pathConstraints": "/////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uibutton",
+            "sub_entity_id": null
+          },
+          "modelId": "uibutton",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 178.0,
+                "y": -335.0
+              },
+              "OffsetMin": {
+                "x": -178.0,
+                "y": -465.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 356.0,
+                "y": 130.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": -400.0
+              },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": -400.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": -1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "336adb94836e45ed9b261e9441e6bb7c"
+              },
+              "OverrideSorting": false,
+              "Type": 1,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ButtonComponent",
+              "Colors": {
+                "NormalColor": {
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                },
+                "HighlightedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "PressedColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 1.0
+                },
+                "SelectedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "DisabledColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 0.5019608
+                },
+                "ColorMultiplier": 1.0,
+                "FadeDuration": 0.1
+              },
+              "ImageRUIDs": {
+                "HighlightedSprite": null,
+                "PressedSprite": null,
+                "SelectedSprite": null,
+                "DisabledSprite": null
+              },
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "script.TermAgreeButton",
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "f997be40-0318-4000-aead-01d4792c6060",
+        "path": "/ui/LobbyInfoUI/TermUI/Frame/AgreeButton/UIText",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "UIText",
+          "path": "/ui/LobbyInfoUI/TermUI/Frame/AgreeButton/UIText",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "//////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 178.0,
+                "y": 50.0
+              },
+              "OffsetMin": {
+                "x": -178.0,
+                "y": -50.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 356.0,
+                "y": 100.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "BestFit": true,
+              "Font": 3,
+              "MaxSize": 50,
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "OverrideSorting": false,
+              "Text": "동의합니다",
               "Enable": true
             }
           ],

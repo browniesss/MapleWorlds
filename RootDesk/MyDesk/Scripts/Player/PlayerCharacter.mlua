@@ -55,6 +55,12 @@ script PlayerCharacter extends Component
 		if enteredMap.Name == "LobbyScene" then
 			self.Entity.Visible = false
 		end
+		
+		local isTermAgree = _TermService:LOAD(self.Entity.PlayerComponent.UserId)
+		
+		if isTermAgree == 0 then
+			_TermService:AgreePopupOn()
+		end
 	end
 
 	method void SetIngameSkill(number skillID, number skillLevel)

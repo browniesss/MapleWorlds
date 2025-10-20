@@ -1,0 +1,15 @@
+@Component
+script TermAgreeButton extends Component
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		local ui = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/TermUI")
+		local player = _EntityService:GetEntityByTag("Player")
+		
+		ui.Enable = false
+		ui.Visible = false
+		
+		_TermService:SAVE(player.PlayerComponent.UserId)
+	end
+
+end
