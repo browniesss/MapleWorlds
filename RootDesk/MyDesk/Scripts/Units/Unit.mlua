@@ -552,17 +552,15 @@ script Unit extends Component
 					return
 				end
 		
-				local projectile = _SpawnService:SpawnByModelId("model://cd38ad89-1c52-45f2-8d86-d6be27475ba9",
-					"Projectile",
+				local projectile = _SpawnService:SpawnByModelId("model://0cd2ce13-1dba-425e-a58a-c32ddeec604e",
+					"NonTargetProjectile",
 					self.Entity.TransformComponent.WorldPosition + Vector3(0.5, 0.3, 0),
 					self._T.projectileParent)
-				projectile.Projectile:SetCaster(self.Entity)
+				projectile.NonTargetProjectile:InitWithRuid(self.Entity, self.damage, 1, self.isEnemy, self.projectileSpeed, true, self.projectileSpriteRUID)
 		
 				if self.passiveSkill ~= nil and self.passiveSkill.PassiveSkillParent.passiveType == _ePassiveType.OnAttack then
 					self.passiveSkill.PassiveSkillParent:OnAttack()
 				end
-		
-				projectile.Projectile:SetShoot(self.projectileSpriteRUID, 1, self.projectileSpeed, self.curTarget, true,self.damage)
 			end
 			
 			local timerTiming = self.attackTiming / animationPlaySpeed
@@ -590,13 +588,12 @@ script Unit extends Component
 			end
 			
 			local attackFunction = function()
-				local projectile = _SpawnService:SpawnByModelId("model://cd38ad89-1c52-45f2-8d86-d6be27475ba9",
-					"Projectile",
+				local projectile = _SpawnService:SpawnByModelId("model://0cd2ce13-1dba-425e-a58a-c32ddeec604e",
+					"NonTargetProjectile",
 					self.Entity.TransformComponent.WorldPosition + (Vector3.up * 0.3),
 					self._T.projectileParent)
-				projectile.Projectile:SetCaster(self.Entity)
-				projectile.Projectile:SetShoot(self.projectileSpriteRUID, 1, self.projectileSpeed, self.curTarget, true,self.damage)
-				
+				projectile.NonTargetProjectile:InitWithRuid(self.Entity, self.damage, 1, self.isEnemy, self.projectileSpeed, true, self.projectileSpriteRUID)
+		
 				-- 마나 충전
 				self:IncreaseMp()
 			end

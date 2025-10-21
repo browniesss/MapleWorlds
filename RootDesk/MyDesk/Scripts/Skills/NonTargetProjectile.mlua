@@ -37,6 +37,22 @@ script NonTargetProjectile extends Component
 		end
 	end
 
+	method void InitWithRuid(Entity caster, number damage, number destroyTime, boolean isEnemy, number moveSpeed, boolean isHitDestroy, string ruid)
+		self.caster = caster;
+		self.damage = damage;
+		self.destroyTime = destroyTime;
+		self.moveSpeed = moveSpeed;
+		self.isEnemy = isEnemy;
+		self.isHitDestroy = isHitDestroy
+		self.Entity.SpriteGUIRendererComponent.ImageRUID = ruid
+		
+		if isEnemy then
+			self.Entity.SpriteGUIRendererComponent.FlipX = false
+		else
+			self.Entity.SpriteGUIRendererComponent.FlipX = true
+		end
+	end
+
 	@ExecSpace("ClientOnly")
 	method void OnUpdate(number delta)
 		local dir
@@ -54,6 +70,7 @@ script NonTargetProjectile extends Component
 		end
 	end
 
+	@ExecSpace("ClientOnly")
 	@EventSender("Self")
 	handler HandleTriggerEnterEvent(TriggerEnterEvent event)
 		local function destroyFunction()

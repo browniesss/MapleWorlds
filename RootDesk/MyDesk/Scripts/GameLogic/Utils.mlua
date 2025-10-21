@@ -74,4 +74,16 @@ script Utils extends Logic
 		end, tick, 0)
 	end
 
+	method Vector2 GetImageSize(string spriteRUID)
+		local sprite = _ResourceService:LoadSpriteAndWait(spriteRUID)
+		local spriteSize = Vector2.zero
+		
+		if sprite.IsLoadComplete then
+		    spriteSize.x = sprite.Width
+			spriteSize.y = sprite.Height
+			
+			return spriteSize
+		end
+	end
+
 end
