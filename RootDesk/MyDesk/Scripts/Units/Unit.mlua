@@ -449,6 +449,9 @@ script Unit extends Component
 		if (self.isUsableCharacter == false and self.Entity.StateAnimationComponent.ActionSheet:ContainsKey("attack") == false)
 			and self.Entity.TweenLineComponent.CurrentState ~= TweenState.Playing then
 			self.originPos = self.Entity.TransformComponent.WorldPosition
+			-- d63720e2f7434b5d9faeaefb236282a2
+		
+			_SoundService:PlaySound("eb49560ca2a84e0585e0e83cd61c9dc6", 1)
 			self:PlayTween()
 			self:Attack_Damage()
 			self:PlayEffect("a05c1966e31a4c409cc263215f786d2e", Vector3(-0.5,0,0))
@@ -476,7 +479,8 @@ script Unit extends Component
 					if self.curState == "die" then
 						return
 					end
-					
+		
+					_SoundService:PlaySound("2ac47382f3ad45f09a0f429cb5aa71a0", 1)
 					self:Attack_Damage()
 				
 					if self.passiveSkill ~= nil and self.passiveSkill.PassiveSkillParent.passiveType == _ePassiveType.OnAttack then
@@ -551,6 +555,8 @@ script Unit extends Component
 				if self.curState == "die" then
 					return
 				end
+				
+				_SoundService:PlaySound("4346b64f2d0a4cf683980bb0d318b14a", 1)
 		
 				local projectile = _SpawnService:SpawnByModelId("model://cd38ad89-1c52-45f2-8d86-d6be27475ba9",
 					"Projectile",
@@ -588,6 +594,8 @@ script Unit extends Component
 			else
 				timerTiming = self.attackTiming / animationPlaySpeed
 			end
+			
+			_SoundService:PlaySound("4346b64f2d0a4cf683980bb0d318b14a", 1)
 			
 			local attackFunction = function()
 				local projectile = _SpawnService:SpawnByModelId("model://cd38ad89-1c52-45f2-8d86-d6be27475ba9",
