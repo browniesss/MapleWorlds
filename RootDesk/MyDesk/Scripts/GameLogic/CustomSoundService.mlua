@@ -1,0 +1,21 @@
+@Logic
+script CustomSoundService extends Logic
+
+	property table playingSounds = {}
+
+	method void PlaySoundAtPos(string soundRUID, Vector3 soundPos, Entity entity)
+		-- cooldown 초 이내에 같은 사운드가 재생되지 않도록 체크
+		if self.playingSounds[soundRUID] then
+		    return -- 이미 재생 중이므로 무시
+		end
+		
+		-- 사운드 재생
+		_SoundService:PlaySoundAtPos(soundRUID, soundPos, entity, 1)
+		
+		-- 중복 방지를 위한 타이머 등록
+		self.playingSounds[soundRUID] = _TimerService:SetTimerOnce(function()
+		    self.playingSounds[soundRUID] = nil
+		end, 0.5)
+	end
+
+end
