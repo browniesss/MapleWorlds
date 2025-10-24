@@ -10,6 +10,7 @@ script UnitService extends Logic
 			
 			item['id'] = tostring(dataSet:GetCell(index, 'id'))
 			item['skillID'] = tostring(dataSet:GetCell(index, 'skillID'))
+			item['spawnSkill'] = tostring(dataSet:GetCell(index, 'spawnSkill'))
 			item['isUsableCharacter'] = tonumber(dataSet:GetCell(index, 'isUsableCharacter'))
 			item['passiveSkillID'] = tonumber(dataSet:GetCell(index, 'passiveSkillID'))
 			item['moveSpeed'] = tonumber(dataSet:GetCell(index, 'moveSpeed'))

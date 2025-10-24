@@ -162,6 +162,11 @@ script Unit extends Component
 	@Sync
 	property string dieAudioClip = ""
 
+	property table spawnSkillData = {}
+
+	@Sync
+	property Entity spawnSkillEntity = nil
+
 	@ExecSpace("Server")
 	method void Spawn(table unitData, table skillData)
 		self.moveSpeed = unitData["moveSpeed"]
@@ -194,6 +199,10 @@ script Unit extends Component
 		self.skillProjectileSpeed = skillData['skillProjectileSpeed'] 
 		self.skillTime = skillData['skillTime']
 		self.skillAttackTiming = skillData['skillAttackTiming']
+		
+		if unitData["spawnSkill"] ~= nil then
+			self.spawnSkillData = _SkillService:GetSkillByIDFromServer(unitData["spawnSkill"])
+		end
 		
 		self:InitTagData()
 		self:InitData()
@@ -294,6 +303,11 @@ script Unit extends Component
 	@ExecSpace("Server")
 	method void InitSkillData()
 		self.activeSkill = _SpawnService:SpawnByModelId(self.skillID, self.skillDesc, Vector3.zero, self.Entity)
+		
+		if self.spawnSkillData ~= nil then
+			self.spawnSkillEntity = _SpawnService:SpawnByModelId(self.spawnSkillData["id"], self.skillDesc, Vector3.zero, self.Entity)
+			self:UseSpawnSkill(self.spawnSkillData)
+		end
 	end
 
 	@ExecSpace("ClientOnly")
@@ -1043,6 +1057,10 @@ script Unit extends Component
 		self.skillTime = skillData['skillTime']
 		self.skillAttackTiming = skillData['skillAttackTiming']
 		
+		if unitData["spawnSkill"] ~= nil then
+			self.spawnSkillData = _SkillService:GetSkillByIDFromServer(unitData["spawnSkill"])
+		end
+		
 		self:InitEnemyTagData()
 		self:InitData()
 		self:InitSkillData()
@@ -1203,6 +1221,14 @@ script Unit extends Component
 		self.Entity.TriggerComponent.BoxSize.y = self.Entity.TriggerComponent.BoxSize.y * scale
 		self.Entity.HitComponent.BoxSize.x = self.Entity.HitComponent.BoxSize.x * scale
 		self.Entity.HitComponent.BoxSize.y = self.Entity.HitComponent.BoxSize.y * scale
+	end
+
+	@ExecSpace("Client")
+	method void UseSpawnSkill(table skillData)
+		_TimerService:SetTimerOnce(function()
+			self.spawnSkillEntity.SkillParent:UseSkill(self.Entity, nil, skillData['skillArea'], skillData['skillAmount'], skillData['skillProjectileSpeed']
+				, skillData['skillTime'], skillData['skillAttackTiming'])
+		end, 0.1)
 	end
 
 	@EventSender("Self")
