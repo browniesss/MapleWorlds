@@ -155,6 +155,9 @@ script GameManager extends Logic
 
 	@ExecSpace("Client")
 	method void GameStartDataInClient(integer chapterIndex, integer mapIndex)
+		self.chapterIndex = chapterIndex
+		self.mapIndex = mapIndex
+		
 		local ourHealthBarUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/Player_HP_bar")
 		local enemyHealthBarUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/EnemyHealthBar")
 		local playerTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/PlayerTower")
