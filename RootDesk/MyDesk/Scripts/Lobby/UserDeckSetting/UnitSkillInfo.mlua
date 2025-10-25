@@ -1,0 +1,37 @@
+@Component
+script UnitSkillInfo extends Component
+
+	@Sync
+	property Entity skillIcon = nil
+
+	@Sync
+	property Entity skillName = nil
+
+	@Sync
+	property Entity skillDesc = nil
+
+	property table skillData = {}
+
+	method void OnBeginPlay()
+		self.skillIcon = self.Entity.Children[1]
+		self.skillName = self.Entity.Children[2]
+		self.skillDesc = self.Entity.Children[3]
+	end
+
+	method void Init(table skillData)
+		self.skillData = skillData
+		
+		self:SetSprite()
+		self:SetLabel()
+	end
+
+	method void SetSprite()
+		self.skillIcon.SpriteGUIRendererComponent.ImageRUID = self.skillData['skillIcon']
+	end
+
+	method void SetLabel()
+		self.skillDesc.TextComponent.Text = self.skillData['desc']
+		self.skillName.TextComponent.Text = self.skillData['skillName']
+	end
+
+end

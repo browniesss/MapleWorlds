@@ -1,0 +1,35 @@
+@Component
+script UnitInfoPanel extends Component
+
+	property table unitData = {}
+
+	property table skillData = {}
+
+	property table spawnSkillData = {}
+
+	property Entity unitDetailInfo = "ccaa0ea2-8d4c-421d-a982-0fa92d80b5cf"
+
+	property Entity normalSkillInfo = "3dc8e662-7f62-4bb3-8edb-5f29d4e4f1a4"
+
+	property Entity spawnSkillInfo = "3b2cce00-067b-49f4-83fa-717ef4cc50ee"
+
+	method void Init(table unitData, table normalSkillData, table spawnSkillData)
+		self.unitData = unitData
+		self.skillData = normalSkillData
+		self.spawnSkillData = spawnSkillData
+		
+		self.unitDetailInfo.UnitDetailInfo:Init(self.unitData)
+		self.normalSkillInfo.UnitSkillInfo:Init(self.skillData)
+		
+		if spawnSkillData == nil then
+			self.spawnSkillInfo.Enable = false
+			self.spawnSkillInfo.Visible = false
+		else
+			self.spawnSkillInfo.Enable = true
+			self.spawnSkillInfo.Visible = true
+			self.normalSkillInfo.UnitSkillInfo:Init(self.spawnSkillData)	
+		end
+		
+	end
+
+end

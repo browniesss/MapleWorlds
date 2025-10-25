@@ -1,0 +1,100 @@
+@Component
+script UnitDetailInfo extends Component
+
+	@Sync
+	property Entity unitSprite = nil
+
+	@Sync
+	property Entity unitAvatarRenderer = nil
+
+	@Sync
+	property Entity unitName = nil
+
+	@Sync
+	property Entity powerLabel = nil
+
+	@Sync
+	property Entity hpLabel = nil
+
+	@Sync
+	property Entity moveSpeedLabel = nil
+
+	@Sync
+	property Entity attackRangeLabel = nil
+
+	@Sync
+	property Entity attackSpeedLabel = nil
+
+	@Sync
+	property Entity mpLabel = nil
+
+	property table unitData = {}
+
+	method void OnBeginPlay()
+		self.unitSprite = self.Entity.Children[2]
+		self.unitAvatarRenderer = self.Entity.Children[3]
+		self.unitName = self.Entity.Children[4]
+		self.powerLabel = self.Entity.Children[6]
+		self.hpLabel = self.Entity.Children[8]
+		self.moveSpeedLabel = self.Entity.Children[10]
+		self.attackRangeLabel = self.Entity.Children[12]
+		self.attackSpeedLabel = self.Entity.Children[14]
+		self.mpLabel = self.Entity.Children[16]
+	end
+
+	method void Init(table unitData)
+		self.unitData = unitData
+		
+		self:SetSprite()
+		self:SetLabel()
+	end
+
+	method void SetSprite()
+		if self.unitData['isUsableCharacter'] == 0 then
+			self.unitAvatarRenderer.Visible = false
+			self.unitSprite.Visible = true
+			self.unitSprite.SpriteGUIRendererComponent.ImageRUID = self.unitData['ImageRUID']
+		else
+			self.unitSprite.Visible = false
+			self.unitAvatarRenderer.Visible = true
+			self:SetCostume()
+		end
+		
+	end
+
+	method void SetCostume()
+		local entity = _SpawnService:SpawnByModelId(self.unitData['id'], "Avatar", Vector3.zero, self.Entity)
+		entity.Visible = false
+		entity.Enable = false
+		
+		self.unitAvatarRenderer.CostumeManagerComponent.UseCustomEquipOnly = true
+		self.unitAvatarRenderer.CostumeManagerComponent.CustomBodyEquip = entity.CostumeManagerComponent.CustomBodyEquip
+		self.unitAvatarRenderer.CostumeManagerComponent.CustomCapEquip = entity.CostumeManagerComponent.CustomCapEquip
+		self.unitAvatarRenderer.CostumeManagerComponent.CustomCapeEquip = entity.CostumeManagerComponent.CustomCapeEquip
+		self.unitAvatarRenderer.CostumeManagerComponent.CustomCoatEquip = entity.CostumeManagerComponent.CustomCoatEquip
+		self.unitAvatarRenderer.CostumeManagerComponent.CustomEarAccessoryEquip = entity.CostumeManagerComponent.CustomEarAccessoryEquip
+		self.unitAvatarRenderer.CostumeManagerComponent.CustomEarEquip = entity.CostumeManagerComponent.CustomEarEquip
+		self.unitAvatarRenderer.CostumeManagerComponent.CustomEyeAccessoryEquip = entity.CostumeManagerComponent.CustomEyeAccessoryEquip
+		self.unitAvatarRenderer.CostumeManagerComponent.CustomFaceAccessoryEquip = entity.CostumeManagerComponent.CustomFaceAccessoryEquip
+		self.unitAvatarRenderer.CostumeManagerComponent.CustomFaceEquip = entity.CostumeManagerComponent.CustomFaceEquip
+		self.unitAvatarRenderer.CostumeManagerComponent.CustomGloveEquip = entity.CostumeManagerComponent.CustomGloveEquip
+		self.unitAvatarRenderer.CostumeManagerComponent.CustomHairEquip = entity.CostumeManagerComponent.CustomHairEquip
+		self.unitAvatarRenderer.CostumeManagerComponent.CustomLongcoatEquip = entity.CostumeManagerComponent.CustomLongcoatEquip
+		self.unitAvatarRenderer.CostumeManagerComponent.CustomOneHandedWeaponEquip = entity.CostumeManagerComponent.CustomOneHandedWeaponEquip
+		self.unitAvatarRenderer.CostumeManagerComponent.CustomPantsEquip = entity.CostumeManagerComponent.CustomPantsEquip
+		self.unitAvatarRenderer.CostumeManagerComponent.CustomShoesEquip = entity.CostumeManagerComponent.CustomShoesEquip
+		self.unitAvatarRenderer.CostumeManagerComponent.CustomSubWeaponEquip = entity.CostumeManagerComponent.CustomSubWeaponEquip
+		self.unitAvatarRenderer.CostumeManagerComponent.CustomTwoHandedWeaponEquip = entity.CostumeManagerComponent.CustomTwoHandedWeaponEquip
+	end
+
+	method void SetLabel()
+		self.unitName.TextComponent.Text = self.unitData['name']
+		self.powerLabel.TextComponent.Text = self.unitData['damage']
+		self.hpLabel.TextComponent.Text = self.unitData['hp']
+		self.moveSpeedLabel.TextComponent.Text = self.unitData['moveSpeed']
+		self.attackRangeLabel.TextComponent.Text = self.unitData['attackRange']
+		self.attackSpeedLabel.TextComponent.Text = self.unitData['attackSpeed']
+		self.mpLabel.TextComponent.Text = self.unitData['maxMp']
+	end
+
+end
