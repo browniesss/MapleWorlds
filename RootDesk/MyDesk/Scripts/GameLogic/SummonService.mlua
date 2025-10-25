@@ -1,0 +1,120 @@
+@Logic
+script SummonService extends Logic
+
+	property table summonResult = {}
+
+	property table summonSetting = {}
+
+	@ExecSpace("ServerOnly")
+	method table GetSummonPool(string PoolName)
+		local summonPool = {}
+		
+		local dataSet = _DataService:GetTable(PoolName)
+		for i = 1, dataSet:GetRowCount() do
+			local item = {}
+			
+			item["ratio"] = tonumber(dataSet:GetCell(i,"ratio"))
+			item["type"] = tostring(dataSet:GetCell(i,"type"))
+			item["value"] = tostring(dataSet:GetCell(i,"value"))
+			
+			summonPool[#summonPool + 1]= item
+		end
+		
+		return summonPool
+	end
+
+	@ExecSpace("Server")
+	method void SummonOne(string pool_id)
+		if self:Billing(senderUserId, pool_id, 1) ~= 0 then
+			return
+		end
+		
+		
+		local pool = self:GetSummonPool(pool_id)
+		local result = {}
+		local idList = {}
+		
+		local item = _RandomPicker:RadomPickFromTable(pool)
+		
+		result[#result + 1] = item
+		idList[#idList + 1] = item.value
+		
+		_UserMonsterService:AddCount(senderUserId, idList)
+		
+		self:SummonCallback(pool_id, result, senderUserId)
+	end
+
+	@ExecSpace("Server")
+	method void SummonTen(string pool_id)
+		if self:Billing(senderUserId, pool_id, 10) ~= 0 then
+			return
+		end
+		
+		local pool = self:GetSummonPool(pool_id)
+		local result = {}
+		local idList = {}
+		
+		for i = 1, 10 do
+			local item = _RandomPicker:RadomPickFromTable(pool)
+			result[#result + 1] = item
+			idList[#idList + 1] = item.value
+		end
+		
+		
+		_UserMonsterService:AddCount(senderUserId, idList)
+		
+		self:SummonCallback(pool_id, result, senderUserId)
+	end
+
+	@ExecSpace("Client")
+	method void SummonCallback(string pool_id, table result)
+		if self.summonResult[pool_id] == nil then
+			self.summonResult[pool_id] = {}
+		end
+		
+		self.summonResult[pool_id][#self.summonResult[pool_id] + 1] = result
+	end
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		self.summonSetting = {}
+		
+		local dataSet = _DataService:GetTable("GachaSetting")
+		for i = 1, dataSet:GetRowCount() do
+			local item = {}
+			
+			item["id"] = tostring(dataSet:GetCell(i,"id"))
+			item["money"] = tostring(dataSet:GetCell(i,"money")) 
+			item["summon_1_value"] = tonumber(dataSet:GetCell(i,"summon_1_value"))
+			item["summon_10_value"] = tonumber(dataSet:GetCell(i,"summon_10_value"))
+			
+			self.summonSetting[item['id']]= item
+		end
+		
+		self:UpdateSetting(self.summonSetting)
+	end
+
+	@ExecSpace("Client")
+	method void UpdateSetting(table setting)
+		self.summonSetting = setting
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer Billing(string uid, string poolId, integer count)
+		local setting = self.summonSetting[poolId]
+		if setting == nil then
+			return -1
+		end
+		
+		if setting.money == "FIRST_COIN" then
+			return _BillingService:UseFirstCoin(uid, setting[string.format("summon_%d_value", count)])
+		end
+		
+		if setting.money == "SECOND_COIN" then
+			return _BillingService:UseSecondCoin(uid, setting[string.format("summon_%d_value", count)])
+		end
+		
+		return -2
+	end
+
+end

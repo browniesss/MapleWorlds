@@ -353,14 +353,16 @@ script GameManager extends Logic
 		_RankingService:AddPoint(key, userName, playTime)
 		self.rankUI:UpdateRankData(userName, playTime, key)
 		
+		local isFirstClear = false
 		if userStage:isLastStageSelected() then
-			self:StageClearServer()
 			local nextStage = _StageService:GetNextOpenStageId(userStage.openChapter, userStage.openStage)
 		
 			
 			userStage:SetClearStage(nextStage.chapter, nextStage.stage)
+			isFirstClear = true
 		end
 		
+		self:StageClearServer(isFirstClear)
 		
 		self.gameClearResult.Enable = true
 		self.gameClearResult.Visible = true
@@ -371,8 +373,13 @@ script GameManager extends Logic
 	end
 
 	@ExecSpace("Server")
-	method void StageClearServer()
+	method void StageClearServer(boolean isFirstClear)
+		if isFirstClear == false then
+			
+			return
+		end
 		_PlayCoinService:AddCoin(senderUserId, 1)
+		_BillingService:AddSecondFreeCoin(senderUserId, 500)
 	end
 
 	method void ShowLoadingScreen()
@@ -448,6 +455,30 @@ script GameManager extends Logic
 		end
 		
 		return ruids
+	end
+
+	@ExecSpace("Client")
+	method void LocalGameStart()
+		local userStage = _UserService.LocalPlayer.UserStage
+		if userStage.openChapter < userStage.selectChapter then
+			return
+		end
+		
+		if userStage.openChapter == userStage.selectChapter and userStage.openStage < userStage.selectStage then
+			return
+		end
+		
+		self:ShowLoadingScreen()
+		
+		local ruids = self:GetPreLoadAssetRuid()
+		
+		_ResourceService:PreloadAsync(ruids, function()
+			_TimerService:ClearTimer(self.loadingTimer)
+			
+			_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage".. userStage.selectChapter.."0"..userStage.selectStage)
+			self:GameStart(userStage.selectChapter, userStage.selectStage)
+			self:HideLoadingScreen()
+		end) 
 	end
 
 	@EventSender("Service", "InputService")

@@ -36,18 +36,15 @@ script PlayCoinService extends Logic
 		self.lastReceiveTs = nowTs 
 	end
 
-	@ExecSpace("Server")
-	method void UseCoin(any callback)
-		if self.playCoin < 1 then
-			callback(-1)
+	@ExecSpace("ServerOnly")
+	method integer UseCoin(string uid)
+		if self.playCoin <= 0 then
+			return -1
 		end
 		
 		self.playCoin += -1
 		
-		local saveCode = self:SaveCoin(senderUserId)
-		if callback ~=nil then
-			callback(saveCode)
-		end
+		return self:SaveCoin(uid)
 	end
 
 	@ExecSpace("Server")
@@ -111,6 +108,18 @@ script PlayCoinService extends Logic
 	method void AddCoin(string uid, integer addCoin)
 		self.playCoin += addCoin
 		local saveCode = self:SaveCoin(uid)
+	end
+
+	@ExecSpace("Server")
+	method integer StartNormalGame()
+		
+		local useCoinCode = self:UseCoin(senderUserId)
+		
+		if useCoinCode ~= 0 then
+			return
+		end
+		
+		_GameManager:LocalGameStart()
 	end
 
 	@ExecSpace("ServerOnly")

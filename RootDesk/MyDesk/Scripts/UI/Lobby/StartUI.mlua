@@ -3,28 +3,7 @@ script StartUI extends Component
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
-		local userStage = _UserService.LocalPlayer.UserStage
-		if userStage.openChapter < userStage.selectChapter then
-			return
-		end
-		
-		if userStage.openChapter == userStage.selectChapter and userStage.openStage < userStage.selectStage then
-			return
-		end
-		
-		_PlayCoinService:UseCoin(nil)
-		
-		_GameManager:ShowLoadingScreen()
-		
-		local ruids = _GameManager:GetPreLoadAssetRuid()
-		
-		_ResourceService:PreloadAsync(ruids, function()
-			_TimerService:ClearTimer(_GameManager.loadingTimer)
-			
-			_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage".. userStage.selectChapter.."0"..userStage.selectStage)
-			_GameManager:GameStart(userStage.selectChapter, userStage.selectStage)
-			_GameManager:HideLoadingScreen()
-		end) 
+		_PlayCoinService:StartNormalGame()
 	end
 
 end

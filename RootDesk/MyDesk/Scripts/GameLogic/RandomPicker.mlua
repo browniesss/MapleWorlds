@@ -1,11 +1,14 @@
 @Logic
 script RandomPicker extends Logic
 
+	property integer lastSeed = 0
+
+	@ExecSpace("ServerOnly")
 	method table RadomPickFromTable(table pool)
 		local res = {}
 		local totalRaio = 0
 		
-		math.randomseed(os.time())
+		math.randomseed(self:GetRandomSeed())
 		
 		for index, value in ipairs(pool) do
 		    totalRaio += value["ratio"]
@@ -31,6 +34,18 @@ script RandomPicker extends Logic
 		
 		
 		error("fail to pick from pool")
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer GetRandomSeed()
+		local tmp = self.lastSeed
+		self.lastSeed = DateTime.UtcNow.Elapsed % tmp
+		return self.lastSeed
+	end
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		self.lastSeed = DateTime.UtcNow.Elapsed % 100000
 	end
 
 end

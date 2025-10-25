@@ -105,6 +105,22 @@ script BillingService extends Logic
 			return loadErr
 		end
 		
+		local freeCoin = self.FirstFreeCoin
+		local paidCoin = self.FirstPaidCoin
+		local totalCoin = freeCoin + paidCoin
+		if totalCoin < usage then
+			return -1
+		end
+		
+		paidCoin -= usage
+		if paidCoin < 0 then
+			freeCoin -= paidCoin
+			paidCoin = 0
+		end
+		
+		self.FirstFreeCoin = freeCoin
+		self.FirstPaidCoin = paidCoin
+		
 		return self:SAVE(userId)
 	end
 
@@ -115,10 +131,26 @@ script BillingService extends Logic
 			return loadErr
 		end
 		
+		local freeCoin = self.SecondFreeCoin
+		local paidCoin = self.SecondPaidCoin
+		local totalCoin = freeCoin + paidCoin
+		if totalCoin < usage then
+			return -1
+		end
+		
+		paidCoin -= usage
+		if paidCoin < 0 then
+			freeCoin -= paidCoin
+			paidCoin = 0
+		end
+		
+		self.SecondFreeCoin = freeCoin
+		self.SecondPaidCoin = paidCoin
+		
 		return self:SAVE(userId)
 	end
 
-	@ExecSpace("Server")
+	@ExecSpace("ServerOnly")
 	method integer AddFirstFreeCoin(string userId, integer addCoin)
 		local loadErr =  self:LOAD(userId) 
 		if loadErr ~= 0 then
@@ -134,7 +166,7 @@ script BillingService extends Logic
 		return self:SAVE(userId)
 	end
 
-	@ExecSpace("Server")
+	@ExecSpace("ServerOnly")
 	method integer AddSecondFreeCoin(string userId, integer addCoin)
 		local loadErr =  self:LOAD(userId) 
 		if loadErr ~= 0 then
@@ -144,8 +176,6 @@ script BillingService extends Logic
 		if addCoin <= 0 then
 			return 12
 		end
-		
-		log("ADD SECOND COIN", addCoin,"TO USER", userId)
 		
 		self.SecondFreeCoin += addCoin
 		
