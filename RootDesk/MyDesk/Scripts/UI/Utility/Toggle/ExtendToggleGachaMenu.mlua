@@ -1,0 +1,33 @@
+@Component
+script ExtendToggleGachaMenu extends ToggleAction
+
+	property Entity GachaButtonGrid = nil
+
+	property number panelIndex = 0
+
+	method void ExecuteOnLogic(Toggle sender)
+		__base:ToggleGroupActivate()
+		
+		if self.GachaButtonGrid then
+			self.GachaButtonGrid.Enable = true
+			self:SetGachaKey(self.panelIndex)
+		end
+	end
+
+	method void ExecuteOffLogic(Toggle sender)
+		if self.GachaButtonGrid then
+			self.GachaButtonGrid.Enable = false
+		end
+	end
+
+	method void SetGachaKey(integer key)
+		if key == 1 then
+			_GachaManager.GachaKey = _GachaManager.PickUpSummonKey
+		elseif key == 2 then
+			
+		elseif key == 3 then
+			_GachaManager.GachaKey = _GachaManager.NormalSummonKey
+		end
+	end
+
+end

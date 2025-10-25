@@ -1,12 +1,28 @@
 @Component
 script ToggleAction extends Component
 
+	property number panelIndex = 0
+
+	@HideFromInspector
+	property Entity ToggleGroup = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnInitialize()
+		self.ToggleGroup = self.Entity.Parent
+	end
+
 	method void ExecuteOnLogic(Toggle sender)
 		
 	end
 
 	method void ExecuteOffLogic(Toggle sender)
 		
+	end
+
+	method void ToggleGroupActivate()
+		if self.ToggleGroup then
+			self.ToggleGroup.ToggleGroup:ActivateButtonByIndex(self.panelIndex)
+		end
 	end
 
 end

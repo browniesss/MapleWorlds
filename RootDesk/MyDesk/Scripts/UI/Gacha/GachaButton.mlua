@@ -1,0 +1,35 @@
+@Component
+script GachaButton extends Component
+
+	property boolean IsSummonTen = false
+
+	@ExecSpace("ClientOnly")
+	method void OnInitialize()
+		_SummonService:AddSummonCallback("summonResult", self.Function1)
+		
+		log("TestSummon Init")
+	end
+
+	method void Function1()
+		local summonData = _SummonService.summonResult[_GachaManager.GachaKey]
+		
+		local summonIdList = _HttpService:JSONDecode(summonData)
+		
+		log("TestSummon Data : " .. summonData)
+		
+		_GachaManager.GachaResultUI.Enable = true
+	end
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		if self.IsSummonTen then
+			log("TestSummon Ten")
+			_SummonService:SummonTen(_GachaManager.GachaKey)
+		else
+			log("TestSummon One")
+			_SummonService:SummonOne(_GachaManager.GachaKey)
+		end
+		
+	end
+
+end

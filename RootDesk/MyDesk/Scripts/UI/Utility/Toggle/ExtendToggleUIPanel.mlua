@@ -6,11 +6,11 @@ script ExtendToggleUIPanel extends ToggleAction
 	property number panelIndex = 0
 
 	method void ExecuteOnLogic(Toggle sender)
+		
 		if self.TargetPanelEntity then
 			-- 예시: 연결된 UI 패널을 보이게 합니다.
 			self.TargetPanelEntity.Enable = true 
 			self.TargetPanelEntity:GetChildByName("LobbyToggle", true).ToggleGroup:ActivateButtonByIndex(self.panelIndex)
-			log(sender.Entity.Name .. " 버튼이 켜졌습니다. 패널 ON")
 		end
 	end
 
@@ -18,7 +18,6 @@ script ExtendToggleUIPanel extends ToggleAction
 		if self.TargetPanelEntity then
 			-- 예시: 연결된 UI 패널을 숨깁니다.
 			self.TargetPanelEntity.Enable = false
-			log(sender.Entity.Name .. " 버튼이 꺼졌습니다. 패널 OFF")
 		end
 	end
 
