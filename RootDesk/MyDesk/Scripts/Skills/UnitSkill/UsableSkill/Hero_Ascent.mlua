@@ -1,0 +1,44 @@
+@Component
+script Hero_Ascent extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		_UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill = true
+		
+		local enemyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
+		local enemies = enemyListParent.Children
+		local player = _EntityService:GetEntityByTag("Player")
+		local entity = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group")
+		
+		_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = "da20579882ac4f5d99e4255c08e93a12"
+		_GameManager.screenSkillUI.Enable = true
+		_GameManager.screenSkillUI.Visible = true
+		
+		local hitFunction = function()
+			for index in ipairs(enemies) do
+				local monster = enemies[index]
+			
+				if monster.Name == "EnemySpawnPoint" then
+					continue
+				end
+				
+				if monster.Enable then
+					monster.Unit:OnHit(self.caster, self.skillAmount, true, 5)
+				end
+			end
+		end
+		
+		local deleteFunction = function()
+			_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = ""
+			_GameManager.screenSkillUI.Enable = false	
+			_GameManager.screenSkillUI.Visible = false
+			_UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill = false
+		end
+		
+		_TimerService:SetTimerOnce(hitFunction, self.skillAttackTiming)
+		_TimerService:SetTimerOnce(deleteFunction, self.skillTime)
+	end
+
+end
