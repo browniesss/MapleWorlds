@@ -5,6 +5,8 @@ script DeckItem extends Component
 
 	property table skillData = {}
 
+	property table spawnSkillData = {}
+
 	@Sync
 	property Entity redDotSprite = nil
 
@@ -42,6 +44,10 @@ script DeckItem extends Component
 		self.unitPriceSprite = self.Entity.Children[6]
 		self.unitPriceLabel = self.Entity.Children[7]
 		self.unitFrameSprite = self.Entity
+		
+		if unitData["spawnSkill"] ~= nil then
+			self.spawnSkillData = _SkillService:GetSkillByIDFromServer(unitData["spawnSkill"])
+		end
 		
 		self:RefreshUI()
 	end
@@ -111,13 +117,12 @@ script DeckItem extends Component
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
-		local userDeckUI = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck").UserDeckUI
+		local unitInfoPanel = _EntityService:GetEntityByPath("/ui/UserDeckUI/UnitInfoPanel")
 		
-		userDeckUI.unitListUI.Enable = true
+		unitInfoPanel.Enable = true
+		unitInfoPanel.Visible = true
 		
-		userDeckUI.unitListUI.UnitListUI:OpenListUI(self.itemIndex)
-		
-		userDeckUI.unitListUI.Visible = true
+		unitInfoPanel.UnitInfoPanel:Init(self.unitData, self.skillData, self.spawnSkillData)
 	end
 
 	@EventSender("Self")
@@ -126,11 +131,11 @@ script DeckItem extends Component
 			return
 		end 
 		
-		local iconTransform = self.Entity.UITransformComponent
-		local iconPos = iconTransform.anchoredPosition
+		-- local iconTransform = self.Entity.UITransformComponent
+		-- local iconPos = iconTransform.anchoredPosition
 		
 		-- self.unitInfoUI.UITransformComponent.anchoredPosition = Vector2(iconPos.x + 300, iconPos.y + 150)
-		self.unitInfoUI.UnitInfo:UpdateInfo(self.skillData, self.unitData)
+		-- self.unitInfoUI.UnitInfo:UpdateInfo(self.skillData, self.unitData)
 		
 		self.unitInfoUI.Visible = true
 	end
