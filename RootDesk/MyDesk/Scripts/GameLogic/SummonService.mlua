@@ -1,9 +1,12 @@
 @Logic
 script SummonService extends Logic
 
-	property table summonResult = {}
+	@Sync
+	property SyncTable<string, string> summonResult
 
 	property table summonSetting = {}
+
+	property table summonCallback = {}
 
 	@ExecSpace("ServerOnly")
 	method table GetSummonPool(string PoolName)
@@ -41,7 +44,7 @@ script SummonService extends Logic
 		
 		_UserMonsterService:AddCount(senderUserId, idList)
 		
-		self:SummonCallback(pool_id, result, senderUserId)
+		self.summonResult[pool_id] = _HttpService:JSONEncode(idList)
 	end
 
 	@ExecSpace("Server")
@@ -63,16 +66,7 @@ script SummonService extends Logic
 		
 		_UserMonsterService:AddCount(senderUserId, idList)
 		
-		self:SummonCallback(pool_id, result, senderUserId)
-	end
-
-	@ExecSpace("Client")
-	method void SummonCallback(string pool_id, table result)
-		if self.summonResult[pool_id] == nil then
-			self.summonResult[pool_id] = {}
-		end
-		
-		self.summonResult[pool_id][#self.summonResult[pool_id] + 1] = result
+		self.summonResult[pool_id] = _HttpService:JSONEncode(idList)
 	end
 
 	@ExecSpace("ServerOnly")
@@ -115,6 +109,21 @@ script SummonService extends Logic
 		end
 		
 		return -2
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnSyncProperty(string name, any value)
+		local callback = self.summonCallback[name]
+		if callback == nil then
+			return
+		end
+		
+		callback()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void AddSummonCallback(string name, any callback)
+		self.summonCallback[name] = callback
 	end
 
 end

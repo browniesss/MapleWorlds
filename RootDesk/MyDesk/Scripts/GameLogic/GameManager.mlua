@@ -348,7 +348,6 @@ script GameManager extends Logic
 		
 		local userAvatar = _EntityService:GetEntityByPath("/ui/GameClearUI/Frame/UserAvatar/UnitAvartar")
 		
-		
 		local key = _RankingService:GetRankKeyByTable({chapter=userStage.selectChapter, stage=userStage.selectStage})
 		_RankingService:AddPoint(key, userName, playTime)
 		self.rankUI:UpdateRankData(userName, playTime, key)

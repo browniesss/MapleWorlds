@@ -39,6 +39,9 @@ script RandomPicker extends Logic
 	@ExecSpace("ServerOnly")
 	method integer GetRandomSeed()
 		local tmp = self.lastSeed
+		if tmp == 0 then
+			tmp = 100000
+		end
 		self.lastSeed = DateTime.UtcNow.Elapsed % tmp
 		return self.lastSeed
 	end

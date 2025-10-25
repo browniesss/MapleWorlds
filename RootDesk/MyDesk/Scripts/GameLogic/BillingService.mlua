@@ -114,7 +114,7 @@ script BillingService extends Logic
 		
 		paidCoin -= usage
 		if paidCoin < 0 then
-			freeCoin -= paidCoin
+			freeCoin += paidCoin
 			paidCoin = 0
 		end
 		
@@ -140,7 +140,7 @@ script BillingService extends Logic
 		
 		paidCoin -= usage
 		if paidCoin < 0 then
-			freeCoin -= paidCoin
+			freeCoin += paidCoin
 			paidCoin = 0
 		end
 		
