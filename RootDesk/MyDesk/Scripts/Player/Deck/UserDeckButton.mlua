@@ -6,14 +6,21 @@ script UserDeckButton extends Component
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
 		local lobbyInfoUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI")
+		local deckPanel = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck")
+		local unitInfoPanel = _EntityService:GetEntityByPath("/ui/UserDeckUI/UnitInfoPanel")
+		
+		deckPanel.Children[1].UITransformComponent.anchoredPosition = Vector2(0, 50)
 		
 		lobbyInfoUI.Enable = false
 		lobbyInfoUI.Visible = false
 		
+		unitInfoPanel.Enable = false
+		unitInfoPanel.Visible = false
+		
 		self.userDeckUI.Enable = true
 		self.userDeckUI.Visible = true
 		
-		self.userDeckUI.Children[1].UserDeckUI:OpenUserDeckUI()
+		self.userDeckUI.Children[2].UserDeckUI:OpenUserDeckUI()
 	end
 
 end

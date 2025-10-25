@@ -21,17 +21,9 @@ script UnitSkillInfo extends Component
 	method void Init(table skillData)
 		self.skillData = skillData
 		
-		self:SetSprite()
-		self:SetLabel()
-	end
-
-	method void SetSprite()
-		self.skillIcon.SpriteGUIRendererComponent.ImageRUID = self.skillData['skillIcon']
-	end
-
-	method void SetLabel()
-		self.skillDesc.TextComponent.Text = self.skillData['desc']
-		self.skillName.TextComponent.Text = self.skillData['skillName']
+		self.skillIcon.SpriteGUIRendererComponent.ImageRUID = skillData['skillIcon']
+		self.skillDesc.TextComponent.Text = skillData['desc']
+		self.skillName.TextComponent.Text = skillData['skillName']
 	end
 
 end

@@ -13,10 +13,14 @@ script UnitInfoPanel extends Component
 
 	property Entity spawnSkillInfo = "3b2cce00-067b-49f4-83fa-717ef4cc50ee"
 
-	method void Init(table unitData, table normalSkillData, table spawnSkillData)
+	@Sync
+	property integer itemIndex = 0
+
+	method void Init(table unitData, table normalSkillData, table spawnSkillData, integer itemIndex)
 		self.unitData = unitData
 		self.skillData = normalSkillData
 		self.spawnSkillData = spawnSkillData
+		self.itemIndex = itemIndex
 		
 		self.unitDetailInfo.UnitDetailInfo:Init(self.unitData)
 		self.normalSkillInfo.UnitSkillInfo:Init(self.skillData)
@@ -27,9 +31,18 @@ script UnitInfoPanel extends Component
 		else
 			self.spawnSkillInfo.Enable = true
 			self.spawnSkillInfo.Visible = true
-			self.normalSkillInfo.UnitSkillInfo:Init(self.spawnSkillData)	
+			self.spawnSkillInfo.UnitSkillInfo:Init(self.spawnSkillData)	
 		end
 		
+	end
+
+	@EventSender("Entity", "12461fd8-902c-4e93-bccd-0008d63b5b34")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		local userDeckUI = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck").UserDeckUI
+		
+		userDeckUI.unitListUI.Enable = true
+		userDeckUI.unitListUI.UnitListUI:OpenListUI(self.itemIndex)
+		userDeckUI.unitListUI.Visible = true
 	end
 
 end

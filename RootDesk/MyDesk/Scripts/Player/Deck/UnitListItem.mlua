@@ -5,6 +5,8 @@ script UnitListItem extends Component
 
 	property table skillData = {}
 
+	property table spawnSkillData = {}
+
 	@Sync
 	property Entity unitSprite = nil
 
@@ -82,12 +84,19 @@ script UnitListItem extends Component
 		local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
 		local userDeckUI = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck").UserDeckUI
 		local unitListUI = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck/UnitListUI").UnitListUI
+		local unitInfoPanel = _EntityService:GetEntityByPath("/ui/UserDeckUI/UnitInfoPanel")
 		local index = unitListUI.itemIndex
 		
 		userDeckUI.deckItems[index].DeckItem:Init(self.unitData, self.skillData)
 		userDeckUI.unitListUI.Enable = false
 		userDeckUI.unitListUI.Visible = false
 		playerDeck:SetDeckItem(self.unitData['id'], index)
+		
+		if self.unitData["spawnSkill"] ~= nil then
+			self.spawnSkillData = _SkillService:GetSkillByIDFromClient(self.unitData["spawnSkill"])
+		end
+		
+		unitInfoPanel.UnitInfoPanel:Init(self.unitData, self.skillData, self.spawnSkillData, index)
 	end
 
 	@EventSender("Self")

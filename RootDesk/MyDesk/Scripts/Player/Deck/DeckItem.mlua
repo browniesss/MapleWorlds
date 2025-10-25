@@ -46,7 +46,7 @@ script DeckItem extends Component
 		self.unitFrameSprite = self.Entity
 		
 		if unitData["spawnSkill"] ~= nil then
-			self.spawnSkillData = _SkillService:GetSkillByIDFromServer(unitData["spawnSkill"])
+			self.spawnSkillData = _SkillService:GetSkillByIDFromClient(unitData["spawnSkill"])
 		end
 		
 		self:RefreshUI()
@@ -118,11 +118,14 @@ script DeckItem extends Component
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
 		local unitInfoPanel = _EntityService:GetEntityByPath("/ui/UserDeckUI/UnitInfoPanel")
+		local deckPanel = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck")
+		
+		deckPanel.Children[1].UITransformComponent.anchoredPosition = Vector2(-200, 50)
 		
 		unitInfoPanel.Enable = true
 		unitInfoPanel.Visible = true
 		
-		unitInfoPanel.UnitInfoPanel:Init(self.unitData, self.skillData, self.spawnSkillData)
+		unitInfoPanel.UnitInfoPanel:Init(self.unitData, self.skillData, self.spawnSkillData, self.itemIndex)
 	end
 
 	@EventSender("Self")
