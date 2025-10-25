@@ -24,6 +24,7 @@ script UICoinInfo extends Component
 		
 		self.FirstCoin.Text = tostring(userBillingComp:GetFirstCoin())
 		self.SecondCoin.Text = tostring(userBillingComp:GetSecondCoin())
+		self.PlayCoin.Text = tostring(_PlayCoinService.playCoin)
 	end
 
 end
