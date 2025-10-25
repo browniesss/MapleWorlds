@@ -1,0 +1,73 @@
+@Logic
+script CustomDynamicMapService extends Logic
+
+	property table dynamicMapNameSet = {}
+
+	property table userIdSetByDynamicMapName = {}
+
+	@ExecSpace("Server")
+	method void EnterDynamicMap(integer chapterIndex, integer mapIndex)
+		-- 동적 맵을 생성합니다.
+		local player = _EntityService:GetEntityByTag("Player")
+		local mapName = "Stage"..chapterIndex.."0"..mapIndex
+		local newMapName = player.PlayerComponent.UserId.."Stage"..chapterIndex.."0"..mapIndex
+		local resultCode = _DynamicMapService:CreateDynamicMap(mapName, newMapName)
+		if resultCode ~= DynamicMapResultCode.Success then
+			error("동적 맵 생성 실패")
+			return 
+		end
+			
+		local reservedUserEntities = {}
+		local reserved = true
+		
+		local userEntity = _UserService:GetUserEntityByUserId(player.PlayerComponent.UserId)
+		reserved = reserved and _TeleportService:ReserveTeleportToMapPosition(userEntity, Vector3.zero, newMapName)
+		
+		if not reserved then
+			error("동적 맵 예약 실패 1")
+			return
+		end
+			
+		-- 맵 이동 예약을 실패 시의 처리 방식입니다.
+		if not reserved then
+			_TeleportService:UnReserveTeleport(userEntity)
+			self:DestroyDynamicMap(newMapName)
+			error("동적 맵 예약 실패 2")
+			return
+		end
+			
+		self.userIdSetByDynamicMapName[newMapName] = player.PlayerComponent.UserId
+		self.dynamicMapNameSet[newMapName] = true
+		
+		_TeleportService:TeleportReservedEntities()
+	end
+
+	@ExecSpace("Server")
+	method void DestroyDynamicMap(string mapName)
+		-- 동적 맵을 파괴합니다.
+		local resultCode = _DynamicMapService:DestroyDynamicMap(mapName)
+		
+		if resultCode ~= DynamicMapResultCode.Success then
+			return
+		end
+			
+		-- 파괴한 동적 맵과 관련된 정보를 제거합니다.
+		self.dynamicMapNameSet[mapName] = nil
+		self.userIdSetByDynamicMapName[mapName] = nil
+	end
+
+	@EventSender("Service", "UserService")
+	handler HandleUserLeaveEvent(UserLeaveEvent event)
+		local UserId = event.UserId
+		local userEntity = _UserService:GetUserEntityByUserId(UserId)
+		local mapName = userEntity.CurrentMapName
+			
+		-- 유저가 있던 맵이 동적 맵인지 확인합니다.
+		if self.dynamicMapNameSet[mapName] == nil then
+			return
+		end
+		
+		self:DestroyDynamicMap(mapName)
+	end
+
+end

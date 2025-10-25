@@ -112,7 +112,6 @@ script PlayCoinService extends Logic
 
 	@ExecSpace("Server")
 	method integer StartNormalGame()
-		
 		local useCoinCode = self:UseCoin(senderUserId)
 		
 		if useCoinCode ~= 0 then

@@ -19,26 +19,23 @@ script MesoIncome extends Component
 	property number currentTs = 0
 
 	method void OnBeginPlay()
-		
-		local dataSet = _DataService:GetTable("meso")
-		for i = 1, dataSet:GetRowCount() do
-			local item = {}
+		--local dataSet = _DataService:GetTable("meso")
+		--for i = 1, dataSet:GetRowCount() do
+			--local item = {}
 			
-			item["id"] = tonumber(dataSet:GetCell(i,"id"))
-			item["init"] = tonumber(dataSet:GetCell(i,"init"))
-			item["income"] = tonumber(dataSet:GetCell(i,"income"))
+			--item["id"] = tonumber(dataSet:GetCell(i,"id"))
+			--item["init"] = tonumber(dataSet:GetCell(i,"init"))
+			--item["income"] = tonumber(dataSet:GetCell(i,"income"))
 			
-			self.incomeData[item["id"]] = item
-		end        
+			--self.incomeData[item["id"]] = item
+		--end        
 		
-		self.UIController:UpdateMesoIncome(self.incomeData[1]["income"])
+		--self.UIController:UpdateMesoIncome(self.incomeData[1]["income"])
 		
-		self.UserWallet:SetMeso(self.incomeData[1]["init"])
+		--self.UserWallet:SetMeso(self.incomeData[1]["init"])
 		
-		self.nextUpdateTs = self.incomeCooltime
-		self.currentTs = 0
-		
-		
+		--self.nextUpdateTs = self.incomeCooltime
+		--self.currentTs = 0
 	end
 
 	@ExecSpace("ServerOnly")
@@ -58,10 +55,15 @@ script MesoIncome extends Component
 
 	@ExecSpace("Server")
 	method void AddMeso()
+		error("현재 엔티티 위치:"..self.Entity.CurrentMap.Name.."데이터:"..self.incomeData[1]["income"])
 		self.UserWallet:AddMeso(self.incomeData[1]["income"])
 	end
 
+	@ExecSpace("ServerOnly")
 	method void OnMapEnter(Entity enteredMap)
+		self.UIController = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ingameWalletUI").MesoUI
+		self.UserWallet = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/userWallet").MesoWallet
+		
 		local dataSet = _DataService:GetTable("meso")
 		for i = 1, dataSet:GetRowCount() do
 			local item = {}

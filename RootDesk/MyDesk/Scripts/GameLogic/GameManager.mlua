@@ -125,11 +125,8 @@ script GameManager extends Logic
 
 	@ExecSpace("Server")
 	method void GameStart(integer chapterIndex, integer mapIndex)
-		self.chapterIndex = chapterIndex
-		self.mapIndex = mapIndex
 		self.isPlaying = true
 		self.playStartTs = DateTime.UtcNow.Elapsed
-		
 		
 		local key = _RankingService:GetRankKeyByTable({chapter=chapterIndex, stage=mapIndex})
 		-- _RankingService:FETCH(key)
@@ -138,7 +135,7 @@ script GameManager extends Logic
 		self:EnableUI()
 		
 		self:SetTimer()
-		self:GameStartDataInClient()
+		self:GameStartDataInClient(chapterIndex, mapIndex)
 		
 		local stageData = _StageService:GetStageByIdFromServer(tostring(mapIndex + 100 * chapterIndex))
 		local playerTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/PlayerTower")
@@ -155,7 +152,7 @@ script GameManager extends Logic
 	end
 
 	@ExecSpace("Client")
-	method void GameStartDataInClient()
+	method void GameStartDataInClient(integer chapterIndex, integer mapIndex)
 		local ourHealthBarUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/Player_HP_bar")
 		local enemyHealthBarUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/EnemyHealthBar")
 		local playerTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/PlayerTower")
@@ -163,7 +160,7 @@ script GameManager extends Logic
 		
 		ourHealthBarUI.OurHealthBar.tower = playerTower
 		enemyHealthBarUI.EnemyHealthBar.tower = enemyTower
-		self.mapTextUI.TextComponent.Text = _StageService:GetStageById(tostring(self.chapterIndex * 100 + self.mapIndex)).name
+		self.mapTextUI.TextComponent.Text = _StageService:GetStageById(tostring(chapterIndex * 100 + mapIndex)).name
 	end
 
 	method void GameEnd()
@@ -184,11 +181,13 @@ script GameManager extends Logic
 	end
 
 	method string GetGameMapName()
+		local player = _EntityService:GetEntityByTag("Player")
 		if self.isTest then
 			return "/maps/TestMap"
 		end
 		
-		return "/maps/Stage"..self.chapterIndex.."0"..self.mapIndex
+		return "/maps/"..player.PlayerComponent.UserId.."Stage"..self.chapterIndex.."0"..self.mapIndex
+		--return "/maps/".."Stage"..self.chapterIndex.."0"..self.mapIndex
 	end
 
 	@ExecSpace("Client")
@@ -471,13 +470,29 @@ script GameManager extends Logic
 		
 		local ruids = self:GetPreLoadAssetRuid()
 		
+		self:SetMapIndex(userStage.selectChapter, userStage.selectStage)
+		self:SetMapIndexInClient(userStage.selectChapter, userStage.selectStage)
+		
 		_ResourceService:PreloadAsync(ruids, function()
 			_TimerService:ClearTimer(self.loadingTimer)
-			
-			_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage".. userStage.selectChapter.."0"..userStage.selectStage)
-			self:GameStart(userStage.selectChapter, userStage.selectStage)
-			self:HideLoadingScreen()
-		end) 
+			_CustomDynamicMapService:EnterDynamicMap(userStage.selectChapter, userStage.selectStage)
+			_TimerService:SetTimerOnce(function()
+				self:GameStart(userStage.selectChapter, userStage.selectStage)
+				self:HideLoadingScreen()
+			end, 0.5)
+		end)
+	end
+
+	@ExecSpace("Server")
+	method void SetMapIndex(integer selectChapter, integer selectStage)
+		self.chapterIndex = selectChapter
+		self.mapIndex = selectStage
+	end
+
+	@ExecSpace("Client")
+	method void SetMapIndexInClient(integer selectChapter, integer selectStage)
+		self.chapterIndex = selectChapter
+		self.mapIndex = selectStage
 	end
 
 	@EventSender("Service", "InputService")

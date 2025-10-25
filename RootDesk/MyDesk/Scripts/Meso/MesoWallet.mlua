@@ -43,4 +43,10 @@ script MesoWallet extends Component
 		return self.CurrentMeso
 	end
 
+	@ExecSpace("ServerOnly")
+	method void OnMapEnter(Entity enteredMap)
+		error("월렛 맵 네임".._GameManager:GetGameMapName().."/ingameWalletUI".."진짜 맵네임:"..enteredMap.Name)
+		self.UIController = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ingameWalletUI").MesoUI 
+	end
+
 end
