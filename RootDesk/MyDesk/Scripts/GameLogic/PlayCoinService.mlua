@@ -13,7 +13,7 @@ script PlayCoinService extends Logic
 
 	property integer maxPlayCoin = 5
 
-	property integer playCoinRefreshTs = 600
+	property integer playCoinRefreshTs = 180
 
 	@ExecSpace("ServerOnly")
 	method void OnUpdate(number delta)

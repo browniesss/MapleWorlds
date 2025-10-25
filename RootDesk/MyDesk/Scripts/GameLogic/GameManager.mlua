@@ -354,7 +354,9 @@ script GameManager extends Logic
 		self.rankUI:UpdateRankData(userName, playTime, key)
 		
 		if userStage:isLastStageSelected() then
+			self:StageClearServer()
 			local nextStage = _StageService:GetNextOpenStageId(userStage.openChapter, userStage.openStage)
+		
 			
 			userStage:SetClearStage(nextStage.chapter, nextStage.stage)
 		end
