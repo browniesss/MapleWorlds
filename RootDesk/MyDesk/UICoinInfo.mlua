@@ -24,7 +24,16 @@ script UICoinInfo extends Component
 		
 		self.FirstCoin.Text = tostring(userBillingComp:GetFirstCoin())
 		self.SecondCoin.Text = tostring(userBillingComp:GetSecondCoin())
-		self.PlayCoin.Text = tostring(_PlayCoinService.playCoin)
+		
+		local playCoinText = tostring(_PlayCoinService.playCoin)
+		if _PlayCoinService.playCoin < _PlayCoinService.maxPlayCoin then
+			
+			local min = math.floor(_PlayCoinService.nextUpdateTs / 60)
+			local sec = _PlayCoinService.nextUpdateTs % 60
+			
+			playCoinText = "[" .. tostring(min) ..":" .. string.format("%02d",sec) .."] " .. playCoinText
+		end
+		self.PlayCoin.Text = playCoinText
 	end
 
 end

@@ -13,47 +13,7 @@ script PlayCoinService extends Logic
 
 	property integer maxPlayCoin = 5
 
-	property integer playCoinRefreshTs = 60
-
-	@ExecSpace("ServerOnly")
-	method void OnBeginPlay()
-		local nowTs = DateTime.UtcNow.Elapsed
-		local uid = _UserService.LocalPlayer.PlayerComponent.UserId
-		local ds = _DataStorageService:GetUserDataStorage(uid)
-		
-		local errCode, res = ds:GetAndWait("PLAY_COIN")
-		if errCode ~= 0 then
-			error("PLAY_COIN " .. tostring(errCode))
-			return
-		end
-		
-		if res == nil then
-			self.playCoin = self.maxPlayCoin
-			self.lastReceiveTs = nowTs
-			
-			self:SaveCoin(uid)
-		end
-		
-		local userData = _HttpService:JSONDecode(res)
-		
-		self.playCoin = tonumber(userData["playCoin"])
-		self.lastReceiveTs = tonumber(userData["lastReceiveTs"])
-		
-		if self.playCoin >= self.maxPlayCoin then
-			return
-		end
-		
-		while self.lastReceiveTs + self.playCoinRefreshTs * 1000 < nowTs do
-			if self.playCoin >= self.maxPlayCoin then
-				break
-			end
-			
-			self.lastReceiveTs += self.playCoinRefreshTs * 1000
-			self.playCoin += 1
-		end
-		
-		
-	end
+	property integer playCoinRefreshTs = 600
 
 	@ExecSpace("ServerOnly")
 	method void OnUpdate(number delta)
@@ -76,40 +36,84 @@ script PlayCoinService extends Logic
 		self.lastReceiveTs = nowTs 
 	end
 
-	@ExecSpace("ServerOnly")
-	method void OnEndPlay()
-		local uid = _UserService.LocalPlayer.PlayerComponent.UserId
-		self:SaveCoin(uid)
-	end
-
 	@ExecSpace("Server")
 	method void UseCoin(any callback)
 		if self.playCoin < 1 then
-			return
+			callback(-1)
 		end
 		
 		self.playCoin += -1
 		
 		local saveCode = self:SaveCoin(senderUserId)
-		if callback !=nil then
+		if callback ~=nil then
 			callback(saveCode)
 		end
 	end
 
-	@ExecSpace("ServerOnly")
+	@ExecSpace("Server")
 	method integer SaveCoin(string uid)
-			local ds = _DataStorageService:GetUserDataStorage(uid)
-			
-			local data = {}
-			
-			data["playCoin"] = self.playCoin
-			data["lastReceiveTs"] = self.lastReceiveTs
-			
-			local save =  _HttpService:JSONEncode(data)
+		local ds = _DataStorageService:GetUserDataStorage(uid) 
 		
-			return ds:SetAndWait("PLAY_COIN", save)
+		local data = {}
+		
+		data["playCoin"] = self.playCoin
+		data["lastReceiveTs"] = self.lastReceiveTs
+		
+		local save =  _HttpService:JSONEncode(data)
+		
+		return ds:SetAndWait("PLAY_COIN", save)
 	end
 
+	@ExecSpace("Server")
+	method void InitCoin(string uid)
+		local nowTs = DateTime.UtcNow.Elapsed
+		self.currentTs = 0
+		
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local errCode, res = ds:GetAndWait("PLAY_COIN")
+		if errCode ~= 0 then
+			error("PLAY_COIN " .. tostring(errCode))
+			return
+		end
+		
+		if res == nil then
+			self.playCoin = self.maxPlayCoin
+			self.lastReceiveTs = nowTs
+			
+			self:SaveCoin(uid)
+		end
+		
+		if res ~= nil then
+			local userData = _HttpService:JSONDecode(res)
+			self.playCoin = tonumber(userData["playCoin"])
+			self.lastReceiveTs = tonumber(userData["lastReceiveTs"])
+			log(res)
+		end
+		
+		if self.playCoin >= self.maxPlayCoin then
+			return
+		end
+		
+		while self.lastReceiveTs + self.playCoinRefreshTs * 1000 < nowTs do
+			if self.playCoin >= self.maxPlayCoin then
+				break
+			end
+			
+			self.lastReceiveTs += self.playCoinRefreshTs * 1000
+			self.playCoin += 1
+		end
+		
+		self.currentTs = (nowTs - self.lastReceiveTs) / 1000
+	end
+
+	@ExecSpace("ServerOnly")
+	method void AddCoin(string uid, integer addCoin)
+		self.playCoin += addCoin
+		local saveCode = self:SaveCoin(uid)
+	end
+
+	@ExecSpace("ServerOnly")
 	@EventSender("Service", "UserService")
 	handler HandleUserLeaveEvent(UserLeaveEvent event)
 		--------------- Native Event Sender Info ----------------
@@ -125,6 +129,24 @@ script PlayCoinService extends Logic
 		local UserId = event.UserId
 		
 		self:SaveCoin(UserId)
+	end
+
+	@ExecSpace("ServerOnly")
+	@EventSender("Service", "UserService")
+	handler HandleUserEnterEvent(UserEnterEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: UserService
+		-- Space: Server
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local ProfileCode = event.ProfileCode
+		-- local UserId = event.UserId
+		---------------------------------------------------------
+		local ProfileCode = event.ProfileCode
+		local UserId = event.UserId
+		
+		self:InitCoin(UserId)
 	end
 
 end

@@ -12,6 +12,8 @@ script StartUI extends Component
 			return
 		end
 		
+		_PlayCoinService:UseCoin(nil)
+		
 		_GameManager:ShowLoadingScreen()
 		
 		local ruids = _GameManager:GetPreLoadAssetRuid()
@@ -23,7 +25,6 @@ script StartUI extends Component
 			_GameManager:GameStart(userStage.selectChapter, userStage.selectStage)
 			_GameManager:HideLoadingScreen()
 		end) 
-		
 	end
 
 end
