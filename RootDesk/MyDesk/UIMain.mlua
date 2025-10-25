@@ -17,7 +17,7 @@ script UIMain extends Component
 			_RankingService:InitUserPointMap(userName)
 			
 			local stageSelectUIEntity = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI")
-			stageSelectUIEntity.StageSelectorUI:SetUserStageComp(self.Entity.UserStage)
+			stageSelectUIEntity.StageSelectorUI:SetUserStageComp(self.Entity)
 			
 			self.IsUserVisible = false
 		end

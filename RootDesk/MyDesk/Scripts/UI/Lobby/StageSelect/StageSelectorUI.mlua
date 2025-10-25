@@ -5,9 +5,6 @@ script StageSelectorUI extends Component
 
 	property table SelectButtonList = {}
 
-	@Sync
-	property UserStage userStage = nil
-
 	property Entity nextButton = "8574a53d-397d-40b1-800c-8ece798f5108"
 
 	property Entity prevButton = "054fd667-8cb8-4012-b703-28b84f55b65e"
@@ -20,13 +17,15 @@ script StageSelectorUI extends Component
 
 	property Entity ChapterNumberText = "1e8431b8-0f5b-4005-815d-83973e0c8c7d"
 
-	method void UpdateData()
+	method void UpdateData(EntityRef userStageEntity)
 		local path = self.Entity.Path
 		
-		local openStage = self.userStage.openStage
-		local selectStage = self.userStage.selectStage
-		local selectChapter = self.userStage.selectChapter
-		local openChapter = self.userStage.openChapter
+		local userStage = userStageEntity.UserStage
+		
+		local openStage = userStage.openStage
+		local selectStage = userStage.selectStage
+		local selectChapter = userStage.selectChapter
+		local openChapter = userStage.openChapter
 		
 		local stageDataList = _StageService:GetStageByChapter(selectChapter)
 		local stageCount = #stageDataList
@@ -49,7 +48,7 @@ script StageSelectorUI extends Component
 			entity.StageSelectItemUI:Init()
 			self.SelectButtonList[i] = entity
 			entity.StageSelectItemUI:AddCallback(function() 
-				self:ClickButtonHanddler(i)
+				self:ClickButtonHanddler(i, userStageEntity)
 			end)
 			
 			entity.StageSelectItemUI:SetImage(stageDataList[i].button)
@@ -87,17 +86,17 @@ script StageSelectorUI extends Component
 		
 	end
 
-	method void ClickButtonHanddler(integer id)
-		local openStage = self.userStage.openStage
-		local selectStage = self.userStage.selectStage
-		local selectChapter = self.userStage.selectChapter
-		local openChapter = self.userStage.openChapter
+	method void ClickButtonHanddler(integer id, EntityRef userStageEntity)
+		local userStage = userStageEntity.UserStage
+		
+		local openStage = userStage.openStage
+		local selectStage = userStage.selectStage
+		local selectChapter = userStage.selectChapter
+		local openChapter = userStage.openChapter
 		
 		local stageDataList = _StageService:GetStageByChapter(selectChapter)
 		
 		local rankingListUI =  _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
-		--rankingListUI.Enable = false
-		--rankingListUI.Visible = false
 		
 		for i, entity in ipairs(self.SelectButtonList) do
 			if i > openStage and selectChapter == openChapter then
@@ -111,41 +110,40 @@ script StageSelectorUI extends Component
 				self.StageNameText.TextComponent.Text = stageDataList[i].stage_name
 				self.ChapterNameText.TextComponent.Text = stageDataList[i].chapter_name
 				self.ChapterNumberText.TextComponent.Text = "CHAPTER " .. tostring(selectChapter)
-				self.userStage.selectStage = stageDataList[i].stage
+				userStage.selectStage = stageDataList[i].stage
 				
 				local key = _RankingService:GetRankKeyByTable({chapter=selectChapter, stage=stageDataList[i].stage})
 			
-				-- _RankingService:DeleteData()
 				rankingListUI.StageRankingListUI:RefreshRankListItem(key)
 			end
 		end
 	end
 
-	method void SetUserStageComp(UserStage newComp)
-		self.userStage = newComp
-		newComp.updateList[#newComp.updateList + 1] = function() self:UpdateData() end
+	method void SetUserStageComp(EntityRef newEntity)
+		local newComp = newEntity.UserStage
+		newComp.updateList[#newComp.updateList + 1] = function() self:UpdateData(newEntity) end
 		
 		self.nextButton.CallBackButton.callback = function() 
-			if self.userStage.selectChapter >= _StageService.lastChapter then
+			if newComp.selectChapter >= _StageService.lastChapter then
 				return
 			end
 			
-			self.userStage.selectChapter += 1
-			self.userStage.selectStage = 1
-			self:UpdateData()
+			newComp.selectChapter += 1
+			newComp.selectStage = 1
+			self:UpdateData(newEntity)
 		end
 		
 		self.prevButton.CallBackButton.callback = function() 
-			if self.userStage.selectChapter <= 1 then
+			if newComp.selectChapter <= 1 then
 				return
 			end
 			
-			self.userStage.selectChapter -=1
-			self.userStage.selectStage = 1
-			self:UpdateData()
+			newComp.selectChapter -=1
+			newComp.selectStage = 1
+			self:UpdateData(newEntity)
 		end
 		
-		local key = _RankingService:GetRankKeyByTable({chapter=self.userStage.selectChapter, stage=self.userStage.selectStage})
+		local key = _RankingService:GetRankKeyByTable({chapter=newComp.selectChapter, stage=newComp.selectStage})
 		local rankingListUI =  _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
 		rankingListUI.StageRankingListUI:InitCheckRankData(key, 0)
 	end

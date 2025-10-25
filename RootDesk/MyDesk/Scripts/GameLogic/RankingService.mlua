@@ -215,7 +215,6 @@ script RankingService extends Logic
 	@ExecSpace("Client")
 	method void UpdaetUserPointMap(string storageKey, integer score)
 		self.userPointMap[storageKey] = score
-		log("update user point mape: " .. storageKey .. " = " .. score)
 	end
 
 	@ExecSpace("Client")
