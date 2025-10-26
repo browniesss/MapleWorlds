@@ -1,0 +1,59 @@
+@Component
+script ClearRewardUI extends Component
+
+	property Entity normalCoinIcon = "40ff6639-e39f-41ad-b2ee-dae8146dda25"
+
+	property Entity normalCoinLabel = "a06b33b1-b2d4-4e20-8161-67f2a53a79af"
+
+	property Entity normalCoinFrame = "a8ca4b2b-2146-4c39-8948-ba8709362bd0"
+
+	property Entity specialCoinIcon = "5d58331c-257a-4715-888d-cf61e87ea98c"
+
+	property Entity specialCoinLabel = "8ddc907f-a487-47d5-b100-95787dff6d20"
+
+	property Entity specialCoinFrame = "4e0edc82-0185-4fed-bb76-5df8d8eac9fb"
+
+	property Entity enterCoinIcon = "1be03a33-40ff-41de-a2e8-43ac36e576dc"
+
+	property Entity enterCoinLabel = "3db6e329-4a4d-4e62-aa8b-0c103f524ef8"
+
+	property Entity enterCoinFrame = "5bb32834-b2e3-47c1-8c00-b2fc92b0223e"
+
+	method void RefreshUI(boolean isFirstClear)
+		local normalCoinAmount = 0
+		local specialCoinAmount = 0
+		local enterCoinAmount = 1
+		
+		if isFirstClear then
+			self.specialCoinIcon.Visible = true
+			self.specialCoinLabel.Visible = true
+			self.specialCoinFrame.Visible = true
+			self.enterCoinIcon.Visible = true
+			self.enterCoinLabel.Visible = true
+			self.enterCoinFrame.Visible = true
+			
+			normalCoinAmount = 500
+			specialCoinAmount = 100
+		else
+			self.specialCoinIcon.Visible = false
+			self.specialCoinLabel.Visible = false
+			self.specialCoinFrame.Visible = false
+			self.enterCoinIcon.Visible = false
+			self.enterCoinLabel.Visible = false
+			self.enterCoinFrame.Visible = false
+			
+			normalCoinAmount = 100
+		end
+		
+		self.normalCoinLabel.TextComponent.Text = tostring(normalCoinAmount)
+		self.specialCoinLabel.TextComponent.Text = tostring(specialCoinAmount)
+		self.enterCoinLabel.TextComponent.Text = tostring(enterCoinAmount)
+	end
+
+	@EventSender("Entity", "6a4c9a1c-cc08-4753-8879-37c1ccc0f4a7")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		local popupUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/ZeroEnterCoinUI")
+		popupUI.Visible = false
+	end
+
+end

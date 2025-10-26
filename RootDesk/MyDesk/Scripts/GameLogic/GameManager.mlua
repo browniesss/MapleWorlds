@@ -343,12 +343,11 @@ script GameManager extends Logic
 	@ExecSpace("Client")
 	method void StageClear()
 		local playTime = DateTime.UtcNow.Elapsed - self.playStartTs 
-		
 		local userName = _UserService.LocalPlayer.PlayerComponent.Nickname
-		
 		local userStage = _UserService.LocalPlayer.UserStage
-		
 		local userAvatar = _EntityService:GetEntityByPath("/ui/GameClearUI/Frame/UserAvatar/UnitAvartar")
+		local clearRewardUI = _
+		EntityService:GetEntityByPath("/ui/GameClearUI/Frame/ClearReward")
 		
 		local key = _RankingService:GetRankKeyByTable({chapter=userStage.selectChapter, stage=userStage.selectStage})
 		_RankingService:AddPoint(key, userName, playTime)
@@ -367,6 +366,7 @@ script GameManager extends Logic
 		
 		self.gameClearResult.Enable = true
 		self.gameClearResult.Visible = true
+		clearRewardUI.ClearRewardUI:RefreshUI(isFirstClear)
 		
 		_Utils:FadeIn(self.gameClearResult, 0.5)
 		
@@ -480,6 +480,12 @@ script GameManager extends Logic
 			self:GameStart(userStage.selectChapter, userStage.selectStage)
 			self:HideLoadingScreen()
 		end) 
+	end
+
+	@ExecSpace("Client")
+	method void OpenZeroEnterCoinUI()
+		local popupUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/ZeroEnterCoinUI")
+		popupUI.Visible = true
 	end
 
 	@EventSender("Service", "InputService")
