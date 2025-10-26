@@ -2950,6 +2950,11 @@
                 "tempEntityId": null,
                 "IsRelative": false,
                 "EntityId": "bb3d45da-fab1-4347-b2b0-c77649d14f5d"
+              },
+              "PickUpCharter": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "af92df35-ab00-44d3-83a0-1c4fa4913c38"
               }
             }
           ],
@@ -3304,6 +3309,11 @@
                 "tempEntityId": null,
                 "IsRelative": false,
                 "EntityId": "3ed7b092-f2c1-452b-9f0d-3f9819870195"
+              },
+              "PickUpCharter": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "af92df35-ab00-44d3-83a0-1c4fa4913c38"
               }
             }
           ],
@@ -3660,6 +3670,11 @@
                 "tempEntityId": null,
                 "IsRelative": false,
                 "EntityId": "65f02812-b920-4e35-ab5c-e1aa79a608d0"
+              },
+              "PickUpCharter": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "af92df35-ab00-44d3-83a0-1c4fa4913c38"
               }
             }
           ],
@@ -5115,7 +5130,7 @@
       {
         "id": "e99cad3d-3b9f-47e9-8ecc-2d11b8df019c",
         "path": "/ui/GachaUI/GachaButtonUI/PickUpGrid_2/GachaButtonOne",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.GachaButton",
         "jsonString": {
           "name": "GachaButtonOne",
           "path": "/ui/GachaUI/GachaButtonUI/PickUpGrid_2/GachaButtonOne",
@@ -5232,6 +5247,10 @@
                 "DisabledSprite": null
               },
               "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "script.GachaButton",
               "Enable": true
             }
           ],
@@ -5527,7 +5546,7 @@
       {
         "id": "f9d9a24a-ce64-4d1d-a514-94eb5961f741",
         "path": "/ui/GachaUI/GachaButtonUI/PickUpGrid_2/GachaButtonTen",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.GachaButton",
         "jsonString": {
           "name": "GachaButtonTen",
           "path": "/ui/GachaUI/GachaButtonUI/PickUpGrid_2/GachaButtonTen",
@@ -5645,6 +5664,11 @@
               },
               "OverrideSorting": false,
               "Enable": true
+            },
+            {
+              "@type": "script.GachaButton",
+              "Enable": true,
+              "IsSummonTen": true
             }
           ],
           "@version": 1
@@ -6122,7 +6146,7 @@
       {
         "id": "f17a9c2b-b459-4fbf-a4d5-78164522f538",
         "path": "/ui/GachaUI/GachaButtonUI/NormalGrid/GachaButtonOne",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.GachaButton",
         "jsonString": {
           "name": "GachaButtonOne",
           "path": "/ui/GachaUI/GachaButtonUI/NormalGrid/GachaButtonOne",
@@ -6239,6 +6263,10 @@
                 "DisabledSprite": null
               },
               "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "script.GachaButton",
               "Enable": true
             }
           ],
@@ -6534,7 +6562,7 @@
       {
         "id": "48425c4f-6faa-4de6-9338-2044d5f811b5",
         "path": "/ui/GachaUI/GachaButtonUI/NormalGrid/GachaButtonTen",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.GachaButton",
         "jsonString": {
           "name": "GachaButtonTen",
           "path": "/ui/GachaUI/GachaButtonUI/NormalGrid/GachaButtonTen",
@@ -6652,6 +6680,11 @@
               },
               "OverrideSorting": false,
               "Enable": true
+            },
+            {
+              "@type": "script.GachaButton",
+              "Enable": true,
+              "IsSummonTen": true
             }
           ],
           "@version": 1

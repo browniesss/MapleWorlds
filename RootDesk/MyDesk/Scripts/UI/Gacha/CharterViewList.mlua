@@ -1,0 +1,23 @@
+@Component
+script CharterViewList extends Component
+
+	property table CharterList = {}
+
+	method void InitData(table userDataList)
+		local children = self.Entity.Children
+		      
+		local index = 1
+		
+		for _, child in pairs(children) do
+		    if child.CharterView then
+				if index > #userDataList then
+					child.CharterView.Enable = false
+				else
+					child.CharterView:InitGacha(_UnitService:GetUnitByIDFromClient(userDataList[index]))
+				end
+				index = index + 1
+		    end
+		end
+	end
+
+end

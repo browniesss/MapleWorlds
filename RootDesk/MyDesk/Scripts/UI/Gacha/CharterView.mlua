@@ -1,0 +1,59 @@
+@Component
+script CharterView extends Component
+
+	property Entity Monster = nil
+
+	property Entity Charter = nil
+
+	property Entity Name = nil
+
+	method void InitGacha(table unitData)
+		log(unitData)
+		
+		-- 해당 슬롯에 장착한 유닛이 없을 경우
+		if unitData == nil then
+			self.Monster.Visible = false
+			self.Name.Visible = false
+			self.Charter.Visible = false
+		else
+			self.Monster.Visible = true
+			self.Name.Visible = true
+			self.Charter.Visible = true
+			-- 일반 프레임
+			self.Name.TextComponent.Text = unitData['name']
+			
+			if unitData['isUsableCharacter'] == 0 then
+				self.Charter.Visible = false
+				self.Monster.SpriteGUIRendererComponent.ImageRUID = unitData['ImageRUID']
+			else
+				self.Monster.Visible = false
+				self:SetCostume(unitData)
+			end
+		end
+	end
+
+	method void SetCostume(table unitData)
+		local entity = _SpawnService:SpawnByModelId(unitData['id'], "Avatar", Vector3.zero, self.Entity)
+		entity.Visible = false
+		entity.Enable = false
+		
+		self.Charter.CostumeManagerComponent.CustomBodyEquip = entity.CostumeManagerComponent.CustomBodyEquip
+		self.Charter.CostumeManagerComponent.CustomCapEquip = entity.CostumeManagerComponent.CustomCapEquip
+		self.Charter.CostumeManagerComponent.CustomCapeEquip = entity.CostumeManagerComponent.CustomCapeEquip
+		self.Charter.CostumeManagerComponent.CustomCoatEquip = entity.CostumeManagerComponent.CustomCoatEquip
+		self.Charter.CostumeManagerComponent.CustomEarAccessoryEquip = entity.CostumeManagerComponent.CustomEarAccessoryEquip
+		self.Charter.CostumeManagerComponent.CustomEarEquip = entity.CostumeManagerComponent.CustomEarEquip
+		self.Charter.CostumeManagerComponent.CustomEyeAccessoryEquip = entity.CostumeManagerComponent.CustomEyeAccessoryEquip
+		self.Charter.CostumeManagerComponent.CustomFaceAccessoryEquip = entity.CostumeManagerComponent.CustomFaceAccessoryEquip
+		self.Charter.CostumeManagerComponent.CustomFaceEquip = entity.CostumeManagerComponent.CustomFaceEquip
+		self.Charter.CostumeManagerComponent.CustomGloveEquip = entity.CostumeManagerComponent.CustomGloveEquip
+		self.Charter.CostumeManagerComponent.CustomHairEquip = entity.CostumeManagerComponent.CustomHairEquip
+		self.Charter.CostumeManagerComponent.CustomLongcoatEquip = entity.CostumeManagerComponent.CustomLongcoatEquip
+		self.Charter.CostumeManagerComponent.CustomOneHandedWeaponEquip = entity.CostumeManagerComponent.CustomOneHandedWeaponEquip
+		self.Charter.CostumeManagerComponent.CustomPantsEquip = entity.CostumeManagerComponent.CustomPantsEquip
+		self.Charter.CostumeManagerComponent.CustomShoesEquip = entity.CostumeManagerComponent.CustomShoesEquip
+		self.Charter.CostumeManagerComponent.CustomSubWeaponEquip = entity.CostumeManagerComponent.CustomSubWeaponEquip
+		self.Charter.CostumeManagerComponent.CustomTwoHandedWeaponEquip = entity.CostumeManagerComponent.CustomTwoHandedWeaponEquip
+	end
+
+end

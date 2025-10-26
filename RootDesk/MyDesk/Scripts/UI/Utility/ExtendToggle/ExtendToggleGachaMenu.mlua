@@ -5,6 +5,8 @@ script ExtendToggleGachaMenu extends ToggleAction
 
 	property number panelIndex = 0
 
+	property Entity PickUpCharter = nil
+
 	method void ExecuteOnLogic(Toggle sender)
 		__base:ToggleGroupActivate()
 		
@@ -12,6 +14,8 @@ script ExtendToggleGachaMenu extends ToggleAction
 			self.GachaButtonGrid.Enable = true
 			self:SetGachaKey(self.panelIndex)
 		end
+		
+		self:SetPickUpCharter()
 	end
 
 	method void ExecuteOffLogic(Toggle sender)
@@ -27,6 +31,15 @@ script ExtendToggleGachaMenu extends ToggleAction
 			
 		elseif key == 3 then
 			_GachaManager.GachaKey = _GachaManager.NormalSummonKey
+		end
+	end
+
+	method void SetPickUpCharter()
+		if self.panelIndex == 3 then
+			self.PickUpCharter.Enable = false
+		else
+			-- 픽업 캐릭터로 세팅
+			self.PickUpCharter.Enable = true
 		end
 	end
 

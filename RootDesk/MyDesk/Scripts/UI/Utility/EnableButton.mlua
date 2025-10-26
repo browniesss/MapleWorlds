@@ -1,0 +1,14 @@
+@Component
+script EnableButton extends Component
+
+	property Entity EnableTarget = nil
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		if self.EnableTarget ~= nil then
+			self.EnableTarget.Enable = false
+		end
+		
+	end
+
+end
