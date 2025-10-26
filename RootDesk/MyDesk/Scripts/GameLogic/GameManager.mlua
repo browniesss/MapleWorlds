@@ -346,8 +346,7 @@ script GameManager extends Logic
 		local userName = _UserService.LocalPlayer.PlayerComponent.Nickname
 		local userStage = _UserService.LocalPlayer.UserStage
 		local userAvatar = _EntityService:GetEntityByPath("/ui/GameClearUI/Frame/UserAvatar/UnitAvartar")
-		local clearRewardUI = _
-		EntityService:GetEntityByPath("/ui/GameClearUI/Frame/ClearReward")
+		local clearRewardUI = _EntityService:GetEntityByPath("/ui/GameClearUI/Frame/ClearReward")
 		
 		local key = _RankingService:GetRankKeyByTable({chapter=userStage.selectChapter, stage=userStage.selectStage})
 		_RankingService:AddPoint(key, userName, playTime)
