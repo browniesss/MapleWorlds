@@ -11,8 +11,9 @@ script CharterViewList extends Component
 		for _, child in pairs(children) do
 		    if child.CharterView then
 				if index > #userDataList then
-					child.CharterView.Enable = false
+					child.CharterView.Entity.Enable = false
 				else
+					child.CharterView.Entity.Enable = true
 					child.CharterView:InitGacha(_UnitService:GetUnitByIDFromClient(userDataList[index]))
 				end
 				index = index + 1
