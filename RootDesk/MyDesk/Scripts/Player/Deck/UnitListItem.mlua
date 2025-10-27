@@ -42,8 +42,6 @@ script UnitListItem extends Component
 	end
 
 	method void RefreshUI()
-		log(self.unitData['name'] .. self.unitData)
-		
 		if self.unitData['isUsableCharacter'] == 0 then
 			self.unitAvartarRenderer.Visible = false
 			self.unitSprite.SpriteGUIRendererComponent.ImageRUID = self.unitData['ImageRUID']

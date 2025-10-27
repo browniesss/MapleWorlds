@@ -634,11 +634,11 @@
               "MobileOnly": false,
               "OffsetMax": {
                 "x": 960.0,
-                "y": 0.0
+                "y": 0.000183105469
               },
               "OffsetMin": {
                 "x": -960.0,
-                "y": -130.0
+                "y": -129.999817
               },
               "Pivot": {
                 "x": 0.5,
@@ -657,11 +657,11 @@
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": 0.0,
-                "y": 0.0
+                "y": 0.000183105469
               },
               "Position": {
                 "x": 0.0,
-                "y": 540.0,
+                "y": 540.0002,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -1998,6 +1998,11 @@
             {
               "@type": "script.Toggle",
               "Enable": true,
+              "ToggleGroupEntity": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "a054e2de-d23f-435c-808f-67a3df70726c"
+              },
               "ImageEntity": {
                 "tempEntityId": null,
                 "IsRelative": false,
@@ -2280,6 +2285,11 @@
             {
               "@type": "script.Toggle",
               "Enable": true,
+              "ToggleGroupEntity": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "a054e2de-d23f-435c-808f-67a3df70726c"
+              },
               "ImageEntity": {
                 "tempEntityId": null,
                 "IsRelative": false,
@@ -2562,6 +2572,11 @@
             {
               "@type": "script.Toggle",
               "Enable": true,
+              "ToggleGroupEntity": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "a054e2de-d23f-435c-808f-67a3df70726c"
+              },
               "ImageEntity": {
                 "tempEntityId": null,
                 "IsRelative": false,
@@ -5303,7 +5318,7 @@
       {
         "id": "e99cad3d-3b9f-47e9-8ecc-2d11b8df019c",
         "path": "/ui/GachaUI/GachaButtonUI/PickUpGrid_2/GachaButtonOne",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.GachaButton",
         "jsonString": {
           "name": "GachaButtonOne",
           "path": "/ui/GachaUI/GachaButtonUI/PickUpGrid_2/GachaButtonOne",
@@ -5420,6 +5435,10 @@
                 "DisabledSprite": null
               },
               "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "script.GachaButton",
               "Enable": true
             }
           ],
@@ -5715,7 +5734,7 @@
       {
         "id": "f9d9a24a-ce64-4d1d-a514-94eb5961f741",
         "path": "/ui/GachaUI/GachaButtonUI/PickUpGrid_2/GachaButtonTen",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.GachaButton",
         "jsonString": {
           "name": "GachaButtonTen",
           "path": "/ui/GachaUI/GachaButtonUI/PickUpGrid_2/GachaButtonTen",
@@ -5833,6 +5852,11 @@
               },
               "OverrideSorting": false,
               "Enable": true
+            },
+            {
+              "@type": "script.GachaButton",
+              "Enable": true,
+              "IsSummonTen": true
             }
           ],
           "@version": 1
@@ -6310,7 +6334,7 @@
       {
         "id": "f17a9c2b-b459-4fbf-a4d5-78164522f538",
         "path": "/ui/GachaUI/GachaButtonUI/NormalGrid/GachaButtonOne",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.GachaButton",
         "jsonString": {
           "name": "GachaButtonOne",
           "path": "/ui/GachaUI/GachaButtonUI/NormalGrid/GachaButtonOne",
@@ -6427,6 +6451,10 @@
                 "DisabledSprite": null
               },
               "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "script.GachaButton",
               "Enable": true
             }
           ],
@@ -6722,7 +6750,7 @@
       {
         "id": "48425c4f-6faa-4de6-9338-2044d5f811b5",
         "path": "/ui/GachaUI/GachaButtonUI/NormalGrid/GachaButtonTen",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.GachaButton",
         "jsonString": {
           "name": "GachaButtonTen",
           "path": "/ui/GachaUI/GachaButtonUI/NormalGrid/GachaButtonTen",
@@ -6840,6 +6868,11 @@
               },
               "OverrideSorting": false,
               "Enable": true
+            },
+            {
+              "@type": "script.GachaButton",
+              "Enable": true,
+              "IsSummonTen": true
             }
           ],
           "@version": 1
@@ -7125,86 +7158,6 @@
               "OverrideSorting": false,
               "Text": "10회 소환",
               "UseOutLine": true,
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "ea8f1728-53b4-4cf9-84a3-9a709dd465a7",
-        "path": "/ui/GachaUI/SummonAnimationUI",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
-        "jsonString": {
-          "name": "SummonAnimationUI",
-          "path": "/ui/GachaUI/SummonAnimationUI",
-          "nameEditable": true,
-          "enable": true,
-          "visible": false,
-          "localize": true,
-          "displayOrder": 4,
-          "pathConstraints": "///",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uisprite",
-            "sub_entity_id": null
-          },
-          "modelId": "uisprite",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 15,
-              "AnchorsMax": {
-                "x": 1.0,
-                "y": 1.0
-              },
-              "AnchorsMin": {
-                "x": 0.0,
-                "y": 0.0
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": 50.0,
-                "y": 50.0
-              },
-              "OffsetMin": {
-                "x": -50.0,
-                "y": -50.0
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 2020.0,
-                "y": 1180.0
-              },
-              "UIMode": 1,
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": 0.0,
-                "y": 0.0
-              },
-              "Position": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "ImageRUID": {
-                "DataId": "0ff504c93c8a404992806d1bbeb5ec3b"
-              },
-              "OverrideSorting": false,
               "Enable": true
             }
           ],

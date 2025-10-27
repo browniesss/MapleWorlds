@@ -11,11 +11,11 @@ script ExtendToggleUIPanel extends ToggleAction
 			-- 예시: 연결된 UI 패널을 보이게 합니다.
 			self.TargetPanelEntity.Enable = true 
 			self.TargetPanelEntity:GetChildByName("LobbyToggle", true).ToggleGroup:ActivateButtonByIndex(self.panelIndex)
+		end
 		
-			if self.panelIndex == 3 then
-				local youtubePlayer = _EntityService:GetEntityByPath("/ui/GachaUI/BackgroundUI/DisplayBoard/YoutubePlayerGUI")
-				youtubePlayer.YoutubePlayerGUIComponent:Play()
-			end
+		if self.panelIndex == 3 then
+			local youtubePlayer = _EntityService:GetEntityByPath("/ui/GachaUI/BackgroundUI/DisplayBoard/YoutubePlayerGUI")
+			youtubePlayer.YoutubePlayerGUIComponent:Play()
 		end
 	end
 

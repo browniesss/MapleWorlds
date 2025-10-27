@@ -3,7 +3,22 @@ script CharterViewList extends Component
 
 	property table CharterList = {}
 
+	property Entity GachaResultUI = "9b3bf949-0e71-4183-814c-ece37fff8ff5"
+
 	method void InitData(table userDataList)
+		self.GachaResultUI.Enable = false
+		
+		_SummonService:SummonAnimation()
+		
+		local asyncFunc = function()
+			self.GachaResultUI.Enable = true
+			self:SetCharterViewer(userDataList)
+		end
+		
+		_TimerService:SetTimerOnce(asyncFunc, 1.0)
+	end
+
+	method void SetCharterViewer(table userDataList)
 		local children = self.Entity.Children
 		      
 		local index = 1

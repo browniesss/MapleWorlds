@@ -5,12 +5,15 @@ script LobbyManager extends Logic
 
 	property Entity adventureMapUI = "7e55cb24-2aa1-4c1e-a0dc-4307358872ab"
 
+	property Entity lobbyTopUI = "5f1a68cb-2fde-436b-abfb-f68b933b78dd"
+
 	method void SetAdventureMapEnable(boolean isActive)
 		self.adventureMapUI.Visible = isActive
 	end
 
 	method void StartAdventure(integer chapterIndex, integer mapIndex)
 		self.lobbyUI.Enable = false
+		self.lobbyTopUI.Enable = false
 		
 		-- 데이터 세팅 필요
 		
