@@ -32,6 +32,7 @@ script SummonService extends Logic
 			return
 		end
 		
+		self:SummonAnimation()
 		
 		local pool = self:GetSummonPool(pool_id)
 		local result = {}
@@ -52,6 +53,8 @@ script SummonService extends Logic
 		if self:Billing(senderUserId, pool_id, 10) ~= 0 then
 			return
 		end
+		
+		self:SummonAnimation()
 		
 		local pool = self:GetSummonPool(pool_id)
 		local result = {}
@@ -124,6 +127,18 @@ script SummonService extends Logic
 	@ExecSpace("ClientOnly")
 	method void AddSummonCallback(string name, any callback)
 		self.summonCallback[name] = callback
+	end
+
+	@ExecSpace("Client")
+	method void SummonAnimation()
+		local animationTime = _Utils:GetRUIDTime("0ff504c93c8a404992806d1bbeb5ec3b")
+		local animationUI = _EntityService:GetEntityByPath("/ui/GachaUI/SummonAnimationUI")
+		
+		animationUI.Visible = true
+		_TimerService:SetTimerOnce(function()
+			animationUI.Visible = false
+		end, animationTime)
+		
 	end
 
 end
