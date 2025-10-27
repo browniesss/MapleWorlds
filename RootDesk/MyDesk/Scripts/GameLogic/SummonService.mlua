@@ -35,15 +35,25 @@ script SummonService extends Logic
 		self:SummonAnimation()
 		
 		local pool = self:GetSummonPool(pool_id)
-		local result = {}
 		local idList = {}
 		
 		local item = _RandomPicker:RadomPickFromTable(pool)
 		
-		result[#result + 1] = item
 		idList[#idList + 1] = item.value
 		
+		local userCount = _UserSummonService:GET_SUMMON_COUNT(pool_id)
+		if self:PickUpCheck(pool_id, (userCount + 1)) then
+			local pickUpId = self:PickUpChar(pool_id)
+			if pickUpId == "" then
+				log_error("fail to get pick up char from " ..  pool_id)
+				return
+			end
+			
+			idList[#idList] = pickUpId
+		end
+		
 		_UserMonsterService:AddCount(senderUserId, idList)
+		_UserSummonService:ADD_SUMMON_COUNT(senderUserId, pool_id, 1)
 		
 		self.summonResult[pool_id] = _HttpService:JSONEncode(idList)
 	end
@@ -66,8 +76,22 @@ script SummonService extends Logic
 			idList[#idList + 1] = item.value
 		end
 		
+		local userCount = _UserSummonService:GET_SUMMON_COUNT(pool_id)
+		if self:PickUpCheck(pool_id, (userCount + 10)) then
+			local pickUpId = self:PickUpChar(pool_id)
+			if pickUpId == "" then
+				log_error("fail to get pick up char from " ..  pool_id)
+				return
+			end
+			
+			local key = (DateTime.UtcNow.Elapsed % #idList)
+			
+			idList[key + 1] = pickUpId
+		end
+		
 		
 		_UserMonsterService:AddCount(senderUserId, idList)
+		_UserSummonService:ADD_SUMMON_COUNT(senderUserId, pool_id, 10)
 		
 		self.summonResult[pool_id] = _HttpService:JSONEncode(idList)
 	end
@@ -84,6 +108,8 @@ script SummonService extends Logic
 			item["money"] = tostring(dataSet:GetCell(i,"money")) 
 			item["summon_1_value"] = tonumber(dataSet:GetCell(i,"summon_1_value"))
 			item["summon_10_value"] = tonumber(dataSet:GetCell(i,"summon_10_value"))
+			item["pickup_char_limit"] = tonumber(dataSet:GetCell(i,"pickup_char_limit"))
+			item["pickup_char_id"] = tostring(dataSet:GetCell(i,"pickup_char_id"))
 			
 			self.summonSetting[item['id']]= item
 		end
@@ -139,6 +165,35 @@ script SummonService extends Logic
 			animationUI.Visible = false
 		end, animationTime)
 		
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean PickUpCheck(string pool_id, integer userCount)
+		local setting = self.summonSetting[pool_id]
+		if setting == nil then
+			return false
+		end
+		
+		if setting.pickup_char_limit == 0 then
+			return false
+		end
+		
+		if setting.pickup_char_limit > userCount then
+			return false
+		end
+		
+		
+		return true
+	end
+
+	@ExecSpace("ServerOnly")
+	method string PickUpChar(string pool_id)
+		local setting = self.summonSetting[pool_id]
+		if setting == nil then
+			return ""
+		end
+		
+		return setting.pickup_char_id
 	end
 
 end

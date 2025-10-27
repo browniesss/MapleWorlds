@@ -1,0 +1,155 @@
+@Logic
+script UserSummonService extends Logic
+
+	@Sync
+	property SyncTable<string, string> UserSummonData
+
+	property table userSummonCallback = {}
+
+	@ExecSpace("ClientOnly")
+	method void OnSyncProperty(string name, any value)
+		local callback = self.userSummonCallback[name]
+		if callback == nil then
+			return
+		end
+		
+		callback()
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer INIT(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local allSummonList = _SummonService.summonSetting
+		local keyList = {}
+		for k, v in pairs(allSummonList) do
+			keyList[#keyList + 1] = k
+		end
+		
+		local errCode, userSummonPages = ds:BatchGetAndWait(keyList)
+		if errCode ~= 0 then
+			return errCode
+		end
+		
+		local userSummonData = {}
+		
+		while true do
+			-- 현재 페이지의 목록을 가져옵니다.
+			local datas = userSummonPages:GetCurrentPageDatas()
+			for _, data in pairs(datas) do
+				local value = data.Value
+				if data.Value == nil then
+					value = _HttpService:JSONEncode({count=0})
+				end
+				
+				self.UserSummonData[data.KeyInfo.Key] = value
+			end
+			     
+			-- 현재 페이지가 마지막 페이지인지 확인합니다.
+			if userSummonPages.IsLastPage == true then
+				break
+			end
+			     
+			-- 다음 페이지의 데이터를 미리 불러오고 다음 페이지가 유효하지 않은 경우 조회를 마칩니다.
+			local loadResultCode = userSummonPages:LoadNextPageAndWait()
+			if loadResultCode ~= 0 then
+				return loadResultCode
+			end
+			     
+			-- 다음 페이지로 이동합니다.
+			userSummonPages:MoveToNextPageAndWait()
+		end
+		
+		return 0
+	end
+
+	@ExecSpace("ServerOnly")
+	method table SAVE_ALL(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local data = {}
+		
+		for key, value in pairs(self.UserSummonData) do
+			data[key] = value
+		end
+		
+		local code, keys = ds:BatchSetAndWait(data)
+		
+		local res = {
+			code=code,
+			body=keys
+		}
+		
+		return res
+	end
+
+	method integer SAVE_ONE(string uid, string pool_id)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local data = self.UserSummonData[pool_id]
+		if data == nil then
+			return -1
+		end
+		
+		return ds:SetAndWait(pool_id, data)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer ADD_SUMMON_COUNT(string uid, string pool_id, integer count)
+		local userJson = self.UserSummonData[pool_id]
+		if userJson == nil then
+			return -1
+		end
+		
+		local userData = _HttpService:JSONDecode(userJson)
+		
+		userData.count += count
+		
+		userJson = _HttpService:JSONEncode(userData)
+		
+		self.UserSummonData[pool_id] = userJson
+		
+		return self:SAVE_ONE(uid, pool_id)
+	end
+
+	method integer GET_SUMMON_COUNT(string pool_id)
+		local userJson = self.UserSummonData[pool_id]
+		if userJson == nil then
+			return -1
+		end
+		
+		local userData = _HttpService:JSONDecode(userJson)
+		
+		return userData.count
+	end
+
+	@EventSender("Service", "UserService")
+	handler HandleUserEnterEvent(UserEnterEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: UserService
+		-- Space: Server
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local ProfileCode = event.ProfileCode
+		-- local UserId = event.UserId
+		---------------------------------------------------------
+		self:INIT(event.UserId)
+	end
+
+	@EventSender("Service", "UserService")
+	handler HandleUserLeaveEvent(UserLeaveEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: UserService
+		-- Space: Server
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local ProfileCode = event.ProfileCode
+		-- local UserId = event.UserId
+		---------------------------------------------------------
+		
+		self:SAVE_ALL(event.UserId)
+	end
+
+end
