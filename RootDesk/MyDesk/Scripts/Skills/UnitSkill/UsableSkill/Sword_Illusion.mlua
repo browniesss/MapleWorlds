@@ -33,7 +33,6 @@ script Sword_Illusion extends SkillParent
 			hitAnimationTimerID = _TimerService:SetTimerRepeat(hitAnimationFunction, 0.05)
 		end
 		
-		
 		-- 첫 번째 발사: 공격 모션 발생
 		_TimerService:SetTimerOnce(attackFunction, self.skillAttackTiming)
 	end

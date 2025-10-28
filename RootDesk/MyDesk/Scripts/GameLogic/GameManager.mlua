@@ -443,8 +443,8 @@ script GameManager extends Logic
 		local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
 		
 		for i = 1, 8 do
-			local unitData = _UnitService:GetUnitByIDFromServer(playerDeck.userDeck[i])
-			local skillData = _SkillService:GetSkillByIDFromServer(unitData["skillID"])
+			local unitData = _UnitService:GetUnitByIDFromClient(playerDeck.userDeck[i])
+			local skillData = _SkillService:GetSkillByIDFromClient(unitData["skillID"])
 			
 			local ruidString = skillData["ruids"] or ""
 		    
