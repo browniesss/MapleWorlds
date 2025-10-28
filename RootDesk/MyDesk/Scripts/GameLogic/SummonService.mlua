@@ -4,7 +4,8 @@ script SummonService extends Logic
 	@Sync
 	property SyncTable<string, string> summonResult
 
-	property table summonSetting = {}
+	@Sync
+	property SyncTable<string, string> summonSetting
 
 	property table summonCallback = {}
 
@@ -72,8 +73,6 @@ script SummonService extends Logic
 
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
-		self.summonSetting = {}
-		
 		local dataSet = _DataService:GetTable("GachaSetting")
 		for i = 1, dataSet:GetRowCount() do
 			local item = {}
@@ -82,16 +81,14 @@ script SummonService extends Logic
 			item["money"] = tostring(dataSet:GetCell(i,"money")) 
 			item["summon_1_value"] = tonumber(dataSet:GetCell(i,"summon_1_value"))
 			item["summon_10_value"] = tonumber(dataSet:GetCell(i,"summon_10_value"))
+			item["video"] = tostring(dataSet:GetCell(i,"video"))
 			
-			self.summonSetting[item['id']]= item
+			local json = _HttpService:JSONEncode(item)
+			
+			self.summonSetting[item['id']]= json
 		end
 		
-		self:UpdateSetting(self.summonSetting)
-	end
-
-	@ExecSpace("Client")
-	method void UpdateSetting(table setting)
-		self.summonSetting = setting
+		
 	end
 
 	@ExecSpace("ServerOnly")
@@ -137,6 +134,16 @@ script SummonService extends Logic
 			animationUI.Visible = false
 		end, animationTime)
 		
+	end
+
+	method table GET_SETTING(string pool_id)
+		local json = self.summonSetting[pool_id]
+		log("GET SUMMON SETTING " .. json)
+		if json == nil then
+			return {}
+		end
+		
+		return _HttpService:JSONDecode(json)
 	end
 
 end

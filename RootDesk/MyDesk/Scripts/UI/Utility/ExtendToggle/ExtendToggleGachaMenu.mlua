@@ -45,6 +45,13 @@ script ExtendToggleGachaMenu extends ToggleAction
 		else
 			-- 픽업 캐릭터로 세팅
 			self.PickUpCharter.Enable = true
+			
+			local setting = _SummonService:GET_SETTING(_GachaManager.GachaKey)
+			if setting.video ~= nil or setting.video ~= "-" then
+				local newUrls = {}
+				newUrls[#newUrls + 1] = setting.video
+				youtubePlayer.YoutubePlayerGUIComponent.Urls = newUrls
+			end
 			board.Enable = true
 			youtubePlayer.YoutubePlayerGUIComponent:Play()
 		end

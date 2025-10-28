@@ -112,6 +112,7 @@ script UserSummonService extends Logic
 		return self:SAVE_ONE(uid, pool_id)
 	end
 
+	@ExecSpace("ServerOnly")
 	method integer GET_SUMMON_COUNT(string pool_id)
 		local userJson = self.UserSummonData[pool_id]
 		if userJson == nil then
@@ -121,6 +122,23 @@ script UserSummonService extends Logic
 		local userData = _HttpService:JSONDecode(userJson)
 		
 		return userData.count
+	end
+
+	method integer INIT_SUMMON_COUNT(string uid, string pool_id)
+		local userJson = self.UserSummonData[pool_id]
+		if userJson == nil then
+			return -1
+		end
+		
+		local userData = _HttpService:JSONDecode(userJson)
+		
+		userData.count = 0
+		
+		userJson = _HttpService:JSONEncode(userData)
+		
+		self.UserSummonData[pool_id] = userJson
+		
+		return self:SAVE_ONE(uid, pool_id)
 	end
 
 	@EventSender("Service", "UserService")
