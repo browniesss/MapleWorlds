@@ -121,6 +121,7 @@ script SummonService extends Logic
 			item["video"] = tostring(dataSet:GetCell(i,"video"))
 			item["pickup_char_limit"] = tonumber(dataSet:GetCell(i,"pickup_char_limit"))
 			item["pickup_char_id"] = tostring(dataSet:GetCell(i,"pickup_char_id"))
+			item["end_ts"] = tonumber(dataSet:GetCell(i,"end_ts"))
 			
 			local json = _HttpService:JSONEncode(item)
 			
