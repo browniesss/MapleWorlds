@@ -119,6 +119,8 @@ script SummonService extends Logic
 			item["summon_1_value"] = tonumber(dataSet:GetCell(i,"summon_1_value"))
 			item["summon_10_value"] = tonumber(dataSet:GetCell(i,"summon_10_value"))
 			item["video"] = tostring(dataSet:GetCell(i,"video"))
+			item["pickup_char_limit"] = tonumber(dataSet:GetCell(i,"pickup_char_limit"))
+			item["pickup_char_id"] = tostring(dataSet:GetCell(i,"pickup_char_id"))
 			
 			local json = _HttpService:JSONEncode(item)
 			
@@ -130,10 +132,12 @@ script SummonService extends Logic
 
 	@ExecSpace("ServerOnly")
 	method integer Billing(string uid, string poolId, integer count)
-		local setting = self.summonSetting[poolId]
-		if setting == nil then
+		local json = self.summonSetting[poolId]
+		if json == nil then
 			return -1
 		end
+		
+		local setting = _HttpService:JSONDecode(json)
 		
 		if setting.money == "FIRST_COIN" then
 			return _BillingService:UseFirstCoin(uid, setting[string.format("summon_%d_value", count)])
