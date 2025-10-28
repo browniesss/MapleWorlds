@@ -124,6 +124,7 @@ script UserSummonService extends Logic
 		return userData.count
 	end
 
+	@ExecSpace("ServerOnly")
 	method integer INIT_SUMMON_COUNT(string uid, string pool_id)
 		local userJson = self.UserSummonData[pool_id]
 		if userJson == nil then
