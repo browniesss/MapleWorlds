@@ -38,12 +38,13 @@ script UnitListUI extends Component
 		end
 		
 		-- 2) 유닛 리스트 출력 (덱에 있는 건 제외)
-		for id, unitData in pairs(_UnitService.UnitTable) do
+		for unitId, jsonStr in pairs(_UserMonsterService.userMonsterDict) do
 		    -- unitData['id']가 있으면 그걸 우선 사용, 없으면 key 사용
-		    local unitId = unitData and unitData["id"] or id
+		    local data = _HttpService:JSONDecode(jsonStr)
+			local unitData = _UnitService:GetUnitByIDFromClient(unitId)
 		
 		    -- 덱에 있는 유닛이면 스킵
-		    if unitData and not equipped[unitId] and unitData['isUsableCharacter'] == 1 then
+		    if data and not equipped[unitId] and unitData['isUsableCharacter'] == 1 then
 		        local skillData = nil
 		        if unitData["skillID"] then
 		            skillData = _SkillService:GetSkillByIDFromClient(unitData["skillID"])
@@ -70,12 +71,13 @@ script UnitListUI extends Component
 		end
 		
 		-- 2) 유닛 리스트 출력 (덱에 있는 건 제외)
-		for id, unitData in pairs(_UnitService.UnitTable) do
+		for unitId, jsonStr in pairs(_UserMonsterService.userMonsterDict) do
 		    -- unitData['id']가 있으면 그걸 우선 사용, 없으면 key 사용
-		    local unitId = unitData and unitData["id"] or id
+		    local data = _HttpService:JSONDecode(jsonStr)
+			local unitData = _UnitService:GetUnitByIDFromClient(unitId)
 		
 		    -- 덱에 있는 유닛이면 스킵
-		    if unitData and not equipped[unitId] and unitData['isUsableCharacter'] == 0 then
+		    if data and not equipped[unitId] and unitData['isUsableCharacter'] == 0 then
 		        local skillData = nil
 		        if unitData["skillID"] then
 		            skillData = _SkillService:GetSkillByIDFromClient(unitData["skillID"])
@@ -85,7 +87,6 @@ script UnitListUI extends Component
 		        button.UnitListItem:Init(unitData, skillData)
 		    end
 		end
-		
 	end
 
 	method void RemoveItem(Entity scroll)

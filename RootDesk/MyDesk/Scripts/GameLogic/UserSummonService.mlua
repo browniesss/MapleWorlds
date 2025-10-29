@@ -66,7 +66,6 @@ script UserSummonService extends Logic
 	@ExecSpace("ServerOnly")
 	method table SAVE_ALL(string uid)
 		local ds = _DataStorageService:GetUserDataStorage(uid)
-		
 		local data = {}
 		
 		for key, value in pairs(self.UserSummonData) do
