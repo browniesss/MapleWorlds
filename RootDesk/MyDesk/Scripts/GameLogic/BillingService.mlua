@@ -37,6 +37,10 @@ script BillingService extends Logic
 			return errCode
 		end
 		
+		if res == nil then
+			return 1000002
+		end
+		
 		local resTable = _HttpService:JSONDecode(res)
 		
 		self.FirstFreeCoin = resTable["FirstFreeCoin"]
@@ -75,6 +79,21 @@ script BillingService extends Logic
 			return loadErr
 		end
 		
+		local product = _ShopService.PRODUCT_ID_DICT[productId]
+		if product == nil then
+			return -1
+		end
+		
+		for type, value in pairs(product.reward) do
+			if type == "dia_paid" then
+				self.FirstPaidCoin += value
+			end
+			
+			if type == "dia_free" then
+				self.FirstFreeCoin += value
+			end
+		end
+		
 		return self:SAVE(userId)
 	end
 
@@ -85,6 +104,17 @@ script BillingService extends Logic
 			return loadErr
 		end
 		
+		local product = _ShopService.PRODUCT_ID_DICT[productId]
+		if product == nil then
+			return -1
+		end
+		
+		for type, value in pairs(product.reward) do
+			if type == "coin" then
+				self.SecondPaidCoin += value
+			end
+		end
+		
 		return self:SAVE(userId)
 	end
 
@@ -93,6 +123,37 @@ script BillingService extends Logic
 		local loadErr =  self:LOAD(userId) 
 		if loadErr ~= 0 then
 			return loadErr
+		end
+		
+		local product = _ShopService.PRODUCT_ID_DICT[productId]
+		if product == nil then
+			return -1
+		end
+		
+		for type, value in pairs(product.price) do
+			if type == "dia" then
+				local freeCoin = self.FirstFreeCoin
+				local paidCoin = self.FirstPaidCoin
+				local totalCoin = freeCoin + paidCoin
+				if totalCoin < value then
+					return -1
+				end
+				
+				paidCoin -= value
+				if paidCoin < 0 then
+					freeCoin += paidCoin
+					paidCoin = 0
+				end
+				
+				self.FirstFreeCoin = freeCoin
+				self.FirstPaidCoin = paidCoin
+			end
+		end
+		
+		for type, value in pairs(product.reward) do
+			if type == "coin" then
+				self.SecondFreeCoin += value
+			end
 		end
 		
 		return self:SAVE(userId)

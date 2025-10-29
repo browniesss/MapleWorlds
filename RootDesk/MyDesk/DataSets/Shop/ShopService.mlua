@@ -1,0 +1,220 @@
+@Logic
+script ShopService extends Logic
+
+	@Sync
+	property SyncTable<string, string> productInfo
+
+	property table PRODUCT_ID_DICT = {}
+
+	property string MUSH_DIA = "dia"
+
+	property string MUSH_COIN = "coin"
+
+	property string PLAY_COIN = "play_coin"
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		self:INIT_PRODUCT_DATA()
+		_WorldShopService:SetProcessPurchaseCallback(self.PROCESS_PRODUCT_ID)
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean PROCESS_PRODUCT_ID(any purchaseInfo)
+		local userEntity = _UserService:GetUserEntityByUserId(purchaseInfo.UserId)
+		     
+		if _EntityService:IsValid(userEntity) == false then
+		    log_error("유효하지 않은 사용자! PurchaseId: " .. purchaseInfo.PurchaseId .. " / " ..
+		               "UserId: " .. purchaseInfo.UserId .. " / " ..
+		                "ProductId: " .. purchaseInfo.ProductId)
+		    return false   
+		end
+		    
+		local item = self.PRODUCT_ID_DICT[purchaseInfo.ProductId]
+		if item == nil then
+		    log_error("유효하지 않은 사용자! PurchaseId: " .. purchaseInfo.PurchaseId .. " / " ..
+		               "UserId: " .. purchaseInfo.UserId .. " / " ..
+		                "ProductId: " .. purchaseInfo.ProductId)
+			return false
+		end
+		
+		if item.type == self.MUSH_DIA then
+			_BillingService:PurchaseFirstCoin(purchaseInfo.UserId, purchaseInfo.ProductId)
+		end
+		
+		if item.type == self.MUSH_COIN then
+			_BillingService:PurchaseSecondCoin(purchaseInfo.UserId, purchaseInfo.ProductId)
+		end
+		
+		if item.type == self.PLAY_COIN then
+			_PlayCoinService:AddCoin(purchaseInfo.UserId, item.reward[1].value)
+		end
+		
+		_LogStorageService:LogPurchaseInfo(purchaseInfo, "Success")
+		    
+		return true
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean PROCESS_GCODE(any purchaseInfo)
+		local userEntity = _UserService:GetUserEntityByUserId(purchaseInfo.UserId)
+		     
+		if _EntityService:IsValid(userEntity) == false then
+		    log_error("유효하지 않은 사용자! PurchaseId: " .. purchaseInfo.PurchaseId .. " / " ..
+		               "UserId: " .. purchaseInfo.UserId .. " / " ..
+		                "ProductId: " .. purchaseInfo.ProductId)
+		    return false   
+		end
+		    
+		local item = self.PRODUCT_ID_DICT[purchaseInfo.ProductId]
+		if item == nil then
+		    log_error("등록되지 않은 상품 아이디! PurchaseId: " .. purchaseInfo.PurchaseId .. " / " ..
+		               "UserId: " .. purchaseInfo.UserId .. " / " ..
+		                "ProductId: " .. purchaseInfo.ProductId)
+			return false
+		end
+		
+		if item.type == self.MUSH_DIA then
+			_BillingService:PurchaseFirstCoin(purchaseInfo.UserId, purchaseInfo.ProductId)
+		end
+		
+		if item.type == self.MUSH_COIN then
+			_BillingService:ExchangeCoin(purchaseInfo.UserId, purchaseInfo.ProductId)
+		end
+		
+		if item.type == self.PLAY_COIN then
+			_BillingService:UseFirstCoin(purchaseInfo.UserId, item.price[1].value)
+			_PlayCoinService:AddCoin(purchaseInfo.UserId, item.reward[1].value)
+		end
+		    
+		return true
+	end
+
+	@ExecSpace("ServerOnly")
+	method void INIT_PRODUCT_DATA()
+		-- 다이아 구매시 보상 설정
+		local diaRewardSet = _DataService:GetTable("mush_dia_reward")    
+		for index = 1, diaRewardSet:GetRowCount() do
+		    local item = {}
+			
+			local id = tostring(diaRewardSet:GetCell(index, 'id'))
+			item['type'] = tostring(diaRewardSet:GetCell(index, 'type'))
+			item['value'] = tonumber(diaRewardSet:GetCell(index, 'value'))
+			
+			if self.PRODUCT_ID_DICT[id] == nil then
+				self.PRODUCT_ID_DICT[id] = {reward={}, price={}, type=self.MUSH_DIA}
+			end
+			local count = #self.PRODUCT_ID_DICT[id].reward
+			self.PRODUCT_ID_DICT[id].reward[count + 1] = item
+		end
+		
+		-- 코인 구매시 보상 설정
+		local coinRewardSet = _DataService:GetTable("mush_coin_reward")    
+		for index = 1, coinRewardSet:GetRowCount() do
+		    local item = {}
+			
+			local id = tostring(coinRewardSet:GetCell(index, 'id'))
+			item['type'] = tostring(coinRewardSet:GetCell(index, 'type'))
+			item['value'] = tonumber(coinRewardSet:GetCell(index, 'value'))
+			
+			if self.PRODUCT_ID_DICT[id] == nil then
+				self.PRODUCT_ID_DICT[id] = {reward={}, price={}, type=self.MUSH_COIN}
+			end
+			local count = #self.PRODUCT_ID_DICT[id].reward
+			self.PRODUCT_ID_DICT[id].reward[count + 1] = item
+		end
+		
+		-- 코인 구매시 가격 설정
+		local coinPriceSet = _DataService:GetTable("mush_coin_price")    
+		for index = 1, coinPriceSet:GetRowCount() do
+		    local item = {}
+			
+			local id = tostring(coinPriceSet:GetCell(index, 'id'))
+			item['type'] = tostring(coinPriceSet:GetCell(index, 'type'))
+			item['value'] = tonumber(coinPriceSet:GetCell(index, 'value'))
+			
+			if self.PRODUCT_ID_DICT[id] == nil then
+				self.PRODUCT_ID_DICT[id] = {reward={}, price={}, type=self.MUSH_COIN}
+			end
+			local count = #self.PRODUCT_ID_DICT[id].price
+			self.PRODUCT_ID_DICT[id].price[count + 1] = item
+		end
+		
+		-- 플레이 재화 구매시 보상 설정
+		local playRewardSet = _DataService:GetTable("play_coin_reward")    
+		for index = 1, playRewardSet:GetRowCount() do
+		    local item = {}
+			
+			local id = tostring(playRewardSet:GetCell(index, 'id'))
+			item['type'] = tostring(playRewardSet:GetCell(index, 'type'))
+			item['value'] = tonumber(playRewardSet:GetCell(index, 'value'))
+			
+			if self.PRODUCT_ID_DICT[id] == nil then
+				self.PRODUCT_ID_DICT[id] = {reward={}, price={}, type=self.PLAY_COIN}
+			end
+			local count = #self.PRODUCT_ID_DICT[id].reward
+			self.PRODUCT_ID_DICT[id].reward[count + 1] = item
+		end
+		
+		-- 플레이 재화 구매시 가격 설정
+		local playPriceSet = _DataService:GetTable("play_coin_price")    
+		for index = 1, playPriceSet:GetRowCount() do
+		    local item = {}
+			
+			local id = tostring(playPriceSet:GetCell(index, 'id'))
+			item['type'] = tostring(playPriceSet:GetCell(index, 'type'))
+			item['value'] = tonumber(playPriceSet:GetCell(index, 'value'))
+			
+			if self.PRODUCT_ID_DICT[id] == nil then
+				self.PRODUCT_ID_DICT[id] = {reward={}, price={}, type=self.PLAY_COIN}
+			end
+			local count = #self.PRODUCT_ID_DICT[id].price
+			self.PRODUCT_ID_DICT[id].price[count + 1] = item
+		end
+		
+		-- 클라이언트 데이터 동기화
+		for id, item in pairs(self.PRODUCT_ID_DICT) do
+			local json = _HttpService:JSONEncode(item)
+			self.productInfo[id] = json
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method table GetAllProductInfoDict()
+		local resp = {}
+		
+		for key, json in pairs(self.productInfo) do
+			local item = _HttpService:JSONDecode(json)
+			
+			resp[key] = item
+		end
+		
+		return resp
+	end
+
+	@ExecSpace("ClientOnly")
+	method table GetProductInfoById(string id)
+		local json = self.productInfo[id]
+		if json == nil then
+			return {}
+		end
+		
+		return _HttpService:JSONDecode(json)
+	end
+
+	@ExecSpace("ClientOnly")
+	method table GetProductInfoDictByType(string targetType)
+		local all = self:GetAllProductInfoDict()
+		local resp = {}
+		
+		for key, item in pairs(all) do
+			if item.type ~= targetType then
+				continue
+			end
+			
+			resp[key] = item
+		end
+		
+		return resp
+	end
+
+end
