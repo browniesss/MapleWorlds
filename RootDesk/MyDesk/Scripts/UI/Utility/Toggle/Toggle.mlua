@@ -70,8 +70,6 @@ script Toggle extends Component
 		if self.ImageEntity and self.ImageEntity.SpriteGUIRendererComponent then
 			self.ImageEntity.SpriteGUIRendererComponent.ImageRUID = targetRuid 
 		end
-		
-		log("Toggle SetState: ", targetRuid)
 	end
 
 	@EventSender("Self")

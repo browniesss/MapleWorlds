@@ -58,7 +58,6 @@ script ToggleGroup extends Component
 	method void ActivateButtonByIndex(number index)
 		-- Lua table 인덱스는 1부터 시작하므로 유효성 검사를 합니다.
 		if index < 1 or index > #self.ToggleButtons then
-			log("ActivateButtonByIndex 실패: 유효하지 않은 인덱스 " .. index)
 			return
 		end
 		
@@ -66,7 +65,6 @@ script ToggleGroup extends Component
 		
 		-- 이미 ON 상태인 버튼을 다시 활성화할 필요는 없습니다.
 		if targetToggle.isOn then
-			 log("ActivateButtonByIndex: 인덱스 " .. index .. "의 버튼이 이미 활성화되어 있습니다.")
 			 return
 		end
 		
@@ -76,8 +74,6 @@ script ToggleGroup extends Component
 		-- 2. 그룹 컨트롤러에 알림을 보내 Radio Mode 로직을 실행하도록 합니다.
 		-- (Radio Mode가 아닐 경우 NotifyToggleOn 내부에서 로직이 실행되지 않습니다.)
 		self:NotifyToggleOn(targetToggle) 
-		
-		log("ActivateButtonByIndex: 인덱스 " .. index .. "의 버튼을 활성화했습니다.")
 	end
 
 end

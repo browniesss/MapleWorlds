@@ -8,8 +8,6 @@ script CharterView extends Component
 	property Entity Name = nil
 
 	method void InitGacha(table unitData)
-		log(unitData)
-		
 		-- 해당 슬롯에 장착한 유닛이 없을 경우
 		if unitData == nil then
 			self.Monster.Visible = false

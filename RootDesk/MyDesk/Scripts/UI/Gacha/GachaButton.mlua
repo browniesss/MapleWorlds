@@ -5,10 +5,10 @@ script GachaButton extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnInitialize()
-		_SummonService:AddSummonCallback("summonResult", self.Function1)
+		_SummonService:AddSummonCallback("summonResult", self.OnSummonButton)
 	end
 
-	method void Function1()
+	method void OnSummonButton()
 		local summonData = _SummonService.summonResult[_GachaManager.GachaKey]
 		
 		local summonIdList = _HttpService:JSONDecode(summonData)

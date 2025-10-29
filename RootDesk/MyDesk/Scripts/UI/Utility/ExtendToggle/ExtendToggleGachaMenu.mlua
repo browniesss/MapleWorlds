@@ -38,6 +38,10 @@ script ExtendToggleGachaMenu extends ToggleAction
 		local youtubePlayer = _EntityService:GetEntityByPath("/ui/GachaUI/BackgroundUI/DisplayBoard/YoutubePlayerGUI")
 		local board = _EntityService:GetEntityByPath("/ui/GachaUI/BackgroundUI/DisplayBoard")
 		
+		local summonCount = _EntityService:GetEntityByPath("/ui/GachaUI/BackgroundUI/SummonCountRoot")
+		
+		summonCount.GachaCount:SetSummonCount()
+		
 		if self.panelIndex == 3 then
 			self.PickUpCharter.Enable = false
 			youtubePlayer.YoutubePlayerGUIComponent:Pause()
