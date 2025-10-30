@@ -10,6 +10,7 @@ script GachaCount extends Component
 		_UserSummonService:AddUserSummonCountCallBack("UserSummonData", self.SetSummonCount)
 	end
 
+	@ExecSpace("ClientOnly")
 	method void SetSummonCount()
 		local userSummonData = _UserSummonService.UserSummonData[_GachaManager.GachaKey]
 		

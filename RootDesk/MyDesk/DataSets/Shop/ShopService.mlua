@@ -101,7 +101,7 @@ script ShopService extends Logic
 			item['value'] = tonumber(diaRewardSet:GetCell(index, 'value'))
 			
 			if self.PRODUCT_ID_DICT[id] == nil then
-				self.PRODUCT_ID_DICT[id] = {reward={}, price={}, type=self.MUSH_DIA}
+				self.PRODUCT_ID_DICT[id] = {reward={}, type=self.MUSH_DIA}
 			end
 			local count = #self.PRODUCT_ID_DICT[id].reward
 			self.PRODUCT_ID_DICT[id].reward[count + 1] = item
@@ -172,7 +172,7 @@ script ShopService extends Logic
 		end
 		
 		-- 클라이언트 데이터 동기화
-		for id, item in pairs(self.PRODUCT_ID_DICT) do
+		for id, item in pairs(self.PRODUCT_ID_DICT) do	
 			local json = _HttpService:JSONEncode(item)
 			self.productInfo[id] = json
 		end

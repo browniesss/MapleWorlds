@@ -1,0 +1,99 @@
+@Logic
+script UserSkillService extends Logic
+
+	@Sync
+	property SyncTable<string> userSkillList
+
+	property string STORAGE_NAME = "SKILL"
+
+	@ExecSpace("ServerOnly")
+	method integer INIT(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local code, json = ds:GetAndWait(self.STORAGE_NAME)
+		if code ~= 0 then
+			return code
+		end
+		
+		if json ==  nil then
+			local data = self:DEFAULT_SKILL_SET()
+			for _, id in ipairs(data) do
+				self.userSkillList[#self.userSkillList + 1] = id
+			end
+			
+			return self:SAVE(uid)
+		end
+		
+		local data = _HttpService:JSONDecode(json)
+		for _, id in ipairs(data) do
+			self.userSkillList[#self.userSkillList + 1] = id
+		end
+		
+		return 0
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer SAVE(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local data = {}
+		for i, skillId in ipairs(self.userSkillList) do
+		    data[#data + 1] = skillId
+		end
+		
+		local save =  _HttpService:JSONEncode(data)
+		
+		return ds:SetAndWait(self.STORAGE_NAME,save)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer ADD_SKILL(string uid, table newSkillList)
+		if #newSkillList == 0 then
+			return -1
+		end
+		
+		for _, id in ipairs(newSkillList) do
+			self.userSkillList[#self.userSkillList + 1] = id
+		end
+		
+		return self:SAVE(uid)
+	end
+
+	@ExecSpace("ServerOnly")
+	method table DEFAULT_SKILL_SET()
+		local skillSet = {}
+		
+		skillSet[#skillSet + 1] = "model://0b7bcaf8-1bc2-444a-8eda-9a2e0448246d"
+		skillSet[#skillSet + 1] = "model://02330bcd-8b7c-4146-8d26-89f5e7aa953c"
+		
+		return skillSet
+	end
+
+	@EventSender("Service", "UserService")
+	handler HandleUserEnterEvent(UserEnterEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: UserService
+		-- Space: Server
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local ProfileCode = event.ProfileCode
+		-- local UserId = event.UserId
+		---------------------------------------------------------
+		self:INIT(event.UserId)
+	end
+
+	@EventSender("Service", "UserService")
+	handler HandleUserLeaveEvent(UserLeaveEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: UserService
+		-- Space: Server
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local ProfileCode = event.ProfileCode
+		-- local UserId = event.UserId
+		---------------------------------------------------------
+		self:SAVE(event.UserId)
+	end
+
+end

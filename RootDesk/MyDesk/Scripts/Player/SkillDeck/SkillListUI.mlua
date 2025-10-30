@@ -17,6 +17,7 @@ script SkillListUI extends Component
 
 	method void SetSkillItemList()
 		local equipped = {}
+		local skillHave = {}
 		local player = _EntityService:GetEntityByTag("Player")
 		if player and player.UserSkillDeck and player.UserSkillDeck.userSkillDeck then
 		    for i = 1, 2 do
@@ -26,12 +27,15 @@ script SkillListUI extends Component
 		        end
 		    end
 		end
+		for _, skillId in ipairs(_UserSkillService.userSkillList) do
+			skillHave[skillId] = true
+		end
 		
 		for id, skillData in pairs(_SkillService.skillTable) do
 		    local skillID = skillData and skillData["id"] or id
 		
 		    -- 덱에 있는 유닛이면 스킵
-		    if skillData and not equipped[skillID] and skillData['coolTime'] ~= nil  then
+		    if skillData and not equipped[skillID] and skillData['coolTime'] ~= nil and skillHave[skillID]  then
 		        local button = _SpawnService:SpawnByEntity(self.buttonPrefab, "button", Vector3.zero, self.skillUIScroll)
 		        button.SkillDeckListItem:Init(skillData)
 		    end

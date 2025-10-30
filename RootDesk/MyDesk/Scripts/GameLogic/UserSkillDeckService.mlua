@@ -36,7 +36,7 @@ script UserSkillDeckService extends Logic
 			local deckList = {}
 			local data = {}
 			
-			local allUnit = _SkillService:GetUserSkillList()
+			local allUnit = _UserSkillService:DEFAULT_SKILL_SET()
 			
 			math.randomseed(os.time())
 			for i = #allUnit, 2, -1 do
@@ -45,7 +45,7 @@ script UserSkillDeckService extends Logic
 			end
 			
 			for i = 1,2 do
-				deckList[i] = allUnit[i].id
+				deckList[i] = allUnit[i]
 			end
 			
 			log(deckList)

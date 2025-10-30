@@ -45,6 +45,7 @@ script StageService extends Logic
 		return target
 	end
 
+	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		local dataSet = _DataService:GetTable("stage")
 		
@@ -73,6 +74,7 @@ script StageService extends Logic
 			
 			self.lastStageIndex = i
 		end
+		log("STAGE SERVICE INIT DONE")
 	end
 
 	@ExecSpace("Client")
