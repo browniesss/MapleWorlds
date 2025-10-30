@@ -1,12 +1,8 @@
 @Component
 script GachaCount extends Component
 
-	property Entity SummonCountText = "dc35cc78-fe91-4de0-8eb1-889c2facfcc2"
-
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
-		self.SummonCountText.TextComponent.Text = _GachaManager.MaxSummonCount .. "회 안에 픽업캐릭터 확정"
-		
 		_UserSummonService:AddUserSummonCountCallBack("UserSummonData", self.SetSummonCount)
 	end
 
@@ -20,7 +16,9 @@ script GachaCount extends Component
 		
 		local summonCountList = _HttpService:JSONDecode(userSummonData)
 		
-		self.SummonCountText.TextComponent.Text = _GachaManager.MaxSummonCount - summonCountList.count .. "회 안에 픽업캐릭터 확정"
+		_GachaManager.GachaCountText.TextComponent.Text = _GachaManager.MaxSummonCount - summonCountList.count .. "회 안에 픽업캐릭터 확정"
+		
+		log("SetSummonCount")
 	end
 
 end

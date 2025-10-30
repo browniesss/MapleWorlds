@@ -38,7 +38,7 @@ script ExtendToggleGachaMenu extends ToggleAction
 		local youtubePlayer = _EntityService:GetEntityByPath("/ui/GachaUI/BackgroundUI/DisplayBoard/YoutubePlayerGUI")
 		local board = _EntityService:GetEntityByPath("/ui/GachaUI/BackgroundUI/DisplayBoard")
 		
-		local summonCount = _EntityService:GetEntityByPath("/ui/GachaUI/BackgroundUI/SummonCountRoot")
+		local summonCount = _EntityService:GetEntityByPath("/ui/GachaUI/BackgroundUI/GachaCountRoot")
 		
 		summonCount.GachaCount:SetSummonCount()
 		
