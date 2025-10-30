@@ -28,6 +28,9 @@ script UnitDetailInfo extends Component
 	@Sync
 	property Entity mpLabel = nil
 
+	@Sync
+	property Entity levelLabel = nil
+
 	property table unitData = {}
 
 	method void OnBeginPlay()
@@ -40,6 +43,7 @@ script UnitDetailInfo extends Component
 		self.attackRangeLabel = self.Entity.Children[12]
 		self.attackSpeedLabel = self.Entity.Children[14]
 		self.mpLabel = self.Entity.Children[16]
+		self.levelLabel = self.Entity.Children[17]
 	end
 
 	method void Init(table unitData)
@@ -88,6 +92,8 @@ script UnitDetailInfo extends Component
 	end
 
 	method void SetLabel()
+		local data = _UserMonsterService:GetOne(self.unitData['id'])
+		
 		self.unitName.TextComponent.Text = self.unitData['name']
 		self.powerLabel.TextComponent.Text = self.unitData['damage']
 		self.hpLabel.TextComponent.Text = self.unitData['hp']
@@ -95,6 +101,7 @@ script UnitDetailInfo extends Component
 		self.attackRangeLabel.TextComponent.Text = self.unitData['attackRange']
 		self.attackSpeedLabel.TextComponent.Text = self.unitData['attackSpeed']
 		self.mpLabel.TextComponent.Text = self.unitData['maxMp']
+		self.levelLabel.TextComponent.Text = "Level: "..data['level'] 
 	end
 
 end
