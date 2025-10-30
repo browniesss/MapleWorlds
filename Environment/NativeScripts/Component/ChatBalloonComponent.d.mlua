@@ -46,6 +46,11 @@ script ChatBalloonComponent extends Component
 	@Sync
 	property float HideDuration = 5
 
+	---@description "Sets whether to use rich text."
+	---@sealed
+	@Sync
+	property boolean IsRichText = true
+
 	---@description "Decides the content that will be displayed in the chat balloon. A chat balloon will not appear when it's nil or an empty string."
 	---@sealed
 	@Sync

@@ -1,0 +1,34 @@
+---@sealed
+@Event
+script SkeletonAnimationTimelineEvent extends EventType
+
+	---@sealed
+	property SkeletonAnimationClip AnimationClip
+
+	---@sealed
+	property string AudioPath
+
+	---@sealed
+	property float Balance
+
+	---@sealed
+	property string EventName
+
+	---@sealed
+	property float Float
+
+	---@sealed
+	property int32 Int
+
+	---@sealed
+	property string String
+
+	---@sealed
+	property float Time
+
+	---@sealed
+	property float Volume
+
+	constructor SkeletonAnimationTimelineEvent() end
+
+end

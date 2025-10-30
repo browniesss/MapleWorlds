@@ -1,0 +1,85 @@
+---@description "The content of this string is delivered to TextGUIRendererComponent."
+@Component
+script TextGUIRendererInputComponent extends Component
+
+	---@description "Sets whether to initialize the input area automatically upon completing text input."
+	---@sealed
+	property boolean AutoClear = false
+
+	---@description "The maximum number of characters that can be entered."
+	---@sealed
+	property int32 CharacterLimit = 0
+
+	---@description "Specifies the type that can be inputted."
+	---@sealed
+	property InputContentType ContentType = InputContentType.Standard
+
+	---@description "Does not perform automatic substitution when the Map Layer's name is specified in SortingLayer."
+	---@sealed
+	@Sync
+	property boolean IgnoreMapLayerCheck = false
+
+	---@description "Displays on whatever is active at the time."
+	---@sealed
+	readonly property boolean IsFocused
+
+	---@description "Specifies how to enter."
+	---@sealed
+	property InputLineType LineType = InputLineType.MultiLineSubmit
+
+	---@description "Determines the priority within the same layer. A higher number indicates higher priority."
+	---@sealed
+	@Sync
+	property int32 OrderInLayer = 0
+
+	---@description "Determines whether to set the SortingLayer and OrderInLayer values manually."
+	---@sealed
+	@Sync
+	property boolean OverrideSorting = false
+
+	---@description "This is the default text that is shown when no text is entered."
+	---@sealed
+	property string PlaceHolder
+
+	---@description "Sets the PlaceHolder color."
+	---@sealed
+	property Color PlaceHolderColor = Color(0.195, 0.195, 0.195, 0.500)
+
+	---@description "When two or more entities overlap, the priority is determined according to the Sorting Layer."
+	---@sealed
+	@Sync
+	property string SortingLayer = "UI"
+
+	---@description "The input content."
+	---@sealed
+	property string Text = "Text"
+
+	---@description "Enables text input. IsFoucsed value is changed to true a few frames after calling ActivateInputFied()."
+	---@sealed
+	method void ActivateInputField() end
+
+	---@description "Finds and returns the text matching the current language settings in LocaleDataSet when IsLocalizationKey's value is true. A Key will be used as PlaceHolder's property value. Returns PlaceHolder's property value when IsLocalizationKey's value is false."
+	---@sealed
+	method string GetLocalizedPlaceHolder() end
+
+	emitter EmitTextInputEndEditEditorEvent(TextInputEndEditEditorEvent event) end
+
+	emitter EmitTextInputEndEditEvent(TextInputEndEditEvent event) end
+
+	emitter EmitTextInputSubmitEditorEvent(TextInputSubmitEditorEvent event) end
+
+	emitter EmitTextInputSubmitEvent(TextInputSubmitEvent event) end
+
+	emitter EmitTextInputValueChangeEditorEvent(TextInputValueChangeEditorEvent event) end
+
+	emitter EmitTextInputValueChangeEvent(TextInputValueChangeEvent event) end
+
+	emitter EmitTextInputKeyDownEvent(TextInputKeyDownEvent event) end
+
+	emitter EmitTextInputKeyUpEvent(TextInputKeyUpEvent event) end
+
+	emitter EmitOrderInLayerChangedEvent(OrderInLayerChangedEvent event) end
+
+	emitter EmitSortingLayerChangedEvent(SortingLayerChangedEvent event) end
+
+end

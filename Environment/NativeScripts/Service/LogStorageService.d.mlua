@@ -17,10 +17,6 @@ script LogStorageService extends Service
 
 	---@sealed
 	@ExecSpace("ServerOnly")
-	method void SendActionLog(int32 type, string userId, any... extra) end
-
-	---@sealed
-	@ExecSpace("ServerOnly")
 	method void SendHackLog(string userId, string title, table detail, int32 cnt) end
 
 end

@@ -1,0 +1,15 @@
+---@sealed
+---@description "This wrap mode is applied to the overall frame when using an AnimationClip on the material's SpriteRUID."
+@Enum
+script MaterialAnimationClipWrapMode
+	---@description "Copies the sprite and displays it."
+	member Repeat = 0
+	---@description "Repeatedly flips the sprite up, down, left, and right."
+	member Mirror = 2
+
+	---@description "Converts numbers to the applicable type."
+	static method MaterialAnimationClipWrapMode CastFrom(number value) end
+
+	---@description "Converts strings to the applicable type."
+	static method MaterialAnimationClipWrapMode CastFrom(string value) end
+end

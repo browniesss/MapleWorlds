@@ -1,0 +1,14 @@
+---@sealed
+@Event
+script RigidbodyKinematicMoveJumpEvent extends EventType
+
+	---@description "The entity affected by the event."
+	---@sealed
+	property Entity Entity
+
+	---@sealed
+	property boolean IsJumping = false
+
+	constructor RigidbodyKinematicMoveJumpEvent() end
+
+end

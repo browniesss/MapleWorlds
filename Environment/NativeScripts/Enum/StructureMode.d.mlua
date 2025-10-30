@@ -1,0 +1,11 @@
+---@sealed
+@Enum
+script StructureMode
+	member ReadOnly = 0
+	member ExclusiveLock = 1
+	member PassiveLock = 2
+
+	static method StructureMode CastFrom(number value) end
+
+	static method StructureMode CastFrom(string value) end
+end

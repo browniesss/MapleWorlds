@@ -1,0 +1,17 @@
+---@sealed
+@Enum
+script WriteResultCode
+	member Success = 0
+	member InternalServerError = 1
+	member BadRequest = 2
+	member RequestCanceled = 3
+	member ServerTerminated = 4
+	member ServiceUnavailable = 5
+	member RateLimitExceeded = 6
+	member EnvironmentError = 7
+	member InvalidError = 8
+
+	static method WriteResultCode CastFrom(number value) end
+
+	static method WriteResultCode CastFrom(string value) end
+end

@@ -43,11 +43,6 @@ script RigidbodyComponent extends Component
 	---@sealed
 	property boolean IsBlockVerticalLine = false
 
-	---@description "This property is deprecated. It will cease to function from core version 1.26.0.0 on. Please use the KinematicMove property."
-	---@obsolete
-	---@sealed
-	property boolean IsQuaterViewMove = false
-
 	---@description "Does not fall even when reaching the end of the foothold if the value is true. You can leave the foothold with external movements, such as jumps."
 	---@sealed
 	property boolean IsolatedMove = false
@@ -76,16 +71,6 @@ script RigidbodyComponent extends Component
 	---@description "The input required for the move. Inputs are mainly controlled by MovementComponent. A positive X indicates right, and a positive Y indicates upward."
 	---@sealed
 	property Vector2 MoveVelocity
-
-	---@description "This property is deprecated. It will cease to function from core version 1.26.0.0 on. Please use the KinematicMoveAcceleration property."
-	---@obsolete
-	---@sealed
-	property float QuaterViewAccelerationX = 1
-
-	---@description "This property is deprecated. It will cease to function from core version 1.26.0.0 on. Please use the KinematicMoveAcceleration property."
-	---@obsolete
-	---@sealed
-	property float QuaterViewAccelerationY = 1
 
 	---@description "Indicates the amount shifted just before. It is read-only and is used when movement amount information is required. A valid execution space exists according to the moving subject, and LocalPlayer has the values from the Client and others from the Server."
 	---@sealed
@@ -186,6 +171,6 @@ script RigidbodyComponent extends Component
 
 	emitter EmitRigidbodyDetachEvent(RigidbodyDetachEvent event) end
 
-	emitter EmitRigidbodyQuartviewJumpEvent(RigidbodyQuartviewJumpEvent event) end
+	emitter EmitRigidbodyKinematicMoveJumpEvent(RigidbodyKinematicMoveJumpEvent event) end
 
 end

@@ -1,0 +1,86 @@
+---@description "The parent component of all Components. Provides basic functions of Components."
+@Component
+script SkeletonRendererComponent extends Component
+
+	---@description "Sets the animation for track 1. Animations play in index order."
+	---@sealed
+	@Sync
+	property SyncList<string> AnimationNames
+
+	---@description "Sets the color."
+	---@sealed
+	@Sync
+	property Color Color = Color(1.000, 1.000, 1.000, 1.000)
+
+	---@sealed
+	@Sync
+	property boolean FlipX = false
+
+	---@sealed
+	@Sync
+	property boolean FlipY = false
+
+	---@sealed
+	@Sync
+	property boolean IgnoreMapLayerCheck = false
+
+	---@sealed
+	@Sync
+	property boolean Loop = true
+
+	---@sealed
+	@Sync
+	property int32 OrderInLayer = 0
+
+	---@description "Sets the animation play speed."
+	---@sealed
+	@Sync
+	property float PlayRate = 1
+
+	---@sealed
+	@Sync
+	property string SkeletonRUID = ""
+
+	---@description "Sets the skin."
+	---@sealed
+	@Sync
+	property SyncList<string> SkinNames
+
+	---@sealed
+	@Sync
+	property string SortingLayer = "Default"
+
+	---@description "Adds an animation to the track. Sets the track number, animation name, and misc properties to animationClip. Track 1 can't be used."
+	---@sealed
+	method void AddAnimation(SkeletonAnimationClip animationClip) end
+
+	---@description "Adds an empty animation to the track. Sets the track number and misc properties to animationClip. Track 1 can't be used."
+	---@sealed
+	method void AddEmptyAnimation(SkeletonAnimationClip animationClip) end
+
+	---@description "Empties the track. Track 1 can't be used."
+	---@sealed
+	method void ClearTrack(int32 trackIndex) end
+
+	---@description "Returns the currently playing animation."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method SkeletonAnimationClip GetCurrentAnimation(int32 trackIndex) end
+
+	---@description "Adds an attachment to the slot. If attachmentName is nil, the attachment is removed."
+	---@sealed
+	method void SetAttachment(string slotName, string attachmentName) end
+
+	emitter EmitOrderInLayerChangedEvent(OrderInLayerChangedEvent event) end
+
+	emitter EmitSortingLayerChangedEvent(SortingLayerChangedEvent event) end
+
+	emitter EmitSkeletonAnimationTimelineEvent(SkeletonAnimationTimelineEvent event) end
+
+	emitter EmitSkeletonAnimationStartEvent(SkeletonAnimationStartEvent event) end
+
+	emitter EmitSkeletonAnimationEndEvent(SkeletonAnimationEndEvent event) end
+
+	emitter EmitSkeletonAnimationCompleteEvent(SkeletonAnimationCompleteEvent event) end
+
+end

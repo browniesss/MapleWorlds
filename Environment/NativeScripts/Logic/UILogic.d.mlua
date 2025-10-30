@@ -11,27 +11,27 @@ script UILogic extends Logic
 	---@sealed
 	readonly property int32 ScreenWidth
 
-	---@description "Transforms the UI coordinates relative to the pivot of the UITransformComponent to World coordinates. You cannot use a UITransformComponent with a UIMode of World."
+	---@description "Converts the UITransformComponent's UI coordinates based on pivot to World coordinates. Cannot use a UITransformComponent with its UIMode set as World."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method Vector2 LocalUIToWorldPosition(Vector2 localUIPosition, UITransformComponent uiTransformComponent) end
 
-	---@description "Transforms the Screen coordinates to UI coordinates relative to the pivot of the UITransformComponent. You cannot use a UITransformComponent with a UIMode of World."
+	---@description "Converts the Screen coodordinates to the UITransformComponent's UI coordinates based on pivot point. Cannot use a UITransformComponent with its UIMode set as World."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method Vector2 ScreenToLocalUIPosition(Vector2 screenPosition, UITransformComponent uiTransformComponent) end
 
-	---@description "Convert Screen coordinates to UI coordinates. The origin of the UI coordinates is the pivot (Middle Center) of the top-level UI."
+	---@description "Converts Screen coordinates to UI coordinates. The UI coordinate's origin point is the pivot (Middle Center) of the top most UI."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method Vector2 ScreenToUIPosition(Vector2 screenPosition) end
 
-	---@description "Converts screen coordinates into World coordinates."
+	---@description "Converts Screen coordinates into World coordinates."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method Vector2 ScreenToWorldPosition(Vector2 screenPosition) end
 
-	---@description "Convert UI coordinates to World coordinates. The origin of the UI coordinates is the pivot (Middle Center) of the top-level UI."
+	---@description "Converts UI coordinates to World coordinates. The UI coordinate's origin point is the pivot (Middle Center) of the top most UI."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method Vector2 UIToWorldPosition(Vector2 uiPosition) end

@@ -1,0 +1,171 @@
+---@description "Displays the text on the screen. We recommend you use it in conjunction with UITransformComponent."
+@Component
+script TextGUIRendererComponent extends Component
+
+	---@description "Adjust the font size to fit the area size."
+	---@sealed
+	property boolean BestFit = false
+
+	---@description "This is the lower left color."
+	---@sealed
+	property Color BottomLeftColor = Color(1.000, 1.000, 1.000, 1.000)
+
+	---@description "This is the lower right color."
+	---@sealed
+	property Color BottomRightColor = Color(1.000, 1.000, 1.000, 1.000)
+
+	---@description "Applies a color gradient to the text. Color gradients are multiplied by the text color."
+	---@sealed
+	property boolean ColorGradient = false
+
+	---@description "Sets the maximum width to limit. Operates when sizefit is true."
+	---@sealed
+	property float ConstraintX = 100
+
+	---@description "Sets the maximum height to limit. Operates when sizefit is true."
+	---@sealed
+	property float ConstraintY = 100
+
+	---@description "Sets the font."
+	---@sealed
+	property string Font = "Default"
+
+	---@description "The color to use to render the text."
+	---@sealed
+	property Color FontColor = Color(0.000, 0.000, 0.000, 1.000)
+
+	---@description "Font size."
+	---@sealed
+	property float FontSize = 20
+
+	---@description "This is a style that's being applied to the text."
+	---@sealed
+	property FontStyleType FontStyle = FontStyleType.Normal
+
+	---@description "Selects the gradient type to be applied."
+	---@sealed
+	property GradientModes GradientMode = GradientModes.Single
+
+	---@description "This is the text's horizontal alignment."
+	---@sealed
+	property TextHorizontalAlignmentOption HorizontalAlignment = TextHorizontalAlignmentOption.Center
+
+	---@description "Does not perform automatic substitution when the Map Layer's name is specified in SortingLayer."
+	---@sealed
+	@Sync
+	property boolean IgnoreMapLayerCheck = false
+
+	---@description "Sets whether to use rich text."
+	---@sealed
+	property boolean IsRichText = true
+
+	---@description "Determines the maximum font size."
+	---@sealed
+	property float MaxSize = 40
+
+	---@description "Determines the minimum font size."
+	---@sealed
+	property float MinSize = 10
+
+	---@description "Determines the priority within the same layer. A higher number indicates higher priority."
+	---@sealed
+	@Sync
+	property int32 OrderInLayer = 0
+
+	---@description "Sets the outline color."
+	---@sealed
+	property Color OutlineColor = Color(0.000, 0.000, 0.000, 1.000)
+
+	---@description "Sets the outline thickness."
+	---@sealed
+	property float OutlineWidth = 0
+
+	---@description "Sets the handling method for when the text exceeds the horizontal area."
+	---@sealed
+	property TextOverflowMode Overflow = TextOverflowMode.Overflow
+
+	---@description "Determines whether to set the SortingLayer and OrderInLayer values manually."
+	---@sealed
+	@Sync
+	property boolean OverrideSorting = false
+
+	---@description "Sets the margin of the text area."
+	---@sealed
+	property RectOffset Padding
+
+	---@sealed
+	property int32 Page = 1
+
+	---@description "Resizes the text area to fit the text."
+	---@sealed
+	property boolean SizeFit
+
+	---@description "When two or more entities overlap, the priority is determined according to the Sorting Layer."
+	---@sealed
+	@Sync
+	property string SortingLayer = "UI"
+
+	---@description "Sets the spacing options."
+	---@sealed
+	property TextRendererSpacingOption SpacingOption
+
+	---@description "The content to be displayed."
+	---@sealed
+	property string Text = "Text"
+
+	---@description "This is the upper left color."
+	---@sealed
+	property Color TopLeftColor = Color(1.000, 1.000, 1.000, 1.000)
+
+	---@description "This is the upper right color."
+	---@sealed
+	property Color TopRightColor = Color(1.000, 1.000, 1.000, 1.000)
+
+	---@description "Sets whether a shadow will be applied."
+	---@sealed
+	property boolean Underlay = false
+
+	---@description "Sets the shadow color."
+	---@sealed
+	property Color UnderlayColor = Color(0.000, 0.000, 0.000, 1.000)
+
+	---@description "Sets the X axis location of the shadow."
+	---@sealed
+	property float UnderlayOffsetX = 0
+
+	---@description "Sets the Y axis location of the shadow."
+	---@sealed
+	property float UnderlayOffsetY = 0
+
+	---@description "Sets the width to be limited using the ConstraintX value."
+	---@sealed
+	property boolean UseConstraintX = false
+
+	---@description "Sets the height to be limited using the ConstraintY value."
+	---@sealed
+	property boolean UseConstraintY = false
+
+	---@description "This is the text's vertical alignment."
+	---@sealed
+	property TextVerticalAlignmentOption VerticalAlignment = TextVerticalAlignmentOption.Middle
+
+	---@description "Returns the text matching the current language settings in LocaleDataSet when IsLocalizationKey's value is true. A Key will be used as Text's property value. Returns Text's property value when IsLocalizationKey's value is false."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method string GetLocalizedText() end
+
+	---@description "Gets the height of the text area that is outputted to a fixed-width space."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method float GetPreferredHeight(string preferredText, float width) end
+
+	---@description "Gets the width of the input text area."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method float GetPreferredWidth(string preferredText) end
+
+	emitter EmitOrderInLayerChangedEvent(OrderInLayerChangedEvent event) end
+
+	emitter EmitSortingLayerChangedEvent(SortingLayerChangedEvent event) end
+
+end

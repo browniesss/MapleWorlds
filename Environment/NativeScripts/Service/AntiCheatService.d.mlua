@@ -9,7 +9,7 @@ script AntiCheatService extends Service
 
 	---@sealed
 	@ExecSpace("ServerOnly")
-	method void SendActionLog(int32 type, string userId, table extra) end
+	method int32 SendActionLog(int32 type, string userId, table extra) end
 
 	---@sealed
 	@ExecSpace("ServerOnly")
@@ -21,8 +21,22 @@ script AntiCheatService extends Service
 
 	---@sealed
 	@ExecSpace("ServerOnly")
+	method int32 StartRecordUserHistory(string userId) end
+
+	---@sealed
+	@ExecSpace("ServerOnly")
 	method boolean WarpAdminToWorldInstanceAndWait(string userId, string destinationWorldInstanceId) end
 
 	emitter EmitStartBotDetectionEvent(StartBotDetectionEvent event) end
+
+	emitter EmitAntiMacroResultEvent(AntiMacroResultEvent event) end
+
+	emitter EmitMacroTestStartEvent(MacroTestStartEvent event) end
+
+	emitter EmitMacroTestEndEvent(MacroTestEndEvent event) end
+
+	emitter EmitMacroTestReadyEvent(MacroTestReadyEvent event) end
+
+	emitter EmitHackLogActionEvent(HackLogActionEvent event) end
 
 end

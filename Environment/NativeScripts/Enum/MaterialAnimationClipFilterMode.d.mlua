@@ -1,0 +1,15 @@
+---@sealed
+---@description "This filter mode is applied to the overall frame when using an AnimationClip on the material's SpriteRUID."
+@Enum
+script MaterialAnimationClipFilterMode
+	---@description "Each pixel has its color displayed distinctly. The lines between colors appear much more vividly when zoomed in."
+	member Point = 0
+	---@description "Blends the colors of neighboring pixels to create a smoother color transition. The lines between the colors may look blurred when zoomed in."
+	member Bilinear = 1
+
+	---@description "Converts numbers to the applicable type."
+	static method MaterialAnimationClipFilterMode CastFrom(number value) end
+
+	---@description "Converts strings to the applicable type."
+	static method MaterialAnimationClipFilterMode CastFrom(string value) end
+end

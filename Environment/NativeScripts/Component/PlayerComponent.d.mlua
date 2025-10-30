@@ -52,7 +52,6 @@ script PlayerComponent extends Component
 	method boolean IsDead() end
 
 	---@description "Moves the player to the same location as an Entity in the worldPath, or another map if the worldPath points to it."
-	---@sealed
 	@ExecSpace("Server")
 	method void MoveToEntityByPath(string worldPath) end
 
@@ -61,7 +60,6 @@ script PlayerComponent extends Component
 	method void MoveToEntity(string entityID) end
 
 	---@description "Moves the player to a specific location on a specific map."
-	---@sealed
 	@ExecSpace("Server")
 	method void MoveToMapPosition(string mapID, Vector2 targetPosition) end
 

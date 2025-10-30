@@ -82,4 +82,24 @@ script BackgroundComponent extends Component
 	---@sealed
 	method void ChangeMaterial(string materialId) end
 
+	---@description "Sets the color by searching for the Background Piece that corresponds to pieceName."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method void SetBackgroundPieceColor(string pieceName, Color color) end
+
+	---@description "Sets activation status by searching for the Background Piece that corresponds to pieceName."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method void SetBackgroundPieceEnable(string pieceName, boolean enable) end
+
+	---@description "Sets location by searching for the Background Piece that corresponds to pieceName."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method void SetBackgroundPiecePosition(string pieceName, Vector2 position) end
+
+	---@description "Sets the background piece ratio by searching for the Background Piece that corresponds to pieceName. This ratio determines how much the Background Piece moves when the camera moves."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method void SetBackgroundPieceRatio(string pieceName, Vector2 ratio) end
+
 end
