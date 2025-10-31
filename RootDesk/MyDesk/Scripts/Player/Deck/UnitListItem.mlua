@@ -59,7 +59,7 @@ script UnitListItem extends Component
 		self.unitName.TextComponent.Text = self.unitData['name'].." X"..data['count']
 		self.skillDesc.TextComponent.Text = self.skillData['desc']
 		self.unitPriceLabel.TextComponent.Text = self.unitData['summonCost']
-		self.unitLevelLabel.TextComponent.Text = data['level']
+		self.unitLevelLabel.TextComponent.Text = "Level: "..data['level'] 
 	end
 
 	method void SetCostume()
