@@ -1,0 +1,32 @@
+@Logic
+script CustomShopService extends Logic
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		_WorldShopService:SetProcessPurchaseCallback(self.ProcessPurchase)
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean ProcessPurchase(any purchaseInfo)
+		local userEntity = _UserService:GetUserEntityByUserId(purchaseInfo.UserId)
+		local product
+		
+		if _EntityService:IsValid(userEntity) == false then
+		    log_error("유효하지 않은 사용자! PurchaseId: " .. purchaseInfo.PurchaseId .. " / " ..
+		                "UserId: " .. purchaseInfo.UserId .. " / " ..
+		                "ProductId: " .. purchaseInfo.ProductId)
+		    return false   
+		end
+		
+		self:GetPurchaseItem(purchaseInfo) 
+		return true
+	end
+
+	@ExecSpace("ServerOnly")
+	method void GetPurchaseItem(any purchaseInfo)
+		if purchaseInfo.ProductId == "O3GS3F1HP" then
+			_BillingService:AddFirstFreeCoin(purchaseInfo.UserId, 100)
+		end
+	end
+
+end
