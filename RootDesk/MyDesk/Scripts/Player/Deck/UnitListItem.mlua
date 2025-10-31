@@ -27,6 +27,9 @@ script UnitListItem extends Component
 	@Sync
 	property Entity unitPriceLabel = nil
 
+	@Sync
+	property Entity unitLevelLabel = nil
+
 	method void Init(table unitData, table skillData)
 		self.unitData = unitData
 		self.skillData = skillData
@@ -37,11 +40,14 @@ script UnitListItem extends Component
 		self.skillDesc = self.Entity.Children[4]
 		self.unitPriceSprite = self.Entity.Children[5]
 		self.unitPriceLabel = self.Entity.Children[6]
+		self.unitLevelLabel = self.Entity.Children[7]
 		
 		self:RefreshUI()
 	end
 
 	method void RefreshUI()
+		local data = _UserMonsterService:GetOne(self.unitData['id'])
+		
 		if self.unitData['isUsableCharacter'] == 0 then
 			self.unitAvartarRenderer.Visible = false
 			self.unitSprite.SpriteGUIRendererComponent.ImageRUID = self.unitData['ImageRUID']
@@ -50,9 +56,10 @@ script UnitListItem extends Component
 			self:SetCostume()
 		end
 		
-		self.unitName.TextComponent.Text = self.unitData['name']
+		self.unitName.TextComponent.Text = self.unitData['name'].." X"..data['count']
 		self.skillDesc.TextComponent.Text = self.skillData['desc']
 		self.unitPriceLabel.TextComponent.Text = self.unitData['summonCost']
+		self.unitLevelLabel.TextComponent.Text = data['level']
 	end
 
 	method void SetCostume()
