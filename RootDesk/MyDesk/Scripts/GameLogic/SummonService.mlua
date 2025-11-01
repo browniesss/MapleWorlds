@@ -21,6 +21,10 @@ script SummonService extends Logic
 			item["type"] = tostring(dataSet:GetCell(i,"type"))
 			item["value"] = tostring(dataSet:GetCell(i,"value"))
 			
+			if item["ratio"] == 0 then
+				continue
+			end
+			
 			summonPool[#summonPool + 1]= item
 		end
 		
