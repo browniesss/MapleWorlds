@@ -11,7 +11,7 @@ script UserMonsterService extends Logic
 		local allUnit = _UnitService:GetUnitList()
 		local keyList = {}
 		for i, v in ipairs(allUnit) do
-			keyList[#keyList + 1] = v.id
+			keyList[#keyList + 1] = "USER_" .. v.id
 		end
 		
 		local errCode, userAnimalPages = ds:BatchGetAndWait(keyList)
@@ -31,7 +31,7 @@ script UserMonsterService extends Logic
 				
 				local info = _HttpService:JSONDecode(data.Value)
 				
-				userMosnterList[data.KeyInfo.Key] = info
+				userMosnterList[info.id] = info
 			end
 			     
 			-- 현재 페이지가 마지막 페이지인지 확인합니다.
@@ -57,6 +57,7 @@ script UserMonsterService extends Logic
 				end
 				
 				local userMonster = {
+					id=unit,
 					level=1,
 					count=1
 				}
@@ -65,7 +66,7 @@ script UserMonsterService extends Logic
 				
 				local save = _HttpService:JSONEncode(userMonster)
 				
-				ds:SetAsync(unit, save, function() end)
+				ds:SetAsync("USER_" .. unit, save, function() end)
 			end
 		end
 		
@@ -80,12 +81,12 @@ script UserMonsterService extends Logic
 		
 		local data = {}
 		
-		for monsterId, monsterInfo in pairs(self.userMonsterDict) do
-			if keyMap[monsterId] == nil then
+		for monsterId, monsterInfo in pairs(keyMap) do
+			if self.userMonsterDict[monsterId] == nil then
 				continue
 			end
 			
-			data[monsterId] = monsterInfo
+			data["USER_" .. monsterId] = self.userMonsterDict[monsterId]
 		end
 		
 		local code, keys = ds:BatchSetAndWait(data)
@@ -105,7 +106,7 @@ script UserMonsterService extends Logic
 		local data = {}
 		
 		for monsterId, monsterInfo in pairs(self.userMonsterDict) do
-			data[monsterId] = monsterInfo
+			data["USER_" .. monsterId] = monsterInfo
 		end
 		
 		local code, keys = ds:BatchSetAndWait(data)
@@ -125,6 +126,7 @@ script UserMonsterService extends Logic
 		for _, monsterId in ipairs(idList) do
 			local json = self.userMonsterDict[monsterId]
 			local data = {
+				id=monsterId,
 				level=1,
 				count=1
 			} 
