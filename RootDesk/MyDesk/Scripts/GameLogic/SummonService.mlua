@@ -38,11 +38,12 @@ script SummonService extends Logic
 		local pool = self:GetSummonPool(pool_id)
 		local idList = {}
 		
+		local userCount = _UserSummonService:GET_SUMMON_COUNT(pool_id)
 		local item = _RandomPicker:RadomPickFromTable(pool)
 		idList[#idList + 1] = item.value
+		userCount += 1
 		
-		local userCount = _UserSummonService:GET_SUMMON_COUNT(pool_id)
-		if self:PICK_UP_CHECK(pool_id, (userCount + 1)) then
+		if self:PICK_UP_CHECK(pool_id, userCount) == true then
 			local pickUpId = self:PICK_UP_CHAR(pool_id)
 			if pickUpId == "" then
 				log_error("fail to get pick up char from " ..  pool_id)
@@ -52,16 +53,12 @@ script SummonService extends Logic
 			idList[#idList] = pickUpId
 		end
 		
+		if self:CHECK_RESET_SUMMON_COUNT(pool_id, idList[#idList]) == true then
+			userCount = 0
+		end
+		
 		_UserMonsterService:AddCount(senderUserId, idList)
-		
-		local needToResetUserSummonCount = self:CHECK_RESET_SUMMON_COUNT(pool_id, idList)
-		if needToResetUserSummonCount == true then
-			_UserSummonService:INIT_SUMMON_COUNT(senderUserId, pool_id)
-		end
-		if needToResetUserSummonCount == false then
-			_UserSummonService:ADD_SUMMON_COUNT(senderUserId, pool_id, 1)
-		end
-		
+		_UserSummonService:SET_SUMMON_COUNT(senderUserId, pool_id, userCount)
 		
 		self.summonResult[pool_id] = _HttpService:JSONEncode(idList)
 	end
@@ -77,33 +74,29 @@ script SummonService extends Logic
 		local pool = self:GetSummonPool(pool_id)
 		local idList = {}
 		
+		local userCount = _UserSummonService:GET_SUMMON_COUNT(pool_id)
 		for i = 1, 10 do
 			local item = _RandomPicker:RadomPickFromTable(pool)
 			idList[#idList + 1] = item.value
-		end
-		
-		local userCount = _UserSummonService:GET_SUMMON_COUNT(pool_id)
-		if self:PICK_UP_CHECK(pool_id, (userCount + 10)) then
-			local pickUpId = self:PICK_UP_CHAR(pool_id)
-			if pickUpId == "" then
-				log_error("fail to get pick up char from " ..  pool_id)
-				return
+			userCount += 1
+			
+			if self:PICK_UP_CHECK(pool_id, userCount) == true then
+				local pickUpId = self:PICK_UP_CHAR(pool_id)
+				if pickUpId == "" then
+					log_error("fail to get pick up char from " ..  pool_id)
+					return
+				end
+				
+				idList[#idList] = pickUpId
 			end
 			
-			local key = (DateTime.UtcNow.Elapsed % #idList)
-			
-			idList[key + 1] = pickUpId
+			if self:CHECK_RESET_SUMMON_COUNT(pool_id, idList[#idList]) == true then
+				userCount = 0
+			end
 		end
 		
 		_UserMonsterService:AddCount(senderUserId, idList)
-		
-		local needToResetUserSummonCount = self:CHECK_RESET_SUMMON_COUNT(pool_id, idList)
-		if needToResetUserSummonCount == true then
-			_UserSummonService:INIT_SUMMON_COUNT(senderUserId, pool_id)
-		end
-		if needToResetUserSummonCount == false then
-			_UserSummonService:ADD_SUMMON_COUNT(senderUserId, pool_id, 10)
-		end
+		_UserSummonService:SET_SUMMON_COUNT(senderUserId, pool_id, userCount)
 		
 		self.summonResult[pool_id] = _HttpService:JSONEncode(idList)
 	end
@@ -220,7 +213,7 @@ script SummonService extends Logic
 	end
 
 	@ExecSpace("ServerOnly")
-	method boolean CHECK_RESET_SUMMON_COUNT(string pool_id, table idList)
+	method boolean CHECK_RESET_SUMMON_COUNT(string pool_id, string unitId)
 		local json = self.summonSetting[pool_id]
 		if json == nil then
 			return false
@@ -237,13 +230,7 @@ script SummonService extends Logic
 			return false
 		end
 		
-		for i, v in ipairs(idList) do
-			if v == char then
-				return true
-			end
-		end
-		
-		return false
+		return char == unitId
 	end
 
 end
