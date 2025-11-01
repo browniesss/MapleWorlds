@@ -45,7 +45,7 @@ script StageService extends Logic
 		return target
 	end
 
-	@ExecSpace("ClientOnly")
+	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
 		local dataSet = _DataService:GetTable("stage")
 		
@@ -95,6 +95,45 @@ script StageService extends Logic
 			chapter=chapter,
 			stage=stage
 		}
+	end
+
+	@ExecSpace("Server")
+	method void ReqUpdateClient()
+		self:UpdateClientCallback(_HttpService:JSONEncode(self.data), senderUserId)
+	end
+
+	@ExecSpace("Client")
+	method void UpdateClientCallback(string json)
+		if json == nil then
+			return 
+		end
+		
+		local serverData = _HttpService:JSONDecode(json)
+		for i, stage in ipairs(serverData) do
+			log(i)
+			self.data[#self.data + 1] = stage
+			self.idMap[stage.id] = i
+			
+			if self.lastChapter < stage.chapter then
+				self.lastChapter = stage.chapter
+			end
+			
+			self.lastStageIndex = i
+		end
+	end
+
+	@EventSender("Service", "UserService")
+	handler HandleUserEnterEvent(UserEnterEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: UserService
+		-- Space: Server
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local ProfileCode = event.ProfileCode
+		-- local UserId = event.UserId
+		---------------------------------------------------------
+		self:ReqUpdateClient()
 	end
 
 end
