@@ -58,9 +58,9 @@ script PlayerCharacter extends Component
 		
 		local isTermAgree = _TermService:LOAD(self.Entity.PlayerComponent.UserId)
 		
-		if isTermAgree == 0 then
-			_TermService:AgreePopupOn()
-		end
+		-- if isTermAgree == 0 then
+		--	_TermService:AgreePopupOn()
+		-- end
 	end
 
 	method void SetIngameSkill(number skillID, number skillLevel)
