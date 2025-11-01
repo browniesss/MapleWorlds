@@ -84,13 +84,13 @@ script BillingService extends Logic
 			return -1
 		end
 		
-		for type, value in pairs(product.reward) do
-			if type == "dia_paid" then
-				self.FirstPaidCoin += value
+		for _, item in pairs(product.reward) do
+			if item.type == "dia_paid" then
+				self.FirstPaidCoin += item.value
 			end
 			
-			if type == "dia_free" then
-				self.FirstFreeCoin += value
+			if item.type == "dia_free" then
+				self.FirstFreeCoin += item.value
 			end
 		end
 		
@@ -109,9 +109,9 @@ script BillingService extends Logic
 			return -1
 		end
 		
-		for type, value in pairs(product.reward) do
-			if type == "coin" then
-				self.SecondPaidCoin += value
+		for _, item in pairs(product.reward) do
+			if item.type == "coin" then
+				self.SecondPaidCoin += item.value
 			end
 		end
 		
@@ -130,16 +130,16 @@ script BillingService extends Logic
 			return -1
 		end
 		
-		for type, value in pairs(product.price) do
-			if type == "dia" then
+		for _, item in pairs(product.price) do
+			if item.type == "dia" then
 				local freeCoin = self.FirstFreeCoin
 				local paidCoin = self.FirstPaidCoin
 				local totalCoin = freeCoin + paidCoin
-				if totalCoin < value then
+				if totalCoin < item.value then
 					return -1
 				end
 				
-				paidCoin -= value
+				paidCoin -= item.value
 				if paidCoin < 0 then
 					freeCoin += paidCoin
 					paidCoin = 0
@@ -150,9 +150,9 @@ script BillingService extends Logic
 			end
 		end
 		
-		for type, value in pairs(product.reward) do
-			if type == "coin" then
-				self.SecondFreeCoin += value
+		for _, item in pairs(product.reward) do
+			if item.type == "coin" then
+				self.SecondPaidCoin += item.value
 			end
 		end
 		

@@ -375,11 +375,12 @@ script GameManager extends Logic
 	@ExecSpace("Server")
 	method void StageClearServer(boolean isFirstClear)
 		if isFirstClear == false then
-			
+			_BillingService:AddSecondFreeCoin(senderUserId, 100)
 			return
 		end
 		_PlayCoinService:AddCoin(senderUserId, 1)
 		_BillingService:AddSecondFreeCoin(senderUserId, 500)
+		_BillingService:AddFirstFreeCoin(senderUserId, 100)
 	end
 
 	method void ShowLoadingScreen()
