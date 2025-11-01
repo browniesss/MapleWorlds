@@ -2841,7 +2841,7 @@
           "name": "MushGoldButton",
           "path": "/ui/ShopUI/ShopMenu/ShopMenuGrid/MushGoldButton",
           "nameEditable": true,
-          "enable": true,
+          "enable": false,
           "visible": true,
           "localize": true,
           "displayOrder": 1,
@@ -3269,7 +3269,7 @@
           "name": "MushDiaItemParent",
           "path": "/ui/ShopUI/ShopItemParent/MushDiaItemParent",
           "nameEditable": true,
-          "enable": false,
+          "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
@@ -7606,8 +7606,8 @@
           "name": "MushGoldItemParent",
           "path": "/ui/ShopUI/ShopItemParent/MushGoldItemParent",
           "nameEditable": true,
-          "enable": true,
-          "visible": true,
+          "enable": false,
+          "visible": false,
           "localize": true,
           "displayOrder": 1,
           "pathConstraints": "////",
@@ -9303,7 +9303,7 @@
       {
         "id": "577cf18f-67a3-403d-9103-7f0d0a3013d2",
         "path": "/ui/ShopUI/ShopItemParent/MessagePopup",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,script.PurchasePopup",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
           "name": "MessagePopup",
           "path": "/ui/ShopUI/ShopItemParent/MessagePopup",
@@ -9376,10 +9376,6 @@
               "OverrideSorting": false,
               "SortingLayer": "MapLayer0",
               "Type": 1,
-              "Enable": true
-            },
-            {
-              "@type": "script.PurchasePopup",
               "Enable": true
             }
           ],
