@@ -14,9 +14,22 @@ script GachaCount extends Component
 			return
 		end
 		
+		local summonPoolData = _SummonService:GET_SETTING(_GachaManager.GachaKey)
+		if summonPoolData == nil then
+			return
+		end
+		
+		local summonPoolCount = summonPoolData.pickup_char_limit
+		
+		_GachaManager.GachaCountRoot.Enable = true
+		if summonPoolCount == 0 then
+			_GachaManager.GachaCountRoot.Enable = false
+			return
+		end
+		
 		local summonCountList = _HttpService:JSONDecode(userSummonData)
 		
-		_GachaManager.GachaCountText.TextComponent.Text = _GachaManager.MaxSummonCount - summonCountList.count .. "회 안에 픽업캐릭터 확정"
+		_GachaManager.GachaCountText.TextComponent.Text = summonPoolCount - summonCountList.count .. "회 안에 픽업캐릭터 확정"
 		
 		log("SetSummonCount")
 	end
