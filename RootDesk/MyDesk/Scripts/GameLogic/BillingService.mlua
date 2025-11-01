@@ -243,6 +243,21 @@ script BillingService extends Logic
 		return self:SAVE(userId)
 	end
 
+	@ExecSpace("Server")
+	method boolean Function1(string productID)
+		local resultCode = _BillingService:ExchangeCoin(senderUserId, productID)
+		local messagePopup = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/MessagePopup")
+		local isSuccess = false
+		
+		if resultCode == -1 then
+			isSuccess = false
+		else
+			isSuccess = true	
+		end
+		
+		messagePopup.MessagePopup:Init(isSuccess)
+	end
+
 	@ExecSpace("ServerOnly")
 	@EventSender("Service", "UserService")
 	handler HandleUserLeaveEvent(UserLeaveEvent event)

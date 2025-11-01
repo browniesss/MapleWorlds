@@ -1,0 +1,22 @@
+@Component
+script ExtendToggleShopMenu extends ToggleAction
+
+	property number panelIndex = 0
+
+	property Entity ShopItemGrid = nil
+
+	method void ExecuteOnLogic(Toggle sender)
+		__base:ToggleGroupActivate()
+		
+		if self.ShopItemGrid then
+			self.ShopItemGrid.Enable = true
+		end
+	end
+
+	method void ExecuteOffLogic(Toggle sender)
+		if self.ShopItemGrid then
+			self.ShopItemGrid.Enable = false
+		end
+	end
+
+end

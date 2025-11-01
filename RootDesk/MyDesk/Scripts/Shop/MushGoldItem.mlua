@@ -1,0 +1,43 @@
+@Component
+script MushGoldItem extends Component
+
+	property string itemID = ""
+
+	property Entity purchaseButton = nil
+
+	@Sync
+	property Entity purchasePopup = nil
+
+	@Sync
+	property Entity coinAmountLabel = nil
+
+	@Sync
+	property Entity coinPriceLabel = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.purchasePopup = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/PurchasePopup")
+		self.purchaseButton = self.Entity:GetChildByName("PurchaseButton")
+		self.coinAmountLabel = self.Entity:GetChildByName("CoinAmountLabel")
+		self.coinPriceLabel = self.Entity:GetChildByName("PurchaseButton"):GetChildByName("PurchaseCoinLabel")
+		self.purchaseButton:ConnectEvent("ButtonClickEvent", function(event) 
+		        self:PurchaseItem()
+		   	end)
+		
+		self:SetLabel()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void SetLabel()
+		local data = _ShopService:GetProductInfoById(self.itemID)
+		self.coinAmountLabel.TextComponent.Text = data['reward'][1]['value']
+		self.coinPriceLabel.TextComponent.Text = data['price'][1]['value']
+	end
+
+	@ExecSpace("ClientOnly")
+	method void PurchaseItem()
+		local data = _ShopService:GetProductInfoById(self.itemID)
+		self.purchasePopup.PurchasePopup:Init(data, self.itemID)
+	end
+
+end
