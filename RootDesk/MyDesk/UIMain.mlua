@@ -6,6 +6,8 @@ script UIMain extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnMapEnter(Entity enteredMap)
+		log("UIMain:OnMapEnter " .. enteredMap.Name)
+		
 		if enteredMap.Name == "LobbyTest" then
 			local MainUIEntity = _EntityService:GetEntityByPath("/ui/LobbyInfoUI")
 			MainUIEntity:SetEnable(true)
@@ -30,6 +32,7 @@ script UIMain extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnMapLeave(Entity leftMap)
+		log("UIMain:OnMapLeave " .. leftMap.Name)
 		if leftMap.Name == "LobbyTest" then
 			local MainUIEntity = _EntityService:GetEntityByPath("/ui/LobbyInfoUI")
 			MainUIEntity:SetEnable(false)

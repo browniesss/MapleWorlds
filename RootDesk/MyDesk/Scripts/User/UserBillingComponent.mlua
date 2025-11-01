@@ -1,13 +1,6 @@
 @Component
 script UserBillingComponent extends Component
 
-	@ExecSpace("ServerOnly")
-	method void OnBeginPlay()
-		local uid = self.Entity.PlayerComponent.UserId
-		local res = _BillingService:LOAD_OR_INIT(uid)
-		log(uid, " result of _BillingService:LOAD_OR_INIT ", res)
-	end
-
 	@ExecSpace("ClientOnly")
 	method integer GetFirstCoin()
 		local uid = self.Entity.PlayerComponent.UserId
@@ -40,6 +33,27 @@ script UserBillingComponent extends Component
 		end
 		
 		return freeCoin + paidCoin
+	end
+
+	@ExecSpace("Server")
+	method void InitUserCoin()
+		local uid = senderUserId
+		local res = _BillingService:LOAD_OR_INIT(uid)
+		log(uid, " result of _BillingService:LOAD_OR_INIT ", res)
+	end
+
+	@EventSender("Service", "UserService")
+	handler HandleUserEnterEvent(UserEnterEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: UserService
+		-- Space: Server
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local ProfileCode = event.ProfileCode
+		-- local UserId = event.UserId
+		---------------------------------------------------------
+		self:InitUserCoin()
 	end
 
 end

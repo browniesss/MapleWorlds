@@ -71,7 +71,19 @@ script MesoIncome extends Component
 			item["income"] = tonumber(dataSet:GetCell(i,"income"))
 			
 			self.incomeData[item["id"]] = item
-		end        
+		end
+		
+		local uiEntity = _EntityService:GetEntityByPath(enteredMap.Path .. "/ingameWalletUI") 
+		if uiEntity == nil or uiEntity.MesoUI then
+			return
+		end
+		local userWalletEntity = _EntityService:GetEntityByPath(enteredMap.Path .. "/userWallet") 
+		if userWalletEntity == nil or userWalletEntity.MesoWallet then
+			return
+		end
+		
+		self.UIController = uiEntity.MesoUI
+		self.UserWallet = userWalletEntity.MesoWallet
 		
 		self.UIController:UpdateMesoIncome(self.incomeData[1]["income"])
 		

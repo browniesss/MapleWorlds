@@ -164,7 +164,7 @@ script RankingService extends Logic
 		self.fetchCallback()
 	end
 
-	@ExecSpace("ClientOnly")
+	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
 		local dataSet = _DataService:GetTable("stage")
 		
@@ -217,7 +217,7 @@ script RankingService extends Logic
 		self.userPointMap[storageKey] = score
 	end
 
-	@ExecSpace("Client")
+	@ExecSpace("Server")
 	method void InitUserPointMap(string userName)
 		local dataSet = _DataService:GetTable("stage")
 		

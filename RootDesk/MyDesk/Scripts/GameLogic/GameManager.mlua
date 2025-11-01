@@ -56,9 +56,6 @@ script GameManager extends Logic
 
 	property Entity mapTextUI = "1374988d-d50e-4f9c-8bb8-e158f9b3decf"
 
-	@Sync
-	property number NewValue1 = 0
-
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		-- 스킬 선택 UI 비활성화
@@ -168,6 +165,7 @@ script GameManager extends Logic
 		self.mapTextUI.TextComponent.Text = _StageService:GetStageById(tostring(chapterIndex * 100 + mapIndex)).name
 	end
 
+	@ExecSpace("Client")
 	method void GameEnd()
 		-- 인게임 UI 비활성화
 		self.shopUI.Enable = false
@@ -320,6 +318,9 @@ script GameManager extends Logic
 		local mesoWallet = _EntityService:GetEntityByPath(_GameManager:GetGameMapName() .. "/userWallet")
 		
 		mesoWallet.MesoWallet:SetMeso(0) 
+		
+		local userEntity =  _UserService:GetUserEntityByUserId(senderUserId)
+		_TeleportService:TeleportToMapPosition(userEntity, Vector3.zero, "LobbyTest")
 	end
 
 	@ExecSpace("Client")
@@ -461,6 +462,7 @@ script GameManager extends Logic
 	@ExecSpace("Client")
 	method void LocalGameStart()
 		local userStage = _UserService.LocalPlayer.UserStage
+		
 		if userStage.openChapter < userStage.selectChapter then
 			return
 		end
@@ -476,8 +478,7 @@ script GameManager extends Logic
 		_ResourceService:PreloadAsync(ruids, function()
 			_TimerService:ClearTimer(self.loadingTimer)
 			
-			_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage".. userStage.selectChapter.."0"..userStage.selectStage)
-			self:GameStart(userStage.selectChapter, userStage.selectStage)
+			self:GameStartPreloadcallBack()
 			self:HideLoadingScreen()
 		end) 
 	end
@@ -486,6 +487,15 @@ script GameManager extends Logic
 	method void OpenZeroEnterCoinUI()
 		local popupUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/ZeroEnterCoinUI")
 		popupUI.Visible = true
+	end
+
+	@ExecSpace("Server")
+	method void GameStartPreloadcallBack()
+		local userEntity =  _UserService:GetUserEntityByUserId(senderUserId)
+		local userStage = userEntity.UserStage
+		
+		_TeleportService:TeleportToMapPosition(userEntity, Vector3.zero, "Stage".. userStage.selectChapter.."0"..userStage.selectStage)
+		self:GameStart(userStage.selectChapter, userStage.selectStage)
 	end
 
 	@EventSender("Service", "InputService")
