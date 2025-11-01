@@ -22,8 +22,10 @@ script GachaCount extends Component
 		local summonPoolCount = summonPoolData.pickup_char_limit
 		
 		_GachaManager.GachaCountRoot.Enable = true
+		_GachaManager.GachaEndTimeRoot.Enable = true
 		if summonPoolCount == 0 then
 			_GachaManager.GachaCountRoot.Enable = false
+			_GachaManager.GachaEndTimeRoot.Enable = false
 			return
 		end
 		
