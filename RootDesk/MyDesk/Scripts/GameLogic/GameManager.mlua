@@ -446,6 +446,7 @@ script GameManager extends Logic
 		for i = 1, 8 do
 			local unitData = _UnitService:GetUnitByIDFromClient(playerDeck.userDeck[i])
 			local skillData = _SkillService:GetSkillByIDFromClient(unitData["skillID"])
+			local spawnSkillData = _SkillService:GetSkillByIDFromClient(unitData["spawnSkill"])
 			
 			local ruidString = skillData["ruids"] or ""
 		    
@@ -453,6 +454,14 @@ script GameManager extends Logic
 		    for ruid in string.gmatch(ruidString, "([^,]+)") do
 		        table.insert(ruids, ruid)
 		    end
+			
+			if spawnSkillData ~= nil then
+				local spawnSkillruidString = spawnSkillData["ruids"] or ""
+				-- 쉼표로 분리된 string을 table로 변환
+		    	for ruid in string.gmatch(spawnSkillruidString, "([^,]+)") do
+		        	table.insert(ruids, ruid)
+		    	end
+			end
 		end
 		
 		return ruids
