@@ -698,7 +698,7 @@ script Unit extends Component
 			end
 		end
 		
-		self.Entity.StateComponent:ChangeState(state)
+		self.Entity.StateComponent:ChangeState(string.upper(state))
 	end
 
 	@ExecSpace("Client")
