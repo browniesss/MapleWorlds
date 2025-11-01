@@ -1,0 +1,59 @@
+@Component
+script PurchasePopup extends Component
+
+	property table productData = {}
+
+	@Sync
+	property string productID = ""
+
+	@Sync
+	property Entity itemIcon = nil
+
+	@Sync
+	property Entity itemAmountLabel = nil
+
+	@Sync
+	property Entity purchaseButton = nil
+
+	@Sync
+	property Entity closeButton = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.itemIcon = self.Entity:GetChildByName("ItemIcon")
+		self.itemAmountLabel = self.Entity:GetChildByName("CoinAmountLabel")
+		self.purchaseButton = self.Entity:GetChildByName("PurchaseButton")
+		self.closeButton = self.Entity:GetChildByName("CloseButton")
+		
+		self.purchaseButton:ConnectEvent("ButtonClickEvent", function(event) 
+		        _BillingService:Function1(self.productID)
+		   	end)
+		
+		self.closeButton:ConnectEvent("ButtonClickEvent", function(event) 
+		        self.Entity.Enable = false
+				self.Entity.Visible = false
+		   	end)
+	end
+
+	method void Init(table data, string productID)
+		self.productData = data
+		self.productID = productID
+		
+		self.Entity.Enable = true
+		self.Entity.Visible = true
+		
+		self:SetSprite()
+		self:SetLabel()
+	end
+
+	method void SetSprite()
+		if self.productData['type'] == "coin" then
+			self.itemIcon.SpriteGUIRendererComponent.ImageRUID = "c99c895020714d47bcdc8d92da5474b7"
+		end
+	end
+
+	method void SetLabel()
+		self.itemAmountLabel.TextComponent.Text = self.productData['reward'][1]['value']
+	end
+
+end

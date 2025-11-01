@@ -1,0 +1,21 @@
+@Component
+script MushDiaItem extends Component
+
+	property string itemID = ""
+
+	property Entity purchaseButton = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.purchaseButton = self.Entity:GetChildByName("PurchaseButton")
+		self.purchaseButton:ConnectEvent("ButtonClickEvent", function(event) 
+		        self:PurchaseItem()
+		   	end)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void PurchaseItem()
+		_WorldShopService:PromptPurchase(self.itemID)
+	end
+
+end

@@ -1,0 +1,26 @@
+@Component
+script MessagePopup extends Component
+
+	@Sync
+	property Entity infoLabel = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.infoLabel = self.Entity:GetChildByName("InfoLabel") 
+	end
+
+	method void Init(boolean isSuccess)
+		if isSuccess then
+			self.infoLabel.TextComponent.Text = "구매에 성공하였습니다 !"
+		else
+			self.infoLabel.TextComponent.Text = "구매에 실패하였습니다."
+		end
+	end
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+	end
+
+end
