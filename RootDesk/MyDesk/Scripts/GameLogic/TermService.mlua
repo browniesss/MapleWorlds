@@ -11,7 +11,7 @@ script TermService extends Logic
 		
 		local save =  _HttpService:JSONEncode(data)
 		
-		return ds:SetAndWait("TERM_AGREE",save)
+		return ds:SetAndWait("USER_TERM_AGREE",save)
 		
 	end
 
@@ -19,7 +19,7 @@ script TermService extends Logic
 	method integer LOAD(string uid)
 		local ds = _DataStorageService:GetUserDataStorage(uid)
 		
-		local errCode, res = ds:GetAndWait("TERM_AGREE")
+		local errCode, res = ds:GetAndWait("USER_TERM_AGREE")
 		if errCode ~= 0 then
 			return errCode
 		end

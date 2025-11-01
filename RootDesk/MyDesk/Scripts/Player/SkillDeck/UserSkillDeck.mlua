@@ -3,8 +3,9 @@ script UserSkillDeck extends Component
 
 	property table userSkillDeck = {}
 
+	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
-		_UserSkillDeckService:LOAD(self.Entity.PlayerComponent.UserId)
+		_UserSkillDeckService:LOAD()
 	end
 
 	@ExecSpace("Client")

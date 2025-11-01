@@ -4,7 +4,7 @@ script UserSkillService extends Logic
 	@Sync
 	property SyncTable<string> userSkillList
 
-	property string STORAGE_NAME = "SKILL"
+	property string STORAGE_NAME = "USER_SKILL"
 
 	@ExecSpace("ServerOnly")
 	method integer INIT(string uid)

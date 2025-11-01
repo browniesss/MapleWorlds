@@ -7,21 +7,4 @@ script UserData extends Component
 	@Sync
 	property number CurrentExp = 0
 
-	@ExecSpace("ServerOnly")
-	method boolean Save()
-		local uid = _UserService.LocalPlayer.PlayerComponent.UserId
-		local ds = _DataStorageService:GetUserDataStorage(uid)
-		
-		ds:TransactSetAndWait(self.data)
-		
-		
-		
-		return true
-	end
-
-	method boolean Load()
-		
-		return true
-	end
-
 end

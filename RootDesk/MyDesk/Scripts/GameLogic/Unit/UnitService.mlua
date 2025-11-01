@@ -59,4 +59,21 @@ script UnitService extends Logic
 		return list
 	end
 
+	@ExecSpace("ServerOnly")
+	method table GetDefaultUnitList()
+		local set = {}
+		set[#set + 1] = "model://5aac7c14-9173-4d47-96f1-5fc5429e36c4"
+		set[#set + 1] = "model://f2205e74-b8c8-4103-a768-59b58f8e2f55"
+		set[#set + 1] = "model://af857ac1-d3ad-4509-b262-6a938c2a717c"
+		set[#set + 1] = "model://87af3002-9559-4a3b-8dcf-716c76dbeb9d"
+		set[#set + 1] = "model://85774479-3395-4a3a-92f3-e8e412d54c70"
+		set[#set + 1] = "model://7f6df940-1b16-441d-b4b2-dc13cce4400b"
+		set[#set + 1] = "model://458f195d-0342-4749-98ba-048df77ac36c"
+		set[#set + 1] = "model://9c5ee7b4-2853-4d2c-9037-c9b9c073a030"
+		set[#set + 1] = "model://ecfafcc5-4753-42ad-b097-2db304e47a1d"
+		set[#set + 1] = "model://02c5b927-1095-4f34-9d02-9c6252772f52"
+		
+		return set
+	end
+
 end

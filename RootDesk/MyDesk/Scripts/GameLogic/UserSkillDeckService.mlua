@@ -2,8 +2,8 @@
 script UserSkillDeckService extends Logic
 
 	@ExecSpace("Server")
-	method integer SAVE(string uid)
-		local ds = _DataStorageService:GetUserDataStorage(uid)
+	method integer SAVE()
+		local ds = _DataStorageService:GetUserDataStorage(senderUserId)
 		
 		local data = {}
 		local playerSkillDeck = _EntityService:GetEntityByTag("Player").UserSkillDeck
@@ -18,15 +18,15 @@ script UserSkillDeckService extends Logic
 		local save =  _HttpService:JSONEncode(data)
 		
 		log(save)
-		return ds:SetAndWait("SKILLDECK",save)
+		return ds:SetAndWait("USER_SKILLDECK",save)
 	end
 
 	@ExecSpace("Server")
-	method integer LOAD(string uid)
-		local ds = _DataStorageService:GetUserDataStorage(uid)
+	method integer LOAD()
+		local ds = _DataStorageService:GetUserDataStorage(senderUserId)
 		local playerSkillDeck = _EntityService:GetEntityByTag("Player").UserSkillDeck
 		
-		local errCode, res = ds:GetAndWait("SKILLDECK")
+		local errCode, res = ds:GetAndWait("USER_SKILLDECK")
 		if errCode ~= 0 then
 			return errCode
 		end
@@ -55,7 +55,7 @@ script UserSkillDeckService extends Logic
 			data["UserSkillDeck"] = deckList
 			local save =  _HttpService:JSONEncode(data)
 		
-			return ds:SetAndWait("SKILLDECK",save)
+			return ds:SetAndWait("USER_SKILLDECK",save)
 		end
 		
 		local resTable = _HttpService:JSONDecode(res)
@@ -67,12 +67,10 @@ script UserSkillDeckService extends Logic
 		return 0
 	end
 
+	@ExecSpace("ClientOnly")
 	@EventSender("Service", "UserService")
 	handler HandleUserLeaveEvent(UserLeaveEvent event)
-		local ProfileCode = event.ProfileCode
-		local UserId = event.UserId
-		
-		self:SAVE(UserId)
+		self:SAVE()
 	end
 
 end

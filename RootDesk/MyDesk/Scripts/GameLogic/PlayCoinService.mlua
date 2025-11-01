@@ -58,7 +58,7 @@ script PlayCoinService extends Logic
 		
 		local save =  _HttpService:JSONEncode(data)
 		
-		return ds:SetAndWait("PLAY_COIN", save)
+		return ds:SetAndWait("USER_PLAY_COIN", save)
 	end
 
 	@ExecSpace("Server")
@@ -68,7 +68,7 @@ script PlayCoinService extends Logic
 		
 		local ds = _DataStorageService:GetUserDataStorage(uid)
 		
-		local errCode, res = ds:GetAndWait("PLAY_COIN")
+		local errCode, res = ds:GetAndWait("USER_PLAY_COIN")
 		if errCode ~= 0 then
 			error("PLAY_COIN " .. tostring(errCode))
 			return

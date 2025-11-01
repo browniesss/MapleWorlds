@@ -106,6 +106,8 @@ script RankingService extends Logic
 			storageKey = storageKey .. "_" .. string.upper(key) .. "_" .. string.upper(tostring(data[key]))
 		end
 		
+		storageKey = storageKey .. "_ver_1"
+		
 		return storageKey
 	end
 

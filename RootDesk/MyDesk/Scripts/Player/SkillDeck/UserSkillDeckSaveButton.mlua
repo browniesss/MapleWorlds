@@ -5,8 +5,7 @@ script UserSkillDeckSaveButton extends Component
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
-		local player = _EntityService:GetEntityByTag("Player")
-		_UserSkillDeckService:SAVE(player.PlayerComponent.UserId)
+		_UserSkillDeckService:SAVE()
 		
 		self.userSkillDeckUI.Enable = false
 		self.userSkillDeckUI.Visible = false

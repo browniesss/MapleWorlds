@@ -28,14 +28,14 @@ script UserStage extends Component
 		
 		local userStorage = _DataStorageService:GetUserDataStorage(self.Entity.PlayerComponent.UserId)
 		
-		return userStorage:SetAndWait("stage", jsonData)
+		return userStorage:SetAndWait("USER_STAGE", jsonData)
 	end
 
 	@ExecSpace("Server")
 	method integer LOAD()
 		local userStorage = _DataStorageService:GetUserDataStorage(self.Entity.PlayerComponent.UserId)
 		
-		local getErr, jsonData = userStorage:GetAndWait("stage")
+		local getErr, jsonData = userStorage:GetAndWait("USER_STAGE")
 		
 		if getErr ~= 0 then
 			return getErr

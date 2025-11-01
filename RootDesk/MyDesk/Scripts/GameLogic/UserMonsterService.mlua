@@ -49,9 +49,10 @@ script UserMonsterService extends Logic
 			userAnimalPages:MoveToNextPageAndWait()
 		end
 		
-		if #userMosnterList < #allUnit then
-			for i, unit in ipairs(allUnit) do
-				if userMosnterList[unit.id] ~= nil then
+		local defaultUnitList = _UnitService:GetDefaultUnitList()
+		if #userMosnterList < #defaultUnitList then
+			for i, unit in ipairs(defaultUnitList) do
+				if userMosnterList[unit] ~= nil then
 					continue
 				end
 				
@@ -60,11 +61,11 @@ script UserMonsterService extends Logic
 					count=1
 				}
 				
-				userMosnterList[unit.id] = userMonster
+				userMosnterList[unit] = userMonster
 				
 				local save = _HttpService:JSONEncode(userMonster)
 				
-				ds:SetAsync(unit.id, save, function() end)
+				ds:SetAsync(unit, save, function() end)
 			end
 		end
 		

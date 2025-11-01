@@ -25,14 +25,14 @@ script BillingService extends Logic
 		data["SecondPaidCoin"] = tostring(self.SecondPaidCoin)
 		local save =  _HttpService:JSONEncode(data)
 		
-		return ds:SetAndWait("COIN",save)
+		return ds:SetAndWait("USER_COIN",save)
 	end
 
 	@ExecSpace("ServerOnly")
 	method integer LOAD(string uid)
 		local ds = _DataStorageService:GetUserDataStorage(uid)
 		
-		local errCode, res = ds:GetAndWait("COIN")
+		local errCode, res = ds:GetAndWait("USER_COIN")
 		if errCode ~= 0 then
 			return errCode
 		end
@@ -56,7 +56,7 @@ script BillingService extends Logic
 		local errCode = self:LOAD(uid)
 		
 		if errCode == 1000002 then
-			self.FirstFreeCoin = 0
+			self.FirstFreeCoin = 3000
 			self.FirstPaidCoin = 0
 			self.SecondFreeCoin = 0
 			self.SecondPaidCoin = 0
