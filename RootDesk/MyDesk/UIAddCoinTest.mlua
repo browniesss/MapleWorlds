@@ -24,7 +24,6 @@ script UIAddCoinTest extends Component
 		-- local Entity = event.Entity
 		---------------------------------------------------------
 		
-		log("add coin to " .. self.userId)
 		local res = 0
 		if self.IsFirstCoin == true then
 			res = _BillingService:AddFirstFreeCoin(self.userId, 100)
@@ -33,8 +32,6 @@ script UIAddCoinTest extends Component
 		if self.IsFirstCoin == false then
 			res = _BillingService:AddSecondFreeCoin(self.userId, 100)
 		end
-		
-		log("add result" .. res)
 	end
 
 end

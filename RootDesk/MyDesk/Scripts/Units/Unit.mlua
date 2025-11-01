@@ -510,7 +510,6 @@ script Unit extends Component
 				
 				_TimerService:SetTimerOnce(attackFunction, timerTiming)
 			else
-				log("머쉬맘 공격")
 				local animationPlaySpeed = self.attackAnimationPlayingTime / (self.attackSpeed - 0.1)
 				self.Entity.SpriteRendererComponent.PlayRate = animationPlaySpeed
 				

@@ -19,9 +19,6 @@ script MonsterSpawnService extends Component
 			return
 		end
 		local value = group[1]
-		
-		log('summon ', value.unit)
-		log('next summon delay', value.delayTs)
 		_SpawnManager:SpawnEnemy(value.unit, Vector3.zero)
 		
 		table.remove(group, 1)
@@ -77,8 +74,6 @@ script MonsterSpawnService extends Component
 			table.insert(groupTable, value)
 		end
 		
-		log('book summon group = ', group)
-		
 		self.timerIdList[#self.timerIdList + 1] = _TimerService:SetTimerOnce(
 			function() self:GroupSummon(groupTable) end,
 			0
@@ -129,8 +124,6 @@ script MonsterSpawnService extends Component
 
 	method void SetStage(integer targetChapter, integer targetStage)
 		local target = tostring(targetStage + 100 * targetChapter)
-		
-		log("current stage is " .. target)
 		
 		local settingFunction = function() 
 			local patterns = _patternRepo:GetPatternByStage(target)

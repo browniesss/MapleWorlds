@@ -30,8 +30,6 @@ script TermService extends Logic
 		
 		local resTable = _HttpService:JSONDecode(res)
 		
-		log(resTable)
-		
 		return resTable["isTermAgree"]
 	end
 

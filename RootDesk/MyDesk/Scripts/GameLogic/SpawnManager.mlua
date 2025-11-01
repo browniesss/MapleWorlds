@@ -16,7 +16,6 @@ script SpawnManager extends Logic
 		if pos == Vector3.zero then
 			spawnEntity = _SpawnService:SpawnByModelId(modelID, "Pig", spawnPos.TransformComponent.Position, spawnParent)
 		else
-			log(pos)
 			spawnEntity = _SpawnService:SpawnByModelId(modelID, "Pig", pos, spawnParent)
 		end
 		local unitData = _UnitService:GetUnitByIDFromServer(modelID)
@@ -44,7 +43,6 @@ script SpawnManager extends Logic
 	end
 
 	method boolean IsCanSpawn(integer price)
-		log(self:GetUserWallet().MesoWallet:GetMeso(), price)
 		return self:GetUserWallet().MesoWallet:GetMeso() >= price
 	end
 
