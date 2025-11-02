@@ -3759,11 +3759,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 100.0,
+                "x": -20.0,
                 "y": -212.5
               },
               "OffsetMin": {
-                "x": -100.0,
+                "x": -220.0,
                 "y": -287.5
               },
               "Pivot": {
@@ -3782,7 +3782,7 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 0.0,
+                "x": -120.0,
                 "y": -250.0
               },
               "Rotation": {
@@ -3791,7 +3791,7 @@
                 "z": -4.46236E-05
               },
               "Position": {
-                "x": 0.0,
+                "x": -120.0,
                 "y": -250.0,
                 "z": 0.0
               },
@@ -3962,6 +3962,251 @@
               "OverrideSorting": false,
               "SizeFit": false,
               "Text": "교체",
+              "UseConstraintX": false,
+              "UseConstraintY": false,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "cb420390-263e-45f2-a6e8-4bafacbc4efc",
+        "path": "/ui/UserDeckUI/UnitInfoPanel/LevelUpButton",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
+        "jsonString": {
+          "name": "LevelUpButton",
+          "path": "/ui/UserDeckUI/UnitInfoPanel/LevelUpButton",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 8,
+          "pathConstraints": "////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uibutton",
+            "sub_entity_id": null
+          },
+          "modelId": "uibutton",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 219.0,
+                "y": -212.5
+              },
+              "OffsetMin": {
+                "x": 19.0,
+                "y": -287.5
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 200.0,
+                "y": 75.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 119.0,
+                "y": -250.0
+              },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -4.46236E-05
+              },
+              "Position": {
+                "x": 119.0,
+                "y": -250.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 3.89414367E-07,
+                "w": -1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "ZRotation": -4.46236E-05,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "23da35f67171431987cf14e99683ac99"
+              },
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ButtonComponent",
+              "Colors": {
+                "NormalColor": {
+                  "r": 1.0,
+                  "g": 0.0,
+                  "b": 0.0,
+                  "a": 1.0
+                },
+                "HighlightedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "PressedColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 1.0
+                },
+                "SelectedColor": {
+                  "r": 1.0,
+                  "g": 0.0,
+                  "b": 0.0,
+                  "a": 1.0
+                },
+                "DisabledColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 0.5019608
+                },
+                "ColorMultiplier": 1.0,
+                "FadeDuration": 0.1
+              },
+              "ImageRUIDs": {
+                "HighlightedSprite": null,
+                "PressedSprite": null,
+                "SelectedSprite": null,
+                "DisabledSprite": null
+              },
+              "OverrideSorting": false,
+              "Enable": false
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "a3ac87fc-856c-4888-b07d-e50dd3f17e01",
+        "path": "/ui/UserDeckUI/UnitInfoPanel/LevelUpButton/UIText",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "UIText",
+          "path": "/ui/UserDeckUI/UnitInfoPanel/LevelUpButton/UIText",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "/////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 90.0,
+                "y": 17.5
+              },
+              "OffsetMin": {
+                "x": -90.0,
+                "y": -17.5
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 180.0,
+                "y": 35.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "BestFit": true,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 35,
+              "MaxSize": 35,
+              "MinSize": 1,
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "Overflow": 1,
+              "OverrideSorting": false,
+              "SizeFit": false,
+              "Text": "레벨 업(업데이트 예정)",
               "UseConstraintX": false,
               "UseConstraintY": false,
               "Enable": true
