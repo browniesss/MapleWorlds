@@ -1,0 +1,211 @@
+@Component
+script TutorialManager extends Component
+
+	property Entity tutorialUI = "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+
+	property integer currentStep = 1
+	property boolean isActive = false
+	property table tutorialData = {}
+
+	property Entity dimmedBackground = nil
+	property Entity highlightArea = nil
+	property Entity textPanel = nil
+	property Entity tutorialText = nil
+	property Entity tutorialArrow = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		-- UI 엔티티 참조 가져오기
+		self.dimmedBackground = _EntityService:GetEntityByPath("/ui/TutorialUI/DimmedBackground")
+		self.highlightArea = _EntityService:GetEntityByPath("/ui/TutorialUI/HighlightArea")
+		self.textPanel = _EntityService:GetEntityByPath("/ui/TutorialUI/TutorialTextPanel")
+		self.tutorialText = _EntityService:GetEntityByPath("/ui/TutorialUI/TutorialTextPanel/TutorialText")
+		self.tutorialArrow = _EntityService:GetEntityByPath("/ui/TutorialUI/TutorialArrow")
+
+		-- 하이라이트 영역 클릭 이벤트 등록
+		if self.highlightArea ~= nil and self.highlightArea.ButtonComponent ~= nil then
+			self.highlightArea.ButtonComponent.OnClickEvent:AddHandler(self, "OnHighlightClick")
+		end
+	end
+
+	@ExecSpace("Client")
+	method void StartTutorial()
+		-- TutorialRepo에서 데이터 가져오기
+		self.tutorialData = _tutorialRepo:GetAllTutorials()
+
+		if #self.tutorialData == 0 then
+			return
+		end
+
+		self.currentStep = 1
+		self.isActive = true
+
+		-- UI 활성화
+		self.tutorialUI.Enable = true
+		self.tutorialUI.Visible = true
+
+		-- 첫 번째 단계 표시
+		self:ShowCurrentStep()
+	end
+
+	@ExecSpace("Client")
+	method void ShowCurrentStep()
+		if not self.isActive or self.currentStep > #self.tutorialData then
+			self:EndTutorial()
+			return
+		end
+
+		local stepData = self.tutorialData[self.currentStep]
+
+		-- 텍스트 업데이트
+		if self.tutorialText ~= nil and self.tutorialText.TextComponent ~= nil then
+			self.tutorialText.TextComponent.Text = stepData.text
+		end
+
+		-- 하이라이트 영역 위치 및 크기 설정
+		if self.highlightArea ~= nil and self.highlightArea.UITransformComponent ~= nil then
+			local transform = self.highlightArea.UITransformComponent
+
+			-- 앵커를 좌하단(0, 0)으로 설정하고 오프셋으로 위치 지정
+			transform.AnchorsMin = Vector2(0, 0)
+			transform.AnchorsMax = Vector2(0, 0)
+
+			-- 화면 좌하단 기준으로 위치 설정
+			local halfWidth = stepData.targetWidth / 2
+			local halfHeight = stepData.targetHeight / 2
+
+			transform.OffsetMin = Vector2(stepData.targetX, stepData.targetY)
+			transform.OffsetMax = Vector2(stepData.targetX + stepData.targetWidth, stepData.targetY + stepData.targetHeight)
+
+			-- Pivot을 중앙으로 설정
+			transform.Pivot = Vector2(0.5, 0.5)
+
+			-- 위치 설정 (앵커 포인트 기준)
+			local centerX = stepData.targetX + halfWidth
+			local centerY = stepData.targetY + halfHeight
+			transform.anchoredPosition = Vector2(centerX, centerY)
+		end
+
+		-- 화살표 방향 설정 및 위치 조정
+		self:SetArrowDirection(stepData.arrowDirection, stepData)
+
+		-- 하이라이트 타입 설정 (원형 또는 사각형)
+		-- MSW에서는 SpriteGUIRendererComponent의 Type으로 설정
+		-- Type 1 = Sliced (사각형), Type 0 = Simple
+		if self.highlightArea ~= nil and self.highlightArea.SpriteGUIRendererComponent ~= nil then
+			if stepData.highlightType == "circle" then
+				-- 원형 효과를 위해 FillMethod 사용
+				self.highlightArea.SpriteGUIRendererComponent.FillMethod = 4 -- Radial360
+			else
+				-- 사각형
+				self.highlightArea.SpriteGUIRendererComponent.FillMethod = 0 -- None
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void SetArrowDirection(string direction, table stepData)
+		if self.tutorialArrow == nil or self.tutorialArrow.UITransformComponent == nil then
+			return
+		end
+
+		if direction == "none" then
+			self.tutorialArrow.Enable = false
+			self.tutorialArrow.Visible = false
+			return
+		end
+
+		self.tutorialArrow.Enable = true
+		self.tutorialArrow.Visible = true
+
+		local transform = self.tutorialArrow.UITransformComponent
+		local rotation = Vector3(0, 0, 0)
+		local offsetX = stepData.targetX + stepData.targetWidth / 2
+		local offsetY = stepData.targetY + stepData.targetHeight / 2
+
+		-- 화살표 방향에 따라 회전 및 위치 조정
+		if direction == "up" then
+			rotation = Vector3(0, 0, 0)
+			offsetY = stepData.targetY + stepData.targetHeight + 80
+		elseif direction == "down" then
+			rotation = Vector3(0, 0, 180)
+			offsetY = stepData.targetY - 80
+		elseif direction == "left" then
+			rotation = Vector3(0, 0, 90)
+			offsetX = stepData.targetX - 80
+		elseif direction == "right" then
+			rotation = Vector3(0, 0, -90)
+			offsetX = stepData.targetX + stepData.targetWidth + 80
+		end
+
+		transform.Rotation = rotation
+
+		-- 화살표 위치 설정
+		transform.AnchorsMin = Vector2(0, 0)
+		transform.AnchorsMax = Vector2(0, 0)
+		transform.anchoredPosition = Vector2(offsetX, offsetY)
+
+		-- 화살표 애니메이션 (깜빡임 효과)
+		self:AnimateArrow()
+	end
+
+	@ExecSpace("Client")
+	method void AnimateArrow()
+		-- 화살표 깜빡임 애니메이션
+		if self.tutorialArrow == nil or self.tutorialArrow.SpriteGUIRendererComponent == nil then
+			return
+		end
+
+		local sprite = self.tutorialArrow.SpriteGUIRendererComponent
+		local originalAlpha = sprite.Color.a
+
+		-- 간단한 깜빡임 효과
+		local blinkFunction = function()
+			if sprite.Color.a > 0.3 then
+				sprite.Color = Color(sprite.Color.r, sprite.Color.g, sprite.Color.b, 0.3)
+			else
+				sprite.Color = Color(sprite.Color.r, sprite.Color.g, sprite.Color.b, 1.0)
+			end
+		end
+
+		-- 0.5초마다 깜빡임
+		_TimerService:SetTimerRepeat(blinkFunction, 0.5, 0)
+	end
+
+	@ExecSpace("Client")
+	method void OnHighlightClick()
+		if not self.isActive then
+			return
+		end
+
+		-- 다음 단계로 이동
+		self.currentStep = self.currentStep + 1
+		self:ShowCurrentStep()
+	end
+
+	@ExecSpace("Client")
+	method void EndTutorial()
+		self.isActive = false
+
+		-- UI 비활성화
+		if self.tutorialUI ~= nil then
+			self.tutorialUI.Enable = false
+			self.tutorialUI.Visible = false
+		end
+
+		-- 튜토리얼 완료 처리 (예: 로컬 저장소에 완료 표시)
+		-- _DataStorageService 또는 CloudDataStoreService 사용
+	end
+
+	@ExecSpace("Client")
+	method void SkipTutorial()
+		self:EndTutorial()
+	end
+
+	@ExecSpace("Client")
+	method void ResetTutorial()
+		self.currentStep = 1
+		self:StartTutorial()
+	end
+
+end
