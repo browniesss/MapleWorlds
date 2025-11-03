@@ -1,37 +1,70 @@
-@Component
-script TutorialManager extends Component
+@Logic
+script TutorialManager extends Logic
 
-	property Entity tutorialUI = "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+	property Entity tutorialUI = nil
 
 	property integer currentStep = 1
 	property boolean isActive = false
 	property table tutorialData = {}
 
-	property Entity dimmedBackground = nil
-	property Entity highlightArea = nil
+	property Entity dimmedTop = nil
+	property Entity dimmedBottom = nil
+	property Entity dimmedLeft = nil
+	property Entity dimmedRight = nil
+	property Entity highlightBorder = nil
 	property Entity textPanel = nil
 	property Entity tutorialText = nil
 	property Entity tutorialArrow = nil
 
+	property Entity currentTargetButton = nil
+	property integer screenWidth = 1920
+	property integer screenHeight = 1080
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		-- UI 엔티티 참조 가져오기
-		self.dimmedBackground = _EntityService:GetEntityByPath("/ui/TutorialUI/DimmedBackground")
-		self.highlightArea = _EntityService:GetEntityByPath("/ui/TutorialUI/HighlightArea")
+		self.tutorialUI = _EntityService:GetEntityByPath("/ui/TutorialUI")
+		self.dimmedTop = _EntityService:GetEntityByPath("/ui/TutorialUI/DimmedTop")
+		self.dimmedBottom = _EntityService:GetEntityByPath("/ui/TutorialUI/DimmedBottom")
+		self.dimmedLeft = _EntityService:GetEntityByPath("/ui/TutorialUI/DimmedLeft")
+		self.dimmedRight = _EntityService:GetEntityByPath("/ui/TutorialUI/DimmedRight")
+		self.highlightBorder = _EntityService:GetEntityByPath("/ui/TutorialUI/HighlightBorder")
 		self.textPanel = _EntityService:GetEntityByPath("/ui/TutorialUI/TutorialTextPanel")
 		self.tutorialText = _EntityService:GetEntityByPath("/ui/TutorialUI/TutorialTextPanel/TutorialText")
 		self.tutorialArrow = _EntityService:GetEntityByPath("/ui/TutorialUI/TutorialArrow")
-
-		-- 하이라이트 영역 클릭 이벤트 등록
-		if self.highlightArea ~= nil and self.highlightArea.ButtonComponent ~= nil then
-			self.highlightArea.ButtonComponent.OnClickEvent:AddHandler(self, "OnHighlightClick")
-		end
 	end
 
 	@ExecSpace("Client")
 	method void StartTutorial()
-		-- TutorialRepo에서 데이터 가져오기
-		self.tutorialData = _tutorialRepo:GetAllTutorials()
+		-- DataSet에서 직접 데이터 가져오기
+		self.tutorialData = {}
+		local dataSet = _DataService:GetTable("Tutorial")
+
+		if dataSet == nil then
+			print("Tutorial DataSet not found!")
+			return
+		end
+
+		for index = 1, dataSet:GetRowCount() do
+			local item = {
+				id = tonumber(dataSet:GetCell(index, 'id')),
+				order = tonumber(dataSet:GetCell(index, 'order')),
+				text = tostring(dataSet:GetCell(index, 'text')),
+				targetX = tonumber(dataSet:GetCell(index, 'targetX')),
+				targetY = tonumber(dataSet:GetCell(index, 'targetY')),
+				targetWidth = tonumber(dataSet:GetCell(index, 'targetWidth')),
+				targetHeight = tonumber(dataSet:GetCell(index, 'targetHeight')),
+				highlightType = tostring(dataSet:GetCell(index, 'highlightType')),
+				arrowDirection = tostring(dataSet:GetCell(index, 'arrowDirection')),
+				targetButtonPath = tostring(dataSet:GetCell(index, 'targetButtonPath')), -- 클릭할 버튼의 경로
+			}
+			table.insert(self.tutorialData, item)
+		end
+
+		-- order로 정렬
+		table.sort(self.tutorialData, function(a, b)
+			return a.order < b.order
+		end)
 
 		if #self.tutorialData == 0 then
 			return
@@ -62,43 +95,110 @@ script TutorialManager extends Component
 			self.tutorialText.TextComponent.Text = stepData.text
 		end
 
-		-- 하이라이트 영역 위치 및 크기 설정
-		if self.highlightArea ~= nil and self.highlightArea.UITransformComponent ~= nil then
-			local transform = self.highlightArea.UITransformComponent
+		-- Dimmed 영역 설정 (하이라이트 영역 제외한 나머지 화면 어둡게)
+		self:SetupDimmedAreas(stepData)
 
-			-- 앵커를 좌하단(0, 0)으로 설정하고 오프셋으로 위치 지정
-			transform.AnchorsMin = Vector2(0, 0)
-			transform.AnchorsMax = Vector2(0, 0)
-
-			-- 화면 좌하단 기준으로 위치 설정
-			local halfWidth = stepData.targetWidth / 2
-			local halfHeight = stepData.targetHeight / 2
-
-			transform.OffsetMin = Vector2(stepData.targetX, stepData.targetY)
-			transform.OffsetMax = Vector2(stepData.targetX + stepData.targetWidth, stepData.targetY + stepData.targetHeight)
-
-			-- Pivot을 중앙으로 설정
-			transform.Pivot = Vector2(0.5, 0.5)
-
-			-- 위치 설정 (앵커 포인트 기준)
-			local centerX = stepData.targetX + halfWidth
-			local centerY = stepData.targetY + halfHeight
-			transform.anchoredPosition = Vector2(centerX, centerY)
-		end
+		-- 하이라이트 테두리 위치 및 크기 설정
+		self:SetupHighlightBorder(stepData)
 
 		-- 화살표 방향 설정 및 위치 조정
 		self:SetArrowDirection(stepData.arrowDirection, stepData)
 
-		-- 하이라이트 타입 설정 (원형 또는 사각형)
-		-- MSW에서는 SpriteGUIRendererComponent의 Type으로 설정
-		-- Type 1 = Sliced (사각형), Type 0 = Simple
-		if self.highlightArea ~= nil and self.highlightArea.SpriteGUIRendererComponent ~= nil then
+		-- 실제 버튼에 클릭 이벤트 연결
+		self:ConnectTargetButton(stepData)
+	end
+
+	@ExecSpace("Client")
+	method void SetupDimmedAreas(table stepData)
+		local targetX = stepData.targetX
+		local targetY = stepData.targetY
+		local targetWidth = stepData.targetWidth
+		local targetHeight = stepData.targetHeight
+
+		-- Top 영역: 하이라이트 위쪽 전체
+		if self.dimmedTop ~= nil and self.dimmedTop.UITransformComponent ~= nil then
+			local transform = self.dimmedTop.UITransformComponent
+			transform.AnchorsMin = Vector2(0, 0)
+			transform.AnchorsMax = Vector2(0, 0)
+			transform.OffsetMin = Vector2(0, targetY + targetHeight)
+			transform.OffsetMax = Vector2(self.screenWidth, self.screenHeight)
+		end
+
+		-- Bottom 영역: 하이라이트 아래쪽 전체
+		if self.dimmedBottom ~= nil and self.dimmedBottom.UITransformComponent ~= nil then
+			local transform = self.dimmedBottom.UITransformComponent
+			transform.AnchorsMin = Vector2(0, 0)
+			transform.AnchorsMax = Vector2(0, 0)
+			transform.OffsetMin = Vector2(0, 0)
+			transform.OffsetMax = Vector2(self.screenWidth, targetY)
+		end
+
+		-- Left 영역: 하이라이트 왼쪽 (하이라이트 높이만큼)
+		if self.dimmedLeft ~= nil and self.dimmedLeft.UITransformComponent ~= nil then
+			local transform = self.dimmedLeft.UITransformComponent
+			transform.AnchorsMin = Vector2(0, 0)
+			transform.AnchorsMax = Vector2(0, 0)
+			transform.OffsetMin = Vector2(0, targetY)
+			transform.OffsetMax = Vector2(targetX, targetY + targetHeight)
+		end
+
+		-- Right 영역: 하이라이트 오른쪽 (하이라이트 높이만큼)
+		if self.dimmedRight ~= nil and self.dimmedRight.UITransformComponent ~= nil then
+			local transform = self.dimmedRight.UITransformComponent
+			transform.AnchorsMin = Vector2(0, 0)
+			transform.AnchorsMax = Vector2(0, 0)
+			transform.OffsetMin = Vector2(targetX + targetWidth, targetY)
+			transform.OffsetMax = Vector2(self.screenWidth, targetY + targetHeight)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void SetupHighlightBorder(table stepData)
+		if self.highlightBorder == nil or self.highlightBorder.UITransformComponent == nil then
+			return
+		end
+
+		local transform = self.highlightBorder.UITransformComponent
+		transform.AnchorsMin = Vector2(0, 0)
+		transform.AnchorsMax = Vector2(0, 0)
+		transform.OffsetMin = Vector2(stepData.targetX, stepData.targetY)
+		transform.OffsetMax = Vector2(stepData.targetX + stepData.targetWidth, stepData.targetY + stepData.targetHeight)
+
+		-- 하이라이트 타입에 따라 시각적 효과 설정
+		if self.highlightBorder.SpriteGUIRendererComponent ~= nil then
 			if stepData.highlightType == "circle" then
-				-- 원형 효과를 위해 FillMethod 사용
-				self.highlightArea.SpriteGUIRendererComponent.FillMethod = 4 -- Radial360
+				self.highlightBorder.SpriteGUIRendererComponent.FillMethod = 4 -- Radial360
 			else
-				-- 사각형
-				self.highlightArea.SpriteGUIRendererComponent.FillMethod = 0 -- None
+				self.highlightBorder.SpriteGUIRendererComponent.FillMethod = 0 -- None
+			end
+		end
+
+		self.highlightBorder.Enable = true
+		self.highlightBorder.Visible = true
+	end
+
+	@ExecSpace("Client")
+	method void ConnectTargetButton(table stepData)
+		-- 이전 버튼 이벤트 연결 해제
+		if self.currentTargetButton ~= nil then
+			-- 이벤트 해제 (MSW에서 지원하는 경우)
+			self.currentTargetButton = nil
+		end
+
+		-- 실제 버튼에 클릭 이벤트 연결
+		if stepData.targetButtonPath ~= nil and stepData.targetButtonPath ~= "" then
+			local targetButton = _EntityService:GetEntityByPath(stepData.targetButtonPath)
+
+			if targetButton ~= nil then
+				self.currentTargetButton = targetButton
+
+				-- 버튼 클릭 시 다음 단계로 이동
+				targetButton:ConnectEvent("ButtonClickEvent", function(event)
+					if self.isActive then
+						self.currentStep = self.currentStep + 1
+						self:ShowCurrentStep()
+					end
+				end)
 			end
 		end
 	end
@@ -170,17 +270,6 @@ script TutorialManager extends Component
 
 		-- 0.5초마다 깜빡임
 		_TimerService:SetTimerRepeat(blinkFunction, 0.5, 0)
-	end
-
-	@ExecSpace("Client")
-	method void OnHighlightClick()
-		if not self.isActive then
-			return
-		end
-
-		-- 다음 단계로 이동
-		self.currentStep = self.currentStep + 1
-		self:ShowCurrentStep()
 	end
 
 	@ExecSpace("Client")
