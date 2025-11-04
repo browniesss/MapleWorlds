@@ -17,8 +17,8 @@ script TutorialManager extends Logic
 	property Entity tutorialArrow = nil
 
 	property Entity currentTargetButton = nil
-	property integer screenWidth = 1920
-	property integer screenHeight = 1080
+	property number screenWidth = 1920
+	property number screenHeight = 1080
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
@@ -32,10 +32,29 @@ script TutorialManager extends Logic
 		self.textPanel = _EntityService:GetEntityByPath("/ui/TutorialUI/TutorialTextPanel")
 		self.tutorialText = _EntityService:GetEntityByPath("/ui/TutorialUI/TutorialTextPanel/TutorialText")
 		self.tutorialArrow = _EntityService:GetEntityByPath("/ui/TutorialUI/TutorialArrow")
+
+		-- 실시간 화면 해상도 감지
+		self:UpdateScreenSize()
+	end
+
+	@ExecSpace("Client")
+	method void UpdateScreenSize()
+		-- Canvas의 실제 크기 가져오기
+		if self.tutorialUI ~= nil and self.tutorialUI.UITransformComponent ~= nil then
+			local canvasSize = self.tutorialUI.UITransformComponent.RectSize
+			if canvasSize ~= nil then
+				self.screenWidth = canvasSize.x
+				self.screenHeight = canvasSize.y
+				print("Tutorial Screen Size: " .. self.screenWidth .. "x" .. self.screenHeight)
+			end
+		end
 	end
 
 	@ExecSpace("Client")
 	method void StartTutorial()
+		-- 화면 크기 업데이트
+		self:UpdateScreenSize()
+
 		-- DataSet에서 직접 데이터 가져오기
 		self.tutorialData = {}
 		local dataSet = _DataService:GetTable("Tutorial")
@@ -50,13 +69,14 @@ script TutorialManager extends Logic
 				id = tonumber(dataSet:GetCell(index, 'id')),
 				order = tonumber(dataSet:GetCell(index, 'order')),
 				text = tostring(dataSet:GetCell(index, 'text')),
-				targetX = tonumber(dataSet:GetCell(index, 'targetX')),
-				targetY = tonumber(dataSet:GetCell(index, 'targetY')),
-				targetWidth = tonumber(dataSet:GetCell(index, 'targetWidth')),
-				targetHeight = tonumber(dataSet:GetCell(index, 'targetHeight')),
 				highlightType = tostring(dataSet:GetCell(index, 'highlightType')),
 				arrowDirection = tostring(dataSet:GetCell(index, 'arrowDirection')),
-				targetButtonPath = tostring(dataSet:GetCell(index, 'targetButtonPath')), -- 클릭할 버튼의 경로
+				targetButtonPath = tostring(dataSet:GetCell(index, 'targetButtonPath')),
+				-- targetX, targetY, targetWidth, targetHeight는 자동 감지로 설정
+				targetX = 0,
+				targetY = 0,
+				targetWidth = 0,
+				targetHeight = 0,
 			}
 			table.insert(self.tutorialData, item)
 		end
@@ -90,15 +110,40 @@ script TutorialManager extends Logic
 
 		local stepData = self.tutorialData[self.currentStep]
 
+		-- 버튼의 실제 위치를 자동으로 가져오기
+		if stepData.targetButtonPath ~= nil and stepData.targetButtonPath ~= "" then
+			local targetButton = _EntityService:GetEntityByPath(stepData.targetButtonPath)
+			if targetButton ~= nil and targetButton.UITransformComponent ~= nil then
+				-- 버튼의 실제 위치와 크기 자동 감지
+				local transform = targetButton.UITransformComponent
+				local rectSize = transform.RectSize
+				local anchoredPos = transform.anchoredPosition
+
+				-- 버튼의 중심 위치 기준으로 좌하단 좌표 계산
+				stepData.targetX = anchoredPos.x - rectSize.x / 2
+				stepData.targetY = anchoredPos.y - rectSize.y / 2
+				stepData.targetWidth = rectSize.x
+				stepData.targetHeight = rectSize.y
+
+				print("Auto-detected button position: " .. stepData.targetX .. ", " .. stepData.targetY .. " | Size: " .. stepData.targetWidth .. "x" .. stepData.targetHeight)
+			else
+				print("Warning: targetButtonPath '" .. stepData.targetButtonPath .. "' not found or has no UITransformComponent!")
+				return
+			end
+		else
+			print("Error: targetButtonPath is required for tutorial step " .. stepData.order)
+			return
+		end
+
 		-- 텍스트 업데이트
 		if self.tutorialText ~= nil and self.tutorialText.TextComponent ~= nil then
 			self.tutorialText.TextComponent.Text = stepData.text
 		end
 
-		-- Dimmed 영역 설정 (하이라이트 영역 제외한 나머지 화면 어둡게)
+		-- Dimmed 영역 설정 (4분할)
 		self:SetupDimmedAreas(stepData)
 
-		-- 하이라이트 테두리 위치 및 크기 설정
+		-- 하이라이트 테두리 설정
 		self:SetupHighlightBorder(stepData)
 
 		-- 화살표 방향 설정 및 위치 조정
@@ -163,15 +208,6 @@ script TutorialManager extends Logic
 		transform.AnchorsMax = Vector2(0, 0)
 		transform.OffsetMin = Vector2(stepData.targetX, stepData.targetY)
 		transform.OffsetMax = Vector2(stepData.targetX + stepData.targetWidth, stepData.targetY + stepData.targetHeight)
-
-		-- 하이라이트 타입에 따라 시각적 효과 설정
-		if self.highlightBorder.SpriteGUIRendererComponent ~= nil then
-			if stepData.highlightType == "circle" then
-				self.highlightBorder.SpriteGUIRendererComponent.FillMethod = 4 -- Radial360
-			else
-				self.highlightBorder.SpriteGUIRendererComponent.FillMethod = 0 -- None
-			end
-		end
 
 		self.highlightBorder.Enable = true
 		self.highlightBorder.Visible = true
