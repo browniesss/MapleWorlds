@@ -21,10 +21,10 @@
           "name": "TutorialUI",
           "path": "/ui/TutorialUI",
           "nameEditable": true,
-          "enable": false,
-          "visible": false,
+          "enable": true,
+          "visible": true,
           "localize": true,
-          "displayOrder": 5,
+          "displayOrder": 19,
           "pathConstraints": "//",
           "revision": 1,
           "origin": {
@@ -94,7 +94,7 @@
             {
               "@type": "MOD.Core.UIGroupComponent",
               "DefaultShow": false,
-              "GroupOrder": 5,
+              "GroupOrder": 19,
               "GroupType": 1,
               "Enable": true
             },
@@ -258,7 +258,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 0,
+          "displayOrder": 1,
           "pathConstraints": "///",
           "revision": 1,
           "origin": {
@@ -396,7 +396,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 0,
+          "displayOrder": 2,
           "pathConstraints": "///",
           "revision": 1,
           "origin": {
@@ -534,7 +534,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 0,
+          "displayOrder": 3,
           "pathConstraints": "///",
           "revision": 1,
           "origin": {
@@ -672,7 +672,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 1,
+          "displayOrder": 4,
           "pathConstraints": "///",
           "revision": 1,
           "origin": {
@@ -810,7 +810,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 2,
+          "displayOrder": 5,
           "pathConstraints": "///",
           "revision": 1,
           "origin": {
@@ -1023,17 +1023,18 @@
             {
               "@type": "MOD.Core.TextComponent",
               "Alignment": 4,
+              "BestFit": true,
               "Bold": true,
-              "Font": 1,
+              "Font": 3,
               "FontColor": {
                 "r": 0.2,
                 "g": 0.2,
                 "b": 0.2,
                 "a": 1.0
               },
-              "FontSize": 32,
+              "FontSize": 35,
               "MaxSize": 40,
-              "MinSize": 20,
+              "MinSize": 15,
               "OutlineColor": {
                 "r": 1.0,
                 "g": 1.0,
@@ -1071,7 +1072,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 3,
+          "displayOrder": 6,
           "pathConstraints": "///",
           "revision": 1,
           "origin": {
@@ -1095,11 +1096,11 @@
               "MobileOnly": false,
               "OffsetMax": {
                 "x": 50.0,
-                "y": 50.0
+                "y": -200.0
               },
               "OffsetMin": {
                 "x": -50.0,
-                "y": -50.0
+                "y": -300.0
               },
               "Pivot": {
                 "x": 0.5,
@@ -1143,7 +1144,7 @@
               "AnimClipPlayType": 0,
               "EndFrameIndex": 2147483647,
               "ImageRUID": {
-                "DataId": ""
+                "DataId": "870f78641cc4409894e4a8f77e36bdb1"
               },
               "LocalPosition": {
                 "x": 0.0,
@@ -1160,7 +1161,7 @@
               "Color": {
                 "r": 1.0,
                 "g": 1.0,
-                "b": 0.0,
+                "b": 1.0,
                 "a": 1.0
               },
               "DropShadow": false,
@@ -1192,6 +1193,252 @@
               "OutlineWidth": 3.0,
               "RaycastTarget": false,
               "Type": 1,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "5f0aea47-4e91-4204-8cdd-e409eb2b9e52",
+        "path": "/ui/TutorialUI/SkipButton",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
+        "jsonString": {
+          "name": "SkipButton",
+          "path": "/ui/TutorialUI/SkipButton",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 7,
+          "pathConstraints": "///",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uibutton",
+            "sub_entity_id": null
+          },
+          "modelId": "uibutton",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 5,
+              "AnchorsMax": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "AnchorsMin": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": -45.9718,
+                "y": -47.9375
+              },
+              "OffsetMin": {
+                "x": -445.9718,
+                "y": -197.9375
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 400.0,
+                "y": 150.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": -245.9718,
+                "y": -122.9375
+              },
+              "Position": {
+                "x": 714.0282,
+                "y": 417.0625,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "4cb749633ec7402eada8f164b8f24830"
+              },
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ButtonComponent",
+              "Colors": {
+                "NormalColor": {
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                },
+                "HighlightedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "PressedColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 1.0
+                },
+                "SelectedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "DisabledColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 0.5019608
+                },
+                "ColorMultiplier": 1.0,
+                "FadeDuration": 0.1
+              },
+              "ImageRUIDs": {
+                "HighlightedSprite": null,
+                "PressedSprite": null,
+                "SelectedSprite": null,
+                "DisabledSprite": null
+              },
+              "OverrideSorting": false,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "ea77cd29-cd65-403c-9dc6-3c4dddc9c915",
+        "path": "/ui/TutorialUI/SkipButton/UIText",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "UIText",
+          "path": "/ui/TutorialUI/SkipButton/UIText",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 200.0,
+                "y": 50.0
+              },
+              "OffsetMin": {
+                "x": -200.0,
+                "y": -50.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 400.0,
+                "y": 100.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "Color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "Enable": false
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 60,
+              "MaxSize": 60,
+              "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "OutlineWidth": 3.0,
+              "OverrideSorting": false,
+              "Text": "SKIP",
+              "UseOutLine": true,
               "Enable": true
             }
           ],

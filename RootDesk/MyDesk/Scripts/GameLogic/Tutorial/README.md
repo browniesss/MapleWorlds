@@ -18,9 +18,9 @@
   - **TutorialText**: 실제 튜토리얼 텍스트
   - **TutorialArrow**: 방향을 가리키는 화살표 (옵션)
 
-### 2. TutorialManager.mlua
+### 2. TutorialService.mlua
 - 튜토리얼 로직을 관리하는 Logic 스크립트 (전역 오브젝트)
-- 위치: `RootDesk/MyDesk/Scripts/GameLogic/Tutorial/TutorialManager.mlua`
+- 위치: `RootDesk/MyDesk/Scripts/UI/Tutorial/TutorialService.mlua`
 - DataSet에서 직접 데이터를 로드하고 튜토리얼 진행을 관리
 
 ## 동작 원리
@@ -110,17 +110,17 @@ targetButtonPath를 통해 실제 버튼의 Transform을 읽어서 자동으로 
 
 > **중요**: 4개의 Dimmed 패널은 RaycastTarget을 true로 설정하여 클릭을 차단하고, HighlightBorder는 false로 설정하여 클릭이 아래 실제 버튼으로 전달되도록 합니다.
 
-### 3. TutorialManager 전역 변수 등록
-메이플스토리 월드 에디터에서 TutorialManager를 전역 Logic으로 등록:
+### 3. TutorialService 전역 변수 등록
+메이플스토리 월드 에디터에서 TutorialService를 전역 Logic으로 등록:
 
 1. Hierarchy에서 Logic 폴더를 우클릭 또는 Create Empty
-2. 이름을 "TutorialManager"로 변경
-3. TutorialManager.mlua 스크립트 추가
-4. Inspector에서 "Global Name"을 `_TutorialManager`로 설정
+2. 이름을 "TutorialService"로 변경
+3. TutorialService.mlua 스크립트 추가
+4. Inspector에서 "Global Name"을 `_TutorialService`로 설정
 
 > **참고**: Logic 스크립트는 Unity의 GameManager처럼 실제 게임 오브젝트 없이 전역으로 동작하는 static class입니다.
 >
-> TutorialManager는 DataSet("Tutorial")에서 직접 데이터를 로드하므로 별도의 Repo가 필요 없습니다.
+> TutorialService는 DataSet("Tutorial")에서 직접 데이터를 로드하므로 별도의 Repo가 필요 없습니다.
 
 ## 사용 방법
 
@@ -128,13 +128,13 @@ targetButtonPath를 통해 실제 버튼의 Transform을 읽어서 자동으로 
 
 ```mlua
 -- 튜토리얼 시작
-_TutorialManager:StartTutorial()
+_TutorialService:StartTutorial()
 
 -- 튜토리얼 스킵
-_TutorialManager:SkipTutorial()
+_TutorialService:SkipTutorial()
 
 -- 튜토리얼 리셋
-_TutorialManager:ResetTutorial()
+_TutorialService:ResetTutorial()
 ```
 
 ### GameManager에 통합 예시
@@ -150,7 +150,7 @@ script GameManager extends Logic
 
 		if hasCompletedTutorial ~= "true" then
 			_TimerService:SetTimerOnce(function()
-				_TutorialManager:StartTutorial()
+				_TutorialService:StartTutorial()
 			end, 1.0)
 		end
 	end
@@ -171,7 +171,7 @@ end
 handler HandlePlayerJoinEvent(PlayerJoinEvent event)
 	if event.player == _UserService.LocalPlayer then
 		_TimerService:SetTimerOnce(function()
-			_TutorialManager:StartTutorial()
+			_TutorialService:StartTutorial()
 		end, 2.0)
 	end
 end
@@ -181,7 +181,7 @@ end
 
 ### 커스텀 콜백 추가
 
-TutorialManager.mlua를 수정하여 각 단계 완료 시 콜백을 추가할 수 있습니다:
+TutorialService.mlua를 수정하여 각 단계 완료 시 콜백을 추가할 수 있습니다:
 
 ```mlua
 @ExecSpace("Client")
@@ -207,7 +207,7 @@ end
 UI 요소의 실제 좌표는 targetButtonPath를 통해 자동으로 계산됩니다:
 
 ```mlua
--- TutorialManager가 자동으로 처리하는 로직
+-- TutorialService가 자동으로 처리하는 로직
 local targetButton = _EntityService:GetEntityByPath(stepData.targetButtonPath)
 if targetButton ~= nil and targetButton.UITransformComponent ~= nil then
     local transform = targetButton.UITransformComponent
@@ -227,10 +227,10 @@ DataSet에는 targetButtonPath만 입력하면 위치와 크기가 자동으로 
 ## 주의사항
 
 1. **좌표 시스템**:
-   - TutorialManager가 targetButtonPath를 통해 자동으로 버튼의 위치를 감지합니다
+   - TutorialService가 targetButtonPath를 통해 자동으로 버튼의 위치를 감지합니다
    - 화면 좌하단(0,0)을 기준으로 좌표가 계산됩니다
 2. **UI 해상도**:
-   - TutorialManager는 시작 시 **자동으로 현재 화면 해상도를 감지**합니다
+   - TutorialService는 시작 시 **자동으로 현재 화면 해상도를 감지**합니다
    - Canvas의 RectSize를 읽어서 screenWidth, screenHeight에 저장
    - 버튼의 실제 위치를 사용하므로 **모든 해상도에서 정확하게 동작**합니다
 3. **터치 영역**: 하이라이트 영역만 터치 가능하며, 나머지 영역은 4개의 Dimmed 패널(Top, Bottom, Left, Right)이 완벽히 차단합니다.
@@ -244,7 +244,7 @@ DataSet에는 targetButtonPath만 입력하면 위치와 크기가 자동으로 
 ## 트러블슈팅
 
 ### 튜토리얼이 시작되지 않음
-- TutorialManager가 전역 변수 `_TutorialManager`로 등록되었는지 확인
+- TutorialService가 전역 변수 `_TutorialService`로 등록되었는지 확인
 - DataSet "Tutorial"이 올바르게 생성되었는지 확인
 - 컬럼 이름이 정확한지 확인 (대소문자 구분)
 - 콘솔 로그에서 "Tutorial DataSet not found!" 메시지 확인
