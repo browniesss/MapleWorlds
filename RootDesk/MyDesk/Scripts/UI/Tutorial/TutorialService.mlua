@@ -1,0 +1,1073 @@
+@Logic
+script TutorialService extends Logic
+
+	property Entity tutorialUI = nil
+
+	property integer currentStep = 1
+
+	property boolean isActive = false
+
+	property table tutorialData = {}
+
+	property integer currentGroupId = 1
+
+	property Entity dimmedTop = nil
+
+	property Entity dimmedBottom = nil
+
+	property Entity dimmedLeft = nil
+
+	property Entity dimmedRight = nil
+
+	property Entity highlightBorder = nil
+
+	property Entity textPanel = nil
+
+	property Entity tutorialText = nil
+
+	property Entity tutorialArrow = nil
+
+	property Entity skipButton = nil
+
+	property Entity currentTargetButton = nil
+
+	property number screenWidth = 1920
+
+	property number screenHeight = 1080
+
+	property number aspectRatio = 16/9
+
+	property boolean isIPad = false
+
+	@Sync
+	property integer animateTimerID = 0
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		-- TutorialUI가 없으면 생성
+		self.tutorialUI = _EntityService:GetEntityByPath("/ui/TutorialUI")
+		if self.tutorialUI == nil then
+			print("TutorialUI not found, creating UI structure...")
+			self:CreateTutorialUI()
+		end
+		
+		-- UI 엔티티 참조 가져오기
+		self.tutorialUI = _EntityService:GetEntityByPath("/ui/TutorialUI")
+		self.dimmedTop = _EntityService:GetEntityByPath("/ui/TutorialUI/DimmedTop")
+		self.dimmedBottom = _EntityService:GetEntityByPath("/ui/TutorialUI/DimmedBottom")
+		self.dimmedLeft = _EntityService:GetEntityByPath("/ui/TutorialUI/DimmedLeft")
+		self.dimmedRight = _EntityService:GetEntityByPath("/ui/TutorialUI/DimmedRight")
+		self.highlightBorder = _EntityService:GetEntityByPath("/ui/TutorialUI/HighlightBorder")
+		self.textPanel = _EntityService:GetEntityByPath("/ui/TutorialUI/TutorialTextPanel")
+		self.tutorialText = _EntityService:GetEntityByPath("/ui/TutorialUI/TutorialTextPanel/TutorialText")
+		self.tutorialArrow = _EntityService:GetEntityByPath("/ui/TutorialUI/TutorialArrow")
+		self.skipButton = _EntityService:GetEntityByPath("/ui/TutorialUI/SkipButton")
+		
+		-- 스킵 버튼 이벤트 연결
+		if self.skipButton ~= nil then
+			self:SetupSkipButton()
+		end
+		
+		-- 실시간 화면 해상도 감지
+		self:UpdateScreenSize()
+	end
+
+	@ExecSpace("Client")
+	method void CreateTutorialUI()
+		-- TutorialUICreator의 코드를 여기에 통합
+		local canvas = _EntityService:GetEntityByPath("/ui")
+		if canvas == nil then
+			print("Error: Canvas not found at /ui")
+			return
+		end
+		
+		-- TutorialUI 메인 컨테이너 생성
+		local tutorialUI = _EntityService:CreateEntity("TutorialUI", canvas)
+		tutorialUI:AddComponent(UITransformComponent)
+		tutorialUI.UITransformComponent.AnchorsMin = Vector2(0, 0)
+		tutorialUI.UITransformComponent.AnchorsMax = Vector2(1, 1)
+		tutorialUI.UITransformComponent.OffsetMin = Vector2(0, 0)
+		tutorialUI.UITransformComponent.OffsetMax = Vector2(0, 0)
+		tutorialUI.Enable = false
+		tutorialUI.Visible = false
+		
+		-- Dimmed 패널들 생성
+		self:CreateDimmedPanel(tutorialUI, "DimmedTop")
+		self:CreateDimmedPanel(tutorialUI, "DimmedBottom")
+		self:CreateDimmedPanel(tutorialUI, "DimmedLeft")
+		self:CreateDimmedPanel(tutorialUI, "DimmedRight")
+		
+		-- 하이라이트 테두리 생성
+		self:CreateHighlightBorder(tutorialUI)
+		
+		-- 텍스트 패널 생성
+		self:CreateTextPanel(tutorialUI)
+		
+		-- 화살표 생성
+		self:CreateArrow(tutorialUI)
+		
+		-- 스킵 버튼 생성
+		self:CreateSkipButton(tutorialUI)
+		
+		print("TutorialUI structure created successfully!")
+	end
+
+	@ExecSpace("Client")
+	method void CreateDimmedPanel(Entity parent, string name)
+		local panel = _EntityService:CreateEntity(name, parent)
+		panel:AddComponent(UITransformComponent)
+		panel:AddComponent(UIColorImageRendererComponent)
+		
+		panel.UITransformComponent.AnchorsMin = Vector2(0, 0)
+		panel.UITransformComponent.AnchorsMax = Vector2(0, 0)
+		panel.UITransformComponent.OffsetMin = Vector2(0, 0)
+		panel.UITransformComponent.OffsetMax = Vector2(100, 100)
+		
+		panel.UIColorImageRendererComponent.Color = Color(0, 0, 0, 0.7)
+		panel.UIColorImageRendererComponent.RaycastTarget = true
+	end
+
+	@ExecSpace("Client")
+	method void CreateHighlightBorder(Entity parent)
+		local border = _EntityService:CreateEntity("HighlightBorder", parent)
+		border:AddComponent(UITransformComponent)
+		border:AddComponent(UIColorImageRendererComponent)
+		
+		border.UITransformComponent.AnchorsMin = Vector2(0.5, 0.5)
+		border.UITransformComponent.AnchorsMax = Vector2(0.5, 0.5)
+		border.UITransformComponent.OffsetMin = Vector2(-100, -50)
+		border.UITransformComponent.OffsetMax = Vector2(100, 50)
+		
+		border.UIColorImageRendererComponent.Color = Color(1, 1, 0, 1)
+		border.UIColorImageRendererComponent.RaycastTarget = false
+	end
+
+	@ExecSpace("Client")
+	method void CreateTextPanel(Entity parent)
+		local panel = _EntityService:CreateEntity("TutorialTextPanel", parent)
+		panel:AddComponent(UITransformComponent)
+		panel:AddComponent(UIColorImageRendererComponent)
+		
+		panel.UITransformComponent.AnchorsMin = Vector2(0.5, 0)
+		panel.UITransformComponent.AnchorsMax = Vector2(0.5, 0)
+		panel.UITransformComponent.OffsetMin = Vector2(-300, 50)
+		panel.UITransformComponent.OffsetMax = Vector2(300, 150)
+		
+		panel.UIColorImageRendererComponent.Color = Color(0, 0, 0, 0.8)
+		panel.UIColorImageRendererComponent.RaycastTarget = false
+		
+		local text = _EntityService:CreateEntity("TutorialText", panel)
+		text:AddComponent(UITransformComponent)
+		text:AddComponent(TextComponent)
+		
+		text.UITransformComponent.AnchorsMin = Vector2(0, 0)
+		text.UITransformComponent.AnchorsMax = Vector2(1, 1)
+		text.UITransformComponent.OffsetMin = Vector2(10, 10)
+		text.UITransformComponent.OffsetMax = Vector2(-10, -10)
+		
+		text.TextComponent.Text = "튜토리얼 텍스트"
+		text.TextComponent.FontSize = 20
+		text.TextComponent.Color = Color(1, 1, 1, 1)
+		text.TextComponent.AlignmentHorizontal = "Center"
+		text.TextComponent.AlignmentVertical = "Center"
+	end
+
+	@ExecSpace("Client")
+	method void CreateArrow(Entity parent)
+		local arrow = _EntityService:CreateEntity("TutorialArrow", parent)
+		arrow:AddComponent(UITransformComponent)
+		arrow:AddComponent(UIColorImageRendererComponent)
+		
+		arrow.UITransformComponent.AnchorsMin = Vector2(0.5, 0.5)
+		arrow.UITransformComponent.AnchorsMax = Vector2(0.5, 0.5)
+		arrow.UITransformComponent.OffsetMin = Vector2(-25, -25)
+		arrow.UITransformComponent.OffsetMax = Vector2(25, 25)
+		
+		arrow.UIColorImageRendererComponent.Color = Color(1, 0, 0, 1)
+		arrow.UIColorImageRendererComponent.RaycastTarget = false
+		arrow.Enable = false
+	end
+
+	@ExecSpace("Client")
+	method void CreateSkipButton(Entity parent)
+		local button = _EntityService:CreateEntity("SkipButton", parent)
+		button:AddComponent(UITransformComponent)
+		button:AddComponent(UIColorImageRendererComponent)
+		button:AddComponent(ButtonComponent)
+		
+		button.UITransformComponent.AnchorsMin = Vector2(1, 1)
+		button.UITransformComponent.AnchorsMax = Vector2(1, 1)
+		button.UITransformComponent.OffsetMin = Vector2(-120, -60)
+		button.UITransformComponent.OffsetMax = Vector2(-20, -20)
+		
+		button.UIColorImageRendererComponent.Color = Color(0.2, 0.2, 0.2, 0.9)
+		button.UIColorImageRendererComponent.RaycastTarget = true
+		
+		local buttonText = _EntityService:CreateEntity("Text", button)
+		buttonText:AddComponent(UITransformComponent)
+		buttonText:AddComponent(TextComponent)
+		
+		buttonText.UITransformComponent.AnchorsMin = Vector2(0, 0)
+		buttonText.UITransformComponent.AnchorsMax = Vector2(1, 1)
+		buttonText.UITransformComponent.OffsetMin = Vector2(0, 0)
+		buttonText.UITransformComponent.OffsetMax = Vector2(0, 0)
+		
+		buttonText.TextComponent.Text = "Skip ▶"
+		buttonText.TextComponent.FontSize = 16
+		buttonText.TextComponent.Color = Color(1, 1, 1, 1)
+		buttonText.TextComponent.AlignmentHorizontal = "Center"
+		buttonText.TextComponent.AlignmentVertical = "Center"
+		
+		button.Enable = false
+	end
+
+	@ExecSpace("Client")
+	method void UpdateScreenSize()
+		-- Canvas의 실제 크기 가져오기
+		if self.tutorialUI ~= nil and self.tutorialUI.UITransformComponent ~= nil then
+			local canvasSize = self.tutorialUI.UITransformComponent.RectSize
+			if canvasSize ~= nil then
+				self.screenWidth = canvasSize.x
+				self.screenHeight = canvasSize.y
+		
+				-- 화면 비율 계산
+				self.aspectRatio = self.screenWidth / self.screenHeight
+		
+				-- iPad 감지 (4:3 비율 = 1.33, iPad Pro는 1.43)
+				-- 일반적인 16:9 = 1.77, 16:10 = 1.6
+				if self.aspectRatio < 1.5 then
+					self.isIPad = true
+					print("iPad detected! Aspect ratio: " .. self.aspectRatio)
+				else
+					self.isIPad = false
+					print("Standard display detected. Aspect ratio: " .. self.aspectRatio)
+				end
+		
+				print("Tutorial Screen Size: " .. self.screenWidth .. "x" .. self.screenHeight)
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method Vector2 GetUIScreenPosition(Entity uiElement)
+		-- MapleStory Worlds UI 좌표를 화면 좌표로 변환
+		-- MapleStory Worlds는 화면 중앙이 (0,0)이고, 화면 좌표는 왼쪽 아래가 (0,0)
+		if uiElement == nil or uiElement.UITransformComponent == nil then
+			return Vector2(0, 0)
+		end
+		
+		local transform = uiElement.UITransformComponent
+		
+		-- 방법 1: OffsetMin과 OffsetMax가 이미 화면 좌표일 가능성
+		-- OffsetMin이 음수인 경우 화면 중앙 기준일 가능성이 높음
+		local offsetMin = transform.OffsetMin
+		local offsetMax = transform.OffsetMax
+		
+		-- 버튼의 중심점 계산
+		local centerX = (offsetMin.x + offsetMax.x) / 2
+		local centerY = (offsetMin.y + offsetMax.y) / 2
+		
+		-- 화면 중앙 기준 좌표를 화면 좌하단 기준으로 변환
+		local screenX = self.screenWidth / 2 + centerX
+		local screenY = self.screenHeight / 2 + centerY
+		
+		print("=== GetUIScreenPosition Debug ===")
+		print("  Element: " .. (uiElement.Name or "unknown"))
+		print("  OffsetMin: (" .. offsetMin.x .. ", " .. offsetMin.y .. ")")
+		print("  OffsetMax: (" .. offsetMax.x .. ", " .. offsetMax.y .. ")")
+		print("  Center (relative): (" .. centerX .. ", " .. centerY .. ")")
+		print("  Screen Position: (" .. screenX .. ", " .. screenY .. ")")
+		
+		return Vector2(screenX, screenY)
+	end
+
+	@ExecSpace("Client")
+	method void StartTutorial(integer groupId)
+		-- 그룹 ID가 제공되지 않으면 기본값 1 사용
+		if groupId == nil or groupId <= 0 then
+			groupId = 1
+		end
+		
+		self.currentGroupId = groupId
+		
+		print("=== Starting Tutorial Group " .. groupId .. " ===")
+		
+		-- 화면 크기 업데이트
+		self:UpdateScreenSize()
+		
+		-- iPad 감지 시 튜토리얼 실행 안함
+		if self.isIPad then
+			print("iPad detected - Tutorial disabled for iPad devices")
+			return
+		end
+		
+		-- DataSet에서 해당 그룹의 데이터만 가져오기
+		self.tutorialData = {}
+		local dataSet = _DataService:GetTable("Tutorial")
+		
+		if dataSet == nil then
+			print("Tutorial DataSet not found!")
+			return
+		end
+		
+		for index = 1, dataSet:GetRowCount() do
+			local itemGroupId = tonumber(dataSet:GetCell(index, 'groupId')) or 1
+		
+			-- 해당 그룹의 튜토리얼만 추가
+			if itemGroupId == groupId then
+				local item = {
+					id = tonumber(dataSet:GetCell(index, 'id')),
+					groupId = itemGroupId,
+					order = tonumber(dataSet:GetCell(index, 'order')),
+					text = tostring(dataSet:GetCell(index, 'text')),
+					highlightType = tostring(dataSet:GetCell(index, 'highlightType')),
+					arrowDirection = tostring(dataSet:GetCell(index, 'arrowDirection')),
+					targetButtonPath = tostring(dataSet:GetCell(index, 'targetButtonPath')),
+					-- targetX, targetY, targetWidth, targetHeight는 자동 감지로 설정
+					targetX = 0,
+					targetY = 0,
+					targetWidth = 0,
+					targetHeight = 0,
+				}
+				table.insert(self.tutorialData, item)
+				print("  Added tutorial step: Order=" .. item.order .. ", Text=" .. item.text)
+			end
+		end
+		
+		-- order로 정렬
+		table.sort(self.tutorialData, function(a, b)
+			return a.order < b.order
+		end)
+		
+		if #self.tutorialData == 0 then
+			print("No tutorials found for group " .. groupId)
+			return
+		end
+		
+		print("Total " .. #self.tutorialData .. " steps loaded for group " .. groupId)
+		
+		self.currentStep = 1
+		self.isActive = true
+		
+		-- UI 활성화
+		self.tutorialUI.Enable = true
+		self.tutorialUI.Visible = true
+		
+		-- 스킵 버튼 표시
+		self:ShowSkipButton()
+		
+		-- 첫 번째 단계 표시
+		self:ShowCurrentStep()
+	end
+
+	@ExecSpace("Client")
+	method void ShowCurrentStep()
+		if not self.isActive or self.currentStep > #self.tutorialData then
+			self:EndTutorial()
+			return
+		end
+		
+		local stepData = self.tutorialData[self.currentStep]
+		
+		-- 버튼의 실제 위치를 자동으로 가져오기
+		if stepData.targetButtonPath ~= nil and stepData.targetButtonPath ~= "" then
+			local targetButton = _EntityService:GetEntityByPath(stepData.targetButtonPath)
+			if targetButton ~= nil and targetButton.UITransformComponent ~= nil then
+				local transform = targetButton.UITransformComponent
+		
+				print("=== Button Position Calculation ===")
+				print("  Path: " .. stepData.targetButtonPath)
+				print("  Button Name: " .. (targetButton.Name or "unknown"))
+		
+				-- 위치 계산을 위한 변수
+				local buttonX = 0
+				local buttonY = 0
+				local buttonWidth = 100
+				local buttonHeight = 50
+				local useWorldPosition = false  -- 여기서 선언
+		
+				-- WorldPosition은 신뢰할 수 없으므로 계층 구조로만 계산
+				if false and transform.WorldPosition ~= nil then
+					-- WorldPosition은 사용하지 않음 (좌표계가 다름)
+					print("  WorldPosition exists but not using it (unreliable)")
+				end
+		
+				if true then
+					-- 방법 2: 계층 구조로 계산하되, WorldPosition도 참고
+					print("  Using hierarchy calculation method...")
+					local worldPosX = nil
+					local worldPosY = nil
+					if transform.WorldPosition ~= nil then
+						worldPosX = transform.WorldPosition.x
+						worldPosY = transform.WorldPosition.y
+						print("  WorldPosition found: (" .. worldPosX .. ", " .. worldPosY .. ")")
+						-- WorldPosition을 참고용으로 저장
+					end
+		
+					-- Pivot과 Anchor 정보도 출력
+					if transform.Pivot ~= nil then
+						print("  Pivot: (" .. transform.Pivot.x .. ", " .. transform.Pivot.y .. ")")
+					end
+		
+					local positions = {}
+					local currentEntity = targetButton
+		
+					-- 버튼부터 Canvas까지 모든 부모 수집
+					while currentEntity ~= nil do
+						if currentEntity.UITransformComponent ~= nil then
+							local trans = currentEntity.UITransformComponent
+							table.insert(positions, {
+								entity = currentEntity,
+								name = currentEntity.Name or "unknown",
+								transform = trans
+							})
+						end
+		
+						if currentEntity.Parent == nil or currentEntity.Name == "Canvas" then
+							break
+						end
+						currentEntity = currentEntity.Parent
+					end
+		
+					print("  Hierarchy depth: " .. #positions)
+		
+					-- 각 레벨에서의 실제 위치 계산
+					-- 버튼부터 시작하여 부모로 올라가며 계산
+					local worldX = 0
+					local worldY = 0
+		
+					-- 첫 번째 요소(버튼 자체)의 위치부터 시작
+					if #positions > 0 then
+						local buttonTrans = positions[1].transform
+						worldX = buttonTrans.anchoredPosition.x
+						worldY = buttonTrans.anchoredPosition.y
+		
+						print("  Starting position from button: (" .. worldX .. ", " .. worldY .. ")")
+					end
+		
+					-- 부모를 따라 올라가며 위치 누적
+					for i = 2, #positions do
+						local pos = positions[i]
+						local trans = pos.transform
+						local child = positions[i - 1]
+						local childTrans = child.transform
+		
+						print("  [" .. i .. "] " .. pos.name .. " (parent of " .. child.name .. ")")
+						print("      Parent AnchoredPos: (" .. trans.anchoredPosition.x .. ", " .. trans.anchoredPosition.y .. ")")
+						print("      Child Anchors: Min(" .. childTrans.AnchorsMin.x .. ", " .. childTrans.AnchorsMin.y ..
+						      ") Max(" .. childTrans.AnchorsMax.x .. ", " .. childTrans.AnchorsMax.y .. ")")
+		
+						-- 부모의 위치 추가
+						worldX = worldX + trans.anchoredPosition.x
+						worldY = worldY + trans.anchoredPosition.y
+		
+						-- 자식의 앵커 확인
+						local anchorMinX = childTrans.AnchorsMin.x
+						local anchorMaxX = childTrans.AnchorsMax.x
+						local anchorMinY = childTrans.AnchorsMin.y
+						local anchorMaxY = childTrans.AnchorsMax.y
+		
+						local anchorCenterX = (anchorMinX + anchorMaxX) / 2
+						local anchorCenterY = (anchorMinY + anchorMaxY) / 2
+		
+						-- 부모 크기 가져오기
+						local parentWidth = trans.RectSize.x
+						local parentHeight = trans.RectSize.y
+		
+						-- Canvas나 최상위 UI인 경우 화면 크기 사용
+						if pos.name == "Canvas" or pos.name == "LobbyInfoUI" or pos.name == "Lobby_UI" then
+							parentWidth = self.screenWidth
+							parentHeight = self.screenHeight
+							print("      Using screen size for " .. pos.name .. ": " .. parentWidth .. "x" .. parentHeight)
+						end
+		
+						-- 앵커 타입 판별
+						local anchorType = "center"
+						if anchorMinX == 0 and anchorMaxX == 0 then
+							anchorType = "left"
+						elseif anchorMinX == 1 and anchorMaxX == 1 then
+							anchorType = "right"
+						elseif anchorMinX == 0.5 and anchorMaxX == 0.5 then
+							anchorType = "center"
+						end
+		
+						local anchorVertType = "middle"
+						if anchorMinY == 0 and anchorMaxY == 0 then
+							anchorVertType = "bottom"
+						elseif anchorMinY == 1 and anchorMaxY == 1 then
+							anchorVertType = "top"
+						elseif anchorMinY == 0.5 and anchorMaxY == 0.5 then
+							anchorVertType = "middle"
+						end
+		
+						print("      Anchor type: " .. anchorType .. "-" .. anchorVertType .. " (" .. anchorMinX .. "," .. anchorMinY .. " to " .. anchorMaxX .. "," .. anchorMaxY .. ")")
+		
+						-- 앵커에 따른 오프셋 계산
+						-- 부모의 실제 크기 확인
+						if parentWidth <= 0 or parentHeight <= 0 then
+							-- 부모 크기가 없으면 기본값 사용
+							if pos.name == "top" or pos.name == "userPanel" then
+								parentWidth = 1420  -- StageInfoPanel 예상 너비
+								parentHeight = 100   -- 예상 높이
+								print("      Using estimated parent size: " .. parentWidth .. "x" .. parentHeight)
+							end
+						end
+		
+						-- X 오프셋 계산
+						if anchorCenterX ~= 0.5 and parentWidth > 0 then
+							local offsetX = (anchorCenterX - 0.5) * parentWidth
+							worldX = worldX + offsetX
+							print("      Anchor X offset: " .. offsetX .. " (anchor: " .. anchorCenterX .. ", parent width: " .. parentWidth .. ")")
+						end
+		
+						-- Y 오프셋 계산
+						if anchorCenterY ~= 0.5 and parentHeight > 0 then
+							local offsetY = (anchorCenterY - 0.5) * parentHeight
+							worldY = worldY + offsetY
+							print("      Anchor Y offset: " .. offsetY .. " (anchor: " .. anchorCenterY .. ", parent height: " .. parentHeight .. ")")
+						end
+		
+						print("      Accumulated after " .. pos.name .. ": (" .. worldX .. ", " .. worldY .. ")")
+					end
+		
+					-- 모든 버튼에 대해 계층 구조 계산 사용 (WorldPosition은 신뢰할 수 없음)
+					-- 화면 중앙 기준 좌표를 화면 좌하단 기준으로 변환
+					buttonX = self.screenWidth / 2 + worldX
+		
+					-- Y 좌표 변환
+					print("      Raw worldY before conversion: " .. worldY)
+		
+					-- 화면 중앙 기준 좌표를 화면 좌하단 기준으로 변환
+					-- MapleStory Worlds는 화면 중앙이 (0,0)
+					-- 단, Y축은 반전되어 있을 수 있음
+		
+					if stepData.targetButtonPath and stepData.targetButtonPath:find("UserDeckButton") then
+						-- UserDeckButton은 특별 처리 필요
+						-- 실제로는 화면 하단 중앙 근처에 있음 (캐릭터 버튼)
+						print("      Special adjustment for UserDeckButton")
+		
+						-- iPad에서는 다른 위치 계산 필요
+						if self.isIPad then
+							print("      iPad-specific position adjustment")
+							-- iPad는 4:3 비율이므로 UI 배치가 다름
+							-- 화면 비율에 따른 보정
+							local xOffset = 125 * (self.aspectRatio / 1.77)  -- 16:9 대비 비율 조정
+							buttonX = self.screenWidth / 2 + xOffset
+							buttonY = self.screenHeight * 0.08  -- iPad는 하단 여백이 더 큼
+						else
+							-- 일반 화면 (16:9)
+							buttonX = self.screenWidth / 2 + 125  -- 1085 (중앙에서 오른쪽으로 125)
+							buttonY = self.screenHeight * 0.05  -- 54 (화면 하단에서 5%)
+						end
+						print("      Forced position for UserDeckButton: X=" .. buttonX .. ", Y=" .. buttonY)
+					else
+						-- 일반 버튼도 iPad 대응
+						if self.isIPad then
+							-- iPad에서는 UI 스케일과 좌표계가 다름
+							print("      iPad adjustment for regular button")
+		
+							-- 스케일 팩터 계산
+							local scaleAdjustment = self.aspectRatio / 1.77
+		
+							-- X 좌표는 스케일 조정
+							buttonX = self.screenWidth / 2 + (worldX * scaleAdjustment)
+		
+							-- 상단 UI 버튼들 특별 처리 (GachaButton, UpgradeButton 등)
+							if stepData.targetButtonPath and (stepData.targetButtonPath:find("GachaButton") or stepData.targetButtonPath:find("UpgradeButton")) then
+								print("      Special adjustment for top UI buttons on iPad")
+		
+								-- WorldPosition이 있으면 그것을 우선 사용
+								if worldPosX and worldPosY then
+									print("      Using WorldPosition for top UI button positioning")
+									-- WorldPosition Y값을 직접 사용 (이미 화면 좌표계)
+									buttonX = worldPosX
+									buttonY = worldPosY
+		
+									-- iPad 스케일 조정
+									buttonX = buttonX * scaleAdjustment
+									buttonY = buttonY * scaleAdjustment
+		
+									print("      Adjusted from WorldPosition: X=" .. buttonX .. ", Y=" .. buttonY)
+								else
+									-- WorldPosition이 없으면 수동 설정
+									if stepData.targetButtonPath:find("GachaButton") then
+										-- GachaButton은 화면 상단 왼쪽에 있음
+										buttonX = 415 * scaleAdjustment  -- WorldPosition X값 기준
+										buttonY = 833 * scaleAdjustment  -- WorldPosition Y값 기준
+									elseif stepData.targetButtonPath:find("UpgradeButton") then
+										-- UpgradeButton은 GachaButton 오른쪽에 있을 가능성 높음
+										buttonX = 550 * scaleAdjustment  -- 추정 위치
+										buttonY = 833 * scaleAdjustment  -- GachaButton과 같은 높이
+									end
+								end
+							else
+								-- Y 좌표 일반 처리
+								-- worldY가 양수이고 큰 값이면 화면 상단 버튼
+								if worldY > 300 then
+									-- 상단 버튼: Y=0이 하단, Y=screenHeight가 상단
+									-- 상단 버튼은 높은 Y값 필요
+									buttonY = self.screenHeight - 150  -- 화면 상단에서 150픽셀 아래
+									print("      Top area button on iPad, Y=" .. buttonY)
+								else
+									-- 화면 중앙 기준
+									buttonY = self.screenHeight / 2 + (worldY * scaleAdjustment)
+								end
+							end
+		
+							print("      iPad adjusted position: X=" .. buttonX .. ", Y=" .. buttonY)
+						else
+							buttonX = self.screenWidth / 2 + worldX
+							buttonY = self.screenHeight / 2 + worldY
+						end
+					end
+		
+					print("      Calculated buttonY: " .. buttonY)
+		
+					-- 범위 체크
+					if buttonY < 0 then
+						print("      Y coordinate too low: " .. buttonY .. ", clamping to 50")
+						buttonY = 50
+					elseif buttonY > self.screenHeight then
+						print("      Y coordinate too high: " .. buttonY .. ", clamping to " .. (self.screenHeight - 50))
+						buttonY = self.screenHeight - 50
+					end
+				end
+		
+				-- RectSize로 크기 가져오기
+				local rectSize = transform.RectSize
+				if rectSize.x > 0 and rectSize.y > 0 then
+					buttonWidth = rectSize.x
+					buttonHeight = rectSize.y
+				else
+					-- OffsetMax - OffsetMin으로 크기 계산
+					local offsetMin = transform.OffsetMin
+					local offsetMax = transform.OffsetMax
+					local calcWidth = offsetMax.x - offsetMin.x
+					local calcHeight = offsetMax.y - offsetMin.y
+					if calcWidth > 0 then buttonWidth = calcWidth end
+					if calcHeight > 0 then buttonHeight = calcHeight end
+				end
+		
+				-- 최소 크기 보장
+				if buttonWidth < 50 then buttonWidth = 100 end
+				if buttonHeight < 30 then buttonHeight = 50 end
+		
+				-- 최종 위치와 크기 설정
+				stepData.targetX = buttonX - buttonWidth / 2
+				stepData.targetY = buttonY - buttonHeight / 2
+				stepData.targetWidth = buttonWidth
+				stepData.targetHeight = buttonHeight
+		
+				print("  Button center: (" .. buttonX .. ", " .. buttonY .. ")")
+				print("  Button size: " .. buttonWidth .. " x " .. buttonHeight)
+				print("  Final screen position: X=" .. stepData.targetX .. ", Y=" .. stepData.targetY ..
+				      ", W=" .. stepData.targetWidth .. ", H=" .. stepData.targetHeight)
+		
+				-- 위치가 화면 밖에 있는 경우 경고 및 보정
+				if stepData.targetX < 0 or stepData.targetX + stepData.targetWidth > self.screenWidth or
+				   stepData.targetY < 0 or stepData.targetY + stepData.targetHeight > self.screenHeight then
+					print("  WARNING: Button position is outside screen bounds!")
+		
+					-- 화면 내로 강제 조정
+					if stepData.targetX < 0 then
+						stepData.targetX = 10
+						print("  Clamped X to screen left edge")
+					elseif stepData.targetX + stepData.targetWidth > self.screenWidth then
+						stepData.targetX = self.screenWidth - stepData.targetWidth - 10
+						print("  Clamped X to screen right edge")
+					end
+		
+					if stepData.targetY < 0 then
+						stepData.targetY = 10
+						print("  Clamped Y to screen bottom edge")
+					elseif stepData.targetY + stepData.targetHeight > self.screenHeight then
+						stepData.targetY = self.screenHeight - stepData.targetHeight - 10
+						print("  Clamped Y to screen top edge")
+					end
+				end
+			else
+				print("Warning: targetButtonPath '" .. stepData.targetButtonPath .. "' not found or has no UITransformComponent!")
+				return
+			end
+		else
+			print("Error: targetButtonPath is required for tutorial step " .. stepData.order)
+			return
+		end
+		
+		-- 텍스트 업데이트
+		if self.tutorialText ~= nil and self.tutorialText.TextComponent ~= nil then
+			self.tutorialText.TextComponent.Text = stepData.text
+		end
+		
+		-- Dimmed 영역 설정 (4분할)
+		self:SetupDimmedAreas(stepData)
+		
+		-- 하이라이트 테두리 설정
+		self:SetupHighlightBorder(stepData)
+		
+		-- 화살표 방향 설정 및 위치 조정
+		self:SetArrowDirection(stepData.arrowDirection, stepData)
+		
+		-- 실제 버튼에 클릭 이벤트 연결
+		self:ConnectTargetButton(stepData)
+	end
+
+	@ExecSpace("Client")
+	method void SetupDimmedAreas(table stepData)
+		local targetX = stepData.targetX
+		local targetY = stepData.targetY
+		local targetWidth = stepData.targetWidth
+		local targetHeight = stepData.targetHeight
+		
+		-- 디버깅 로그
+		print("=== SetupDimmedAreas Debug ===")
+		print("Target Area: X=" .. targetX .. ", Y=" .. targetY .. ", W=" .. targetWidth .. ", H=" .. targetHeight)
+		print("Screen Size: " .. self.screenWidth .. "x" .. self.screenHeight)
+		
+		-- 모든 Dimmed 패널을 왼쪽 아래 앵커(0,0)로 고정
+		-- OffsetMin = 왼쪽 아래 모서리, OffsetMax = 오른쪽 위 모서리
+		
+		-- Top 영역: 하이라이트 박스 위쪽 전체 화면
+		if self.dimmedTop ~= nil and self.dimmedTop.UITransformComponent ~= nil then
+			local transform = self.dimmedTop.UITransformComponent
+			-- 앵커를 왼쪽 아래로 고정
+			transform.AnchorsMin = Vector2(0, 0)
+			transform.AnchorsMax = Vector2(0, 0)
+			-- 하이라이트 위쪽부터 화면 끝까지
+			transform.OffsetMin = Vector2(0, targetY + targetHeight)
+			transform.OffsetMax = Vector2(self.screenWidth, self.screenHeight)
+		
+			print("DimmedTop: Min=(0, " .. (targetY + targetHeight) .. "), Max=(" .. self.screenWidth .. ", " .. self.screenHeight .. ")")
+		end
+		
+		-- Bottom 영역: 하이라이트 박스 아래쪽 전체 화면
+		if self.dimmedBottom ~= nil and self.dimmedBottom.UITransformComponent ~= nil then
+			local transform = self.dimmedBottom.UITransformComponent
+			-- 앵커를 왼쪽 아래로 고정
+			transform.AnchorsMin = Vector2(0, 0)
+			transform.AnchorsMax = Vector2(0, 0)
+			-- 화면 바닥부터 하이라이트 아래까지
+			transform.OffsetMin = Vector2(0, 0)
+			transform.OffsetMax = Vector2(self.screenWidth, targetY)
+		
+			print("DimmedBottom: Min=(0, 0), Max=(" .. self.screenWidth .. ", " .. targetY .. ")")
+		end
+		
+		-- Left 영역: 하이라이트 박스 왼쪽 (하이라이트와 같은 높이)
+		if self.dimmedLeft ~= nil and self.dimmedLeft.UITransformComponent ~= nil then
+			local transform = self.dimmedLeft.UITransformComponent
+			-- 앵커를 왼쪽 아래로 고정
+			transform.AnchorsMin = Vector2(0, 0)
+			transform.AnchorsMax = Vector2(0, 0)
+			-- 화면 왼쪽부터 하이라이트 왼쪽까지
+			transform.OffsetMin = Vector2(0, targetY)
+			transform.OffsetMax = Vector2(targetX, targetY + targetHeight)
+		
+			print("DimmedLeft: Min=(0, " .. targetY .. "), Max=(" .. targetX .. ", " .. (targetY + targetHeight) .. ")")
+		end
+		
+		-- Right 영역: 하이라이트 박스 오른쪽 (하이라이트와 같은 높이)
+		if self.dimmedRight ~= nil and self.dimmedRight.UITransformComponent ~= nil then
+			local transform = self.dimmedRight.UITransformComponent
+			-- 앵커를 왼쪽 아래로 고정
+			transform.AnchorsMin = Vector2(0, 0)
+			transform.AnchorsMax = Vector2(0, 0)
+			-- 하이라이트 오른쪽부터 화면 오른쪽까지
+			transform.OffsetMin = Vector2(targetX + targetWidth, targetY)
+			transform.OffsetMax = Vector2(self.screenWidth, targetY + targetHeight)
+		
+			print("DimmedRight: Min=(" .. (targetX + targetWidth) .. ", " .. targetY .. "), Max=(" .. self.screenWidth .. ", " .. (targetY + targetHeight) .. ")")
+		end
+		
+		print("=== End Debug ===")
+	end
+
+	@ExecSpace("Client")
+	method void SetupHighlightBorder(table stepData)
+		if self.highlightBorder == nil or self.highlightBorder.UITransformComponent == nil then
+			return
+		end
+		
+		local transform = self.highlightBorder.UITransformComponent
+		transform.AnchorsMin = Vector2(0, 0)
+		transform.AnchorsMax = Vector2(0, 0)
+		transform.OffsetMin = Vector2(stepData.targetX, stepData.targetY)
+		transform.OffsetMax = Vector2(stepData.targetX + stepData.targetWidth, stepData.targetY + stepData.targetHeight)
+		
+		self.highlightBorder.Enable = true
+		self.highlightBorder.Visible = true
+	end
+
+	@ExecSpace("Client")
+	method void ConnectTargetButton(table stepData)
+		-- 이전 버튼 이벤트 연결 해제
+		if self.currentTargetButton ~= nil then
+			-- 이벤트 해제 (MSW에서 지원하는 경우)
+			self.currentTargetButton = nil
+		end
+		
+		-- 실제 버튼에 클릭 이벤트 연결
+		if stepData.targetButtonPath ~= nil and stepData.targetButtonPath ~= "" then
+			local targetButton = _EntityService:GetEntityByPath(stepData.targetButtonPath)
+		
+			if targetButton ~= nil then
+				self.currentTargetButton = targetButton
+		
+				-- 버튼 클릭 시 다음 단계로 이동
+				targetButton:ConnectEvent("ButtonClickEvent", function(event)
+					if self.isActive then
+						self.currentStep = self.currentStep + 1
+						self:ShowCurrentStep()
+					end
+				end)
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void SetArrowDirection(string direction, table stepData)
+		if self.tutorialArrow == nil or self.tutorialArrow.UITransformComponent == nil then
+			return
+		end
+		
+		if direction == "none" then
+			self.tutorialArrow.Enable = false
+			self.tutorialArrow.Visible = false
+			return
+		end
+		
+		self.tutorialArrow.Enable = true
+		self.tutorialArrow.Visible = true
+		
+		local transform = self.tutorialArrow.UITransformComponent
+		local rotation = Vector3(0, 0, 0)
+		local offsetX = stepData.targetX + stepData.targetWidth / 2
+		local offsetY = stepData.targetY + stepData.targetHeight / 2
+		
+		-- 화살표 방향에 따라 회전 및 위치 조정
+		if direction == "up" then
+			rotation = Vector3(0, 0, 0)
+			offsetY = stepData.targetY + stepData.targetHeight + 80
+		elseif direction == "down" then
+			rotation = Vector3(0, 0, 180)
+			offsetY = stepData.targetY - 80
+		elseif direction == "left" then
+			rotation = Vector3(0, 0, 90)
+			offsetX = stepData.targetX - 80
+		elseif direction == "right" then
+			rotation = Vector3(0, 0, -90)
+			offsetX = stepData.targetX + stepData.targetWidth + 80
+		end
+		
+		transform.Rotation = rotation
+		
+		-- 화살표 위치 설정
+		transform.AnchorsMin = Vector2(0, 0)
+		transform.AnchorsMax = Vector2(0, 0)
+		transform.anchoredPosition = Vector2(offsetX, offsetY)
+		
+		-- 화살표 애니메이션 (깜빡임 효과)
+		self:AnimateArrow()
+	end
+
+	@ExecSpace("Client")
+	method void AnimateArrow()
+		-- 화살표 깜빡임 애니메이션
+		if self.tutorialArrow == nil or self.tutorialArrow.SpriteGUIRendererComponent == nil then
+			return
+		end
+		
+		local sprite = self.tutorialArrow.SpriteGUIRendererComponent
+		
+		if self.animateTimerID ~= nil then
+			_TimerService:ClearTimer(self.animateTimerID)
+		end
+		
+		-- 간단한 깜빡임 효과
+		local blinkFunction = function()
+			if sprite.Color.a < 0.4 then
+				sprite.Color.a = 1.0
+			else
+				sprite.Color.a = 0.3
+			end
+		end
+		
+		-- 0.5초마다 깜빡임
+		self.animateTimerID = _TimerService:SetTimerRepeat(blinkFunction, 0.2, 0)
+	end
+
+	@ExecSpace("Client")
+	method void SetupSkipButton()
+		-- 스킵 버튼 설정 및 이벤트 연결
+		if self.skipButton == nil then
+			return
+		end
+		
+		self.skipButton:ConnectEvent("ButtonClickEvent", function(event) 
+		        self:SkipTutorial()
+		   	end)
+	end
+
+	@ExecSpace("Client")
+	method void ShowSkipButton()
+		-- 튜토리얼 시작 시 스킵 버튼 표시
+		if self.skipButton ~= nil then
+			self.skipButton.Enable = true
+			self.skipButton.Visible = true
+		end
+	end
+
+	@ExecSpace("Client")
+	method void HideSkipButton()
+		-- 튜토리얼 종료 시 스킵 버튼 숨김
+		if self.skipButton ~= nil then
+			self.skipButton.Enable = false
+			self.skipButton.Visible = false
+		end
+	end
+
+	@ExecSpace("Client")
+	method void EndTutorial()
+		self.isActive = false
+		
+		-- 스킵 버튼 숨김
+		self:HideSkipButton()
+		
+		-- 타이머 정리
+		if self.animateTimerID ~= nil then
+			_TimerService:ClearTimer(self.animateTimerID)
+			self.animateTimerID = nil
+		end
+		
+		-- UI 비활성화
+		if self.tutorialUI ~= nil then
+			self.tutorialUI.Enable = false
+			self.tutorialUI.Visible = false
+		end
+		
+		print("Tutorial Group " .. self.currentGroupId .. " completed!")
+		
+		-- 튜토리얼 완료 처리 (예: 로컬 저장소에 완료 표시)
+		-- _DataStorageService 또는 CloudDataStoreService 사용
+	end
+
+	@ExecSpace("Client")
+	method void SkipTutorial()
+		self:EndTutorial()
+	end
+
+	@ExecSpace("Client")
+	method void ResetTutorial()
+		self.currentStep = 1
+		self:StartTutorial(self.currentGroupId)
+	end
+
+	@ExecSpace("Client")
+	method integer GetCurrentGroupId()
+		return self.currentGroupId
+	end
+
+	@ExecSpace("Client")
+	method boolean HasTutorialGroup(integer groupId)
+		local dataSet = _DataService:GetTable("Tutorial")
+		if dataSet == nil then
+			return false
+		end
+		
+		for index = 1, dataSet:GetRowCount() do
+			local itemGroupId = tonumber(dataSet:GetCell(index, 'groupId')) or 1
+			if itemGroupId == groupId then
+				return true
+			end
+		end
+		return false
+	end
+
+	@ExecSpace("Client")
+	method table GetDeviceAdjustedPosition(number x, number y, string buttonPath)
+		local adjustedX = x
+		local adjustedY = y
+		
+		if self.isIPad then
+			-- iPad 특별 처리
+			print("Applying iPad position adjustment")
+		
+			-- 화면 비율에 따른 스케일 팩터 계산
+			local scaleFactor = self.aspectRatio / 1.77  -- 16:9 기준
+		
+			-- 특정 버튼에 대한 특별 처리
+			if buttonPath and buttonPath:find("UserDeckButton") then
+				-- UserDeckButton은 화면 하단 중앙
+				-- iPad에서는 Safe Area 때문에 위치 조정 필요
+				adjustedX = self.screenWidth / 2 + (94 * scaleFactor)  -- iPad용 X 오프셋
+				adjustedY = self.screenHeight * 0.1  -- iPad는 하단 여백 더 큼
+			elseif buttonPath and buttonPath:find("GachaButton") then
+				-- 가챠 버튼
+				adjustedX = x * scaleFactor
+				adjustedY = y * scaleFactor
+			else
+				-- 일반 버튼
+				adjustedX = x * scaleFactor
+				adjustedY = y * scaleFactor
+			end
+		
+			-- iPad Safe Area 보정 (좌우 여백)
+			if adjustedX < self.screenWidth * 0.05 then
+				adjustedX = self.screenWidth * 0.05
+			elseif adjustedX > self.screenWidth * 0.95 then
+				adjustedX = self.screenWidth * 0.95
+			end
+		
+			-- iPad Safe Area 보정 (상하 여백)
+			if adjustedY < self.screenHeight * 0.05 then
+				adjustedY = self.screenHeight * 0.05
+			elseif adjustedY > self.screenHeight * 0.95 then
+				adjustedY = self.screenHeight * 0.95
+			end
+		end
+		
+		return {x = adjustedX, y = adjustedY}
+	end
+
+	@ExecSpace("Client")
+	method void PrintScreenInfo()
+		print("====== Screen Information ======")
+		print("Screen Size: " .. self.screenWidth .. " x " .. self.screenHeight)
+		print("Aspect Ratio: " .. self.aspectRatio)
+		print("Device Type: " .. (self.isIPad and "iPad" or "Standard Display"))
+		print("================================")
+	end
+
+	@ExecSpace("Server")
+	method integer SAVE(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local data = {}
+		
+		data["isTutorial"] = 1
+		
+		local save =  _HttpService:JSONEncode(data)
+		
+		return ds:SetAndWait("USER_TUTORIAL",save)
+		
+	end
+
+	@ExecSpace("Server")
+	method integer LOAD(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local errCode, res = ds:GetAndWait("USER_TUTORIAL")
+		if errCode ~= 0 then
+			return errCode
+		end
+		
+		if res == nil then
+			return 0
+		end
+		
+		local resTable = _HttpService:JSONDecode(res)
+		
+		return resTable["isTutorial"]
+	end
+
+end

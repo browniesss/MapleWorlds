@@ -1,0 +1,99 @@
+@Logic
+script TutorialRepo extends Logic
+
+	property table tutorialData = {}
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		local dataSet = _DataService:GetTable("Tutorial")
+
+		for index = 1, dataSet:GetRowCount() do
+			local item = {
+				id = tonumber(dataSet:GetCell(index, 'id')),
+				groupId = tonumber(dataSet:GetCell(index, 'groupId')) or 1, -- 그룹 ID (기본값 1)
+				order = tonumber(dataSet:GetCell(index, 'order')),
+				text = tostring(dataSet:GetCell(index, 'text')),
+				highlightType = tostring(dataSet:GetCell(index, 'highlightType')), -- "rect" or "circle"
+				arrowDirection = tostring(dataSet:GetCell(index, 'arrowDirection')), -- "up", "down", "left", "right", "none"
+			}
+
+			table.insert(self.tutorialData, item)
+		end
+
+		-- groupId와 order로 정렬
+		table.sort(self.tutorialData, function(a, b)
+			if a.groupId == b.groupId then
+				return a.order < b.order
+			end
+			return a.groupId < b.groupId
+		end)
+	end
+
+	method table GetAllTutorials()
+		return self.tutorialData
+	end
+
+	method table GetTutorialByOrder(integer order)
+		for i, tutorial in ipairs(self.tutorialData) do
+			if tutorial.order == order then
+				return tutorial
+			end
+		end
+		return nil
+	end
+
+	method integer GetTutorialCount()
+		return #self.tutorialData
+	end
+
+	-- 특정 그룹의 튜토리얼만 가져오기
+	method table GetTutorialsByGroup(integer groupId)
+		local groupTutorials = {}
+		for i, tutorial in ipairs(self.tutorialData) do
+			if tutorial.groupId == groupId then
+				table.insert(groupTutorials, tutorial)
+			end
+		end
+		-- order로 정렬
+		table.sort(groupTutorials, function(a, b)
+			return a.order < b.order
+		end)
+		return groupTutorials
+	end
+
+	-- 특정 그룹의 튜토리얼 개수 가져오기
+	method integer GetTutorialCountByGroup(integer groupId)
+		local count = 0
+		for i, tutorial in ipairs(self.tutorialData) do
+			if tutorial.groupId == groupId then
+				count = count + 1
+			end
+		end
+		return count
+	end
+
+	-- 특정 그룹의 특정 순서 튜토리얼 가져오기
+	method table GetTutorialByGroupAndOrder(integer groupId, integer order)
+		for i, tutorial in ipairs(self.tutorialData) do
+			if tutorial.groupId == groupId and tutorial.order == order then
+				return tutorial
+			end
+		end
+		return nil
+	end
+
+	-- 모든 그룹 ID 목록 가져오기
+	method table GetAllGroupIds()
+		local groupIds = {}
+		local seen = {}
+		for i, tutorial in ipairs(self.tutorialData) do
+			if not seen[tutorial.groupId] then
+				table.insert(groupIds, tutorial.groupId)
+				seen[tutorial.groupId] = true
+			end
+		end
+		table.sort(groupIds)
+		return groupIds
+	end
+
+end
