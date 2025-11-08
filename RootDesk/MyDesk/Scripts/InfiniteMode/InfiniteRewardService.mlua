@@ -1,0 +1,270 @@
+@Logic
+script InfiniteRewardService extends Logic
+
+	property string STORAGE_KEY = "INFINITE_MODE_PROGRESS"
+
+	property table rewardData = {}
+
+	property table claimedRewards = {}
+
+	method void OnBeginPlay()
+		self:LoadRewardData()
+	end
+
+	@ExecSpace("Server")
+	method void LoadRewardData()
+		-- Load reward configuration from InfiniteReward data table
+		-- For now, use default rewards
+		-- This will be populated from CSV data table later
+		
+		self.rewardData = {}
+		
+		-- Default reward structure (10%, 20%, ..., 100%)
+		local defaultRewards = {
+			{progress = 10, playCoin = 0, secondCoin = 100, firstCoin = 10, skillReward = ""},
+			{progress = 20, playCoin = 0, secondCoin = 200, firstCoin = 20, skillReward = ""},
+			{progress = 30, playCoin = 0, secondCoin = 300, firstCoin = 30, skillReward = ""},
+			{progress = 40, playCoin = 1, secondCoin = 400, firstCoin = 40, skillReward = ""},
+			{progress = 50, playCoin = 1, secondCoin = 500, firstCoin = 50, skillReward = ""},
+			{progress = 60, playCoin = 1, secondCoin = 600, firstCoin = 60, skillReward = ""},
+			{progress = 70, playCoin = 2, secondCoin = 700, firstCoin = 70, skillReward = ""},
+			{progress = 80, playCoin = 2, secondCoin = 800, firstCoin = 80, skillReward = ""},
+			{progress = 90, playCoin = 2, secondCoin = 900, firstCoin = 90, skillReward = ""},
+			{progress = 100, playCoin = 3, secondCoin = 1000, firstCoin = 100, skillReward = ""}
+		}
+		
+		for i, reward in ipairs(defaultRewards) do
+			self.rewardData[reward.progress] = reward
+		end
+		
+		-- TODO: Load from DataService table when InfiniteReward.csv is created
+		-- local dataSet = _DataService:GetTable("InfiniteReward")
+		-- for index = 1, dataSet:GetRowCount() do
+		--     local item = {
+		--         progress = tonumber(dataSet:GetCell(index, 'progress')),
+		--         playCoin = tonumber(dataSet:GetCell(index, 'playCoin')),
+		--         secondCoin = tonumber(dataSet:GetCell(index, 'secondCoin')),
+		--         firstCoin = tonumber(dataSet:GetCell(index, 'firstCoin')),
+		--         skillReward = tostring(dataSet:GetCell(index, 'skillReward'))
+		--     }
+		--     self.rewardData[item.progress] = item
+		-- end
+	end
+
+	@ExecSpace("Server")
+	method void SaveProgress(string userId, number progress, number survivalTime)
+		local ds = _DataStorageService:GetUserDataStorage(userId)
+		
+		if ds == nil then
+			return
+		end
+		
+		local data = {
+			progress = progress,
+			survivalTime = survivalTime,
+			timestamp = DateTime.UtcNow.Elapsed,
+			claimedRewards = self.claimedRewards[userId] or {}
+		}
+		
+		local jsonData = _HttpService:JSONEncode(data)
+		ds:SetAndWait(self.STORAGE_KEY, jsonData)
+	end
+
+	@ExecSpace("Server")
+	method table LoadProgress(string userId)
+		local ds = _DataStorageService:GetUserDataStorage(userId)
+		
+		if ds == nil then
+			return nil
+		end
+		
+		local jsonData = ds:GetAndWait(self.STORAGE_KEY)
+		
+		if jsonData == nil or jsonData == "" then
+			return {
+				progress = 0,
+				survivalTime = 0,
+				timestamp = 0,
+				claimedRewards = {}
+			}
+		end
+		
+		local data = _HttpService:JSONDecode(jsonData)
+		
+		-- Load claimed rewards into memory
+		if data.claimedRewards ~= nil then
+			self.claimedRewards[userId] = data.claimedRewards
+		else
+			self.claimedRewards[userId] = {}
+		end
+		
+		return data
+	end
+
+	@ExecSpace("Server")
+	method boolean CanClaimReward(string userId, integer progressLevel)
+		-- Check if reward exists for this progress level
+		if self.rewardData[progressLevel] == nil then
+			return false
+		end
+		
+		-- Check if already claimed
+		if self.claimedRewards[userId] == nil then
+			self.claimedRewards[userId] = {}
+		end
+		
+		if self.claimedRewards[userId][progressLevel] == true then
+			return false
+		end
+		
+		-- Check if user has reached this progress level
+		local progress = self:LoadProgress(userId)
+		if progress == nil or progress.progress < progressLevel then
+			return false
+		end
+		
+		return true
+	end
+
+	@ExecSpace("Server")
+	method boolean ClaimReward(string userId, integer progressLevel)
+		if not self:CanClaimReward(userId, progressLevel) then
+			return false
+		end
+		
+		local reward = self.rewardData[progressLevel]
+		
+		if reward == nil then
+			return false
+		end
+		
+		-- Award PlayCoin
+		if reward.playCoin > 0 then
+			_PlayCoinService:AddCoin(userId, reward.playCoin)
+		end
+		
+		-- Award SecondFreeCoin (Meso/Normal Gacha Currency)
+		if reward.secondCoin > 0 then
+			_BillingService:AddSecondFreeCoin(userId, reward.secondCoin)
+		end
+		
+		-- Award FirstFreeCoin (Premium Gacha Currency)
+		if reward.firstCoin > 0 then
+			_BillingService:AddFirstFreeCoin(userId, reward.firstCoin)
+		end
+		
+		-- Award Skill (if specified)
+		if reward.skillReward ~= nil and reward.skillReward ~= "" then
+			_UserSkillService:ADD_SKILL(userId, {reward.skillReward})
+			_UserSkillService:SAVE(userId)
+		end
+		
+		-- Mark as claimed
+		if self.claimedRewards[userId] == nil then
+			self.claimedRewards[userId] = {}
+		end
+		
+		self.claimedRewards[userId][progressLevel] = true
+		
+		-- Save to storage
+		local progress = self:LoadProgress(userId)
+		self:SaveProgress(userId, progress.progress, progress.survivalTime)
+		
+		return true
+	end
+
+	@ExecSpace("Server")
+	method table GetAvailableRewards(string userId)
+		local progress = self:LoadProgress(userId)
+		
+		if progress == nil then
+			return {}
+		end
+		
+		local availableRewards = {}
+		
+		-- Check each reward level
+		for progressLevel, reward in pairs(self.rewardData) do
+			if progressLevel <= progress.progress then
+				local isClaimed = false
+		
+				if self.claimedRewards[userId] ~= nil then
+					isClaimed = self.claimedRewards[userId][progressLevel] or false
+				end
+		
+				table.insert(availableRewards, {
+					progressLevel = progressLevel,
+					reward = reward,
+					isClaimed = isClaimed,
+					canClaim = not isClaimed
+				})
+			end
+		end
+		
+		-- Sort by progress level
+		table.sort(availableRewards, function(a, b)
+			return a.progressLevel < b.progressLevel
+		end)
+		
+		return availableRewards
+	end
+
+	@ExecSpace("Server")
+	method void ResetProgress(string userId)
+		-- Reset claimed rewards
+		self.claimedRewards[userId] = {}
+		
+		-- Clear storage
+		local ds = _DataStorageService:GetUserDataStorage(userId)
+		
+		if ds ~= nil then
+			ds:SetAndWait(self.STORAGE_KEY, "")
+		end
+	end
+
+	@ExecSpace("Server")
+	method table GetRewardInfo(integer progressLevel)
+		return self.rewardData[progressLevel]
+	end
+
+	@ExecSpace("Server")
+	method table GetAllRewardLevels()
+		local levels = {}
+		
+		for level, _ in pairs(self.rewardData) do
+			table.insert(levels, level)
+		end
+		
+		-- Sort ascending
+		table.sort(levels)
+		
+		return levels
+	end
+
+	@ExecSpace("Client")
+	method void RequestClaimReward(integer progressLevel)
+		self:ClaimRewardRPC(progressLevel)
+	end
+
+	@ExecSpace("Server")
+	method void ClaimRewardRPC(integer progressLevel)
+		local success = self:ClaimReward(senderUserId, progressLevel)
+		
+		if success then
+			-- Notify client of successful claim
+			self:NotifyRewardClaimedInClient(progressLevel)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void NotifyRewardClaimedInClient(integer progressLevel)
+		-- Update UI to reflect claimed reward
+		-- This will be called by the reward UI component
+		if _InfiniteGameManager.infiniteRewardUI ~= nil then
+			if _InfiniteGameManager.infiniteRewardUI.InfiniteRewardUI ~= nil then
+				_InfiniteGameManager.infiniteRewardUI.InfiniteRewardUI:OnRewardClaimed(progressLevel)
+			end
+		end
+	end
+
+end

@@ -1,0 +1,442 @@
+@Logic
+script InfiniteGameManager extends Logic
+
+	property Entity shopUI = "e0ec4a39-4a35-4e17-95aa-c16dee01f5fa"
+
+	property Entity infoUI = "a07f182a-214a-414d-b995-9863eaa71d62"
+
+	property Entity unitShop = "fa5581b7-25d8-40c7-8b0f-ea16534303e2"
+
+	property Entity skillSlots = "847312aa-e2d9-4375-9707-b0a2000cf8c0"
+
+	property Entity joystick = "02c6fd20-fdb0-4b80-bbd3-2241e929c46d"
+
+	property Entity screenSkillUI = "c735233f-679d-4f6d-a9c2-ab9db46c5bd6"
+
+	property Entity loadingUI = "8430a269-3cee-4cf9-a07c-ba7e814a8051"
+
+	property Entity failPopupUI = "6f1b960c-08f8-41f2-93e4-3e585ec70ab8"
+
+	property Entity timeText = "f229ed5a-4dbc-4c26-8ff0-3fa8ebf7f5ce"
+
+	property Entity infiniteRewardUI = nil
+
+	@Sync
+	property integer mapId = 1
+
+	@Sync
+	property boolean isPlaying = false
+
+	@Sync
+	property integer playStartTs = 0
+
+	@Sync
+	property integer timer = 0
+
+	@Sync
+	property number loadingTimer = 0
+
+	@Sync
+	property number timerStep = 0
+
+	@Sync
+	property number steps = 0
+
+	@Sync
+	property number progress = 0
+
+	@Sync
+	property integer currentWave = 0
+
+	@Sync
+	property number survivalTime = 0
+
+	property number maxTime = 600
+
+	@ExecSpace("Server")
+	method void GameStart(integer mapId)
+		self.mapId = mapId
+		self.isPlaying = true
+		self.playStartTs = DateTime.UtcNow.Elapsed
+		self.progress = 0
+		self.currentWave = 0
+		self.survivalTime = 0
+		
+		self:SetPlayerCharacter()
+		self:EnableUI()
+		self:SetTimer()
+		self:GameStartDataInClient(mapId)
+		
+		-- Initialize towers
+		local playerTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/PlayerTower")
+		
+		if playerTower ~= nil then
+			playerTower.Unit.originMaxHP = 500
+			playerTower.Unit.maxHP = 500
+			playerTower.Unit.hp = 500
+		end
+		
+		-- Start infinite spawn service
+		if _InfiniteSpawnService ~= nil then
+			_InfiniteSpawnService:StartInfiniteMode(mapId)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void GameStartDataInClient(integer mapId)
+		self.mapId = mapId
+		
+		local ourHealthBarUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/Player_HP_bar")
+		local playerTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/PlayerTower")
+		
+		if ourHealthBarUI ~= nil and playerTower ~= nil then
+			ourHealthBarUI.OurHealthBar.tower = playerTower
+		end
+	end
+
+	method void GameEnd()
+		-- Disable ingame UI
+		self.shopUI.Enable = false
+		self.shopUI.Visible = false
+		self.infoUI.Enable = false
+		self.infoUI.Visible = false
+		self.failPopupUI.Enable = false
+		self.failPopupUI.Visible = false
+		
+		if self.infiniteRewardUI ~= nil then
+			self.infiniteRewardUI.Enable = false
+			self.infiniteRewardUI.Visible = false
+		end
+		
+		self:ClearObjects()
+		self:ClearTimer()
+		self:ClearGameData()
+		self:ClearGameDataInClient()
+		
+		-- Stop infinite spawn service
+		if _InfiniteSpawnService ~= nil then
+			_InfiniteSpawnService:StopInfiniteMode()
+		end
+	end
+
+	method string GetGameMapName()
+		return "/maps/InfiniteMap"..self.mapId
+	end
+
+	@ExecSpace("Client")
+	method void EnableUI()
+		-- Enable ingame UI
+		self.shopUI.Enable = true
+		self.shopUI.Visible = true
+		self.infoUI.Enable = true
+		self.infoUI.Visible = true
+		self.joystick.Enable = false
+		self.joystick.Visible = false
+		
+		-- Disable unnecessary UI
+		self.failPopupUI.Enable = false
+		self.failPopupUI.Visible = false
+		
+		-- Mobile support
+		if Environment:IsMobilePlatform() then
+			self.joystick.Enable = true
+			self.joystick.Visible = true
+		end
+		
+		-- Set nickname
+		local userNameUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/UserInfo/UserName")
+		if userNameUI ~= nil then
+			userNameUI.TextComponent.Text = _UserService.LocalPlayer.PlayerComponent.Nickname
+		end
+		
+		-- Initialize shop
+		self.unitShop.UnitShop:InitShop()
+		
+		-- Initialize skill slots
+		for i = 1, 2 do
+		    local child = self.skillSlots.Children[i]
+		    if child ~= nil then
+				child.SkillSlot:Initialize()
+		    end
+		end
+		
+		-- Enable infinite reward UI
+		if self.infiniteRewardUI ~= nil then
+			self.infiniteRewardUI.Enable = true
+			self.infiniteRewardUI.Visible = true
+		end
+	end
+
+	@ExecSpace("Client")
+	method void SetPlayerCharacter()
+		local player = _UserService.LocalPlayer.UserSkillDeck
+		
+		local skill1 = _SkillService:GetSkillByIDFromClient(player.userSkillDeck[1])
+		local skill2 = _SkillService:GetSkillByIDFromClient(player.userSkillDeck[2])
+		
+		_UserService.LocalPlayer.PlayerCharacter:SetSkill(skill1, skill2)
+	end
+
+	method void ClearObjects()
+		local myMonsterList = _EntityService:GetEntityByPath(self:GetGameMapName().."/MyMonsterList")
+		local enemyList = _EntityService:GetEntityByPath(self:GetGameMapName().."/EnemyList")
+		local skillParent = _EntityService:GetEntityByPath(self:GetGameMapName().."/SkillParent")
+		local ProjectileParent = _EntityService:GetEntityByPath(self:GetGameMapName().."/ProjectileParent")
+		local minimap = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/Minimap Group/Minimap Background")
+		local timeText = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/CenterUI/TimeText")
+		
+		-- Keep first child
+		self:DestroyChildren(myMonsterList, true)
+		self:DestroyChildren(enemyList, true)
+		self:DestroyChildrenInClient(minimap, true)
+		
+		-- Destroy all
+		self:DestroyChildren(skillParent, false)
+		self:DestroyChildren(ProjectileParent, false)
+		
+		if timeText ~= nil then
+			timeText.TextComponent.Text = "0:00"
+		end
+	end
+
+	@ExecSpace("Server")
+	method void DestroyChildren(Entity entity, boolean keepFirst)
+		if not entity or not entity.Children then return end
+		local targets = {}
+		for idx, child in ipairs(entity.Children) do
+			if not keepFirst or idx ~= 1 then
+				table.insert(targets, child)
+			end
+		end
+		for _, e in ipairs(targets) do
+			if e and e.Destroy then
+				e:Destroy()
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void DestroyChildrenInClient(Entity entity, boolean keepFirst)
+		if not entity or not entity.Children then return end
+		local targets = {}
+		for idx, child in ipairs(entity.Children) do
+			if not keepFirst or idx ~= 1 then
+				table.insert(targets, child)
+			end
+		end
+		for _, e in ipairs(targets) do
+			if e and e.Destroy then
+				e:Destroy()
+			end
+		end
+	end
+
+	@ExecSpace("Server")
+	method void SetTimer()
+		self.timer = _TimerService:SetTimerRepeat(function()
+			local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
+		
+			-- Calculate survival time in seconds
+			self.survivalTime = playTime / 1000
+		
+			-- Calculate progress (0-100%)
+			self.progress = math.min((self.survivalTime / self.maxTime) * 100, 100)
+		
+			self:SetTimeText(playTime)
+			self:UpdateProgress(self.progress)
+		end, 1.0, 0)
+	end
+
+	@ExecSpace("Client")
+	method void ClearTimer()
+		self.playStartTs = 0
+		_TimerService:ClearTimer(self.timer)
+	end
+
+	@ExecSpace("Client")
+	method void SetTimeText(integer playTime)
+		if self.timeText ~= nil then
+			self.timeText.TextComponent.Text = self:FormatMMSS(playTime / 1000)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void UpdateProgress(number progress)
+		-- Update infinite reward UI progress bar
+		if self.infiniteRewardUI ~= nil and self.infiniteRewardUI.InfiniteRewardUI ~= nil then
+			self.infiniteRewardUI.InfiniteRewardUI:UpdateProgress(progress)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void ClearGameData()
+		self.isPlaying = false
+		
+		local mesoWallet = _EntityService:GetEntityByPath(self:GetGameMapName() .. "/userWallet")
+		
+		if mesoWallet ~= nil then
+			mesoWallet.MesoWallet:SetMeso(0)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void ClearGameDataInClient()
+		local skillSlots = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group/SkillSlots")
+		
+		if skillSlots ~= nil then
+			for i = 1, 2 do
+				skillSlots.Children[i].SkillSlot.remainingTime = 0
+				skillSlots.Children[i].Children[2].SpriteGUIRendererComponent.FillAmount = 0
+			end
+		end
+	end
+
+	method string FormatMMSS(number time)
+		local s = math.max(0, math.floor(time))
+		local m = math.floor(s / 60)
+		local ss = s % 60
+		
+		return string.format("%d:%02d", m, ss)
+	end
+
+	@ExecSpace("Client")
+	method void OnGameFail()
+		local shopUI = self.shopUI
+		local failPopupUI = self.failPopupUI
+		local infoUI = self.infoUI
+		
+		infoUI.Enable = false
+		infoUI.Visible = false
+		shopUI.Enable = false
+		shopUI.Visible = false
+		failPopupUI.Enable = true
+		failPopupUI.Visible = true
+		_Utils:FadeIn(failPopupUI, 0.5)
+		
+		-- Save progress to reward service
+		if _InfiniteRewardService ~= nil then
+			_InfiniteRewardService:SaveProgress(self.progress, self.survivalTime)
+		end
+	end
+
+	method void ShowLoadingScreen()
+		self.loadingUI.Enable = true
+		self.loadingUI.Visible = true
+		
+		local color = self.loadingUI.SpriteGUIRendererComponent.Color
+		self.loadingUI.SpriteGUIRendererComponent.Color = Color(color.r, color.g, color.b, 0)
+		self:FadeSprite(1, 0.35, false)
+	end
+
+	method void HideLoadingScreen()
+		local color = self.loadingUI.SpriteGUIRendererComponent.Color
+		self.loadingUI.SpriteGUIRendererComponent.Color = Color(color.r, color.g, color.b, 0)
+		self:FadeSprite(0, 0.35, true)
+	end
+
+	method void FadeSprite(number targetAlpha, number duration, boolean isFadeOut)
+		duration = duration or 0.35
+		
+		local t, tick = 0, 1/60
+		
+		self.steps = math.ceil(duration / tick)
+		self.timerStep = 0
+		
+		self.loadingTimer = _TimerService:SetTimerRepeat(function()
+		    self.timerStep = self.timerStep + 1
+		
+		    local progress = math.min(self.timerStep / self.steps, 1.0)
+			local sprite = self.loadingUI.SpriteGUIRendererComponent
+			local slimeSprite = self.loadingUI.Children[1].SpriteGUIRendererComponent
+			local loadingText = self.loadingUI.Children[2].TextComponent
+			local startColor = sprite.Color
+			local endColor = Color(startColor.r, startColor.g, startColor.b, targetAlpha)
+			local startSlimeColor = slimeSprite.Color
+			local endSlimeColor = Color(startSlimeColor.r, startSlimeColor.g, startSlimeColor.b, targetAlpha)
+			local startTextColor = loadingText.FontColor
+			local endTextColor = Color(startTextColor.r, startTextColor.g, startTextColor.b, targetAlpha)
+		
+		    sprite.Color = Color.Lerp(startColor, endColor, progress)
+		    slimeSprite.Color = Color.Lerp(startSlimeColor, endSlimeColor, progress)
+		    loadingText.FontColor = Color.Lerp(startTextColor, endTextColor, progress)
+		
+		    if progress >= 1 then
+		        sprite.Color = endColor
+		        _TimerService:ClearTimer(self.loadingTimer)
+		    end
+		end, tick, 0)
+		
+		if isFadeOut then
+			_TimerService:SetTimerOnce(function()
+				self.loadingUI.Enable = false
+				self.loadingUI.Visible = false
+			end, self.steps * tick)
+		end
+	end
+
+	method table GetPreLoadAssetRuid()
+		local ruids = {}
+		local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
+		
+		for i = 1, 8 do
+			local unitData = _UnitService:GetUnitByIDFromClient(playerDeck.userDeck[i])
+			local skillData = _SkillService:GetSkillByIDFromClient(unitData["skillID"])
+			local spawnSkillData = _SkillService:GetSkillByIDFromClient(unitData["spawnSkill"])
+		
+			local ruidString = skillData["ruids"] or ""
+		
+		    for ruid in string.gmatch(ruidString, "([^,]+)") do
+		        table.insert(ruids, ruid)
+		    end
+		
+			if spawnSkillData ~= nil then
+				local spawnSkillruidString = spawnSkillData["ruids"] or ""
+		    	for ruid in string.gmatch(spawnSkillruidString, "([^,]+)") do
+		        	table.insert(ruids, ruid)
+		    	end
+			end
+		end
+		
+		return ruids
+	end
+
+	@ExecSpace("Client")
+	method void LocalGameStart(integer mapId)
+		self:ShowLoadingScreen()
+		
+		local ruids = self:GetPreLoadAssetRuid()
+		
+		_ResourceService:PreloadAsync(ruids, function()
+			_TimerService:ClearTimer(self.loadingTimer)
+		
+			_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "InfiniteMap"..mapId)
+			self:GameStart(mapId)
+			self:HideLoadingScreen()
+		end)
+	end
+
+	method void IncrementWave()
+		self.currentWave = self.currentWave + 1
+	end
+
+	method number GetDifficultyMultiplier()
+		-- Before 10 minutes: 10% per wave
+		-- After 10 minutes: 50% per wave
+		local baseMultiplier = 1.0
+		
+		if self.survivalTime < 600 then
+			-- 0-10 minutes: 10% increase per wave
+			return baseMultiplier + (self.currentWave * 0.1)
+		else
+			-- After 10 minutes: 50% increase per wave
+			local wavesAfter10Min = self.currentWave - math.floor(600 / self:GetWaveInterval())
+			return baseMultiplier + (self.currentWave * 0.1) + (wavesAfter10Min * 0.4)
+		end
+	end
+
+	method number GetWaveInterval()
+		-- Default wave interval (can be adjusted based on spawn pattern)
+		return 30  -- 30 seconds per wave
+	end
+
+end

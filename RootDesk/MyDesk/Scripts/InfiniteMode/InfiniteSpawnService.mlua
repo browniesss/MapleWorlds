@@ -1,0 +1,221 @@
+@Logic
+script InfiniteSpawnService extends Logic
+
+	property table timerIdList = {}
+
+	property table spawnPatterns = {}
+
+	property integer currentMapId = 0
+
+	property boolean isRunning = false
+
+	property integer loopInterval = 30
+
+	@ExecSpace("Server")
+	method void StartInfiniteMode(integer mapId)
+		self.currentMapId = mapId
+		self.isRunning = true
+		
+		-- Clear existing timers
+		self:ClearAllTimers()
+		
+		-- Load spawn patterns from data table
+		self:LoadSpawnPatterns(mapId)
+		
+		-- Start infinite loop
+		self:StartInfiniteLoop()
+	end
+
+	@ExecSpace("Server")
+	method void StopInfiniteMode()
+		self.isRunning = false
+		self:ClearAllTimers()
+		self.spawnPatterns = {}
+		self.currentMapId = 0
+	end
+
+	@ExecSpace("Server")
+	method void LoadSpawnPatterns(integer mapId)
+		-- Load from InfiniteSpawnPattern data table
+		-- For now, use default pattern
+		-- This will be populated from CSV data table later
+		
+		self.spawnPatterns = {}
+		
+		-- Default pattern structure
+		-- Each pattern contains: groupId, loopDelay
+		table.insert(self.spawnPatterns, {
+			groupId = 1,  -- Will reference SpawnGroup table
+			loopDelay = 30  -- 30 seconds per wave
+		})
+		
+		-- TODO: Load from DataService table when InfiniteSpawnPattern.csv is created
+		-- local dataSet = _DataService:GetTable("InfiniteSpawnPattern")
+		-- for index = 1, dataSet:GetRowCount() do
+		--     local item = {
+		--         mapId = tonumber(dataSet:GetCell(index, 'mapId')),
+		--         groupId = tonumber(dataSet:GetCell(index, 'groupId')),
+		--         loopDelay = tonumber(dataSet:GetCell(index, 'loopDelay'))
+		--     }
+		--     if item.mapId == mapId then
+		--         table.insert(self.spawnPatterns, item)
+		--     end
+		-- end
+	end
+
+	@ExecSpace("Server")
+	method void StartInfiniteLoop()
+		if #self.spawnPatterns == 0 then
+			return
+		end
+		
+		-- Start loop for each pattern
+		for i, pattern in ipairs(self.spawnPatterns) do
+			local timerId = _TimerService:SetTimerRepeat(
+				function()
+					if not self.isRunning then
+						return
+					end
+		
+					self:InfiniteLoopSummon(pattern.groupId)
+		
+					-- Increment wave counter in InfiniteGameManager
+					if _InfiniteGameManager ~= nil then
+						_InfiniteGameManager:IncrementWave()
+					end
+				end,
+				pattern.loopDelay,
+				0  -- Start immediately
+			)
+		
+			table.insert(self.timerIdList, timerId)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void InfiniteLoopSummon(integer groupId)
+		-- Get group data from InfiniteGroupRepo
+		local group_data = _InfiniteGroupRepo:GetGroupById(groupId)
+		
+		if group_data == nil or #group_data == 0 then
+			return
+		end
+		
+		-- Create group table for spawning
+		local groupTable = {}
+		for i, g in ipairs(group_data) do
+			local value = {}
+			value['unit'] = g.unit
+			value['delayTs'] = g.delayTs
+		
+			table.insert(groupTable, value)
+		end
+		
+		-- Spawn group with delay between units
+		local timerId = _TimerService:SetTimerOnce(
+			function()
+				self:GroupSummonWithScaling(groupTable)
+			end,
+			0
+		)
+		
+		table.insert(self.timerIdList, timerId)
+	end
+
+	@ExecSpace("Server")
+	method void GroupSummonWithScaling(table group)
+		if group == nil or #group == 0 then
+			return
+		end
+		
+		local value = group[1]
+		
+		-- Spawn enemy
+		local spawnedEntity = self:SpawnEnemyWithScaling(value.unit)
+		
+		table.remove(group, 1)
+		
+		-- Continue spawning next unit in group
+		if #group > 0 then
+			local timerId = _TimerService:SetTimerOnce(
+				function()
+					self:GroupSummonWithScaling(group)
+				end,
+				value.delayTs
+			)
+		
+			table.insert(self.timerIdList, timerId)
+		end
+	end
+
+	@ExecSpace("Server")
+	method Entity SpawnEnemyWithScaling(string modelID)
+		-- Spawn enemy using SpawnManager
+		local spawnParent = _EntityService:GetEntityByPath(
+			"/maps/InfiniteMap"..self.currentMapId..'/EnemyList')
+		local spawnPos = _EntityService:GetEntityByPath(
+			"/maps/InfiniteMap"..self.currentMapId.."/EnemyList/EnemySpawnPoint")
+		
+		if spawnParent == nil or spawnPos == nil then
+			return nil
+		end
+		
+		local spawnEntity = _SpawnService:SpawnByModelId(
+			modelID,
+			"Pig",
+			spawnPos.TransformComponent.Position,
+			spawnParent
+		)
+		
+		if spawnEntity == nil then
+			return nil
+		end
+		
+		-- Get unit and skill data
+		local unitData = _UnitService:GetUnitByIDFromServer(modelID)
+		local skillData = _SkillService:GetSkillByIDFromServer(unitData["skillID"])
+		
+		-- Initialize unit
+		spawnEntity.Unit:Spawn(unitData, skillData)
+		
+		-- Apply difficulty scaling
+		self:ApplyDifficultyScaling(spawnEntity)
+		
+		return spawnEntity
+	end
+
+	@ExecSpace("Server")
+	method void ApplyDifficultyScaling(Entity unitEntity)
+		if unitEntity == nil or unitEntity.Unit == nil then
+			return
+		end
+		
+		-- Get difficulty multiplier from InfiniteGameManager
+		local difficultyMultiplier = 1.0
+		
+		if _InfiniteGameManager ~= nil then
+			difficultyMultiplier = _InfiniteGameManager:GetDifficultyMultiplier()
+		end
+		
+		-- Scale HP
+		local originalMaxHP = unitEntity.Unit.originMaxHP
+		local scaledMaxHP = math.floor(originalMaxHP * difficultyMultiplier)
+		unitEntity.Unit.maxHP = scaledMaxHP
+		unitEntity.Unit.hp = scaledMaxHP
+		
+		-- Scale damage
+		local originalDamage = unitEntity.Unit.damage
+		local scaledDamage = math.floor(originalDamage * difficultyMultiplier)
+		unitEntity.Unit.damage = scaledDamage
+	end
+
+	@ExecSpace("Server")
+	method void ClearAllTimers()
+		for i, id in ipairs(self.timerIdList) do
+			_TimerService:ClearTimer(id)
+		end
+		
+		self.timerIdList = {}
+	end
+
+end

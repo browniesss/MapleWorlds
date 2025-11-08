@@ -497,22 +497,34 @@ script GameManager extends Logic
 		popupUI.Visible = true
 	end
 
+	-- Infinite Mode Integration
+	@ExecSpace("Client")
+	method void LocalInfiniteGameStart(integer mapId)
+		-- Delegate to InfiniteGameManager (automatic singleton)
+		_InfiniteGameManager:LocalGameStart(mapId)
+	end
+
 	@EventSender("Service", "InputService")
 	handler HandleKeyDownEvent(KeyDownEvent event)
 		--------------- Native Event Sender Info ----------------
 		-- Sender: InputService
 		-- Space: Client
 		---------------------------------------------------------
-		
+
 		-- Parameters
 		local key = event.key
 		---------------------------------------------------------
 		if key == KeyboardKey.C and Environment:IsMakerPlay() then
 			self:OpenSkillSelect()
 		end
-		
+
 		if event.key == KeyboardKey.G and Environment:IsMakerPlay() then
 			self:StageClear()
+		end
+
+		-- Debug: Start infinite mode with I key (Maker mode only)
+		if key == KeyboardKey.I and Environment:IsMakerPlay() then
+			self:LocalInfiniteGameStart(1)
 		end
 	end
 
