@@ -3,10 +3,10 @@ script GachaEndTs extends Component
 
 	property Entity EndTsText = "239bb522-faac-42ad-a225-381d930f1be0"
 
-	method void SetEndTsText(string text)
+	method void SetEndTsText()
 		local EndTsText = _EntityService:GetEntityByPath("/ui/GachaUI/BackgroundUI/GachaEndTimeRoot/EndTimeBackground/EndTimeLabel")
 		
-		EndTsText.TextComponent.Text = text
+		EndTsText.TextComponent.Text = self
 	end
 
 	@EventSender("Self")

@@ -13,7 +13,7 @@ script TimeManager extends Logic
 			
 		local formattedString = localTime:ToFormattedString("yyyy-MM-dd HH:mm:ss")
 		    
-		local finalString = "픽업 진행기간 : {" .. formattedString .. " (UTC+".. localTime.Hour - endDateTime.Hour ..")}"
+		local finalString = "픽업 기간 : " .. formattedString .. " (UTC+".. localTime.Hour - endDateTime.Hour ..")"
 		 
 		if callback == nil then
 			return
