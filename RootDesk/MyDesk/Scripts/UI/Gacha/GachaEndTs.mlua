@@ -1,0 +1,25 @@
+@Component
+script GachaEndTs extends Component
+
+	property Entity EndTsText = "239bb522-faac-42ad-a225-381d930f1be0"
+
+	method void SetEndTsText(string text)
+		local EndTsText = _EntityService:GetEntityByPath("/ui/GachaUI/BackgroundUI/GachaEndTimeRoot/EndTimeBackground/EndTimeLabel")
+		
+		EndTsText.TextComponent.Text = text
+	end
+
+	@EventSender("Self")
+	handler HandleEntityEnabledInHierarchyChangedEvent(EntityEnabledInHierarchyChangedEvent event)
+		local dataSet = _SummonService:GET_SETTING(_GachaManager.GachaKey)
+		
+		if dataSet == nil then
+			return
+		end
+		
+		if event.EnabledInHierarchy == true then
+			_TimeManager:SetEndTs(dataSet.end_ts, self.SetEndTsText)
+		end
+	end
+
+end

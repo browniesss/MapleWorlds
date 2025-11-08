@@ -1,0 +1,25 @@
+@Logic
+script TimeManager extends Logic
+
+	@ExecSpace("ClientOnly")
+	method void SetEndTs(integer endTs, any callback)
+		local epochUtcDate = DateTime(1970, 1, 1, 0, 0, 0)
+		
+		local elapsedDuration = TimeSpan.FromSeconds(endTs)
+		
+		local endDateTime = epochUtcDate + elapsedDuration
+		
+		local localTime = _UtilLogic:GetLocalTimeFrom(endDateTime)
+			
+		local formattedString = localTime:ToFormattedString("yyyy-MM-dd HH:mm:ss")
+		    
+		local finalString = "픽업 진행기간 : {" .. formattedString .. " (UTC+".. localTime.Hour - endDateTime.Hour ..")}"
+		 
+		if callback == nil then
+			return
+		end
+		
+		callback(finalString)
+	end
+
+end
