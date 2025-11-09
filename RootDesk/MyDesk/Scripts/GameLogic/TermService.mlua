@@ -35,7 +35,7 @@ script TermService extends Logic
 
 	@ExecSpace("Client")
 	method void AgreePopupOn()
-		local ui = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/TermUI")
+		local ui = _EntityService:GetEntityByPath("/ui/TermUI")
 			
 		ui.Enable = true
 		ui.Visible = true
