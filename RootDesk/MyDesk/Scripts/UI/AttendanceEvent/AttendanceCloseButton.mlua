@@ -1,0 +1,9 @@
+@Component
+script AttendanceCloseButton extends Component
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		_AttendanceEventService:CloseUI()
+	end
+
+end

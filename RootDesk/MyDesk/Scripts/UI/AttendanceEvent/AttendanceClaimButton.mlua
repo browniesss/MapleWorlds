@@ -1,0 +1,9 @@
+@Component
+script AttendanceClaimButton extends Component
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		_AttendanceEventService:RequestClaimReward()
+	end
+
+end

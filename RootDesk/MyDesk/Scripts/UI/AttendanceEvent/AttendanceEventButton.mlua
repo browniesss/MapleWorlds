@@ -1,0 +1,37 @@
+@Component
+script AttendanceEventButton extends Component
+
+	property Entity redDotSprite = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.redDotSprite = self.Entity.Children[1]
+		
+		-- 레드닷 초기화
+		if self.redDotSprite ~= nil then
+			self.redDotSprite.Enable = false
+			self.redDotSprite.Visible = false
+		end
+		
+		-- 레드닷 상태 체크
+		_AttendanceEventService:RequestCanClaimStatus()
+	end
+
+	@ExecSpace("Client")
+	method void UpdateRedDot(boolean canClaim)
+		if self.redDotSprite ~= nil then
+			self.redDotSprite.Enable = canClaim
+			self.redDotSprite.Visible = canClaim
+		end
+	end
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: ButtonComponent
+		-- Space: Client
+		---------------------------------------------------------
+		_AttendanceEventService:OpenUI()
+	end
+
+end

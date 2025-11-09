@@ -1,0 +1,436 @@
+@Logic
+script AttendanceEventService extends Logic
+
+	@Sync
+	property SyncTable<string, string> UserAttendanceData
+
+	property Entity AttendanceUI = nil
+
+	property table CurrentAttendanceInfo = nil
+
+	property table AllRewards = nil
+
+	property number DEBUG_DayOffset = 0
+
+	@ExecSpace("ServerOnly")
+	method void LoadUserAttendance(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local errCode, data = ds:GetAndWait("USER_ATTENDANCE")
+		
+		if errCode ~= 0 then
+			print("[AttendanceService] Error loading data for user: " .. uid)
+			self:InitializeUserAttendance(uid)
+			return
+		end
+		
+		if data ~= nil and data ~= "" then
+			local success, attendanceData = pcall(function()
+				return _HttpService:JSONDecode(data)
+			end)
+		
+			if success then
+				self.UserAttendanceData[uid] = data
+			else
+				self:InitializeUserAttendance(uid)
+			end
+		else
+			self:InitializeUserAttendance(uid)
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void InitializeUserAttendance(string uid)
+		local initialData = {
+			consecutiveDays = 0,
+			totalDays = 0,
+			lastCheckDate = ""
+		}
+		
+		local jsonData = _HttpService:JSONEncode(initialData)
+		self.UserAttendanceData[uid] = jsonData
+		
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		ds:SetAndWait("USER_ATTENDANCE", jsonData)
+	end
+
+	method table GetOrCreateUserAttendance(string uid)
+		local data = self:GetUserAttendance(uid)
+		if data == nil then
+			self:InitializeUserAttendance(uid)
+			data = self:GetUserAttendance(uid)
+		end
+		
+		return data
+	end
+
+	@ExecSpace("ServerOnly")
+	method table GetUserAttendance(string uid)
+		local jsonData = self.UserAttendanceData[uid]
+		if jsonData == nil or jsonData == "" then
+			return nil
+		end
+		
+		local success, data = pcall(function()
+			return _HttpService:JSONDecode(jsonData)
+		end)
+		
+		if success then
+			return data
+		else
+			return nil
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void SaveUserAttendance(string uid, table attendanceData)
+		local jsonData = _HttpService:JSONEncode(attendanceData)
+		self.UserAttendanceData[uid] = jsonData
+		
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		ds:SetAndWait("USER_ATTENDANCE", jsonData)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void SaveUserAttendanceFromCache(string uid)
+		local jsonData = self.UserAttendanceData[uid]
+		if jsonData ~= nil and jsonData ~= "" then
+			local ds = _DataStorageService:GetUserDataStorage(uid)
+			ds:SetAndWait("USER_ATTENDANCE", jsonData)
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method table GetAttendanceRewards()
+		local rewards = {}
+		local dataSet = _DataService:GetTable("AttendanceRewards")
+		
+		if dataSet == nil then
+			print("[AttendanceEventService] Warning: AttendanceRewards dataset not found")
+			return self:GetDefaultRewards()
+		end
+		
+		for i = 1, dataSet:GetRowCount() do
+			local day = tonumber(dataSet:GetCell(i, "day"))
+			if day ~= nil then
+				rewards[day] = {
+					gems = tonumber(dataSet:GetCell(i, "gems")) or 0,
+					coins = tonumber(dataSet:GetCell(i, "coins")) or 0,
+					special = tostring(dataSet:GetCell(i, "special")) == "true"
+				}
+			end
+		end
+		
+		return rewards
+	end
+
+	@ExecSpace("ServerOnly")
+	method table GetDefaultRewards()
+		local rewards = {}
+		for day = 1, 7 do
+			local gems = 10 + (day - 1) * 5
+			local coins = 100 + (day - 1) * 50
+			local special = (day == 7)
+		
+			if special then
+				gems = 100
+				coins = 1000
+			end
+		
+			rewards[day] = {
+				gems = gems,
+				coins = coins,
+				special = special
+			}
+		end
+		return rewards
+	end
+
+	@ExecSpace("ServerOnly")
+	method table GetRewardForDay(number day)
+		local rewards = self:GetAttendanceRewards()
+		return rewards[day]
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean CanClaimReward(string uid)
+		local userAttendance = self:GetUserAttendance(uid)
+		
+		if userAttendance == nil then
+			return true
+		end
+		
+		local today = self:GetTodayDateString()
+		if userAttendance.lastCheckDate == today then
+			return false
+		end
+		
+		return true
+	end
+
+	@ExecSpace("ServerOnly")
+	method table ClaimDailyReward(string uid)
+		if not self:CanClaimReward(uid) then
+			return {success = false, message = "오늘은 이미 출석 체크를 완료했습니다."}
+		end
+		
+		local userAttendance = self:GetOrCreateUserAttendance(uid)
+		
+		local today = self:GetTodayDateString()
+		local yesterday = self:GetYesterdayDateString()
+		
+		if userAttendance.lastCheckDate == yesterday then
+			userAttendance.consecutiveDays = userAttendance.consecutiveDays + 1
+		else
+			userAttendance.consecutiveDays = 1
+		end
+		
+		userAttendance.totalDays = userAttendance.totalDays + 1
+		userAttendance.lastCheckDate = today
+		
+		local currentDay = userAttendance.totalDays
+		if currentDay > 7 then
+			currentDay = ((currentDay - 1) % 7) + 1
+		end
+		
+		local reward = self:GetRewardForDay(currentDay)
+		
+		if reward ~= nil then
+			if reward.gems > 0 then
+				--_BillingService:AddFirstPaidCoin(uid, reward.gems)
+				print("[AttendanceEventService] Gave " .. tostring(reward.gems) .. " paid gems to user " .. uid)
+			end
+		
+			if reward.coins > 0 then
+				_BillingService:AddSecondFreeCoin(uid, reward.coins)
+				print("[AttendanceEventService] Gave " .. tostring(reward.coins) .. " free coins to user " .. uid)
+			end
+		end
+		
+		self:SaveUserAttendance(uid, userAttendance)
+		
+		return {
+			success = true,
+			day = currentDay,
+			consecutiveDays = userAttendance.consecutiveDays,
+			totalDays = userAttendance.totalDays,
+			reward = reward
+		}
+	end
+
+	@ExecSpace("ServerOnly")
+	method table GetUserAttendanceInfo(string uid)
+		local userAttendance = self:GetUserAttendance(uid)
+		
+		if userAttendance == nil then
+			return {
+				consecutiveDays = 0,
+				totalDays = 0,
+				lastCheckDate = "",
+				canClaim = true,
+				currentDay = 1
+			}
+		end
+		
+		local currentDay = userAttendance.totalDays + 1
+		if currentDay > 7 then
+			currentDay = ((currentDay - 1) % 7) + 1
+		end
+		
+		return {
+			consecutiveDays = userAttendance.consecutiveDays,
+			totalDays = userAttendance.totalDays,
+			lastCheckDate = userAttendance.lastCheckDate,
+			canClaim = self:CanClaimReward(uid),
+			currentDay = currentDay
+		}
+	end
+
+	@ExecSpace("ServerOnly")
+	method string GetTodayDateString()
+		local time = os.time() + (self.DEBUG_DayOffset * 24 * 60 * 60)
+		local date = os.date("*t", time)
+		return string.format("%04d-%02d-%02d", date.year, date.month, date.day)
+	end
+
+	@ExecSpace("ServerOnly")
+	method string GetYesterdayDateString()
+		local time = os.time() + (self.DEBUG_DayOffset * 24 * 60 * 60) - (24 * 60 * 60)
+		local date = os.date("*t", time)
+		return string.format("%04d-%02d-%02d", date.year, date.month, date.day)
+	end
+
+	@ExecSpace("Server")
+	method void RequestClaimReward()
+		local uid = senderUserId
+		local result = self:ClaimDailyReward(uid)
+		self:SendClaimResultToClient(uid, result)
+	end
+
+	@ExecSpace("Client")
+	method void SendClaimResultToClient(string uid, table result)
+		self:OnClaimResult(result)
+	end
+
+	@ExecSpace("Server")
+	method void RequestAttendanceInfo()
+		local uid = senderUserId
+		local info = self:GetUserAttendanceInfo(uid)
+		local rewards = self:GetAttendanceRewards()
+		self:SendAttendanceInfoToClient(uid, info, rewards)
+	end
+
+	@ExecSpace("Client")
+	method void SendAttendanceInfoToClient(string uid, table info, table rewards)
+		self:UpdateAttendanceInfo(info, rewards)
+	end
+
+	@ExecSpace("Client")
+	method void OpenUI()
+		if self.AttendanceUI == nil then
+			self.AttendanceUI = _EntityService:GetEntityByPath("/ui/AttendanceUI")
+		end
+		
+		if self.AttendanceUI ~= nil then
+			self.AttendanceUI.Enable = true
+			self.AttendanceUI.Visible = true
+			self:RequestAttendanceInfo()
+		else
+			print("[AttendanceEventService] Error: AttendanceUI not found")
+		end
+	end
+
+	@ExecSpace("Client")
+	method void CloseUI()
+		if self.AttendanceUI ~= nil then
+			self.AttendanceUI.Enable = false
+			self.AttendanceUI.Visible = false
+		end
+	end
+
+	@ExecSpace("Server")
+	method void RequestCanClaimStatus()
+		local uid = senderUserId
+		local canClaim = self:CanClaimReward(uid)
+		self:SendCanClaimStatusToClient(uid, canClaim)
+	end
+
+	@ExecSpace("Client")
+	method void SendCanClaimStatusToClient(string uid, boolean canClaim)
+		self:UpdateRedDotStatus(canClaim)
+	end
+
+	@ExecSpace("Client")
+	method void UpdateRedDotStatus(boolean canClaim)
+		-- 모든 출석 이벤트 버튼의 레드닷 업데이트
+		local attendanceButton = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/AttendanceEventButton")
+		if attendanceButton ~= nil then
+			attendanceButton.AttendanceEventButton:UpdateRedDot(canClaim)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void UpdateAttendanceInfo(table info, table rewards)
+		self.CurrentAttendanceInfo = info
+		self.AllRewards = rewards
+		
+		print("[AttendanceEventService] Updating attendance info")
+		
+		-- InfoText 업데이트
+		local infoText = _EntityService:GetEntityByPath("/ui/AttendanceUI/Panel/InfoText")
+		if infoText ~= nil and infoText.AttendanceInfoText ~= nil then
+			infoText.AttendanceInfoText:UpdateInfo(info.consecutiveDays, info.totalDays)
+		end
+		
+		-- 7일치 Day 아이템 업데이트
+		local currentDay = info.currentDay
+		local totalDays = info.totalDays
+		
+		for day = 1, 7 do
+			local dayItem = _EntityService:GetEntityByPath("/ui/AttendanceUI/Panel/DayGrid/Day" .. tostring(day))
+			if dayItem ~= nil and dayItem.AttendanceDayItem ~= nil then
+				local reward = rewards[day]
+				if reward ~= nil then
+					local isCompleted = day <= totalDays
+					local isToday = day == currentDay and info.canClaim
+					
+					dayItem.AttendanceDayItem:SetDayInfo(day, reward, isCompleted, isToday)
+				end
+			end
+		end
+		
+		-- ClaimButton 상태 업데이트 (ButtonComponent로 직접 접근)
+		local claimButton = _EntityService:GetEntityByPath("/ui/AttendanceUI/Panel/ClaimButton")
+		if claimButton ~= nil and claimButton.ButtonComponent ~= nil then
+			claimButton.ButtonComponent.Enable = info.canClaim
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnClaimResult(table result)
+		if result.success then
+			print("[AttendanceEventService] Claim successful!")
+			print("  Day: " .. tostring(result.day))
+			if result.reward ~= nil then
+				print("  Reward: " .. tostring(result.reward.gems) .. " gems")
+			end
+		
+			self:ShowToastMessage("출석 보상을 받았습니다! +" .. tostring(result.reward.gems) .. " 다이아")
+			self:RequestAttendanceInfo()
+		
+			-- 레드닷 업데이트 (보상 받았으니 false)
+			self:UpdateRedDotStatus(false)
+		else
+			print("[AttendanceEventService] Claim failed: " .. result.message)
+			self:ShowToastMessage(result.message)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void ShowToastMessage(string message)
+		print("[Toast] " .. message)
+	end
+
+	@EventSender("Service", "UserService")
+	handler HandleUserEnterEvent(UserEnterEvent event)
+		local uid = event.UserId
+		self:LoadUserAttendance(uid)	
+	end
+
+	@EventSender("Service", "UserService")
+	handler HandleUserLeaveEvent(UserLeaveEvent event)
+		local uid = event.UserId
+		self:SaveUserAttendanceFromCache(uid)
+		self.UserAttendanceData[uid] = nil
+		print("[AttendanceEventService] Saved and cleared attendance data for user: " .. uid)
+	end
+
+	@EventSender("Service", "InputService")
+	handler HandleKeyDownEvent(KeyDownEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: InputService
+		-- Space: Client
+		---------------------------------------------------------
+		
+		-- F5 키: 하루 전진
+		if event.key == KeyboardKey.F5 then
+			self.DEBUG_DayOffset = self.DEBUG_DayOffset + 1
+			print("[DEBUG] Day offset: " .. tostring(self.DEBUG_DayOffset))
+		
+			-- UI가 열려있으면 새로고침
+			if self.AttendanceUI ~= nil and self.AttendanceUI.Enable then
+				self:RequestAttendanceInfo()
+			end
+		end
+		
+		-- F6 키: 리셋
+		if event.key == KeyboardKey.F6 then
+			self.DEBUG_DayOffset = 0
+			print("[DEBUG] Day offset reset")
+		
+			if self.AttendanceUI ~= nil and self.AttendanceUI.Enable then
+				self:RequestAttendanceInfo()
+			end
+		end
+	end
+
+end
