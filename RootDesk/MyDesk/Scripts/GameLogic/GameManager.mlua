@@ -348,6 +348,8 @@ script GameManager extends Logic
 		local userAvatar = _EntityService:GetEntityByPath("/ui/GameClearUI/Frame/UserAvatar/UnitAvartar")
 		local clearRewardUI = _EntityService:GetEntityByPath("/ui/GameClearUI/Frame/ClearReward")
 		
+		self:Log_NormalStageClear()
+		
 		local key = _RankingService:GetRankKeyByTable({chapter=userStage.selectChapter, stage=userStage.selectStage})
 		_RankingService:AddPoint(key, userName, playTime)
 		self.rankUI:UpdateRankData(userName, playTime, key)
@@ -495,6 +497,26 @@ script GameManager extends Logic
 	method void OpenZeroEnterCoinUI()
 		local popupUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/ZeroEnterCoinUI")
 		popupUI.Visible = true
+	end
+
+	@ExecSpace("Server")
+	method void Log_NormalStageClear()
+		local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
+		local userEntity = _UserService:GetUserEntityByUserId(senderUserId)
+		local selectStageId = self.chapterIndex * 100 + self.mapIndex
+		local userDeck = userEntity.UserDeck.userDeck
+		local userSkill = userEntity.UserSkillDeck.userSkillDeck
+		_AnalyticsService:GameEnd(senderUserId, playTime, selectStageId, userDeck, userSkill, true)
+	end
+
+	@ExecSpace("Server")
+	method void Log_NormalStageFail()
+		local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
+		local userEntity = _UserService:GetUserEntityByUserId(senderUserId)
+		local selectStageId = self.chapterIndex * 100 + self.mapIndex
+		local userDeck = userEntity.UserDeck.userDeck
+		local userSkill = userEntity.UserSkillDeck.userSkillDeck
+		_AnalyticsService:GameEnd(senderUserId, playTime, selectStageId, userDeck, userSkill, false)
 	end
 
 	@EventSender("Service", "InputService")

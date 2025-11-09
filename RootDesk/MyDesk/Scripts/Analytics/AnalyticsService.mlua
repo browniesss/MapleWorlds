@@ -1,14 +1,7 @@
 @Logic
 script AnalyticsService extends Logic
 
-	property string host = ""
-
-	property string endpoint = ""
-
-	property string measurement_id = ""
-
-	@Sync
-	property string api_secret = ""
+	property table data = {}
 
 	@ExecSpace("ServerOnly")
 	method void SendAnalyticsLog(string userId, table logData)
@@ -22,27 +15,22 @@ script AnalyticsService extends Logic
 			return
 		end
 		
-		local params = {}
+		local content = {}
 		for key, value in pairs(logData) do
 			if key == "name" then
 				continue
 			end
 			
-			params[key] = value
+			content[key] = value
 		end
 		
-		local events = {name=logData["name"], params=params}
-		
-		local content = {
-			client_id= userId,
-			events=events
-		}
-		
 		local header = {}
-		header["User-Agent"]="GameServer/1.0"
+		header["Authorization"]="Bearer " .. self.data.auth
+		header[self.data.api_key]=self.data.api_secret
 		
 		
-		_HttpService:PostAndWait(self:GetUrl(), _HttpService:JSONEncode(content), HttpContentType.ApplicationJson, header)
+		local res = _HttpService:PostAndWait(self:GetUrl(), _HttpService:JSONEncode(content), HttpContentType.ApplicationJson, header)
+		log(res)
 	end
 
 	@ExecSpace("ServerOnly")
@@ -51,30 +39,38 @@ script AnalyticsService extends Logic
 		
 		local index = 1
 		
-		self.host = tostring(dataSet:GetCell(index, 'host'))
-		self.endpoint = tostring(dataSet:GetCell(index, 'endpoint'))
-		self.measurement_id = tostring(dataSet:GetCell(index, 'measurement_id'))
-		self.api_secret = tostring(dataSet:GetCell(index, 'api_secret'))
+		self.data = {
+			host=tostring(dataSet:GetCell(index, 'host')),
+			endpoint=tostring(dataSet:GetCell(index, 'endpoint')),
+			api_key=tostring(dataSet:GetCell(index, 'api_key')),
+			api_secret=tostring(dataSet:GetCell(index, 'api_secret')),
+			auth=tostring(dataSet:GetCell(index, 'auth_key')),
+		}
 	end
 
 	@ExecSpace("ServerOnly")
 	method string GetUrl()
-		local query = string.format("?measurement_id=%s&api_secret=%s", self.measurement_id, self.api_secret)
-		
-		return string.format("https://%s%s%s", self.host, self.endpoint, query)
+		return string.format("https://%s%s", self.data.host, self.data.endpoint)
 	end
 
-	@ExecSpace("Server")
-	method void GameClear(string userId, integer playTs, integer stage, table monsterList, table skillList)
+	@ExecSpace("ServerOnly")
+	method void GameEnd(string userId, integer playTs, integer stage, table monsterList, table skillList, boolean is_clear)
 		local logData = {name="NORMAL_STAGE_CLEAR"}
 		
-		logData["stage"] = tostring(stage)
-		logData["play_time"] = tostring(playTs)
-		logData["monster"] = _HttpService:JSONEncode(monsterList)
-		logData["skill"] = _HttpService:JSONEncode(skillList)
+		logData["user_id"] = userId
+		logData["stage_id"] = stage
+		logData["play_time"] = playTs
+		logData["deck"] = monsterList
+		logData["skill"] = skillList
+		logData["is_clear"] = is_clear
 		
+		local id = _TimerService:SetTimerOnce(function() 
+			self:SendAnalyticsLog(userId, logData)
+		end, 0)
 		
-		self:SendAnalyticsLog(userId, logData)
+		if id == 0 then
+			log_error("SendAnalyticsLog reservation failed.")
+		end
 	end
 
 end

@@ -4,7 +4,7 @@ script StageGiveUpButton extends Component
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
 		_GameManager:GameEnd()
-		
+		_GameManager:Log_NormalStageFail()
 		_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "LobbyTest")
 	end
 

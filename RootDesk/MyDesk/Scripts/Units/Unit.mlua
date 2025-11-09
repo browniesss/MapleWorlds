@@ -857,6 +857,7 @@ script Unit extends Component
 			failPopupUI.Enable = true
 			failPopupUI.Visible = true
 			_Utils:FadeIn(failPopupUI, 0.5)
+			_GameManager:Log_NormalStageFail()
 			return
 		end
 		
