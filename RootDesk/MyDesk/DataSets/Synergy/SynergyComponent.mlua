@@ -1,8 +1,8 @@
 @Component
-script UnitSynergyComponent extends Component
+script SynergyComponent extends Component
 
 	@ExecSpace("ServerOnly")
-	method void APPLY_SYNERGY(SynergyList list)
+	method void APPLY_UNIT_SYNERGY(EntityRef arg1)
 		local count = list:length()
 		
 		for i=1, count do
