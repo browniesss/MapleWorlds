@@ -168,7 +168,7 @@ script UnitShopItem extends Component
 			isKeyDown = true	
 		end
 		
-		if not isKeyDown or not _SpawnManager:IsCanSpawn(self.unitData['summonCost']) then
+		if not isKeyDown or not _SpawnManager:IsCanSpawn(self.unitData['summonCost']) or  _UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill then
 			return
 		end
 		

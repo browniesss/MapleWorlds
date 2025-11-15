@@ -16,7 +16,7 @@ script Cold_Eye_Laser extends SkillParent
 		laser.SpriteRendererComponent.FlipX = self.caster.Unit.isEnemy == false
 		laser.LoopAttackComponent:Init(self.skillAmount, self.skillTime, 0.5, self.caster, function(target)
 		        target.Unit:GetDebuff(_eDebuffType.AttackSpeedDecrease, 0.5, self.skillTime)
-		    end)
+		    end, false)
 		
 		local deleteFunction = function()
 			-- 스킬 사용 종료 처리
