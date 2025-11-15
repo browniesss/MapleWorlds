@@ -130,11 +130,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 149.999878,
+                "x": 149.999969,
                 "y": 150.0
               },
               "OffsetMin": {
-                "x": -149.999939,
+                "x": -150.000031,
                 "y": -150.0
               },
               "Pivot": {
@@ -142,7 +142,7 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 2219.99976,
+                "x": 2220.0,
                 "y": 1380.0
               },
               "UIMode": 1,
@@ -166,6 +166,9 @@
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": ""
+              },
               "OverrideSorting": false,
               "Color": {
                 "r": 0.0,
@@ -249,6 +252,9 @@
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "b2f74ef6e0a9442da201c3c8a19bd064"
+              },
               "OverrideSorting": false,
               "Enable": true
             }
@@ -257,12 +263,12 @@
         }
       },
       {
-        "id": "fded5f18-29f0-468c-b1f5-e562e545a40c",
-        "path": "/ui/AttendanceUI/Panel/Title",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "id": "5994a1f9-50d8-45a2-9261-499edf08648d",
+        "path": "/ui/AttendanceUI/Panel/TitleBackground",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
-          "name": "Title",
-          "path": "/ui/AttendanceUI/Panel/Title",
+          "name": "TitleBackground",
+          "path": "/ui/AttendanceUI/Panel/TitleBackground",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -272,10 +278,10 @@
           "revision": 1,
           "origin": {
             "type": "Model",
-            "entry_id": "uitext",
+            "entry_id": "uisprite",
             "sub_entity_id": null
           },
-          "modelId": "uitext",
+          "modelId": "uisprite",
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
@@ -290,62 +296,68 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 254.366913,
-                "y": 378.164185
+                "x": 401.5039,
+                "y": 321.6562
               },
               "OffsetMin": {
-                "x": -245.633087,
-                "y": 278.164185
+                "x": -398.4961,
+                "y": 221.656189
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 500.0,
+                "x": 800.0,
                 "y": 100.0
               },
               "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 4.36692047,
-                "y": 328.164185
+                "x": 1.5039,
+                "y": 271.6562
+              },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
               },
               "Position": {
-                "x": 4.36692047,
-                "y": 328.164185,
+                "x": 1.5039,
+                "y": 271.6562,
                 "z": 0.0
               },
               "QuaternionRotation": {
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0,
-                "w": 1.0
+                "w": -1.0
               },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "ZRotation": 0.0,
               "Enable": true
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "cc3457b8e97b3e14f9d5c39ccdd640bf"
+              },
               "OverrideSorting": false,
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.TextComponent",
-              "FontColor": {
-                "r": 0.0,
-                "g": 0.0,
-                "b": 0.0,
+              "Color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
                 "a": 1.0
               },
-              "FontSize": 40,
-              "MaxSize": 40,
-              "MinSize": 10,
-              "OutlineDistance": {
-                "x": 1.0,
-                "y": -1.0
-              },
-              "OverrideSorting": false,
-              "Text": "출석 이벤트",
               "Enable": true
             }
           ],
@@ -353,12 +365,12 @@
         }
       },
       {
-        "id": "0049c2d4-16ed-47a5-b0a4-d2f33c59b94f",
-        "path": "/ui/AttendanceUI/Panel/InfoText",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent,script.AttendanceInfoText",
+        "id": "fded5f18-29f0-468c-b1f5-e562e545a40c",
+        "path": "/ui/AttendanceUI/Panel/Title",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
-          "name": "InfoText",
-          "path": "/ui/AttendanceUI/Panel/InfoText",
+          "name": "Title",
+          "path": "/ui/AttendanceUI/Panel/Title",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -386,30 +398,141 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": -282.9269,
-                "y": 154.6537
+                "x": 402.8677,
+                "y": 323.0197
               },
               "OffsetMin": {
-                "x": -582.9269,
-                "y": 54.6537
+                "x": -397.1323,
+                "y": 223.019714
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 300.0,
+                "x": 800.0,
                 "y": 100.0
               },
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -432.9269,
-                "y": 104.6537
+                "x": 2.8677,
+                "y": 273.0197
               },
               "Position": {
-                "x": -432.9269,
-                "y": 104.6537,
+                "x": 2.8677,
+                "y": 273.0197,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "Color": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "BestFit": true,
+              "Font": 3,
+              "FontColor": {
+                "r": 0.41796875,
+                "g": 1.0,
+                "b": 0.0,
+                "a": 1.0
+              },
+              "FontSize": 60,
+              "MaxSize": 60,
+              "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "OverrideSorting": false,
+              "Text": "출석 이벤트",
+              "UseOutLine": true,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "27c2829d-0674-49c2-bfbe-69b8fd01c499",
+        "path": "/ui/AttendanceUI/Panel/EndTsText",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent,script.AttendanceEndTs",
+        "jsonString": {
+          "name": "EndTsText",
+          "path": "/ui/AttendanceUI/Panel/EndTsText",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 2,
+          "pathConstraints": "////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 489.071,
+                "y": 221.656
+              },
+              "OffsetMin": {
+                "x": -510.929,
+                "y": 171.656
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 1000.0,
+                "y": 50.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": -10.929,
+                "y": 196.656
+              },
+              "Position": {
+                "x": -10.929,
+                "y": 196.656,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -424,29 +547,44 @@
               "@type": "MOD.Core.SpriteGUIRendererComponent",
               "OverrideSorting": false,
               "SortingLayer": "MapLayer0",
+              "Color": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.0
+              },
               "Enable": true
             },
             {
               "@type": "MOD.Core.TextComponent",
+              "BestFit": true,
+              "Font": 3,
               "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 25,
+              "MaxSize": 25,
+              "MinSize": 10,
+              "OutlineColor": {
                 "r": 0.0,
                 "g": 0.0,
                 "b": 0.0,
                 "a": 1.0
               },
-              "FontSize": 40,
-              "MaxSize": 40,
-              "MinSize": 10,
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "현재 3일차",
+              "Text": "출석 이벤트 기간 : 2025-11-29 11:00:00 (UTC+9)",
+              "UseOutLine": true,
               "Enable": true
             },
             {
-              "@type": "script.AttendanceInfoText",
+              "@type": "script.AttendanceEndTs",
               "Enable": true
             }
           ],
@@ -464,7 +602,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 2,
+          "displayOrder": 3,
           "pathConstraints": "////",
           "revision": 1,
           "origin": {
@@ -487,12 +625,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 557.073,
-                "y": 254.48
+                "x": 423.5685,
+                "y": 159.9706
               },
               "OffsetMin": {
-                "x": -282.927,
-                "y": -145.52
+                "x": -416.4315,
+                "y": -240.0294
               },
               "Pivot": {
                 "x": 0.5,
@@ -505,12 +643,12 @@
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 137.073,
-                "y": 54.48
+                "x": 3.5685,
+                "y": -40.0294
               },
               "Position": {
-                "x": 137.073,
-                "y": 54.48,
+                "x": 3.5685,
+                "y": -40.0294,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -528,7 +666,7 @@
                 "r": 1.0,
                 "g": 0.0,
                 "b": 0.0,
-                "a": 1.0
+                "a": 0.0
               },
               "Enable": true
             }
@@ -606,6 +744,9 @@
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "9cabdd08cb834cbab689c6219db5db05"
+              },
               "OverrideSorting": false,
               "Enable": true
             },
@@ -692,15 +833,29 @@
             },
             {
               "@type": "MOD.Core.TextComponent",
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
               "FontSize": 35,
               "MaxSize": 40,
               "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
               "OverrideSorting": false,
               "Text": "1일차",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -822,11 +977,11 @@
               "MobileOnly": false,
               "OffsetMax": {
                 "x": 64.9999161,
-                "y": -45.0
+                "y": -49.0
               },
               "OffsetMin": {
                 "x": -65.0000839,
-                "y": -75.0
+                "y": -79.0
               },
               "Pivot": {
                 "x": 0.5,
@@ -840,11 +995,11 @@
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": -8.05325E-05,
-                "y": -60.0
+                "y": -64.0
               },
               "Position": {
                 "x": -8.05325E-05,
-                "y": -60.0,
+                "y": -64.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -862,15 +1017,30 @@
             },
             {
               "@type": "MOD.Core.TextComponent",
-              "FontSize": 30,
-              "MaxSize": 40,
+              "BestFit": true,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 20,
+              "MaxSize": 20,
               "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
               "OverrideSorting": false,
               "Text": "30",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -1029,6 +1199,9 @@
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "9cabdd08cb834cbab689c6219db5db05"
+              },
               "OverrideSorting": false,
               "SortingLayer": "MapLayer0",
               "Enable": true
@@ -1117,15 +1290,29 @@
             },
             {
               "@type": "MOD.Core.TextComponent",
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
               "FontSize": 35,
               "MaxSize": 40,
               "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
               "OverrideSorting": false,
               "Text": "1일차",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -1248,11 +1435,11 @@
               "MobileOnly": false,
               "OffsetMax": {
                 "x": 64.9999161,
-                "y": -45.0
+                "y": -49.0
               },
               "OffsetMin": {
                 "x": -65.0000839,
-                "y": -75.0
+                "y": -79.0
               },
               "Pivot": {
                 "x": 0.5,
@@ -1266,11 +1453,11 @@
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": -8.05325E-05,
-                "y": -60.0
+                "y": -64.0
               },
               "Position": {
                 "x": -8.05325E-05,
-                "y": -60.0,
+                "y": -64.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -1289,15 +1476,30 @@
             },
             {
               "@type": "MOD.Core.TextComponent",
-              "FontSize": 30,
-              "MaxSize": 40,
+              "BestFit": true,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 20,
+              "MaxSize": 20,
               "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
               "OverrideSorting": false,
               "Text": "30",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -1456,6 +1658,9 @@
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "9cabdd08cb834cbab689c6219db5db05"
+              },
               "OverrideSorting": false,
               "SortingLayer": "MapLayer0",
               "Enable": true
@@ -1544,15 +1749,29 @@
             },
             {
               "@type": "MOD.Core.TextComponent",
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
               "FontSize": 35,
               "MaxSize": 40,
               "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
               "OverrideSorting": false,
               "Text": "1일차",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -1675,11 +1894,11 @@
               "MobileOnly": false,
               "OffsetMax": {
                 "x": 64.9999161,
-                "y": -45.0
+                "y": -49.0
               },
               "OffsetMin": {
                 "x": -65.0000839,
-                "y": -75.0
+                "y": -79.0
               },
               "Pivot": {
                 "x": 0.5,
@@ -1693,11 +1912,11 @@
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": -8.05325E-05,
-                "y": -60.0
+                "y": -64.0
               },
               "Position": {
                 "x": -8.05325E-05,
-                "y": -60.0,
+                "y": -64.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -1716,15 +1935,30 @@
             },
             {
               "@type": "MOD.Core.TextComponent",
-              "FontSize": 30,
-              "MaxSize": 40,
+              "BestFit": true,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 20,
+              "MaxSize": 20,
               "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
               "OverrideSorting": false,
               "Text": "30",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -1883,6 +2117,9 @@
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "9cabdd08cb834cbab689c6219db5db05"
+              },
               "OverrideSorting": false,
               "SortingLayer": "MapLayer0",
               "Enable": true
@@ -1971,15 +2208,29 @@
             },
             {
               "@type": "MOD.Core.TextComponent",
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
               "FontSize": 35,
               "MaxSize": 40,
               "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
               "OverrideSorting": false,
               "Text": "1일차",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -2102,11 +2353,11 @@
               "MobileOnly": false,
               "OffsetMax": {
                 "x": 64.9999161,
-                "y": -45.0
+                "y": -49.0
               },
               "OffsetMin": {
                 "x": -65.0000839,
-                "y": -75.0
+                "y": -79.0
               },
               "Pivot": {
                 "x": 0.5,
@@ -2120,11 +2371,11 @@
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": -8.05325E-05,
-                "y": -60.0
+                "y": -64.0
               },
               "Position": {
                 "x": -8.05325E-05,
-                "y": -60.0,
+                "y": -64.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -2143,15 +2394,30 @@
             },
             {
               "@type": "MOD.Core.TextComponent",
-              "FontSize": 30,
-              "MaxSize": 40,
+              "BestFit": true,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 20,
+              "MaxSize": 20,
               "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
               "OverrideSorting": false,
               "Text": "30",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -2310,6 +2576,9 @@
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "9cabdd08cb834cbab689c6219db5db05"
+              },
               "OverrideSorting": false,
               "SortingLayer": "MapLayer0",
               "Enable": true
@@ -2398,15 +2667,29 @@
             },
             {
               "@type": "MOD.Core.TextComponent",
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
               "FontSize": 35,
               "MaxSize": 40,
               "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
               "OverrideSorting": false,
               "Text": "1일차",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -2529,11 +2812,11 @@
               "MobileOnly": false,
               "OffsetMax": {
                 "x": 64.9999161,
-                "y": -45.0
+                "y": -49.0
               },
               "OffsetMin": {
                 "x": -65.0000839,
-                "y": -75.0
+                "y": -79.0
               },
               "Pivot": {
                 "x": 0.5,
@@ -2547,11 +2830,11 @@
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": -8.05325E-05,
-                "y": -60.0
+                "y": -64.0
               },
               "Position": {
                 "x": -8.05325E-05,
-                "y": -60.0,
+                "y": -64.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -2570,15 +2853,30 @@
             },
             {
               "@type": "MOD.Core.TextComponent",
-              "FontSize": 30,
-              "MaxSize": 40,
+              "BestFit": true,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 20,
+              "MaxSize": 20,
               "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
               "OverrideSorting": false,
               "Text": "30",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -2737,6 +3035,9 @@
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "9cabdd08cb834cbab689c6219db5db05"
+              },
               "OverrideSorting": false,
               "SortingLayer": "MapLayer0",
               "Enable": true
@@ -2825,15 +3126,29 @@
             },
             {
               "@type": "MOD.Core.TextComponent",
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
               "FontSize": 35,
               "MaxSize": 40,
               "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
               "OverrideSorting": false,
               "Text": "1일차",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -2956,11 +3271,11 @@
               "MobileOnly": false,
               "OffsetMax": {
                 "x": 64.9999161,
-                "y": -45.0
+                "y": -49.0
               },
               "OffsetMin": {
                 "x": -65.0000839,
-                "y": -75.0
+                "y": -79.0
               },
               "Pivot": {
                 "x": 0.5,
@@ -2974,11 +3289,11 @@
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": -8.05325E-05,
-                "y": -60.0
+                "y": -64.0
               },
               "Position": {
                 "x": -8.05325E-05,
-                "y": -60.0,
+                "y": -64.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -2997,15 +3312,30 @@
             },
             {
               "@type": "MOD.Core.TextComponent",
-              "FontSize": 30,
-              "MaxSize": 40,
+              "BestFit": true,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 20,
+              "MaxSize": 20,
               "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
               "OverrideSorting": false,
               "Text": "30",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -3164,6 +3494,9 @@
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "9cabdd08cb834cbab689c6219db5db05"
+              },
               "OverrideSorting": false,
               "SortingLayer": "MapLayer0",
               "Enable": true
@@ -3252,15 +3585,29 @@
             },
             {
               "@type": "MOD.Core.TextComponent",
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
               "FontSize": 35,
               "MaxSize": 40,
               "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
               "OverrideSorting": false,
               "Text": "1일차",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -3382,30 +3729,30 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 64.9999161,
-                "y": -115.0
+                "x": 89.9999161,
+                "y": -112.0
               },
               "OffsetMin": {
-                "x": -65.0000839,
-                "y": -145.0
+                "x": -90.0000839,
+                "y": -142.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 130.0,
+                "x": 180.0,
                 "y": 30.0
               },
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": -8.05325E-05,
-                "y": -130.0
+                "y": -127.0
               },
               "Position": {
                 "x": -8.05325E-05,
-                "y": -130.0,
+                "y": -127.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -3424,15 +3771,30 @@
             },
             {
               "@type": "MOD.Core.TextComponent",
+              "BestFit": true,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
               "FontSize": 30,
               "MaxSize": 40,
               "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
               "OverrideSorting": false,
               "Text": "30",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -3532,7 +3894,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 3,
+          "displayOrder": 4,
           "pathConstraints": "////",
           "revision": 1,
           "origin": {
@@ -3555,30 +3917,30 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 110.308,
-                "y": -217.978
+                "x": 150.0,
+                "y": -252.5
               },
               "OffsetMin": {
-                "x": -89.692,
-                "y": -292.978
+                "x": -150.0,
+                "y": -337.5
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 200.0,
-                "y": 75.0
+                "x": 300.0,
+                "y": 85.0
               },
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 10.308,
-                "y": -255.478
+                "x": 0.0,
+                "y": -295.0
               },
               "Position": {
-                "x": 10.308,
-                "y": -255.478,
+                "x": 0.0,
+                "y": -295.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -3651,6 +4013,111 @@
         }
       },
       {
+        "id": "90f97236-70e4-4872-b4f4-0143afd8bf1d",
+        "path": "/ui/AttendanceUI/Panel/ClaimButton/ClaimText",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "ClaimText",
+          "path": "/ui/AttendanceUI/Panel/ClaimButton/ClaimText",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "/////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 140.0,
+                "y": 42.5
+              },
+              "OffsetMin": {
+                "x": -140.0,
+                "y": -42.5
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 280.0,
+                "y": 85.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "BestFit": true,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 40,
+              "MaxSize": 40,
+              "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "OverrideSorting": false,
+              "Text": "출석 체크",
+              "UseOutLine": true,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
         "id": "bd9cf1e7-4c19-4310-b8c3-15dbced787c5",
         "path": "/ui/AttendanceUI/Panel/CloseButton",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.AttendanceCloseButton",
@@ -3661,7 +4128,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 4,
+          "displayOrder": 5,
           "pathConstraints": "////",
           "revision": 1,
           "origin": {
@@ -3684,12 +4151,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 618.4902,
-                "y": 369.4697
+                "x": 623.4905,
+                "y": 363.3341
               },
               "OffsetMin": {
-                "x": 564.4902,
-                "y": 315.4697
+                "x": 569.4905,
+                "y": 309.3341
               },
               "Pivot": {
                 "x": 0.5,
@@ -3702,12 +4169,12 @@
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 591.4902,
-                "y": 342.4697
+                "x": 596.4905,
+                "y": 336.3341
               },
               "Position": {
-                "x": 591.4902,
-                "y": 342.4697,
+                "x": 596.4905,
+                "y": 336.3341,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -3721,11 +4188,11 @@
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
               "ImageRUID": {
-                "DataId": "777ab2e80cb54aa08d47a406bfcad516"
+                "DataId": "36196ed92811aec4096f05005bc1bfb3"
               },
               "LocalScale": {
-                "x": 3.0,
-                "y": 3.0
+                "x": 1.5,
+                "y": 1.5
               },
               "OverrideSorting": false,
               "SortingLayer": "MapLayer0",

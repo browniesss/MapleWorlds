@@ -115,7 +115,8 @@ script AttendanceEventService extends Logic
 				rewards[day] = {
 					gems = tonumber(dataSet:GetCell(i, "gems")) or 0,
 					coins = tonumber(dataSet:GetCell(i, "coins")) or 0,
-					special = tostring(dataSet:GetCell(i, "special")) == "true"
+					special = tostring(dataSet:GetCell(i, "special")) == "true",
+					endTs = tonumber(dataSet:GetCell(i, "endTs")) or 0
 				}
 			end
 		end
@@ -196,7 +197,7 @@ script AttendanceEventService extends Logic
 		
 		if reward ~= nil then
 			if reward.gems > 0 then
-				--_BillingService:AddFirstPaidCoin(uid, reward.gems)
+				_BillingService:AddFirstFreeCoin(uid, reward.gems)
 				print("[AttendanceEventService] Gave " .. tostring(reward.gems) .. " paid gems to user " .. uid)
 			end
 		
@@ -325,6 +326,76 @@ script AttendanceEventService extends Logic
 		local attendanceButton = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/AttendanceEventButton")
 		if attendanceButton ~= nil then
 			attendanceButton.AttendanceEventButton:UpdateRedDot(canClaim)
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean IsEventActive()
+		local dataSet = _DataService:GetTable("AttendanceRewards")
+		
+		if dataSet == nil then
+			return false
+		end
+		
+		local endTs = tonumber(dataSet:GetCell(1, "endTs"))
+		
+		if endTs == nil or endTs == 0 then
+			return true
+		end
+		
+		local currentTime = os.time()
+		return currentTime <= endTs
+	end
+
+	@ExecSpace("Server")
+	method void RequestEventStatus()
+		local uid = senderUserId
+		local isActive = self:IsEventActive()
+		self:SendEventStatusToClient(uid, isActive)
+	end
+
+	@ExecSpace("Client")
+	method void SendEventStatusToClient(string uid, boolean isActive)
+		self:UpdateEventButtonVisibility(isActive)
+	end
+
+	@ExecSpace("Client")
+	method void UpdateEventButtonVisibility(boolean isActive)
+		local attendanceButton = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/AttendanceEventButton")
+		if attendanceButton ~= nil then
+			attendanceButton.Enable = isActive
+			attendanceButton.Visible = isActive
+		end
+	end
+
+	@ExecSpace("Server")
+	method void RequestEndTsText()
+		local uid = senderUserId
+		local dataSet = _DataService:GetTable("AttendanceRewards")
+		
+		if dataSet == nil then
+			return
+		end
+		
+		local endTs = tonumber(dataSet:GetCell(1, "endTs"))
+		
+		if endTs == nil or endTs == 0 then
+			return
+		end
+		
+		self:SendEndTsToClient(uid, endTs)
+	end
+
+	@ExecSpace("Client")
+	method void SendEndTsToClient(string uid, number endTs)
+		_TimeManager:SetEndTs(endTs, self.UpdateEndTsText, "출석 이벤트 기간")
+	end
+
+	@ExecSpace("Client")
+	method void UpdateEndTsText()
+		local endTsText = _EntityService:GetEntityByPath("/ui/AttendanceUI/Panel/EndTsText")
+		if endTsText ~= nil and endTsText.TextComponent ~= nil then
+			endTsText.TextComponent.Text = self
 		end
 	end
 

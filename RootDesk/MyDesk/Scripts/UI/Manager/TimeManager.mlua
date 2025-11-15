@@ -2,23 +2,40 @@
 script TimeManager extends Logic
 
 	@ExecSpace("ClientOnly")
-	method void SetEndTs(integer endTs, any callback)
+	method void SetEndTs(integer endTs, any callback, string prefix)
 		local epochUtcDate = DateTime(1970, 1, 1, 0, 0, 0)
-		
+
 		local elapsedDuration = TimeSpan.FromSeconds(endTs)
-		
+
 		local endDateTime = epochUtcDate + elapsedDuration
-		
+
 		local localTime = _UtilLogic:GetLocalTimeFrom(endDateTime)
-			
+
 		local formattedString = localTime:ToFormattedString("yyyy-MM-dd HH:mm:ss")
-		    
-		local finalString = "픽업 기간 : " .. formattedString .. " (UTC+".. localTime.Hour - endDateTime.Hour ..")"
-		 
+
+		-- UTC 시간대 계산 (로컬 시간 - UTC 시간)
+		local utcOffset = localTime.Hour - endDateTime.Hour
+
+		-- 날짜가 바뀐 경우 보정
+		if localTime.Day ~= endDateTime.Day then
+			if localTime.Day > endDateTime.Day then
+				utcOffset = utcOffset + 24
+			else
+				utcOffset = utcOffset - 24
+			end
+		end
+
+		-- prefix 기본값 설정
+		if prefix == nil or prefix == "" then
+			prefix = "픽업 기간"
+		end
+
+		local finalString = prefix .. " : " .. formattedString .. " (UTC+".. utcOffset ..")"
+
 		if callback == nil then
 			return
 		end
-		
+
 		callback(finalString)
 	end
 

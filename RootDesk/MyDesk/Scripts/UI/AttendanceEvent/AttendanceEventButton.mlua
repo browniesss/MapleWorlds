@@ -6,13 +6,16 @@ script AttendanceEventButton extends Component
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		self.redDotSprite = self.Entity.Children[1]
-		
+
 		-- 레드닷 초기화
 		if self.redDotSprite ~= nil then
 			self.redDotSprite.Enable = false
 			self.redDotSprite.Visible = false
 		end
-		
+
+		-- 이벤트 활성 상태 체크 (서버에서 endTs 확인)
+		_AttendanceEventService:RequestEventStatus()
+
 		-- 레드닷 상태 체크
 		_AttendanceEventService:RequestCanClaimStatus()
 	end
