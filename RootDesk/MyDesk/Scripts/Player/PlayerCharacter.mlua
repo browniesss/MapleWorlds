@@ -60,15 +60,13 @@ script PlayerCharacter extends Component
 		local isTutorial = _TutorialService:LOAD(self.Entity.PlayerComponent.UserId)
 		
 		if isTermAgree == 0 then
-			-- _TermService:AgreePopupOn()
+			_TermService:AgreePopupOn()
 		end
 		
 		if isTutorial == 0 then
-			-- _TutorialService:StartTutorial(1)
+			_TutorialService:StartTutorial(1)
 			_TutorialService:SAVE(self.Entity.PlayerComponent.UserId)
 		end
-		
-		_AttendanceEventService:OpenUI()
 	end
 
 	method void SetIngameSkill(number skillID, number skillLevel)
