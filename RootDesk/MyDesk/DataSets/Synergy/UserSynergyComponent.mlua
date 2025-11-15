@@ -1,0 +1,16 @@
+@Component
+script UserSynergyComponent extends Component
+
+	property table countMap = {}
+
+	@ExecSpace("ServerOnly")
+	method integer GET_SYNERGY_COUNT(string target)
+		return self.countMap[target]
+	end
+
+	@ExecSpace("ServerOnly")
+	method void SET_SYNERGY(table deck)
+		
+	end
+
+end

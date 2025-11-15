@@ -1,0 +1,14 @@
+@Component
+script UnitSynergyComponent extends Component
+
+	@ExecSpace("ServerOnly")
+	method void APPLY_SYNERGY(SynergyList list)
+		local count = list:length()
+		
+		for i=1, count do
+			local item = list:Get(i)
+			self.Entity.Unit:GetBuff()
+		end
+	end
+
+end
