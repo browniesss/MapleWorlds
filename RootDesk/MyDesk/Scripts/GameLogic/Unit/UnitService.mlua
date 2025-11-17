@@ -3,8 +3,12 @@ script UnitService extends Logic
 
 	property table UnitTable = {}
 
+	@Sync
+	property boolean needSync = false
+
+	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
-		local dataSet = _DataService:GetTable("Unit")    
+		local dataSet = _DataService:GetTable("Unit")
 		for index = 1, dataSet:GetRowCount() do
 		    local item = {}
 			
@@ -34,6 +38,8 @@ script UnitService extends Logic
 			
 			self.UnitTable[item['id']] = item
 		end
+		
+		self.needSync = true
 	end
 
 	@ExecSpace("Server")
@@ -74,6 +80,30 @@ script UnitService extends Logic
 		set[#set + 1] = "model://02c5b927-1095-4f34-9d02-9c6252772f52"
 		
 		return set
+	end
+
+	@ExecSpace("Client")
+	method void SyncClient(table item)
+		self.UnitTable[item.id] = item
+	end
+
+	@ExecSpace("Server")
+	method void SyncCall()
+		if self.needSync == false then
+			return
+		end
+		
+		self.needSync = false
+		for k, v in pairs(self.UnitTable) do
+			self:SyncClient(v)
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnSyncProperty(string name, any value)
+		if name == "needSync" then
+			self:SyncCall()
+		end
 	end
 
 end

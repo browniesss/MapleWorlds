@@ -37,4 +37,18 @@ script SynergyList
 		return -1
 	end
 
+	method string ENCODE()
+		local list = {}
+		
+		for i, data in ipairs(list) do
+			local item = {}
+			for k, v in pairs(data) do
+				item[k]=v
+			end
+			list[#list + 1] = item
+		end
+		
+		return _HttpService:JSONEncode(list)
+	end
+
 end

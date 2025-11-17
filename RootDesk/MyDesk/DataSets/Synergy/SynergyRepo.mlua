@@ -22,20 +22,24 @@ script SynergyRepo extends Logic
 			item.value = tonumber(dataSet:GetCell(i,"value"))
 			
 			if self.SERVER_DATA[item.target] == nil then
-				self.SERVER_DATA[item.target] = {}
+				self.SERVER_DATA[item.target] = SynergyList()
 			end
 			
-			self.SERVER_DATA[item.target][#self.SERVER_DATA[item.target] + 1] = item
+			self.SERVER_DATA[item.target]:Add(item)
 		end
 		
 		for k, v in pairs(self.SERVER_DATA) do
-			self.ClientData[k] = _HttpService:JSONEncode(v)
+			self.ClientData[k] = v:ENCODE()
 		end
 	end
 
 	@ExecSpace("ServerOnly")
-	method SynergyItem FIRST_SYNERGY_AVAILABLE(string target, integer arg1)
+	method SynergyItem FIRST_SYNERGY_AVAILABLE(string target, integer count)
+		local resp = SynergyItem()
 		
+		
+		
+		return resp
 	end
 
 end
