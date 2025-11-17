@@ -1,0 +1,31 @@
+@Component
+script Show_Down_Challenge extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		-- f669f51ac74c4fafbc67b61b831f234d
+		local arrow = _SpawnService:SpawnByModelId("model://6584762e-b48c-4b7c-af93-a9307ad670c9", "Show_Down_Challenge", Vector3(0.1, 0, 0), self.caster)
+		local deleteTime = _Utils:GetRUIDTime(arrow.SpriteRendererComponent.SpriteRUID)
+		
+		arrow.SpriteRendererComponent.FlipX = self.caster.Unit.isEnemy == true
+		arrow.DelayAttackComponent:Init(self.skillAmount, self.caster, self.caster.Unit.isEnemy == false)
+		
+		local damageFunction = function()
+			arrow.TriggerComponent.Enable = true
+		end
+		
+		local deleteFunction = function()
+			-- 스킬 사용 종료 처리
+			_EntityService:Destroy(arrow)
+			self:SkillEnd()
+		end
+		
+		-- 레이저 발사 타이밍에 데미지 입히는 처리
+		_TimerService:SetTimerOnce(damageFunction, self.skillAttackTiming)
+		-- 스킬 사용 종료 처리
+		_TimerService:SetTimerOnce(deleteFunction, deleteTime)
+	end
+
+end
