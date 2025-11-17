@@ -17,11 +17,1093 @@
       "Name": "SynergyItem",
       "BaseModelId": null,
       "Id": "c4e27100-4894-41a8-bb13-da550e47ddf3",
-      "Components": [],
+      "Components": [
+        "MOD.Core.UITransformComponent",
+        "MOD.Core.ScrollLayoutGroupComponent",
+        "script.SynergyComponentItem"
+      ],
       "Properties": [],
-      "Values": [],
+      "Values": [
+        {
+          "TargetType": "MOD.Core.UITransformComponent",
+          "Name": "AlignmentOption",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.AlignmentType, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": 0
+        },
+        {
+          "TargetType": "MOD.Core.UITransformComponent",
+          "Name": "AnchorsMax",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODVector2, MOD.Core",
+            "x": 0.5,
+            "y": 0.5
+          }
+        },
+        {
+          "TargetType": "MOD.Core.UITransformComponent",
+          "Name": "AnchorsMin",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODVector2, MOD.Core",
+            "x": 0.5,
+            "y": 0.5
+          }
+        },
+        {
+          "TargetType": "MOD.Core.UITransformComponent",
+          "Name": "MobileOnly",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": false
+        },
+        {
+          "TargetType": "MOD.Core.UITransformComponent",
+          "Name": "OffsetMax",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODVector2, MOD.Core",
+            "x": 65.0,
+            "y": 20.0
+          }
+        },
+        {
+          "TargetType": "MOD.Core.UITransformComponent",
+          "Name": "OffsetMin",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODVector2, MOD.Core",
+            "x": -65.0,
+            "y": -20.0
+          }
+        },
+        {
+          "TargetType": "MOD.Core.UITransformComponent",
+          "Name": "Pivot",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODVector2, MOD.Core",
+            "x": 0.5,
+            "y": 0.5
+          }
+        },
+        {
+          "TargetType": "MOD.Core.UITransformComponent",
+          "Name": "RectSize",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODVector2, MOD.Core",
+            "x": 130.0,
+            "y": 40.0
+          }
+        },
+        {
+          "TargetType": "MOD.Core.UITransformComponent",
+          "Name": "UIMode",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.UIModeType, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": 2
+        },
+        {
+          "TargetType": "MOD.Core.UITransformComponent",
+          "Name": "UIVersion",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": 2
+        },
+        {
+          "TargetType": "MOD.Core.UITransformComponent",
+          "Name": "anchoredPosition",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODVector2, MOD.Core",
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "TargetType": "MOD.Core.UITransformComponent",
+          "Name": "Position",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODVector3, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODVector3, MOD.Core",
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        {
+          "TargetType": "MOD.Core.UITransformComponent",
+          "Name": "QuaternionRotation",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODQuaternion, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODQuaternion, MOD.Core",
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          }
+        },
+        {
+          "TargetType": "MOD.Core.UITransformComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.ScrollLayoutGroupComponent",
+          "Name": "ChildAlignment",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.ChildAlignmentType, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": 4
+        },
+        {
+          "TargetType": "MOD.Core.ScrollLayoutGroupComponent",
+          "Name": "ConstraintCount",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": 3
+        },
+        {
+          "TargetType": "MOD.Core.ScrollLayoutGroupComponent",
+          "Name": "GridChildAlignment",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.ChildAlignmentType, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": 4
+        },
+        {
+          "TargetType": "MOD.Core.ScrollLayoutGroupComponent",
+          "Name": "OverrideSorting",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": false
+        },
+        {
+          "TargetType": "MOD.Core.ScrollLayoutGroupComponent",
+          "Name": "ScrollBarBackgroundColor",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODColor, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODColor, MOD.Core",
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 0.0
+          }
+        },
+        {
+          "TargetType": "MOD.Core.ScrollLayoutGroupComponent",
+          "Name": "ScrollBarHandleColor",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODColor, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODColor, MOD.Core",
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5,
+            "a": 0.0
+          }
+        },
+        {
+          "TargetType": "MOD.Core.ScrollLayoutGroupComponent",
+          "Name": "ScrollBarVisible",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.ScrollBarVisibility, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": 2
+        },
+        {
+          "TargetType": "MOD.Core.ScrollLayoutGroupComponent",
+          "Name": "Spacing",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Single, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": 10.0
+        },
+        {
+          "TargetType": "MOD.Core.ScrollLayoutGroupComponent",
+          "Name": "Type",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.LayoutGroupType, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": 2
+        },
+        {
+          "TargetType": "MOD.Core.ScrollLayoutGroupComponent",
+          "Name": "UseScroll",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": false
+        },
+        {
+          "TargetType": "MOD.Core.ScrollLayoutGroupComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "script.SynergyComponentItem",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "script.SynergyComponentItem",
+          "Name": "spriteJob",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODEntity, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODEntityRef, MOD.Core",
+            "tempEntityId": null,
+            "IsRelative": true,
+            "EntityId": "36dc9961-72aa-46a1-9e7c-80acf1da79a9"
+          }
+        },
+        {
+          "TargetType": "script.SynergyComponentItem",
+          "Name": "spriteCountry",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODEntity, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODEntityRef, MOD.Core",
+            "tempEntityId": null,
+            "IsRelative": true,
+            "EntityId": "6b7c5e9e-0290-4c45-b058-6016dc12c548"
+          }
+        },
+        {
+          "TargetType": "script.SynergyComponentItem",
+          "Name": "spriteRegion",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODEntity, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODEntityRef, MOD.Core",
+            "tempEntityId": null,
+            "IsRelative": true,
+            "EntityId": "36ce9d0a-823a-4b77-b4da-69a0fa26f856"
+          }
+        },
+        {
+          "TargetType": "MOD.Core.MODEntity",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.MODEntity",
+          "Name": "Visible",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.ScrollLayoutGroupComponent",
+          "Name": "CellSize",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODVector2, MOD.Core",
+            "x": 35.0,
+            "y": 35.0
+          }
+        },
+        {
+          "TargetType": "MOD.Core.ScrollLayoutGroupComponent",
+          "Name": "GridSpacing",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODVector2, MOD.Core",
+            "x": 5.0,
+            "y": 0.0
+          }
+        }
+      ],
       "EventLinks": [],
-      "Children": []
+      "Children": [
+        {
+          "Id": "36dc9961-72aa-46a1-9e7c-80acf1da79a9",
+          "ParentId": "c4e27100-4894-41a8-bb13-da550e47ddf3",
+          "Name": "JobSprite",
+          "Model": {
+            "Version": 1,
+            "Name": "JobSprite",
+            "BaseModelId": null,
+            "Id": "36dc9961-72aa-46a1-9e7c-80acf1da79a9",
+            "Components": [
+              "MOD.Core.UITransformComponent",
+              "MOD.Core.SpriteGUIRendererComponent"
+            ],
+            "Properties": [],
+            "Values": [
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "AlignmentOption",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.AlignmentType, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": 4
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "AnchorsMax",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector2, MOD.Core",
+                  "x": 0.0,
+                  "y": 1.0
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "AnchorsMin",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector2, MOD.Core",
+                  "x": 0.0,
+                  "y": 1.0
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "MobileOnly",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": false
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "OffsetMax",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector2, MOD.Core",
+                  "x": 17.61025,
+                  "y": 17.41225
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "OffsetMin",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector2, MOD.Core",
+                  "x": -17.38975,
+                  "y": -17.58775
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "RectSize",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector2, MOD.Core",
+                  "x": 35.0,
+                  "y": 35.0
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "UIMode",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.UIModeType, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": 2
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "UIVersion",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": 2
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "anchoredPosition",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector2, MOD.Core",
+                  "x": 0.225,
+                  "y": -0.225
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "Position",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector3, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector3, MOD.Core",
+                  "x": 0.110249996,
+                  "y": -0.0877499953,
+                  "z": 0.0
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "QuaternionRotation",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODQuaternion, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODQuaternion, MOD.Core",
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0,
+                  "w": 1.0
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "Enable",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": true
+              },
+              {
+                "TargetType": "MOD.Core.SpriteGUIRendererComponent",
+                "Name": "ImageRUID",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODDataRef, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODDataRef, MOD.Core",
+                  "DataId": "a9d74083a4d14513b6c7703036d0cc71"
+                }
+              },
+              {
+                "TargetType": "MOD.Core.SpriteGUIRendererComponent",
+                "Name": "OverrideSorting",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": false
+              },
+              {
+                "TargetType": "MOD.Core.SpriteGUIRendererComponent",
+                "Name": "Color",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODColor, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODColor, MOD.Core",
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                }
+              },
+              {
+                "TargetType": "MOD.Core.SpriteGUIRendererComponent",
+                "Name": "Enable",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": true
+              },
+              {
+                "TargetType": "MOD.Core.MODEntity",
+                "Name": "Enable",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": true
+              },
+              {
+                "TargetType": "MOD.Core.MODEntity",
+                "Name": "Visible",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": true
+              }
+            ],
+            "EventLinks": [],
+            "Children": []
+          }
+        },
+        {
+          "Id": "6b7c5e9e-0290-4c45-b058-6016dc12c548",
+          "ParentId": "c4e27100-4894-41a8-bb13-da550e47ddf3",
+          "Name": "CountrySprite",
+          "Model": {
+            "Version": 1,
+            "Name": "CountrySprite",
+            "BaseModelId": null,
+            "Id": "6b7c5e9e-0290-4c45-b058-6016dc12c548",
+            "Components": [
+              "MOD.Core.UITransformComponent",
+              "MOD.Core.SpriteGUIRendererComponent"
+            ],
+            "Properties": [],
+            "Values": [
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "AlignmentOption",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.AlignmentType, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": 4
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "AnchorsMax",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector2, MOD.Core",
+                  "x": 0.0,
+                  "y": 1.0
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "AnchorsMin",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector2, MOD.Core",
+                  "x": 0.0,
+                  "y": 1.0
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "MobileOnly",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": false
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "OffsetMax",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector2, MOD.Core",
+                  "x": 17.79025,
+                  "y": 17.41225
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "OffsetMin",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector2, MOD.Core",
+                  "x": -17.20975,
+                  "y": -17.58775
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "RectSize",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector2, MOD.Core",
+                  "x": 35.0,
+                  "y": 35.0
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "UIMode",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.UIModeType, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": 2
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "UIVersion",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": 2
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "anchoredPosition",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector2, MOD.Core",
+                  "x": 0.719999969,
+                  "y": -0.225
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "Position",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector3, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector3, MOD.Core",
+                  "x": 0.290249974,
+                  "y": -0.0877499953,
+                  "z": 0.0
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "QuaternionRotation",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODQuaternion, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODQuaternion, MOD.Core",
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0,
+                  "w": 1.0
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "Enable",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": true
+              },
+              {
+                "TargetType": "MOD.Core.SpriteGUIRendererComponent",
+                "Name": "ImageRUID",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODDataRef, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODDataRef, MOD.Core",
+                  "DataId": "63a751da122f47589186bed27e7db088"
+                }
+              },
+              {
+                "TargetType": "MOD.Core.SpriteGUIRendererComponent",
+                "Name": "OverrideSorting",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": false
+              },
+              {
+                "TargetType": "MOD.Core.SpriteGUIRendererComponent",
+                "Name": "Color",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODColor, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODColor, MOD.Core",
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                }
+              },
+              {
+                "TargetType": "MOD.Core.SpriteGUIRendererComponent",
+                "Name": "Enable",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": true
+              },
+              {
+                "TargetType": "MOD.Core.MODEntity",
+                "Name": "Enable",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": true
+              },
+              {
+                "TargetType": "MOD.Core.MODEntity",
+                "Name": "Visible",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": true
+              }
+            ],
+            "EventLinks": [],
+            "Children": []
+          }
+        },
+        {
+          "Id": "36ce9d0a-823a-4b77-b4da-69a0fa26f856",
+          "ParentId": "c4e27100-4894-41a8-bb13-da550e47ddf3",
+          "Name": "RegionSprite",
+          "Model": {
+            "Version": 1,
+            "Name": "RegionSprite",
+            "BaseModelId": null,
+            "Id": "36ce9d0a-823a-4b77-b4da-69a0fa26f856",
+            "Components": [
+              "MOD.Core.UITransformComponent",
+              "MOD.Core.SpriteGUIRendererComponent"
+            ],
+            "Properties": [],
+            "Values": [
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "AlignmentOption",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.AlignmentType, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": 4
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "AnchorsMax",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector2, MOD.Core",
+                  "x": 0.0,
+                  "y": 1.0
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "AnchorsMin",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector2, MOD.Core",
+                  "x": 0.0,
+                  "y": 1.0
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "MobileOnly",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": false
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "OffsetMax",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector2, MOD.Core",
+                  "x": 17.97025,
+                  "y": 17.41225
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "OffsetMin",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector2, MOD.Core",
+                  "x": -17.02975,
+                  "y": -17.58775
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "RectSize",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector2, MOD.Core",
+                  "x": 35.0,
+                  "y": 35.0
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "UIMode",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.UIModeType, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": 2
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "UIVersion",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": 2
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "anchoredPosition",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector2, MOD.Core",
+                  "x": 1.21499991,
+                  "y": -0.225
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "Position",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODVector3, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODVector3, MOD.Core",
+                  "x": 0.470249981,
+                  "y": -0.0877499953,
+                  "z": 0.0
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "QuaternionRotation",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODQuaternion, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODQuaternion, MOD.Core",
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0,
+                  "w": 1.0
+                }
+              },
+              {
+                "TargetType": "MOD.Core.UITransformComponent",
+                "Name": "Enable",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": true
+              },
+              {
+                "TargetType": "MOD.Core.SpriteGUIRendererComponent",
+                "Name": "ImageRUID",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODDataRef, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODDataRef, MOD.Core",
+                  "DataId": "63971baad104403392fd31b6c3f0bfd3"
+                }
+              },
+              {
+                "TargetType": "MOD.Core.SpriteGUIRendererComponent",
+                "Name": "OverrideSorting",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": false
+              },
+              {
+                "TargetType": "MOD.Core.SpriteGUIRendererComponent",
+                "Name": "Color",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "MOD.Core.MODColor, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+                },
+                "Value": {
+                  "$type": "MOD.Core.MODColor, MOD.Core",
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                }
+              },
+              {
+                "TargetType": "MOD.Core.SpriteGUIRendererComponent",
+                "Name": "Enable",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": true
+              },
+              {
+                "TargetType": "MOD.Core.MODEntity",
+                "Name": "Enable",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": true
+              },
+              {
+                "TargetType": "MOD.Core.MODEntity",
+                "Name": "Visible",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": true
+              }
+            ],
+            "EventLinks": [],
+            "Children": []
+          }
+        }
+      ]
     }
   }
 }

@@ -10,8 +10,8 @@ script SynergyRepo extends Logic
 
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
-		self:SetSynergy()
 		self:SetSynergyData()
+		self:SetSynergy()
 	end
 
 	@ExecSpace("ServerOnly")

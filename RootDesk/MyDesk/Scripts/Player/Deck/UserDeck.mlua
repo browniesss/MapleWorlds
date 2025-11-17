@@ -4,7 +4,7 @@ script UserDeck extends Component
 	property table userDeck = {}
 
 	method void OnBeginPlay()
-		_UserDeckService:LOAD(self.Entity.PlayerComponent.UserId)
+		_UserDeckService:LOAD()
 	end
 
 	@ExecSpace("Client")
