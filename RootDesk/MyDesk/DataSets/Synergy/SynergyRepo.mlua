@@ -1,0 +1,41 @@
+@Logic
+script SynergyRepo extends Logic
+
+	@Sync
+	property SyncTable<string, string> ClientData
+
+	property table SERVER_DATA = {}
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		local dataSet = _DataService:GetTable("Synergy")
+		
+		local dataCount = dataSet:GetRowCount()
+		
+		for i = 1, dataCount do
+			local item = SynergyItem()
+			
+			item.target = tostring(dataSet:GetCell(i,"target"))
+			item.count = tonumber(dataSet:GetCell(i,"count"))
+			item.buff = tostring(dataSet:GetCell(i,"buff"))
+			item.type = tostring(dataSet:GetCell(i,"type"))
+			item.value = tonumber(dataSet:GetCell(i,"value"))
+			
+			if self.SERVER_DATA[item.target] == nil then
+				self.SERVER_DATA[item.target] = {}
+			end
+			
+			self.SERVER_DATA[item.target][#self.SERVER_DATA[item.target] + 1] = item
+		end
+		
+		for k, v in pairs(self.SERVER_DATA) do
+			self.ClientData[k] = _HttpService:JSONEncode(v)
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method SynergyItem FIRST_SYNERGY_AVAILABLE(string target, integer arg1)
+		
+	end
+
+end

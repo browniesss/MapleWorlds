@@ -1,0 +1,55 @@
+@Component
+script AttendanceDayItem extends Component
+
+	property number DayNumber = 1
+
+	property Entity DayNumberText = nil
+
+	property Entity RewardAmountText = nil
+
+	property Entity StatusOverlay = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.DayNumberText = self.Entity.Children[1]
+		self.RewardAmountText = self.Entity.Children[3]
+		self.StatusOverlay = self.Entity.Children[4]
+	end
+
+	@ExecSpace("Client")
+	method void SetDayInfo(number day, table reward, boolean isCompleted, boolean isToday)
+		self.DayNumber = day
+		
+		-- 일차 텍스트
+		if self.DayNumberText ~= nil and self.DayNumberText.TextComponent ~= nil then
+			self.DayNumberText.TextComponent.Text = tostring(day) .. "일차"
+		end
+		
+		-- 보상 텍스트
+		if self.RewardAmountText ~= nil and self.RewardAmountText.TextComponent ~= nil then
+			self.RewardAmountText.TextComponent.Text = tostring(reward.gems)
+		end
+		
+		-- 상태 표시
+		if self.StatusOverlay ~= nil then
+			if isCompleted then
+				-- 완료: 체크 표시
+				self.StatusOverlay.Enable = true
+				self.StatusOverlay.Visible = true
+			elseif isToday then
+				-- 오늘: 강조
+				self.StatusOverlay.Enable = false
+				self.StatusOverlay.Visible = false
+			else
+				-- 잠김: 어둡게
+				self.StatusOverlay.Enable = false
+				self.StatusOverlay.Visible = false
+			end
+		end
+		
+		-- 특별 보상 표시
+		if reward.special then
+		end
+	end
+
+end

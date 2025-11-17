@@ -5,20 +5,20 @@ script GachaEndTs extends Component
 
 	method void SetEndTsText()
 		local EndTsText = _EntityService:GetEntityByPath("/ui/GachaUI/BackgroundUI/GachaEndTimeRoot/EndTimeBackground/EndTimeLabel")
-		
+
 		EndTsText.TextComponent.Text = self
 	end
 
 	@EventSender("Self")
 	handler HandleEntityEnabledInHierarchyChangedEvent(EntityEnabledInHierarchyChangedEvent event)
 		local dataSet = _SummonService:GET_SETTING(_GachaManager.GachaKey)
-		
+
 		if dataSet == nil then
 			return
 		end
-		
+
 		if event.EnabledInHierarchy == true then
-			_TimeManager:SetEndTs(dataSet.end_ts, self.SetEndTsText)
+			_TimeManager:SetEndTs(dataSet.end_ts, self.SetEndTsText, "픽업 기간")
 		end
 	end
 

@@ -1,0 +1,8 @@
+@Component
+script AttendanceInfoText extends Component
+	@ExecSpace("Client")
+	method void UpdateInfo(number currentDay, number totalAttendance)
+		local text = string.format("연속 출석: %d일 | 총 출석: %d일", currentDay, totalAttendance)
+		self.Entity.TextComponent.Text = text
+	end
+end

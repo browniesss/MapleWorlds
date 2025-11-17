@@ -1,0 +1,12 @@
+@Component
+script AttendanceEndTs extends Component
+
+	@EventSender("Self")
+	handler HandleEntityEnabledInHierarchyChangedEvent(EntityEnabledInHierarchyChangedEvent event)
+		if event.EnabledInHierarchy == true then
+			-- 서버에 endTs 텍스트 요청 (서버에서 DataSet 접근)
+			_AttendanceEventService:RequestEndTsText()
+		end
+	end
+
+end

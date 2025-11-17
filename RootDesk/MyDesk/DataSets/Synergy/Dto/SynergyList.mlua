@@ -1,0 +1,40 @@
+@Struct
+script SynergyList
+
+	property table list = {}
+
+	method SynergyItem Get(integer index)
+		return self.list[index]
+	end
+
+	method void Add(SynergyItem item)
+		table.insert(self.list, item)
+	end
+
+	method void Remove(integer index)
+		if index > self:length() then
+			return
+		end
+		
+		table.remove(self.list, index)
+	end
+
+	method integer length()
+		return #self.list
+	end
+
+	method integer findIndex(table option)
+		for i, item in ipairs(self.list) do
+			for k, v in pairs(option) do
+				if not item[k] == v then
+					continue
+				end
+			end
+			
+			return i
+		end
+		
+		return -1
+	end
+
+end
