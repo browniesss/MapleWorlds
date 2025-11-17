@@ -834,6 +834,15 @@ script Unit extends Component
 		end
 	end
 
+	method void OnHeal(Entity caster, number healAmount)
+		if self.hp <= 0 then
+			return
+		end
+		
+		self.hp += healAmount
+		_EffectService:PlayEffectAttached("93f3cd96f3b1432693e5d2765d396338",self.Entity, Vector3.zero, 0, Vector3.one)
+	end
+
 	method void OnDie(Entity attacker)
 		if self.curState == "die" then
 			return
@@ -957,6 +966,41 @@ script Unit extends Component
 				self.attackSpeedDecreaseTimerID = _TimerService:SetTimerOnce(deleteFunction, debuffTime)
 			end
 		end
+	end
+
+	method void Cleans_Debuff()
+		-- 스턴 초기화
+		if self.stunTime >= 0 then
+			self.stunTime = 0
+		end
+		
+		-- 공포 초기화
+		if self.curState == "fear" then
+			self.fearTimerID = 0
+			self:SetState("stand")
+			_EffectService:RemoveEffect(self.debuffEffectID)
+		
+			if self.isEnemy then
+				self.Entity.SpriteRendererComponent.FlipX = false
+			else
+				self.Entity.SpriteRendererComponent.FlipX = true
+			end
+		end
+		
+		-- 침묵 초기화
+		if self.debuffState == _eDebuffType.Silence then
+			self.silenceTimerID = 0
+			_EffectService:RemoveEffect(self.debuffEffectID)
+			self.debuffState = 0
+		end
+		
+		-- 공속 감소 디버프 초기화
+		if self.attackSpeedDecreaseTimerID ~= 0 then
+			self.attackSpeedDecreaseTimerID = 0
+			self.attackSpeed = self.originAttackSpeed
+			_EffectService:RemoveEffect(self.debuffEffectID)
+		end
+		
 	end
 
 	method void OnStun(number delta)

@@ -1,0 +1,41 @@
+@Component
+script Holy_Fountain extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		-- 생성 f0ae3ac26a83422795c25931d58da17e
+		-- 중간 ec3d24ba83b747abb6c71f99e6616f0c
+		-- 삭제 6867a44ded694a5b847073b4c6ef49ba
+		-- 옵젝 model://0b3019ed-d034-48eb-b2fd-eec6443cec38
+		
+		
+		local basePos = self.Entity.TransformComponent.WorldPosition
+		local pos = Vector3(2, 0, 0)
+		local fountainPos = basePos + pos + Vector3(0, -0.5, 0)
+		if self._T.projectileParent == nil then
+			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+		end
+		
+		_EffectService:PlayEffect("f0ae3ac26a83422795c25931d58da17e", self._T.projectileParent, basePos + pos, 0, Vector3.one)
+		
+		local spawnFunction = function()	
+			local fountain = _SpawnService:SpawnByModelId("model://0b3019ed-d034-48eb-b2fd-eec6443cec38", "Holy_Fountain_Object", fountainPos, self._T.projectileParent)
+		
+			fountain.SpriteRendererComponent.FlipX = self.caster.Unit.isEnemy == false
+			fountain.LoopAttackComponent:Init(self.skillAmount, self.skillTime, self.skillAttackTiming, self.caster, nil, true)
+			self:SkillEnd()
+		end
+		
+		local deleteFunction = function()
+			-- 스킬 사용 종료 처리
+			_EffectService:PlayEffect("6867a44ded694a5b847073b4c6ef49ba", self._T.projectileParent, basePos + pos, 0, Vector3.one)
+		end
+		
+		-- 스킬 사용 종료 처리
+		_TimerService:SetTimerOnce(spawnFunction, 1.8)
+		_TimerService:SetTimerOnce(deleteFunction, 1.8 + self.skillTime * self.skillAttackTiming)
+	end
+
+end

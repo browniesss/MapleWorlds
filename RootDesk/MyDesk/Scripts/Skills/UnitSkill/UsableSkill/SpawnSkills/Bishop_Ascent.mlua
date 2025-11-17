@@ -1,0 +1,44 @@
+@Component
+script Bishop_Ascent extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		_UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill = true
+		
+		local monsterList = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+		local myMonsters = monsterList.Children
+		local player = _EntityService:GetEntityByTag("Player")
+		
+		_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = "7a871e0365124a59b38996c70d134b6f"
+		_GameManager.screenSkillUI.Enable = true
+		_GameManager.screenSkillUI.Visible = true
+		
+		local buffFunction = function()
+			for index in ipairs(myMonsters) do
+				local monster = myMonsters[index]
+			
+				if monster.Name == "MySpawnPoint" then
+					continue
+				end
+				
+				if monster.Enable then
+					monster.Unit:Cleans_Debuff()
+					monster.Unit.damageAvoidAmount += self.skillAmount
+				end
+			end
+		end
+		
+		local deleteFunction = function()
+			_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = ""
+			_GameManager.screenSkillUI.Enable = false	
+			_GameManager.screenSkillUI.Visible = false
+			_UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill = false
+		end
+		
+		_TimerService:SetTimerOnce(buffFunction, self.skillAttackTiming)
+		_TimerService:SetTimerOnce(deleteFunction, self.skillTime)
+	end
+
+end

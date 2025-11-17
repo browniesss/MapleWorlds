@@ -14,7 +14,7 @@ script Cuzz_Eye_Laser extends SkillParent
 		local laser = _SpawnService:SpawnByModelId("model://3d9de781-8816-446d-9fc6-8dd52dad7f94", "CuzzEye_Laser_Object", position, self.caster)
 		
 		laser.SpriteRendererComponent.FlipX = self.caster.Unit.isEnemy == false
-		laser.LoopAttackComponent:Init(self.skillAmount, self.skillTime, 0.5, self.caster, nil)
+		laser.LoopAttackComponent:Init(self.skillAmount, self.skillTime, 0.5, self.caster, nil, false)
 		
 		local deleteFunction = function()
 			-- 스킬 사용 종료 처리
