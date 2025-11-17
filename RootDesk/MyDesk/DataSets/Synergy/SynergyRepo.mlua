@@ -6,8 +6,20 @@ script SynergyRepo extends Logic
 
 	property table SERVER_DATA = {}
 
+	property table SynergyDataList = {}
+
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
+		self:SetSynergy()
+		self:SetSynergyData()
+	end
+
+	@ExecSpace("ServerOnly")
+	method SynergyItem FIRST_SYNERGY_AVAILABLE(string target, integer arg1)
+		
+	end
+
+	method void SetSynergy()
 		local dataSet = _DataService:GetTable("Synergy")
 		
 		local dataCount = dataSet:GetRowCount()
@@ -33,9 +45,21 @@ script SynergyRepo extends Logic
 		end
 	end
 
-	@ExecSpace("ServerOnly")
-	method SynergyItem FIRST_SYNERGY_AVAILABLE(string target, integer arg1)
+	method void SetSynergyData()
+		local dataSet = _DataService:GetTable("SynergyData")
 		
+		local dataCount = dataSet:GetRowCount()
+		
+		for i = 1, dataCount do
+			local item = SynergyDataItem()
+			
+			item.id = tonumber(dataSet:GetCell(i,"id"))
+			item.type = tostring(dataSet:GetCell(i,"type"))
+			item.name = tostring(dataSet:GetCell(i,"name"))
+			item.RUID = tostring(dataSet:GetCell(i,"RUID"))
+			
+			self.SynergyDataList[item.id] = item
+		end
 	end
 
 end
