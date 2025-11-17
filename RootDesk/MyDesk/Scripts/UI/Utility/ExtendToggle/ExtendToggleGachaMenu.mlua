@@ -15,6 +15,10 @@ script ExtendToggleGachaMenu extends ToggleAction
 			self:SetGachaKey(self.panelIndex)
 		end
 		
+		if self.PickUpCharter then
+			self.PickUpCharter.Enable = true
+		end
+		
 		self:SetPickUpCharter()
 	end
 
@@ -22,13 +26,17 @@ script ExtendToggleGachaMenu extends ToggleAction
 		if self.GachaButtonGrid then
 			self.GachaButtonGrid.Enable = false
 		end
+		
+		if self.PickUpCharter then
+			self.PickUpCharter.Enable = false
+		end
 	end
 
 	method void SetGachaKey(integer key)
 		if key == 1 then
 			_GachaManager.GachaKey = _GachaManager.PickUpSummonKey
 		elseif key == 2 then
-			
+			_GachaManager.GachaKey = _GachaManager.PickUp_2_SummonKey
 		elseif key == 3 then
 			_GachaManager.GachaKey = _GachaManager.NormalSummonKey
 		end
@@ -43,7 +51,6 @@ script ExtendToggleGachaMenu extends ToggleAction
 		summonCount.GachaCount:SetSummonCount()
 		
 		if self.panelIndex == 3 then
-			self.PickUpCharter.Enable = false
 			youtubePlayer.YoutubePlayerGUIComponent:Pause()
 			board.Enable = false
 		else

@@ -576,11 +576,11 @@
       },
       {
         "id": "3e67abca-75ee-417b-8712-62f06b495b81",
-        "path": "/ui/GachaUI/BackgroundUI/PickUpCharterRoot/UnitAvartar",
+        "path": "/ui/GachaUI/BackgroundUI/PickUpCharterRoot/UnitAvartar_1",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.AvatarGUIRendererComponent,MOD.Core.CostumeManagerComponent",
         "jsonString": {
-          "name": "UnitAvartar",
-          "path": "/ui/GachaUI/BackgroundUI/PickUpCharterRoot/UnitAvartar",
+          "name": "UnitAvartar_1",
+          "path": "/ui/GachaUI/BackgroundUI/PickUpCharterRoot/UnitAvartar_1",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -666,12 +666,123 @@
             },
             {
               "@type": "MOD.Core.CostumeManagerComponent",
+              "CustomBodyEquip": "5b510a5cb03b4ba9bfe1b1666b17b2cf",
+              "CustomCapEquip": "2d2c164b8cda45aaa0ca59cdff242e59",
+              "CustomEarEquip": "",
+              "CustomEyeAccessoryEquip": "",
+              "CustomFaceAccessoryEquip": "8d081f60435b47159e1d998ba14da80a",
+              "CustomFaceEquip": "401e39bb32664c97b0fa4a1ab4649e0b",
+              "CustomHairEquip": "1cc0a5e24fa547f69ea5aefb6ba48796",
+              "CustomLongcoatEquip": "f6ded93c726f4974972392fdeecce574",
+              "CustomOneHandedWeaponEquip": "ffa0f813b710492088cbd93b3d4a7db6",
+              "CustomShoesEquip": "3479e24a019d4bceaef8155e853718f7",
+              "DefaultEquipUserId": "",
+              "UseCustomEquipOnly": true,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "6539b2cf-495a-4cb6-b041-912eead45d51",
+        "path": "/ui/GachaUI/BackgroundUI/PickUpCharterRoot/UnitAvartar_2",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.AvatarGUIRendererComponent,MOD.Core.CostumeManagerComponent",
+        "jsonString": {
+          "name": "UnitAvartar_2",
+          "path": "/ui/GachaUI/BackgroundUI/PickUpCharterRoot/UnitAvartar_2",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 1,
+          "pathConstraints": "/////",
+          "revision": 1,
+          "modelId": null,
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 6,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.0
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.0
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 100.0,
+                "y": 200.0
+              },
+              "OffsetMin": {
+                "x": -100.0,
+                "y": 0.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.0
+              },
+              "RectSize": {
+                "x": 200.0,
+                "y": 200.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": -280.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.AvatarGUIRendererComponent",
+              "Color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "PreserveAvatar": 1,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.CostumeManagerComponent",
               "CustomBodyEquip": "3cf4cb29ae344577b9eed37e531688a4",
-              "CustomFaceEquip": "6bb83205915542c68cc49e64121c8fe1",
-              "CustomHairEquip": "8799ee2ad8314c9ebbd248525e5b913c",
-              "CustomLongcoatEquip": "c92ab70d7a064aafaa34298c2e9890e3",
-              "CustomOneHandedWeaponEquip": "5c17efb794334d4980987edaace1f546",
-              "CustomShoesEquip": "186a55d192d24b4da5201801422bebf7",
+              "CustomCapEquip": "bea7e3aa369445efa505c1ad2943969b",
+              "CustomFaceEquip": "31350f4c8ca144a488698d93fd1c6c1e",
+              "CustomHairEquip": "2c0ae06e45744e7fa4a8e986f8249b14",
+              "CustomLongcoatEquip": "b2f43a0a2ce344d6a3eb7e5c5f288415",
+              "CustomOneHandedWeaponEquip": "37cdd4cecceb4315864f1e014711a8cc",
+              "CustomShoesEquip": "4539394af12f41afa9f1a6e4736717a6",
               "DefaultEquipUserId": "",
               "UseCustomEquipOnly": true,
               "Enable": true
@@ -3913,7 +4024,7 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 363.3792,
+                "x": 440.0,
                 "y": 50.0
               },
               "OffsetMin": {
@@ -3925,7 +4036,7 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 253.379227,
+                "x": 330.0,
                 "y": 100.0
               },
               "UIMode": 1,
@@ -3955,6 +4066,7 @@
             {
               "@type": "MOD.Core.TextComponent",
               "Alignment": 3,
+              "BestFit": true,
               "Font": 3,
               "FontColor": {
                 "r": 1.0,
@@ -3965,12 +4077,19 @@
               "FontSize": 40,
               "MaxSize": 40,
               "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "프리미엄",
+              "Text": "<color=#00D26A>비숍</color> 픽업",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -3985,7 +4104,7 @@
           "name": "GachaPickUpButton_2",
           "path": "/ui/GachaUI/GachaMenuUI/GachaMenuGrid/GachaPickUpButton_2",
           "nameEditable": true,
-          "enable": false,
+          "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 1,
@@ -4151,7 +4270,7 @@
               "PickUpCharter": {
                 "tempEntityId": null,
                 "IsRelative": false,
-                "EntityId": "3e67abca-75ee-417b-8712-62f06b495b81"
+                "EntityId": "6539b2cf-495a-4cb6-b041-912eead45d51"
               }
             }
           ],
@@ -4273,7 +4392,7 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 363.3792,
+                "x": 440.0,
                 "y": 50.0
               },
               "OffsetMin": {
@@ -4285,7 +4404,7 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 253.379227,
+                "x": 330.0,
                 "y": 100.0
               },
               "UIMode": 1,
@@ -4316,6 +4435,7 @@
             {
               "@type": "MOD.Core.TextComponent",
               "Alignment": 3,
+              "BestFit": true,
               "Font": 3,
               "FontColor": {
                 "r": 1.0,
@@ -4326,12 +4446,19 @@
               "FontSize": 40,
               "MaxSize": 40,
               "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "프리미엄",
+              "Text": "<color=#8A2BE2>나이트로드</color> 픽업",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -4373,11 +4500,11 @@
               "MobileOnly": false,
               "OffsetMax": {
                 "x": 485.5,
-                "y": -147.0
+                "y": -274.0
               },
               "OffsetMin": {
                 "x": 20.0,
-                "y": -264.0
+                "y": -391.0
               },
               "Pivot": {
                 "x": 0.5,
@@ -4396,7 +4523,7 @@
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": 252.75,
-                "y": -205.5
+                "y": -332.5
               },
               "Rotation": {
                 "x": 0.0,
@@ -4405,7 +4532,7 @@
               },
               "Position": {
                 "x": 252.75,
-                "y": -205.5,
+                "y": -332.5,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -4509,11 +4636,7 @@
                 "IsRelative": false,
                 "EntityId": "65f02812-b920-4e35-ab5c-e1aa79a608d0"
               },
-              "PickUpCharter": {
-                "tempEntityId": null,
-                "IsRelative": false,
-                "EntityId": "3e67abca-75ee-417b-8712-62f06b495b81"
-              }
+              "PickUpCharter": null
             }
           ],
           "@version": 1
@@ -4687,12 +4810,19 @@
               "FontSize": 40,
               "MaxSize": 40,
               "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
               "OverrideSorting": false,
               "Text": "일반",
+              "UseOutLine": true,
               "Enable": true
             }
           ],

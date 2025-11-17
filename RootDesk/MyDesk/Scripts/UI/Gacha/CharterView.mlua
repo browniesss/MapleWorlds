@@ -7,6 +7,8 @@ script CharterView extends Component
 
 	property Entity Name = nil
 
+	property Entity EffectEntity = nil
+
 	method void InitGacha(table unitData)
 		-- 해당 슬롯에 장착한 유닛이 없을 경우
 		if unitData == nil then
@@ -26,6 +28,12 @@ script CharterView extends Component
 			else
 				self.Monster.Visible = false
 				self:SetCostume(unitData)
+		
+				if unitData['spawnSkill'] == "" then
+					self.EffectEntity.Visible = false
+				else
+					self.EffectEntity.Visible = true
+				end
 			end
 		end
 	end
