@@ -6,12 +6,15 @@ script SynergyRepo extends Logic
 
 	property table SERVER_DATA = {}
 
-	property table SynergyDataList = {}
+	@Sync
+	property SyncTable<number, string> SyncSynergyDataTable
+
+	property table synergyDataTable = {}
 
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
-		self:SetSynergy()
 		self:SetSynergyData()
+		self:SetSynergy()
 	end
 
 	method void SetSynergy()
@@ -76,16 +79,33 @@ script SynergyRepo extends Logic
 		local dataCount = dataSet:GetRowCount()
 		
 		for i = 1, dataCount do
-			local item = SynergyDataItem()
+			local item = {["id"] = tonumber(dataSet:GetCell(i,"id")), ["type"] = tostring(dataSet:GetCell(i,"type")), 
+				["name"] = tostring(dataSet:GetCell(i,"name")), ["RUID"] = tostring(dataSet:GetCell(i,"RUID"))}
 			
-			item.id = tonumber(dataSet:GetCell(i,"id"))
-			item.type = tostring(dataSet:GetCell(i,"type"))
-			item.name = tostring(dataSet:GetCell(i,"name"))
-			item.RUID = tostring(dataSet:GetCell(i,"RUID"))
+			--item.id = tonumber(dataSet:GetCell(i,"id"))
+			--item.type = tostring(dataSet:GetCell(i,"type"))
+			--item.name = tostring(dataSet:GetCell(i,"name"))
+			--item.RUID = tostring(dataSet:GetCell(i,"RUID"))
 			
-			self.SynergyDataList[item.id] = item
+			self.synergyDataTable[item.id] = _HttpService:JSONEncode(item)
+			self.SyncSynergyDataTable[item.id] = self.synergyDataTable[item.id]
+			
 		end
 		
+	end
+
+	method SynergyDataItem GetSynergyData(number id)
+		local synergyDataJson = self.SyncSynergyDataTable[id]
+		local synergyDataTable = _HttpService:JSONDecode(synergyDataJson)
+		
+		local synergyData = SynergyDataItem()
+		
+		synergyData.id = synergyDataTable.id
+		synergyData.type = synergyDataTable.type
+		synergyData.name = synergyDataTable.name
+		synergyData.RUID = synergyDataTable.RUID
+		
+		return synergyData
 	end
 
 end

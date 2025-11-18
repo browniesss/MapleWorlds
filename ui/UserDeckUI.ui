@@ -4395,7 +4395,7 @@
         }
       },
       {
-        "id": "d1e60812-0e24-452d-908d-d784c01fc208",
+        "id": "46c71b3f-afd6-4ffd-8a0a-0add4a53a261",
         "path": "/ui/UserDeckUI/UserDeck/DeckFrame/DeckItem_1",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,script.DeckItem,MOD.Core.ButtonComponent,MOD.Core.UITouchReceiveComponent",
         "jsonString": {
@@ -4444,11 +4444,6 @@
                 "y": 216.0
               },
               "UIMode": 1,
-              "UIScale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": -375.0,
@@ -4465,11 +4460,6 @@
                 "z": 0.0,
                 "w": 1.0
               },
-              "Scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
               "Enable": true
             },
             {
@@ -4482,12 +4472,17 @@
                 "y": 1.25
               },
               "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
               "Type": 0,
               "Enable": true
             },
             {
               "@type": "script.DeckItem",
-              "Enable": true
+              "Enable": true,
+              "synergyComponentItem": {
+                "IsRelative": false,
+                "ComponentId": ":SynergyComponentItem"
+              }
             },
             {
               "@type": "MOD.Core.ButtonComponent",
@@ -4543,7 +4538,7 @@
         }
       },
       {
-        "id": "e921f7c6-c717-493d-9610-2ab22ac591ae",
+        "id": "8c44cad0-251f-4045-9422-9e9179cf453a",
         "path": "/ui/UserDeckUI/UserDeck/DeckFrame/DeckItem_1/ShadowSprite",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
@@ -4645,7 +4640,7 @@
         }
       },
       {
-        "id": "931016b0-d641-44cb-8adc-753c00988151",
+        "id": "d7ba3ae5-d662-4468-bffa-8b3e585a0b57",
         "path": "/ui/UserDeckUI/UserDeck/DeckFrame/DeckItem_1/RedDotSprite",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
@@ -4747,7 +4742,7 @@
         }
       },
       {
-        "id": "00eeccf5-546c-4525-b7ef-420ca92c6ed3",
+        "id": "4ac0c132-8620-4617-9788-c7fab25b8ab2",
         "path": "/ui/UserDeckUI/UserDeck/DeckFrame/DeckItem_1/UnitSprite",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
@@ -4836,6 +4831,7 @@
                 "DataId": "b57fd007b2b5438591361ec745495f44"
               },
               "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
               "Type": 0,
               "Enable": true
             }
@@ -4844,7 +4840,7 @@
         }
       },
       {
-        "id": "f65da159-ece6-4501-b40d-473d030fd2ba",
+        "id": "91319b3e-88f9-469a-8a92-0bd739dc8eb3",
         "path": "/ui/UserDeckUI/UserDeck/DeckFrame/DeckItem_1/UnitAvartar",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.AvatarGUIRendererComponent,MOD.Core.CostumeManagerComponent",
         "jsonString": {
@@ -4944,7 +4940,7 @@
         }
       },
       {
-        "id": "d13ef32d-d467-469c-95ca-12ee86b5c157",
+        "id": "187de209-4244-48aa-b858-e29a7fe7b7d7",
         "path": "/ui/UserDeckUI/UserDeck/DeckFrame/DeckItem_1/UnitName",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
@@ -5030,6 +5026,7 @@
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
               "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
               "Enable": true
             },
             {
@@ -5073,7 +5070,7 @@
         }
       },
       {
-        "id": "f2c3abb8-44b1-4827-9710-3897a377b498",
+        "id": "077d35dd-f78b-4f7e-b6f0-ea85f1762363",
         "path": "/ui/UserDeckUI/UserDeck/DeckFrame/DeckItem_1/PriceSprite",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
@@ -5106,19 +5103,19 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 25.0,
-                "y": 122.5
+                "x": -15.1063232,
+                "y": 122.4991
               },
               "OffsetMin": {
-                "x": -95.0,
-                "y": 97.5
+                "x": -100.106323,
+                "y": 97.4991
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 120.0,
+                "x": 85.0,
                 "y": 25.0
               },
               "UIMode": 1,
@@ -5129,12 +5126,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -35.0,
-                "y": 110.0
+                "x": -57.6063232,
+                "y": 109.9991
               },
               "Position": {
-                "x": -35.0,
-                "y": 110.0,
+                "x": -57.6063232,
+                "y": 109.9991,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -5169,7 +5166,7 @@
         }
       },
       {
-        "id": "06d48789-5bf0-4f7a-84b8-20ba2a81d2c6",
+        "id": "32584f32-d6cf-40f0-8bce-70a57467cac9",
         "path": "/ui/UserDeckUI/UserDeck/DeckFrame/DeckItem_1/PriceLabel",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
@@ -5202,12 +5199,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 114.0,
-                "y": 120.0
+                "x": 91.39369,
+                "y": 119.9991
               },
               "OffsetMin": {
-                "x": 14.0,
-                "y": 100.0
+                "x": -8.606308,
+                "y": 99.9991
               },
               "Pivot": {
                 "x": 0.5,
@@ -5225,12 +5222,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 64.0,
-                "y": 110.0
+                "x": 41.393692,
+                "y": 109.9991
               },
               "Position": {
-                "x": -25.0,
-                "y": 110.0,
+                "x": -47.606308,
+                "y": 109.9991,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -5376,7 +5373,11 @@
             },
             {
               "@type": "script.DeckItem",
-              "Enable": true
+              "Enable": true,
+              "synergyComponentItem": {
+                "IsRelative": false,
+                "ComponentId": ":SynergyComponentItem"
+              }
             },
             {
               "@type": "MOD.Core.ButtonComponent",
@@ -5997,19 +5998,19 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 25.0,
-                "y": 122.5
+                "x": -15.1063232,
+                "y": 122.4991
               },
               "OffsetMin": {
-                "x": -95.0,
-                "y": 97.5
+                "x": -100.106323,
+                "y": 97.4991
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 120.0,
+                "x": 85.0,
                 "y": 25.0
               },
               "UIMode": 1,
@@ -6020,12 +6021,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -35.0,
-                "y": 110.0
+                "x": -57.6063232,
+                "y": 109.9991
               },
               "Position": {
-                "x": -35.0,
-                "y": 110.0,
+                "x": -57.6063232,
+                "y": 109.9991,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -6093,12 +6094,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 114.0,
-                "y": 120.0
+                "x": 91.39369,
+                "y": 119.9991
               },
               "OffsetMin": {
-                "x": 14.0,
-                "y": 100.0
+                "x": -8.606308,
+                "y": 99.9991
               },
               "Pivot": {
                 "x": 0.5,
@@ -6116,12 +6117,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 64.0,
-                "y": 110.0
+                "x": 41.393692,
+                "y": 109.9991
               },
               "Position": {
-                "x": -25.0,
-                "y": 110.0,
+                "x": -47.606308,
+                "y": 109.9991,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -6267,7 +6268,11 @@
             },
             {
               "@type": "script.DeckItem",
-              "Enable": true
+              "Enable": true,
+              "synergyComponentItem": {
+                "IsRelative": false,
+                "ComponentId": ":SynergyComponentItem"
+              }
             },
             {
               "@type": "MOD.Core.ButtonComponent",
@@ -6888,19 +6893,19 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 25.0,
-                "y": 122.5
+                "x": -15.106308,
+                "y": 122.4991
               },
               "OffsetMin": {
-                "x": -95.0,
-                "y": 97.5
+                "x": -100.106308,
+                "y": 97.4991
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 120.0,
+                "x": 85.0,
                 "y": 25.0
               },
               "UIMode": 1,
@@ -6911,12 +6916,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -35.0,
-                "y": 110.0
+                "x": -57.606308,
+                "y": 109.9991
               },
               "Position": {
-                "x": -35.0,
-                "y": 110.0,
+                "x": -57.606308,
+                "y": 109.9991,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -6984,12 +6989,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 114.0,
-                "y": 120.0
+                "x": 91.39369,
+                "y": 119.9991
               },
               "OffsetMin": {
-                "x": 14.0,
-                "y": 100.0
+                "x": -8.606308,
+                "y": 99.9991
               },
               "Pivot": {
                 "x": 0.5,
@@ -7007,12 +7012,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 64.0,
-                "y": 110.0
+                "x": 41.393692,
+                "y": 109.9991
               },
               "Position": {
-                "x": -25.0,
-                "y": 110.0,
+                "x": -47.606308,
+                "y": 109.9991,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -7158,7 +7163,11 @@
             },
             {
               "@type": "script.DeckItem",
-              "Enable": true
+              "Enable": true,
+              "synergyComponentItem": {
+                "IsRelative": false,
+                "ComponentId": ":SynergyComponentItem"
+              }
             },
             {
               "@type": "MOD.Core.ButtonComponent",
@@ -7779,19 +7788,19 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 25.0,
-                "y": 122.5
+                "x": -15.1063232,
+                "y": 122.4991
               },
               "OffsetMin": {
-                "x": -95.0,
-                "y": 97.5
+                "x": -100.106323,
+                "y": 97.4991
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 120.0,
+                "x": 85.0,
                 "y": 25.0
               },
               "UIMode": 1,
@@ -7802,12 +7811,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -35.0,
-                "y": 110.0
+                "x": -57.6063232,
+                "y": 109.9991
               },
               "Position": {
-                "x": -35.0,
-                "y": 110.0,
+                "x": -57.6063232,
+                "y": 109.9991,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -7875,12 +7884,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 114.0,
-                "y": 120.0
+                "x": 91.39368,
+                "y": 119.9991
               },
               "OffsetMin": {
-                "x": 14.0,
-                "y": 100.0
+                "x": -8.606323,
+                "y": 99.9991
               },
               "Pivot": {
                 "x": 0.5,
@@ -7898,12 +7907,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 64.0,
-                "y": 110.0
+                "x": 41.3936768,
+                "y": 109.9991
               },
               "Position": {
-                "x": -25.0,
-                "y": 110.0,
+                "x": -47.6063232,
+                "y": 109.9991,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -8049,7 +8058,11 @@
             },
             {
               "@type": "script.DeckItem",
-              "Enable": true
+              "Enable": true,
+              "synergyComponentItem": {
+                "IsRelative": false,
+                "ComponentId": ":SynergyComponentItem"
+              }
             },
             {
               "@type": "MOD.Core.ButtonComponent",
@@ -8670,19 +8683,19 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 25.0,
-                "y": 122.5
+                "x": -15.1062927,
+                "y": 122.499084
               },
               "OffsetMin": {
-                "x": -95.0,
-                "y": 97.5
+                "x": -100.106293,
+                "y": 97.4990845
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 120.0,
+                "x": 85.0,
                 "y": 25.0
               },
               "UIMode": 1,
@@ -8693,12 +8706,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -35.0,
-                "y": 110.0
+                "x": -57.6062927,
+                "y": 109.999084
               },
               "Position": {
-                "x": -35.0,
-                "y": 110.0,
+                "x": -57.6062927,
+                "y": 109.999084,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -8766,12 +8779,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 114.0,
-                "y": 120.0
+                "x": 91.39371,
+                "y": 119.999084
               },
               "OffsetMin": {
-                "x": 14.0,
-                "y": 100.0
+                "x": -8.606293,
+                "y": 99.9990845
               },
               "Pivot": {
                 "x": 0.5,
@@ -8789,12 +8802,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 64.0,
-                "y": 110.0
+                "x": 41.3937073,
+                "y": 109.999084
               },
               "Position": {
-                "x": -25.0,
-                "y": 110.0,
+                "x": -47.6062927,
+                "y": 109.999084,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -8940,7 +8953,11 @@
             },
             {
               "@type": "script.DeckItem",
-              "Enable": true
+              "Enable": true,
+              "synergyComponentItem": {
+                "IsRelative": false,
+                "ComponentId": ":SynergyComponentItem"
+              }
             },
             {
               "@type": "MOD.Core.ButtonComponent",
@@ -9561,19 +9578,19 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 25.0,
-                "y": 122.5
+                "x": -15.1063232,
+                "y": 122.499084
               },
               "OffsetMin": {
-                "x": -95.0,
-                "y": 97.5
+                "x": -100.106323,
+                "y": 97.4990845
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 120.0,
+                "x": 85.0,
                 "y": 25.0
               },
               "UIMode": 1,
@@ -9584,12 +9601,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -35.0,
-                "y": 110.0
+                "x": -57.6063232,
+                "y": 109.999084
               },
               "Position": {
-                "x": -35.0,
-                "y": 110.0,
+                "x": -57.6063232,
+                "y": 109.999084,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -9657,12 +9674,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 114.0,
-                "y": 120.0
+                "x": 91.3936844,
+                "y": 119.999084
               },
               "OffsetMin": {
-                "x": 14.0,
-                "y": 100.0
+                "x": -8.606316,
+                "y": 99.9990845
               },
               "Pivot": {
                 "x": 0.5,
@@ -9680,12 +9697,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 64.0,
-                "y": 110.0
+                "x": 41.3936844,
+                "y": 109.999084
               },
               "Position": {
-                "x": -25.0,
-                "y": 110.0,
+                "x": -47.6063156,
+                "y": 109.999084,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -9831,7 +9848,11 @@
             },
             {
               "@type": "script.DeckItem",
-              "Enable": true
+              "Enable": true,
+              "synergyComponentItem": {
+                "IsRelative": false,
+                "ComponentId": ":SynergyComponentItem"
+              }
             },
             {
               "@type": "MOD.Core.ButtonComponent",
@@ -10452,19 +10473,19 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 25.0,
-                "y": 122.5
+                "x": -15.106308,
+                "y": 122.499084
               },
               "OffsetMin": {
-                "x": -95.0,
-                "y": 97.5
+                "x": -100.106308,
+                "y": 97.4990845
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 120.0,
+                "x": 85.0,
                 "y": 25.0
               },
               "UIMode": 1,
@@ -10475,12 +10496,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -35.0,
-                "y": 110.0
+                "x": -57.606308,
+                "y": 109.999084
               },
               "Position": {
-                "x": -35.0,
-                "y": 110.0,
+                "x": -57.606308,
+                "y": 109.999084,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -10548,12 +10569,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 114.0,
-                "y": 120.0
+                "x": 91.39369,
+                "y": 119.999084
               },
               "OffsetMin": {
-                "x": 14.0,
-                "y": 100.0
+                "x": -8.606308,
+                "y": 99.9990845
               },
               "Pivot": {
                 "x": 0.5,
@@ -10571,12 +10592,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 64.0,
-                "y": 110.0
+                "x": 41.393692,
+                "y": 109.999084
               },
               "Position": {
-                "x": -25.0,
-                "y": 110.0,
+                "x": -47.606308,
+                "y": 109.999084,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -10722,7 +10743,11 @@
             },
             {
               "@type": "script.DeckItem",
-              "Enable": true
+              "Enable": true,
+              "synergyComponentItem": {
+                "IsRelative": false,
+                "ComponentId": ":SynergyComponentItem"
+              }
             },
             {
               "@type": "MOD.Core.ButtonComponent",
@@ -11343,19 +11368,19 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 25.0,
-                "y": 122.5
+                "x": -15.1063232,
+                "y": 122.499084
               },
               "OffsetMin": {
-                "x": -95.0,
-                "y": 97.5
+                "x": -100.106323,
+                "y": 97.4990845
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 120.0,
+                "x": 85.0,
                 "y": 25.0
               },
               "UIMode": 1,
@@ -11366,12 +11391,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -35.0,
-                "y": 110.0
+                "x": -57.6063232,
+                "y": 109.999084
               },
               "Position": {
-                "x": -35.0,
-                "y": 110.0,
+                "x": -57.6063232,
+                "y": 109.999084,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -11439,12 +11464,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 114.0,
-                "y": 120.0
+                "x": 91.39368,
+                "y": 119.999084
               },
               "OffsetMin": {
-                "x": 14.0,
-                "y": 100.0
+                "x": -8.606323,
+                "y": 99.9990845
               },
               "Pivot": {
                 "x": 0.5,
@@ -11462,12 +11487,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 64.0,
-                "y": 110.0
+                "x": 41.3936768,
+                "y": 109.999084
               },
               "Position": {
-                "x": -25.0,
-                "y": 110.0,
+                "x": -47.6063232,
+                "y": 109.999084,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -12642,19 +12667,19 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": -50.0,
-                "y": 82.5
+                "x": -107.5,
+                "y": 82.5001
               },
               "OffsetMin": {
-                "x": -170.0,
-                "y": 57.5
+                "x": -192.5,
+                "y": 57.5001
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 120.0,
+                "x": 85.0,
                 "y": 25.0
               },
               "UIMode": 1,
@@ -12665,12 +12690,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -110.0,
-                "y": 70.0
+                "x": -150.0,
+                "y": 70.0001
               },
               "Position": {
-                "x": -110.0,
-                "y": 70.0,
+                "x": -150.0,
+                "y": 70.0001,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -12738,11 +12763,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": -50.0,
+                "x": -105.0,
                 "y": 80.0
               },
               "OffsetMin": {
-                "x": -150.0,
+                "x": -185.0,
                 "y": 60.0
               },
               "Pivot": {
@@ -12750,7 +12775,7 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 100.0,
+                "x": 80.0,
                 "y": 20.0
               },
               "UIMode": 1,
@@ -12761,11 +12786,11 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -100.0,
+                "x": -145.0,
                 "y": 70.0
               },
               "Position": {
-                "x": -100.0,
+                "x": -145.0,
                 "y": 70.0,
                 "z": 0.0
               },
@@ -13699,11 +13724,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": -50.0,
+                "x": -107.5,
                 "y": 82.5
               },
               "OffsetMin": {
-                "x": -170.0,
+                "x": -192.5,
                 "y": 57.5
               },
               "Pivot": {
@@ -13711,7 +13736,7 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 120.0,
+                "x": 85.0,
                 "y": 25.0
               },
               "UIMode": 1,
@@ -13722,11 +13747,11 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -110.0,
+                "x": -150.0,
                 "y": 70.0
               },
               "Position": {
-                "x": -110.0,
+                "x": -150.0,
                 "y": 70.0,
                 "z": 0.0
               },
@@ -13795,11 +13820,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": -50.0,
+                "x": -105.0,
                 "y": 80.0
               },
               "OffsetMin": {
-                "x": -150.0,
+                "x": -185.0,
                 "y": 60.0
               },
               "Pivot": {
@@ -13807,7 +13832,7 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 100.0,
+                "x": 80.0,
                 "y": 20.0
               },
               "UIMode": 1,
@@ -13818,11 +13843,11 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -100.0,
+                "x": -145.0,
                 "y": 70.0
               },
               "Position": {
-                "x": -100.0,
+                "x": -145.0,
                 "y": 70.0,
                 "z": 0.0
               },

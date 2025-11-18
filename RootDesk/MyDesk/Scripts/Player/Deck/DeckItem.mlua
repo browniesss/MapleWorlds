@@ -33,6 +33,9 @@ script DeckItem extends Component
 
 	property Entity unitInfoUI = "53e0a15f-931e-46fe-b601-b05b2575fe14"
 
+	@HideFromInspector
+	property SynergyComponentItemRef synergyComponentItem = nil
+
 	method void Init(table unitData, table skillData)
 		self.unitData = unitData
 		self.skillData = skillData
@@ -59,6 +62,10 @@ script DeckItem extends Component
 	end
 
 	method void RefreshUI()
+		if self.synergyComponentItem ~= nil then
+			_EntityService:Destroy(self.synergyComponentItem.Entity)
+		end
+		
 		-- 해당 슬롯에 장착한 유닛이 없을 경우
 		if self.unitData == nil then
 			self.redDotSprite.Visible = true
@@ -88,6 +95,9 @@ script DeckItem extends Component
 				self.unitSprite.Visible = false
 				self:SetCostume()
 			end
+			
+			self.synergyComponentItem = _SpawnService:SpawnByModelId("model://c4e27100-4894-41a8-bb13-da550e47ddf3", "SynergyItem", Vector3(45, 110, 0), self.Entity).SynergyComponentItem
+			self.synergyComponentItem:SetSynergyData(self.unitData)
 		end
 	end
 
