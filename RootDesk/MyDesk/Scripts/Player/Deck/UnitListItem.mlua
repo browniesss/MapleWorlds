@@ -67,8 +67,7 @@ script UnitListItem extends Component
 		self.unitPriceLabel.TextComponent.Text = self.unitData['summonCost']
 		self.unitLevelLabel.TextComponent.Text = "Level: "..data['level'] 
 		
-		local test = _SpawnService:SpawnByModelId("model://c4e27100-4894-41a8-bb13-da550e47ddf3", "SynergyItem", Vector3(-65, 70, 0), self.Entity)
-		--test.SpriteGUIRendererComponent.LocalScale = Vector2(0.8, 0.8)
+		local test = _SpawnService:SpawnByModelId("model://c4e27100-4894-41a8-bb13-da550e47ddf3", "SynergyIcon", Vector3(-65, 70, 0), self.Entity)
 		self.synergyComponentItem = test.SynergyComponentItem
 		self.synergyComponentItem:SetSynergyData(self.unitData)
 	end
