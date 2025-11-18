@@ -22,6 +22,11 @@ script UserDeck extends Component
 	method void SetUserDeck(table deckData)
 		self.userDeck = deckData
 		self:LoadUserDeck(deckData)
+		
+		local userSynergy = self.Entity.UserSynergyComponent
+		if not userSynergy == nil then
+			userSynergy:SET_SYNERGY(deckData)
+		end
 	end
 
 	@ExecSpace("Client")

@@ -1,0 +1,25 @@
+@Component
+script IncreaseMpByTime extends BaseSynergyComponent
+
+	property number ts = 0
+
+	@ExecSpace("ServerOnly")
+	method void OnUpdate(number delta)
+		self.ts += delta
+		if self.ts < 1 then
+			return
+		end
+		self.ts = 0
+		
+		local target = self.Entity.Unit
+		if target == nil then
+			return
+		end
+		
+		target.mp += self:CalValue(target.maxMP)
+		if target.mp > target.maxMP then
+			target.mp = target.maxMP
+		end
+	end
+
+end

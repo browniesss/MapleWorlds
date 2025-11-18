@@ -56,9 +56,6 @@ script GameManager extends Logic
 
 	property Entity mapTextUI = "1374988d-d50e-4f9c-8bb8-e158f9b3decf"
 
-	@Sync
-	property number NewValue1 = 0
-
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		-- 스킬 선택 UI 비활성화

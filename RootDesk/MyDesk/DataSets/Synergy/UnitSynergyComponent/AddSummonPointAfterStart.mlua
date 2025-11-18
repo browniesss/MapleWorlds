@@ -1,0 +1,8 @@
+@Component
+script AddSummonPointAfterStart extends BaseSynergyComponent
+
+	method integer GetInitPoint(integer basePoint)
+		return self:CalValue(basePoint)
+	end
+
+end

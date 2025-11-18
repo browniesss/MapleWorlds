@@ -1,0 +1,15 @@
+@Component
+script AddSummonPointAfterKill extends BaseSynergyComponent
+
+	property Entity userWallet = nil
+
+	@ExecSpace("Server")
+	method SynergyOnHitResult OnHit(Entity attacker, number damage, boolean isCritical, number attackCount)
+		local desposit = self:CalValue(1)
+		
+		self.userWallet.MesoWallet:AddMeso(desposit)
+		
+		return __base:OnHit(attacker,damage,isCritical,attackCount)
+	end
+
+end

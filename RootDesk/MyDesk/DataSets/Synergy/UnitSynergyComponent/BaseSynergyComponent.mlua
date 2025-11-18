@@ -1,0 +1,37 @@
+@Component
+script BaseSynergyComponent extends Component
+
+	property string type = ""
+
+	property number value = 0
+
+	@ExecSpace("ServerOnly")
+	method number CalValue(number baseValue)
+		if type == "절대" then
+			return baseValue + self.value
+		end
+		
+		if type == "비율" then
+			return baseValue * (self.value / 100000 + 1)
+		end
+		
+		return 0
+	end
+
+	@ExecSpace("ServerOnly")
+	method void OnUpdate(number delta)
+		
+	end
+
+	@ExecSpace("Server")
+	method SynergyOnHitResult OnHit(Entity attacker, number damage, boolean isCritical, number attackCount)
+		local result = SynergyOnHitResult()
+		result.attacker = attacker
+		result.damage = damage
+		result.isCritical = isCritical
+		result.attackCount = attackCount
+		
+		return result
+	end
+
+end

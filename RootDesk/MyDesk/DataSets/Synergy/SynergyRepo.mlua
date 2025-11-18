@@ -41,13 +41,32 @@ script SynergyRepo extends Logic
 	end
 
 	@ExecSpace("ServerOnly")
-	method SynergyItem FIRST_SYNERGY_AVAILABLE(string target, integer count)
-		local resp = SynergyItem()
+	method SynergyList FIND_SYNERGY_AVAILABLE(string target, integer count)
+		local list = self.SERVER_DATA[target]
+		local resp = SynergyList()
+		local itemMaxCount = 0
 		
-		
+		for i = 1, list:length()  do
+			local item = list:get(i)
+			if item.count > count then
+				continue
+			end
+			
+			if item.count < itemMaxCount then
+				continue
+			end
+			
+			if item.count == itemMaxCount then
+				resp:Add(item)
+			end
+			
+			resp = SynergyList()
+			resp:Add(item)
+			itemMaxCount = item.count
+		end
 		
 		return resp
-
+		
 	end
 
 	method void SetSynergyData()
@@ -65,7 +84,7 @@ script SynergyRepo extends Logic
 			
 			self.SynergyDataList[item.id] = item
 		end
-
+		
 	end
 
 end

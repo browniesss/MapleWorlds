@@ -1,0 +1,25 @@
+@Component
+script IncreaseHpByTime extends BaseSynergyComponent
+
+	property number ts = 0
+
+	@ExecSpace("ServerOnly")
+	method void OnUpdate(number delta)
+		self.ts += delta
+		if self.ts < 1 then
+			return
+		end
+		self.ts = 0
+		
+		local target = self.Entity.Unit
+		if target == nil then
+			return
+		end
+		
+		target.hp += self:CalValue(target.maxHP)
+		if target.hp > target.maxHP then
+			target.hp = target.maxHP
+		end
+	end
+
+end

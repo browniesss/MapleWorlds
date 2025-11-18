@@ -1,7 +1,8 @@
 @Component
 script UserSynergyComponent extends Component
 
-	property table countMap = {}
+	@Sync
+	property SyncTable<string, number> countMap
 
 	@ExecSpace("ServerOnly")
 	method integer GET_SYNERGY_COUNT(string target)
