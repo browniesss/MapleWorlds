@@ -44,12 +44,10 @@ script SynergyComponentItem extends Component
 		
 		local res = _HttpService:JSONDecode(synergyDataJson)
 		local synergyData = res["synergyData"]
-		local synergyItem = _SynergyRepo.SynergyDataList
 		
-		local jobRuid = synergyItem[synergyData['jobId']]
-		local countryRuid = synergyItem[synergyData['countryId']]
-		local regionRuid = synergyItem[synergyData['regionId']]
-		
+		local jobRuid = _SynergyRepo:GetSynergyData(synergyData['jobId']).RUID
+		local countryRuid = _SynergyRepo:GetSynergyData(synergyData['countryId']).RUID
+		local regionRuid = _SynergyRepo:GetSynergyData(synergyData['regionId']).RUID
 		
 		self:SetJobSprite(jobRuid)
 		self:SetCountrySprite(countryRuid)
