@@ -111,7 +111,6 @@ script StageService extends Logic
 		
 		local serverData = _HttpService:JSONDecode(json)
 		for i, stage in ipairs(serverData) do
-			log(i)
 			self.data[#self.data + 1] = stage
 			self.idMap[stage.id] = i
 			

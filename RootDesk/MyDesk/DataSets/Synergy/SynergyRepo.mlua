@@ -49,6 +49,10 @@ script SynergyRepo extends Logic
 		local resp = SynergyList()
 		local itemMaxCount = 0
 		
+		if list == nil then
+			return resp
+		end
+		
 		for i = 1, list:length()  do
 			local item = list:get(i)
 			if item.count > count then

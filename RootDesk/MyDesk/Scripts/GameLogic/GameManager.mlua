@@ -146,7 +146,7 @@ script GameManager extends Logic
 			
 			local addPointRatio = "101"
 			local addPointRatioCount = user.UserSynergyComponent:GET_SYNERGY_COUNT(addPointRatio)
-			local addPointRatioSynergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(addInitPoint, count)
+			local addPointRatioSynergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(addPointRatio, count)
 			
 			if addPointRatioSynergy:length() > 0 then
 				local item = addPointRatioSynergy:Get(1)

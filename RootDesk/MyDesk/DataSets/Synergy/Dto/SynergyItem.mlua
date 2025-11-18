@@ -34,11 +34,11 @@ script SynergyItem
 	end
 
 	method number CalcValue(number baseValue)
-		if type == "절대" then
+		if self.type == "절대" then
 			return baseValue + self.value
 		end
 		
-		if type == "비율" then
+		if self.type == "비율" then
 			return baseValue * (self.value / 100000 + 1)
 		end
 		

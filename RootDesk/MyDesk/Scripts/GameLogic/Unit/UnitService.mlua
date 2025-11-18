@@ -44,7 +44,7 @@ script UnitService extends Logic
 		self.needSync = true
 	end
 
-	@ExecSpace("Server")
+	@ExecSpace("ServerOnly")
 	method table GetUnitByIDFromServer(string id)
 		return self.UnitTable[id]
 	end
@@ -97,6 +97,7 @@ script UnitService extends Logic
 		
 		self.needSync = false
 		for k, v in pairs(self.UnitTable) do
+			log(k)
 			self:SyncClient(v)
 		end
 	end

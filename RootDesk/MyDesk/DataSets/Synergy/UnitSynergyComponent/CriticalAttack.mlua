@@ -8,7 +8,7 @@ script CriticalAttack extends BaseSynergyComponent
 		math.randomseed(_RandomPicker:GetRandomSeed())
 		if baseCritial >=  math.random(100000) then
 			isCritical = true
-			damage *= 1.50
+			damage *= 1.5
 		end
 		
 		return __base:OnHit(attacker,damage,isCritical,attackCount)
