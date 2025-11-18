@@ -3,12 +3,12 @@ script CriticalAttack extends BaseSynergyComponent
 
 	@ExecSpace("Server")
 	method SynergyOnHitResult OnHit(Entity attacker, number damage, boolean isCritical, number attackCount)
-		local baseCritial = self:CalValue(100)
+		local baseCritial = self:CalValue(attacker.Unit.criticalRatio)
 		
 		math.randomseed(_RandomPicker:GetRandomSeed())
-		if baseCritial >=  math.random(100) then
+		if baseCritial >=  math.random(100000) then
 			isCritical = true
-			damage *= 1.75
+			damage *= 1.50
 		end
 		
 		return __base:OnHit(attacker,damage,isCritical,attackCount)

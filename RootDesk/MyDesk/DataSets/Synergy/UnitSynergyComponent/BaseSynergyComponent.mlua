@@ -5,6 +5,8 @@ script BaseSynergyComponent extends Component
 
 	property number value = 0
 
+	property string target = ""
+
 	@ExecSpace("ServerOnly")
 	method number CalValue(number baseValue)
 		if type == "절대" then

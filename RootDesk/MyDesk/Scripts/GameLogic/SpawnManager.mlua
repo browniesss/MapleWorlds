@@ -6,21 +6,77 @@ script SpawnManager extends Logic
 
 	@ExecSpace("Server")
 	method void Spawn(string modelID, integer price, Vector3 pos)
-		if not self:IsCanSpawn(price) then
+		local unitData = _UnitService:GetUnitByIDFromServer(modelID)
+		
+		if not senderUserId == nil then
+			local user = _UserService:GetUserEntityByUserId(senderUserId)
+			local stageId = tostring(_GameManager.chapterIndex * 100 + _GameManager.mapIndex)
+			
+			local stage = _StageService:GetStageByIdFromServer(stageId)
+			
+			local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(stage.synergy_id)
+			local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(stage.synergy_id, count)
+			
+			if synergy:length() > 0 then
+				local item = synergy:Get(1)
+				
+				price = item:CalcValue(price)
+			end
+		end
+		
+		if not self:IsCanSpawn(unitData.price) then
 			return
 		end
 		
 		local spawnParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/MyMonsterList')
 		local spawnPos = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList/MySpawnPoint")
-		local spawnEntity
+		
 		if pos == Vector3.zero then
-			spawnEntity = _SpawnService:SpawnByModelId(modelID, "Pig", spawnPos.TransformComponent.Position, spawnParent)
-		else
-			spawnEntity = _SpawnService:SpawnByModelId(modelID, "Pig", pos, spawnParent)
+			pos = spawnPos.TransformComponent.Position
 		end
-		local unitData = _UnitService:GetUnitByIDFromServer(modelID)
+		
+		local spawnEntity = _SpawnService:SpawnByModelId(modelID, "Pig", pos, spawnParent)
 		local skillData = _SkillService:GetSkillByIDFromServer(unitData["skillID"])
+		
+		if not senderUserId == nil then
+			local user = _UserService:GetUserEntityByUserId(senderUserId)
+			local jobID = tostring(unitData.synergeData.jobId)
+			local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(jobID)
+			local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(jobID, count)
 			
+			if synergy:length() > 0 then
+				local item = synergy:Get(1)
+				
+				if jobID == "1" then
+					spawnEntity:RemoveComponent("IncreaseHpByTime")
+					spawnEntity:AddComponent("IncreaseHpByTime")
+					spawnEntity.IncreaseHpByTime.type = item.type
+					spawnEntity.IncreaseHpByTime.value = item.value
+				end
+			
+				if jobID == "2" then
+					spawnEntity:RemoveComponent("CriticalAttack")
+					spawnEntity:AddComponent("CriticalAttack")
+					spawnEntity.CriticalAttack.type = item.type
+					spawnEntity.CriticalAttack.value = item.value
+				end
+				
+				if jobID == "3" then
+					spawnEntity:RemoveComponent("IncreaseMpByTime")
+					spawnEntity:AddComponent("IncreaseMpByTime")
+					spawnEntity.IncreaseMpByTime.type = item.type
+					spawnEntity.IncreaseMpByTime.value = item.value
+				end
+			
+				if jobID == "4" then
+					spawnEntity:RemoveComponent("AddSummonPointAfterKill")
+					spawnEntity:AddComponent("AddSummonPointAfterKill")
+					spawnEntity.AddSummonPointAfterKill.type = item.type
+					spawnEntity.AddSummonPointAfterKill.value = item.value
+					spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet()
+				end
+			end
+		end
 		spawnEntity.Unit:Spawn(unitData, skillData)
 				
 		self:GetUserWallet().MesoWallet:UseMeso(price)
@@ -48,6 +104,10 @@ script SpawnManager extends Logic
 
 	method Entity GetUserWallet()
 		return _EntityService:GetEntityByPath(_GameManager:GetGameMapName() .. "/userWallet")
+	end
+
+	method Entity GetUserIncome()
+		return _EntityService:GetEntityByPath(_GameManager:GetGameMapName() .. "/ingameIncome")
 	end
 
 end

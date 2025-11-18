@@ -33,4 +33,16 @@ script SynergyItem
 		self.value = data["value"]
 	end
 
+	method number CalcValue(number baseValue)
+		if type == "절대" then
+			return baseValue + self.value
+		end
+		
+		if type == "비율" then
+			return baseValue * (self.value / 100000 + 1)
+		end
+		
+		return 0
+	end
+
 end

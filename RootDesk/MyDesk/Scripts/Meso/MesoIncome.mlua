@@ -18,6 +18,7 @@ script MesoIncome extends Component
 	@Sync
 	property number currentTs = 0
 
+	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
 		
 		local dataSet = _DataService:GetTable("meso")
@@ -61,7 +62,10 @@ script MesoIncome extends Component
 		self.UserWallet:AddMeso(self.incomeData[1]["income"])
 	end
 
+	@ExecSpace("ServerOnly")
 	method void OnMapEnter(Entity enteredMap)
+		return
+		
 		local dataSet = _DataService:GetTable("meso")
 		for i = 1, dataSet:GetRowCount() do
 			local item = {}
@@ -71,7 +75,9 @@ script MesoIncome extends Component
 			item["income"] = tonumber(dataSet:GetCell(i,"income"))
 			
 			self.incomeData[item["id"]] = item
-		end        
+		end
+		
+		
 		
 		self.UIController:UpdateMesoIncome(self.incomeData[1]["income"])
 		
@@ -81,6 +87,7 @@ script MesoIncome extends Component
 		self.currentTs = 0
 	end
 
+	@ExecSpace("ServerOnly")
 	method void OnMapLeave(Entity leftMap)
 		self.incomeData = {}
 		self.incomeData[1] = {
@@ -88,6 +95,39 @@ script MesoIncome extends Component
 			init=0,
 			income=0
 		}
+	end
+
+	@ExecSpace("ServerOnly")
+	method void InitData(integer meso, integer income)
+		self.incomeData = {}
+		self.incomeData[1] = {
+			id=1,
+			init=meso,
+			income=income
+		}
+		
+		self.UIController:UpdateMesoIncome(income)
+		
+		self.UserWallet:SetMeso(meso)
+		
+		self.nextUpdateTs = self.incomeCooltime
+		self.currentTs = 0
+	end
+
+	@ExecSpace("ServerOnly")
+	method table GetMesoData()
+		local dataSet = _DataService:GetTable("meso")
+		for i = 1, dataSet:GetRowCount() do
+			local item = {}
+			
+			item["id"] = tonumber(dataSet:GetCell(i,"id"))
+			item["init"] = tonumber(dataSet:GetCell(i,"init"))
+			item["income"] = tonumber(dataSet:GetCell(i,"income"))
+			
+			self.incomeData[item["id"]] = item
+		end     
+		
+		return self.incomeData[1]
 	end
 
 end

@@ -58,6 +58,7 @@ script SynergyRepo extends Logic
 			
 			if item.count == itemMaxCount then
 				resp:Add(item)
+				continue
 			end
 			
 			resp = SynergyList()
