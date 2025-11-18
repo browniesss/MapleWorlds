@@ -19,11 +19,17 @@ script UserSynergyComponent extends Component
 		
 		for i, id in ipairs(deck) do
 			local unit = _UnitService:GetUnitByIDFromServer(id)
-			local unitSynergyData = unit.synergyData
+			local unitSynergyData = _HttpService:JSONDecode(unit.synergyData)
+			
+			if unitSynergyData == nil then
+				continue
+			end
+			
+			local item = unitSynergyData.synergyData
 			
 			for i, col in ipairs(syncCols) do
-				if not unit[col] == nil then
-					self:AddCount(tostring(unit[col]))
+				if not item[col] == nil then
+					self:AddCount(tostring(item[col]))
 				end
 			end
 		end

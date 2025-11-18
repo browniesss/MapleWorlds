@@ -7,20 +7,24 @@ script SpawnManager extends Logic
 	@ExecSpace("Server")
 	method void Spawn(string modelID, integer price, Vector3 pos)
 		local unitData = _UnitService:GetUnitByIDFromServer(modelID)
+		local unitSynergyData = _HttpService:JSONDecode(unitData.synergyData)
+		
+		price = unitData.price
 		
 		if not senderUserId == nil then
 			local user = _UserService:GetUserEntityByUserId(senderUserId)
 			local stageId = tostring(_GameManager.chapterIndex * 100 + _GameManager.mapIndex)
 			
 			local stage = _StageService:GetStageByIdFromServer(stageId)
-			
-			local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(stage.synergy_id)
-			local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(stage.synergy_id, count)
-			
-			if synergy:length() > 0 then
-				local item = synergy:Get(1)
+			if not unitSynergyData == nil and tostring(unitSynergyData.countryId) == stage.synergy_id then
+				local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(stage.synergy_id)
+				local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(stage.synergy_id, count)
 				
-				price = item:CalcValue(price)
+				if synergy:length() > 0 then
+					local item = synergy:Get(1)
+					
+					price = item:CalcValue(price)
+				end
 			end
 		end
 		
@@ -38,9 +42,9 @@ script SpawnManager extends Logic
 		local spawnEntity = _SpawnService:SpawnByModelId(modelID, "Pig", pos, spawnParent)
 		local skillData = _SkillService:GetSkillByIDFromServer(unitData["skillID"])
 		
-		if not senderUserId == nil then
+		if not senderUserId == nil and not unitSynergyData == nil then
 			local user = _UserService:GetUserEntityByUserId(senderUserId)
-			local jobID = tostring(unitData.synergeData.jobId)
+			local jobID = tostring(unitSynergyData.jobId)
 			local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(jobID)
 			local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(jobID, count)
 			
