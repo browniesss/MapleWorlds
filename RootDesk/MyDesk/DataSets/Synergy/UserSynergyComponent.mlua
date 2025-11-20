@@ -28,9 +28,15 @@ script UserSynergyComponent extends Component
 			local item = unitSynergyData.synergyData
 			
 			for i, col in ipairs(syncCols) do
-				if not item[col] == nil then
-					self:AddCount(tostring(item[col]))
+				if item[col] == nil then
+					continue
 				end
+				
+				if item[col] == 0 then
+					continue
+				end
+				
+				self:AddCount(tostring(item[col]))
 			end
 		end
 	end
