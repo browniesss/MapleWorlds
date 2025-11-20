@@ -7,22 +7,28 @@ script SpawnManager extends Logic
 	@ExecSpace("Server")
 	method void Spawn(string modelID, integer price, Vector3 pos)
 		local unitData = _UnitService:GetUnitByIDFromServer(modelID)
-		local unitSynergyData = _HttpService:JSONDecode(unitData.synergyData)
+		local synergeDataMap = _HttpService:JSONDecode(unitData.synergyData)
+		local unitSynergyData = {}
+		if synergeDataMap ~= nil then
+			unitSynergyData = synergeDataMap.synergyData
+		end
+		
 		
 		--price = unitData.summonCost
 		
-		if not senderUserId == nil then
+		if senderUserId ~= nil then
 			local user = _UserService:GetUserEntityByUserId(senderUserId)
 			local stageId = tostring(_GameManager.chapterIndex * 100 + _GameManager.mapIndex)
 			
 			local stage = _StageService:GetStageByIdFromServer(stageId)
+			
 			if unitSynergyData ~= nil and tostring(unitSynergyData.countryId) == stage.synergy_id then
 				local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(stage.synergy_id)
 				local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(stage.synergy_id, count)
 				
 				if synergy:length() > 0 then
 					local item = synergy:Get(1)
-					
+					log("unit price ", price , " => ", item:CalcValue(price))
 					price = item:CalcValue(price)
 				end
 			end
@@ -48,12 +54,16 @@ script SpawnManager extends Logic
 			local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(jobID)
 			local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(jobID, count)
 			
+			log(jobID)
+			log(count)
+			log(synergy:length())
 			if synergy:length() > 0 then
 				local item = synergy:Get(1)
 				
 				if jobID == "1" then
 					spawnEntity:RemoveComponent("IncreaseHpByTime")
 					spawnEntity:AddComponent("IncreaseHpByTime")
+					spawnEntity.IncreaseHpByTime.Enable = true
 					spawnEntity.IncreaseHpByTime.type = item.type
 					spawnEntity.IncreaseHpByTime.value = item.value
 				end
@@ -61,6 +71,7 @@ script SpawnManager extends Logic
 				if jobID == "2" then
 					spawnEntity:RemoveComponent("CriticalAttack")
 					spawnEntity:AddComponent("CriticalAttack")
+					spawnEntity.CriticalAttack.Enable = true
 					spawnEntity.CriticalAttack.type = item.type
 					spawnEntity.CriticalAttack.value = item.value
 				end
@@ -68,6 +79,7 @@ script SpawnManager extends Logic
 				if jobID == "3" then
 					spawnEntity:RemoveComponent("IncreaseMpByTime")
 					spawnEntity:AddComponent("IncreaseMpByTime")
+					spawnEntity.IncreaseMpByTime.Enable = true
 					spawnEntity.IncreaseMpByTime.type = item.type
 					spawnEntity.IncreaseMpByTime.value = item.value
 				end
@@ -75,6 +87,7 @@ script SpawnManager extends Logic
 				if jobID == "4" then
 					spawnEntity:RemoveComponent("AddSummonPointAfterKill")
 					spawnEntity:AddComponent("AddSummonPointAfterKill")
+					spawnEntity.AddSummonPointAfterKill.Enable = true
 					spawnEntity.AddSummonPointAfterKill.type = item.type
 					spawnEntity.AddSummonPointAfterKill.value = item.value
 					spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet()

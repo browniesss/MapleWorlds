@@ -16,6 +16,11 @@ script UserDeck extends Component
 	method void SetDeckItem(string unitID, integer index)
 		self.userDeck[index] = unitID
 		self:SetDeckItemInClient(unitID, index)
+		
+		local userSynergy = self.Entity.UserSynergyComponent
+		if userSynergy ~= nil then
+			userSynergy:SET_SYNERGY(self.userDeck)
+		end
 	end
 
 	@ExecSpace("Server")
@@ -24,7 +29,7 @@ script UserDeck extends Component
 		self:LoadUserDeck(deckData)
 		
 		local userSynergy = self.Entity.UserSynergyComponent
-		if not userSynergy == nil then
+		if userSynergy ~= nil then
 			userSynergy:SET_SYNERGY(deckData)
 		end
 	end

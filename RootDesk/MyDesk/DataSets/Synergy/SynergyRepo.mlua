@@ -54,7 +54,7 @@ script SynergyRepo extends Logic
 		end
 		
 		for i = 1, list:length()  do
-			local item = list:get(i)
+			local item = list:Get(i)
 			if item.count > count then
 				continue
 			end
@@ -99,6 +99,14 @@ script SynergyRepo extends Logic
 	end
 
 	method SynergyDataItem GetSynergyData(number id)
+		if id == nil then
+			return SynergyDataItem()
+		end
+		
+		if id == 0 then
+			return SynergyDataItem()
+		end
+		
 		local synergyDataJson = self.SyncSynergyDataTable[id]
 		local synergyDataTable = _HttpService:JSONDecode(synergyDataJson)
 		

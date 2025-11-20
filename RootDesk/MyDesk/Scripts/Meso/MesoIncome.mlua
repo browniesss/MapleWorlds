@@ -78,9 +78,9 @@ script MesoIncome extends Component
 			income=income
 		}
 		
+		self.UserWallet:SetMeso(meso)
 		self.UIController:UpdateMesoIncome(income)
 		
-		self.UserWallet:SetMeso(meso)
 		
 		self.nextUpdateTs = self.incomeCooltime
 		self.currentTs = 0

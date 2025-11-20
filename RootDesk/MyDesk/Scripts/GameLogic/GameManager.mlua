@@ -131,26 +131,28 @@ script GameManager extends Logic
 		local baseIncomeData = userIncome.MesoIncome:GetMesoData()
 		local meso = baseIncomeData.init
 		local income = baseIncomeData.income
-		if not senderUserId == nil then
+		if senderUserId ~= nil then
 			local user = _UserService:GetUserEntityByUserId(senderUserId)
 			
 			local addInitPoint = "5"
 			local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(addInitPoint)
 			local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(addInitPoint, count)
+				log(addInitPoint, " => ", count)
 			
 			if synergy:length() > 0 then
 				local item = synergy:Get(1)
-				
+				log("add init point" , meso, " => ", item:CalcValue(meso))
 				meso = item:CalcValue(meso)
 			end
 			
 			local addPointRatio = "101"
 			local addPointRatioCount = user.UserSynergyComponent:GET_SYNERGY_COUNT(addPointRatio)
-			local addPointRatioSynergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(addPointRatio, count)
+			local addPointRatioSynergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(addPointRatio, addPointRatioCount)
+			log(addPointRatio, " => ", addPointRatioCount)
 			
 			if addPointRatioSynergy:length() > 0 then
 				local item = addPointRatioSynergy:Get(1)
-				
+				log("add income point" , income, " => ", item:CalcValue(income))
 				income = item:CalcValue(income)
 			end
 		end

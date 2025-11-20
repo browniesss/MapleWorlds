@@ -6,7 +6,7 @@ script UserSynergyComponent extends Component
 
 	@ExecSpace("ServerOnly")
 	method integer GET_SYNERGY_COUNT(string target)
-		if not self.countMap[target] == nil then
+		if self.countMap[target] ~= nil then
 			return self.countMap[target]
 		end
 		
@@ -16,6 +16,10 @@ script UserSynergyComponent extends Component
 	@ExecSpace("ServerOnly")
 	method void SET_SYNERGY(table deck)
 		local syncCols = {"jobId","countryId","regionId"}
+		
+		for k, v in pairs(self.countMap) do
+			self.countMap[k] = 0
+		end
 		
 		for i, id in ipairs(deck) do
 			local unit = _UnitService:GetUnitByIDFromServer(id)
@@ -28,6 +32,8 @@ script UserSynergyComponent extends Component
 			local item = unitSynergyData.synergyData
 			
 			for i, col in ipairs(syncCols) do
+				log(col, " " , item[col])
+				
 				if item[col] == nil then
 					continue
 				end
