@@ -17,7 +17,7 @@ script SynergyUIManager extends Component
 		
 		local activeSynergy = _UserService.LocalPlayer.UserSynergyComponent.countMap
 		
-		for id, count in activeSynergy do
+		for id, count in pairs(activeSynergy) do
 		
 			if self.SynergyItemTable[id] ~= nil and self.SynergyItemTable[id] then
 				self.SynergyItemTable[id]:SetSynergyItem(self:GetSynergyDataItem(id), count)
