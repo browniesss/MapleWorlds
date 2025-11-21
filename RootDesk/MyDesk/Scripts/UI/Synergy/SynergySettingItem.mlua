@@ -1,0 +1,16 @@
+@Component
+script SynergySettingItem extends Component
+
+	property Entity SynergyIcon = nil
+
+	property Entity SynergyCount = nil
+
+	property Entity SynergyName = nil
+
+	method void SetSynergyItem(SynergyDataItem synergyData, number synergyCount)
+		self.SynergyIcon.SpriteGUIRendererComponent.ImageRUID = synergyData.RUID
+		self.SynergyName.TextComponent.Text = synergyData.name
+		self.SynergyCount.TextComponent.Text = tostring(math.floor(synergyCount))
+	end
+
+end

@@ -3,6 +3,8 @@ script UserDeckButton extends Component
 
 	property Entity userDeckUI = "b4891055-14b0-4f0a-86e0-bac32bb50af8"
 
+	property Entity userSynergyUI = "f0b89f1c-3fee-4d84-91ef-12af6daa42c5"
+
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
 		local lobbyInfoUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI")
@@ -19,6 +21,8 @@ script UserDeckButton extends Component
 		
 		self.userDeckUI.Enable = true
 		self.userDeckUI.Visible = true
+		
+		self.userSynergyUI.Enable = true
 		
 		self.userDeckUI.Children[2].UserDeckUI:OpenUserDeckUI()
 	end

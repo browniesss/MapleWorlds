@@ -1,0 +1,35 @@
+@Component
+script SynergyUIManager extends Component
+
+	property Entity SynergyScrollView = nil
+
+	property table SynergyItemTable = {}
+
+	method SynergyDataItem GetSynergyDataItem(string id)
+		return _SynergyRepo:GetSynergyData(tonumber(id))
+	end
+
+	@EventSender("Self")
+	handler HandleComponentEnabledInHierarchyChangedEvent(ComponentEnabledInHierarchyChangedEvent event)
+		if event.EnabledInHierarchy == nil then
+			return
+		end
+		
+		local activeSynergy = _UserService.LocalPlayer.UserSynergyComponent.countMap
+		
+		for id, count in activeSynergy do
+		
+			if self.SynergyItemTable[id] ~= nil and self.SynergyItemTable[id] then
+				self.SynergyItemTable[id]:SetSynergyItem(self:GetSynergyDataItem(id), count)
+				continue
+			end
+				
+			local synergyItem = _SpawnService:SpawnByModelId("model://b001dcdc-ff48-4c91-a232-be30a46f74ee", "SynergyItem", Vector3.zero, self.SynergyScrollView)
+			
+			synergyItem.SynergySettingItem:SetSynergyItem(self:GetSynergyDataItem(id), count)
+		
+			self.SynergyItemTable[id] = synergyItem
+		end
+	end
+
+end

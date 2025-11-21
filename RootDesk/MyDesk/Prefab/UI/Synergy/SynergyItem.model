@@ -18,7 +18,8 @@
       "BaseModelId": null,
       "Id": "b001dcdc-ff48-4c91-a232-be30a46f74ee",
       "Components": [
-        "MOD.Core.UITransformComponent"
+        "MOD.Core.UITransformComponent",
+        "script.SynergySettingItem"
       ],
       "Properties": [],
       "Values": [
@@ -232,6 +233,57 @@
             "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
           },
           "Value": true
+        },
+        {
+          "TargetType": "script.SynergySettingItem",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "script.SynergySettingItem",
+          "Name": "SynergyIcon",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODEntity, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODEntityRef, MOD.Core",
+            "tempEntityId": null,
+            "IsRelative": true,
+            "EntityId": "46d540d3-fc8f-4b3e-acb7-d7f92be58a6f"
+          }
+        },
+        {
+          "TargetType": "script.SynergySettingItem",
+          "Name": "SynergyCount",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODEntity, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODEntityRef, MOD.Core",
+            "tempEntityId": null,
+            "IsRelative": true,
+            "EntityId": "10753968-43b5-4319-954f-e358be96998f"
+          }
+        },
+        {
+          "TargetType": "script.SynergySettingItem",
+          "Name": "SynergyName",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODEntity, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODEntityRef, MOD.Core",
+            "tempEntityId": null,
+            "IsRelative": true,
+            "EntityId": "aeb8d7ef-3c6b-4023-adf3-84845c2bcb5b"
+          }
         }
       ],
       "EventLinks": [],
@@ -818,7 +870,7 @@
                 },
                 "Value": {
                   "$type": "MOD.Core.MODVector2, MOD.Core",
-                  "x": 150.0,
+                  "x": 155.0,
                   "y": 30.0
                 }
               },
@@ -831,7 +883,7 @@
                 },
                 "Value": {
                   "$type": "MOD.Core.MODVector2, MOD.Core",
-                  "x": 110.0,
+                  "x": 115.0,
                   "y": -30.0
                 }
               },
@@ -875,7 +927,7 @@
                 },
                 "Value": {
                   "$type": "MOD.Core.MODVector2, MOD.Core",
-                  "x": 0.585,
+                  "x": 0.607499957,
                   "y": 0.0
                 }
               },
@@ -888,7 +940,7 @@
                 },
                 "Value": {
                   "$type": "MOD.Core.MODVector3, MOD.Core",
-                  "x": -0.202499986,
+                  "x": -0.18,
                   "y": 0.0,
                   "z": 0.0
                 }
@@ -1395,7 +1447,7 @@
                 "Value": {
                   "$type": "MOD.Core.MODVector2, MOD.Core",
                   "x": 0.0,
-                  "y": 45.0
+                  "y": 44.75
                 }
               },
               {
@@ -1407,8 +1459,8 @@
                 },
                 "Value": {
                   "$type": "MOD.Core.MODVector2, MOD.Core",
-                  "x": -185.0,
-                  "y": -5.0
+                  "x": -185.000015,
+                  "y": -12.75
                 }
               },
               {
@@ -1433,8 +1485,8 @@
                 },
                 "Value": {
                   "$type": "MOD.Core.MODVector2, MOD.Core",
-                  "x": 185.0,
-                  "y": 50.0
+                  "x": 185.000015,
+                  "y": 57.5
                 }
               },
               {
@@ -1465,7 +1517,7 @@
                 "Value": {
                   "$type": "MOD.Core.MODVector2, MOD.Core",
                   "x": 0.0,
-                  "y": 0.0899999961
+                  "y": 0.072
                 }
               },
               {
@@ -1478,7 +1530,7 @@
                 "Value": {
                   "$type": "MOD.Core.MODVector3, MOD.Core",
                   "x": 0.787499964,
-                  "y": 0.0899999961,
+                  "y": 0.072,
                   "z": 0.0
                 }
               },
@@ -1582,7 +1634,7 @@
                   "$type": "MODNativeType",
                   "type": "System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
                 },
-                "Value": 32
+                "Value": 38
               },
               {
                 "TargetType": "MOD.Core.TextComponent",
@@ -1735,7 +1787,7 @@
                 "Value": {
                   "$type": "MOD.Core.MODVector2, MOD.Core",
                   "x": 0.0,
-                  "y": 5.0
+                  "y": -10.0
                 }
               },
               {
@@ -1747,7 +1799,7 @@
                 },
                 "Value": {
                   "$type": "MOD.Core.MODVector2, MOD.Core",
-                  "x": -185.0,
+                  "x": -185.000015,
                   "y": -45.0
                 }
               },
@@ -1773,8 +1825,8 @@
                 },
                 "Value": {
                   "$type": "MOD.Core.MODVector2, MOD.Core",
-                  "x": 185.0,
-                  "y": 50.0
+                  "x": 185.000015,
+                  "y": 35.0
                 }
               },
               {
@@ -1805,7 +1857,7 @@
                 "Value": {
                   "$type": "MOD.Core.MODVector2, MOD.Core",
                   "x": 0.0,
-                  "y": -0.0899999961
+                  "y": -0.123749994
                 }
               },
               {
@@ -1818,7 +1870,7 @@
                 "Value": {
                   "$type": "MOD.Core.MODVector3, MOD.Core",
                   "x": 0.787499964,
-                  "y": -0.0899999961,
+                  "y": -0.123749994,
                   "z": 0.0
                 }
               },
