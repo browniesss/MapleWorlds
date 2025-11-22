@@ -162,10 +162,10 @@ script GameManager extends Logic
 		local key = _RankingService:GetRankKeyByTable({chapter=chapterIndex, stage=mapIndex})
 		
 		self:SetPlayerCharacter()
-		self:EnableUI()
 		
 		self:SetTimer()
 		self:GameStartDataInClient(chapterIndex, mapIndex)
+		self:EnableUI()
 		
 		local stageData = _StageService:GetStageByIdFromServer(tostring(mapIndex + 100 * chapterIndex))
 		local playerTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/PlayerTower")

@@ -36,6 +36,9 @@ script UnitShopItem extends Component
 	@Sync
 	property Entity effectEntity = nil
 
+	@Sync
+	property integer price = 0
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		self:SetEntity()
@@ -52,11 +55,12 @@ script UnitShopItem extends Component
 	end
 
 	@ExecSpace("Client")
-	method void Initialize(table unitData, integer id, UnitShop shop, table skillData)
+	method void Initialize(table unitData, integer id, UnitShop shop, table skillData, integer cost)
 		self.unitData = unitData
 		self.id = id
 		self.shop = shop
 		self.skillData = skillData
+		self.price = cost
 		
 		self:SetEntity()
 		self:SetSprite()
@@ -103,7 +107,7 @@ script UnitShopItem extends Component
 	end
 
 	method void SetLabel()
-		self.priceLabel.TextComponent.Text = self.unitData['summonCost']
+		self.priceLabel.TextComponent.Text = tostring(self.price)
 	end
 
 	method void SetEffect()
@@ -116,13 +120,13 @@ script UnitShopItem extends Component
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
-		if not _SpawnManager:IsCanSpawn(self.unitData['summonCost'])then
+		if not _SpawnManager:IsCanSpawn(self.price)then
 			return
 		end
 		
-		_SpawnManager:Spawn(self.unitData['id'], self.unitData['summonCost'], Vector3.zero)
+		_SpawnManager:Spawn(self.unitData['id'], self.price, Vector3.zero)
 		
-		self.shop:OnSpawn(self.id, self.unitData['summonCost'])
+		self.shop:OnSpawn(self.id, self.price)
 	end
 
 	@EventSender("Self")
@@ -168,13 +172,13 @@ script UnitShopItem extends Component
 			isKeyDown = true	
 		end
 		
-		if not isKeyDown or not _SpawnManager:IsCanSpawn(self.unitData['summonCost']) or  _UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill then
+		if not isKeyDown or not _SpawnManager:IsCanSpawn(self.price) or  _UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill then
 			return
 		end
 		
-		_SpawnManager:Spawn(self.unitData['id'], self.unitData['summonCost'], Vector3.zero)
+		_SpawnManager:Spawn(self.unitData['id'], self.price, Vector3.zero)
 		
-		self.shop:OnSpawn(self.id, self.unitData['summonCost'])
+		self.shop:OnSpawn(self.id, self.price)
 	end
 
 end

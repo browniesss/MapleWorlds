@@ -15,24 +15,24 @@ script SpawnManager extends Logic
 		
 		
 		--price = unitData.summonCost
-		
-		if senderUserId ~= nil then
-			local user = _UserService:GetUserEntityByUserId(senderUserId)
-			local stageId = tostring(_GameManager.chapterIndex * 100 + _GameManager.mapIndex)
-			
-			local stage = _StageService:GetStageByIdFromServer(stageId)
-			
-			if unitSynergyData ~= nil and tostring(unitSynergyData.countryId) == stage.synergy_id then
-				local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(stage.synergy_id)
-				local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(stage.synergy_id, count)
-				
-				if synergy:length() > 0 then
-					local item = synergy:Get(1)
-					log("unit price ", price , " => ", item:CalcValue(price))
-					price += item:CalcValue(price)
-				end
-			end
-		end
+		--
+		--if senderUserId ~= nil then
+		--    local user = _UserService:GetUserEntityByUserId(senderUserId)
+		--    local stageId = tostring(_GameManager.chapterIndex * 100 + _GameManager.mapIndex)
+		--    
+		--    local stage = _StageService:GetStageByIdFromServer(stageId)
+		--    
+		--    if unitSynergyData ~= nil and tostring(unitSynergyData.countryId) == stage.synergy_id then
+		--        local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(stage.synergy_id)
+		--        local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(stage.synergy_id, count)
+		--        
+		--        if synergy:length() > 0 then
+		--            local item = synergy:Get(1)
+		--            log("unit price ", price , " => ", item:CalcValue(price))
+		--            price += item:CalcValue(price)
+		--        end
+		--    end
+		--end
 		
 		if not self:IsCanSpawn(price) then
 			return
