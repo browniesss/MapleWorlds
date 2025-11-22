@@ -63,10 +63,15 @@ script SynergySettingItem extends Component
 				
 				synergyInfoValue = synergyList[i].value
 			else
-				
-				if isActiveStepText == false and synergyCount < synergyList[i + 1].count then
+		
+				if isActiveStepText == false and i == #synergyList and synergyCount > synergyList[#synergyList].count then
 					isActiveStepText = true
-					synergyStepText = synergyStepText .. "<color=#FFFFFF>" .. synergyList[i].count .. "</color>"	
+					synergyStepText = synergyStepText .. "<color=#FFFFFF>" .. synergyList[i].count .. "</color>"
+		
+					synergyInfoValue = synergyList[i].value					
+				elseif isActiveStepText == false and synergyCount < synergyList[i + 1].count then
+					isActiveStepText = true
+					synergyStepText = synergyStepText .. "<color=#FFFFFF>" .. synergyList[i].count .. "</color>"
 					
 					synergyInfoValue = synergyList[i].value
 				else
