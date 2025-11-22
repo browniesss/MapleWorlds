@@ -30,6 +30,7 @@ script SynergyRepo extends Logic
 			item.buff = tostring(dataSet:GetCell(i,"buff"))
 			item.type = tostring(dataSet:GetCell(i,"type"))
 			item.value = tonumber(dataSet:GetCell(i,"value"))
+			item.desc = tostring(dataSet:GetCell(i, "desc"))
 			
 			if self.SERVER_DATA[item.target] == nil then
 				self.SERVER_DATA[item.target] = SynergyList()

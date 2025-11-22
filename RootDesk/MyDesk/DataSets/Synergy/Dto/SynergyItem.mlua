@@ -11,6 +11,8 @@ script SynergyItem
 
 	property number value = 0
 
+	property string desc = ""
+
 	method string SynergyItem_ENCODE()
 		local item = {
 			target=self.target,
@@ -18,6 +20,7 @@ script SynergyItem
 			buff=self.buff,
 			type=self.type,
 			value=self.value,
+			desc=self.desc,
 		}
 		
 		return _HttpService:JSONEncode(item)
@@ -31,6 +34,7 @@ script SynergyItem
 		self.buff = data["buff"]
 		self.type = data["type"]
 		self.value = data["value"]
+		self.desc = data["desc"]
 	end
 
 	method number CalcValue(number baseValue)
