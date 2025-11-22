@@ -122,6 +122,20 @@ script PlayCoinService extends Logic
 		_GameManager:LocalGameStart()
 	end
 
+	@ExecSpace("Client")
+	method boolean IsUseCoin()
+		local userStage = _UserService.LocalPlayer.UserStage
+		if userStage.openChapter < userStage.selectChapter then
+			return false
+		end
+		
+		if userStage.openChapter == userStage.selectChapter and userStage.openStage < userStage.selectStage then
+			return false
+		end
+		
+		return true
+	end
+
 	@ExecSpace("ServerOnly")
 	@EventSender("Service", "UserService")
 	handler HandleUserLeaveEvent(UserLeaveEvent event)

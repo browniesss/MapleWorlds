@@ -3,7 +3,9 @@ script StartUI extends Component
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
-		_PlayCoinService:StartNormalGame()
+		if _PlayCoinService:IsUseCoin() then
+			_PlayCoinService:StartNormalGame()
+		end
 	end
 
 end
