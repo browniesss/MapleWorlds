@@ -7,23 +7,23 @@
   "Usage": 0,
   "UsePublish": 1,
   "UseService": 0,
-  "CoreVersion": "1.25.0.0",
+  "CoreVersion": "1.26.0.0",
   "StudioVersion": "0.1.0.0",
   "DynamicLoading": 0,
   "ContentProto": {
     "Use": "Json",
     "Json": {
       "Version": 1,
-      "Name": "DropItem_Prefab",
+      "Name": "IngameCoinItem_Prefab",
       "BaseModelId": null,
       "Id": "9831318f-894a-429a-9951-144ccd9eddc9",
       "Components": [
         "MOD.Core.TransformComponent",
         "MOD.Core.SpriteRendererComponent",
-        "script.DropItem",
         "MOD.Core.RigidbodyComponent",
         "MOD.Core.TriggerComponent",
-        "MOD.Core.TweenLineComponent"
+        "MOD.Core.TweenLineComponent",
+        "script.IngameCoinItem"
       ],
       "Properties": [],
       "Values": [
@@ -32,7 +32,7 @@
           "Name": "Position",
           "ValueType": {
             "$type": "MODNativeType",
-            "type": "MOD.Core.MODVector3, MOD.Core, Version=1.25.0.0, Culture=neutral, PublicKeyToken=null"
+            "type": "MOD.Core.MODVector3, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
           },
           "Value": {
             "$type": "MOD.Core.MODVector3, MOD.Core",
@@ -46,7 +46,7 @@
           "Name": "QuaternionRotation",
           "ValueType": {
             "$type": "MODNativeType",
-            "type": "MOD.Core.MODQuaternion, MOD.Core, Version=1.25.0.0, Culture=neutral, PublicKeyToken=null"
+            "type": "MOD.Core.MODQuaternion, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
           },
           "Value": {
             "$type": "MOD.Core.MODQuaternion, MOD.Core",
@@ -99,7 +99,7 @@
           "Name": "RenderSetting",
           "ValueType": {
             "$type": "MODNativeType",
-            "type": "MOD.Core.RenderSettingType, MOD.Core, Version=1.25.0.0, Culture=neutral, PublicKeyToken=null"
+            "type": "MOD.Core.RenderSettingType, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
           },
           "Value": 0
         },
@@ -158,20 +158,11 @@
           "Value": true
         },
         {
-          "TargetType": "script.DropItem",
-          "Name": "Enable",
-          "ValueType": {
-            "$type": "MODNativeType",
-            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
-          },
-          "Value": true
-        },
-        {
           "TargetType": "MOD.Core.RigidbodyComponent",
           "Name": "MoveVelocity",
           "ValueType": {
             "$type": "MODNativeType",
-            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.25.0.0, Culture=neutral, PublicKeyToken=null"
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
           },
           "Value": {
             "$type": "MOD.Core.MODVector2, MOD.Core",
@@ -184,7 +175,7 @@
           "Name": "RealMoveVelocity",
           "ValueType": {
             "$type": "MODNativeType",
-            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.25.0.0, Culture=neutral, PublicKeyToken=null"
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
           },
           "Value": {
             "$type": "MOD.Core.MODVector2, MOD.Core",
@@ -206,12 +197,12 @@
           "Name": "BoxSize",
           "ValueType": {
             "$type": "MODNativeType",
-            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.25.0.0, Culture=neutral, PublicKeyToken=null"
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
           },
           "Value": {
             "$type": "MOD.Core.MODVector2, MOD.Core",
-            "x": 0.23,
-            "y": 0.24
+            "x": 3.0,
+            "y": 3.0
           }
         },
         {
@@ -219,12 +210,12 @@
           "Name": "ColliderOffset",
           "ValueType": {
             "$type": "MODNativeType",
-            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.25.0.0, Culture=neutral, PublicKeyToken=null"
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
           },
           "Value": {
             "$type": "MOD.Core.MODVector2, MOD.Core",
-            "x": 0.165,
-            "y": 0.17
+            "x": 0.166015625,
+            "y": 0.169921875
           }
         },
         {
@@ -244,6 +235,69 @@
             "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
           },
           "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.TweenLineComponent",
+          "Name": "AutoStart",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": false
+        },
+        {
+          "TargetType": "MOD.Core.TweenLineComponent",
+          "Name": "IsOriginInited",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": false
+        },
+        {
+          "TargetType": "MOD.Core.TweenLineComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "script.IngameCoinItem",
+          "Name": "CurrentSpeed",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": 5.0
+        },
+        {
+          "TargetType": "script.IngameCoinItem",
+          "Name": "Acceleration",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": 80.0
+        },
+        {
+          "TargetType": "script.IngameCoinItem",
+          "Name": "MaxSpeed",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": 50.0
+        },
+        {
+          "TargetType": "MOD.Core.RigidbodyComponent",
+          "Name": "Mass",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Single, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": 5.0
         }
       ],
       "EventLinks": [],

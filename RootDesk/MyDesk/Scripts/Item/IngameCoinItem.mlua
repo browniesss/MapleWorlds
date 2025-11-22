@@ -1,0 +1,19 @@
+@Component
+script IngameCoinItem extends DropItem
+
+	@ExecSpace("Server")
+	method void Init()
+		__base:Init()
+		self.amount = math.random(5, 15)
+	end
+
+	@ExecSpace("Server")
+	method void EffectItem()
+		-- 먼저 돈 지급 후 엔티티 파괴
+		local mesoIncome = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/userWallet")
+		mesoIncome.MesoWallet:AddMeso(self.amount)
+		
+		__base:EffectItem()
+	end
+
+end
