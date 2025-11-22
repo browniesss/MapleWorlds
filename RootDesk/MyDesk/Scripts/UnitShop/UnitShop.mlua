@@ -15,7 +15,6 @@ script UnitShop extends Component
 
 	method void SetShop()
 		local stageId = tostring(_GameManager.chapterIndex * 100 + _GameManager.mapIndex)
-		log_error(stageId)
 		local stage = _StageService:GetStageById(stageId)
 		
 		
