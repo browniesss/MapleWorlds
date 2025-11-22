@@ -24,7 +24,8 @@ script Sword_Illusion extends SkillParent
 				self:SkillEnd()
 				return
 			end
-				
+			
+			hitCount += 1
 			_EffectService:PlayEffectAttached("f5856f5a3b754cf6adfabccde129fe40", self.target, Vector3.zero , 0, Vector3.one, false, options)
 			self.target.Unit:OnHit(self.caster, self.skillAmount / 12, false, 1)
 		end
