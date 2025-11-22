@@ -1,0 +1,107 @@
+@Component
+script SynergySettingItem extends Component
+
+	property Entity SynergyIcon = nil
+
+	property Entity SynergyCount = nil
+
+	property Entity SynergyName = nil
+
+	property Entity SynergyStep = nil
+
+	property Entity SynergyIconMask = nil
+
+	property Entity SynergyInfo = nil
+
+	property Entity SynergyInfoText = nil
+
+	method void SetSynergyItem(SynergyDataItem synergyData, number synergyCount)
+		self.SynergyIcon.SpriteGUIRendererComponent.ImageRUID = synergyData.RUID
+		self.SynergyName.TextComponent.Text = synergyData.name
+		self.SynergyCount.TextComponent.Text = tostring(math.floor(synergyCount))
+		
+		local synergyList = _SynergyRepo:GetSynergyList(synergyData.id)
+		local minSynergyCount = synergyList.list[1].count
+		
+		-- 시너지 비활성화 처리
+		if synergyCount < minSynergyCount then
+			self.SynergyIconMask.Enable = true
+			self.SynergyName.TextComponent.FontColor = Color.gray
+			self.SynergyStep.TextComponent.FontColor = Color.gray
+			
+			self:SetSynergyStepText(synergyList, synergyCount)
+		else
+			self.SynergyIconMask.Enable = false
+			self.SynergyName.TextComponent.FontColor = Color.white
+			
+			self:SetSynergyStepText(synergyList, synergyCount)
+		end
+	end
+
+	method void SetSynergyStepText(SynergyList synergyListData, number synergyCount)
+		local synergyList = synergyListData.list
+		
+		local synergyStepText = ""
+		local isActiveStepText = false
+		
+		local synergyInfoText = synergyList[1].desc
+		local synergyInfoValue = ""
+		
+		if synergyCount < synergyList[1].count then
+			isActiveStepText = true
+		end
+		
+		for i = 1, #synergyList do
+			if isActiveStepText == false and synergyCount == synergyList[i].count then
+				isActiveStepText = true
+				synergyStepText = synergyStepText .. "<color=#FFFFFF>" .. synergyList[i].count .. "</color>"
+				
+				synergyInfoValue = synergyList[i].value		
+			elseif isActiveStepText == false and synergyCount < synergyList[i].count then
+				isActiveStepText = true
+				synergyStepText = synergyStepText .. "<color=#FFFFFF>" .. synergyList[i].count .. "</color>"
+				
+				synergyInfoValue = synergyList[i].value
+			else
+				
+				if isActiveStepText == false and synergyCount < synergyList[i + 1].count then
+					isActiveStepText = true
+					synergyStepText = synergyStepText .. "<color=#FFFFFF>" .. synergyList[i].count .. "</color>"	
+					
+					synergyInfoValue = synergyList[i].value
+				else
+					synergyStepText = synergyStepText .. synergyList[i].count
+				end
+			end
+			
+			if i == #synergyList then
+				continue
+			end
+			
+			synergyStepText = synergyStepText .. " > "
+		end
+		
+		if synergyInfoValue == "" then
+			synergyInfoValue = synergyList[1].value
+		end
+		
+		if synergyList[1].type == "비율" then
+			synergyInfoValue = synergyInfoValue / 1000
+		end
+		
+		self.SynergyInfoText.TextComponent.Text = string.format(synergyInfoText, synergyInfoValue)
+		
+		self.SynergyStep.TextComponent.Text = synergyStepText
+	end
+
+	@EventSender("Self")
+	handler HandleUITouchUpEvent(UITouchUpEvent event)
+		self.SynergyInfo.Enable = false
+	end
+
+	@EventSender("Self")
+	handler HandleUITouchDownEvent(UITouchDownEvent event)
+		self.SynergyInfo.Enable = true
+	end
+
+end

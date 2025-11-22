@@ -64,6 +64,7 @@ script StageService extends Logic
 			stage["stage_name"] = tostring(dataSet:GetCell(i,"name"))
 			stage["stage_desc"] = tostring(dataSet:GetCell(i,"stage_desc"))
 			stage["chapter_name"] = tostring(dataSet:GetCell(i,"chapter_name"))
+			stage["synergy_id"] = tostring(dataSet:GetCell(i,"synergy_id"))
 			
 			self.data[i] = stage
 			self.idMap[stage.id] = i
@@ -110,7 +111,6 @@ script StageService extends Logic
 		
 		local serverData = _HttpService:JSONDecode(json)
 		for i, stage in ipairs(serverData) do
-			log(i)
 			self.data[#self.data + 1] = stage
 			self.idMap[stage.id] = i
 			

@@ -23,8 +23,8 @@ script UserDeckService extends Logic
 	end
 
 	@ExecSpace("Server")
-	method integer LOAD(string uid)
-		local ds = _DataStorageService:GetUserDataStorage(uid)
+	method integer LOAD()
+		local ds = _DataStorageService:GetUserDataStorage(senderUserId)
 		local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
 		
 		local errCode, res = ds:GetAndWait("USER_DECK")

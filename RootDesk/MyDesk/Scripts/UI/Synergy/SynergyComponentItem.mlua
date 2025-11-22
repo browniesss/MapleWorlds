@@ -1,0 +1,57 @@
+@Component
+script SynergyComponentItem extends Component
+
+	property Entity spriteJob = nil
+
+	property Entity spriteCountry = nil
+
+	property Entity spriteRegion = nil
+
+	method void SetJobSprite(string jobRuid)
+		if jobRuid == nil or jobRuid == "" then
+			self.spriteJob.Enable = false
+			return
+		end
+		
+		self.spriteJob.SpriteGUIRendererComponent.ImageRUID = jobRuid
+	end
+
+	method void SetCountrySprite(string countryRuid)
+		if countryRuid == nil or countryRuid == "" then
+			self.spriteCountry.Enable = false
+			return
+		end
+		
+		self.spriteCountry.SpriteGUIRendererComponent.ImageRUID = countryRuid
+	end
+
+	method void SetRegionSprite(string regionRuid)
+		if regionRuid == nil or regionRuid == "" then
+			self.spriteRegion.Enable = false
+			return
+		end
+		
+		self.spriteRegion.SpriteGUIRendererComponent.ImageRUID = regionRuid
+	end
+
+	method void SetSynergyData(table unitData)
+		local synergyDataJson = unitData["synergyData"]
+		
+		if synergyDataJson == "" then
+			self.Entity.Enable = false
+			return
+		end
+		
+		local res = _HttpService:JSONDecode(synergyDataJson)
+		local synergyData = res["synergyData"]
+		
+		local jobRuid = _SynergyRepo:GetSynergyData(synergyData['jobId']).RUID
+		local countryRuid = _SynergyRepo:GetSynergyData(synergyData['countryId']).RUID
+		local regionRuid = _SynergyRepo:GetSynergyData(synergyData['regionId']).RUID
+		
+		self:SetJobSprite(jobRuid)
+		self:SetCountrySprite(countryRuid)
+		self:SetRegionSprite(regionRuid)
+	end
+
+end

@@ -4,7 +4,7 @@ script UserDeck extends Component
 	property table userDeck = {}
 
 	method void OnBeginPlay()
-		_UserDeckService:LOAD(self.Entity.PlayerComponent.UserId)
+		_UserDeckService:LOAD()
 	end
 
 	@ExecSpace("Client")
@@ -16,12 +16,22 @@ script UserDeck extends Component
 	method void SetDeckItem(string unitID, integer index)
 		self.userDeck[index] = unitID
 		self:SetDeckItemInClient(unitID, index)
+		
+		local userSynergy = self.Entity.UserSynergyComponent
+		if userSynergy ~= nil then
+			userSynergy:SET_SYNERGY(self.userDeck)
+		end
 	end
 
 	@ExecSpace("Server")
 	method void SetUserDeck(table deckData)
 		self.userDeck = deckData
 		self:LoadUserDeck(deckData)
+		
+		local userSynergy = self.Entity.UserSynergyComponent
+		if userSynergy ~= nil then
+			userSynergy:SET_SYNERGY(deckData)
+		end
 	end
 
 	@ExecSpace("Client")

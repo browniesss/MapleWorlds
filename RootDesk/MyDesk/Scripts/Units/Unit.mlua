@@ -167,6 +167,12 @@ script Unit extends Component
 	@Sync
 	property Entity spawnSkillEntity = nil
 
+	@Sync
+	property integer criticalRatio = 0
+
+	@Sync
+	property integer criticalDamage = 1
+
 	@ExecSpace("Server")
 	method void Spawn(table unitData, table skillData)
 		self.moveSpeed = unitData["moveSpeed"]
@@ -191,6 +197,8 @@ script Unit extends Component
 		local isUsableCharacter = unitData["isUsableCharacter"]
 		self.isUsableCharacter = isUsableCharacter == 1
 		self.dieAudioClip = unitData["dieAudioClip"]
+		self.criticalRatio = unitData["criticalRatio"]
+		self.criticalDamage = unitData["criticalDamage"]
 		
 		self.skillID = skillData['id']
 		self.skillDesc = skillData['desc']
@@ -824,6 +832,17 @@ script Unit extends Component
 			if damage <= 1 then
 				damage = 1
 			end
+		end
+		
+		if attacker.AddSummonPointAfterKill ~= nil then
+			attacker.AddSummonPointAfterKill:OnHit(attacker, damage, isCritical, attackCount)
+		end
+		
+		if attacker.CriticalAttack ~=  nil then
+			local criticalResult = attacker.CriticalAttack:OnHit(attacker, damage, isCritical, attackCount)
+			damage = criticalResult.damage
+			isCritical = criticalResult.isCritical
+			attackCount = criticalResult.attackCount
 		end
 		
 		self.Entity.HitComponent:OnHit(attacker, damage, isCritical, "", attackCount)

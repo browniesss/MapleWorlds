@@ -1,0 +1,8 @@
+@Component
+script DecreaseSummonCost extends BaseSynergyComponent
+
+	method integer GetSummonCost(integer baseCost)
+		return self:CalValue(baseCost)
+	end
+
+end

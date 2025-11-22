@@ -9,21 +9,21 @@ script MesoUI extends Component
 
 	property TextComponent Display = "12c0befb-73b8-4f52-8ab8-a84a490e2e53"
 
-	@ExecSpace("ClientOnly")
-	method void UpdateDisplay()
-		self.Display.Text = string.format("%d + %d", self.currentMeso, self.mesoIncome)
+	@ExecSpace("Client")
+	method void UpdateDisplay(string text)
+		self.Display.Text = text
 	end
 
-	@ExecSpace("Client")
+	@ExecSpace("Server")
 	method void UpdateCurrentMeso(integer newCurrentMeso)
 		self.currentMeso = newCurrentMeso
-		self:UpdateDisplay()
+		self:UpdateDisplay(string.format("%d + %d", self.currentMeso, self.mesoIncome))
 	end
 
-	@ExecSpace("Client")
+	@ExecSpace("Server")
 	method void UpdateMesoIncome(integer newIncome)
 		self.mesoIncome = newIncome
-		self:UpdateDisplay()
+		self:UpdateDisplay(string.format("%d + %d", self.currentMeso, self.mesoIncome))
 	end
 
 end

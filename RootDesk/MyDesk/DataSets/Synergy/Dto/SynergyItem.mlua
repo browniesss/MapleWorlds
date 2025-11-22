@@ -11,4 +11,42 @@ script SynergyItem
 
 	property number value = 0
 
+	property string desc = ""
+
+	method string SynergyItem_ENCODE()
+		local item = {
+			target=self.target,
+			count=self.count,
+			buff=self.buff,
+			type=self.type,
+			value=self.value,
+			desc=self.desc,
+		}
+		
+		return _HttpService:JSONEncode(item)
+	end
+
+	method void SynergyItem_DECODE(string item)
+		local data = _HttpService:JSONDecode(item)
+		
+		self.target = data["target"]
+		self.count = data["count"]
+		self.buff = data["buff"]
+		self.type = data["type"]
+		self.value = data["value"]
+		self.desc = data["desc"]
+	end
+
+	method number CalcValue(number baseValue)
+		if self.type == "절대" then
+			return baseValue + self.value
+		end
+		
+		if self.type == "비율" then
+			return baseValue * (self.value / 100000 + 1)
+		end
+		
+		return 0
+	end
+
 end

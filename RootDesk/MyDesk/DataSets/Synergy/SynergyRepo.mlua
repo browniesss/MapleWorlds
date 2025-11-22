@@ -6,8 +6,18 @@ script SynergyRepo extends Logic
 
 	property table SERVER_DATA = {}
 
+	@Sync
+	property SyncTable<number, string> SyncSynergyDataTable
+
+	property table synergyDataTable = {}
+
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
+		self:SetSynergyData()
+		self:SetSynergy()
+	end
+
+	method void SetSynergy()
 		local dataSet = _DataService:GetTable("Synergy")
 		
 		local dataCount = dataSet:GetRowCount()
@@ -20,22 +30,106 @@ script SynergyRepo extends Logic
 			item.buff = tostring(dataSet:GetCell(i,"buff"))
 			item.type = tostring(dataSet:GetCell(i,"type"))
 			item.value = tonumber(dataSet:GetCell(i,"value"))
+			item.desc = tostring(dataSet:GetCell(i, "desc"))
 			
 			if self.SERVER_DATA[item.target] == nil then
-				self.SERVER_DATA[item.target] = {}
+				self.SERVER_DATA[item.target] = SynergyList()
 			end
 			
-			self.SERVER_DATA[item.target][#self.SERVER_DATA[item.target] + 1] = item
+			self.SERVER_DATA[item.target]:Add(item)
 		end
 		
 		for k, v in pairs(self.SERVER_DATA) do
-			self.ClientData[k] = _HttpService:JSONEncode(v)
+			log("SET_CLIENT SYNERGY ", k, " ", v:SynergyList_ENCODE())
+			self.ClientData[k] = v:SynergyList_ENCODE()
+			log("SET_CLIENT SYNERGY DONE", k, " ", self.ClientData[k])
 		end
 	end
 
 	@ExecSpace("ServerOnly")
-	method SynergyItem FIRST_SYNERGY_AVAILABLE(string target, integer arg1)
+	method SynergyList FIND_SYNERGY_AVAILABLE(string target, integer count)
+		local list = self.SERVER_DATA[target]
+		local resp = SynergyList()
+		local itemMaxCount = 0
 		
+		if list == nil then
+			return resp
+		end
+		
+		for i = 1, list:length()  do
+			local item = list:Get(i)
+			if item.count > count then
+				continue
+			end
+			
+			if item.count < itemMaxCount then
+				continue
+			end
+			
+			if item.count == itemMaxCount then
+				resp:Add(item)
+				continue
+			end
+			
+			resp = SynergyList()
+			resp:Add(item)
+			itemMaxCount = item.count
+		end
+		
+		return resp
+		
+	end
+
+	method void SetSynergyData()
+		local dataSet = _DataService:GetTable("SynergyData")
+		
+		local dataCount = dataSet:GetRowCount()
+		
+		for i = 1, dataCount do
+			local item = {["id"] = tonumber(dataSet:GetCell(i,"id")), ["type"] = tostring(dataSet:GetCell(i,"type")), 
+				["name"] = tostring(dataSet:GetCell(i,"name")), ["RUID"] = tostring(dataSet:GetCell(i,"RUID"))}
+			
+			--item.id = tonumber(dataSet:GetCell(i,"id"))
+			--item.type = tostring(dataSet:GetCell(i,"type"))
+			--item.name = tostring(dataSet:GetCell(i,"name"))
+			--item.RUID = tostring(dataSet:GetCell(i,"RUID"))
+			
+			self.synergyDataTable[item.id] = _HttpService:JSONEncode(item)
+			self.SyncSynergyDataTable[item.id] = self.synergyDataTable[item.id]
+			
+		end
+		
+	end
+
+	method SynergyDataItem GetSynergyData(number id)
+		if id == nil then
+			return SynergyDataItem()
+		end
+		
+		if id == 0 then
+			return SynergyDataItem()
+		end
+		
+		local synergyDataJson = self.SyncSynergyDataTable[id]
+		local synergyDataTable = _HttpService:JSONDecode(synergyDataJson)
+		
+		local synergyData = SynergyDataItem()
+		
+		synergyData.id = synergyDataTable.id
+		synergyData.type = synergyDataTable.type
+		synergyData.name = synergyDataTable.name
+		synergyData.RUID = synergyDataTable.RUID
+		
+		return synergyData
+	end
+
+	method SynergyList GetSynergyList(number id)
+		local synergy = self.ClientData[tostring(id)]
+		
+		local synergyList = SynergyList()
+		synergyList:SynergyList_DECODE(synergy)
+		
+		return synergyList
 	end
 
 end

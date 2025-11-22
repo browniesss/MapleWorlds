@@ -3,6 +3,8 @@ script UserDeckSaveButton extends Component
 
 	property Entity userDeckUI = "b4891055-14b0-4f0a-86e0-bac32bb50af8"
 
+	property Entity userSynergyUI = "f0b89f1c-3fee-4d84-91ef-12af6daa42c5"
+
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
 		local player = _EntityService:GetEntityByTag("Player")
@@ -10,6 +12,8 @@ script UserDeckSaveButton extends Component
 		
 		self.userDeckUI.Enable = false
 		self.userDeckUI.Visible = false
+		
+		self.userSynergyUI.Enable = false
 		
 		local lobbyInfoUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI")
 		

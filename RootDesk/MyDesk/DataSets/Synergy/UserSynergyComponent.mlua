@@ -1,16 +1,74 @@
 @Component
 script UserSynergyComponent extends Component
 
-	property table countMap = {}
+	@Sync
+	property SyncTable<string, number> countMap
+
+	property table synergyTable = {}
 
 	@ExecSpace("ServerOnly")
 	method integer GET_SYNERGY_COUNT(string target)
-		return self.countMap[target]
+		if self.countMap[target] ~= nil then
+			return self.countMap[target]
+		end
+		
+		return 0
 	end
 
 	@ExecSpace("ServerOnly")
 	method void SET_SYNERGY(table deck)
+		local syncCols = {"jobId","countryId","regionId"}
 		
+		for k, v in pairs(self.countMap) do
+			self.countMap[k] = 0
+		end
+		
+		for i, id in ipairs(deck) do
+			local unit = _UnitService:GetUnitByIDFromServer(id)
+			local unitSynergyData = _HttpService:JSONDecode(unit.synergyData)
+			
+			if unitSynergyData == nil then
+				continue
+			end
+			
+			local item = unitSynergyData.synergyData
+			
+			for i, col in ipairs(syncCols) do
+				log(col, " " , item[col])
+				
+				if item[col] == nil then
+					continue
+				end
+				
+				if item[col] == 0 then
+					continue
+				end
+				
+				self:AddCount(tostring(item[col]))
+			end
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void AddCount(string key)
+		if self.countMap[key] == nil then
+			self.countMap[key] = 0
+		end
+		
+		self.countMap[key] += 1
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnSyncProperty(string name, any value)
+		local callback = self.synergyTable[name]
+		
+		if callback ~= nil then
+			callback()
+		end
+	end
+
+	method void AddSynercyCallback(string name, any callback)
+		self.synergyTable[name] = callback
 	end
 
 end
