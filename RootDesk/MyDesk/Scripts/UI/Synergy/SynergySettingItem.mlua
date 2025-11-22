@@ -7,10 +7,31 @@ script SynergySettingItem extends Component
 
 	property Entity SynergyName = nil
 
+	property Entity SynergyStep = nil
+
+	property Entity SynergyIconMask = nil
+
 	method void SetSynergyItem(SynergyDataItem synergyData, number synergyCount)
 		self.SynergyIcon.SpriteGUIRendererComponent.ImageRUID = synergyData.RUID
 		self.SynergyName.TextComponent.Text = synergyData.name
 		self.SynergyCount.TextComponent.Text = tostring(math.floor(synergyCount))
+		
+		local synergyList = _SynergyRepo:GetSynergyList(synergyData.id)
+		
+		-- 시너지 비활성화 처리
+		if synergyCount < 2 then
+			self.SynergyIconMask.Enable = true
+			self.SynergyName.TextComponent.FontColor = Color.gray
+			self.SynergyStep.TextComponent.FontColor = Color.gray
+		else
+			self.SynergyIconMask.Enable = false
+			self.SynergyName.TextComponent.FontColor = Color.white
+		end
+	end
+
+	@EventSender("Self")
+	handler HandleButtonPressedEvent(ButtonPressedEvent event)
+		
 	end
 
 end

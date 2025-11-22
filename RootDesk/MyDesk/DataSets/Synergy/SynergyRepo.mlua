@@ -120,4 +120,13 @@ script SynergyRepo extends Logic
 		return synergyData
 	end
 
+	method SynergyList GetSynergyList(number id)
+		local synergy = self.ClientData[tostring(id)]
+		
+		local synergyList = SynergyList()
+		synergyList:SynergyList_DECODE(synergy)
+		
+		return synergyList
+	end
+
 end

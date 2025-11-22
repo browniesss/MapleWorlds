@@ -4,6 +4,8 @@ script UserSynergyComponent extends Component
 	@Sync
 	property SyncTable<string, number> countMap
 
+	property table synergyTable = {}
+
 	@ExecSpace("ServerOnly")
 	method integer GET_SYNERGY_COUNT(string target)
 		if self.countMap[target] ~= nil then
@@ -54,6 +56,19 @@ script UserSynergyComponent extends Component
 		end
 		
 		self.countMap[key] += 1
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnSyncProperty(string name, any value)
+		local callback = self.synergyTable[name]
+		
+		if callback ~= nil then
+			callback()
+		end
+	end
+
+	method void AddSynercyCallback(string name, any callback)
+		self.synergyTable[name] = callback
 	end
 
 end

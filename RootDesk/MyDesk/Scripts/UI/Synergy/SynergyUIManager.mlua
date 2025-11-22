@@ -9,27 +9,51 @@ script SynergyUIManager extends Component
 		return _SynergyRepo:GetSynergyData(tonumber(id))
 	end
 
-	@EventSender("Self")
-	handler HandleComponentEnabledInHierarchyChangedEvent(ComponentEnabledInHierarchyChangedEvent event)
-		if event.EnabledInHierarchy == nil then
-			return
+	@ExecSpace("ClientOnly")
+	method void OnSyncProperty(string name, any value)
+		if value ~= nil then
+			value()
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		_UserService.LocalPlayer.UserSynergyComponent:AddSynercyCallback("countMap", function()	self:SetSynergyItem() end)
+		
+		self:SetSynergyItem()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void SetSynergyItem()
+		-- 시너지 아이템 삭제
+		for k, v in pairs(self.SynergyItemTable) do
+			_EntityService:Destroy(self.SynergyItemTable[k])
 		end
 		
+		-- 시너지 아이템 추가
 		local activeSynergy = _UserService.LocalPlayer.UserSynergyComponent.countMap
 		
 		for id, count in pairs(activeSynergy) do
-		
-			if self.SynergyItemTable[id] ~= nil and self.SynergyItemTable[id] then
-				self.SynergyItemTable[id]:SetSynergyItem(self:GetSynergyDataItem(id), count)
+			if count == 0 then
+				_EntityService:Destroy(self.SynergyItemTable[id])
 				continue
 			end
-				
+			
 			local synergyItem = _SpawnService:SpawnByModelId("model://b001dcdc-ff48-4c91-a232-be30a46f74ee", "SynergyItem", Vector3.zero, self.SynergyScrollView)
 			
 			synergyItem.SynergySettingItem:SetSynergyItem(self:GetSynergyDataItem(id), count)
 		
 			self.SynergyItemTable[id] = synergyItem
 		end
+	end
+
+	@EventSender("Self")
+	handler HandleComponentEnabledInHierarchyChangedEvent(ComponentEnabledInHierarchyChangedEvent event)
+		if event.EnabledInHierarchy == nil then
+			return
+		end
+		
+		--self:SetSynergyItem()
 	end
 
 end
