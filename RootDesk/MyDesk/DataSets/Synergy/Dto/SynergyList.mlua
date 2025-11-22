@@ -37,7 +37,7 @@ script SynergyList
 		return -1
 	end
 
-	method string ENCODE()
+	method string SynergyList_ENCODE()
 		local list = {}
 		
 		for i, data in ipairs(list) do
@@ -49,6 +49,19 @@ script SynergyList
 		end
 		
 		return _HttpService:JSONEncode(list)
+	end
+
+	method void SynergyList_DECODE(string item)
+		self.list = {}
+		local list = _HttpService:JSONDecode(item)
+		
+		for i, table in ipairs(list) do
+			local synergyItem = SynergyItem()
+			
+			synergyItem:SynergyItem_DECODE(_HttpService:JSONEncode(table))
+			
+			self.list[#self.list + 1] = synergyItem
+		end
 	end
 
 end
