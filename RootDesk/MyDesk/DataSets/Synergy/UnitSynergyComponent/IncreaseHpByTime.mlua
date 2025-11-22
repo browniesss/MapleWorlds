@@ -16,12 +16,12 @@ script IncreaseHpByTime extends BaseSynergyComponent
 			return
 		end
 		
-		target.hp += self:CalValue(target.maxHP) - target.maxHP
+		target.hp += self:CalValue(target.maxHP)
 		if target.hp > target.maxHP then
 			target.hp = target.maxHP
 		end
 		
-		log("hp up ", self:CalValue(target.maxHP) - target.maxHP)
+		log("hp up ", self:CalValue(target.maxHP))
 	end
 
 end

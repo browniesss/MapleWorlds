@@ -29,7 +29,7 @@ script SpawnManager extends Logic
 				if synergy:length() > 0 then
 					local item = synergy:Get(1)
 					log("unit price ", price , " => ", item:CalcValue(price))
-					price = item:CalcValue(price)
+					price += item:CalcValue(price)
 				end
 			end
 		end

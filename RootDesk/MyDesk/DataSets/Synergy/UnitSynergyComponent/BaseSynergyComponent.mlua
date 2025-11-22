@@ -11,11 +11,11 @@ script BaseSynergyComponent extends Component
 
 	method number CalValue(number baseValue)
 		if self.type == "절대" then
-			return baseValue + self.value
+			return self.value
 		end
 		
 		if self.type == "비율" then
-			return baseValue * (self.value / 100000 + 1)
+			return (self.value / 100000)
 		end
 		
 		return 0
@@ -39,11 +39,11 @@ script BaseSynergyComponent extends Component
 	@ExecSpace("ClientOnly")
 	method number CalValueInClient(number baseValue)
 		if self.type == "절대" then
-			return baseValue + self.value
+			return self.value
 		end
 		
 		if self.type == "비율" then
-			return baseValue * (self.value / 100000 + 1)
+			return (self.value / 100000 + 1)
 		end
 		
 		return 0

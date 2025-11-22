@@ -142,7 +142,7 @@ script GameManager extends Logic
 			if synergy:length() > 0 then
 				local item = synergy:Get(1)
 				log("add init point" , meso, " => ", item:CalcValue(meso))
-				meso = item:CalcValue(meso)
+				meso += item:CalcValue(meso)
 			end
 			
 			local addPointRatio = "101"
@@ -153,7 +153,7 @@ script GameManager extends Logic
 			if addPointRatioSynergy:length() > 0 then
 				local item = addPointRatioSynergy:Get(1)
 				log("add income point" , income, " => ", item:CalcValue(income))
-				income = item:CalcValue(income)
+				income += item:CalcValue(income)
 			end
 		end
 		

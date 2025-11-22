@@ -5,7 +5,7 @@ script CriticalAttack extends BaseSynergyComponent
 		math.randomseed(DateTime.UtcNow.Elapsed % 11614)
 		local random = math.random(100000)
 		
-		local baseCritial = self:CalValue(1)
+		local baseCritial = self:CalValue(1) * 100000
 		log("is critical ", baseCritial, " >= ", random)
 		if baseCritial >=  random then
 			isCritical = true
