@@ -834,10 +834,6 @@ script Unit extends Component
 			end
 		end
 		
-		if attacker.AddSummonPointAfterKill ~= nil then
-			attacker.AddSummonPointAfterKill:OnHit(attacker, damage, isCritical, attackCount)
-		end
-		
 		if attacker.CriticalAttack ~=  nil then
 			local criticalResult = attacker.CriticalAttack:OnHit(attacker, damage, isCritical, attackCount)
 			damage = criticalResult.damage
@@ -850,6 +846,10 @@ script Unit extends Component
 		
 		if self.hp <= 0 then
 			self:OnDie(attacker)
+		
+			if attacker.AddSummonPointAfterKill ~= nil then
+				attacker.AddSummonPointAfterKill:OnHit(attacker, damage, isCritical, attackCount)
+			end
 		end
 	end
 
