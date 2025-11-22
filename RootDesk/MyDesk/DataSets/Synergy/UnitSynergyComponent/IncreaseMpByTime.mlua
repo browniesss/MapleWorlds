@@ -3,7 +3,7 @@ script IncreaseMpByTime extends BaseSynergyComponent
 
 	property number ts = 0
 
-	@ExecSpace("ServerOnly")
+	@ExecSpace("ClientOnly")
 	method void OnUpdate(number delta)
 		self.ts += delta
 		if self.ts < 1 then
