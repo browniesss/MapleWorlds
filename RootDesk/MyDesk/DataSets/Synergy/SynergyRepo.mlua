@@ -39,7 +39,7 @@ script SynergyRepo extends Logic
 		end
 		
 		for k, v in pairs(self.SERVER_DATA) do
-			self.ClientData[k] = v:ENCODE()
+			self.ClientData[k] = v:SynergyList_ENCODE()
 		end
 	end
 

@@ -11,7 +11,7 @@ script SynergyItem
 
 	property number value = 0
 
-	method string ENCODE()
+	method string SynergyItem_ENCODE()
 		local item = {
 			target=self.target,
 			count=self.count,
@@ -23,7 +23,7 @@ script SynergyItem
 		return _HttpService:JSONEncode(item)
 	end
 
-	method void DECODE(string item)
+	method void SynergyItem_DECODE(string item)
 		local data = _HttpService:JSONDecode(item)
 		
 		self.target = data["target"]
