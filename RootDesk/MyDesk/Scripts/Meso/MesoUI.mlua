@@ -17,13 +17,13 @@ script MesoUI extends Component
 	@ExecSpace("Server")
 	method void UpdateCurrentMeso(integer newCurrentMeso)
 		self.currentMeso = newCurrentMeso
-		self:UpdateDisplay(string.format("%d + %d", self.currentMeso, self.mesoIncome))
+		self:UpdateDisplay(string.format("%d + %.1f", self.currentMeso, self.mesoIncome))
 	end
 
 	@ExecSpace("Server")
 	method void UpdateMesoIncome(number newIncome)
 		self.mesoIncome = newIncome
-		self:UpdateDisplay(string.format("%d + %d", self.currentMeso, self.mesoIncome))
+		self:UpdateDisplay(string.format("%d + %.1f", self.currentMeso, self.mesoIncome))
 	end
 
 end
