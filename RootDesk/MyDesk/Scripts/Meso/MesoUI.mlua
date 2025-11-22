@@ -5,7 +5,7 @@ script MesoUI extends Component
 	property integer currentMeso = 0
 
 	@Sync
-	property integer mesoIncome = 0
+	property number mesoIncome = 0
 
 	property TextComponent Display = "12c0befb-73b8-4f52-8ab8-a84a490e2e53"
 
@@ -21,7 +21,7 @@ script MesoUI extends Component
 	end
 
 	@ExecSpace("Server")
-	method void UpdateMesoIncome(integer newIncome)
+	method void UpdateMesoIncome(number newIncome)
 		self.mesoIncome = newIncome
 		self:UpdateDisplay(string.format("%d + %d", self.currentMeso, self.mesoIncome))
 	end

@@ -2,17 +2,17 @@
 script MesoWallet extends Component
 
 	@Sync
-	property integer CurrentMeso = 20
+	property number CurrentMeso = 0
 
 	@Sync
 	property MesoUI UIController = nil
 
-	method integer GetMeso()
+	method number GetMeso()
 		return self.CurrentMeso
 	end
 
 	@ExecSpace("Server")
-	method void AddMeso(integer deposit)
+	method void AddMeso(number deposit)
 		if deposit <= 0 then
 			return
 		end
@@ -23,7 +23,7 @@ script MesoWallet extends Component
 	end
 
 	@ExecSpace("Server")
-	method void UseMeso(integer withdrawal)
+	method void UseMeso(number withdrawal)
 		if withdrawal <= 0 or self.CurrentMeso < withdrawal then
 			return
 		end
@@ -33,7 +33,7 @@ script MesoWallet extends Component
 	end
 
 	@ExecSpace("Server")
-	method integer SetMeso(integer newMeso)
+	method number SetMeso(number newMeso)
 		if newMeso < 0 then
 			return -1
 		end

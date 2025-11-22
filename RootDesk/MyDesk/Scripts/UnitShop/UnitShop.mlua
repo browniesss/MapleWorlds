@@ -14,9 +14,7 @@ script UnitShop extends Component
 	property SyncTable<integer> summonDeck
 
 	method void SetShop()
-		local stageId = tostring(_GameManager.chapterIndex * 100 + _GameManager.mapIndex)
-		local stage = _StageService:GetStageById(stageId)
-		
+		local user = _UserService.LocalPlayer
 		
 		-- 1~4: 실제 사용 가능 카드
 		for slot = 1, 4 do
@@ -28,30 +26,28 @@ script UnitShop extends Component
 			local synergeDataMap = _HttpService:JSONDecode(unitData.synergyData)
 			local unitSynergyData = synergeDataMap.synergyData
 			local price = unitData.summonCost
-			if tostring(unitSynergyData.countryId) == stage.synergy_id then
-				local user = _UserService.LocalPlayer
-		        local count = user.UserSynergyComponent.countMap[tostring(stage.synergy_id)]
-				if count == nil then
-					count = 0
+		    local count = user.UserSynergyComponent.countMap[tostring(unitSynergyData.countryId)]
+			
+			if count == nil then
+				count = 0
+			end
+			
+		    local synergy = _SynergyRepo:GetSynergyList(tonumber(unitSynergyData.countryId))
+			local maxCount = 0
+		    for i = 1, synergy:length() do
+				local item = synergy:Get(i)
+				
+				if item.count > count then
+					continue
 				end
-		        local synergy = _SynergyRepo:GetSynergyList(tonumber(stage.synergy_id))
-		        
-				local maxCount = 0
-		        for i = 1, synergy:length() do
-					local item = synergy:Get(i)
-					
-					if item.count > count then
-						continue
-					end
-					
-					if item.count <= maxCount then
-						continue
-					end
-					maxCount = item.count
-					
-		            log("unit price ", price , " => ", item:CalcValue(0))
-					price = math.tointeger(unitData.summonCost + item:CalcValue(0))
-		        end
+				
+				if item.count <= maxCount then
+					continue
+				end
+				maxCount = item.count
+				
+		        log("unit price ", price , " => ", item:CalcValue(0))
+				price = math.tointeger(unitData.summonCost + item:CalcValue(0))
 		    end
 		
 		
@@ -67,31 +63,28 @@ script UnitShop extends Component
 		local synergeDataMap = _HttpService:JSONDecode(previewUD.synergyData)
 		local unitSynergyData = synergeDataMap.synergyData
 		local price = previewUD.summonCost
-		if tostring(unitSynergyData.countryId) == stage.synergy_id then
-			local user = _UserService.LocalPlayer
-		        local count = user.UserSynergyComponent.countMap[tostring(stage.synergy_id)]
-			if count == nil then
-				count = 0
-			end
+		local count = user.UserSynergyComponent.countMap[tostring(unitSynergyData.countryId)]
+		if count == nil then
+			count = 0
+		end
 		    
-			local synergy = _SynergyRepo:GetSynergyList(tonumber(stage.synergy_id))
+		local synergy = _SynergyRepo:GetSynergyList(tonumber(unitSynergyData.countryId))
 		        
-			local maxCount = 0
-		    for i = 1, synergy:length() do
-				local item = synergy:Get(i)
-				
-				if item.count > count then
-					continue
-				end
-				
-				if item.count <= maxCount then
-					continue
-				end
-				maxCount = item.count
-				
-				price = math.tointeger(previewUD.summonCost + item:CalcValue(0))
-		        log("unit price ", price , " => ", item:CalcValue(0))
-		    end
+		local maxCount = 0
+		for i = 1, synergy:length() do
+			local item = synergy:Get(i)
+			
+			if item.count > count then
+				continue
+			end
+			
+			if item.count <= maxCount then
+				continue
+			end
+			maxCount = item.count
+			
+			price = math.tointeger(previewUD.summonCost + item:CalcValue(0))
+		    log("unit price ", price , " => ", item:CalcValue(0))
 		end
 		self.shopItems[5].UnitShopItem:Initialize(previewUD, PREVIEW_SLOT, self, previewSD, price)
 	end
