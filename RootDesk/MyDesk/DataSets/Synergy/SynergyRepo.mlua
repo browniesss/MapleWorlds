@@ -39,7 +39,9 @@ script SynergyRepo extends Logic
 		end
 		
 		for k, v in pairs(self.SERVER_DATA) do
+			log("SET_CLIENT SYNERGY ", k, " ", v:SynergyList_ENCODE())
 			self.ClientData[k] = v:SynergyList_ENCODE()
+			log("SET_CLIENT SYNERGY DONE", k, " ", self.ClientData[k])
 		end
 	end
 
