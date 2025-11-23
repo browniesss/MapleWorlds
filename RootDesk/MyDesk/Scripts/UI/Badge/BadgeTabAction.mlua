@@ -1,0 +1,18 @@
+@Component
+script BadgeTabAction extends ToggleAction
+
+	property string grade = ""
+
+	method void ExecuteOnLogic(Toggle sender)
+		__base:ExecuteOnLogic(sender)
+		
+		print(string.format("[BadgeTabAction] ExecuteOnLogic: grade=%s", self.grade))
+		
+		_BadgeUIService:SwitchToGrade(self.grade)
+	end
+
+	method void ExecuteOffLogic(Toggle sender)
+		__base:ExecuteOffLogic(sender)
+	end
+
+end

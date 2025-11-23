@@ -1,0 +1,22 @@
+@Component
+script BadgeCloseButton extends Component
+
+	property any buttonHandler = nil
+
+	method void OnBeginPlay()
+		self.buttonHandler = self.Entity:ConnectEvent(ButtonClickEvent, self.OnClickButton)
+	end
+
+	method void OnClickButton(Entity entity)
+		print("[BadgeCloseButton] OnClickButton")
+		
+		_BadgeUIService:CloseUI()
+	end
+
+	method void OnDestroy()
+		if self.buttonHandler ~= nil then
+			self.Entity:DisconnectEvent(ButtonClickEvent, self.buttonHandler)
+		end
+	end
+
+end
