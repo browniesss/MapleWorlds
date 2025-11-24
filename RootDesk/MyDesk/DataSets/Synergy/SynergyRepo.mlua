@@ -132,4 +132,14 @@ script SynergyRepo extends Logic
 		return synergyList
 	end
 
+	method boolean IsSynergyActive(number id, number count)
+		local synergyList = self:GetSynergyList(id).list
+		
+		if count < synergyList[1].count then
+			return false
+		end
+		
+		return true
+	end
+
 end

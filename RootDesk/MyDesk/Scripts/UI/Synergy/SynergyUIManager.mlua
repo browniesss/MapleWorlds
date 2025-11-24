@@ -33,17 +33,37 @@ script SynergyUIManager extends Component
 		-- 시너지 아이템 추가
 		local activeSynergy = _UserService.LocalPlayer.UserSynergyComponent.countMap
 		
-		for id, count in pairs(activeSynergy) do
-			if count == 0 then
-				_EntityService:Destroy(self.SynergyItemTable[id])
-				continue
+		local keys = {}
+		for k, v in pairs(activeSynergy) do
+			table.insert(keys, {id = k, count = v})
+		end
+		
+		table.sort(keys, function(a, b) 
+			if _SynergyRepo:IsSynergyActive(a.id, a.count) == false and _SynergyRepo:IsSynergyActive(b.id, b.count) then
+				return false
+			elseif _SynergyRepo:IsSynergyActive(a.id, a.count) and _SynergyRepo:IsSynergyActive(b.id, b.count) == false then
+				return true
+			else
+				if a.count == b.count then
+					return a.id < b.id
+				else
+					return a.count > b.count
+				end
+			end
+		end)
+		
+		for i, k in ipairs(keys) do
+			if k.count ==  0 then
+				_EntityService:Destroy(self.SynergyItemTable[k.id])
+				continue		
 			end
 			
 			local synergyItem = _SpawnService:SpawnByModelId("model://b001dcdc-ff48-4c91-a232-be30a46f74ee", "SynergyItem", Vector3.zero, self.SynergyScrollView)
 			
-			synergyItem.SynergySettingItem:SetSynergyItem(self:GetSynergyDataItem(id), count)
+			synergyItem.SynergySettingItem:SetSynergyItem(self:GetSynergyDataItem(k.id), k.count)
 		
-			self.SynergyItemTable[id] = synergyItem
+			self.SynergyItemTable[k.id] = synergyItem
+			
 		end
 	end
 
