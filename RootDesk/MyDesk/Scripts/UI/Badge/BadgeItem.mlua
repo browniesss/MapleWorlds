@@ -128,7 +128,7 @@ script BadgeItem extends Component
 				end
 			end
 		end
-
+		
 		-- 보상 수령 완료 시 보상 관련 UI 숨김
 		if self.isClaimed then
 			if self.RewardIcon ~= nil then
@@ -143,6 +143,15 @@ script BadgeItem extends Component
 				self.RewardBackground.Enable = false
 				self.RewardBackground.Visible = false
 			end
+		end
+		
+		-- 보상 수령 완료 시 텍스트 영역 수정
+		if self.isClaimed then
+			self.BadgeName.UITransformComponent.RectSize = Vector2(950, 50)
+			self.BadgeName.UITransformComponent.anchoredPosition = Vector2(50, 25)
+		
+			self.BadgeDescription.UITransformComponent.RectSize = Vector2(950, 50)
+			self.BadgeDescription.UITransformComponent.anchoredPosition = Vector2(50, -33.9)
 		end
 	end
 
