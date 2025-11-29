@@ -64,15 +64,15 @@ script BadgeUIService extends Logic
 	@ExecSpace("Client")
 	method void UpdateBadgeList()
 		print(string.format("[BadgeUIService] UpdateBadgeList: currentGrade=%s", self.currentGrade))
-
+		
 		self:ClearBadgeItems()
-
+		
 		local badgeListPanel = _EntityService:GetEntityByPath("/ui/BadgeUI/BadgeListPanel")
 		if badgeListPanel == nil then
 			print("[BadgeUIService] Warning: BadgeListPanel not found")
 			return
 		end
-
+		
 		-- 현재 등급에 해당하는 배지들을 리스트로 수집
 		local badgeList = {}
 		for badgeId, status in pairs(self.badgeStatusList) do
@@ -80,7 +80,7 @@ script BadgeUIService extends Logic
 				table.insert(badgeList, {badgeId = badgeId, status = status})
 			end
 		end
-
+		
 		-- 정렬: 보상 수령 가능 -> 보상 이미 수령 -> 미달성
 		-- 같은 우선순위 내에서는 id 순으로 정렬
 		table.sort(badgeList, function(a, b)
@@ -92,12 +92,12 @@ script BadgeUIService extends Logic
 			end
 			return priorityA < priorityB
 		end)
-
+		
 		-- 정렬된 순서대로 배지 아이템 생성
 		for _, badge in ipairs(badgeList) do
 			self:CreateBadgeItem(badgeListPanel, badge.badgeId, badge.status)
 		end
-
+		
 		print(string.format("[BadgeUIService] Created %d badge items", #self.badgeItemEntities))
 	end
 
@@ -155,14 +155,14 @@ script BadgeUIService extends Logic
 	method void RequestClaimReward(string badgeId)
 		local userId = senderUserId
 		print(string.format("[BadgeUIService] RequestClaimReward: userId=%s, badgeId=%s", userId, badgeId))
-
+		
 		local success = _BadgeConditionService:ClaimBadgeReward(userId, badgeId)
 		self:SendClaimResult(userId, badgeId, success)
-
+		
 		if success then
 			local badgeStatus = _BadgeConditionService:GetUserBadgeStatus(userId)
 			self:SendBadgeListToClient(userId, badgeStatus)
-
+		
 			-- 레드닷 상태 갱신
 			local hasUnclaimed = _BadgeConditionService:HasUnclaimedRewards(userId)
 			self:SendRedDotStatus(userId, hasUnclaimed)
@@ -190,8 +190,8 @@ script BadgeUIService extends Logic
 	@ExecSpace("Client")
 	method void SendRedDotStatus(string userId, boolean hasUnclaimed)
 		print(string.format("[BadgeUIService] SendRedDotStatus: hasUnclaimed=%s", tostring(hasUnclaimed)))
-
-		local badgeOpenButton = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/TopBar/BadgeButton")
+		
+		local badgeOpenButton = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/BadgeButton")
 		if badgeOpenButton ~= nil then
 			print("[BadgeUIService] Found BadgeOpenButton entity")
 			if badgeOpenButton.BadgeOpenButton ~= nil then
@@ -201,7 +201,8 @@ script BadgeUIService extends Logic
 				print("[BadgeUIService] Warning: BadgeOpenButton component not found on entity")
 			end
 		else
-			print("[BadgeUIService] Warning: BadgeOpenButton entity not found at /ui/Lobby/BadgeOpenButton")
+			-- 게임 플레이 중에는 로비 UI가 비활성화되어 찾지 못할 수 있음 (정상 동작)
+		-- 로비로 돌아올 때 BadgeOpenButton.OnMapEnter에서 레드닷 상태를 갱신함
 		end
 	end
 
