@@ -35,7 +35,7 @@ script StageSelectorUI extends Component
 		local key = _RankingService:GetRankKeyByTable({chapter=selectChapter, stage=selectStage})
 		
 		local rankingListUI =  _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
-		rankingListUI.StageRankingListUI:InitCheckRankData(key, 0)
+		rankingListUI.StageRankingListUI:RefreshRankListItem(key)
 		
 		for i = 1, 6 do
 			local entity = _EntityService:GetEntityByPath(path .. "/SelectPanel/StageSelectScroll/Select_" .. tostring(i))
@@ -143,9 +143,9 @@ script StageSelectorUI extends Component
 			self:UpdateData(newEntity)
 		end
 		
-		local key = _RankingService:GetRankKeyByTable({chapter=newComp.selectChapter, stage=newComp.selectStage})
-		local rankingListUI =  _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
-		rankingListUI.StageRankingListUI:InitCheckRankData(key, 0)
+		--local key = _RankingService:GetRankKeyByTable({chapter=newComp.selectChapter, stage=newComp.selectStage})
+		--local rankingListUI =  _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
+		--rankingListUI.StageRankingListUI:InitCheckRankData(key, 0)
 	end
 
 end
