@@ -1,0 +1,49 @@
+@Component
+script HealItem extends DropItem
+
+	@ExecSpace("Server")
+	method void Init()
+		__base:Init()
+		self.amount = 100
+	end
+
+	@ExecSpace("Server")
+	method void EffectItem()
+		local myMonsterListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+		
+		if myMonsterListParent ~= nil then
+			local myMonsters = myMonsterListParent.Children
+		
+			for index in ipairs(myMonsters) do
+				local monster = myMonsters[index]
+		
+				if monster.Enable and monster.Unit ~= nil then
+					monster.Unit.hp += self.amount
+				end
+			end
+		end
+		
+		self:PlayHealEffect()
+		__base:EffectItem()
+	end
+
+	@ExecSpace("Client")
+	method void PlayHealEffect()
+		local myMonsterListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+		
+		if myMonsterListParent == nil then
+			return
+		end
+		
+		local myMonsters = myMonsterListParent.Children
+		
+		for index in ipairs(myMonsters) do
+			local monster = myMonsters[index]
+		
+			if monster.Enable and monster.Unit ~= nil then
+				_EffectService:PlayEffectAttached("92f5e05881614a50a58ea58b59fc7752", monster, Vector3(0, 0, 0) , 0, Vector3.one)
+			end
+		end
+	end
+
+end
