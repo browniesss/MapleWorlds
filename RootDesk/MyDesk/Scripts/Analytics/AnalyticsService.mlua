@@ -4,7 +4,7 @@ script AnalyticsService extends Logic
 	property table data = {}
 
 	@ExecSpace("ServerOnly")
-	method void SendAnalyticsLog(string userId, table logData)
+	method void SendAnalyticsLog(string userId, table logData, string endpoint)
 		if userId == nil then
 			log("invalid analytics request: userId is nil")
 			return
@@ -22,6 +22,8 @@ script AnalyticsService extends Logic
 			end
 			
 			content[key] = value
+			
+			log(key," : ", value)
 		end
 		
 		local header = {}
@@ -29,7 +31,7 @@ script AnalyticsService extends Logic
 		header[self.data.api_key]=self.data.api_secret
 		
 		
-		local res = _HttpService:PostAndWait(self:GetUrl(), _HttpService:JSONEncode(content), HttpContentType.ApplicationJson, header)
+		local res = _HttpService:PostAndWait(self:GetUrl(endpoint), _HttpService:JSONEncode(content), HttpContentType.ApplicationJson, header)
 		log(res)
 	end
 
@@ -49,8 +51,8 @@ script AnalyticsService extends Logic
 	end
 
 	@ExecSpace("ServerOnly")
-	method string GetUrl()
-		return string.format("https://%s%s", self.data.host, self.data.endpoint)
+	method string GetUrl(string endpoint)
+		return string.format("https://%s%s%s", self.data.host, self.data.endpoint, endpoint)
 	end
 
 	@ExecSpace("ServerOnly")
@@ -65,12 +67,77 @@ script AnalyticsService extends Logic
 		logData["is_clear"] = is_clear
 		
 		local id = _TimerService:SetTimerOnce(function() 
-			self:SendAnalyticsLog(userId, logData)
+			self:SendAnalyticsLog(userId, logData, "database-access")
 		end, 0)
 		
 		if id == 0 then
 			log_error("SendAnalyticsLog reservation failed.")
 		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void Login(string userId)
+		local logData = {name="actions"}
+		
+		logData["user_id"] = userId
+		logData["type"] = 0
+		
+		local id = _TimerService:SetTimerOnce(function() 
+			self:SendAnalyticsLog(userId, logData, "action")
+		end, 0)
+		
+		if id == 0 then
+			log_error("SendAnalyticsLog reservation failed.")
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void Logout(string userId)
+		local logData = {name="actions"}
+		
+		logData["user_id"] = userId
+		logData["type"] = 1
+		
+		local id = _TimerService:SetTimerOnce(function() 
+			self:SendAnalyticsLog(userId, logData, "action")
+		end, 0)
+		
+		if id == 0 then
+			log_error("SendAnalyticsLog reservation failed.")
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	@EventSender("Service", "UserService")
+	handler HandleUserEnterEvent(UserEnterEvent event)
+		self:Login(event.UserId)
+		
+	end
+
+	@ExecSpace("ServerOnly")
+	@EventSender("Service", "UserService")
+	handler HandleUserReconnectEvent(UserReconnectEvent event)
+		self:Login(event.UserId)
+		
+	end
+
+	@ExecSpace("ServerOnly")
+	@EventSender("Service", "UserService")
+	handler HandleUserLeaveEvent(UserLeaveEvent event)
+		self:Logout(event.UserId)
+	end
+
+	@ExecSpace("ServerOnly")
+	@EventSender("Service", "UserService")
+	handler HandleUserDisconnectEvent(UserDisconnectEvent event)
+		self:Logout(event.UserId)
+	end
+
+	@ExecSpace("ServerOnly")
+	@EventSender("Service", "UserService")
+	handler HandleUserKickEvent(UserKickEvent event)
+		self:Logout(event.UserId)
+		
 	end
 
 end
