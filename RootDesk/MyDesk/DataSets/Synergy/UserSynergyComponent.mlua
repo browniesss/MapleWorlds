@@ -34,7 +34,6 @@ script UserSynergyComponent extends Component
 			local item = unitSynergyData.synergyData
 			
 			for i, col in ipairs(syncCols) do
-				log(col, " " , item[col])
 				
 				if item[col] == nil then
 					continue

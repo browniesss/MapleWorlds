@@ -52,12 +52,12 @@ script RankingService extends Logic
 		local ds = _DataStorageService:GetSortableDataStorage(storageKey)
 		 
 		-- 데이터들을 정렬된 순서로 가져옵니다.
-		local errorCode, itemPages = ds:GetSortedAndWait(SortDirection.Ascending, 0, 9999999)
+		-- 30분 단위로 컷
+		local errorCode, itemPages = ds:GetSortedAndWait(SortDirection.Ascending, 0, 1800000)
 		if errorCode ~= 0 then
 			log("fetch rank code:" .. errorCode)
 			return
 		end
-		
 		local rank = 1
 		local rankList = {}
 		while true do
@@ -114,7 +114,9 @@ script RankingService extends Logic
 	@ExecSpace("ClientOnly")
 	method table GetTop3RankTable(string key)
 		local table = {}
-		
+		if self.rankList[key] == nil then
+			return table
+		end
 		for rank = 1, 4 do
 			if rank > #self.rankList[key] then
 				table[rank] = {name="NONE", score=9999999}
@@ -124,8 +126,7 @@ script RankingService extends Logic
 			table[rank] = self.rankList[key][rank]
 		end
 		
-		local thread = function () self:FETCH(key) end
-		thread()
+		_TimerService:SetTimerOnce(function () self:FETCH(key) end, 0)
 		
 		return table
 	end
@@ -133,6 +134,9 @@ script RankingService extends Logic
 	@ExecSpace("ClientOnly")
 	method table GetTop50RankTable(string key)
 		local table = {}
+		if self.rankList[key] == nil then
+			return table
+		end
 		
 		for rank = 1, 50 do
 			if rank > #self.rankList[key] then
@@ -142,8 +146,7 @@ script RankingService extends Logic
 			table[rank] = self.rankList[key][rank]
 		end
 		
-		local thread = function () self:FETCH(key) end
-		thread()
+		_TimerService:SetTimerOnce(function () self:FETCH(key) end, 0)
 		
 		return table
 	end
@@ -179,8 +182,8 @@ script RankingService extends Logic
 			
 			
 			local key = _RankingService:GetRankKeyByTable({chapter=chapter, stage=stage})
-			local thread = function () self:FETCH(key) end
-			thread()
+			self.rankList[key] = {}
+			_TimerService:SetTimerOnce(function () self:FETCH(key) end, 0)
 		end
 	end
 
