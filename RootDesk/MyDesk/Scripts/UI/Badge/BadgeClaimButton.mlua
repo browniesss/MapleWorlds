@@ -1,0 +1,17 @@
+@Component
+script BadgeClaimButton extends Component
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		local badgeItem = self.Entity.Parent.BadgeItem
+		if badgeItem ~= nil then
+			print(string.format("[BadgeClaimButton] Clicked, badgeId=%s", badgeItem.badgeId))
+			if badgeItem.isAcquired and not badgeItem.isClaimed then
+				_BadgeUIService:RequestClaimReward(badgeItem.badgeId)
+			end
+		else
+			print("[BadgeClaimButton] Warning: BadgeItem component not found on parent")
+		end
+	end
+
+end

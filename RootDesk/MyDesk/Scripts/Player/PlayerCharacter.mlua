@@ -55,14 +55,14 @@ script PlayerCharacter extends Component
 		if enteredMap.Name == "LobbyScene" then
 			self.Entity.Visible = false
 		end
-		
+
 		local isTermAgree = _TermService:LOAD(self.Entity.PlayerComponent.UserId)
 		local isTutorial = _TutorialService:LOAD(self.Entity.PlayerComponent.UserId)
-		
+
 		if isTermAgree == 0 then
 			_TermService:AgreePopupOn()
 		end
-		
+
 		if isTutorial == 0 then
 			_TutorialService:StartTutorial(1)
 			_TutorialService:SAVE(self.Entity.PlayerComponent.UserId)

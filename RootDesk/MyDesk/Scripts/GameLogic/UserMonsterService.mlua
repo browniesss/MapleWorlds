@@ -180,13 +180,16 @@ script UserMonsterService extends Logic
 		-- Sender: UserService
 		-- Space: Server
 		---------------------------------------------------------
-		
+
 		-- Parameters
 		-- local ProfileCode = event.ProfileCode
 		-- local UserId = event.UserId
 		---------------------------------------------------------
-		
+
 		self:INIT(event.UserId)
+
+		-- 유저 몬스터 데이터 로드 후 배지 체크 (기존 유저 배지 자동 지급)
+		_BadgeConditionService:CheckAllBadgesOnLogin(event.UserId)
 	end
 
 	@EventSender("Service", "UserService")
