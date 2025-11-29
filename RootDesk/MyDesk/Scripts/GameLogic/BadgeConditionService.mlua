@@ -38,10 +38,10 @@ script BadgeConditionService extends Logic
 			condition["stage"] = (stageStr ~= "-" and stageStr ~= "") and tonumber(stageStr) or nil
 			condition["unit_id"] = tostring(dataSet:GetCell(i, "unit_id"))
 			condition["rank"] = (rankStr ~= "-" and rankStr ~= "") and tonumber(rankStr) or nil
-			condition["enabled"] = tostring(dataSet:GetCell(i, "enabled")) == "true"
+			condition["enabled"] = tostring(dataSet:GetCell(i, "enabled")) == "TRUE"
 			condition["reward_type"] = tostring(dataSet:GetCell(i, "reward_type"))
 			condition["reward_amount"] = tonumber(dataSet:GetCell(i, "reward_amount"))
-
+		
 			self.conditions[condition.badge_id] = condition
 		
 			print(string.format("[BadgeConditionService] Loaded badge: %s (Type: %s)",
@@ -91,7 +91,7 @@ script BadgeConditionService extends Logic
 			else
 				print(string.format("[Badge] ✗ Failed to award '%s' to user %s (but saved to DataStorage)", badgeId, userId))
 			end
-
+		
 			-- 배지 획득 시 레드닷 상태 갱신
 			local hasUnclaimed = self:HasUnclaimedRewards(userId)
 			_BadgeUIService:SendRedDotStatus(userId, hasUnclaimed)
@@ -105,7 +105,6 @@ script BadgeConditionService extends Logic
 		print("[Badge] CheckChapterClear: PASS - Called from CheckChapterBadges with matching chapter")
 		return true
 	end
-
 
 	@ExecSpace("Server")
 	method boolean CheckPickupChar(string userId, table condition)
@@ -166,14 +165,14 @@ script BadgeConditionService extends Logic
 	@ExecSpace("Server")
 	method table GetUserBadgeStatus(string userId)
 		print(string.format("[Badge] GetUserBadgeStatus: userId=%s", userId))
-
+		
 		local badgeStatus = {}
-
+		
 		for badgeId, condition in pairs(self.conditions) do
 			if condition.enabled then
 				local hasBadge = self:IsBadgeAcquired(userId, badgeId)
 				local claimed = self:IsRewardClaimed(userId, badgeId)
-
+		
 				badgeStatus[badgeId] = {
 					acquired = hasBadge,
 					claimed = claimed,
@@ -181,7 +180,7 @@ script BadgeConditionService extends Logic
 				}
 			end
 		end
-
+		
 		return badgeStatus
 	end
 
@@ -189,11 +188,11 @@ script BadgeConditionService extends Logic
 	method boolean IsRewardClaimed(string userId, string badgeId)
 		local ds = _DataStorageService:GetUserDataStorage(userId)
 		local errorCode, claimed = ds:GetAndWait("BADGE_REWARD_" .. badgeId)
-
+		
 		if errorCode == 0 and claimed == "true" then
 			return true
 		end
-
+		
 		return false
 	end
 
@@ -201,7 +200,7 @@ script BadgeConditionService extends Logic
 	method void SetRewardClaimed(string userId, string badgeId)
 		local ds = _DataStorageService:GetUserDataStorage(userId)
 		ds:SetAndWait("BADGE_REWARD_" .. badgeId, "true")
-
+		
 		print(string.format("[Badge] SetRewardClaimed: userId=%s, badgeId=%s", userId, badgeId))
 	end
 
@@ -210,14 +209,14 @@ script BadgeConditionService extends Logic
 		-- DataStorage 먼저 확인 (Maker 환경에서는 BadgeService가 영구 저장 안됨)
 		local ds = _DataStorageService:GetUserDataStorage(userId)
 		local errorCode, acquired = ds:GetAndWait("BADGE_ACQUIRED_" .. badgeId)
-
+		
 		print(string.format("[Badge] IsBadgeAcquired: userId=%s, badgeId=%s, errorCode=%s, acquired=%s",
 			userId, badgeId, tostring(errorCode), tostring(acquired)))
-
+		
 		if errorCode == 0 and acquired == "true" then
 			return true
 		end
-
+		
 		-- 네이티브 BadgeService도 확인 (배포 환경 대응)
 		local hasBadge = _BadgeService:UserHasBadgeAndWait(userId, badgeId)
 		print(string.format("[Badge] IsBadgeAcquired (native): badgeId=%s, hasBadge=%s", badgeId, tostring(hasBadge)))
@@ -226,7 +225,7 @@ script BadgeConditionService extends Logic
 			self:SetBadgeAcquired(userId, badgeId)
 			return true
 		end
-
+		
 		return false
 	end
 
@@ -234,32 +233,32 @@ script BadgeConditionService extends Logic
 	method void SetBadgeAcquired(string userId, string badgeId)
 		local ds = _DataStorageService:GetUserDataStorage(userId)
 		ds:SetAndWait("BADGE_ACQUIRED_" .. badgeId, "true")
-
+		
 		print(string.format("[Badge] SetBadgeAcquired: userId=%s, badgeId=%s", userId, badgeId))
 	end
 
 	@ExecSpace("Server")
 	method boolean ClaimBadgeReward(string userId, string badgeId)
 		print(string.format("[Badge] ClaimBadgeReward: userId=%s, badgeId=%s", userId, badgeId))
-
+		
 		local condition = self.conditions[badgeId]
 		if condition == nil then
 			print(string.format("[Badge] Condition not found for badgeId: %s", badgeId))
 			return false
 		end
-
+		
 		local hasBadge = self:IsBadgeAcquired(userId, badgeId)
 		if not hasBadge then
 			print(string.format("[Badge] User does not have badge: %s", badgeId))
 			return false
 		end
-
+		
 		local claimed = self:IsRewardClaimed(userId, badgeId)
 		if claimed then
 			print(string.format("[Badge] Reward already claimed for badge: %s", badgeId))
 			return false
 		end
-
+		
 		if condition.reward_type == "FirstCoin" then
 			_BillingService:AddFirstFreeCoin(userId, condition.reward_amount)
 			print(string.format("[Badge] Added FirstCoin: %d", condition.reward_amount))
@@ -267,10 +266,10 @@ script BadgeConditionService extends Logic
 			_BillingService:AddSecondFreeCoin(userId, condition.reward_amount)
 			print(string.format("[Badge] Added SecondCoin: %d", condition.reward_amount))
 		end
-
+		
 		self:SetRewardClaimed(userId, badgeId)
 		print(string.format("[Badge] ✓ Claimed reward for badge: %s", badgeId))
-
+		
 		return true
 	end
 
@@ -280,20 +279,20 @@ script BadgeConditionService extends Logic
 			if condition.enabled then
 				local hasBadge = self:IsBadgeAcquired(userId, badgeId)
 				local claimed = self:IsRewardClaimed(userId, badgeId)
-
+		
 				if hasBadge and not claimed then
 					return true
 				end
 			end
 		end
-
+		
 		return false
 	end
 
 	@ExecSpace("Server")
 	method void CheckAllBadgesOnLogin(string userId)
 		print(string.format("[Badge] CheckAllBadgesOnLogin: userId=%s", userId))
-
+		
 		-- 1. 챕터 클리어 배지 체크 (모든 클리어한 챕터)
 		local player = _UserService:GetUserEntityByUserId(userId)
 		if player ~= nil and player.UserStage ~= nil then
@@ -303,13 +302,13 @@ script BadgeConditionService extends Logic
 				self:CheckChapterBadges(userId, chapter)
 			end
 		end
-
+		
 		-- 2. 픽업 캐릭터 배지 체크 (보유한 모든 캐릭터)
 		-- _UserMonsterService:GetList()는 ClientOnly이므로 userMonsterDict 직접 순회
 		for unitId, json in pairs(_UserMonsterService.userMonsterDict) do
 			self:CheckPickupBadges(userId, unitId)
 		end
-
+		
 		print("[Badge] CheckAllBadgesOnLogin completed")
 	end
 

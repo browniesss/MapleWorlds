@@ -82,9 +82,14 @@ script BadgeUIService extends Logic
 		end
 
 		-- 정렬: 보상 수령 가능 -> 보상 이미 수령 -> 미달성
+		-- 같은 우선순위 내에서는 id 순으로 정렬
 		table.sort(badgeList, function(a, b)
 			local priorityA = self:GetBadgeSortPriority(a.status)
 			local priorityB = self:GetBadgeSortPriority(b.status)
+			-- 같은 우선순위면 id로 2차 정렬
+			if priorityA == priorityB then
+				return a.status.condition.id < b.status.condition.id
+			end
 			return priorityA < priorityB
 		end)
 

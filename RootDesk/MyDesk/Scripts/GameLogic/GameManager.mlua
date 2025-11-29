@@ -579,9 +579,9 @@ script GameManager extends Logic
 		-- Parameters
 		local key = event.key
 		---------------------------------------------------------
-		if key == KeyboardKey.C and Environment:IsMakerPlay() then
-			self:OpenSkillSelect()
-		end
+		-- if key == KeyboardKey.C and Environment:IsMakerPlay() then
+		-- 	self:OpenSkillSelect()
+		-- end
 		
 		if event.key == KeyboardKey.G and Environment:IsMakerPlay() then
 			self:StageClear()
