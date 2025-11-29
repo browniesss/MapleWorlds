@@ -134,9 +134,9 @@ script GameManager extends Logic
 		if senderUserId ~= nil then
 			local user = _UserService:GetUserEntityByUserId(senderUserId)
 			
-			local addInitPoint = "5"
+			local addInitPoint = 5
 			local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(addInitPoint)
-			local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(addInitPoint, count)
+			local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(tostring(addInitPoint), count)
 				log(addInitPoint, " => ", count)
 			
 			if synergy:length() > 0 then
@@ -145,9 +145,9 @@ script GameManager extends Logic
 				meso += item:CalcValue(meso)
 			end
 			
-			local addPointRatio = "101"
+			local addPointRatio = 101
 			local addPointRatioCount = user.UserSynergyComponent:GET_SYNERGY_COUNT(addPointRatio)
-			local addPointRatioSynergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(addPointRatio, addPointRatioCount)
+			local addPointRatioSynergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(tostring(addPointRatio), addPointRatioCount)
 			log(addPointRatio, " => ", addPointRatioCount)
 			
 			if addPointRatioSynergy:length() > 0 then
@@ -330,7 +330,7 @@ script GameManager extends Logic
 		end, 1.0, 0)
 	end
 
-	@ExecSpace("Client")
+	@ExecSpace("Server")
 	method void ClearTimer()
 		self.playStartTs = 0
 		_TimerService:ClearTimer(self.timer)
@@ -370,17 +370,11 @@ script GameManager extends Logic
 
 	@ExecSpace("Client")
 	method void StageClear()
-		local playTime = DateTime.UtcNow.Elapsed - self.playStartTs 
-		local userName = _UserService.LocalPlayer.PlayerComponent.Nickname
 		local userStage = _UserService.LocalPlayer.UserStage
 		local userAvatar = _EntityService:GetEntityByPath("/ui/GameClearUI/Frame/UserAvatar/UnitAvartar")
 		local clearRewardUI = _EntityService:GetEntityByPath("/ui/GameClearUI/Frame/ClearReward")
 		
 		self:Log_NormalStageClear()
-		
-		local key = _RankingService:GetRankKeyByTable({chapter=userStage.selectChapter, stage=userStage.selectStage})
-		_RankingService:AddPoint(key, userName, playTime)
-		self.rankUI:UpdateRankData(userName, playTime, key)
 		
 		local isFirstClear = false
 		local clearedChapter = userStage.selectChapter
@@ -408,6 +402,14 @@ script GameManager extends Logic
 	method void StageClearServer(boolean isFirstClear, integer clearedChapter, integer clearedStage)
 		print(string.format("[GameManager] StageClearServer: userId=%s, isFirstClear=%s, clearedChapter=%s, clearedStage=%s",
 			senderUserId, tostring(isFirstClear), tostring(clearedChapter), tostring(clearedStage)))
+		
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		local userName = user.PlayerComponent.Nickname
+		local playTime = DateTime.UtcNow.Elapsed - self.playStartTs 
+		local key = _RankingService:GetRankKeyByTable({chapter=clearedChapter, stage=clearedStage})
+		_RankingService:AddPoint(key, userName, playTime)
+		
+		self:UpdateRankData(userName, playTime, key, senderUserId)
 		
 		if isFirstClear == false then
 			_BillingService:AddSecondFreeCoin(senderUserId, 100)
@@ -567,6 +569,11 @@ script GameManager extends Logic
 		local userDeck = userEntity.UserDeck.userDeck
 		local userSkill = userEntity.UserSkillDeck.userSkillDeck
 		_AnalyticsService:GameEnd(senderUserId, playTime, selectStageId, userDeck, userSkill, false)
+	end
+
+	@ExecSpace("Client")
+	method void UpdateRankData(string userName, integer playTime, string key)
+		self.rankUI:UpdateRankData(userName, playTime, key)
 	end
 
 	@EventSender("Service", "InputService")
