@@ -30,9 +30,14 @@ script StageRankingListUI extends Component
 		local currentRankTable = _RankingService:GetTop50RankTable(key)
 		currentRankTable = _RankingService:AddUserScore(key, userName, currentRankTable)
 		
+		local userScore = _RankingService.userPointMap[key]
+		if userScore == nil then
+			userScore = 999999
+		end
+		
 		local userRankItem = {
 			name=userName,
-			score=999999,
+			score=userScore,
 			isUser=true
 		}
 		local userRank = "50+"

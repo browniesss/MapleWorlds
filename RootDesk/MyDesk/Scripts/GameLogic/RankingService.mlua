@@ -24,6 +24,7 @@ script RankingService extends Logic
 		end
 		
 		if lastScore <= userScore then
+			self:UpdaetUserPointMap(storageKey, userScore)
 			return
 		end
 		
@@ -235,8 +236,7 @@ script RankingService extends Logic
 			local key = _RankingService:GetRankKeyByTable({chapter=chapter, stage=stage})
 			self.userPointMap[key] = 999999
 			
-			local thread = function () self:FetchUserPoint(key, userName) end
-			thread()
+			_TimerService:SetTimerOnce(function () self:FetchUserPoint(key, userName) end, 0)
 		end
 	end
 
