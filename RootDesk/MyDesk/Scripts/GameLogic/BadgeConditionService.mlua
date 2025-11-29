@@ -83,12 +83,16 @@ script BadgeConditionService extends Logic
 		if passed then
 			log("[Badge] Attempting to award badge:", badgeId)
 			local success = _BadgeService:AwardBadgeAndWait(userId, badgeId)
-			-- DataStorage에도 백업 저장 (Maker 환경 대응)
-			self:SetBadgeAcquired(userId, badgeId)
+
+			if Environment:IsMakerPlay() then
+				-- Maker 환경에서는 BadgeService가 영구 저장 안되므로 DataStorage에 백업 저장
+				self:SetBadgeAcquired(userId, badgeId)
+			end
+
 			if success then
 				log("[Badge] Awarded", badgeId, "to user", userId)
 			else
-				log("[Badge] Failed to award", badgeId, "to user", userId, "(but saved to DataStorage)")
+				log("[Badge] Failed to award", badgeId, "to user", userId)
 			end
 
 			-- 배지 획득 시 레드닷 상태 갱신
@@ -205,34 +209,36 @@ script BadgeConditionService extends Logic
 
 	@ExecSpace("Server")
 	method boolean IsBadgeAcquired(string userId, string badgeId)
-		-- DataStorage 먼저 확인 (Maker 환경에서는 BadgeService가 영구 저장 안됨)
-		local ds = _DataStorageService:GetUserDataStorage(userId)
-		local errorCode, acquired = ds:GetAndWait("BADGE_ACQUIRED_" .. badgeId)
+		if Environment:IsMakerPlay() then
+			-- Maker 환경에서는 DataStorage 확인
+			local ds = _DataStorageService:GetUserDataStorage(userId)
+			local errorCode, acquired = ds:GetAndWait("BADGE_ACQUIRED_" .. badgeId)
 
-		log("[Badge] IsBadgeAcquired: userId=", userId, "badgeId=", badgeId, "errorCode=", errorCode, "acquired=", acquired)
+			log("[Badge] IsBadgeAcquired (Maker): userId=", userId, "badgeId=", badgeId, "acquired=", acquired)
 
-		if errorCode == 0 and acquired == "true" then
-			return true
+			if errorCode == 0 and acquired == "true" then
+				return true
+			end
+			return false
 		end
 
-		-- 네이티브 BadgeService도 확인 (배포 환경 대응)
+		-- 라이브 환경에서는 네이티브 BadgeService만 확인
 		local hasBadge = _BadgeService:UserHasBadgeAndWait(userId, badgeId)
-		log("[Badge] IsBadgeAcquired (native): badgeId=", badgeId, "hasBadge=", hasBadge)
-		if hasBadge then
-			-- 네이티브에 있으면 DataStorage에도 마이그레이션 저장
-			self:SetBadgeAcquired(userId, badgeId)
-			return true
-		end
-
-		return false
+		log("[Badge] IsBadgeAcquired (Live): badgeId=", badgeId, "hasBadge=", hasBadge)
+		return hasBadge
 	end
 
 	@ExecSpace("Server")
 	method void SetBadgeAcquired(string userId, string badgeId)
+		-- Maker 환경에서만 DataStorage에 저장
+		if not Environment:IsMakerPlay() then
+			return
+		end
+
 		local ds = _DataStorageService:GetUserDataStorage(userId)
 		ds:SetAndWait("BADGE_ACQUIRED_" .. badgeId, "true")
 
-		log("[Badge] SetBadgeAcquired: userId=", userId, "badgeId=", badgeId)
+		log("[Badge] SetBadgeAcquired (Maker): userId=", userId, "badgeId=", badgeId)
 	end
 
 	@ExecSpace("Server")
