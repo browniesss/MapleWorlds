@@ -1,7 +1,7 @@
 {
   "Id": "",
   "GameId": "",
-  "EntryKey": "model://9831318f-894a-429a-9951-144ccd9eddc9",
+  "EntryKey": "model://a71e2a9e-5704-4480-8db5-227fadd6fe09",
   "ContentType": "x-mod/model",
   "Content": "",
   "Usage": 0,
@@ -14,16 +14,16 @@
     "Use": "Json",
     "Json": {
       "Version": 1,
-      "Name": "IngameCoinItem_Prefab",
+      "Name": "MoveSpeedUpItem_Prefab",
       "BaseModelId": null,
-      "Id": "9831318f-894a-429a-9951-144ccd9eddc9",
+      "Id": "a71e2a9e-5704-4480-8db5-227fadd6fe09",
       "Components": [
         "MOD.Core.TransformComponent",
         "MOD.Core.SpriteRendererComponent",
         "MOD.Core.RigidbodyComponent",
         "MOD.Core.TriggerComponent",
         "MOD.Core.TweenLineComponent",
-        "script.IngameCoinItem"
+        "script.MoveSpeedUpItem"
       ],
       "Properties": [],
       "Values": [
@@ -119,7 +119,7 @@
             "$type": "MODNativeType",
             "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
           },
-          "Value": "b034e14a4c154ad4bfadd7590953d926"
+          "Value": "8a668406667d48e89c0b29755bd3ebed"
         },
         {
           "TargetType": "MOD.Core.SpriteRendererComponent",
@@ -264,33 +264,6 @@
           "Value": true
         },
         {
-          "TargetType": "script.IngameCoinItem",
-          "Name": "CurrentSpeed",
-          "ValueType": {
-            "$type": "MODNativeType",
-            "type": "System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
-          },
-          "Value": 5.0
-        },
-        {
-          "TargetType": "script.IngameCoinItem",
-          "Name": "Acceleration",
-          "ValueType": {
-            "$type": "MODNativeType",
-            "type": "System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
-          },
-          "Value": 80.0
-        },
-        {
-          "TargetType": "script.IngameCoinItem",
-          "Name": "MaxSpeed",
-          "ValueType": {
-            "$type": "MODNativeType",
-            "type": "System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
-          },
-          "Value": 50.0
-        },
-        {
           "TargetType": "MOD.Core.RigidbodyComponent",
           "Name": "Mass",
           "ValueType": {
@@ -300,7 +273,7 @@
           "Value": 5.0
         },
         {
-          "TargetType": "script.IngameCoinItem",
+          "TargetType": "script.MoveSpeedUpItem",
           "Name": "Enable",
           "ValueType": {
             "$type": "MODNativeType",
@@ -312,14 +285,14 @@
       "EventLinks": [],
       "Children": [
         {
-          "Id": "69fbdf25-37a9-4779-9577-aaf7d461da6c",
-          "ParentId": "9831318f-894a-429a-9951-144ccd9eddc9",
+          "Id": "2573671a-bcc1-4e85-97b3-a19ab25b39e8",
+          "ParentId": "a71e2a9e-5704-4480-8db5-227fadd6fe09",
           "Name": "EffectEntity",
           "Model": {
             "Version": 1,
             "Name": "EffectEntity",
             "BaseModelId": null,
-            "Id": "69fbdf25-37a9-4779-9577-aaf7d461da6c",
+            "Id": "2573671a-bcc1-4e85-97b3-a19ab25b39e8",
             "Components": [
               "MOD.Core.TransformComponent",
               "MOD.Core.SpriteRendererComponent"
@@ -335,7 +308,7 @@
                 },
                 "Value": {
                   "$type": "MOD.Core.MODVector3, MOD.Core",
-                  "x": 0.115,
+                  "x": 0.1591,
                   "y": 0.0104,
                   "z": 0.0001
                 }

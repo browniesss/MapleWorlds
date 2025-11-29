@@ -19,7 +19,7 @@ script DropItem extends Component
 		end
 		
 		local coinPos   = self.Entity.TransformComponent.WorldPosition
-		local targetPos = self.Player.TransformComponent.WorldPosition
+		local targetPos = self.Player.TransformComponent.WorldPosition + (Vector3.up * 0.3)
 		
 		-- 2D 평면 거리 계산 (x, y만 사용)
 		local dx = targetPos.x - coinPos.x
@@ -79,6 +79,7 @@ script DropItem extends Component
 			return
 		end
 		
+		_CustomSoundService:PlaySoundAtPos("acf66093cbbe421398da26a335f9616e", self.Entity.TransformComponent.WorldPosition, self.Entity)
 		self.Player = event.TriggerBodyEntity
 	end
 

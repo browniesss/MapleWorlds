@@ -1,7 +1,7 @@
 {
   "Id": "",
   "GameId": "",
-  "EntryKey": "model://9831318f-894a-429a-9951-144ccd9eddc9",
+  "EntryKey": "model://350812af-35ac-4a61-96a0-655220375210",
   "ContentType": "x-mod/model",
   "Content": "",
   "Usage": 0,
@@ -14,16 +14,16 @@
     "Use": "Json",
     "Json": {
       "Version": 1,
-      "Name": "IngameCoinItem_Prefab",
+      "Name": "HealItem_Prefab",
       "BaseModelId": null,
-      "Id": "9831318f-894a-429a-9951-144ccd9eddc9",
+      "Id": "350812af-35ac-4a61-96a0-655220375210",
       "Components": [
         "MOD.Core.TransformComponent",
         "MOD.Core.SpriteRendererComponent",
         "MOD.Core.RigidbodyComponent",
         "MOD.Core.TriggerComponent",
         "MOD.Core.TweenLineComponent",
-        "script.IngameCoinItem"
+        "script.HealItem"
       ],
       "Properties": [],
       "Values": [
@@ -119,7 +119,7 @@
             "$type": "MODNativeType",
             "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
           },
-          "Value": "b034e14a4c154ad4bfadd7590953d926"
+          "Value": "323920d2805d4ec1aa85eca9e3e1cab2"
         },
         {
           "TargetType": "MOD.Core.SpriteRendererComponent",
@@ -264,33 +264,6 @@
           "Value": true
         },
         {
-          "TargetType": "script.IngameCoinItem",
-          "Name": "CurrentSpeed",
-          "ValueType": {
-            "$type": "MODNativeType",
-            "type": "System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
-          },
-          "Value": 5.0
-        },
-        {
-          "TargetType": "script.IngameCoinItem",
-          "Name": "Acceleration",
-          "ValueType": {
-            "$type": "MODNativeType",
-            "type": "System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
-          },
-          "Value": 80.0
-        },
-        {
-          "TargetType": "script.IngameCoinItem",
-          "Name": "MaxSpeed",
-          "ValueType": {
-            "$type": "MODNativeType",
-            "type": "System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
-          },
-          "Value": 50.0
-        },
-        {
           "TargetType": "MOD.Core.RigidbodyComponent",
           "Name": "Mass",
           "ValueType": {
@@ -300,7 +273,7 @@
           "Value": 5.0
         },
         {
-          "TargetType": "script.IngameCoinItem",
+          "TargetType": "script.HealItem",
           "Name": "Enable",
           "ValueType": {
             "$type": "MODNativeType",
@@ -312,14 +285,14 @@
       "EventLinks": [],
       "Children": [
         {
-          "Id": "69fbdf25-37a9-4779-9577-aaf7d461da6c",
-          "ParentId": "9831318f-894a-429a-9951-144ccd9eddc9",
+          "Id": "2b0f9074-4ab9-4c95-9935-5c7de8e1fdd8",
+          "ParentId": "350812af-35ac-4a61-96a0-655220375210",
           "Name": "EffectEntity",
           "Model": {
             "Version": 1,
             "Name": "EffectEntity",
             "BaseModelId": null,
-            "Id": "69fbdf25-37a9-4779-9577-aaf7d461da6c",
+            "Id": "2b0f9074-4ab9-4c95-9935-5c7de8e1fdd8",
             "Components": [
               "MOD.Core.TransformComponent",
               "MOD.Core.SpriteRendererComponent"
@@ -335,7 +308,7 @@
                 },
                 "Value": {
                   "$type": "MOD.Core.MODVector3, MOD.Core",
-                  "x": 0.115,
+                  "x": 0.178,
                   "y": 0.0104,
                   "z": 0.0001
                 }
@@ -391,6 +364,15 @@
               },
               {
                 "TargetType": "MOD.Core.SpriteRendererComponent",
+                "Name": "EndFrameIndex",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": 2147483647
+              },
+              {
+                "TargetType": "MOD.Core.SpriteRendererComponent",
                 "Name": "OrderInLayer",
                 "ValueType": {
                   "$type": "MODNativeType",
@@ -433,6 +415,15 @@
                   "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
                 },
                 "Value": "4a89c1ad05704ed5a50fca6cbc27f674"
+              },
+              {
+                "TargetType": "MOD.Core.SpriteRendererComponent",
+                "Name": "StartFrameIndex",
+                "ValueType": {
+                  "$type": "MODNativeType",
+                  "type": "System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                },
+                "Value": 0
               },
               {
                 "TargetType": "MOD.Core.SpriteRendererComponent",

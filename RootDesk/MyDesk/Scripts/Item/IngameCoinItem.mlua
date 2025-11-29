@@ -4,7 +4,7 @@ script IngameCoinItem extends DropItem
 	@ExecSpace("Server")
 	method void Init()
 		__base:Init()
-		self.amount = math.random(5, 15)
+		self.amount = 1
 	end
 
 	@ExecSpace("Server")

@@ -1,0 +1,49 @@
+@Component
+script MoveSpeedUpItem extends DropItem
+
+	@ExecSpace("Server")
+	method void Init()
+		__base:Init()
+		self.amount = 0.5
+	end
+
+	@ExecSpace("Server")
+	method void EffectItem()
+		local myMonsterListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+		
+		if myMonsterListParent ~= nil then
+			local myMonsters = myMonsterListParent.Children
+		
+			for index in ipairs(myMonsters) do
+				local monster = myMonsters[index]
+		
+				if monster.Enable and monster.Unit ~= nil then
+					monster.Unit:GetBuff(_eBuffType.MoveSpeedBuff, self.amount, 2)
+				end
+			end
+		end
+		
+		self:PlayBuffEffect()
+		__base:EffectItem()
+	end
+
+	@ExecSpace("Client")
+	method void PlayBuffEffect()
+		local myMonsterListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+		
+		if myMonsterListParent == nil then
+			return
+		end
+		
+		local myMonsters = myMonsterListParent.Children
+		
+		for index in ipairs(myMonsters) do
+			local monster = myMonsters[index]
+		
+			if monster.Enable and monster.Unit ~= nil then
+				_EffectService:PlayEffectAttached("288b2ca13ae34efc987c49ac0bb22f79", monster, Vector3(0, 0, 0) , 0, Vector3.one)
+			end
+		end
+	end
+
+end

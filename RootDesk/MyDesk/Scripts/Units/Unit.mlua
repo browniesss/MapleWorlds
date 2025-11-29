@@ -885,12 +885,12 @@ script Unit extends Component
 		
 		self:DestroyProjectile()
 		self:ClearAttackerInfo()
-
+		
 		-- 적 유닛이 죽으면 아이템 드롭
 		if self.isEnemy then
 			self:DropItem(self.Entity.TransformComponent.WorldPosition)
 		end
-
+		
 		-- 죽는 애니메이션이 없는 경우 직접 처리
 		if self.dieAnimationPlayingTime == 0 then
 			self:DestroyAction()
@@ -1149,9 +1149,28 @@ script Unit extends Component
 
 	@ExecSpace("Server")
 	method void DropItem(Vector3 dropPos)
+		-- 10% 확률로 아이템 드롭
+		local dropChance = math.random(1, 100)
+		if dropChance > 10 then
+			return
+		end
+		
+		-- 아이템 종류 선택 (60%, 20%, 10%, 10%)
+		local itemChance = math.random(1, 100)
+		local itemModelId = ""
+		
+		if itemChance <= 60 then
+			itemModelId = "model://9831318f-894a-429a-9951-144ccd9eddc9"
+		elseif itemChance <= 80 then
+			itemModelId = "model://350812af-35ac-4a61-96a0-655220375210"
+		elseif itemChance <= 90 then
+			itemModelId = "model://a71e2a9e-5704-4480-8db5-227fadd6fe09"
+		else
+			itemModelId = "model://1fd8ca34-b28b-4e5f-8bde-acaac8f8dfa3"
+		end
+		
 		local projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
-		local item = _SpawnService:SpawnByModelId("model://9831318f-894a-429a-9951-144ccd9eddc9", "item",
-			dropPos, projectileParent)
+		local item = _SpawnService:SpawnByModelId(itemModelId, "item", dropPos, projectileParent)
 		item.DropItem:Init()
 	end
 
@@ -1161,7 +1180,7 @@ script Unit extends Component
 			local destroyFunction = function()
 				self.Entity:Destroy()
 			end
-
+		
 			_TimerService:SetTimerOnce(destroyFunction, 5)
 		else
 			local spriteRenderer = self.Entity.SpriteRendererComponent
@@ -1173,20 +1192,20 @@ script Unit extends Component
 			    spriteRenderer.Color.a = tweenValue
 			end
 			local dieAlphaTweenTime = 0.5
-
+		
 			if self.dieAnimationPlayingTime > 0 then
 				dieAlphaTweenTime = self.dieAnimationPlayingTime
 			end
-
+		
 			tween = _TweenLogic:MakeTween(spriteRenderer.Color.a, 0, dieAlphaTweenTime * 0.5, EaseType.Linear, tweenAlpha)
 			tween.LoopCount = 0
 			tween.AutoDestroy = false
 			tween:Play()
-
+		
 			local destroyFunction = function()
 				self.Entity:Destroy()
 			end
-
+		
 			_TimerService:SetTimerOnce(destroyFunction, dieAlphaTweenTime * 0.5)
 		end
 	end
