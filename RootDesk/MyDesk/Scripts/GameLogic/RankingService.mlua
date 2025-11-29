@@ -52,8 +52,7 @@ script RankingService extends Logic
 		local ds = _DataStorageService:GetSortableDataStorage(storageKey)
 		 
 		-- 데이터들을 정렬된 순서로 가져옵니다.
-		-- 30분 단위로 컷
-		local errorCode, itemPages = ds:GetSortedAndWait(SortDirection.Ascending, 0, 1800000)
+		local errorCode, itemPages = ds:GetSortedAndWait(SortDirection.Ascending, 0, 9999999)
 		if errorCode ~= 0 then
 			log("fetch rank code:" .. errorCode)
 			return
