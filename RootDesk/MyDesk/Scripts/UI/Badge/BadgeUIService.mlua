@@ -1,0 +1,217 @@
+@Logic
+script BadgeUIService extends Logic
+
+	property Entity BadgeUI = nil
+
+	property table badgeStatusList = {}
+
+	property string currentGrade = "Normal"
+
+	property table badgeItemEntities = {}
+
+	property string badgeItemModelId = "model://e8f6440b-6d10-481d-88da-04bbb1c58420"
+
+	@ExecSpace("Client")
+	method void OnBeginPlay()
+		self.BadgeUI = _EntityService:GetEntityByPath("/ui/BadgeUI")
+		print("[BadgeUIService] Initialized")
+	end
+
+	@ExecSpace("Client")
+	method void OpenUI()
+		print("[BadgeUIService] OpenUI called")
+		
+		if self.BadgeUI == nil then
+			self.BadgeUI = _EntityService:GetEntityByPath("/ui/BadgeUI")
+		end
+		
+		if self.BadgeUI ~= nil then
+			self.BadgeUI.Enable = true
+			self.BadgeUI.Visible = true
+			self:RequestBadgeList()
+		else
+			print("[BadgeUIService] Warning: BadgeUI entity not found")
+		end
+	end
+
+	@ExecSpace("Client")
+	method void CloseUI()
+		print("[BadgeUIService] CloseUI called")
+		
+		if self.BadgeUI ~= nil then
+			self.BadgeUI.Enable = false
+			self.BadgeUI.Visible = false
+		end
+	end
+
+	@ExecSpace("Server")
+	method void RequestBadgeList()
+		local userId = senderUserId
+		print(string.format("[BadgeUIService] RequestBadgeList from userId: %s", userId))
+		
+		local badgeStatus = _BadgeConditionService:GetUserBadgeStatus(userId)
+		self:SendBadgeListToClient(userId, badgeStatus)
+	end
+
+	@ExecSpace("Client")
+	method void SendBadgeListToClient(string userId, table badgeStatus)
+		print(string.format("[BadgeUIService] SendBadgeListToClient: received %d badges", self:CountTable(badgeStatus)))
+		
+		self.badgeStatusList = badgeStatus
+		self:UpdateBadgeList()
+	end
+
+	@ExecSpace("Client")
+	method void UpdateBadgeList()
+		print(string.format("[BadgeUIService] UpdateBadgeList: currentGrade=%s", self.currentGrade))
+
+		self:ClearBadgeItems()
+
+		local badgeListPanel = _EntityService:GetEntityByPath("/ui/BadgeUI/BadgeListPanel")
+		if badgeListPanel == nil then
+			print("[BadgeUIService] Warning: BadgeListPanel not found")
+			return
+		end
+
+		-- 현재 등급에 해당하는 배지들을 리스트로 수집
+		local badgeList = {}
+		for badgeId, status in pairs(self.badgeStatusList) do
+			if status.condition.grade == self.currentGrade then
+				table.insert(badgeList, {badgeId = badgeId, status = status})
+			end
+		end
+
+		-- 정렬: 보상 수령 가능 -> 보상 이미 수령 -> 미달성
+		-- 같은 우선순위 내에서는 id 순으로 정렬
+		table.sort(badgeList, function(a, b)
+			local priorityA = self:GetBadgeSortPriority(a.status)
+			local priorityB = self:GetBadgeSortPriority(b.status)
+			-- 같은 우선순위면 id로 2차 정렬
+			if priorityA == priorityB then
+				return a.status.condition.id < b.status.condition.id
+			end
+			return priorityA < priorityB
+		end)
+
+		-- 정렬된 순서대로 배지 아이템 생성
+		for _, badge in ipairs(badgeList) do
+			self:CreateBadgeItem(badgeListPanel, badge.badgeId, badge.status)
+		end
+
+		print(string.format("[BadgeUIService] Created %d badge items", #self.badgeItemEntities))
+	end
+
+	@ExecSpace("Client")
+	method integer GetBadgeSortPriority(table status)
+		-- 1: 보상 수령 가능 (acquired=true, claimed=false)
+		-- 2: 보상 이미 수령 (acquired=true, claimed=true)
+		-- 3: 미달성 (acquired=false)
+		if status.acquired and not status.claimed then
+			return 1
+		elseif status.acquired and status.claimed then
+			return 2
+		else
+			return 3
+		end
+	end
+
+	@ExecSpace("Client")
+	method void CreateBadgeItem(Entity parent, string badgeId, table status)
+		local badgeItemEntity = _SpawnService:SpawnByModelId(self.badgeItemModelId, badgeId, Vector3.zero, parent)
+		
+		if badgeItemEntity ~= nil then
+			table.insert(self.badgeItemEntities, badgeItemEntity)
+		
+			if badgeItemEntity.BadgeItem ~= nil then
+				badgeItemEntity.BadgeItem:SetBadgeInfo(badgeId, status)
+			else
+				print(string.format("[BadgeUIService] Warning: BadgeItem component not found on spawned entity for %s", badgeId))
+			end
+		else
+			print(string.format("[BadgeUIService] Warning: Failed to spawn BadgeItem for %s", badgeId))
+		end
+	end
+
+	@ExecSpace("Client")
+	method void ClearBadgeItems()
+		for i, entity in ipairs(self.badgeItemEntities) do
+			if entity ~= nil then
+				entity:Destroy()
+			end
+		end
+		
+		self.badgeItemEntities = {}
+	end
+
+	@ExecSpace("Client")
+	method void SwitchToGrade(string grade)
+		print(string.format("[BadgeUIService] SwitchToGrade: %s", grade))
+		
+		self.currentGrade = grade
+		self:UpdateBadgeList()
+	end
+
+	@ExecSpace("Server")
+	method void RequestClaimReward(string badgeId)
+		local userId = senderUserId
+		print(string.format("[BadgeUIService] RequestClaimReward: userId=%s, badgeId=%s", userId, badgeId))
+
+		local success = _BadgeConditionService:ClaimBadgeReward(userId, badgeId)
+		self:SendClaimResult(userId, badgeId, success)
+
+		if success then
+			local badgeStatus = _BadgeConditionService:GetUserBadgeStatus(userId)
+			self:SendBadgeListToClient(userId, badgeStatus)
+
+			-- 레드닷 상태 갱신
+			local hasUnclaimed = _BadgeConditionService:HasUnclaimedRewards(userId)
+			self:SendRedDotStatus(userId, hasUnclaimed)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void SendClaimResult(string userId, string badgeId, boolean success)
+		print(string.format("[BadgeUIService] SendClaimResult: badgeId=%s, success=%s", badgeId, tostring(success)))
+		
+		if success then
+			print("[BadgeUIService] Reward claimed successfully")
+		else
+			print("[BadgeUIService] Failed to claim reward")
+		end
+	end
+
+	@ExecSpace("Server")
+	method void RequestRedDotStatus()
+		local userId = senderUserId
+		local hasUnclaimed = _BadgeConditionService:HasUnclaimedRewards(userId)
+		self:SendRedDotStatus(userId, hasUnclaimed)
+	end
+
+	@ExecSpace("Client")
+	method void SendRedDotStatus(string userId, boolean hasUnclaimed)
+		print(string.format("[BadgeUIService] SendRedDotStatus: hasUnclaimed=%s", tostring(hasUnclaimed)))
+
+		local badgeOpenButton = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/TopBar/BadgeButton")
+		if badgeOpenButton ~= nil then
+			print("[BadgeUIService] Found BadgeOpenButton entity")
+			if badgeOpenButton.BadgeOpenButton ~= nil then
+				print("[BadgeUIService] Found BadgeOpenButton component, calling SetRedDot")
+				badgeOpenButton.BadgeOpenButton:SetRedDot(hasUnclaimed)
+			else
+				print("[BadgeUIService] Warning: BadgeOpenButton component not found on entity")
+			end
+		else
+			print("[BadgeUIService] Warning: BadgeOpenButton entity not found at /ui/Lobby/BadgeOpenButton")
+		end
+	end
+
+	@ExecSpace("Client")
+	method number CountTable(table t)
+		local count = 0
+		for _ in pairs(t) do
+			count = count + 1
+		end
+		return count
+	end
+
+end

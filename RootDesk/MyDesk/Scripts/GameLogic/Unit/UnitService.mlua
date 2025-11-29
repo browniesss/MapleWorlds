@@ -97,7 +97,6 @@ script UnitService extends Logic
 		
 		self.needSync = false
 		for k, v in pairs(self.UnitTable) do
-			log(k)
 			self:SyncClient(v)
 		end
 	end

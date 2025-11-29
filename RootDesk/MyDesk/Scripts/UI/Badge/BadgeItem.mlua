@@ -1,0 +1,158 @@
+@Component
+script BadgeItem extends Component
+
+	property string badgeId = ""
+
+	property table badgeStatus = {}
+
+	property boolean isAcquired = false
+
+	property boolean isClaimed = false
+
+	property Entity BadgeImage = nil
+
+	property Entity BadgeName = nil
+
+	property Entity BadgeDescription = nil
+
+	property Entity RewardText = nil
+
+	property Entity RewardIcon = nil
+
+	property Entity RewardBackground = nil
+
+	property Entity StatusOverlay = nil
+
+	property Entity ClaimButton = nil
+
+	method void OnBeginPlay()
+		self:ConnectChildren()
+	end
+
+	method void ConnectChildren()
+		self.BadgeImage = self.Entity:GetChildByName("BadgeImage", false)
+		self.BadgeName = self.Entity:GetChildByName("BadgeName", false)
+		self.BadgeDescription = self.Entity:GetChildByName("BadgeDescription", false)
+		self.RewardText = self.Entity:GetChildByName("RewardText", false)
+		self.RewardIcon = self.Entity:GetChildByName("RewardIcon", false)
+		self.RewardBackground = self.Entity:GetChildByName("RewardBackground", false)
+		self.StatusOverlay = self.Entity:GetChildByName("StatusOverlay", false)
+		self.ClaimButton = self.Entity:GetChildByName("ClaimButton", false)
+	end
+
+	method void SetBadgeInfo(string badgeId, table status)
+		print(string.format("[BadgeItem] SetBadgeInfo: badgeId=%s, acquired=%s, claimed=%s",
+			badgeId, tostring(status.acquired), tostring(status.claimed)))
+		
+		self.badgeId = badgeId
+		self.badgeStatus = status
+		self.isAcquired = status.acquired
+		self.isClaimed = status.claimed
+		
+		self:RefreshUI()
+	end
+
+	method void RefreshUI()
+		local condition = self.badgeStatus.condition
+		
+		if condition == nil then
+			print("[BadgeItem] Warning: condition is nil")
+			return
+		end
+		
+		-- BadgeImage 업데이트 (thumbnail_ruid)
+		if self.BadgeImage ~= nil and self.BadgeImage.SpriteGUIRendererComponent ~= nil then
+			if condition.thumbnail_ruid ~= nil and condition.thumbnail_ruid ~= "-" and condition.thumbnail_ruid ~= "" then
+				self.BadgeImage.SpriteGUIRendererComponent.ImageRUID = condition.thumbnail_ruid
+			end
+		end
+		
+		-- 텍스트 업데이트
+		if self.BadgeName ~= nil and self.BadgeName.TextComponent ~= nil then
+			self.BadgeName.TextComponent.Text = condition.name
+		end
+		
+		if self.BadgeDescription ~= nil and self.BadgeDescription.TextComponent ~= nil then
+			self.BadgeDescription.TextComponent.Text = condition.description
+		end
+		
+		-- RewardIcon 업데이트 (재화 타입에 따라)
+		if self.RewardIcon ~= nil and self.RewardIcon.SpriteGUIRendererComponent ~= nil then
+			if condition.reward_type == "FirstCoin" then
+				self.RewardIcon.SpriteGUIRendererComponent.ImageRUID = "3d291a0daa274583a7856b0470793de5"
+			elseif condition.reward_type == "SecondCoin" then
+				self.RewardIcon.SpriteGUIRendererComponent.ImageRUID = "c99c895020714d47bcdc8d92da5474b7"
+			end
+		end
+		
+		if self.RewardText ~= nil and self.RewardText.TextComponent ~= nil then
+			local rewardTypeText = ""
+			if condition.reward_type == "FirstCoin" then
+				rewardTypeText = "유료 재화"
+			elseif condition.reward_type == "SecondCoin" then
+				rewardTypeText = "무료 재화"
+			end
+			self.RewardText.TextComponent.Text = condition.reward_amount
+		end
+		
+		-- StatusOverlay: 미획득 시에만 표시 (딤드 처리)
+		if self.StatusOverlay ~= nil then
+			if self.isAcquired then
+				self.StatusOverlay.Enable = false
+				self.StatusOverlay.Visible = false
+			else
+				self.StatusOverlay.Enable = true
+				self.StatusOverlay.Visible = true
+			end
+		end
+		
+		-- ClaimButton 상태 설정
+		if self.ClaimButton ~= nil then
+			if not self.isAcquired then
+				-- 미획득: 버튼 보이지만 비활성화
+				self.ClaimButton.Enable = true
+				self.ClaimButton.Visible = true
+				if self.ClaimButton.ButtonComponent ~= nil then
+					self.ClaimButton.ButtonComponent.Enable = false
+				end
+			elseif self.isClaimed then
+				-- 수령 완료: 버튼 숨김
+				self.ClaimButton.Enable = false
+				self.ClaimButton.Visible = false
+			else
+				-- 획득했지만 미수령: 버튼 활성화
+				self.ClaimButton.Enable = true
+				self.ClaimButton.Visible = true
+				if self.ClaimButton.ButtonComponent ~= nil then
+					self.ClaimButton.ButtonComponent.Enable = true
+				end
+			end
+		end
+		
+		-- 보상 수령 완료 시 보상 관련 UI 숨김
+		if self.isClaimed then
+			if self.RewardIcon ~= nil then
+				self.RewardIcon.Enable = false
+				self.RewardIcon.Visible = false
+			end
+			if self.RewardText ~= nil then
+				self.RewardText.Enable = false
+				self.RewardText.Visible = false
+			end
+			if self.RewardBackground ~= nil then
+				self.RewardBackground.Enable = false
+				self.RewardBackground.Visible = false
+			end
+		end
+		
+		-- 보상 수령 완료 시 텍스트 영역 수정
+		if self.isClaimed then
+			self.BadgeName.UITransformComponent.RectSize = Vector2(950, 50)
+			self.BadgeName.UITransformComponent.anchoredPosition = Vector2(50, 25)
+		
+			self.BadgeDescription.UITransformComponent.RectSize = Vector2(950, 50)
+			self.BadgeDescription.UITransformComponent.anchoredPosition = Vector2(50, -33.9)
+		end
+	end
+
+end

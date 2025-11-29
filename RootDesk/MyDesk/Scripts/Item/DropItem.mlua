@@ -1,28 +1,86 @@
 @Component
 script DropItem extends Component
 
-	method void MoveTween(Entity target)
-		-- 메소 아이템의 시작 위치
-		local startPosition = self.Entity.TransformComponent.Position
-		local playerPosition = target.TransformComponent.Position
+	@Sync
+	property Entity Player = nil
+
+	property number CurrentSpeed = 5
+
+	property number Acceleration = 80
+
+	property number MaxSpeed = 50
+
+	@Sync
+	property integer amount = 0
+
+	method void OnUpdate(number delta)
+		if self.Player == nil then
+			return
+		end
 		
-		-- Tween 설정: 메소 아이템이 유저 캐릭터 위치로 이동
-		local tweenTime = 0.8 -- 이동 시간
-		local tween = _TweenLogic:MoveTo(self.Entity, Vector2(playerPosition.x, playerPosition.y + 0.25), tweenTime, EaseType.QuadEaseOut)
+		local coinPos   = self.Entity.TransformComponent.WorldPosition
+		local targetPos = self.Player.TransformComponent.WorldPosition + (Vector3.up * 0.3)
 		
-		-- Tween 완료 후 TriggerComponent 활성화
-		tween:SetOnEndCallback(function()
-		    self.Entity.TriggerComponent.Enable = true
-		end)
+		-- 2D 평면 거리 계산 (x, y만 사용)
+		local dx = targetPos.x - coinPos.x
+		local dy = targetPos.y - coinPos.y
+		local dist = math.sqrt(dx * dx + dy * dy)
+		
+		-- 거리가 매우 가까우면 삭제 (플레이어 몸 안으로)
+		if dist <= 0.15 then
+			self:EffectItem()
+		    return
+		end
+		
+		-- 방향 벡터 (정규화)
+		local dirX = dx / dist
+		local dirY = dy / dist
+		
+		-- 가속도 적용 (시간이 지날수록 빨라짐)
+		self.CurrentSpeed = self.CurrentSpeed + self.Acceleration * delta
+		
+		-- 최고속 제한
+		if self.CurrentSpeed > self.MaxSpeed then
+		    self.CurrentSpeed = self.MaxSpeed
+		end
+		
+		-- 실제 이동 거리
+		local moveDistance = self.CurrentSpeed * delta
+		
+		-- 새 위치 계산
+		local newPos = Vector3(
+		    coinPos.x + dirX * moveDistance,
+		    coinPos.y + dirY * moveDistance,
+		    coinPos.z
+		)
+		
+		self.Entity.TransformComponent.WorldPosition = newPos
+	end
+
+	@ExecSpace("Server")
+	method void Init()
+		-- Rigidbody가 있으면 위로 튀어오르는 힘 적용
+		local rb = self.Entity.RigidbodyComponent
+		if rb ~= nil then
+			local forceX = 0
+			local forceY = 6  -- 위로 튀어오르는 힘
+			rb:AddForce(Vector2(forceX, forceY))
+		end
+	end
+
+	@ExecSpace("Server")
+	method void EffectItem()
+		self.Entity:Destroy()
 	end
 
 	@EventSender("Self")
 	handler HandleTriggerEnterEvent(TriggerEnterEvent event)
-		if event.TriggerBodyEntity.PlayerCharacter == nil then
+		if event.TriggerBodyEntity.PlayerCharacter == nil or self.Player ~= nil then
 			return
 		end
 		
-		self:MoveTween(event.TriggerBodyEntity)
+		_CustomSoundService:PlaySoundAtPos("acf66093cbbe421398da26a335f9616e", self.Entity.TransformComponent.WorldPosition, self.Entity)
+		self.Player = event.TriggerBodyEntity
 	end
 
 end

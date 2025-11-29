@@ -383,15 +383,17 @@ script GameManager extends Logic
 		self.rankUI:UpdateRankData(userName, playTime, key)
 		
 		local isFirstClear = false
+		local clearedChapter = userStage.selectChapter
+		local clearedStage = userStage.selectStage
+		
 		if userStage:isLastStageSelected() then
 			local nextStage = _StageService:GetNextOpenStageId(userStage.openChapter, userStage.openStage)
 		
-			
 			userStage:SetClearStage(nextStage.chapter, nextStage.stage)
 			isFirstClear = true
 		end
 		
-		self:StageClearServer(isFirstClear)
+		self:StageClearServer(isFirstClear, clearedChapter, clearedStage)
 		
 		self.gameClearResult.Enable = true
 		self.gameClearResult.Visible = true
@@ -403,14 +405,34 @@ script GameManager extends Logic
 	end
 
 	@ExecSpace("Server")
-	method void StageClearServer(boolean isFirstClear)
+	method void StageClearServer(boolean isFirstClear, integer clearedChapter, integer clearedStage)
+		print(string.format("[GameManager] StageClearServer: userId=%s, isFirstClear=%s, clearedChapter=%s, clearedStage=%s",
+			senderUserId, tostring(isFirstClear), tostring(clearedChapter), tostring(clearedStage)))
+		
 		if isFirstClear == false then
 			_BillingService:AddSecondFreeCoin(senderUserId, 100)
+			print("[GameManager] Not first clear, skipping badge check")
 			return
 		end
 		_PlayCoinService:AddCoin(senderUserId, 1)
 		_BillingService:AddSecondFreeCoin(senderUserId, 500)
 		_BillingService:AddFirstFreeCoin(senderUserId, 100)
+		
+		print("[GameManager] First clear! Checking badges...")
+		
+		local isChapterComplete = false
+		if clearedChapter == 1 and clearedStage == 5 then
+			isChapterComplete = true
+		elseif clearedChapter >= 2 and clearedStage == 6 then
+			isChapterComplete = true
+		end
+		
+		if isChapterComplete then
+			print(string.format("[GameManager] Chapter %s completed! Checking chapter badge...", tostring(clearedChapter)))
+			_BadgeConditionService:CheckChapterBadges(senderUserId, clearedChapter)
+		end
+		
+		_BadgeConditionService:CheckStageBadges(senderUserId, clearedChapter, clearedStage)
 	end
 
 	method void ShowLoadingScreen()
@@ -557,9 +579,9 @@ script GameManager extends Logic
 		-- Parameters
 		local key = event.key
 		---------------------------------------------------------
-		if key == KeyboardKey.C and Environment:IsMakerPlay() then
-			self:OpenSkillSelect()
-		end
+		-- if key == KeyboardKey.C and Environment:IsMakerPlay() then
+		-- 	self:OpenSkillSelect()
+		-- end
 		
 		if event.key == KeyboardKey.G and Environment:IsMakerPlay() then
 			self:StageClear()

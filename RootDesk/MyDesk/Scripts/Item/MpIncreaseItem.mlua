@@ -1,0 +1,49 @@
+@Component
+script MpIncreaseItem extends DropItem
+
+	@ExecSpace("Server")
+	method void Init()
+		__base:Init()
+		self.amount = 10
+	end
+
+	@ExecSpace("Server")
+	method void EffectItem()
+		local myMonsterListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+		
+		if myMonsterListParent ~= nil then
+			local myMonsters = myMonsterListParent.Children
+		
+			for index in ipairs(myMonsters) do
+				local monster = myMonsters[index]
+		
+				if monster.Enable and monster.Unit ~= nil then
+					monster.Unit.mp += self.amount
+				end
+			end
+		end
+		
+		self:PlayBuffEffect()
+		__base:EffectItem()
+	end
+
+	@ExecSpace("Client")
+	method void PlayBuffEffect()
+		local myMonsterListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+		
+		if myMonsterListParent == nil then
+			return
+		end
+		
+		local myMonsters = myMonsterListParent.Children
+		
+		for index in ipairs(myMonsters) do
+			local monster = myMonsters[index]
+		
+			if monster.Enable and monster.Unit ~= nil then
+				_EffectService:PlayEffectAttached("96d56f1f25174bb9b051fb6407398d6a", monster, Vector3(0, 0, 0) , 0, Vector3.one)
+			end
+		end
+	end
+
+end

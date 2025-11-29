@@ -173,8 +173,13 @@ script AttendanceEventService extends Logic
 		if not self:CanClaimReward(uid) then
 			return {success = false, message = "오늘은 이미 출석 체크를 완료했습니다."}
 		end
-		
+
 		local userAttendance = self:GetOrCreateUserAttendance(uid)
+
+		-- 7일 출석 완료 체크
+		if userAttendance.totalDays >= 7 then
+			return {success = false, message = "7일 출석이 완료되었습니다."}
+		end
 		
 		local today = self:GetTodayDateString()
 		local yesterday = self:GetYesterdayDateString()
@@ -187,12 +192,10 @@ script AttendanceEventService extends Logic
 		
 		userAttendance.totalDays = userAttendance.totalDays + 1
 		userAttendance.lastCheckDate = today
-		
+
+		-- 7일 완료 시스템 (순환 없음)
 		local currentDay = userAttendance.totalDays
-		if currentDay > 7 then
-			currentDay = ((currentDay - 1) % 7) + 1
-		end
-		
+
 		local reward = self:GetRewardForDay(currentDay)
 		
 		if reward ~= nil then
@@ -232,11 +235,12 @@ script AttendanceEventService extends Logic
 			}
 		end
 		
+		-- 7일 완료 시스템 (순환 없음, 최대 7일)
 		local currentDay = userAttendance.totalDays + 1
 		if currentDay > 7 then
-			currentDay = ((currentDay - 1) % 7) + 1
+			currentDay = 7
 		end
-		
+
 		return {
 			consecutiveDays = userAttendance.consecutiveDays,
 			totalDays = userAttendance.totalDays,
@@ -332,19 +336,31 @@ script AttendanceEventService extends Logic
 	@ExecSpace("ServerOnly")
 	method boolean IsEventActive()
 		local dataSet = _DataService:GetTable("AttendanceRewards")
-		
+
 		if dataSet == nil then
 			return false
 		end
-		
+
 		local endTs = tonumber(dataSet:GetCell(1, "endTs"))
-		
+
 		if endTs == nil or endTs == 0 then
 			return true
 		end
-		
+
 		local currentTime = os.time()
 		return currentTime <= endTs
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean IsUserFullyCompleted(string uid)
+		local userAttendance = self:GetUserAttendance(uid)
+
+		if userAttendance == nil then
+			return false
+		end
+
+		-- 7일 출석 완료
+		return userAttendance.totalDays >= 7
 	end
 
 	@ExecSpace("Server")
@@ -354,9 +370,26 @@ script AttendanceEventService extends Logic
 		self:SendEventStatusToClient(uid, isActive)
 	end
 
+	@ExecSpace("Server")
+	method void RequestButtonVisibility()
+		local uid = senderUserId
+		local isActive = self:IsEventActive()
+		local isCompleted = self:IsUserFullyCompleted(uid)
+
+		-- 이벤트 활성화 AND 7일 미완료인 경우에만 버튼 표시
+		local shouldShow = isActive and not isCompleted
+
+		self:SendButtonVisibilityToClient(uid, shouldShow)
+	end
+
 	@ExecSpace("Client")
 	method void SendEventStatusToClient(string uid, boolean isActive)
 		self:UpdateEventButtonVisibility(isActive)
+	end
+
+	@ExecSpace("Client")
+	method void SendButtonVisibilityToClient(string uid, boolean shouldShow)
+		self:UpdateEventButtonVisibility(shouldShow)
 	end
 
 	@ExecSpace("Client")
@@ -444,12 +477,19 @@ script AttendanceEventService extends Logic
 			if result.reward ~= nil then
 				print("  Reward: " .. tostring(result.reward.gems) .. " gems")
 			end
-		
+
 			self:ShowToastMessage("출석 보상을 받았습니다! +" .. tostring(result.reward.gems) .. " 다이아")
 			self:RequestAttendanceInfo()
-		
+
 			-- 레드닷 업데이트 (보상 받았으니 false)
 			self:UpdateRedDotStatus(false)
+
+			-- 7일차 완료 시 팝업 닫고 버튼 숨기기
+			if result.totalDays >= 7 then
+				print("[AttendanceEventService] 7-day attendance completed!")
+				self:CloseUI()
+				_AttendanceEventService:RequestButtonVisibility()
+			end
 		else
 			print("[AttendanceEventService] Claim failed: " .. result.message)
 			self:ShowToastMessage(result.message)
@@ -481,23 +521,23 @@ script AttendanceEventService extends Logic
 		-- Sender: InputService
 		-- Space: Client
 		---------------------------------------------------------
-		
+
 		-- F5 키: 하루 전진
 		if event.key == KeyboardKey.F5 then
 			self.DEBUG_DayOffset = self.DEBUG_DayOffset + 1
 			print("[DEBUG] Day offset: " .. tostring(self.DEBUG_DayOffset))
-		
+
 			-- UI가 열려있으면 새로고침
 			if self.AttendanceUI ~= nil and self.AttendanceUI.Enable then
 				self:RequestAttendanceInfo()
 			end
 		end
-		
+
 		-- F6 키: 리셋
 		if event.key == KeyboardKey.F6 then
 			self.DEBUG_DayOffset = 0
 			print("[DEBUG] Day offset reset")
-		
+
 			if self.AttendanceUI ~= nil and self.AttendanceUI.Enable then
 				self:RequestAttendanceInfo()
 			end
