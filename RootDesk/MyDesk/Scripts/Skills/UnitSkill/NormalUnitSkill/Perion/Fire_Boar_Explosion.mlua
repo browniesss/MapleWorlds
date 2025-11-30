@@ -1,0 +1,36 @@
+@Component
+script Fire_Boar_Explosion extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		local hitCount = 0
+		local effectID = 0
+		local damageFunctionTimerID = 0
+		local secondSpawnFunction = function()
+			effectID = _EffectService:PlayEffectAttached("082f57d78a4e44928645ab509484dc1d", self.caster, Vector3(0, -0.1, 0), 0, Vector3.one, true)
+		end
+		
+		local damageFunction = function()
+			if hitCount >= self.skillTime or isvalid(self.caster) == false or self.caster.Unit.curState == "die" then
+				_TimerService:ClearTimer(damageFunctionTimerID)
+				_EffectService:RemoveEffect(effectID)
+				return
+			end
+			
+			self:AttackNearByEnemies(1, 10)
+			hitCount += 1
+		
+		end
+		
+		local destroyFunction = function()
+			self:SkillEnd()
+		end
+		
+		_TimerService:SetTimerOnce(secondSpawnFunction, 0.5)
+		damageFunctionTimerID = _TimerService:SetTimerRepeat(damageFunction, 0.5)
+		_TimerService:SetTimerOnce(destroyFunction, 0.5)
+	end
+
+end

@@ -1,0 +1,18 @@
+@Component
+script Skeleton_Commander_HpUp extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		self.caster.Unit:GetBuff(_eBuffType.MaxHealthMultiplyBuff, self.skillAmount, self.skillTime)
+		_EffectService:PlayEffectAttached("a3deb77b95954a1d9b9bb6ad5519b656", self.caster, Vector3.zero, 0, Vector3.one, false)
+		
+		local endFunction = function()
+			self:SkillEnd()
+		end
+		
+		_TimerService:SetTimerOnce(endFunction, 1)
+	end
+
+end

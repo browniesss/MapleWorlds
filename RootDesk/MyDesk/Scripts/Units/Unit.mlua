@@ -173,6 +173,9 @@ script Unit extends Component
 	@Sync
 	property integer criticalDamage = 1
 
+	@Sync
+	property number healDecreaseTimerID = 0
+
 	@ExecSpace("Server")
 	method void Spawn(table unitData, table skillData)
 		self.moveSpeed = unitData["moveSpeed"]
@@ -861,6 +864,10 @@ script Unit extends Component
 			return
 		end
 		
+		if self.debuffState == _eDebuffType.HealDecrease then
+			healAmount = healAmount * 0.5
+		end
+		
 		self.hp += healAmount
 		_EffectService:PlayEffectAttached("93f3cd96f3b1432693e5d2765d396338",self.Entity, Vector3.zero, 0, Vector3.one)
 	end
@@ -992,6 +999,23 @@ script Unit extends Component
 				end
 				
 				self.attackSpeedDecreaseTimerID = _TimerService:SetTimerOnce(deleteFunction, debuffTime)
+			end
+		elseif debuffType == _eDebuffType.HealDecrease then
+			self.debuffState = debuffType
+			self.debuffEffectID = _EffectService:PlayEffectAttached("b0577e63c40d4bceb28a571fc841e0b9", self.Entity, Vector3(0, 0, 0) , 0, Vector3.one, true)	
+			
+			if self.healDecreaseTimerID ~= 0 then
+				_TimerService:ClearTimer(self.healDecreaseTimerID)
+				_EffectService:RemoveEffect(self.debuffEffectID)
+			end
+			
+			if debuffTime ~= 0 then
+				deleteFunction = function()
+					self.healDecreaseTimerID = 0
+					_EffectService:RemoveEffect(self.debuffEffectID)
+				end
+				
+				self.healDecreaseTimerID = _TimerService:SetTimerOnce(deleteFunction, debuffTime)
 			end
 		end
 	end

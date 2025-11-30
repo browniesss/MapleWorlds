@@ -1,0 +1,34 @@
+@Component
+script Iron_Hog_Buff extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		local healCount = 0
+		local effectID = 0
+		local healFunctionTimerID = 0
+		
+		self.caster.Unit:GetBuff(_eBuffType.DamageDecreaseBuff, self.skillAmount, self.skillTime)
+		
+		local secondSpawnFunction = function()
+			effectID = _EffectService:PlayEffectAttached("8607b7e6fa57462485787c05aa9533d4", self.caster, Vector3.zero, 0, Vector3.one, true)
+		end
+		
+		local healFunction = function()
+			if healCount >= self.skillTime or isvalid(self.caster) == false or self.caster.Unit.curState == "die" then
+				_TimerService:ClearTimer(healFunctionTimerID)
+				_EffectService:RemoveEffect(effectID)
+				return
+			end
+			
+			self.caster.Unit.hp += self.skillAmount
+			healCount += 1
+		end
+		
+		_TimerService:SetTimerOnce(secondSpawnFunction, 0)
+		healFunctionTimerID = _TimerService:SetTimerRepeat(healFunction, self.skillAttackTiming)
+		self:SkillEnd()
+	end
+
+end
