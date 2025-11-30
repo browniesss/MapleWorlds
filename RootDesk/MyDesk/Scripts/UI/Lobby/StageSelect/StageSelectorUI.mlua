@@ -133,19 +133,18 @@ script StageSelectorUI extends Component
 			self:UpdateData(newEntity)
 		end
 		
-		self.prevButton.CallBackButton.callback = function() 
+		self.prevButton.CallBackButton.callback = function()
 			if newComp.selectChapter <= 1 then
 				return
 			end
-			
+
 			newComp.selectChapter -=1
 			newComp.selectStage = 1
 			self:UpdateData(newEntity)
 		end
-		
-		--local key = _RankingService:GetRankKeyByTable({chapter=newComp.selectChapter, stage=newComp.selectStage})
-		--local rankingListUI =  _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
-		--rankingListUI.StageRankingListUI:InitCheckRankData(key, 0)
+
+		-- 즉시 UI 업데이트 호출
+		self:UpdateData(newEntity)
 	end
 
 end

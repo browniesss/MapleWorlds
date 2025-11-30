@@ -3928,7 +3928,7 @@
       {
         "id": "88f0a3c4-4a31-42cf-9476-a068595af6eb",
         "path": "/maps/MainLobbyMap/Potal",
-        "componentNames": "MOD.Core.TransformComponent,MOD.Core.SpriteRendererComponent",
+        "componentNames": "MOD.Core.TransformComponent,MOD.Core.SpriteRendererComponent,script.LobbyPortal,MOD.Core.PortalComponent",
         "jsonString": {
           "name": "Potal",
           "path": "/maps/MainLobbyMap/Potal",
@@ -3949,20 +3949,15 @@
             {
               "@type": "MOD.Core.TransformComponent",
               "Position": {
-                "x": -0.245940208,
-                "y": -1.76000023,
-                "z": 999.999
+                "x": -0.2556591,
+                "y": -1.82,
+                "z": 0.0
               },
               "QuaternionRotation": {
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0,
                 "w": 1.0
-              },
-              "Scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
               },
               "Enable": true
             },
@@ -3971,9 +3966,36 @@
               "ActionSheet": {},
               "EndFrameIndex": 2147483647,
               "RenderSetting": 0,
-              "SortingLayer": "MapLayer0",
+              "SortingLayer": "Effect",
               "SpriteRUID": "1e91ee7e727846139858c78d5d79feb3",
               "StartFrameIndex": 0,
+              "Enable": true
+            },
+            {
+              "@type": "script.LobbyPortal",
+              "Enable": true,
+              "lobbyInfoUI": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "701c6938-68d9-499a-b153-57f6aee2bcaf"
+              }
+            },
+            {
+              "@type": "MOD.Core.PortalComponent",
+              "BoxOffset": {
+                "x": 0.0150000155,
+                "y": 1.19999993
+              },
+              "BoxSize": {
+                "x": 0.85,
+                "y": 2.56
+              },
+              "IsLegacy": false,
+              "PortalEntityRef": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "88f0a3c4-4a31-42cf-9476-a068595af6eb"
+              },
               "Enable": true
             }
           ],
@@ -4022,11 +4044,11 @@
       },
       {
         "id": "dd68ee92-477f-4ce1-b356-12640da4a978",
-        "path": "/maps/MainLobbyMap/NpcRoot/npc-4405",
+        "path": "/maps/MainLobbyMap/NpcRoot/npc-운영자",
         "componentNames": "MOD.Core.TransformComponent,MOD.Core.SpriteRendererComponent,MOD.Core.RigidbodyComponent,MOD.Core.StateComponent,MOD.Core.ChatBalloonComponent,MOD.Core.StateAnimationComponent,MOD.Core.NameTagComponent",
         "jsonString": {
-          "name": "npc-4405",
-          "path": "/maps/MainLobbyMap/NpcRoot/npc-4405",
+          "name": "npc-운영자",
+          "path": "/maps/MainLobbyMap/NpcRoot/npc-운영자",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -4107,7 +4129,7 @@
             },
             {
               "@type": "MOD.Core.NameTagComponent",
-              "Name": "npc-4405",
+              "Name": "운영자",
               "NameTagRUID": {
                 "DataId": "9bf18287398c44699c20fc5123d1a1ae"
               },
@@ -4119,11 +4141,11 @@
       },
       {
         "id": "06636bee-e408-49ca-9de4-7370e99054e5",
-        "path": "/maps/MainLobbyMap/NpcRoot/npc-3937",
+        "path": "/maps/MainLobbyMap/NpcRoot/npc-이벤트",
         "componentNames": "MOD.Core.TransformComponent,MOD.Core.SpriteRendererComponent,MOD.Core.RigidbodyComponent,MOD.Core.StateComponent,MOD.Core.ChatBalloonComponent,MOD.Core.StateAnimationComponent,MOD.Core.NameTagComponent",
         "jsonString": {
-          "name": "npc-3937",
-          "path": "/maps/MainLobbyMap/NpcRoot/npc-3937",
+          "name": "npc-이벤트",
+          "path": "/maps/MainLobbyMap/NpcRoot/npc-이벤트",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -4204,7 +4226,7 @@
             },
             {
               "@type": "MOD.Core.NameTagComponent",
-              "Name": "npc-3937",
+              "Name": "이벤트 운영자",
               "NameTagRUID": {
                 "DataId": "9bf18287398c44699c20fc5123d1a1ae"
               },
@@ -4216,11 +4238,11 @@
       },
       {
         "id": "5ea7c4f4-e59d-4d0c-b1f8-1ca8381bb2a7",
-        "path": "/maps/MainLobbyMap/NpcRoot/npc-2301",
+        "path": "/maps/MainLobbyMap/NpcRoot/npc-상점 상인",
         "componentNames": "MOD.Core.TransformComponent,MOD.Core.SpriteRendererComponent,MOD.Core.RigidbodyComponent,MOD.Core.StateComponent,MOD.Core.ChatBalloonComponent,MOD.Core.StateAnimationComponent,MOD.Core.NameTagComponent",
         "jsonString": {
-          "name": "npc-2301",
-          "path": "/maps/MainLobbyMap/NpcRoot/npc-2301",
+          "name": "npc-상점 상인",
+          "path": "/maps/MainLobbyMap/NpcRoot/npc-상점 상인",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -4301,7 +4323,7 @@
             },
             {
               "@type": "MOD.Core.NameTagComponent",
-              "Name": "npc-2301",
+              "Name": "상점 상인",
               "NameTagRUID": {
                 "DataId": "9bf18287398c44699c20fc5123d1a1ae"
               },
@@ -4313,11 +4335,11 @@
       },
       {
         "id": "9eb2f4da-eb20-4f8f-b41f-601b58898fb9",
-        "path": "/maps/MainLobbyMap/NpcRoot/npc-머쉬 교환",
+        "path": "/maps/MainLobbyMap/NpcRoot/npc-머쉬 상인",
         "componentNames": "MOD.Core.TransformComponent,MOD.Core.SpriteRendererComponent,MOD.Core.RigidbodyComponent,MOD.Core.StateComponent,MOD.Core.ChatBalloonComponent,MOD.Core.StateAnimationComponent,MOD.Core.NameTagComponent,script.NPCClickHandler,MOD.Core.TouchReceiveComponent",
         "jsonString": {
-          "name": "npc-머쉬 교환",
-          "path": "/maps/MainLobbyMap/NpcRoot/npc-머쉬 교환",
+          "name": "npc-머쉬 상인",
+          "path": "/maps/MainLobbyMap/NpcRoot/npc-머쉬 상인",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -4398,7 +4420,7 @@
             },
             {
               "@type": "MOD.Core.NameTagComponent",
-              "Name": "머쉬 교환",
+              "Name": "머쉬 상인",
               "NameTagRUID": {
                 "DataId": "9bf18287398c44699c20fc5123d1a1ae"
               },
