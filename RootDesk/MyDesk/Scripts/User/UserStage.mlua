@@ -15,44 +15,89 @@ script UserStage extends Component
 
 	property table updateList = {}
 
+	-- 클리어한 스테이지 목록 (서버에서만 사용, key: "챕터_스테이지", value: true)
+	property table clearedStages = {}
+
 	@ExecSpace("Server")
 	method integer SAVE()
 		local data = {}
-		
+
 		data["openStage"] = self.openStage
 		data["openChapter"] = self.openChapter
 		data["selectStage"] = self.selectStage
 		data["selectChapter"] = self.selectChapter
-		
+
+		-- clearedStages를 문자열로 변환 (예: "101,102,201,506")
+		local clearedList = {}
+		for key, _ in pairs(self.clearedStages) do
+			clearedList[#clearedList + 1] = key
+		end
+		data["cleared"] = table.concat(clearedList, ",")
+
 		local jsonData = _HttpService:JSONEncode(data)
-		
+
 		local userStorage = _DataStorageService:GetUserDataStorage(self.Entity.PlayerComponent.UserId)
-		
+
 		return userStorage:SetAndWait("USER_STAGE", jsonData)
 	end
 
 	@ExecSpace("Server")
 	method integer LOAD()
 		local userStorage = _DataStorageService:GetUserDataStorage(self.Entity.PlayerComponent.UserId)
-		
+
 		local getErr, jsonData = userStorage:GetAndWait("USER_STAGE")
-		
+
 		if getErr ~= 0 then
 			return getErr
 		end
-		
+
 		if jsonData == nil then
 			return 100012
 		end
-		
+
 		local data = _HttpService:JSONDecode(jsonData)
-		
+
 		self.openStage = tonumber(data["openStage"])
 		self.openChapter = tonumber(data["openChapter"])
 		self.selectStage = tonumber(data["selectStage"])
 		self.selectChapter = tonumber(data["selectChapter"])
-		
+
+		-- cleared 문자열을 테이블로 변환
+		self.clearedStages = {}
+		local clearedStr = data["cleared"]
+		if clearedStr ~= nil and clearedStr ~= "" then
+			for stageId in string.gmatch(clearedStr, "[^,]+") do
+				self.clearedStages[stageId] = true
+			end
+		else
+			-- 기존 유저: openChapter/openStage 이전 스테이지를 모두 클리어한 것으로 간주
+			self:GenerateClearedFromOpenStage()
+		end
+
 		return 0
+	end
+
+	-- 기존 유저를 위해 openChapter/openStage 이전 스테이지를 cleared 목록에 추가
+	@ExecSpace("Server")
+	method void GenerateClearedFromOpenStage()
+		-- 챕터별 스테이지 수: 챕터1은 5개, 챕터2~5는 6개
+		for chapter = 1, self.openChapter do
+			local maxStage = 6
+			if chapter == 1 then
+				maxStage = 5
+			end
+
+			local stageLimit = maxStage
+			if chapter == self.openChapter then
+				-- 현재 오픈 챕터에서는 openStage 직전까지만 클리어
+				stageLimit = self.openStage - 1
+			end
+
+			for stage = 1, stageLimit do
+				local stageId = tostring(chapter * 100 + stage)
+				self.clearedStages[stageId] = true
+			end
+		end
 	end
 
 	@ExecSpace("ServerOnly")
@@ -75,16 +120,24 @@ script UserStage extends Component
 		self:SAVE()
 	end
 
+	-- 스테이지를 클리어 목록에 추가
+	@ExecSpace("Server")
+	method void AddClearedStage(integer chapter, integer stage)
+		local stageId = tostring(chapter * 100 + stage)
+		self.clearedStages[stageId] = true
+		self:SAVE()
+	end
+
+	-- 해당 스테이지가 이미 클리어되었는지 확인 (서버용)
+	@ExecSpace("Server")
+	method boolean IsStageCleared(integer chapter, integer stage)
+		local stageId = tostring(chapter * 100 + stage)
+		return self.clearedStages[stageId] == true
+	end
+
 	@ExecSpace("ClientOnly")
 	method void OnSyncProperty(string name, any value)
 		if name == "openStage" or name == "openChapter" or name == "selectStage" or name == "selectChapter" then
-			local chapterData = _StageService:GetStageByChapter(self.openChapter)
-			local lastStage = chapterData[#chapterData]
-			
-			if self.openStage > lastStage.stage then
-				self.openStage = lastStage.stage
-			end
-			
 			for i, cb in ipairs(self.updateList) do
 				cb()
 			end

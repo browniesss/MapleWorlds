@@ -82,16 +82,36 @@ script StageService extends Logic
 	method table GetNextOpenStageId(integer chapter, integer stage)
 		local id = tostring(stage + 100 * chapter)
 		local index = self.idMap[id]
-		
+
 		if index < #self.data then
 			local nextStage = self.data[index + 1]
-			
+
 			return {
 				chapter=nextStage.chapter,
 				stage=nextStage.stage
 			}
 		end
-		
+
+		return {
+			chapter=chapter,
+			stage=stage
+		}
+	end
+
+	@ExecSpace("Server")
+	method table GetNextOpenStageIdFromServer(integer chapter, integer stage)
+		local id = tostring(stage + 100 * chapter)
+		local index = self.idMap[id]
+
+		if index < #self.data then
+			local nextStage = self.data[index + 1]
+
+			return {
+				chapter=nextStage.chapter,
+				stage=nextStage.stage
+			}
+		end
+
 		return {
 			chapter=chapter,
 			stage=stage
