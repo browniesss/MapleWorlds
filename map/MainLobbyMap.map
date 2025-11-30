@@ -16,7 +16,7 @@
       {
         "id": "546da0ca-0ad2-43ad-a57c-c154a4fa48d3",
         "path": "/maps/MainLobbyMap",
-        "componentNames": "MOD.Core.MapComponent,MOD.Core.FootholdComponent",
+        "componentNames": "MOD.Core.MapComponent,MOD.Core.FootholdComponent,MOD.Core.SoundComponent",
         "jsonString": {
           "name": "MainLobbyMap",
           "path": "/maps/MainLobbyMap",
@@ -1222,9 +1222,114 @@
                       "y": -1.0
                     },
                     "IsDynamic": false
+                  },
+                  {
+                    "Length": 1.8300004,
+                    "NextFootholdId": 0,
+                    "PreviousFootholdId": 0,
+                    "groupID": 5,
+                    "layer": 1,
+                    "sortingLayerName": "MapLayer0",
+                    "attribute": {
+                      "walk": 1.0,
+                      "force": 0.0,
+                      "drag": 1.0,
+                      "isBlockVertical": false,
+                      "isDynamic": false,
+                      "isCustomFoothold": true,
+                      "inertiaOption": 0
+                    },
+                    "OwnerId": "3dc2131d-9633-41d9-974a-8008cf6ca65c",
+                    "Id": 38,
+                    "StartPoint": {
+                      "x": 6.0957,
+                      "y": -1.76
+                    },
+                    "EndPoint": {
+                      "x": 7.9257,
+                      "y": -1.76
+                    },
+                    "Variance": {
+                      "x": 1.0,
+                      "y": 0.0
+                    },
+                    "IsDynamic": false
+                  },
+                  {
+                    "Length": 1.02999973,
+                    "NextFootholdId": 0,
+                    "PreviousFootholdId": 0,
+                    "groupID": 6,
+                    "layer": 1,
+                    "sortingLayerName": "MapLayer0",
+                    "attribute": {
+                      "walk": 1.0,
+                      "force": 0.0,
+                      "drag": 1.0,
+                      "isBlockVertical": false,
+                      "isDynamic": false,
+                      "isCustomFoothold": true,
+                      "inertiaOption": 0
+                    },
+                    "OwnerId": "3dc2131d-9633-41d9-974a-8008cf6ca65c",
+                    "Id": 39,
+                    "StartPoint": {
+                      "x": 6.6557,
+                      "y": -1.08
+                    },
+                    "EndPoint": {
+                      "x": 7.6857,
+                      "y": -1.08
+                    },
+                    "Variance": {
+                      "x": 1.0,
+                      "y": 0.0
+                    },
+                    "IsDynamic": false
+                  },
+                  {
+                    "Length": 0.5,
+                    "NextFootholdId": 0,
+                    "PreviousFootholdId": 0,
+                    "groupID": 7,
+                    "layer": 1,
+                    "sortingLayerName": "MapLayer0",
+                    "attribute": {
+                      "walk": 1.0,
+                      "force": 0.0,
+                      "drag": 1.0,
+                      "isBlockVertical": false,
+                      "isDynamic": false,
+                      "isCustomFoothold": true,
+                      "inertiaOption": 0
+                    },
+                    "OwnerId": "a8d0dbb8-dd41-4d70-8516-2983fe58efba",
+                    "Id": 40,
+                    "StartPoint": {
+                      "x": 9.3235,
+                      "y": -1.9252
+                    },
+                    "EndPoint": {
+                      "x": 9.8235,
+                      "y": -1.9252
+                    },
+                    "Variance": {
+                      "x": 1.0,
+                      "y": 0.0
+                    },
+                    "IsDynamic": false
                   }
                 ]
               },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SoundComponent",
+              "AudioClipRUID": "3926b48759d246dc8464a876ff7fa5ce",
+              "Bgm": true,
+              "Loop": true,
+              "PlayOnEnable": true,
+              "Volume": 1.0,
               "Enable": true
             }
           ],
@@ -3844,7 +3949,7 @@
             {
               "@type": "MOD.Core.TransformComponent",
               "Position": {
-                "x": -0.92627,
+                "x": -0.245940208,
                 "y": -1.76000023,
                 "z": 999.999
               },
@@ -3876,217 +3981,6 @@
         }
       },
       {
-        "id": "bab354db-14e3-4841-a902-ec46a3b55435",
-        "path": "/maps/MainLobbyMap/ladder-3",
-        "componentNames": "MOD.Core.TransformComponent,MOD.Core.ClimbableSpriteRendererComponent,MOD.Core.ClimbableComponent",
-        "jsonString": {
-          "name": "ladder-3",
-          "path": "/maps/MainLobbyMap/ladder-3",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": false,
-          "displayOrder": 4,
-          "pathConstraints": "///",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "Ladder",
-            "sub_entity_id": null
-          },
-          "modelId": "ladder",
-          "@components": [
-            {
-              "@type": "MOD.Core.TransformComponent",
-              "Position": {
-                "x": 8.332073,
-                "y": -2.0664897,
-                "z": 999.999
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.ClimbableSpriteRendererComponent",
-              "BodySpriteFlipInfo": {
-                "x": 1.0,
-                "y": 1.0
-              },
-              "BodySpriteLocalPos": {
-                "x": -0.25,
-                "y": -0.24
-              },
-              "NeedGizmo": true,
-              "OriginOffset": {
-                "x": 0.0149999857,
-                "y": 0.0
-              },
-              "OriginRectSize": {
-                "x": 0.53,
-                "y": 0.48
-              },
-              "RenderSetting": 0,
-              "SortingLayer": "MapLayer0",
-              "SpriteRUID": "ca7aec6ae04749cda9a44096cd9c389e",
-              "SpriteRUIDHead": "",
-              "SpriteRUIDTail": "",
-              "TiledSize": {
-                "x": 1.0,
-                "y": 4.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.ClimbableComponent",
-              "BoxOffset": {
-                "x": 0.0149999857,
-                "y": 0.719999969
-              },
-              "BoxSize": {
-                "x": 0.53,
-                "y": 2.17
-              },
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "506f2252-4473-46bb-932a-d08cc650114b",
-        "path": "/maps/MainLobbyMap/ladder-3/head",
-        "componentNames": "MOD.Core.TransformComponent,MOD.Core.ClimbableSpriteRendererComponent",
-        "jsonString": {
-          "name": "head",
-          "path": "/maps/MainLobbyMap/ladder-3/head",
-          "nameEditable": false,
-          "enable": true,
-          "visible": true,
-          "localize": false,
-          "displayOrder": 0,
-          "pathConstraints": "////",
-          "revision": 1,
-          "modelId": null,
-          "@components": [
-            {
-              "@type": "MOD.Core.TransformComponent",
-              "Position": {
-                "x": 0.0,
-                "y": 1.81,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.ClimbableSpriteRendererComponent",
-              "BodySpriteFlipInfo": {
-                "x": 0.0,
-                "y": 0.0
-              },
-              "BodySpriteLocalPos": {
-                "x": 0.0,
-                "y": 0.0
-              },
-              "NeedGizmo": false,
-              "OrderInLayer": 2,
-              "OriginOffset": {
-                "x": 0.0,
-                "y": -0.0199999958
-              },
-              "OriginRectSize": {
-                "x": 0.48,
-                "y": 0.22
-              },
-              "RenderSetting": 0,
-              "SortingLayer": "MapLayer0",
-              "SpriteRUID": "267bf7d10cbe41109242ab795142c30c",
-              "SpriteRUIDHead": "",
-              "SpriteRUIDTail": "",
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "40b3d252-aa2c-404f-8666-e6ed6325f2d2",
-        "path": "/maps/MainLobbyMap/ladder-3/tail",
-        "componentNames": "MOD.Core.TransformComponent,MOD.Core.ClimbableSpriteRendererComponent",
-        "jsonString": {
-          "name": "tail",
-          "path": "/maps/MainLobbyMap/ladder-3/tail",
-          "nameEditable": false,
-          "enable": true,
-          "visible": true,
-          "localize": false,
-          "displayOrder": 1,
-          "pathConstraints": "////",
-          "revision": 1,
-          "modelId": null,
-          "@components": [
-            {
-              "@type": "MOD.Core.TransformComponent",
-              "Position": {
-                "x": 0.0,
-                "y": -0.31,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.ClimbableSpriteRendererComponent",
-              "BodySpriteFlipInfo": {
-                "x": 0.0,
-                "y": 0.0
-              },
-              "BodySpriteLocalPos": {
-                "x": 0.0,
-                "y": 0.0
-              },
-              "NeedGizmo": false,
-              "OrderInLayer": 2,
-              "OriginOffset": {
-                "x": 0.0150000006,
-                "y": 0.0
-              },
-              "OriginRectSize": {
-                "x": 0.47,
-                "y": 0.14
-              },
-              "RenderSetting": 0,
-              "SortingLayer": "MapLayer0",
-              "SpriteRUID": "61769bf9001e4e16b0e1875354e76916",
-              "SpriteRUIDHead": "",
-              "SpriteRUIDTail": "",
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
         "id": "071970ea-db42-4e02-80cb-06ff31007c6c",
         "path": "/maps/MainLobbyMap/NpcRoot",
         "componentNames": "MOD.Core.TransformComponent",
@@ -4097,7 +3991,7 @@
           "enable": true,
           "visible": true,
           "localize": false,
-          "displayOrder": 5,
+          "displayOrder": 4,
           "pathConstraints": "///",
           "revision": 1,
           "origin": {
@@ -4149,28 +4043,22 @@
           "@components": [
             {
               "@type": "MOD.Core.TransformComponent",
-              "Rotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-              },
               "Position": {
-                "x": -4.9742,
-                "y": 1.4288,
+                "x": -5.3827,
+                "y": 1.355,
                 "z": 0.0
               },
               "QuaternionRotation": {
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0,
-                "w": -1.0
+                "w": 1.0
               },
               "Scale": {
                 "x": 1.0,
                 "y": 1.0,
                 "z": 1.0
               },
-              "ZRotation": 0.0,
               "Enable": true
             },
             {
@@ -4252,28 +4140,22 @@
           "@components": [
             {
               "@type": "MOD.Core.TransformComponent",
-              "Rotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-              },
               "Position": {
-                "x": -4.214,
-                "y": 1.4288,
+                "x": -4.7007,
+                "y": 1.3673,
                 "z": 0.0
               },
               "QuaternionRotation": {
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0,
-                "w": -1.0
+                "w": 1.0
               },
               "Scale": {
                 "x": 1.0,
                 "y": 1.0,
                 "z": 1.0
               },
-              "ZRotation": 0.0,
               "Enable": true
             },
             {
@@ -4355,28 +4237,22 @@
           "@components": [
             {
               "@type": "MOD.Core.TransformComponent",
-              "Rotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-              },
               "Position": {
-                "x": -8.5658,
-                "y": 0.8288,
+                "x": -8.5852,
+                "y": 0.77,
                 "z": 0.0
               },
               "QuaternionRotation": {
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0,
-                "w": -1.0
+                "w": 1.0
               },
               "Scale": {
                 "x": 1.0,
                 "y": 1.0,
                 "z": 1.0
               },
-              "ZRotation": 0.0,
               "Enable": true
             },
             {
@@ -4437,11 +4313,11 @@
       },
       {
         "id": "9eb2f4da-eb20-4f8f-b41f-601b58898fb9",
-        "path": "/maps/MainLobbyMap/NpcRoot/npc-1769",
-        "componentNames": "MOD.Core.TransformComponent,MOD.Core.SpriteRendererComponent,MOD.Core.RigidbodyComponent,MOD.Core.StateComponent,MOD.Core.ChatBalloonComponent,MOD.Core.StateAnimationComponent,MOD.Core.NameTagComponent",
+        "path": "/maps/MainLobbyMap/NpcRoot/npc-머쉬 교환",
+        "componentNames": "MOD.Core.TransformComponent,MOD.Core.SpriteRendererComponent,MOD.Core.RigidbodyComponent,MOD.Core.StateComponent,MOD.Core.ChatBalloonComponent,MOD.Core.StateAnimationComponent,MOD.Core.NameTagComponent,script.NPCClickHandler,MOD.Core.TouchReceiveComponent",
         "jsonString": {
-          "name": "npc-1769",
-          "path": "/maps/MainLobbyMap/NpcRoot/npc-1769",
+          "name": "npc-머쉬 교환",
+          "path": "/maps/MainLobbyMap/NpcRoot/npc-머쉬 교환",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -4458,28 +4334,22 @@
           "@components": [
             {
               "@type": "MOD.Core.TransformComponent",
-              "Rotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-              },
               "Position": {
-                "x": -10.3355,
-                "y": 0.2288,
+                "x": -10.3161,
+                "y": 0.1686,
                 "z": 0.0
               },
               "QuaternionRotation": {
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0,
-                "w": -1.0
+                "w": 1.0
               },
               "Scale": {
                 "x": 1.0,
                 "y": 1.0,
                 "z": 1.0
               },
-              "ZRotation": 0.0,
               "Enable": true
             },
             {
@@ -4528,9 +4398,34 @@
             },
             {
               "@type": "MOD.Core.NameTagComponent",
-              "Name": "npc-1769",
+              "Name": "머쉬 교환",
               "NameTagRUID": {
                 "DataId": "9bf18287398c44699c20fc5123d1a1ae"
+              },
+              "Enable": true
+            },
+            {
+              "@type": "script.NPCClickHandler",
+              "Enable": true,
+              "targetUIPath": "",
+              "targetUIEntity": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "bfdb5446-a938-401f-9399-dd4b1a77b79f"
+              },
+              "closeUIPath1": ""
+            },
+            {
+              "@type": "MOD.Core.TouchReceiveComponent",
+              "AutoFitToSize": false,
+              "Offset": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "RelayEventToBehind": false,
+              "TouchArea": {
+                "x": 1.0,
+                "y": 2.0
               },
               "Enable": true
             }
@@ -4549,7 +4444,7 @@
           "enable": true,
           "visible": true,
           "localize": false,
-          "displayOrder": 6,
+          "displayOrder": 5,
           "pathConstraints": "///",
           "revision": 1,
           "origin": {
@@ -4562,8 +4457,8 @@
             {
               "@type": "MOD.Core.TransformComponent",
               "Position": {
-                "x": -0.932251,
-                "y": 0.366881,
+                "x": -0.251921177,
+                "y": 0.357164025,
                 "z": 999.998047
               },
               "QuaternionRotation": {
@@ -4604,7 +4499,7 @@
           "enable": true,
           "visible": true,
           "localize": false,
-          "displayOrder": 7,
+          "displayOrder": 6,
           "pathConstraints": "///",
           "revision": 1,
           "origin": {
@@ -4659,7 +4554,7 @@
           "enable": true,
           "visible": true,
           "localize": false,
-          "displayOrder": 8,
+          "displayOrder": 7,
           "pathConstraints": "///",
           "revision": 1,
           "origin": {
@@ -4697,6 +4592,381 @@
               "SortingLayer": "MapLayer0",
               "SpriteRUID": "3b69098fb20a4baba4de52a2c9663bc3",
               "StartFrameIndex": 0,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "3dc2131d-9633-41d9-974a-8008cf6ca65c",
+        "path": "/maps/MainLobbyMap/foothold-918",
+        "componentNames": "MOD.Core.TransformComponent,MOD.Core.SpriteRendererComponent,MOD.Core.CustomFootholdComponent",
+        "jsonString": {
+          "name": "foothold-918",
+          "path": "/maps/MainLobbyMap/foothold-918",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": false,
+          "displayOrder": 8,
+          "pathConstraints": "///",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "Foothold",
+            "sub_entity_id": null
+          },
+          "modelId": "foothold",
+          "@components": [
+            {
+              "@type": "MOD.Core.TransformComponent",
+              "Position": {
+                "x": 7.025724,
+                "y": -1.81000042,
+                "z": 999.999
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteRendererComponent",
+              "ActionSheet": {},
+              "EndFrameIndex": 2147483647,
+              "RenderSetting": 0,
+              "SortingLayer": "MapLayer0",
+              "SpriteRUID": "3a2191cf8d3f4846947782a2a909c9e7",
+              "StartFrameIndex": 0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.CustomFootholdComponent",
+              "edgeLists": [
+                [
+                  {
+                    "x": -0.93,
+                    "y": 0.05
+                  },
+                  {
+                    "x": 0.9,
+                    "y": 0.05
+                  }
+                ],
+                [
+                  {
+                    "x": -0.37,
+                    "y": 0.73
+                  },
+                  {
+                    "x": 0.66,
+                    "y": 0.73
+                  }
+                ]
+              ],
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "a8d0dbb8-dd41-4d70-8516-2983fe58efba",
+        "path": "/maps/MainLobbyMap/foothold-2265",
+        "componentNames": "MOD.Core.TransformComponent,MOD.Core.SpriteRendererComponent,MOD.Core.CustomFootholdComponent",
+        "jsonString": {
+          "name": "foothold-2265",
+          "path": "/maps/MainLobbyMap/foothold-2265",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": false,
+          "displayOrder": 9,
+          "pathConstraints": "///",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "Foothold",
+            "sub_entity_id": null
+          },
+          "modelId": "foothold",
+          "@components": [
+            {
+              "@type": "MOD.Core.TransformComponent",
+              "Position": {
+                "x": 9.573467,
+                "y": -2.17524862,
+                "z": 999.998047
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteRendererComponent",
+              "ActionSheet": {},
+              "EndFrameIndex": 2147483647,
+              "RenderSetting": 0,
+              "SortingLayer": "MapLayer0",
+              "SpriteRUID": "433f0815cab34e29a4a396e360e47a7d",
+              "StartFrameIndex": 0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.CustomFootholdComponent",
+              "edgeLists": [
+                [
+                  {
+                    "x": -0.25,
+                    "y": 0.25
+                  },
+                  {
+                    "x": 0.25,
+                    "y": 0.25
+                  }
+                ]
+              ],
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "aacabd71-3ac6-401a-bb3a-96d9e55e6efa",
+        "path": "/maps/MainLobbyMap/ladder-3",
+        "componentNames": "MOD.Core.TransformComponent,MOD.Core.ClimbableSpriteRendererComponent,MOD.Core.ClimbableComponent",
+        "jsonString": {
+          "name": "ladder-3",
+          "path": "/maps/MainLobbyMap/ladder-3",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": false,
+          "displayOrder": 10,
+          "pathConstraints": "///",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "Ladder",
+            "sub_entity_id": null
+          },
+          "modelId": "ladder",
+          "@components": [
+            {
+              "@type": "MOD.Core.TransformComponent",
+              "Position": {
+                "x": 8.347891,
+                "y": -1.845,
+                "z": -0.001
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ClimbableSpriteRendererComponent",
+              "BodySpriteFlipInfo": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "BodySpriteLocalPos": {
+                "x": -0.25,
+                "y": -0.24
+              },
+              "NeedGizmo": true,
+              "OriginOffset": {
+                "x": 0.0149999857,
+                "y": 0.0
+              },
+              "OriginRectSize": {
+                "x": 0.53,
+                "y": 0.48
+              },
+              "RenderSetting": 0,
+              "SortingLayer": "MapLayer0",
+              "SpriteRUID": "ca7aec6ae04749cda9a44096cd9c389e",
+              "SpriteRUIDHead": "",
+              "SpriteRUIDTail": "",
+              "TiledSize": {
+                "x": 1.0,
+                "y": 4.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ClimbableComponent",
+              "BoxOffset": {
+                "x": 0.0149999857,
+                "y": 0.719999969
+              },
+              "BoxSize": {
+                "x": 0.53,
+                "y": 2.17
+              },
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "dfd74b9b-e377-44aa-a8c9-fa4e7b48bf77",
+        "path": "/maps/MainLobbyMap/ladder-3/head",
+        "componentNames": "MOD.Core.TransformComponent,MOD.Core.ClimbableSpriteRendererComponent",
+        "jsonString": {
+          "name": "head",
+          "path": "/maps/MainLobbyMap/ladder-3/head",
+          "nameEditable": false,
+          "enable": true,
+          "visible": true,
+          "localize": false,
+          "displayOrder": 0,
+          "pathConstraints": "////",
+          "revision": 1,
+          "modelId": null,
+          "@components": [
+            {
+              "@type": "MOD.Core.TransformComponent",
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 1.81,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ClimbableSpriteRendererComponent",
+              "BodySpriteFlipInfo": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "BodySpriteLocalPos": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "NeedGizmo": false,
+              "OrderInLayer": 2,
+              "OriginOffset": {
+                "x": 0.0,
+                "y": -0.0199999958
+              },
+              "OriginRectSize": {
+                "x": 0.48,
+                "y": 0.22
+              },
+              "RenderSetting": 0,
+              "SortingLayer": "MapLayer0",
+              "SpriteRUID": "267bf7d10cbe41109242ab795142c30c",
+              "SpriteRUIDHead": "",
+              "SpriteRUIDTail": "",
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "bd655d9c-834f-4317-834a-7db850d94924",
+        "path": "/maps/MainLobbyMap/ladder-3/tail",
+        "componentNames": "MOD.Core.TransformComponent,MOD.Core.ClimbableSpriteRendererComponent",
+        "jsonString": {
+          "name": "tail",
+          "path": "/maps/MainLobbyMap/ladder-3/tail",
+          "nameEditable": false,
+          "enable": true,
+          "visible": true,
+          "localize": false,
+          "displayOrder": 1,
+          "pathConstraints": "////",
+          "revision": 1,
+          "modelId": null,
+          "@components": [
+            {
+              "@type": "MOD.Core.TransformComponent",
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": -0.31,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ClimbableSpriteRendererComponent",
+              "BodySpriteFlipInfo": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "BodySpriteLocalPos": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "NeedGizmo": false,
+              "OrderInLayer": 2,
+              "OriginOffset": {
+                "x": 0.0150000006,
+                "y": 0.0
+              },
+              "OriginRectSize": {
+                "x": 0.47,
+                "y": 0.14
+              },
+              "RenderSetting": 0,
+              "SortingLayer": "MapLayer0",
+              "SpriteRUID": "61769bf9001e4e16b0e1875354e76916",
+              "SpriteRUIDHead": "",
+              "SpriteRUIDTail": "",
               "Enable": true
             }
           ],

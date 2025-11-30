@@ -97,6 +97,100 @@
         }
       },
       {
+        "id": "0f11a491-4e67-4ee7-9a8b-9a9111e15c17",
+        "path": "/ui/ShopUI/BackgroundUI",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "jsonString": {
+          "name": "BackgroundUI",
+          "path": "/ui/ShopUI/BackgroundUI",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "///",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uisprite",
+            "sub_entity_id": null
+          },
+          "modelId": "uisprite",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 15,
+              "AnchorsMax": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "AnchorsMin": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "OffsetMin": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 1920.0,
+                "y": 1080.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Color": {
+                "r": 0.08235294,
+                "g": 0.164705887,
+                "b": 0.31764707,
+                "a": 0.9589844
+              },
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
         "id": "ad3cacc2-08ff-4efc-827c-88df5423d652",
         "path": "/ui/ShopUI/TopBar",
         "componentNames": "MOD.Core.UITransformComponent,script.UICoinInfo",
@@ -107,7 +201,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 0,
+          "displayOrder": 1,
           "pathConstraints": "///",
           "revision": 1,
           "origin": {
@@ -1275,7 +1369,7 @@
       {
         "id": "af8afbe9-2699-4561-89ed-1fd16c4d2a2c",
         "path": "/ui/ShopUI/TopBar/LobbyToggle",
-        "componentNames": "MOD.Core.UITransformComponent,script.ToggleGroup",
+        "componentNames": "MOD.Core.UITransformComponent",
         "jsonString": {
           "name": "LobbyToggle",
           "path": "/ui/ShopUI/TopBar/LobbyToggle",
@@ -1339,297 +1433,6 @@
                 "w": 1.0
               },
               "Enable": true
-            },
-            {
-              "@type": "script.ToggleGroup",
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "423c5e0c-47b2-4afc-a43f-1a9c8d3c028c",
-        "path": "/ui/ShopUI/TopBar/LobbyToggle/MainButton",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.Toggle,script.ExtendToggleUIPanel",
-        "jsonString": {
-          "name": "MainButton",
-          "path": "/ui/ShopUI/TopBar/LobbyToggle/MainButton",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 0,
-          "pathConstraints": "/////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uibutton",
-            "sub_entity_id": null
-          },
-          "modelId": "uibutton",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 6,
-              "AnchorsMax": {
-                "x": 0.5,
-                "y": 0.0
-              },
-              "AnchorsMin": {
-                "x": 0.5,
-                "y": 0.0
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": -100.0,
-                "y": 6.5
-              },
-              "OffsetMin": {
-                "x": -300.0,
-                "y": 0.0
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.0
-              },
-              "RectSize": {
-                "x": 200.0,
-                "y": 6.5
-              },
-              "UIMode": 1,
-              "UIScale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": -200.0,
-                "y": 0.0
-              },
-              "Rotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-              },
-              "Position": {
-                "x": -200.0,
-                "y": -35.0,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": -1.0
-              },
-              "Scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "ZRotation": 0.0,
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "ImageRUID": {
-                "DataId": "f9929119a4e14af69cfcd5607ddd85da"
-              },
-              "OverrideSorting": false,
-              "SortingLayer": "MapLayer0",
-              "Color": {
-                "r": 1.0,
-                "g": 1.0,
-                "b": 1.0,
-                "a": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.ButtonComponent",
-              "Colors": {
-                "NormalColor": {
-                  "r": 1.0,
-                  "g": 1.0,
-                  "b": 1.0,
-                  "a": 1.0
-                },
-                "HighlightedColor": {
-                  "r": 0.9607843,
-                  "g": 0.9607843,
-                  "b": 0.9607843,
-                  "a": 1.0
-                },
-                "PressedColor": {
-                  "r": 1.0,
-                  "g": 1.0,
-                  "b": 1.0,
-                  "a": 1.0
-                },
-                "SelectedColor": {
-                  "r": 0.9607843,
-                  "g": 0.9607843,
-                  "b": 0.9607843,
-                  "a": 1.0
-                },
-                "DisabledColor": {
-                  "r": 1.0,
-                  "g": 1.0,
-                  "b": 1.0,
-                  "a": 1.0
-                },
-                "ColorMultiplier": 1.0,
-                "FadeDuration": 0.1
-              },
-              "ImageRUIDs": {
-                "HighlightedSprite": null,
-                "PressedSprite": null,
-                "SelectedSprite": null,
-                "DisabledSprite": null
-              },
-              "OverrideSorting": false,
-              "Enable": true
-            },
-            {
-              "@type": "script.Toggle",
-              "Enable": true,
-              "ToggleGroupEntity": {
-                "tempEntityId": null,
-                "IsRelative": false,
-                "EntityId": "af8afbe9-2699-4561-89ed-1fd16c4d2a2c"
-              },
-              "ImageEntity": {
-                "tempEntityId": null,
-                "IsRelative": false,
-                "EntityId": "423c5e0c-47b2-4afc-a43f-1a9c8d3c028c"
-              },
-              "OnRUID": "d3db062ac46c472ebf0310a02b584c59",
-              "OffRUID": "f9929119a4e14af69cfcd5607ddd85da",
-              "ActionTargetEntity": {
-                "IsRelative": false,
-                "ComponentId": "423c5e0c-47b2-4afc-a43f-1a9c8d3c028c:ToggleAction"
-              }
-            },
-            {
-              "@type": "script.ExtendToggleUIPanel",
-              "Enable": true,
-              "panelIndex": 1.0,
-              "ToggleGroup": null,
-              "TargetPanelEntity": {
-                "tempEntityId": null,
-                "IsRelative": false,
-                "EntityId": "701c6938-68d9-499a-b153-57f6aee2bcaf"
-              }
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "dca77955-371b-4797-ac73-471b9c957b2a",
-        "path": "/ui/ShopUI/TopBar/LobbyToggle/MainButton/UIText",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
-        "jsonString": {
-          "name": "UIText",
-          "path": "/ui/ShopUI/TopBar/LobbyToggle/MainButton/UIText",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 0,
-          "pathConstraints": "//////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uitext",
-            "sub_entity_id": null
-          },
-          "modelId": "uitext",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 0,
-              "AnchorsMax": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "AnchorsMin": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": 100.0,
-                "y": 76.25
-              },
-              "OffsetMin": {
-                "x": -100.0,
-                "y": 13.75
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 200.0,
-                "y": 62.5
-              },
-              "UIMode": 1,
-              "UIScale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": 0.0,
-                "y": 45.0
-              },
-              "Position": {
-                "x": 0.0,
-                "y": 48.25,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "OverrideSorting": false,
-              "SortingLayer": "MapLayer0",
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.TextComponent",
-              "Font": 3,
-              "FontColor": {
-                "r": 1.0,
-                "g": 1.0,
-                "b": 1.0,
-                "a": 1.0
-              },
-              "FontSize": 42,
-              "MaxSize": 44,
-              "MinSize": 10,
-              "OutlineDistance": {
-                "x": 1.0,
-                "y": -1.0
-              },
-              "OverrideSorting": false,
-              "Text": "메인",
-              "Enable": true
             }
           ],
           "@version": 1
@@ -1638,7 +1441,7 @@
       {
         "id": "ddf9923f-77fa-423e-89a7-47d8475d6e45",
         "path": "/ui/ShopUI/TopBar/LobbyToggle/ShopButton",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.Toggle,script.ExtendToggleUIPanel",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
         "jsonString": {
           "name": "ShopButton",
           "path": "/ui/ShopUI/TopBar/LobbyToggle/ShopButton",
@@ -1646,294 +1449,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 1,
-          "pathConstraints": "/////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uibutton",
-            "sub_entity_id": null
-          },
-          "modelId": "uibutton",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 6,
-              "AnchorsMax": {
-                "x": 0.5,
-                "y": 0.0
-              },
-              "AnchorsMin": {
-                "x": 0.5,
-                "y": 0.0
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": 100.0,
-                "y": 6.5
-              },
-              "OffsetMin": {
-                "x": -100.0,
-                "y": 0.0
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.0
-              },
-              "RectSize": {
-                "x": 200.0,
-                "y": 6.5
-              },
-              "UIMode": 1,
-              "UIScale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": 0.0,
-                "y": 0.0
-              },
-              "Rotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-              },
-              "Position": {
-                "x": 0.0,
-                "y": -35.0,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": -1.0
-              },
-              "Scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "ZRotation": 0.0,
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "ImageRUID": {
-                "DataId": "f9929119a4e14af69cfcd5607ddd85da"
-              },
-              "OverrideSorting": false,
-              "SortingLayer": "MapLayer0",
-              "Color": {
-                "r": 1.0,
-                "g": 1.0,
-                "b": 1.0,
-                "a": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.ButtonComponent",
-              "Colors": {
-                "NormalColor": {
-                  "r": 1.0,
-                  "g": 1.0,
-                  "b": 1.0,
-                  "a": 1.0
-                },
-                "HighlightedColor": {
-                  "r": 0.9607843,
-                  "g": 0.9607843,
-                  "b": 0.9607843,
-                  "a": 1.0
-                },
-                "PressedColor": {
-                  "r": 1.0,
-                  "g": 1.0,
-                  "b": 1.0,
-                  "a": 1.0
-                },
-                "SelectedColor": {
-                  "r": 0.9607843,
-                  "g": 0.9607843,
-                  "b": 0.9607843,
-                  "a": 1.0
-                },
-                "DisabledColor": {
-                  "r": 1.0,
-                  "g": 1.0,
-                  "b": 1.0,
-                  "a": 1.0
-                },
-                "ColorMultiplier": 1.0,
-                "FadeDuration": 0.1
-              },
-              "ImageRUIDs": {
-                "HighlightedSprite": null,
-                "PressedSprite": null,
-                "SelectedSprite": null,
-                "DisabledSprite": null
-              },
-              "OverrideSorting": false,
-              "Enable": true
-            },
-            {
-              "@type": "script.Toggle",
-              "Enable": true,
-              "ToggleGroupEntity": {
-                "tempEntityId": null,
-                "IsRelative": false,
-                "EntityId": "af8afbe9-2699-4561-89ed-1fd16c4d2a2c"
-              },
-              "ImageEntity": {
-                "tempEntityId": null,
-                "IsRelative": false,
-                "EntityId": "ddf9923f-77fa-423e-89a7-47d8475d6e45"
-              },
-              "OnRUID": "d3db062ac46c472ebf0310a02b584c59",
-              "OffRUID": "f9929119a4e14af69cfcd5607ddd85da",
-              "ActionTargetEntity": {
-                "IsRelative": false,
-                "ComponentId": "ddf9923f-77fa-423e-89a7-47d8475d6e45:ToggleAction"
-              }
-            },
-            {
-              "@type": "script.ExtendToggleUIPanel",
-              "Enable": true,
-              "panelIndex": 2.0,
-              "ToggleGroup": null,
-              "TargetPanelEntity": {
-                "tempEntityId": null,
-                "IsRelative": false,
-                "EntityId": "bfdb5446-a938-401f-9399-dd4b1a77b79f"
-              }
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "eefc151c-de47-4d53-8a5a-b5257d0ce4f9",
-        "path": "/ui/ShopUI/TopBar/LobbyToggle/ShopButton/UIText",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
-        "jsonString": {
-          "name": "UIText",
-          "path": "/ui/ShopUI/TopBar/LobbyToggle/ShopButton/UIText",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
           "displayOrder": 0,
-          "pathConstraints": "//////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uitext",
-            "sub_entity_id": null
-          },
-          "modelId": "uitext",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 0,
-              "AnchorsMax": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "AnchorsMin": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": 100.0,
-                "y": 76.25
-              },
-              "OffsetMin": {
-                "x": -100.0,
-                "y": 13.75
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 200.0,
-                "y": 62.5
-              },
-              "UIMode": 1,
-              "UIScale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": 0.0,
-                "y": 45.0
-              },
-              "Position": {
-                "x": 0.0,
-                "y": 48.25,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "OverrideSorting": false,
-              "SortingLayer": "MapLayer0",
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.TextComponent",
-              "Font": 3,
-              "FontColor": {
-                "r": 1.0,
-                "g": 1.0,
-                "b": 1.0,
-                "a": 1.0
-              },
-              "FontSize": 42,
-              "MaxSize": 44,
-              "MinSize": 10,
-              "OutlineDistance": {
-                "x": 1.0,
-                "y": -1.0
-              },
-              "OverrideSorting": false,
-              "Text": "상점",
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "5f17a5cd-a803-4000-a4aa-7cf59fe61ff7",
-        "path": "/ui/ShopUI/TopBar/LobbyToggle/GachaButton",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.Toggle,script.ExtendToggleUIPanel",
-        "jsonString": {
-          "name": "GachaButton",
-          "path": "/ui/ShopUI/TopBar/LobbyToggle/GachaButton",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 2,
           "pathConstraints": "/////",
           "revision": 1,
           "origin": {
@@ -1945,26 +1461,26 @@
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 6,
+              "AlignmentOption": 7,
               "AnchorsMax": {
-                "x": 0.5,
+                "x": 0.0,
                 "y": 0.0
               },
               "AnchorsMin": {
-                "x": 0.5,
+                "x": 0.0,
                 "y": 0.0
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 300.0,
+                "x": 200.0,
                 "y": 6.5
               },
               "OffsetMin": {
-                "x": 100.0,
+                "x": 0.0,
                 "y": 0.0
               },
               "Pivot": {
-                "x": 0.5,
+                "x": 0.0,
                 "y": 0.0
               },
               "RectSize": {
@@ -1979,7 +1495,7 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 200.0,
+                "x": 0.0,
                 "y": 0.0
               },
               "Rotation": {
@@ -1988,7 +1504,7 @@
                 "z": 0.0
               },
               "Position": {
-                "x": 200.0,
+                "x": -300.0,
                 "y": -35.0,
                 "z": 0.0
               },
@@ -2065,49 +1581,18 @@
               },
               "OverrideSorting": false,
               "Enable": true
-            },
-            {
-              "@type": "script.Toggle",
-              "Enable": true,
-              "ToggleGroupEntity": {
-                "tempEntityId": null,
-                "IsRelative": false,
-                "EntityId": "af8afbe9-2699-4561-89ed-1fd16c4d2a2c"
-              },
-              "ImageEntity": {
-                "tempEntityId": null,
-                "IsRelative": false,
-                "EntityId": "5f17a5cd-a803-4000-a4aa-7cf59fe61ff7"
-              },
-              "OnRUID": "d3db062ac46c472ebf0310a02b584c59",
-              "OffRUID": "f9929119a4e14af69cfcd5607ddd85da",
-              "ActionTargetEntity": {
-                "IsRelative": false,
-                "ComponentId": "5f17a5cd-a803-4000-a4aa-7cf59fe61ff7:ToggleAction"
-              }
-            },
-            {
-              "@type": "script.ExtendToggleUIPanel",
-              "Enable": true,
-              "panelIndex": 3.0,
-              "ToggleGroup": null,
-              "TargetPanelEntity": {
-                "tempEntityId": null,
-                "IsRelative": false,
-                "EntityId": "1c801a28-6e22-4b4c-9db9-fa27a84a9a02"
-              }
             }
           ],
           "@version": 1
         }
       },
       {
-        "id": "e9d5a990-ecc9-46c7-b4a0-14e7d7a0bf83",
-        "path": "/ui/ShopUI/TopBar/LobbyToggle/GachaButton/UIText",
+        "id": "eefc151c-de47-4d53-8a5a-b5257d0ce4f9",
+        "path": "/ui/ShopUI/TopBar/LobbyToggle/ShopButton/UIText",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
           "name": "UIText",
-          "path": "/ui/ShopUI/TopBar/LobbyToggle/GachaButton/UIText",
+          "path": "/ui/ShopUI/TopBar/LobbyToggle/ShopButton/UIText",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -2162,7 +1647,7 @@
                 "y": 45.0
               },
               "Position": {
-                "x": 0.0,
+                "x": 100.0,
                 "y": 48.25,
                 "z": 0.0
               },
@@ -2202,7 +1687,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "뽑기",
+              "Text": "상점",
               "Enable": true
             }
           ],
@@ -2220,7 +1705,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 1,
+          "displayOrder": 2,
           "pathConstraints": "///",
           "revision": 1,
           "origin": {
@@ -3200,7 +2685,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 2,
+          "displayOrder": 3,
           "pathConstraints": "///",
           "revision": 1,
           "origin": {
