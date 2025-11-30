@@ -1,0 +1,45 @@
+@Component
+script Serpent_Screw extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		-- dc25141841b84bfb8801b0b5f4a62c08 피격
+		-- 61c3910f4eb7412097a40f53173c8b70 등장
+		-- 8fe263a5879b4d8c8460cc17cfef3f21 원
+		local hitCount = 0
+		local effectID = 0
+		local damageFunctionTimerID = 0
+		
+		local firstSpawnFunction = function()
+			_EffectService:PlayEffectAttached("61c3910f4eb7412097a40f53173c8b70", self.caster, Vector3.zero, 0, Vector3.one)
+		end
+		
+		local secondSpawnFunction = function()
+			effectID = _EffectService:PlayEffectAttached("8fe263a5879b4d8c8460cc17cfef3f21", self.caster, Vector3.zero, 0, Vector3.one, true)
+		end
+		
+		local damageFunction = function()
+			if hitCount >= self.skillTime or isvalid(self.caster) == false or self.caster.Unit.curState == "die" then
+				_TimerService:ClearTimer(damageFunctionTimerID)
+				_EffectService:RemoveEffect(effectID)
+				return
+			end
+			
+			self:AttackNearByEnemies(3, 10)
+			hitCount += 1
+		
+		end
+		
+		local destroyFunction = function()
+			self:SkillEnd()
+		end
+		
+		_TimerService:SetTimerOnce(firstSpawnFunction, 0)
+		_TimerService:SetTimerOnce(secondSpawnFunction, 0.5)
+		damageFunctionTimerID = _TimerService:SetTimerRepeat(damageFunction, 0.5)
+		_TimerService:SetTimerOnce(destroyFunction, 0.5)
+	end
+
+end

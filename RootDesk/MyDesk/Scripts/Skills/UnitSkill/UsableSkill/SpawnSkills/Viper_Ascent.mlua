@@ -1,0 +1,77 @@
+@Component
+script Viper_Ascent extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		_UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill = true
+		
+		local enemyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
+		local enemies = enemyListParent.Children
+		local player = _EntityService:GetEntityByTag("Player")
+		local entity = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group")
+		
+		_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = "3b706b57d72f4e3092ed3c277ab97f7a"
+		_GameManager.screenSkillUI.Enable = true
+		_GameManager.screenSkillUI.Visible = true
+		
+		local pushFunction = function()
+			for index in ipairs(enemies) do
+				local monster = enemies[index]
+			
+				if monster.Name == "EnemySpawnPoint" then
+					continue
+				end
+				
+				if monster.Enable then
+					monster.Unit:GetDebuff(_eDebuffType.Stun, 0, 1)
+					monster.Unit:OnHit(self.caster, self.skillAmount / 5, true, 1)
+					
+					-- 밀쳐지는 효과: 점진적으로 이동
+					local pushDistance = 2  -- 총 밀리는 거리
+					local pushSteps = 10    -- 몇 번에 나눠서 밀지
+					local pushInterval = 0.02  -- 각 스텝 간격 (초)
+					local stepDistance = pushDistance / pushSteps
+					
+					for i = 1, pushSteps do
+						_TimerService:SetTimerOnce(function()
+							if isvalid(monster) and monster.Unit.curState ~= "die" then
+								local pos = monster.TransformComponent.WorldPosition
+								-- 점점 느려지는 효과 (이징)
+								local ratio = 1 - (i / pushSteps)
+								monster.TransformComponent.WorldPosition = Vector3(pos.x + (stepDistance * ratio * 2), pos.y, pos.z)
+							end
+						end, pushInterval * i)
+					end
+				end
+			end
+		end
+		
+		local hitFunction = function()
+			for index in ipairs(enemies) do
+				local monster = enemies[index]
+			
+				if monster.Name == "EnemySpawnPoint" then
+					continue
+				end
+				
+				if monster.Enable then
+					monster.Unit:OnHit(self.caster, self.skillAmount, true, 5)
+				end
+			end
+		end
+		
+		local deleteFunction = function()
+			_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = ""
+			_GameManager.screenSkillUI.Enable = false	
+			_GameManager.screenSkillUI.Visible = false
+			_UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill = false
+		end
+		
+		_TimerService:SetTimerOnce(pushFunction, 0.1)
+		_TimerService:SetTimerOnce(hitFunction, self.skillAttackTiming)
+		_TimerService:SetTimerOnce(deleteFunction, self.skillTime)
+	end
+
+end
