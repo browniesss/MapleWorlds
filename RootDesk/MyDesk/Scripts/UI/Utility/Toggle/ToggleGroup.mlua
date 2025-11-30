@@ -5,29 +5,6 @@ script ToggleGroup extends Component
 
 	property table ToggleButtons = {}
 
-	@ExecSpace("ClientOnly")
-	method void OnBeginPlay()
-		-- 1. 자신의 모든 자식 엔티티들을 검색합니다.
-		local children = self.Entity.Children
-		      
-		-- 2. 자식들 중 Toggle 컴포넌트를 가진 엔티티만 필터링하여 리스트를 구성합니다.
-		for _, child in pairs(children) do
-		    -- child:GetComponent() 대신, 컴포넌트명으로 직접 접근하여 Toggle 컴포넌트를 찾습니다.
-		    if child.Toggle then
-		        table.insert(self.ToggleButtons, child.Toggle)
-		        -- 자식 Toggle에게 부모 ToggleGroup을 알려줍니다.
-		        child.Toggle:SetGroupController(self.Entity)
-		    end
-		end
-		        
-		log("ToggleGroup found " .. #self.ToggleButtons .. " child Toggle buttons.")
-		
-		-- 라디오 모드 초기화 로직 (구성된 내부 리스트를 사용)
-		if self.UseRadioMode and #self.ToggleButtons > 0 then
-		    self:InitializeRadioMode()
-		end
-	end
-
 	method void InitializeRadioMode()
 		local firstToggle = self.ToggleButtons[1] 
 				
@@ -74,6 +51,33 @@ script ToggleGroup extends Component
 		-- 2. 그룹 컨트롤러에 알림을 보내 Radio Mode 로직을 실행하도록 합니다.
 		-- (Radio Mode가 아닐 경우 NotifyToggleOn 내부에서 로직이 실행되지 않습니다.)
 		self:NotifyToggleOn(targetToggle) 
+	end
+
+	method void InitToggleGroup()
+		-- 1. 자신의 모든 자식 엔티티들을 검색합니다.
+		local children = self.Entity.Children
+		      
+		-- 2. 자식들 중 Toggle 컴포넌트를 가진 엔티티만 필터링하여 리스트를 구성합니다.
+		for _, child in pairs(children) do
+		    -- child:GetComponent() 대신, 컴포넌트명으로 직접 접근하여 Toggle 컴포넌트를 찾습니다.
+		    if child.Toggle then
+		        table.insert(self.ToggleButtons, child.Toggle)
+		        -- 자식 Toggle에게 부모 ToggleGroup을 알려줍니다.
+		        child.Toggle:SetGroupController(self.Entity)
+		    end
+		end
+		        
+		log("ToggleGroup found " .. #self.ToggleButtons .. " child Toggle buttons.")
+		
+		-- 라디오 모드 초기화 로직 (구성된 내부 리스트를 사용)
+		if self.UseRadioMode and #self.ToggleButtons > 0 then
+		    self:InitializeRadioMode()
+		end
+	end
+
+	@EventSender("Self")
+	handler HandleComponentEnabledInHierarchyChangedEvent(ComponentEnabledInHierarchyChangedEvent event)
+		self:InitToggleGroup()
 	end
 
 end
