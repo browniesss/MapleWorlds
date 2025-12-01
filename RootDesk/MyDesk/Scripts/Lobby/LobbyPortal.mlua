@@ -28,19 +28,6 @@ script LobbyPortal extends Component
 		self.IsUserVisible = false
 	end
 
-	@ExecSpace("ClientOnly")
-	method void OnMapLeave(Entity leftMap)
-		if leftMap.Name == "LobbyTest" then
-			local MainUIEntity = _EntityService:GetEntityByPath("/ui/LobbyInfoUI")
-			MainUIEntity:SetEnable(false)
-			
-			local oldUIEntity = _EntityService:GetEntityByPath("/ui/Lobby_UI")
-			oldUIEntity:SetEnable(false)
-			
-			self.IsUserVisible = true
-		end
-	end
-
 	@EventSender("Self")
 	handler HandlePortalUseEvent(PortalUseEvent event)
 		if self.lobbyInfoUI == nil or self.lobbyInfoUI.EnabledInHierarchy then

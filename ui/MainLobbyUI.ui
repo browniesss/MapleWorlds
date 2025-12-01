@@ -1,7 +1,7 @@
 {
   "Id": "",
   "GameId": "",
-  "EntryKey": "ui://9f61834a-aaf6-4103-9a85-0a1233cf5f34",
+  "EntryKey": "ui://729b72f7-f21b-424b-b214-542b435ce758",
   "ContentType": "x-mod/ui",
   "Content": "",
   "Usage": 0,
@@ -14,17 +14,17 @@
     "Use": "Binary",
     "Entities": [
       {
-        "id": "9f61834a-aaf6-4103-9a85-0a1233cf5f34",
-        "path": "/ui/TEST_GROUP",
+        "id": "729b72f7-f21b-424b-b214-542b435ce758",
+        "path": "/ui/MainLobbyUI",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.UIGroupComponent,MOD.Core.CanvasGroupComponent",
         "jsonString": {
-          "name": "TEST_GROUP",
-          "path": "/ui/TEST_GROUP",
+          "name": "MainLobbyUI",
+          "path": "/ui/MainLobbyUI",
           "nameEditable": true,
-          "enable": false,
+          "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 7,
+          "displayOrder": 23,
           "pathConstraints": "//",
           "revision": 1,
           "origin": {
@@ -83,8 +83,8 @@
             },
             {
               "@type": "MOD.Core.UIGroupComponent",
-              "DefaultShow": false,
-              "GroupOrder": 8,
+              "DefaultShow": true,
+              "GroupOrder": 5,
               "GroupType": 2,
               "Enable": true
             },
@@ -97,53 +97,197 @@
         }
       },
       {
-        "id": "7524be99-2d8c-4ccf-81d3-828ec78e5e85",
-        "path": "/ui/TEST_GROUP/Scroll_Layout",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ScrollLayoutGroupComponent,script.TestAnimScrollView",
+        "id": "9e66a447-1440-490a-a736-cac11248e491",
+        "path": "/ui/MainLobbyUI/UIRoot",
+        "componentNames": "MOD.Core.UITransformComponent",
         "jsonString": {
-          "name": "Scroll_Layout",
-          "path": "/ui/TEST_GROUP/Scroll_Layout",
+          "name": "UIRoot",
+          "path": "/ui/MainLobbyUI/UIRoot",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
           "pathConstraints": "///",
-          "revision": 0,
+          "revision": 1,
           "origin": {
             "type": "Model",
-            "entry_id": "UISprite",
+            "entry_id": "uiempty",
             "sub_entity_id": null
           },
-          "modelId": "uisprite",
+          "modelId": "uiempty",
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 0,
+              "AlignmentOption": 15,
               "AnchorsMax": {
-                "x": 0.5,
-                "y": 0.5
+                "x": 1.0,
+                "y": 1.0
               },
               "AnchorsMin": {
-                "x": 0.5,
-                "y": 0.5
+                "x": 0.0,
+                "y": 0.0
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": -424.701782,
-                "y": 510.9463
+                "x": 0.0,
+                "y": 0.0
               },
               "OffsetMin": {
-                "x": -924.7018,
-                "y": 10.9462891
+                "x": 0.0,
+                "y": 0.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 500.0,
-                "y": 500.0
+                "x": 1920.0,
+                "y": 1080.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "18c53239-7d31-4476-b288-86e346daf131",
+        "path": "/ui/MainLobbyUI/UIRoot/TopUI",
+        "componentNames": "MOD.Core.UITransformComponent",
+        "jsonString": {
+          "name": "TopUI",
+          "path": "/ui/MainLobbyUI/UIRoot/TopUI",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uiempty",
+            "sub_entity_id": null
+          },
+          "modelId": "uiempty",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 9,
+              "AnchorsMax": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "AnchorsMin": {
+                "x": 0.0,
+                "y": 1.0
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "OffsetMin": {
+                "x": 0.0,
+                "y": -150.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 1.0
+              },
+              "RectSize": {
+                "x": 1920.0,
+                "y": 150.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 540.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "1499b805-8740-47ae-8db2-3e982f7c340d",
+        "path": "/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.BadgeOpenButton",
+        "jsonString": {
+          "name": "BadgeButton",
+          "path": "/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "/////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uibutton",
+            "sub_entity_id": null
+          },
+          "modelId": "uibutton",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 5,
+              "AnchorsMax": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "AnchorsMin": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": -207.5,
+                "y": -31.0
+              },
+              "OffsetMin": {
+                "x": -287.5,
+                "y": -114.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 80.0,
+                "y": 83.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -153,12 +297,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -674.7018,
-                "y": 260.9463
+                "x": -247.5,
+                "y": -72.5
               },
               "Position": {
-                "x": -674.7018,
-                "y": 260.9463,
+                "x": 712.5,
+                "y": -72.5,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -176,181 +320,17 @@
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "AnimClipPlayType": 0,
-              "EndFrameIndex": 2147483647,
               "ImageRUID": {
-                "DataId": ""
-              },
-              "LocalPosition": {
-                "x": 0.0,
-                "y": 0.0
+                "DataId": "e363fe71863482e40954b62b58bf4ac8"
               },
               "LocalScale": {
                 "x": 1.0,
                 "y": 1.0
               },
               "OverrideSorting": false,
-              "PlayRate": 1.0,
-              "StartFrameIndex": 0,
-              "Color": {
-                "r": 0.223990083,
-                "g": 0.223990083,
-                "b": 0.223990083,
-                "a": 0.5
-              },
-              "DropShadow": false,
-              "DropShadowAngle": 30.0,
-              "DropShadowColor": {
-                "r": 0.0,
-                "g": 0.0,
-                "b": 0.0,
-                "a": 0.72
-              },
-              "DropShadowDistance": 32.0,
-              "FillAmount": 1.0,
+              "SortingLayer": "MapLayer0",
               "FillCenter": true,
-              "FillClockWise": true,
-              "FillMethod": 0,
-              "FillOrigin": 0,
-              "FlipX": false,
-              "FlipY": false,
-              "FrameColumn": 1,
-              "FrameRate": 0,
-              "FrameRow": 1,
-              "Outline": false,
-              "OutlineColor": {
-                "r": 0.0,
-                "g": 0.0,
-                "b": 0.0,
-                "a": 1.0
-              },
-              "OutlineWidth": 3.0,
-              "RaycastTarget": true,
-              "Type": 1,
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.ScrollLayoutGroupComponent",
-              "CellSize": {
-                "x": 100.0,
-                "y": 100.0
-              },
-              "Constraint": 0,
-              "ConstraintCount": 1,
-              "GridSpacing": {
-                "x": 10.0,
-                "y": 10.0
-              },
-              "HorizontalScrollBarDirection": 0,
-              "OverrideSorting": false,
-              "Padding": {
-                "left": 10,
-                "right": 10,
-                "top": 10,
-                "bottom": 10
-              },
-              "ReverseArrangement": false,
-              "ScrollBarBackgroundColor": {
-                "r": 1.0,
-                "g": 1.0,
-                "b": 1.0,
-                "a": 0.4
-              },
-              "ScrollBarHandleColor": {
-                "r": 0.5,
-                "g": 0.5,
-                "b": 0.5,
-                "a": 1.0
-              },
-              "ScrollBarThickness": 20.0,
-              "ScrollBarVisible": 1,
-              "Spacing": 0.0,
-              "StartAxis": 0,
-              "StartCorner": 0,
-              "Type": 2,
-              "UseScroll": true,
-              "VerticalScrollBarDirection": 2,
-              "Enable": true
-            },
-            {
-              "@type": "script.TestAnimScrollView",
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "7321a67f-49dd-4b97-8343-dd1da7da6e36",
-        "path": "/ui/TEST_GROUP/Scroll_Layout/UIButton",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.TestAnimButton",
-        "jsonString": {
-          "name": "UIButton",
-          "path": "/ui/TEST_GROUP/Scroll_Layout/UIButton",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 0,
-          "pathConstraints": "////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uibutton",
-            "sub_entity_id": null
-          },
-          "modelId": "uibutton",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 4,
-              "AnchorsMax": {
-                "x": 0.0,
-                "y": 1.0
-              },
-              "AnchorsMin": {
-                "x": 0.0,
-                "y": 1.0
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": 110.0,
-                "y": -10.0
-              },
-              "OffsetMin": {
-                "x": 10.0,
-                "y": -110.0
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 100.0,
-                "y": 100.0
-              },
-              "UIMode": 1,
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": 60.0,
-                "y": -60.0
-              },
-              "Position": {
-                "x": 60.0,
-                "y": -60.0,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "OverrideSorting": false,
+              "Type": 0,
               "Enable": true
             },
             {
@@ -399,7 +379,7 @@
               "Enable": true
             },
             {
-              "@type": "script.TestAnimButton",
+              "@type": "script.BadgeOpenButton",
               "Enable": true
             }
           ],
@@ -407,53 +387,135 @@
         }
       },
       {
-        "id": "ba6df585-bfb8-45f5-958c-04828e4a552d",
-        "path": "/ui/TEST_GROUP/Scroll_Layout/UIButton/UIText",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "id": "2dc209b8-ffc5-4198-86f5-be3fb9f5f9c5",
+        "path": "/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton/RedDotSprite",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
-          "name": "UIText",
-          "path": "/ui/TEST_GROUP/Scroll_Layout/UIButton/UIText",
+          "name": "RedDotSprite",
+          "path": "/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton/RedDotSprite",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
-          "pathConstraints": "/////",
+          "pathConstraints": "//////",
           "revision": 1,
           "origin": {
             "type": "Model",
-            "entry_id": "uitext",
+            "entry_id": "uisprite",
             "sub_entity_id": null
           },
-          "modelId": "uitext",
+          "modelId": "uisprite",
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 4,
+              "AlignmentOption": 0,
               "AnchorsMax": {
-                "x": 0.0,
-                "y": 1.0
+                "x": 0.5,
+                "y": 0.5
               },
               "AnchorsMin": {
-                "x": 0.0,
-                "y": 1.0
+                "x": 0.5,
+                "y": 0.5
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 100.0,
-                "y": 0.0
+                "x": 61.0,
+                "y": 56.0
               },
               "OffsetMin": {
-                "x": 0.0,
-                "y": -100.0
+                "x": 29.0,
+                "y": 24.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 100.0,
-                "y": 100.0
+                "x": 32.0,
+                "y": 32.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 45.0,
+                "y": 40.0
+              },
+              "Position": {
+                "x": 45.0,
+                "y": 40.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "df88de85d1a34a088f274ad0f7c5c906"
+              },
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Type": 0,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "8a07dba5-f1d5-4373-b96e-ac5eab6847d6",
+        "path": "/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton/BadgeIcon",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "jsonString": {
+          "name": "BadgeIcon",
+          "path": "/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton/BadgeIcon",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 1,
+          "pathConstraints": "//////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uisprite",
+            "sub_entity_id": null
+          },
+          "modelId": "uisprite",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 29.5,
+                "y": 30.5
+              },
+              "OffsetMin": {
+                "x": -29.5,
+                "y": -30.5
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 59.0,
+                "y": 61.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -463,13 +525,8 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 50.0,
-                "y": -50.0
-              },
-              "Rotation": {
                 "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
+                "y": 0.0
               },
               "Position": {
                 "x": 0.0,
@@ -480,34 +537,22 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0,
-                "w": -1.0
+                "w": 1.0
               },
               "Scale": {
                 "x": 1.0,
                 "y": 1.0,
                 "z": 1.0
               },
-              "ZRotation": 0.0,
               "Enable": true
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "OverrideSorting": false,
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.TextComponent",
-              "FontColor": {
-                "r": 1.0,
-                "g": 1.0,
-                "b": 1.0,
-                "a": 1.0
-              },
-              "OutlineDistance": {
-                "x": 1.0,
-                "y": -1.0
+              "ImageRUID": {
+                "DataId": "6ad1a07f71faad24288e6954e1839dcc"
               },
               "OverrideSorting": false,
+              "Type": 0,
               "Enable": true
             }
           ],

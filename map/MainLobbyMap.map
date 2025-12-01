@@ -4066,8 +4066,8 @@
             {
               "@type": "MOD.Core.TransformComponent",
               "Position": {
-                "x": -5.3827,
-                "y": 1.355,
+                "x": -6.9313,
+                "y": 1.4205,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -4111,10 +4111,19 @@
             },
             {
               "@type": "MOD.Core.ChatBalloonComponent",
-              "ChatBalloonRUID": {
-                "DataId": "7b6bd117bd0446a5bacec8ea6831c997"
-              },
+              "ArrowChatEnabled": true,
+              "AutoShowEnabled": true,
+              "BalloonScale": 1.5,
               "ChatModeEnabled": false,
+              "FontColor": {
+                "r": 0.545098066,
+                "g": 0.02745098,
+                "b": 0.02745098,
+                "a": 1.0
+              },
+              "FontSize": 1.5,
+              "Message": "즐거운 하루 보내세요~",
+              "Offset": -2.35,
               "Enable": true
             },
             {
@@ -4142,7 +4151,7 @@
       {
         "id": "06636bee-e408-49ca-9de4-7370e99054e5",
         "path": "/maps/MainLobbyMap/NpcRoot/npc-이벤트",
-        "componentNames": "MOD.Core.TransformComponent,MOD.Core.SpriteRendererComponent,MOD.Core.RigidbodyComponent,MOD.Core.StateComponent,MOD.Core.ChatBalloonComponent,MOD.Core.StateAnimationComponent,MOD.Core.NameTagComponent",
+        "componentNames": "MOD.Core.TransformComponent,MOD.Core.SpriteRendererComponent,MOD.Core.RigidbodyComponent,MOD.Core.StateComponent,MOD.Core.ChatBalloonComponent,MOD.Core.StateAnimationComponent,MOD.Core.NameTagComponent,MOD.Core.TouchReceiveComponent,script.AttendanceEventButton",
         "jsonString": {
           "name": "npc-이벤트",
           "path": "/maps/MainLobbyMap/NpcRoot/npc-이벤트",
@@ -4163,8 +4172,8 @@
             {
               "@type": "MOD.Core.TransformComponent",
               "Position": {
-                "x": -4.7007,
-                "y": 1.3673,
+                "x": -4.6619,
+                "y": 1.3841,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -4208,10 +4217,20 @@
             },
             {
               "@type": "MOD.Core.ChatBalloonComponent",
+              "AutoShowEnabled": true,
+              "BalloonScale": 1.6,
               "ChatBalloonRUID": {
                 "DataId": "7b6bd117bd0446a5bacec8ea6831c997"
               },
               "ChatModeEnabled": false,
+              "FontColor": {
+                "r": 0.545098066,
+                "g": 0.02745098,
+                "b": 0.02745098,
+                "a": 1.0
+              },
+              "FontSize": 1.5,
+              "Message": "이벤트를 확인하고 싶으면 나를 클릭해 봐",
               "Enable": true
             },
             {
@@ -4231,6 +4250,31 @@
                 "DataId": "9bf18287398c44699c20fc5123d1a1ae"
               },
               "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TouchReceiveComponent",
+              "AutoFitOnce": true,
+              "AutoFitToSize": false,
+              "DynamicTouchArea": false,
+              "Offset": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "RelayEventToBehind": false,
+              "TouchArea": {
+                "x": 1.0,
+                "y": 2.0
+              },
+              "TouchAreaUpdateTime": 1.0,
+              "Enable": true
+            },
+            {
+              "@type": "script.AttendanceEventButton",
+              "Enable": true,
+              "redDotSprite": {
+                "IsRelative": false,
+                "ComponentId": "06636bee-e408-49ca-9de4-7370e99054e5:ChatBalloonComponent"
+              }
             }
           ],
           "@version": 1
@@ -4402,10 +4446,19 @@
             },
             {
               "@type": "MOD.Core.ChatBalloonComponent",
+              "AutoShowEnabled": true,
               "ChatBalloonRUID": {
                 "DataId": "7b6bd117bd0446a5bacec8ea6831c997"
               },
               "ChatModeEnabled": false,
+              "FontColor": {
+                "r": 0.545098066,
+                "g": 0.02745098,
+                "b": 0.02745098,
+                "a": 1.0
+              },
+              "FontSize": 1.5,
+              "Message": "안녕?",
               "Enable": true
             },
             {
@@ -4589,8 +4642,8 @@
             {
               "@type": "MOD.Core.TransformComponent",
               "Position": {
-                "x": 5.83311653,
-                "y": 0.83,
+                "x": 6.541398,
+                "y": 0.8299999,
                 "z": 999.999
               },
               "QuaternionRotation": {
