@@ -1,0 +1,40 @@
+@Component
+script GachaUnitInfoPanel extends Component
+
+	property table unitData = {}
+
+	property table skillData = {}
+
+	property table spawnSkillData = {}
+
+	property Entity unitDetailInfo = "05879926-07e0-412f-aa4d-43c8a8258596"
+
+	property Entity normalSkillInfo = "88caa43e-4764-4a16-9af4-84db6016774c"
+
+	property Entity spawnSkillInfo = "7afb82e1-511b-4884-8f65-f5da1e804a21"
+
+	method void Init(table unitData, table normalSkillData, table spawnSkillData)
+		self.unitData = unitData
+		self.skillData = normalSkillData
+		self.spawnSkillData = spawnSkillData
+		
+		self.unitDetailInfo.UnitDetailInfo:Init(self.unitData)
+		self.normalSkillInfo.UnitSkillInfo:Init(self.skillData)
+		
+		if spawnSkillData == nil then
+			self.spawnSkillInfo.Enable = false
+			self.spawnSkillInfo.Visible = false
+		else
+			self.spawnSkillInfo.Enable = true
+			self.spawnSkillInfo.Visible = true
+			self.spawnSkillInfo.UnitSkillInfo:Init(self.spawnSkillData)	
+		end
+		
+	end
+
+	@EventSender("Entity", "5e3a20c7-852a-4125-ba54-92fb040f3884")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		self.Entity.Visible = false
+	end
+
+end
