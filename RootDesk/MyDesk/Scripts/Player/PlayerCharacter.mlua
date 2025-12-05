@@ -52,6 +52,8 @@ script PlayerCharacter extends Component
 
 	@ExecSpace("ServerOnly")
 	method void OnMapEnter(Entity enteredMap)
+		log("[PlayerCharacter] OnMapEnter called, map: ", enteredMap.Name)
+
 		if enteredMap.Name == "LobbyScene" then
 			self.Entity.Visible = false
 		end
@@ -59,18 +61,64 @@ script PlayerCharacter extends Component
 		local isTermAgree = _TermService:LOAD(self.Entity.PlayerComponent.UserId)
 		local isTutorial = _TutorialService:LOAD(self.Entity.PlayerComponent.UserId)
 
+		log("[PlayerCharacter] isTermAgree: ", isTermAgree, ", isTutorial: ", isTutorial)
+
 		if isTermAgree == 0 then
 			_TermService:AgreePopupOn()
 		end
 
+		-- 신규 유저: Stage000 튜토리얼 스테이지로 이동
 		if isTutorial == 0 then
-			_TutorialService:StartTutorial(1)
-			_TutorialService:SAVE(self.Entity.PlayerComponent.UserId)
+			-- MainLobbyMap에서 진입한 경우 클라이언트에서 튜토리얼 시작
+			if enteredMap.Name == "MainLobbyMap" then
+				log("[Tutorial] New user detected, starting tutorial...")
+				-- 클라이언트에서 튜토리얼 게임 시작 호출
+				self:StartTutorialFromClient()
+			end
+		elseif isTutorial == 1 then
+			-- 인게임 튜토리얼 완료 후 로비 진입 시 로비 튜토리얼 시작
+			if enteredMap.Name == "MainLobbyMap" then
+				local isLobbyTutorial = _TutorialService:LOAD_LOBBY(self.Entity.PlayerComponent.UserId)
+				log("[PlayerCharacter] isLobbyTutorial: ", isLobbyTutorial)
+				if isLobbyTutorial == 0 then
+					log("[Tutorial] Starting lobby tutorial...")
+					self:StartLobbyTutorialFromClient()
+				else
+					log("[Tutorial] Lobby tutorial already completed, skipping")
+				end
+			end
+		else
+			log("[PlayerCharacter] isTutorial value not 0 or 1: ", isTutorial)
 		end
 	end
 
 	method void SetIngameSkill(number skillID, number skillLevel)
 		self.ingameSkills[skillID] = skillLevel;
+	end
+
+	-- 클라이언트에서 튜토리얼 게임 시작
+	@ExecSpace("Client")
+	method void StartTutorialFromClient()
+		log("[Tutorial] StartTutorialFromClient called")
+		-- 약간의 딜레이 후 시작 (데이터 로드 완료 대기)
+		_TimerService:SetTimerOnce(function()
+			_GameManager:StartTutorialGame()
+		end, 0.5)
+	end
+
+	-- 클라이언트에서 로비 튜토리얼 시작
+	@ExecSpace("Client")
+	method void StartLobbyTutorialFromClient()
+		log("[Tutorial] StartLobbyTutorialFromClient called")
+		-- 약간의 딜레이 후 시작 (UI 로드 완료 대기)
+		_TimerService:SetTimerOnce(function()
+			log("[Tutorial] Timer fired, calling StartLobbyTutorial...")
+			if _TutorialService ~= nil then
+				_TutorialService:StartLobbyTutorial(2)
+			else
+				log("[Tutorial] ERROR: _TutorialService is nil!")
+			end
+		end, 1.0)
 	end
 
 end

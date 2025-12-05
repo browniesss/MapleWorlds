@@ -42,6 +42,15 @@ script TutorialService extends Logic
 	@Sync
 	property integer animateTimerID = 0
 
+	-- 인게임 튜토리얼용 프로퍼티
+	property boolean isIngameTutorial = false
+	property boolean isGamePaused = false
+	property string currentActionType = "touch"
+	property boolean dimmedTouchConnected = false
+
+	-- 로비 튜토리얼용 프로퍼티
+	property boolean isLobbyTutorial = false
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		-- TutorialUI가 없으면 생성
@@ -50,7 +59,7 @@ script TutorialService extends Logic
 			print("TutorialUI not found, creating UI structure...")
 			self:CreateTutorialUI()
 		end
-		
+
 		-- UI 엔티티 참조 가져오기
 		self.tutorialUI = _EntityService:GetEntityByPath("/ui/TutorialUI")
 		self.dimmedTop = _EntityService:GetEntityByPath("/ui/TutorialUI/DimmedTop")
@@ -62,12 +71,36 @@ script TutorialService extends Logic
 		self.tutorialText = _EntityService:GetEntityByPath("/ui/TutorialUI/TutorialTextPanel/TutorialText")
 		self.tutorialArrow = _EntityService:GetEntityByPath("/ui/TutorialUI/TutorialArrow")
 		self.skipButton = _EntityService:GetEntityByPath("/ui/TutorialUI/SkipButton")
-		
+
+		-- 모든 Dimmed 패널에 ButtonComponent 추가 (터치 이벤트용)
+		self:AddButtonComponentToDimmed(self.dimmedTop, "DimmedTop")
+		self:AddButtonComponentToDimmed(self.dimmedBottom, "DimmedBottom")
+		self:AddButtonComponentToDimmed(self.dimmedLeft, "DimmedLeft")
+		self:AddButtonComponentToDimmed(self.dimmedRight, "DimmedRight")
+
+		-- 텍스트 패널에도 ButtonComponent 추가
+		if self.textPanel ~= nil and self.textPanel.ButtonComponent == nil then
+			self.textPanel:AddComponent(ButtonComponent)
+			print("Added ButtonComponent to TutorialTextPanel")
+		end
+
+		-- 하이라이트 테두리에 ButtonComponent 확인 (UI 파일에 이미 포함됨)
+		if self.highlightBorder ~= nil then
+			if self.highlightBorder.ButtonComponent == nil then
+				self.highlightBorder:AddComponent(ButtonComponent)
+				print("Added ButtonComponent to HighlightBorder")
+			end
+			-- SpriteGUIRendererComponent 사용 (UI 파일과 일치)
+			if self.highlightBorder.SpriteGUIRendererComponent ~= nil then
+				self.highlightBorder.SpriteGUIRendererComponent.RaycastTarget = true
+			end
+		end
+
 		-- 스킵 버튼 이벤트 연결
 		if self.skipButton ~= nil then
 			self:SetupSkipButton()
 		end
-		
+
 		-- 실시간 화면 해상도 감지
 		self:UpdateScreenSize()
 	end
@@ -117,29 +150,40 @@ script TutorialService extends Logic
 		local panel = _EntityService:CreateEntity(name, parent)
 		panel:AddComponent(UITransformComponent)
 		panel:AddComponent(UIColorImageRendererComponent)
-		
+		panel:AddComponent(ButtonComponent)
+
 		panel.UITransformComponent.AnchorsMin = Vector2(0, 0)
 		panel.UITransformComponent.AnchorsMax = Vector2(0, 0)
 		panel.UITransformComponent.OffsetMin = Vector2(0, 0)
 		panel.UITransformComponent.OffsetMax = Vector2(100, 100)
-		
+
 		panel.UIColorImageRendererComponent.Color = Color(0, 0, 0, 0.7)
 		panel.UIColorImageRendererComponent.RaycastTarget = true
+	end
+
+	@ExecSpace("Client")
+	method void AddButtonComponentToDimmed(Entity panel, string name)
+		if panel ~= nil and panel.ButtonComponent == nil then
+			panel:AddComponent(ButtonComponent)
+			print("Added ButtonComponent to " .. name)
+		end
 	end
 
 	@ExecSpace("Client")
 	method void CreateHighlightBorder(Entity parent)
 		local border = _EntityService:CreateEntity("HighlightBorder", parent)
 		border:AddComponent(UITransformComponent)
-		border:AddComponent(UIColorImageRendererComponent)
-		
+		border:AddComponent(SpriteGUIRendererComponent)
+		border:AddComponent(ButtonComponent)
+
 		border.UITransformComponent.AnchorsMin = Vector2(0.5, 0.5)
 		border.UITransformComponent.AnchorsMax = Vector2(0.5, 0.5)
 		border.UITransformComponent.OffsetMin = Vector2(-100, -50)
 		border.UITransformComponent.OffsetMax = Vector2(100, 50)
-		
-		border.UIColorImageRendererComponent.Color = Color(1, 1, 0, 1)
-		border.UIColorImageRendererComponent.RaycastTarget = false
+
+		-- 투명하게 하되 클릭은 받을 수 있도록
+		border.SpriteGUIRendererComponent.Color = Color(1, 1, 0, 0.1)  -- 거의 투명
+		border.SpriteGUIRendererComponent.RaycastTarget = true  -- 클릭 가로채기
 	end
 
 	@ExecSpace("Client")
@@ -147,14 +191,15 @@ script TutorialService extends Logic
 		local panel = _EntityService:CreateEntity("TutorialTextPanel", parent)
 		panel:AddComponent(UITransformComponent)
 		panel:AddComponent(UIColorImageRendererComponent)
-		
+		panel:AddComponent(ButtonComponent)
+
 		panel.UITransformComponent.AnchorsMin = Vector2(0.5, 0)
 		panel.UITransformComponent.AnchorsMax = Vector2(0.5, 0)
 		panel.UITransformComponent.OffsetMin = Vector2(-300, 50)
 		panel.UITransformComponent.OffsetMax = Vector2(300, 150)
-		
+
 		panel.UIColorImageRendererComponent.Color = Color(0, 0, 0, 0.8)
-		panel.UIColorImageRendererComponent.RaycastTarget = false
+		panel.UIColorImageRendererComponent.RaycastTarget = true
 		
 		local text = _EntityService:CreateEntity("TutorialText", panel)
 		text:AddComponent(UITransformComponent)
@@ -718,11 +763,15 @@ script TutorialService extends Logic
 		local targetY = stepData.targetY
 		local targetWidth = stepData.targetWidth
 		local targetHeight = stepData.targetHeight
-		
+
 		-- 디버깅 로그
 		print("=== SetupDimmedAreas Debug ===")
 		print("Target Area: X=" .. targetX .. ", Y=" .. targetY .. ", W=" .. targetWidth .. ", H=" .. targetHeight)
 		print("Screen Size: " .. self.screenWidth .. "x" .. self.screenHeight)
+		print("ActionType: " .. self.currentActionType)
+
+		-- summon 모드에서는 RaycastTarget을 false로 설정하여 클릭이 뒤로 전달되도록 함
+		local raycastEnabled = (self.currentActionType ~= "summon")
 		
 		-- 모든 Dimmed 패널을 왼쪽 아래 앵커(0,0)로 고정
 		-- OffsetMin = 왼쪽 아래 모서리, OffsetMax = 오른쪽 위 모서리
@@ -736,10 +785,13 @@ script TutorialService extends Logic
 			-- 하이라이트 위쪽부터 화면 끝까지
 			transform.OffsetMin = Vector2(0, targetY + targetHeight)
 			transform.OffsetMax = Vector2(self.screenWidth, self.screenHeight)
-		
-			print("DimmedTop: Min=(0, " .. (targetY + targetHeight) .. "), Max=(" .. self.screenWidth .. ", " .. self.screenHeight .. ")")
+			-- summon 모드에서는 클릭 통과
+			if self.dimmedTop.SpriteGUIRendererComponent ~= nil then
+				self.dimmedTop.SpriteGUIRendererComponent.RaycastTarget = raycastEnabled
+			end
+			print("DimmedTop: Min=(0, " .. (targetY + targetHeight) .. "), Max=(" .. self.screenWidth .. ", " .. self.screenHeight .. "), Raycast=" .. tostring(raycastEnabled))
 		end
-		
+
 		-- Bottom 영역: 하이라이트 박스 아래쪽 전체 화면
 		if self.dimmedBottom ~= nil and self.dimmedBottom.UITransformComponent ~= nil then
 			local transform = self.dimmedBottom.UITransformComponent
@@ -749,10 +801,13 @@ script TutorialService extends Logic
 			-- 화면 바닥부터 하이라이트 아래까지
 			transform.OffsetMin = Vector2(0, 0)
 			transform.OffsetMax = Vector2(self.screenWidth, targetY)
-		
-			print("DimmedBottom: Min=(0, 0), Max=(" .. self.screenWidth .. ", " .. targetY .. ")")
+			-- summon 모드에서는 클릭 통과
+			if self.dimmedBottom.SpriteGUIRendererComponent ~= nil then
+				self.dimmedBottom.SpriteGUIRendererComponent.RaycastTarget = raycastEnabled
+			end
+			print("DimmedBottom: Min=(0, 0), Max=(" .. self.screenWidth .. ", " .. targetY .. "), Raycast=" .. tostring(raycastEnabled))
 		end
-		
+
 		-- Left 영역: 하이라이트 박스 왼쪽 (하이라이트와 같은 높이)
 		if self.dimmedLeft ~= nil and self.dimmedLeft.UITransformComponent ~= nil then
 			local transform = self.dimmedLeft.UITransformComponent
@@ -762,10 +817,13 @@ script TutorialService extends Logic
 			-- 화면 왼쪽부터 하이라이트 왼쪽까지
 			transform.OffsetMin = Vector2(0, targetY)
 			transform.OffsetMax = Vector2(targetX, targetY + targetHeight)
-		
-			print("DimmedLeft: Min=(0, " .. targetY .. "), Max=(" .. targetX .. ", " .. (targetY + targetHeight) .. ")")
+			-- summon 모드에서는 클릭 통과
+			if self.dimmedLeft.SpriteGUIRendererComponent ~= nil then
+				self.dimmedLeft.SpriteGUIRendererComponent.RaycastTarget = raycastEnabled
+			end
+			print("DimmedLeft: Min=(0, " .. targetY .. "), Max=(" .. targetX .. ", " .. (targetY + targetHeight) .. "), Raycast=" .. tostring(raycastEnabled))
 		end
-		
+
 		-- Right 영역: 하이라이트 박스 오른쪽 (하이라이트와 같은 높이)
 		if self.dimmedRight ~= nil and self.dimmedRight.UITransformComponent ~= nil then
 			local transform = self.dimmedRight.UITransformComponent
@@ -775,10 +833,13 @@ script TutorialService extends Logic
 			-- 하이라이트 오른쪽부터 화면 오른쪽까지
 			transform.OffsetMin = Vector2(targetX + targetWidth, targetY)
 			transform.OffsetMax = Vector2(self.screenWidth, targetY + targetHeight)
-		
-			print("DimmedRight: Min=(" .. (targetX + targetWidth) .. ", " .. targetY .. "), Max=(" .. self.screenWidth .. ", " .. (targetY + targetHeight) .. ")")
+			-- summon 모드에서는 클릭 통과
+			if self.dimmedRight.SpriteGUIRendererComponent ~= nil then
+				self.dimmedRight.SpriteGUIRendererComponent.RaycastTarget = raycastEnabled
+			end
+			print("DimmedRight: Min=(" .. (targetX + targetWidth) .. ", " .. targetY .. "), Max=(" .. self.screenWidth .. ", " .. (targetY + targetHeight) .. "), Raycast=" .. tostring(raycastEnabled))
 		end
-		
+
 		print("=== End Debug ===")
 	end
 
@@ -787,15 +848,42 @@ script TutorialService extends Logic
 		if self.highlightBorder == nil or self.highlightBorder.UITransformComponent == nil then
 			return
 		end
-		
+
 		local transform = self.highlightBorder.UITransformComponent
 		transform.AnchorsMin = Vector2(0, 0)
 		transform.AnchorsMax = Vector2(0, 0)
 		transform.OffsetMin = Vector2(stepData.targetX, stepData.targetY)
 		transform.OffsetMax = Vector2(stepData.targetX + stepData.targetWidth, stepData.targetY + stepData.targetHeight)
-		
+
 		self.highlightBorder.Enable = true
 		self.highlightBorder.Visible = true
+
+		-- 액션 타입에 따라 RaycastTarget 및 ButtonComponent 설정
+		-- summon: 뒤 버튼 클릭 가능하도록 하이라이트 비활성화
+		-- touch: 클릭 가로채서 다음 스텝으로
+		if self.currentActionType == "summon" then
+			-- summon 모드: 하이라이트 영역을 통과해서 뒤 버튼 클릭 가능
+			-- 완전히 비활성화하여 클릭이 뒤로 전달되도록 함
+			self.highlightBorder.Enable = false
+			self.highlightBorder.Visible = false
+			print("  HighlightBorder: summon mode - disabled completely")
+		else
+			-- touch 모드: 하이라이트 영역이 클릭을 가로챔
+			-- 뒤 버튼이 클릭되지 않도록 설정
+			self.highlightBorder.Enable = true
+			self.highlightBorder.Visible = true
+
+			-- SpriteGUIRendererComponent 사용 (UI 파일과 일치)
+			if self.highlightBorder.SpriteGUIRendererComponent ~= nil then
+				self.highlightBorder.SpriteGUIRendererComponent.RaycastTarget = true
+				-- 투명하게 유지하되 클릭은 가로챔
+				self.highlightBorder.SpriteGUIRendererComponent.Color = Color(0, 0, 0, 0.01)
+			end
+			if self.highlightBorder.ButtonComponent ~= nil then
+				self.highlightBorder.ButtonComponent.Enable = true
+			end
+			print("  HighlightBorder: touch mode - click intercepted")
+		end
 	end
 
 	@ExecSpace("Client")
@@ -953,7 +1041,569 @@ script TutorialService extends Logic
 
 	@ExecSpace("Client")
 	method void SkipTutorial()
-		self:EndTutorial()
+		-- 튜토리얼 스킵 처리
+		if self.isIngameTutorial then
+			self:ResumeGame()
+			self:EndIngameTutorial()
+		elseif self.isLobbyTutorial then
+			self:EndLobbyTutorial()
+		else
+			self:EndTutorial()
+		end
+	end
+
+	-- ========== 인게임 튜토리얼 메서드 ==========
+
+	@ExecSpace("Client")
+	method void StartIngameTutorial(integer groupId)
+		-- 인게임 튜토리얼 시작 (NewTutorial DataSet 사용)
+		if groupId == nil or groupId <= 0 then
+			groupId = 1
+		end
+
+		self.currentGroupId = groupId
+		self.isIngameTutorial = true
+
+		print("=== Starting Ingame Tutorial Group " .. groupId .. " ===")
+
+		-- 화면 크기 업데이트
+		self:UpdateScreenSize()
+
+		-- NewTutorial DataSet에서 데이터 가져오기
+		self.tutorialData = {}
+		local dataSet = _DataService:GetTable("NewTutorial")
+
+		if dataSet == nil then
+			print("NewTutorial DataSet not found!")
+			return
+		end
+
+		for index = 1, dataSet:GetRowCount() do
+			local itemGroupId = tonumber(dataSet:GetCell(index, 'groupId')) or 1
+
+			if itemGroupId == groupId then
+				local item = {
+					id = tonumber(dataSet:GetCell(index, 'id')),
+					groupId = itemGroupId,
+					order = tonumber(dataSet:GetCell(index, 'order')),
+					text = tostring(dataSet:GetCell(index, 'text')),
+					highlightType = tostring(dataSet:GetCell(index, 'highlightType')),
+					arrowDirection = tostring(dataSet:GetCell(index, 'arrowDirection')),
+					targetButtonPath = tostring(dataSet:GetCell(index, 'targetButtonPath')),
+					actionType = tostring(dataSet:GetCell(index, 'actionType')) or "touch",
+					targetX = 0,
+					targetY = 0,
+					targetWidth = 0,
+					targetHeight = 0,
+				}
+				table.insert(self.tutorialData, item)
+				print("  Added ingame tutorial step: Order=" .. item.order .. ", ActionType=" .. item.actionType)
+			end
+		end
+
+		-- order로 정렬
+		table.sort(self.tutorialData, function(a, b)
+			return a.order < b.order
+		end)
+
+		if #self.tutorialData == 0 then
+			print("No ingame tutorials found for group " .. groupId)
+			return
+		end
+
+		print("Total " .. #self.tutorialData .. " ingame steps loaded")
+
+		self.currentStep = 1
+		self.isActive = true
+
+		-- UI 활성화
+		self.tutorialUI.Enable = true
+		self.tutorialUI.Visible = true
+
+		-- 스킵 버튼 표시
+		self:ShowSkipButton()
+
+		-- 첫 번째 단계 표시
+		self:ShowIngameStep()
+	end
+
+	@ExecSpace("Client")
+	method void ShowIngameStep()
+		if not self.isActive or self.currentStep > #self.tutorialData then
+			self:EndIngameTutorial()
+			return
+		end
+
+		-- 이전 이벤트 핸들러 정리
+		self:CleanupEventHandlers()
+
+		local stepData = self.tutorialData[self.currentStep]
+		self.currentActionType = stepData.actionType or "touch"
+
+		print("=== Showing Ingame Step " .. self.currentStep .. " ===")
+		print("  ActionType: " .. self.currentActionType)
+		print("  Text: " .. stepData.text)
+
+		-- highlightType이 none이면 전체 화면 터치 모드
+		if stepData.highlightType == "none" then
+			self:ShowFullScreenTutorial(stepData)
+		else
+			-- 타겟 버튼이 있는 경우 기존 로직 사용
+			self:ShowTargetedTutorial(stepData)
+		end
+
+		-- summon 타입이면 게임 일시정지
+		if self.currentActionType == "summon" then
+			self:PauseGame()
+		end
+	end
+
+	@ExecSpace("Client")
+	method void CleanupEventHandlers()
+		-- 이전 이벤트 핸들러 정리
+		-- MSW에서는 ConnectEvent가 핸들러 객체를 반환하지 않음
+		-- 대신 isActive 플래그로 이벤트 무시 처리
+		self.currentTargetButton = nil
+	end
+
+	@ExecSpace("Client")
+	method void ShowFullScreenTutorial(table stepData)
+		-- 전체 화면 딤드 + 중앙 텍스트만 표시
+		log("  Full screen tutorial mode")
+
+		-- 텍스트 업데이트
+		if self.tutorialText ~= nil and self.tutorialText.TextComponent ~= nil then
+			self.tutorialText.TextComponent.Text = stepData.text
+		end
+
+		-- 전체 화면을 덮는 단일 딤드 영역 (클릭 가능)
+		-- DimmedTop만 전체 화면으로 사용하고 나머지는 숨김
+		if self.dimmedTop ~= nil and self.dimmedTop.UITransformComponent ~= nil then
+			local transform = self.dimmedTop.UITransformComponent
+			transform.AnchorsMin = Vector2(0, 0)
+			transform.AnchorsMax = Vector2(1, 1)
+			transform.OffsetMin = Vector2(0, 0)
+			transform.OffsetMax = Vector2(0, 0)
+			self.dimmedTop.Enable = true
+			self.dimmedTop.Visible = true
+		end
+
+		-- 나머지 딤드 패널 숨김
+		if self.dimmedBottom ~= nil then
+			self.dimmedBottom.Enable = false
+			self.dimmedBottom.Visible = false
+		end
+		if self.dimmedLeft ~= nil then
+			self.dimmedLeft.Enable = false
+			self.dimmedLeft.Visible = false
+		end
+		if self.dimmedRight ~= nil then
+			self.dimmedRight.Enable = false
+			self.dimmedRight.Visible = false
+		end
+
+		-- 하이라이트 테두리 숨김
+		if self.highlightBorder ~= nil then
+			self.highlightBorder.Enable = false
+			self.highlightBorder.Visible = false
+		end
+
+		-- 화살표 방향 처리 (none이 아니면 화면 중앙에 표시)
+		if stepData.arrowDirection ~= "none" and stepData.arrowDirection ~= "" then
+			self:ShowDirectionArrow(stepData.arrowDirection)
+		else
+			if self.tutorialArrow ~= nil then
+				self.tutorialArrow.Enable = false
+				self.tutorialArrow.Visible = false
+			end
+		end
+
+		-- 터치 이벤트 연결 (전체 화면 클릭 시 다음 스텝)
+		self:ConnectAllDimmedTouch()
+	end
+
+	@ExecSpace("Client")
+	method void ShowDirectionArrow(string direction)
+		-- 화면 중앙에서 방향을 가리키는 화살표 표시
+		if self.tutorialArrow == nil then
+			return
+		end
+
+		self.tutorialArrow.Enable = true
+		self.tutorialArrow.Visible = true
+
+		local transform = self.tutorialArrow.UITransformComponent
+		local rotation = Vector3(0, 0, 0)
+
+		-- 화면 중앙 위치
+		local centerX = self.screenWidth / 2
+		local centerY = self.screenHeight / 2
+
+		if direction == "right" then
+			rotation = Vector3(0, 0, -90)
+			centerX = self.screenWidth * 0.7  -- 오른쪽으로 치우침
+		elseif direction == "left" then
+			rotation = Vector3(0, 0, 90)
+			centerX = self.screenWidth * 0.3  -- 왼쪽으로 치우침
+		elseif direction == "up" then
+			rotation = Vector3(0, 0, 0)
+			centerY = self.screenHeight * 0.7
+		elseif direction == "down" then
+			rotation = Vector3(0, 0, 180)
+			centerY = self.screenHeight * 0.3
+		end
+
+		transform.Rotation = rotation
+		transform.AnchorsMin = Vector2(0, 0)
+		transform.AnchorsMax = Vector2(0, 0)
+		transform.anchoredPosition = Vector2(centerX, centerY)
+
+		self:AnimateArrow()
+	end
+
+	@ExecSpace("Client")
+	method void ShowTargetedTutorial(table stepData)
+		-- 타겟 버튼 하이라이트 모드 (기존 ShowCurrentStep 로직 재사용)
+		print("  Targeted tutorial mode: " .. (stepData.targetButtonPath or "none"))
+
+		-- 버튼의 실제 위치를 자동으로 가져오기
+		if stepData.targetButtonPath ~= nil and stepData.targetButtonPath ~= "" then
+			local targetButton = _EntityService:GetEntityByPath(stepData.targetButtonPath)
+			if targetButton ~= nil and targetButton.UITransformComponent ~= nil then
+				-- 기존 위치 계산 로직 사용
+				self:CalculateButtonPosition(targetButton, stepData)
+
+				-- 텍스트 업데이트
+				if self.tutorialText ~= nil and self.tutorialText.TextComponent ~= nil then
+					self.tutorialText.TextComponent.Text = stepData.text
+				end
+
+				-- 모든 딤드 패널 활성화
+				if self.dimmedTop ~= nil then
+					self.dimmedTop.Enable = true
+					self.dimmedTop.Visible = true
+				end
+				if self.dimmedBottom ~= nil then
+					self.dimmedBottom.Enable = true
+					self.dimmedBottom.Visible = true
+				end
+				if self.dimmedLeft ~= nil then
+					self.dimmedLeft.Enable = true
+					self.dimmedLeft.Visible = true
+				end
+				if self.dimmedRight ~= nil then
+					self.dimmedRight.Enable = true
+					self.dimmedRight.Visible = true
+				end
+
+				-- Dimmed 영역 설정
+				self:SetupDimmedAreas(stepData)
+
+				-- 하이라이트 테두리 설정
+				self:SetupHighlightBorder(stepData)
+
+				-- 화살표 방향 설정
+				self:SetArrowDirection(stepData.arrowDirection, stepData)
+
+				-- 액션 타입에 따른 이벤트 연결
+				if self.currentActionType == "touch" then
+					self:ConnectTargetButtonForTouch(stepData)
+				elseif self.currentActionType == "summon" then
+					self:ConnectTargetButtonForSummon(stepData)
+				end
+			else
+				print("Warning: Target button not found: " .. stepData.targetButtonPath)
+				-- 버튼을 찾지 못하면 전체 화면 모드로 폴백
+				self:ShowFullScreenTutorial(stepData)
+			end
+		else
+			self:ShowFullScreenTutorial(stepData)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void CalculateButtonPosition(Entity targetButton, table stepData)
+		-- 인게임 UI 위치 계산
+		-- UI 데이터 기반: anchoredPosition은 화면 중앙(0,0) 기준, Anchor(0.5, 0)은 화면 하단 중앙
+		-- 화면 좌표: 좌하단이 (0, 0), 우상단이 (screenWidth, screenHeight)
+
+		local targetPath = stepData.targetButtonPath or ""
+
+		-- 카드 크기 (사용자 제공 데이터)
+		local cardWidth = 153
+		local cardHeight = 172
+		local cardSpacing = 210  -- 카드 중심 간 간격
+
+		-- 스크린샷 기반 위치 계산 (1920x1080 기준)
+		-- 스크린샷(1194x648)에서 첫 번째 카드 중심 X ≈ 420px
+		-- 1920 기준으로 환산: 420 * (1920/1194) ≈ 675
+
+		local scaleX = self.screenWidth / 1920
+		local scaleY = self.screenHeight / 1080
+
+		-- 첫 번째 카드 중심 X (1920x1080 기준)
+		-- 스크린샷 기반 조정: 675 -> 720 (오른쪽으로 이동)
+		local firstCardCenterX = 720
+		local cardBottomY = 15  -- 카드 하단 Y 위치 (화면 맨 아래 근처)
+
+		-- UI 경로별 위치 (1920x1080 기준, 좌하단 원점)
+		if targetPath:find("UnitShop/UnitShopItem_1") then
+			-- 첫 번째 유닛 카드 (Q)
+			local centerX = firstCardCenterX
+			stepData.targetX = (centerX - cardWidth/2) * scaleX
+			stepData.targetY = cardBottomY * scaleY
+			stepData.targetWidth = cardWidth * scaleX
+			stepData.targetHeight = cardHeight * scaleY
+		elseif targetPath:find("UnitShop/UnitShopItem_2") then
+			-- 두 번째 유닛 카드 (W)
+			local centerX = firstCardCenterX + cardSpacing
+			stepData.targetX = (centerX - cardWidth/2) * scaleX
+			stepData.targetY = cardBottomY * scaleY
+			stepData.targetWidth = cardWidth * scaleX
+			stepData.targetHeight = cardHeight * scaleY
+		elseif targetPath:find("UnitShop/UnitShopItem_3") then
+			-- 세 번째 유닛 카드 (E)
+			local centerX = firstCardCenterX + cardSpacing * 2
+			stepData.targetX = (centerX - cardWidth/2) * scaleX
+			stepData.targetY = cardBottomY * scaleY
+			stepData.targetWidth = cardWidth * scaleX
+			stepData.targetHeight = cardHeight * scaleY
+		elseif targetPath:find("UnitShop/UnitShopItem_4") then
+			-- 네 번째 유닛 카드 (R)
+			local centerX = firstCardCenterX + cardSpacing * 3
+			stepData.targetX = (centerX - cardWidth/2) * scaleX
+			stepData.targetY = cardBottomY * scaleY
+			stepData.targetWidth = cardWidth * scaleX
+			stepData.targetHeight = cardHeight * scaleY
+		elseif targetPath:find("UnitShop") then
+			-- 유닛샵 전체 영역 (4개 카드 포함)
+			-- 첫 번째 카드 왼쪽 ~ 네 번째 카드 오른쪽
+			local padding = 15  -- 좌우 여백
+			local startX = firstCardCenterX - cardWidth/2 - padding  -- 첫 카드 왼쪽
+			local endX = firstCardCenterX + cardSpacing * 3 + cardWidth/2 + padding  -- 마지막 카드 오른쪽
+			stepData.targetX = startX * scaleX
+			stepData.targetY = (cardBottomY - 10) * scaleY  -- 카드 하단보다 조금 아래
+			stepData.targetWidth = (endX - startX) * scaleX
+			stepData.targetHeight = (cardHeight + 20) * scaleY  -- 카드 높이 + 여백
+		elseif targetPath:find("User_Coin_Bar") then
+			-- 코스트 표시 영역 (좌하단)
+			-- anchoredPosition: (-761.4554, 120), RectSize: (350, 100)
+			local centerX = 960 - 761  -- = 199
+			local centerY = 120  -- 앵커(0.5, 0) 기준이므로 하단에서 120 위
+			stepData.targetX = (centerX - 175) * scaleX  -- 350/2 = 175
+			stepData.targetY = (centerY - 50) * scaleY  -- 100/2 = 50
+			stepData.targetWidth = 350 * scaleX
+			stepData.targetHeight = 100 * scaleY
+		else
+			-- 기본값: 화면 중앙
+			stepData.targetX = (self.screenWidth - 200) / 2
+			stepData.targetY = (self.screenHeight - 100) / 2
+			stepData.targetWidth = 200
+			stepData.targetHeight = 100
+		end
+
+		print("  Target: " .. targetPath)
+		print("  Position: X=" .. stepData.targetX .. ", Y=" .. stepData.targetY)
+		print("  Size: " .. stepData.targetWidth .. "x" .. stepData.targetHeight)
+	end
+
+	@ExecSpace("Client")
+	method void ConnectAllDimmedTouch()
+		-- 모든 딤드 패널에 터치 이벤트 연결 (한 번만)
+		if self.dimmedTouchConnected then
+			return
+		end
+
+		log("  Connecting touch events to all dimmed panels")
+
+		-- DimmedTop
+		if self.dimmedTop ~= nil then
+			self.dimmedTop:ConnectEvent("ButtonClickEvent", function(event)
+				self:OnDimmedClicked("Top")
+			end)
+		end
+
+		-- DimmedBottom
+		if self.dimmedBottom ~= nil then
+			self.dimmedBottom:ConnectEvent("ButtonClickEvent", function(event)
+				self:OnDimmedClicked("Bottom")
+			end)
+		end
+
+		-- DimmedLeft
+		if self.dimmedLeft ~= nil then
+			self.dimmedLeft:ConnectEvent("ButtonClickEvent", function(event)
+				self:OnDimmedClicked("Left")
+			end)
+		end
+
+		-- DimmedRight
+		if self.dimmedRight ~= nil then
+			self.dimmedRight:ConnectEvent("ButtonClickEvent", function(event)
+				self:OnDimmedClicked("Right")
+			end)
+		end
+
+		-- TextPanel (텍스트 박스도 터치 가능)
+		if self.textPanel ~= nil then
+			self.textPanel:ConnectEvent("ButtonClickEvent", function(event)
+				self:OnDimmedClicked("TextPanel")
+			end)
+		end
+
+		-- HighlightBorder (하이라이트 영역 클릭 시 - touch 타입에서만 진행)
+		if self.highlightBorder ~= nil then
+			self.highlightBorder:ConnectEvent("ButtonClickEvent", function(event)
+				self:OnDimmedClicked("Highlight")
+			end)
+		end
+
+		self.dimmedTouchConnected = true
+		log("  All dimmed touch events connected")
+	end
+
+	@ExecSpace("Client")
+	method void OnDimmedClicked(string panelName)
+		log("[Tutorial] OnDimmedClicked: ", panelName)
+		log("  isActive=", self.isActive, ", actionType=", self.currentActionType)
+		log("  isIngameTutorial=", self.isIngameTutorial, ", isLobbyTutorial=", self.isLobbyTutorial)
+		if self.isActive and self.currentActionType == "touch" then
+			if self.isIngameTutorial then
+				log("  -> Calling NextIngameStep()")
+				self:NextIngameStep()
+			elseif self.isLobbyTutorial then
+				log("  -> Calling NextLobbyStep()")
+				self:NextLobbyStep()
+			else
+				log("  -> No tutorial type matched!")
+			end
+		else
+			log("  -> Conditions not met for advancing")
+		end
+	end
+
+	@ExecSpace("Client")
+	method void ConnectTargetButtonForTouch(table stepData)
+		-- 타겟 버튼 하이라이트 표시 (터치 타입)
+		-- touch 타입에서는 하이라이트 영역(HighlightBorder)이 클릭을 가로채서 다음 스텝으로 진행
+		-- 뒤에 있는 실제 버튼은 클릭되지 않음 (HighlightBorder의 RaycastTarget = true)
+		if stepData.targetButtonPath ~= nil and stepData.targetButtonPath ~= "" then
+			local targetButton = _EntityService:GetEntityByPath(stepData.targetButtonPath)
+			if targetButton ~= nil then
+				self.currentTargetButton = targetButton
+				print("  Target button for touch: " .. stepData.targetButtonPath)
+				-- 타겟 버튼에 직접 이벤트 연결 불필요 - HighlightBorder가 클릭을 가로챔
+			else
+				print("  WARNING: Target button not found: " .. stepData.targetButtonPath)
+			end
+		end
+
+		-- 모든 딤드 패널 클릭으로 다음 스텝 이동
+		self:ConnectAllDimmedTouch()
+	end
+
+	@ExecSpace("Client")
+	method void ConnectTargetButtonForSummon(table stepData)
+		-- summon 타입: 버튼 클릭 시 소환 이벤트 대기
+		-- 실제 소환은 UnitShopItem에서 OnUnitSummoned 호출
+		if stepData.targetButtonPath ~= nil and stepData.targetButtonPath ~= "" then
+			local targetButton = _EntityService:GetEntityByPath(stepData.targetButtonPath)
+			if targetButton ~= nil then
+				self.currentTargetButton = targetButton
+				print("  Waiting for unit summon on: " .. stepData.targetButtonPath)
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnUnitSummoned()
+		-- 유닛 소환 완료 시 호출 (UnitShopItem에서 호출)
+		print("[Tutorial] OnUnitSummoned called!")
+		print("  isIngameTutorial=" .. tostring(self.isIngameTutorial))
+		print("  isActive=" .. tostring(self.isActive))
+		print("  currentActionType=" .. tostring(self.currentActionType))
+		print("  currentStep=" .. tostring(self.currentStep))
+
+		if self.isIngameTutorial and self.isActive and self.currentActionType == "summon" then
+			print("[Tutorial] Conditions met! Advancing to next tutorial step...")
+			self:ResumeGame()
+			self:NextIngameStep()
+		else
+			print("[Tutorial] Conditions NOT met, not advancing")
+		end
+	end
+
+	@ExecSpace("Client")
+	method void NextIngameStep()
+		self.currentStep = self.currentStep + 1
+		self:ShowIngameStep()
+	end
+
+	@ExecSpace("Client")
+	method void PauseGame()
+		-- 게임 일시정지
+		if not self.isGamePaused then
+			self.isGamePaused = true
+			print("Game paused for tutorial")
+
+			-- GameManager에 일시정지 알림
+			if _GameManager ~= nil then
+				_GameManager.isTutorialPaused = true
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void ResumeGame()
+		-- 게임 재개
+		if self.isGamePaused then
+			self.isGamePaused = false
+			print("Game resumed")
+
+			-- GameManager에 재개 알림
+			if _GameManager ~= nil then
+				_GameManager.isTutorialPaused = false
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void EndIngameTutorial()
+		print("=== Ingame Tutorial Completed ===")
+
+		self.isActive = false
+		self.isIngameTutorial = false
+		self.isGamePaused = false
+		self.dimmedTouchConnected = false
+
+		-- 스킵 버튼 숨김
+		self:HideSkipButton()
+
+		-- 타이머 정리
+		if self.animateTimerID ~= nil then
+			_TimerService:ClearTimer(self.animateTimerID)
+			self.animateTimerID = nil
+		end
+
+		-- UI 비활성화
+		if self.tutorialUI ~= nil then
+			self.tutorialUI.Enable = false
+			self.tutorialUI.Visible = false
+		end
+
+		-- GameManager 상태 복원
+		if _GameManager ~= nil then
+			_GameManager.isTutorialPaused = false
+			_GameManager.isTutorialMode = false
+		end
+
+		-- 튜토리얼 완료 저장
+		local userId = _UserService.LocalPlayer.PlayerComponent.UserId
+		self:SAVE(userId)
+		print("Ingame tutorial completed and saved for user: " .. userId)
+
+		-- 튜토리얼 완료 후 게임 계속 진행 (로비 이동 하지 않음)
+		print("Tutorial finished. Game continues...")
 	end
 
 	@ExecSpace("Client")
@@ -1055,19 +1705,394 @@ script TutorialService extends Logic
 	@ExecSpace("Server")
 	method integer LOAD(string uid)
 		local ds = _DataStorageService:GetUserDataStorage(uid)
-		
+
 		local errCode, res = ds:GetAndWait("USER_TUTORIAL")
 		if errCode ~= 0 then
 			return errCode
 		end
-		
+
 		if res == nil then
 			return 0
 		end
-		
+
 		local resTable = _HttpService:JSONDecode(res)
-		
+
 		return resTable["isTutorial"]
+	end
+
+	-- 테스트용: 튜토리얼 데이터 리셋 (신규 유저처럼 만들기)
+	@ExecSpace("Server")
+	method integer RESET(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+
+		local data = {}
+		data["isTutorial"] = 0
+
+		local save = _HttpService:JSONEncode(data)
+
+		print("[TutorialService] RESET tutorial data for user: " .. uid)
+		return ds:SetAndWait("USER_TUTORIAL", save)
+	end
+
+	-- 클라이언트에서 호출 가능한 리셋 메서드 (인게임 + 로비 튜토리얼 모두 리셋)
+	@ExecSpace("Client")
+	method void ResetTutorialData()
+		local userId = _UserService.LocalPlayer.PlayerComponent.UserId
+		self:RESET(userId)
+		self:RESET_LOBBY(userId)
+		log("[TutorialService] All tutorial data reset (ingame + lobby). Please re-enter the game.")
+	end
+
+	-- ========== 로비 튜토리얼 메서드 ==========
+
+	@ExecSpace("Client")
+	method void StartLobbyTutorial(integer groupId)
+		log("[LobbyTutorial] StartLobbyTutorial called with groupId: ", groupId)
+
+		-- 로비 튜토리얼 시작 (LobbyTutorial DataSet 사용)
+		if groupId == nil or groupId <= 0 then
+			groupId = 2  -- 로비 튜토리얼 기본 그룹 ID
+		end
+
+		self.currentGroupId = groupId
+		self.isLobbyTutorial = true
+		self.isIngameTutorial = false
+
+		log("=== Starting Lobby Tutorial Group ", groupId, " ===")
+		log("  tutorialUI exists: ", self.tutorialUI ~= nil)
+
+		-- 화면 크기 업데이트
+		self:UpdateScreenSize()
+
+		-- LobbyTutorial DataSet에서 데이터 가져오기
+		self.tutorialData = {}
+		local dataSet = _DataService:GetTable("LobbyTutorial")
+
+		if dataSet == nil then
+			log("[LobbyTutorial] ERROR: LobbyTutorial DataSet not found!")
+			return
+		end
+
+		log("[LobbyTutorial] DataSet found, rowCount: ", dataSet:GetRowCount())
+
+		for index = 1, dataSet:GetRowCount() do
+			local itemGroupId = tonumber(dataSet:GetCell(index, 'groupId')) or 2
+
+			if itemGroupId == groupId then
+				local item = {
+					id = tonumber(dataSet:GetCell(index, 'id')),
+					groupId = itemGroupId,
+					order = tonumber(dataSet:GetCell(index, 'order')),
+					text = tostring(dataSet:GetCell(index, 'text')),
+					highlightType = tostring(dataSet:GetCell(index, 'highlightType')),
+					arrowDirection = tostring(dataSet:GetCell(index, 'arrowDirection')),
+					targetButtonPath = tostring(dataSet:GetCell(index, 'targetButtonPath')),
+					actionType = tostring(dataSet:GetCell(index, 'actionType')) or "touch",
+					targetX = 0,
+					targetY = 0,
+					targetWidth = 0,
+					targetHeight = 0,
+				}
+				table.insert(self.tutorialData, item)
+				log("  Added lobby tutorial step: Order=", item.order, ", ActionType=", item.actionType)
+			end
+		end
+
+		-- order로 정렬
+		table.sort(self.tutorialData, function(a, b)
+			return a.order < b.order
+		end)
+
+		if #self.tutorialData == 0 then
+			log("[LobbyTutorial] No lobby tutorials found for group ", groupId)
+			return
+		end
+
+		log("[LobbyTutorial] Total ", #self.tutorialData, " lobby steps loaded")
+
+		self.currentStep = 1
+		self.isActive = true
+		self.dimmedTouchConnected = false  -- 터치 이벤트 재연결을 위해 리셋
+
+		-- UI 활성화
+		log("[LobbyTutorial] Activating tutorialUI...")
+		if self.tutorialUI ~= nil then
+			self.tutorialUI.Enable = true
+			self.tutorialUI.Visible = true
+			log("[LobbyTutorial] tutorialUI activated! Enable=", self.tutorialUI.Enable, ", Visible=", self.tutorialUI.Visible)
+		else
+			log("[LobbyTutorial] ERROR: tutorialUI is nil!")
+			return
+		end
+
+		-- 스킵 버튼 표시
+		self:ShowSkipButton()
+
+		-- 첫 번째 단계 표시
+		log("[LobbyTutorial] Calling ShowLobbyStep()...")
+		self:ShowLobbyStep()
+	end
+
+	@ExecSpace("Client")
+	method void ShowLobbyStep()
+		if not self.isActive or self.currentStep > #self.tutorialData then
+			self:EndLobbyTutorial()
+			return
+		end
+
+		-- 이전 이벤트 핸들러 정리
+		self:CleanupEventHandlers()
+
+		local stepData = self.tutorialData[self.currentStep]
+		self.currentActionType = stepData.actionType or "touch"
+
+		log("=== Showing Lobby Step ", self.currentStep, " ===")
+		log("  ActionType: ", self.currentActionType)
+		log("  Text: ", stepData.text)
+
+		-- highlightType이 none이면 전체 화면 터치 모드
+		if stepData.highlightType == "none" then
+			self:ShowFullScreenTutorial(stepData)
+		else
+			-- 타겟 버튼이 있는 경우
+			self:ShowLobbyTargetedTutorial(stepData)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void ShowLobbyTargetedTutorial(table stepData)
+		-- 로비 타겟 버튼 하이라이트 모드
+		log("  Lobby targeted tutorial mode: ", stepData.targetButtonPath or "none")
+
+		if stepData.targetButtonPath ~= nil and stepData.targetButtonPath ~= "" then
+			local targetButton = _EntityService:GetEntityByPath(stepData.targetButtonPath)
+			if targetButton ~= nil and targetButton.UITransformComponent ~= nil then
+				-- 로비 UI 위치 계산
+				self:CalculateLobbyButtonPosition(targetButton, stepData)
+
+				-- 텍스트 업데이트
+				if self.tutorialText ~= nil and self.tutorialText.TextComponent ~= nil then
+					self.tutorialText.TextComponent.Text = stepData.text
+				end
+
+				-- 모든 딤드 패널 활성화
+				if self.dimmedTop ~= nil then
+					self.dimmedTop.Enable = true
+					self.dimmedTop.Visible = true
+				end
+				if self.dimmedBottom ~= nil then
+					self.dimmedBottom.Enable = true
+					self.dimmedBottom.Visible = true
+				end
+				if self.dimmedLeft ~= nil then
+					self.dimmedLeft.Enable = true
+					self.dimmedLeft.Visible = true
+				end
+				if self.dimmedRight ~= nil then
+					self.dimmedRight.Enable = true
+					self.dimmedRight.Visible = true
+				end
+
+				-- Dimmed 영역 설정
+				self:SetupDimmedAreas(stepData)
+
+				-- 하이라이트 테두리 설정
+				self:SetupHighlightBorder(stepData)
+
+				-- 화살표 방향 설정
+				self:SetArrowDirection(stepData.arrowDirection, stepData)
+
+				-- 터치 이벤트 연결
+				self:ConnectAllDimmedTouch()
+			else
+				log("Warning: Lobby target button not found: ", stepData.targetButtonPath)
+				self:ShowFullScreenTutorial(stepData)
+			end
+		else
+			self:ShowFullScreenTutorial(stepData)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void CalculateLobbyButtonPosition(Entity targetButton, table stepData)
+		-- 로비 UI 위치 계산
+		local targetPath = stepData.targetButtonPath or ""
+		local transform = targetButton.UITransformComponent
+
+		local scaleX = self.screenWidth / 1920
+		local scaleY = self.screenHeight / 1080
+
+		-- 기본값: 버튼의 실제 위치에서 계산
+		local worldX = 0
+		local worldY = 0
+
+		-- 계층 구조로 위치 계산
+		local positions = {}
+		local currentEntity = targetButton
+
+		while currentEntity ~= nil do
+			if currentEntity.UITransformComponent ~= nil then
+				local trans = currentEntity.UITransformComponent
+				table.insert(positions, {
+					entity = currentEntity,
+					name = currentEntity.Name or "unknown",
+					transform = trans
+				})
+			end
+
+			if currentEntity.Parent == nil or currentEntity.Name == "Canvas" then
+				break
+			end
+			currentEntity = currentEntity.Parent
+		end
+
+		-- 첫 번째 요소(버튼 자체)의 위치부터 시작
+		if #positions > 0 then
+			local buttonTrans = positions[1].transform
+			worldX = buttonTrans.anchoredPosition.x
+			worldY = buttonTrans.anchoredPosition.y
+		end
+
+		-- 부모를 따라 올라가며 위치 누적
+		for i = 2, #positions do
+			local pos = positions[i]
+			local trans = pos.transform
+			local child = positions[i - 1]
+			local childTrans = child.transform
+
+			worldX = worldX + trans.anchoredPosition.x
+			worldY = worldY + trans.anchoredPosition.y
+
+			local anchorMinX = childTrans.AnchorsMin.x
+			local anchorMaxX = childTrans.AnchorsMax.x
+			local anchorMinY = childTrans.AnchorsMin.y
+			local anchorMaxY = childTrans.AnchorsMax.y
+
+			local anchorCenterX = (anchorMinX + anchorMaxX) / 2
+			local anchorCenterY = (anchorMinY + anchorMaxY) / 2
+
+			local parentWidth = trans.RectSize.x
+			local parentHeight = trans.RectSize.y
+
+			if pos.name == "Canvas" or pos.name == "MainLobbyUI" or pos.name == "Lobby_UI" then
+				parentWidth = self.screenWidth
+				parentHeight = self.screenHeight
+			end
+
+			if anchorCenterX ~= 0.5 and parentWidth > 0 then
+				local offsetX = (anchorCenterX - 0.5) * parentWidth
+				worldX = worldX + offsetX
+			end
+
+			if anchorCenterY ~= 0.5 and parentHeight > 0 then
+				local offsetY = (anchorCenterY - 0.5) * parentHeight
+				worldY = worldY + offsetY
+			end
+		end
+
+		-- 화면 중앙 기준 좌표를 화면 좌하단 기준으로 변환
+		local buttonX = self.screenWidth / 2 + worldX
+		local buttonY = self.screenHeight / 2 + worldY
+
+		-- 버튼 크기
+		local buttonWidth = 100
+		local buttonHeight = 50
+		local rectSize = transform.RectSize
+		if rectSize.x > 0 and rectSize.y > 0 then
+			buttonWidth = rectSize.x
+			buttonHeight = rectSize.y
+		end
+
+		-- 최종 위치와 크기 설정
+		stepData.targetX = buttonX - buttonWidth / 2
+		stepData.targetY = buttonY - buttonHeight / 2
+		stepData.targetWidth = buttonWidth
+		stepData.targetHeight = buttonHeight
+
+		print("  Lobby button position: X=" .. stepData.targetX .. ", Y=" .. stepData.targetY)
+		print("  Size: " .. stepData.targetWidth .. "x" .. stepData.targetHeight)
+	end
+
+	@ExecSpace("Client")
+	method void NextLobbyStep()
+		log("[LobbyTutorial] NextLobbyStep called, currentStep: ", self.currentStep, " -> ", self.currentStep + 1)
+		self.currentStep = self.currentStep + 1
+		self:ShowLobbyStep()
+	end
+
+	@ExecSpace("Client")
+	method void EndLobbyTutorial()
+		log("=== Lobby Tutorial Completed ===")
+
+		self.isActive = false
+		self.isLobbyTutorial = false
+		self.dimmedTouchConnected = false
+
+		-- 스킵 버튼 숨김
+		self:HideSkipButton()
+
+		-- 타이머 정리
+		if self.animateTimerID ~= nil then
+			_TimerService:ClearTimer(self.animateTimerID)
+			self.animateTimerID = nil
+		end
+
+		-- UI 비활성화
+		if self.tutorialUI ~= nil then
+			self.tutorialUI.Enable = false
+			self.tutorialUI.Visible = false
+		end
+
+		-- 로비 튜토리얼 완료 저장
+		local userId = _UserService.LocalPlayer.PlayerComponent.UserId
+		self:SAVE_LOBBY(userId)
+		log("Lobby tutorial completed and saved for user: ", userId)
+	end
+
+	-- ========== 로비 튜토리얼 저장/로드 ==========
+
+	@ExecSpace("Server")
+	method integer SAVE_LOBBY(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+
+		local data = {}
+		data["isLobbyTutorial"] = 1
+
+		local save = _HttpService:JSONEncode(data)
+
+		return ds:SetAndWait("USER_LOBBY_TUTORIAL", save)
+	end
+
+	@ExecSpace("Server")
+	method integer LOAD_LOBBY(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+
+		local errCode, res = ds:GetAndWait("USER_LOBBY_TUTORIAL")
+		if errCode ~= 0 then
+			return errCode
+		end
+
+		if res == nil then
+			return 0
+		end
+
+		local resTable = _HttpService:JSONDecode(res)
+
+		return resTable["isLobbyTutorial"]
+	end
+
+	-- 테스트용: 로비 튜토리얼 데이터 리셋
+	@ExecSpace("Server")
+	method integer RESET_LOBBY(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+
+		local data = {}
+		data["isLobbyTutorial"] = 0
+
+		local save = _HttpService:JSONEncode(data)
+
+		print("[TutorialService] RESET lobby tutorial data for user: " .. uid)
+		return ds:SetAndWait("USER_LOBBY_TUTORIAL", save)
 	end
 
 end

@@ -123,10 +123,21 @@ script UnitShopItem extends Component
 		if not _SpawnManager:IsCanSpawn(self.price)then
 			return
 		end
-		
+
 		_SpawnManager:Spawn(self.unitData['id'], self.price, Vector3.zero)
-		
+
 		self.shop:OnSpawn(self.id, self.price)
+
+		-- 인게임 튜토리얼 중 소환 이벤트 알림
+		print("[UnitShopItem] ButtonClick - Checking tutorial...")
+		print("  _TutorialService exists: " .. tostring(_TutorialService ~= nil))
+		if _TutorialService ~= nil then
+			print("  isIngameTutorial: " .. tostring(_TutorialService.isIngameTutorial))
+			if _TutorialService.isIngameTutorial then
+				print("[UnitShopItem] Calling OnUnitSummoned...")
+				_TutorialService:OnUnitSummoned()
+			end
+		end
 	end
 
 	@EventSender("Self")
@@ -175,10 +186,17 @@ script UnitShopItem extends Component
 		if not isKeyDown or not _SpawnManager:IsCanSpawn(self.price) or  _UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill then
 			return
 		end
-		
+
 		_SpawnManager:Spawn(self.unitData['id'], self.price, Vector3.zero)
-		
+
 		self.shop:OnSpawn(self.id, self.price)
+
+		-- 인게임 튜토리얼 중 소환 이벤트 알림
+		print("[UnitShopItem] KeyDown - Checking tutorial...")
+		if _TutorialService ~= nil and _TutorialService.isIngameTutorial then
+			print("[UnitShopItem] Calling OnUnitSummoned from KeyDown...")
+			_TutorialService:OnUnitSummoned()
+		end
 	end
 
 end

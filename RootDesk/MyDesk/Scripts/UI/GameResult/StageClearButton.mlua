@@ -7,13 +7,52 @@ script StageClearButton extends Component
 		-- Sender: ButtonComponent
 		-- Space: Client
 		---------------------------------------------------------
-		
+
 		-- Parameters
 		-- local Entity = event.Entity
 		---------------------------------------------------------
+
+		log("[StageClearButton] Button clicked!")
+		log("[StageClearButton] _GameManager exists: ", _GameManager ~= nil)
+
+		-- 튜토리얼 모드(Stage000)에서 클리어한 경우 체크
+		-- chapterIndex와 mapIndex로 직접 판단 (동기화 문제 해결)
+		local wasTutorialMode = false
+		if _GameManager ~= nil then
+			local chapterIndex = _GameManager.chapterIndex
+			local mapIndex = _GameManager.mapIndex
+			wasTutorialMode = (chapterIndex == 0 and mapIndex == 0)
+			log("[StageClearButton] chapterIndex: ", chapterIndex, ", mapIndex: ", mapIndex)
+			log("[StageClearButton] wasTutorialMode (calculated): ", wasTutorialMode)
+		end
+
 		_GameManager:GameEnd()
-		
+
 		_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "MainLobbyMap")
+
+		-- MainLobbyUI 다시 활성화
+		local mainLobbyUI = _EntityService:GetEntityByPath("/ui/MainLobbyUI")
+		if mainLobbyUI ~= nil then
+			mainLobbyUI.Enable = true
+			mainLobbyUI.Visible = true
+		end
+
+		-- 튜토리얼 모드였다면 로비 진입 후 로비 튜토리얼 시작
+		log("[StageClearButton] wasTutorialMode = ", wasTutorialMode)
+		if wasTutorialMode then
+			log("[StageClearButton] Tutorial mode detected, starting lobby tutorial after delay...")
+			_TimerService:SetTimerOnce(function()
+				log("[StageClearButton] Timer fired! Checking TutorialService...")
+				if _TutorialService ~= nil then
+					log("[StageClearButton] Calling StartLobbyTutorial(2)...")
+					_TutorialService:StartLobbyTutorial(2)
+				else
+					log("[StageClearButton] ERROR: _TutorialService is nil!")
+				end
+			end, 1.5)
+		else
+			log("[StageClearButton] Not tutorial mode, skipping lobby tutorial")
+		end
 	end
 
 end

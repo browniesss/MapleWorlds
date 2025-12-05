@@ -3,12 +3,22 @@ script EnableButton extends Component
 
 	property Entity EnableTarget = nil
 
-	@EventSender("Self")
-	handler HandleButtonClickEvent(ButtonClickEvent event)
+	method void TargetEnable()
 		if self.EnableTarget ~= nil then
 			self.EnableTarget.Enable = false
 		end
-		
+	end
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		self:TargetEnable()
+	end
+
+	@EventSender("Service", "InputService")
+	handler HandleKeyDownEvent(KeyDownEvent event)
+		if event.key == KeyboardKey.Escape then
+			self:TargetEnable()	
+		end
 	end
 
 end
