@@ -27,8 +27,6 @@ script TutorialService extends Logic
 
 	property Entity tutorialArrow = nil
 
-	property Entity skipButton = nil
-
 	property Entity currentTargetButton = nil
 
 	property number screenWidth = 1920
@@ -71,7 +69,6 @@ script TutorialService extends Logic
 		self.textPanel = _EntityService:GetEntityByPath("/ui/TutorialUI/TutorialTextPanel")
 		self.tutorialText = _EntityService:GetEntityByPath("/ui/TutorialUI/TutorialTextPanel/TutorialText")
 		self.tutorialArrow = _EntityService:GetEntityByPath("/ui/TutorialUI/TutorialArrow")
-		self.skipButton = _EntityService:GetEntityByPath("/ui/TutorialUI/SkipButton")
 
 		-- 모든 Dimmed 패널에 ButtonComponent 추가 (터치 이벤트용)
 		self:AddButtonComponentToDimmed(self.dimmedTop, "DimmedTop")
@@ -95,11 +92,6 @@ script TutorialService extends Logic
 			if self.highlightBorder.SpriteGUIRendererComponent ~= nil then
 				self.highlightBorder.SpriteGUIRendererComponent.RaycastTarget = true
 			end
-		end
-
-		-- 스킵 버튼 이벤트 연결
-		if self.skipButton ~= nil then
-			self:SetupSkipButton()
 		end
 
 		-- 실시간 화면 해상도 감지
@@ -139,10 +131,7 @@ script TutorialService extends Logic
 		
 		-- 화살표 생성
 		self:CreateArrow(tutorialUI)
-		
-		-- 스킵 버튼 생성
-		self:CreateSkipButton(tutorialUI)
-		
+
 		print("TutorialUI structure created successfully!")
 	end
 
@@ -232,39 +221,6 @@ script TutorialService extends Logic
 		arrow.UIColorImageRendererComponent.Color = Color(1, 0, 0, 1)
 		arrow.UIColorImageRendererComponent.RaycastTarget = false
 		arrow.Enable = false
-	end
-
-	@ExecSpace("Client")
-	method void CreateSkipButton(Entity parent)
-		local button = _EntityService:CreateEntity("SkipButton", parent)
-		button:AddComponent(UITransformComponent)
-		button:AddComponent(UIColorImageRendererComponent)
-		button:AddComponent(ButtonComponent)
-		
-		button.UITransformComponent.AnchorsMin = Vector2(1, 1)
-		button.UITransformComponent.AnchorsMax = Vector2(1, 1)
-		button.UITransformComponent.OffsetMin = Vector2(-120, -60)
-		button.UITransformComponent.OffsetMax = Vector2(-20, -20)
-		
-		button.UIColorImageRendererComponent.Color = Color(0.2, 0.2, 0.2, 0.9)
-		button.UIColorImageRendererComponent.RaycastTarget = true
-		
-		local buttonText = _EntityService:CreateEntity("Text", button)
-		buttonText:AddComponent(UITransformComponent)
-		buttonText:AddComponent(TextComponent)
-		
-		buttonText.UITransformComponent.AnchorsMin = Vector2(0, 0)
-		buttonText.UITransformComponent.AnchorsMax = Vector2(1, 1)
-		buttonText.UITransformComponent.OffsetMin = Vector2(0, 0)
-		buttonText.UITransformComponent.OffsetMax = Vector2(0, 0)
-		
-		buttonText.TextComponent.Text = "Skip ▶"
-		buttonText.TextComponent.FontSize = 16
-		buttonText.TextComponent.Color = Color(1, 1, 1, 1)
-		buttonText.TextComponent.AlignmentHorizontal = "Center"
-		buttonText.TextComponent.AlignmentVertical = "Center"
-		
-		button.Enable = false
 	end
 
 	@ExecSpace("Client")
@@ -398,10 +354,7 @@ script TutorialService extends Logic
 		-- UI 활성화
 		self.tutorialUI.Enable = true
 		self.tutorialUI.Visible = true
-		
-		-- 스킵 버튼 표시
-		self:ShowSkipButton()
-		
+
 		-- 첫 번째 단계 표시
 		self:ShowCurrentStep()
 	end
@@ -986,42 +939,9 @@ script TutorialService extends Logic
 	end
 
 	@ExecSpace("Client")
-	method void SetupSkipButton()
-		-- 스킵 버튼 설정 및 이벤트 연결
-		if self.skipButton == nil then
-			return
-		end
-		
-		self.skipButton:ConnectEvent("ButtonClickEvent", function(event) 
-		        self:SkipTutorial()
-		   	end)
-	end
-
-	@ExecSpace("Client")
-	method void ShowSkipButton()
-		-- 튜토리얼 시작 시 스킵 버튼 표시
-		if self.skipButton ~= nil then
-			self.skipButton.Enable = true
-			self.skipButton.Visible = true
-		end
-	end
-
-	@ExecSpace("Client")
-	method void HideSkipButton()
-		-- 튜토리얼 종료 시 스킵 버튼 숨김
-		if self.skipButton ~= nil then
-			self.skipButton.Enable = false
-			self.skipButton.Visible = false
-		end
-	end
-
-	@ExecSpace("Client")
 	method void EndTutorial()
 		self.isActive = false
-		
-		-- 스킵 버튼 숨김
-		self:HideSkipButton()
-		
+
 		-- 타이머 정리
 		if self.animateTimerID ~= nil then
 			_TimerService:ClearTimer(self.animateTimerID)
@@ -1122,9 +1042,6 @@ script TutorialService extends Logic
 		-- UI 활성화
 		self.tutorialUI.Enable = true
 		self.tutorialUI.Visible = true
-
-		-- 스킵 버튼 표시
-		self:ShowSkipButton()
 
 		-- 첫 번째 단계 표시
 		self:ShowIngameStep()
@@ -1593,9 +1510,6 @@ script TutorialService extends Logic
 		self.isGamePaused = false
 		self.dimmedTouchConnected = false
 
-		-- 스킵 버튼 숨김
-		self:HideSkipButton()
-
 		-- 타이머 정리
 		if self.animateTimerID ~= nil then
 			_TimerService:ClearTimer(self.animateTimerID)
@@ -1843,9 +1757,6 @@ script TutorialService extends Logic
 			return
 		end
 
-		-- 스킵 버튼 표시
-		self:ShowSkipButton()
-
 		-- 첫 번째 단계 표시
 		log("[LobbyTutorial] Calling ShowLobbyStep()...")
 		self:ShowLobbyStep()
@@ -2045,9 +1956,6 @@ script TutorialService extends Logic
 		self.isActive = false
 		self.isLobbyTutorial = false
 		self.dimmedTouchConnected = false
-
-		-- 스킵 버튼 숨김
-		self:HideSkipButton()
 
 		-- 타이머 정리
 		if self.animateTimerID ~= nil then
