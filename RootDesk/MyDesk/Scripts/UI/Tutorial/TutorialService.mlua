@@ -47,6 +47,7 @@ script TutorialService extends Logic
 	property boolean isGamePaused = false
 	property string currentActionType = "touch"
 	property boolean dimmedTouchConnected = false
+	property boolean isStepCooldown = false  -- 스텝 간 터치 쿨다운
 
 	-- 로비 튜토리얼용 프로퍼티
 	property boolean isLobbyTutorial = false
@@ -1115,6 +1116,8 @@ script TutorialService extends Logic
 
 		self.currentStep = 1
 		self.isActive = true
+		self.dimmedTouchConnected = false  -- 터치 이벤트 재연결을 위해 리셋
+		self.isStepCooldown = false  -- 쿨다운 리셋
 
 		-- UI 활성화
 		self.tutorialUI.Enable = true
@@ -1467,7 +1470,21 @@ script TutorialService extends Logic
 		log("[Tutorial] OnDimmedClicked: ", panelName)
 		log("  isActive=", self.isActive, ", actionType=", self.currentActionType)
 		log("  isIngameTutorial=", self.isIngameTutorial, ", isLobbyTutorial=", self.isLobbyTutorial)
+		log("  isStepCooldown=", self.isStepCooldown)
+
+		-- 쿨다운 중이면 무시
+		if self.isStepCooldown then
+			log("  -> Step cooldown active, ignoring touch")
+			return
+		end
+
 		if self.isActive and self.currentActionType == "touch" then
+			-- 쿨다운 시작 (0.5초)
+			self.isStepCooldown = true
+			_TimerService:SetTimerOnce(function()
+				self.isStepCooldown = false
+			end, 0.5)
+
 			if self.isIngameTutorial then
 				log("  -> Calling NextIngameStep()")
 				self:NextIngameStep()
@@ -1813,6 +1830,7 @@ script TutorialService extends Logic
 		self.currentStep = 1
 		self.isActive = true
 		self.dimmedTouchConnected = false  -- 터치 이벤트 재연결을 위해 리셋
+		self.isStepCooldown = false  -- 쿨다운 리셋
 
 		-- UI 활성화
 		log("[LobbyTutorial] Activating tutorialUI...")
