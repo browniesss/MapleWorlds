@@ -414,6 +414,13 @@ script GameManager extends Logic
 
 	@ExecSpace("Server")
 	method void StageClearServer(integer clearedChapter, integer clearedStage)
+		-- 튜토리얼 스테이지(0,0)는 보상/랭킹/진행도 저장 없이 UI만 표시
+		if clearedChapter == 0 and clearedStage == 0 then
+			log("[GameManager] Tutorial stage clear - skipping rewards and progression")
+			self:StageClearClientCallback(false, senderUserId)
+			return
+		end
+
 		local user = _UserService:GetUserEntityByUserId(senderUserId)
 		local userStage = user.UserStage
 		local userName = user.PlayerComponent.Nickname

@@ -1469,7 +1469,67 @@ script TutorialService extends Logic
 
 	@ExecSpace("Client")
 	method void NextIngameStep()
+		-- 4스텝에서 5스텝으로 넘어갈 때는 몬스터 스폰 후 진행
+		if self.currentStep == 4 then
+			log("[Tutorial] Step 4 completed, waiting for monster spawn...")
+			self:HideTutorialUI()
+			self:SpawnTutorialMonster()
+			return
+		end
+
 		self.currentStep = self.currentStep + 1
+		self:ShowIngameStep()
+	end
+
+	@ExecSpace("Client")
+	method void HideTutorialUI()
+		-- 튜토리얼 UI 임시 숨김 (스폰 대기 중)
+		if self.tutorialUI ~= nil then
+			self.tutorialUI.Enable = false
+			self.tutorialUI.Visible = false
+		end
+	end
+
+	@ExecSpace("Client")
+	method void SpawnTutorialMonster()
+		-- 튜토리얼용 몬스터 스폰 요청 (서버로)
+		log("[Tutorial] Requesting tutorial monster spawn...")
+		self:SpawnTutorialMonsterServer()
+
+		-- 스폰 후 약간의 딜레이를 두고 5스텝 시작
+		_TimerService:SetTimerOnce(function()
+			self:OnTutorialMonsterSpawned()
+		end, 1.5)
+	end
+
+	@ExecSpace("Server")
+	method void SpawnTutorialMonsterServer()
+		-- 서버에서 튜토리얼용 몬스터 스폰
+		log("[Tutorial] Spawning tutorial monster on server...")
+
+		-- SpawnManager를 통해 적 스폰
+		if _SpawnManager ~= nil then
+			-- 기본 몬스터 모델 ID 사용 (SpawnGroup의 첫 번째 유닛)
+			local monsterModelId = "model://5aac7c14-9173-4d47-96f1-5fc5429e36c4"
+			_SpawnManager:SpawnEnemy(monsterModelId, Vector3.zero)
+			log("[Tutorial] Monster spawned!")
+		else
+			log("[Tutorial] ERROR: _SpawnManager is nil!")
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnTutorialMonsterSpawned()
+		-- 몬스터 스폰 완료 후 5스텝 시작
+		log("[Tutorial] Monster spawn complete, starting step 5...")
+
+		-- 튜토리얼 UI 다시 표시
+		if self.tutorialUI ~= nil then
+			self.tutorialUI.Enable = true
+			self.tutorialUI.Visible = true
+		end
+
+		self.currentStep = 5
 		self:ShowIngameStep()
 	end
 
