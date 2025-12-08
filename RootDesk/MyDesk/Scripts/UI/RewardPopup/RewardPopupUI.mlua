@@ -1,0 +1,16 @@
+@Component
+script RewardPopupUI extends Component
+
+	property Entity coinAmountLabel = "6030a60f-918b-4829-91dc-a69e58e4279d"
+
+	method void Init(number coinAmount)
+		self.coinAmountLabel.TextComponent.Text = tostring(coinAmount)
+	end
+
+	@EventSender("Entity", "208d3de9-9f49-4158-aa1a-aae2d21e0d45")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+	end
+
+end
