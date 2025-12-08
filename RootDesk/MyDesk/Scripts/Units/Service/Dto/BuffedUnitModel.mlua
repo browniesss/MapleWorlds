@@ -1,0 +1,26 @@
+@Struct
+script BuffedUnitModel extends UnitModel
+
+	property string LimitBreakActiveSkill = ""
+
+	property string LimitBreakPassiveSkill = ""
+
+	method void SetLevelBuff(LevelUpModel model)
+		self.hp += model.hp
+		self.damage += model.damage
+	end
+
+	method void SetLimitBreakBuff(LimitBreakModel model)
+		self.hp += model.hp
+		self.damage += model.damage
+		self.summonCost += model.summonCost
+		
+		self.LimitBreakActiveSkill = model.skillID
+		self.LimitBreakPassiveSkill = model.passiveSkillID
+	end
+
+	method void SetSynergyBuff()
+		
+	end
+
+end
