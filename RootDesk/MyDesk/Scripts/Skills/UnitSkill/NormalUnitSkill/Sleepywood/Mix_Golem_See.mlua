@@ -1,0 +1,23 @@
+@Component
+script Mix_Golem_See extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		local targetList = self:GetFarthestEnemies(1)
+		log(targetList)
+		local damageFunction = function()
+			for _, target in ipairs(targetList) do
+			    if isvalid(target) and target.Unit and target.Unit.curState ~= "die" then
+					_EffectService:PlayEffectAttached("c14b637c7a7643a18596dd04448289e3", target, Vector3.zero , 0, Vector3.one, false)
+					target.Unit:OnHit(self.caster, self.skillAmount, false, 1)
+					self:SkillEnd()
+				end
+			end
+		end
+		
+		_TimerService:SetTimerOnce(damageFunction, self.skillAttackTiming)
+	end
+
+end
