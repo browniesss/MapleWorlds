@@ -1,0 +1,15 @@
+@Component
+script Wood_Mask_Fear extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		_EffectService:PlayEffectAttached("3c279d785875440a99e57cdfd5732882", self.caster, Vector3(0.2, self.caster.Unit.imageSize.y, 0), 0, Vector3.one)
+		_TimerService:SetTimerOnce(function()
+			self.caster.Unit.curTarget.Unit:GetDebuff(_eDebuffType.Fear, self.skillAmount, self.skillTime)
+			self:SkillEnd()
+		end, self.skillAttackTiming)
+	end
+
+end

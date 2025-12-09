@@ -15,53 +15,52 @@ script UserStage extends Component
 
 	property table updateList = {}
 
-	-- 클리어한 스테이지 목록 (서버에서만 사용, key: "챕터_스테이지", value: true)
 	property table clearedStages = {}
 
 	@ExecSpace("Server")
 	method integer SAVE()
 		local data = {}
-
+		
 		data["openStage"] = self.openStage
 		data["openChapter"] = self.openChapter
 		data["selectStage"] = self.selectStage
 		data["selectChapter"] = self.selectChapter
-
+		
 		-- clearedStages를 문자열로 변환 (예: "101,102,201,506")
 		local clearedList = {}
 		for key, _ in pairs(self.clearedStages) do
 			clearedList[#clearedList + 1] = key
 		end
 		data["cleared"] = table.concat(clearedList, ",")
-
+		
 		local jsonData = _HttpService:JSONEncode(data)
-
+		
 		local userStorage = _DataStorageService:GetUserDataStorage(self.Entity.PlayerComponent.UserId)
-
+		
 		return userStorage:SetAndWait("USER_STAGE", jsonData)
 	end
 
 	@ExecSpace("Server")
 	method integer LOAD()
 		local userStorage = _DataStorageService:GetUserDataStorage(self.Entity.PlayerComponent.UserId)
-
+		
 		local getErr, jsonData = userStorage:GetAndWait("USER_STAGE")
-
+		
 		if getErr ~= 0 then
 			return getErr
 		end
-
+		
 		if jsonData == nil then
 			return 100012
 		end
-
+		
 		local data = _HttpService:JSONDecode(jsonData)
-
+		
 		self.openStage = tonumber(data["openStage"])
 		self.openChapter = tonumber(data["openChapter"])
 		self.selectStage = tonumber(data["selectStage"])
 		self.selectChapter = tonumber(data["selectChapter"])
-
+		
 		-- cleared 문자열을 테이블로 변환
 		self.clearedStages = {}
 		local clearedStr = data["cleared"]
@@ -73,11 +72,10 @@ script UserStage extends Component
 			-- 기존 유저: openChapter/openStage 이전 스테이지를 모두 클리어한 것으로 간주
 			self:GenerateClearedFromOpenStage()
 		end
-
+		
 		return 0
 	end
 
-	-- 기존 유저를 위해 openChapter/openStage 이전 스테이지를 cleared 목록에 추가
 	@ExecSpace("Server")
 	method void GenerateClearedFromOpenStage()
 		-- 챕터별 스테이지 수: 챕터1은 5개, 챕터2~5는 6개
@@ -86,13 +84,13 @@ script UserStage extends Component
 			if chapter == 1 then
 				maxStage = 5
 			end
-
+		
 			local stageLimit = maxStage
 			if chapter == self.openChapter then
 				-- 현재 오픈 챕터에서는 openStage 직전까지만 클리어
 				stageLimit = self.openStage - 1
 			end
-
+		
 			for stage = 1, stageLimit do
 				local stageId = tostring(chapter * 100 + stage)
 				self.clearedStages[stageId] = true
@@ -109,6 +107,9 @@ script UserStage extends Component
 			self.selectChapter = 1
 			self:SAVE()
 		end
+		
+		-- 메소 업데이트 이후 최초 접속 보상 체크
+		self:CheckMesoInitialReward()
 	end
 
 	@ExecSpace("Server")
@@ -120,7 +121,6 @@ script UserStage extends Component
 		self:SAVE()
 	end
 
-	-- 스테이지를 클리어 목록에 추가
 	@ExecSpace("Server")
 	method void AddClearedStage(integer chapter, integer stage)
 		local stageId = tostring(chapter * 100 + stage)
@@ -128,11 +128,77 @@ script UserStage extends Component
 		self:SAVE()
 	end
 
-	-- 해당 스테이지가 이미 클리어되었는지 확인 (서버용)
 	@ExecSpace("Server")
 	method boolean IsStageCleared(integer chapter, integer stage)
 		local stageId = tostring(chapter * 100 + stage)
 		return self.clearedStages[stageId] == true
+	end
+
+	@ExecSpace("ServerOnly")
+	method void CheckMesoInitialReward()
+		local userId = self.Entity.PlayerComponent.UserId
+		local userStorage = _DataStorageService:GetUserDataStorage(userId)
+		
+		log("[MesoReward] CheckMesoInitialReward started for user:", userId)
+		
+		-- 이미 보상을 받았는지 확인
+		local errCode, rewardFlag = userStorage:GetAndWait("MESO_INITIAL_REWARD")
+		log("[MesoReward] GetAndWait result - errCode:", errCode, "rewardFlag:", rewardFlag)
+		
+		if errCode ~= 0 then
+			log_error("[MesoReward] Failed to check reward flag for user:", userId, "error:", errCode)
+			return
+		end
+		
+		-- 이미 보상을 받은 경우 종료
+		if rewardFlag == "1" then
+			log("[MesoReward] User already received reward, skipping:", userId)
+			return
+		end
+		
+		-- 클리어한 스테이지 수 계산
+		local clearedCount = 0
+		for key, _ in pairs(self.clearedStages) do
+			clearedCount = clearedCount + 1
+			log("[MesoReward] Cleared stage found:", key)
+		end
+		log("[MesoReward] Total cleared stages:", clearedCount)
+		
+		-- 보상 지급 (스테이지당 2500 메소)
+		local rewardAmount = clearedCount * 2500
+		log("[MesoReward] Calculated reward amount:", rewardAmount)
+		
+		if rewardAmount > 0 then
+			local addResult = _BillingService:AddThirdFreeCoin(userId, rewardAmount)
+			log("[MesoReward] AddThirdFreeCoin result:", addResult)
+			if addResult ~= 0 then
+				log_error("[MesoReward] Failed to add meso for user:", userId, "error:", addResult)
+				return
+			end
+			log("[MesoReward] Granted", rewardAmount, "meso to user:", userId, "(", clearedCount, "stages cleared)")
+		else
+			log("[MesoReward] No reward to grant (0 stages cleared)")
+		end
+		
+		-- 보상 지급 플래그 저장
+		local saveResult = userStorage:SetAndWait("MESO_INITIAL_REWARD", "1")
+		log("[MesoReward] SetAndWait (flag save) result:", saveResult)
+		if saveResult ~= 0 then
+			log_error("[MesoReward] Failed to save reward flag for user:", userId, "error:", saveResult)
+		else
+			log("[MesoReward] Reward flag saved successfully for user:", userId)
+		end
+		
+		self:SetRewardPopup(rewardAmount)
+	end
+
+	@ExecSpace("Client")
+	method void SetRewardPopup(number rewardAmount)
+		local rewardPopupUI = _EntityService:GetEntityByPath("/ui/RewardPopupUI")
+		rewardPopupUI.Enable = true
+		rewardPopupUI.Visible = true
+		
+		rewardPopupUI.RewardPopupUI:Init(rewardAmount)
 	end
 
 	@ExecSpace("ClientOnly")

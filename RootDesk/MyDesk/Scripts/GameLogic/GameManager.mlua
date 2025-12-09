@@ -371,12 +371,12 @@ script GameManager extends Logic
 	@ExecSpace("Client")
 	method void StageClear()
 		local userStage = _UserService.LocalPlayer.UserStage
-
+		
 		self:Log_NormalStageClear()
-
+		
 		local clearedChapter = userStage.selectChapter
 		local clearedStage = userStage.selectStage
-
+		
 		-- 서버에서 실제 최초 클리어 판정 및 보상 처리 (UI 업데이트는 콜백에서)
 		self:StageClearServer(clearedChapter, clearedStage)
 	end
@@ -385,13 +385,13 @@ script GameManager extends Logic
 	method void StageClearClientCallback(boolean isFirstClear)
 		local userAvatar = _EntityService:GetEntityByPath("/ui/GameClearUI/Frame/UserAvatar/UnitAvartar")
 		local clearRewardUI = _EntityService:GetEntityByPath("/ui/GameClearUI/Frame/ClearReward")
-
+		
 		self.gameClearResult.Enable = true
 		self.gameClearResult.Visible = true
 		clearRewardUI.ClearRewardUI:RefreshUI(isFirstClear)
-
+		
 		_Utils:FadeIn(self.gameClearResult, 0.5)
-
+		
 		userAvatar.AvatarGUIRendererComponent:PlayEmotion(EmotionalType.Love, 100)
 	end
 
@@ -403,9 +403,9 @@ script GameManager extends Logic
 		local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
 		local key = _RankingService:GetRankKeyByTable({chapter=clearedChapter, stage=clearedStage})
 		_RankingService:AddPoint(key, userName, playTime)
-
+		
 		self:UpdateRankData(userName, playTime, key, senderUserId)
-
+		
 		-- 서버에서 최초 클리어 판정 (AND 조건)
 		-- 1. 기존 조건: openChapter/openStage가 현재 스테이지와 같거나 이전
 		-- 2. 새 조건: cleared 목록에 해당 스테이지가 없음
@@ -413,49 +413,53 @@ script GameManager extends Logic
 		local isNewStage = (clearedChapter > userStage.openChapter) or
 			(clearedChapter == userStage.openChapter and clearedStage >= userStage.openStage)
 		local isNotCleared = not userStage:IsStageCleared(clearedChapter, clearedStage)
-
+		
 		if isNewStage and isNotCleared then
 			isFirstClear = true
 		end
-
+		
 		print(string.format("[GameManager] StageClearServer: userId=%s, isFirstClear=%s, clearedChapter=%s, clearedStage=%s",
 			senderUserId, tostring(isFirstClear), tostring(clearedChapter), tostring(clearedStage)))
-
+		
 		-- 클라이언트 UI 업데이트 콜백
 		self:StageClearClientCallback(isFirstClear, senderUserId)
-
-		if isFirstClear == false then
-			_BillingService:AddSecondFreeCoin(senderUserId, 100)
-			print("[GameManager] Not first clear, skipping badge check")
-			return
-		end
-
+		
 		-- 최초 클리어: cleared 목록에 추가 및 다음 스테이지 오픈
 		userStage:AddClearedStage(clearedChapter, clearedStage)
-
+		
 		local nextStage = _StageService:GetNextOpenStageIdFromServer(userStage.openChapter, userStage.openStage)
 		if nextStage.chapter ~= userStage.openChapter or nextStage.stage ~= userStage.openStage then
 			userStage:SetClearStage(nextStage.chapter, nextStage.stage)
 		end
-
+		
+		
+		if isFirstClear == false then
+			_BillingService:AddSecondFreeCoin(senderUserId, 100)
+			_BillingService:AddThirdFreeCoin(senderUserId, 500)
+		
+			print("[GameManager] Not first clear, skipping badge check")
+			return
+		end
+		
 		_PlayCoinService:AddCoin(senderUserId, 1)
 		_BillingService:AddSecondFreeCoin(senderUserId, 500)
 		_BillingService:AddFirstFreeCoin(senderUserId, 100)
-
+		_BillingService:AddThirdFreeCoin(senderUserId, 2000)
+		
 		print("[GameManager] First clear! Checking badges...")
-
+		
 		local isChapterComplete = false
 		if clearedChapter == 1 and clearedStage == 5 then
 			isChapterComplete = true
 		elseif clearedChapter >= 2 and clearedStage == 6 then
 			isChapterComplete = true
 		end
-
+		
 		if isChapterComplete then
 			print(string.format("[GameManager] Chapter %s completed! Checking chapter badge...", tostring(clearedChapter)))
 			_BadgeConditionService:CheckChapterBadges(senderUserId, clearedChapter)
 		end
-
+		
 		_BadgeConditionService:CheckStageBadges(senderUserId, clearedChapter, clearedStage)
 	end
 

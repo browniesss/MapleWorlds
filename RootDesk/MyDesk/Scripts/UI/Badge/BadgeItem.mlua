@@ -82,15 +82,19 @@ script BadgeItem extends Component
 				self.RewardIcon.SpriteGUIRendererComponent.ImageRUID = "3d291a0daa274583a7856b0470793de5"
 			elseif condition.reward_type == "SecondCoin" then
 				self.RewardIcon.SpriteGUIRendererComponent.ImageRUID = "c99c895020714d47bcdc8d92da5474b7"
+			elseif condition.reward_type == "ThirdCoin" then
+				self.RewardIcon.SpriteGUIRendererComponent.ImageRUID = "4cc5ffc272224edc809a792b8efa16e3"
 			end
 		end
-		
+
 		if self.RewardText ~= nil and self.RewardText.TextComponent ~= nil then
 			local rewardTypeText = ""
 			if condition.reward_type == "FirstCoin" then
 				rewardTypeText = "유료 재화"
 			elseif condition.reward_type == "SecondCoin" then
 				rewardTypeText = "무료 재화"
+			elseif condition.reward_type == "ThirdCoin" then
+				rewardTypeText = "메소"
 			end
 			self.RewardText.TextComponent.Text = condition.reward_amount
 		end

@@ -1,0 +1,31 @@
+@Component
+script GachaUnitInfoButton extends Component
+
+	property string unitID = ""
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: ButtonComponent
+		-- Space: Client
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local Entity = event.Entity
+		---------------------------------------------------------
+		local gachaUnitInfoPanel = _EntityService:GetEntityByPath("/ui/GachaUI/BackgroundUI/GachaUnitInfoPanel")
+		
+		if gachaUnitInfoPanel.Visible == true then
+			gachaUnitInfoPanel.Visible = false
+		else
+			gachaUnitInfoPanel.Visible = true
+			
+			local unitData = _UnitService:GetUnitByIDFromClient(self.unitID)
+			local normalSkillData = _SkillService:GetSkillByIDFromClient(unitData["skillID"])
+			local spawnSkillData = _SkillService:GetSkillByIDFromClient(unitData["spawnSkill"])
+			
+			gachaUnitInfoPanel.GachaUnitInfoPanel:Init(unitData, normalSkillData, spawnSkillData)
+		end 
+	end
+
+end

@@ -1,0 +1,639 @@
+{
+  "Id": "",
+  "GameId": "",
+  "EntryKey": "model://1b254db4-577b-423f-b439-3e1b3475991a",
+  "ContentType": "x-mod/model",
+  "Content": "",
+  "Usage": 0,
+  "UsePublish": 1,
+  "UseService": 0,
+  "CoreVersion": "1.26.0.0",
+  "StudioVersion": "0.1.0.0",
+  "DynamicLoading": 0,
+  "ContentProto": {
+    "Use": "Json",
+    "Json": {
+      "Version": 1,
+      "Name": "Unit_Viper",
+      "BaseModelId": null,
+      "Id": "1b254db4-577b-423f-b439-3e1b3475991a",
+      "Components": [
+        "MOD.Core.CostumeManagerComponent",
+        "MOD.Core.TransformComponent",
+        "MOD.Core.AvatarRendererComponent",
+        "MOD.Core.RigidbodyComponent",
+        "MOD.Core.MovementComponent",
+        "MOD.Core.StateComponent",
+        "MOD.Core.HitComponent",
+        "MOD.Core.DamageSkinSpawnerComponent",
+        "MOD.Core.DamageSkinSettingComponent",
+        "MOD.Core.TriggerComponent",
+        "MOD.Core.AvatarStateAnimationComponent",
+        "script.Unit",
+        "MOD.Core.AttackComponent",
+        "MOD.Core.AvatarBodyActionSelectorComponent",
+        "script.AvatarAnimationComponent"
+      ],
+      "Properties": [],
+      "Values": [
+        {
+          "TargetType": "MOD.Core.CostumeManagerComponent",
+          "Name": "CustomBodyEquip",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": "3cf4cb29ae344577b9eed37e531688a4"
+        },
+        {
+          "TargetType": "MOD.Core.CostumeManagerComponent",
+          "Name": "CustomCapEquip",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": "bea7e3aa369445efa505c1ad2943969b"
+        },
+        {
+          "TargetType": "MOD.Core.CostumeManagerComponent",
+          "Name": "CustomCoatEquip",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": ""
+        },
+        {
+          "TargetType": "MOD.Core.CostumeManagerComponent",
+          "Name": "CustomFaceAccessoryEquip",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": ""
+        },
+        {
+          "TargetType": "MOD.Core.CostumeManagerComponent",
+          "Name": "CustomFaceEquip",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": "1da5b7211d884b9ebfe011e064525a85"
+        },
+        {
+          "TargetType": "MOD.Core.CostumeManagerComponent",
+          "Name": "CustomHairEquip",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": "d339891a105a43cbbcf784d40aae74c7"
+        },
+        {
+          "TargetType": "MOD.Core.CostumeManagerComponent",
+          "Name": "CustomLongcoatEquip",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": "8499cdc373bb41189b4eb3d854eabfef"
+        },
+        {
+          "TargetType": "MOD.Core.CostumeManagerComponent",
+          "Name": "CustomOneHandedWeaponEquip",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": "674c7c86a83a4697afef4688c69eca15"
+        },
+        {
+          "TargetType": "MOD.Core.CostumeManagerComponent",
+          "Name": "CustomPantsEquip",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": ""
+        },
+        {
+          "TargetType": "MOD.Core.CostumeManagerComponent",
+          "Name": "CustomShoesEquip",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": "34ed1a529886409ebd99830b31550ee2"
+        },
+        {
+          "TargetType": "MOD.Core.CostumeManagerComponent",
+          "Name": "CustomTwoHandedWeaponEquip",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": ""
+        },
+        {
+          "TargetType": "MOD.Core.CostumeManagerComponent",
+          "Name": "DefaultEquipUserId",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": ""
+        },
+        {
+          "TargetType": "MOD.Core.CostumeManagerComponent",
+          "Name": "UseCustomEquipOnly",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.CostumeManagerComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.TransformComponent",
+          "Name": "Rotation",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODVector3, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODVector3, MOD.Core",
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        {
+          "TargetType": "MOD.Core.TransformComponent",
+          "Name": "Position",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODVector3, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODVector3, MOD.Core",
+            "x": 1.37494278,
+            "y": 1.13196862,
+            "z": 999.999
+          }
+        },
+        {
+          "TargetType": "MOD.Core.TransformComponent",
+          "Name": "QuaternionRotation",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODQuaternion, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODQuaternion, MOD.Core",
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          }
+        },
+        {
+          "TargetType": "MOD.Core.TransformComponent",
+          "Name": "ZRotation",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Single, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": 0.0
+        },
+        {
+          "TargetType": "MOD.Core.TransformComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.AvatarRendererComponent",
+          "Name": "OrderInLayer",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": 2
+        },
+        {
+          "TargetType": "MOD.Core.AvatarRendererComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.RigidbodyComponent",
+          "Name": "MoveVelocity",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODVector2, MOD.Core",
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "TargetType": "MOD.Core.RigidbodyComponent",
+          "Name": "RealMoveVelocity",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODVector2, MOD.Core",
+            "x": 0.0,
+            "y": 0.0
+          }
+        },
+        {
+          "TargetType": "MOD.Core.RigidbodyComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.MovementComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.StateComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.HitComponent",
+          "Name": "BoxSize",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODVector2, MOD.Core",
+            "x": 0.5,
+            "y": 0.8
+          }
+        },
+        {
+          "TargetType": "MOD.Core.HitComponent",
+          "Name": "ColliderOffset",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODVector2, MOD.Core",
+            "x": 0.0,
+            "y": 0.4
+          }
+        },
+        {
+          "TargetType": "MOD.Core.HitComponent",
+          "Name": "IsLegacy",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": false
+        },
+        {
+          "TargetType": "MOD.Core.HitComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.DamageSkinSpawnerComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.DamageSkinSettingComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.TriggerComponent",
+          "Name": "BoxSize",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODVector2, MOD.Core",
+            "x": 0.5,
+            "y": 0.8
+          }
+        },
+        {
+          "TargetType": "MOD.Core.TriggerComponent",
+          "Name": "ColliderOffset",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODVector2, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODVector2, MOD.Core",
+            "x": 0.0,
+            "y": 0.4
+          }
+        },
+        {
+          "TargetType": "MOD.Core.TriggerComponent",
+          "Name": "IsLegacy",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": false
+        },
+        {
+          "TargetType": "MOD.Core.TriggerComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.AvatarStateAnimationComponent",
+          "Name": "IsLegacy",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": false
+        },
+        {
+          "TargetType": "MOD.Core.AvatarStateAnimationComponent",
+          "Name": "StateToAvatarBodyActionSheet",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MODSyncDictionary`2[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089],[MOD.Core.AvatarBodyActionElement, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null]], MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": {
+            "$type": "MOD.Core.MODSyncDictionary`2[[System.String, mscorlib],[MOD.Core.AvatarBodyActionElement, MOD.Core]], MOD.Core",
+            "STAND": {
+              "AvatarBodyActionStateName": "stand",
+              "PlayRate": 1.0
+            },
+            "MOVE": {
+              "AvatarBodyActionStateName": "walk",
+              "PlayRate": 1.68
+            },
+            "HIT": {
+              "AvatarBodyActionStateName": "hit",
+              "PlayRate": 1.0
+            },
+            "CROUCH": {
+              "AvatarBodyActionStateName": "crouch",
+              "PlayRate": 1.0
+            },
+            "DIE": {
+              "AvatarBodyActionStateName": "dead",
+              "PlayRate": 1.0
+            }
+          }
+        },
+        {
+          "TargetType": "MOD.Core.AvatarStateAnimationComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "script.Unit",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.AttackComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.AvatarBodyActionSelectorComponent",
+          "Name": "ActionState",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "MOD.Core.MapleAvatarBodyActionState, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null"
+          },
+          "Value": 1
+        },
+        {
+          "TargetType": "MOD.Core.AvatarBodyActionSelectorComponent",
+          "Name": "StateActionDicForNative",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Collections.Generic.Dictionary`2[[MOD.Core.MapleAvatarBodyActionState, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null],[System.Collections.Generic.List`1[[MOD.Core.MapleAvatarActionStateElement, MOD.Core, Version=1.26.0.0, Culture=neutral, PublicKeyToken=null]], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": {
+            "$type": "System.Collections.Generic.Dictionary`2[[MOD.Core.MapleAvatarBodyActionState, MOD.Core],[System.Collections.Generic.List`1[[MOD.Core.MapleAvatarActionStateElement, MOD.Core]], mscorlib]], mscorlib",
+            "Stand": [
+              {
+                "CoreActionName": "stand1",
+                "PartsActionName": "",
+                "PlayType": 2
+              },
+              {
+                "CoreActionName": "stand2",
+                "PartsActionName": "",
+                "PlayType": 2
+              }
+            ],
+            "Walk": [
+              {
+                "CoreActionName": "walk1",
+                "PartsActionName": "",
+                "PlayType": 1
+              },
+              {
+                "CoreActionName": "walk2",
+                "PartsActionName": "",
+                "PlayType": 1
+              }
+            ],
+            "Attack": [
+              {
+                "CoreActionName": "alert",
+                "PartsActionName": "",
+                "PlayType": 1
+              }
+            ],
+            "Alert": [
+              {
+                "CoreActionName": "alert",
+                "PartsActionName": "",
+                "PlayType": 2
+              }
+            ],
+            "Hit": [
+              {
+                "CoreActionName": "alert",
+                "PartsActionName": "",
+                "PlayType": 2
+              }
+            ],
+            "Crouch": [
+              {
+                "CoreActionName": "prone",
+                "PartsActionName": "",
+                "PlayType": 1
+              }
+            ],
+            "Fall": [
+              {
+                "CoreActionName": "jump",
+                "PartsActionName": "",
+                "PlayType": 1
+              }
+            ],
+            "Sit": [
+              {
+                "CoreActionName": "sit",
+                "PartsActionName": "",
+                "PlayType": 1
+              }
+            ],
+            "Rope": [
+              {
+                "CoreActionName": "rope",
+                "PartsActionName": "",
+                "PlayType": 1
+              }
+            ],
+            "Ladder": [
+              {
+                "CoreActionName": "ladder",
+                "PartsActionName": "",
+                "PlayType": 1
+              }
+            ],
+            "Dead": [
+              {
+                "CoreActionName": "dead",
+                "PartsActionName": "stand1",
+                "PlayType": 1
+              }
+            ],
+            "Blink": [
+              {
+                "CoreActionName": "blink",
+                "PartsActionName": "",
+                "PlayType": 1
+              }
+            ],
+            "Fly": [
+              {
+                "CoreActionName": "fly",
+                "PartsActionName": "",
+                "PlayType": 1
+              }
+            ],
+            "Heal": [
+              {
+                "CoreActionName": "heal",
+                "PartsActionName": "",
+                "PlayType": 1
+              }
+            ]
+          }
+        },
+        {
+          "TargetType": "MOD.Core.AvatarBodyActionSelectorComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "script.AvatarAnimationComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.MODEntity",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "MOD.Core.MODEntity",
+          "Name": "Visible",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        }
+      ],
+      "EventLinks": [],
+      "Children": []
+    }
+  }
+}

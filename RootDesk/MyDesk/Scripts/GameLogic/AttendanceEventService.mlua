@@ -16,20 +16,22 @@ script AttendanceEventService extends Logic
 	method void LoadUserAttendance(string uid)
 		local ds = _DataStorageService:GetUserDataStorage(uid)
 		local errCode, data = ds:GetAndWait("USER_ATTENDANCE")
-		
+
 		if errCode ~= 0 then
 			print("[AttendanceService] Error loading data for user: " .. uid)
 			self:InitializeUserAttendance(uid)
 			return
 		end
-		
+
 		if data ~= nil and data ~= "" then
 			local success, attendanceData = pcall(function()
 				return _HttpService:JSONDecode(data)
 			end)
-		
+
 			if success then
 				self.UserAttendanceData[uid] = data
+				-- 새 버전 이벤트인지 체크하고 필요시 리셋
+				self:CheckAndResetForNewVersion(uid)
 			else
 				self:InitializeUserAttendance(uid)
 			end
@@ -40,17 +42,54 @@ script AttendanceEventService extends Logic
 
 	@ExecSpace("ServerOnly")
 	method void InitializeUserAttendance(string uid)
+		local currentVersion = self:GetCurrentEventVersion()
 		local initialData = {
+			version = currentVersion,
 			consecutiveDays = 0,
 			totalDays = 0,
 			lastCheckDate = ""
 		}
-		
+
 		local jsonData = _HttpService:JSONEncode(initialData)
 		self.UserAttendanceData[uid] = jsonData
-		
+
 		local ds = _DataStorageService:GetUserDataStorage(uid)
 		ds:SetAndWait("USER_ATTENDANCE", jsonData)
+	end
+
+	@ExecSpace("ServerOnly")
+	method number GetCurrentEventVersion()
+		local dataSet = _DataService:GetTable("AttendanceRewards")
+
+		if dataSet == nil then
+			return 1
+		end
+
+		local version = tonumber(dataSet:GetCell(1, "version"))
+
+		if version == nil then
+			return 1
+		end
+
+		return version
+	end
+
+	@ExecSpace("ServerOnly")
+	method void CheckAndResetForNewVersion(string uid)
+		local userAttendance = self:GetUserAttendance(uid)
+
+		if userAttendance == nil then
+			return
+		end
+
+		local currentVersion = self:GetCurrentEventVersion()
+		local userVersion = userAttendance.version or 0
+
+		-- 버전이 다르면 출석 데이터 리셋
+		if userVersion ~= currentVersion then
+			print("[AttendanceEventService] New event version detected. Resetting attendance for user: " .. uid)
+			self:InitializeUserAttendance(uid)
+		end
 	end
 
 	method table GetOrCreateUserAttendance(string uid)

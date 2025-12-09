@@ -10,6 +10,8 @@ script ExtendToggleGachaMenu extends ToggleAction
 	method void ExecuteOnLogic(Toggle sender)
 		__base:ToggleGroupActivate()
 		
+		local gachaUnitInfoPanel = _EntityService:GetEntityByPath("/ui/GachaUI/BackgroundUI/GachaUnitInfoPanel")
+		
 		if self.GachaButtonGrid then
 			self.GachaButtonGrid.Enable = true
 			self:SetGachaKey(self.panelIndex)
@@ -20,6 +22,8 @@ script ExtendToggleGachaMenu extends ToggleAction
 		end
 		
 		self:SetPickUpCharter()
+		
+		gachaUnitInfoPanel.Visible = false
 	end
 
 	method void ExecuteOffLogic(Toggle sender)
@@ -45,7 +49,7 @@ script ExtendToggleGachaMenu extends ToggleAction
 	method void SetPickUpCharter()
 		local youtubePlayer = _EntityService:GetEntityByPath("/ui/GachaUI/BackgroundUI/DisplayBoard/YoutubePlayerGUI")
 		local board = _EntityService:GetEntityByPath("/ui/GachaUI/BackgroundUI/DisplayBoard")
-		
+		local infoButton = _EntityService:GetEntityByPath("/ui/GachaUI/BackgroundUI/InfoButton")
 		local summonCount = _EntityService:GetEntityByPath("/ui/GachaUI/BackgroundUI/GachaCountRoot")
 		
 		summonCount.GachaCount:SetSummonCount()
@@ -53,9 +57,11 @@ script ExtendToggleGachaMenu extends ToggleAction
 		if self.panelIndex == 3 then
 			youtubePlayer.YoutubePlayerGUIComponent:Pause()
 			board.Enable = false
+			infoButton.Enable = false
 		else
 			-- 픽업 캐릭터로 세팅
 			self.PickUpCharter.Enable = true
+			infoButton.Enable = true
 			
 			local setting = _SummonService:GET_SETTING(_GachaManager.GachaKey)
 			if setting.video ~= nil or setting.video ~= "-" then
@@ -65,6 +71,7 @@ script ExtendToggleGachaMenu extends ToggleAction
 			end
 			board.Enable = true
 			youtubePlayer.YoutubePlayerGUIComponent:Play()
+			infoButton.GachaUnitInfoButton.unitID = setting.pickup_char_id
 		end
 	end
 
