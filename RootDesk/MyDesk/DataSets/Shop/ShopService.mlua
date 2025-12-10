@@ -14,6 +14,11 @@ script ShopService extends Logic
 
 	property string PACKAGE = "package"
 
+	property string PASS = "pass"
+
+	@Sync
+	property SyncTable<integer, string> passRewardInfo
+
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
 		self:INIT_PRODUCT_DATA()
@@ -58,6 +63,15 @@ script ShopService extends Logic
 			end
 			-- 구매 완료 후 클라이언트에 알림 (패키지 아이템 비활성화)
 			self:OnPackagePurchaseComplete(purchaseInfo.UserId, purchaseInfo.ProductId)
+		end
+		
+		if item.type == self.PASS then
+			local success = self:ProcessPassPurchase(purchaseInfo.UserId, purchaseInfo.ProductId)
+			if not success then
+				return false
+			end
+			-- 구매 완료 후 클라이언트에 알림
+			self:OnPassPurchaseComplete(purchaseInfo.UserId, purchaseInfo.ProductId)
 		end
 		
 		_LogStorageService:LogPurchaseInfo(purchaseInfo, "Success")
@@ -108,6 +122,7 @@ script ShopService extends Logic
 		    local item = {}
 			
 			local id = tostring(diaRewardSet:GetCell(index, 'id'))
+		
 			item['type'] = tostring(diaRewardSet:GetCell(index, 'type'))
 			item['value'] = tonumber(diaRewardSet:GetCell(index, 'value'))
 			
@@ -200,8 +215,35 @@ script ShopService extends Logic
 			end
 		end
 		
+		-- 패스 상품 등록
+		local passProductSet = _DataService:GetTable("pass_product")
+		if passProductSet ~= nil then
+			for index = 1, passProductSet:GetRowCount() do
+				local id = tostring(passProductSet:GetCell(index, 'id'))
+				if self.PRODUCT_ID_DICT[id] == nil then
+					self.PRODUCT_ID_DICT[id] = {type=self.PASS}
+				end
+			end
+			log("[Pass] Loaded pass products")
+		end
+		
+		-- 패스 보상 설정 (일별 보상)
+		local passRewardSet = _DataService:GetTable("pass_reward")
+		if passRewardSet ~= nil then
+			for index = 1, passRewardSet:GetRowCount() do
+				local day = tonumber(passRewardSet:GetCell(index, 'day'))
+				local rewardType = tostring(passRewardSet:GetCell(index, 'type'))
+				local value = tonumber(passRewardSet:GetCell(index, 'value'))
+		
+				-- 클라이언트 동기화용
+				local rewardJson = _HttpService:JSONEncode({type = rewardType, value = value})
+				self.passRewardInfo[day] = rewardJson
+			end
+			log("[Pass] Loaded pass rewards")
+		end
+		
 		-- 클라이언트 데이터 동기화
-		for id, item in pairs(self.PRODUCT_ID_DICT) do	
+		for id, item in pairs(self.PRODUCT_ID_DICT) do
 			local json = _HttpService:JSONEncode(item)
 			self.productInfo[id] = json
 		end
@@ -410,6 +452,303 @@ script ShopService extends Logic
 			if mushDiaButton ~= nil and mushDiaButton.ButtonComponent ~= nil and mushDiaButton.Toggle ~= nil then
 				mushDiaButton.Toggle:Toggle()
 			end
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method string GetTodayDateStringKST()
+		-- 한국시간(UTC+9) 기준 오늘 날짜 문자열 반환
+		local now = os.time() + (9 * 60 * 60)
+		local date = os.date("*t", now)
+		return string.format("%04d-%02d-%02d", date.year, date.month, date.day)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer GetCurrentPassDay(string purchaseDate)
+		-- 구매일 기준 현재 일차 계산 (한국시간 00:00 기준)
+		local now = os.time() + (9 * 60 * 60)
+		local todayKST = os.date("*t", now)
+		local todayMidnight = os.time({year=todayKST.year, month=todayKST.month, day=todayKST.day, hour=0, min=0, sec=0})
+		
+		local y, m, d = purchaseDate:match("(%d+)-(%d+)-(%d+)")
+		local purchaseMidnight = os.time({year=tonumber(y), month=tonumber(m), day=tonumber(d), hour=0, min=0, sec=0})
+		
+		local dayDiff = math.floor((todayMidnight - purchaseMidnight) / 86400) + 1
+		return math.min(math.max(dayDiff, 1), 14)
+	end
+
+	@ExecSpace("ServerOnly")
+	method table GetPassData(string userId)
+		local userStorage = _DataStorageService:GetUserDataStorage(userId)
+		local errCode, data = userStorage:GetAndWait("USER_PASS_DATA")
+		
+		if errCode ~= 0 or data == nil or data == "" then
+			return nil
+		end
+		
+		return _HttpService:JSONDecode(data)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer SavePassData(string userId, table passData)
+		local userStorage = _DataStorageService:GetUserDataStorage(userId)
+		local json = _HttpService:JSONEncode(passData)
+		return userStorage:SetAndWait("USER_PASS_DATA", json)
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean ProcessPassPurchase(string userId, string passId)
+		log("[Pass] ProcessPassPurchase - userId:", userId, "passId:", passId)
+		
+		-- 이미 패스 데이터가 있는지 확인
+		local existingData = self:GetPassData(userId)
+		if existingData ~= nil then
+			log("[Pass] User already has pass data")
+			return false
+		end
+		
+		-- 패스 데이터 초기화 및 저장
+		local passData = {
+			passId = passId,
+			purchaseDate = self:GetTodayDateStringKST(),
+			claimedDay = 0
+		}
+		
+		local saveResult = self:SavePassData(userId, passData)
+		if saveResult ~= 0 then
+			log_error("[Pass] Failed to save pass data:", saveResult)
+			return false
+		end
+		
+		log("[Pass] Pass purchase completed - purchaseDate:", passData.purchaseDate)
+		return true
+	end
+
+	@ExecSpace("ServerOnly")
+	method void OnPassPurchaseComplete(string userId, string passId)
+		local userEntity = _UserService:GetUserEntityByUserId(userId)
+		if userEntity == nil then
+			return
+		end
+		-- 클라이언트에 패스 구매 완료 알림
+		self:NotifyPassPurchaseComplete(passId)
+	end
+
+	@ExecSpace("Client")
+	method void NotifyPassPurchaseComplete(string passId)
+		log("[Pass] Pass purchase complete notification received")
+		-- MushDiaPassUI에서 UI 갱신 처리
+		local passParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/MushDiaPassParent")
+		if passParent ~= nil and passParent.MushDiaPassUI ~= nil then
+			passParent.MushDiaPassUI.hasPass = true
+			passParent.MushDiaPassUI.currentDay = 1
+			passParent.MushDiaPassUI.claimedDay = 0
+			passParent.MushDiaPassUI:RefreshUI()
+		end
+	end
+
+	@ExecSpace("Server")
+	method void RequestClaimPassRewards()
+		local userId = senderUserId
+		local result = self:ClaimPassRewards(userId)
+		self:OnPassRewardsClaimed(result.success, result.claimedDays or 0, result.totalReward or 0, result.currentDay or 0)
+	end
+
+	@ExecSpace("ServerOnly")
+	method table ClaimPassRewards(string userId)
+		log("[Pass] ClaimPassRewards - userId:", userId)
+		
+		local passData = self:GetPassData(userId)
+		if passData == nil then
+			log("[Pass] No pass data found")
+			return {success = false, reason = "no_pass"}
+		end
+		
+		local currentDay = self:GetCurrentPassDay(passData.purchaseDate)
+		local claimedDay = passData.claimedDay
+		
+		log("[Pass] currentDay:", currentDay, "claimedDay:", claimedDay)
+		
+		if currentDay <= claimedDay then
+			log("[Pass] No rewards to claim")
+			return {success = false, reason = "no_rewards", currentDay = currentDay}
+		end
+		
+		-- claimedDay+1 부터 currentDay 까지 보상 지급
+		local totalReward = 0
+		for day = claimedDay + 1, currentDay do
+			local rewardJson = self.passRewardInfo[day]
+			if rewardJson ~= nil then
+				local reward = _HttpService:JSONDecode(rewardJson)
+				log("[Pass] Claiming day", day, "reward:", reward.type, reward.value)
+				if reward.type == "dia_paid" then
+					_BillingService:AddFirstPaidCoin(userId, reward.value)
+				elseif reward.type == "dia_free" then
+					_BillingService:AddFirstFreeCoin(userId, reward.value)
+				end
+				totalReward = totalReward + reward.value
+			end
+		end
+		
+		-- 저장
+		passData.claimedDay = currentDay
+		local saveResult = self:SavePassData(userId, passData)
+		if saveResult ~= 0 then
+			log_error("[Pass] Failed to save pass data after claim:", saveResult)
+		end
+		
+		log("[Pass] Rewards claimed - days:", currentDay - claimedDay, "total:", totalReward)
+		
+		-- 14일 완료 시 버튼 숨김 처리
+		if currentDay >= 14 then
+			self:OnPassCompleted(userId)
+		end
+		
+		return {success = true, claimedDays = currentDay - claimedDay, totalReward = totalReward, currentDay = currentDay}
+	end
+
+	@ExecSpace("Client")
+	method void OnPassRewardsClaimed(boolean success, integer claimedDays, integer totalReward, integer currentDay)
+		log("[Pass] OnPassRewardsClaimed - success:", success, "claimedDays:", claimedDays, "totalReward:", totalReward, "currentDay:", currentDay)
+		self:OnPassRewardsClaimedUI(success, claimedDays, totalReward, currentDay)
+	end
+
+	@ExecSpace("Server")
+	method void AdvancePassDay()
+		if not Environment:IsMakerPlay() then
+			log_error("[Pass] AdvancePassDay is only available in test mode")
+			return
+		end
+		
+		local userId = senderUserId
+		local passData = self:GetPassData(userId)
+		if passData == nil then
+			log_error("[Pass] No pass data to advance")
+			return
+		end
+		
+		-- 구매일을 하루 앞당김 (= 현재 일차가 하루 증가)
+		local y, m, d = passData.purchaseDate:match("(%d+)-(%d+)-(%d+)")
+		local purchaseTime = os.time({year=tonumber(y), month=tonumber(m), day=tonumber(d), hour=0, min=0, sec=0})
+		local newPurchaseTime = purchaseTime - 86400  -- 하루(86400초) 빼기
+		local newDate = os.date("*t", newPurchaseTime)
+		passData.purchaseDate = string.format("%04d-%02d-%02d", newDate.year, newDate.month, newDate.day)
+		
+		local saveResult = self:SavePassData(userId, passData)
+		if saveResult ~= 0 then
+			log_error("[Pass] Failed to save advanced pass data:", saveResult)
+			return
+		end
+		
+		local currentDay = self:GetCurrentPassDay(passData.purchaseDate)
+		local claimedDay = passData.claimedDay
+		local isCompleted = claimedDay >= 14
+		
+		log("[Pass] TEST: Advanced pass day - new purchaseDate:", passData.purchaseDate, "currentDay:", currentDay)
+		
+		self:OnPassStatusChecked(true, isCompleted, currentDay, claimedDay)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void OnPassCompleted(string userId)
+		local userEntity = _UserService:GetUserEntityByUserId(userId)
+		if userEntity == nil then
+			return
+		end
+		self:HidePassButton()
+	end
+
+	@ExecSpace("Client")
+	method void HidePassButton()
+		local passButton = _EntityService:GetEntityByPath("/ui/ShopUI/ShopMenu/ShopMenuGrid/MushDiaPassButton")
+		if passButton ~= nil then
+			passButton.Enable = false
+		end
+		
+		-- 머쉬 다이아 탭으로 전환
+		local mushDiaButton = _EntityService:GetEntityByPath("/ui/ShopUI/ShopMenu/ShopMenuGrid/MushDiaButton")
+		if mushDiaButton ~= nil and mushDiaButton.Toggle ~= nil then
+			mushDiaButton.Toggle:Toggle()
+		end
+	end
+
+	@ExecSpace("Server")
+	method void CheckPassStatus(string passId)
+		local userId = senderUserId
+		local userName = _UserService:GetUserEntityByUserId(userId).Name
+		
+		log("[Pass] CheckPassStatus - userId:", userId, "userName:", userName, "passId:", passId)
+		
+		-- 이용권 보유 확인
+		local hasPass = _WorldShopService:UserHasPassAndWait(userName, passId)
+		log("[Pass] UserHasPassAndWait result:", hasPass)
+		
+		-- 이용권 API와 별개로 우리 데이터 확인
+		local passData = self:GetPassData(userId)
+		log("[Pass] GetPassData result:", passData)
+		
+		if not hasPass then
+			-- 이용권 API에서는 없지만 우리 데이터가 있으면 구매된 것으로 처리
+			if passData ~= nil then
+				log("[Pass] Pass data exists, treating as purchased")
+				local currentDay = self:GetCurrentPassDay(passData.purchaseDate)
+				local claimedDay = passData.claimedDay
+				local isCompleted = claimedDay >= 14
+				self:OnPassStatusChecked(true, isCompleted, currentDay, claimedDay)
+				return
+			end
+			self:OnPassStatusChecked(false, false, 0, 0)
+			return
+		end
+		
+		-- 패스 데이터 확인 (이미 위에서 가져옴)
+		if passData == nil then
+			-- 이용권은 있는데 데이터가 없는 경우 (비정상 상태)
+			self:OnPassStatusChecked(true, false, 0, 0)
+			return
+		end
+		
+		local currentDay = self:GetCurrentPassDay(passData.purchaseDate)
+		local claimedDay = passData.claimedDay
+		local isCompleted = claimedDay >= 14
+		
+		self:OnPassStatusChecked(true, isCompleted, currentDay, claimedDay)
+	end
+
+	@ExecSpace("Client")
+	method void OnPassStatusChecked(boolean hasPass, boolean isCompleted, integer currentDay, integer claimedDay)
+		log("[Pass] OnPassStatusChecked - hasPass:", hasPass, "isCompleted:", isCompleted, "currentDay:", currentDay, "claimedDay:", claimedDay)
+		
+		if hasPass and isCompleted then
+			self:HidePassButton()
+		end
+		
+		-- MushDiaPassUI 갱신
+		local passParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/MushDiaPassParent")
+		if passParent ~= nil and passParent.MushDiaPassUI ~= nil then
+			passParent.MushDiaPassUI.hasPass = hasPass
+			passParent.MushDiaPassUI.currentDay = currentDay
+			passParent.MushDiaPassUI.claimedDay = claimedDay
+			passParent.MushDiaPassUI:RefreshUI()
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnPassRewardsClaimedUI(boolean success, integer claimedDays, integer totalReward, integer currentDay)
+		log("[Pass] OnPassRewardsClaimedUI - success:", success, "claimedDays:", claimedDays, "totalReward:", totalReward, "currentDay:", currentDay)
+		
+		-- MushDiaPassUI 갱신
+		local passParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/MushDiaPassParent")
+		if passParent ~= nil and passParent.MushDiaPassUI ~= nil then
+			if success then
+				passParent.MushDiaPassUI.claimedDay = currentDay
+				passParent.MushDiaPassUI:RefreshUI()
+			end
+		end
+		
+		-- 14일 완료 시 2초 후 버튼 숨김
+		if success and currentDay >= 14 then
+			self:HidePassButton()
 		end
 	end
 
