@@ -65,11 +65,29 @@ script PlayerCharacter extends Component
 
 		-- 신규 유저: 튜토리얼 시작
 		if isTutorial == 0 then
-			-- MainLobbyMap에서 진입한 경우 클라이언트에서 튜토리얼 시작
+			-- MainLobbyMap에서 진입한 경우
 			if enteredMap.Name == "MainLobbyMap" then
-				log("[Tutorial] New user detected, starting tutorial...")
-				-- 클라이언트에서 튜토리얼 게임 시작 호출
-				self:StartTutorialFromClient()
+				-- Stage 101 클리어 여부 확인 (기존 유저인지 체크)
+				local userStage = self.Entity.UserStage
+				local hasCleared101 = false
+				if userStage ~= nil then
+					hasCleared101 = userStage:IsStageCleared(1, 1)
+				end
+
+				if hasCleared101 then
+					-- Stage 101을 클리어한 기존 유저: 튜토리얼 건너뛰고 완료 처리
+					log("[Tutorial] User has cleared Stage 101, skipping tutorial...")
+					_TutorialService:SAVE(self.Entity.PlayerComponent.UserId)
+					-- 약관 동의도 확인
+					if isTermAgree == 0 then
+						log("[PlayerCharacter] Showing terms agreement popup...")
+						_TermService:AgreePopupOn()
+					end
+				else
+					-- 신규 유저: 튜토리얼 시작
+					log("[Tutorial] New user detected, starting tutorial...")
+					self:StartTutorialFromClient()
+				end
 			end
 		elseif isTutorial == 1 then
 			-- NewTutorial 완료 후 MainLobbyMap 입장 시 약관 동의 팝업 표시
