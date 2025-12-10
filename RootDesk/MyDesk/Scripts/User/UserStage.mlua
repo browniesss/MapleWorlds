@@ -189,6 +189,10 @@ script UserStage extends Component
 			log("[MesoReward] Reward flag saved successfully for user:", userId)
 		end
 		
+		if rewardAmount == 0 then
+			return
+		end
+		
 		self:SetRewardPopup(rewardAmount)
 	end
 

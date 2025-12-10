@@ -225,17 +225,33 @@ script BillingService extends Logic
 
 	@ExecSpace("ServerOnly")
 	method integer AddFirstFreeCoin(string userId, integer addCoin)
-		local loadErr =  self:LOAD(userId) 
+		local loadErr =  self:LOAD(userId)
 		if loadErr ~= 0 then
 			return loadErr
 		end
-		
+
 		if addCoin <= 0 then
 			return 11
 		end
-		
+
 		self.FirstFreeCoin += addCoin
-		
+
+		return self:SAVE(userId)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer AddFirstPaidCoin(string userId, integer addCoin)
+		local loadErr = self:LOAD(userId)
+		if loadErr ~= 0 then
+			return loadErr
+		end
+
+		if addCoin <= 0 then
+			return 14
+		end
+
+		self.FirstPaidCoin += addCoin
+
 		return self:SAVE(userId)
 	end
 
@@ -251,6 +267,22 @@ script BillingService extends Logic
 		end
 
 		self.SecondFreeCoin += addCoin
+
+		return self:SAVE(userId)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer AddSecondPaidCoin(string userId, integer addCoin)
+		local loadErr = self:LOAD(userId)
+		if loadErr ~= 0 then
+			return loadErr
+		end
+
+		if addCoin <= 0 then
+			return 15
+		end
+
+		self.SecondPaidCoin += addCoin
 
 		return self:SAVE(userId)
 	end
@@ -293,6 +325,24 @@ script BillingService extends Logic
 		end
 
 		self.ThirdFreeCoin += addCoin
+		log("[Meso] AddThirdFreeCoin - userId:", userId, "added:", addCoin, "free:", self.ThirdFreeCoin, "paid:", self.ThirdPaidCoin, "total:", self.ThirdFreeCoin + self.ThirdPaidCoin)
+
+		return self:SAVE(userId)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer AddThirdPaidCoin(string userId, integer addCoin)
+		local loadErr = self:LOAD(userId)
+		if loadErr ~= 0 then
+			return loadErr
+		end
+
+		if addCoin <= 0 then
+			return 16
+		end
+
+		self.ThirdPaidCoin += addCoin
+		log("[Meso] AddThirdPaidCoin - userId:", userId, "added:", addCoin, "free:", self.ThirdFreeCoin, "paid:", self.ThirdPaidCoin, "total:", self.ThirdFreeCoin + self.ThirdPaidCoin)
 
 		return self:SAVE(userId)
 	end
