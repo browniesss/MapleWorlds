@@ -1,0 +1,24 @@
+@Component
+script PackageItem extends Component
+
+	property string itemID = ""
+
+	property Entity purchaseButton = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.purchaseButton = self.Entity:GetChildByName("PurchaseButton")
+		self.purchaseButton:ConnectEvent("ButtonClickEvent", function(event)
+			self:PurchaseItem()
+		end)
+
+		-- 서버에 구매 여부 확인 요청 (ShopService를 통해)
+		_ShopService:CheckPackagePurchased(self.itemID)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void PurchaseItem()
+		_WorldShopService:PromptPurchase(self.itemID)
+	end
+
+end

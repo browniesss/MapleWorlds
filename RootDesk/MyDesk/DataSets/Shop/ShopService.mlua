@@ -12,6 +12,8 @@ script ShopService extends Logic
 
 	property string PLAY_COIN = "play_coin"
 
+	property string PACKAGE = "package"
+
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
 		self:INIT_PRODUCT_DATA()
@@ -47,6 +49,15 @@ script ShopService extends Logic
 		
 		if item.type == self.PLAY_COIN then
 			_PlayCoinService:AddCoin(purchaseInfo.UserId, item.reward[1].value)
+		end
+		
+		if item.type == self.PACKAGE then
+			local success = self:ProcessPackagePurchase(purchaseInfo.UserId, purchaseInfo.ProductId)
+			if not success then
+				return false
+			end
+			-- 구매 완료 후 클라이언트에 알림 (패키지 아이템 비활성화)
+			self:OnPackagePurchaseComplete(purchaseInfo.UserId, purchaseInfo.ProductId)
 		end
 		
 		_LogStorageService:LogPurchaseInfo(purchaseInfo, "Success")
@@ -156,19 +167,37 @@ script ShopService extends Logic
 		end
 		
 		-- 플레이 재화 구매시 가격 설정
-		local playPriceSet = _DataService:GetTable("play_coin_price")    
+		local playPriceSet = _DataService:GetTable("play_coin_price")
 		for index = 1, playPriceSet:GetRowCount() do
 		    local item = {}
-			
+		
 			local id = tostring(playPriceSet:GetCell(index, 'id'))
 			item['type'] = tostring(playPriceSet:GetCell(index, 'type'))
 			item['value'] = tonumber(playPriceSet:GetCell(index, 'value'))
-			
+		
 			if self.PRODUCT_ID_DICT[id] == nil then
 				self.PRODUCT_ID_DICT[id] = {reward={}, price={}, type=self.PLAY_COIN}
 			end
 			local count = #self.PRODUCT_ID_DICT[id].price
 			self.PRODUCT_ID_DICT[id].price[count + 1] = item
+		end
+		
+		-- 패키지 구매시 보상 설정
+		local packageRewardSet = _DataService:GetTable("package_reward")
+		if packageRewardSet ~= nil then
+			for index = 1, packageRewardSet:GetRowCount() do
+				local item = {}
+		
+				local id = tostring(packageRewardSet:GetCell(index, 'id'))
+				item['type'] = tostring(packageRewardSet:GetCell(index, 'type'))
+				item['value'] = tonumber(packageRewardSet:GetCell(index, 'value'))
+		
+				if self.PRODUCT_ID_DICT[id] == nil then
+					self.PRODUCT_ID_DICT[id] = {reward={}, type=self.PACKAGE}
+				end
+				local count = #self.PRODUCT_ID_DICT[id].reward
+				self.PRODUCT_ID_DICT[id].reward[count + 1] = item
+			end
 		end
 		
 		-- 클라이언트 데이터 동기화
@@ -210,11 +239,178 @@ script ShopService extends Logic
 			if item.type ~= targetType then
 				continue
 			end
-			
+		
 			resp[key] = item
 		end
 		
 		return resp
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean IsPackagePurchased(string userId, string packageId)
+		local userStorage = _DataStorageService:GetUserDataStorage(userId)
+		local errCode, data = userStorage:GetAndWait("PURCHASED_PACKAGES")
+		
+		log("[Package] IsPackagePurchased - errCode:", errCode, "data:", data)
+		
+		if errCode ~= 0 then
+			return false
+		end
+		
+		if data == nil or data == "" then
+			return false
+		end
+		
+		for id in string.gmatch(data, "[^,]+") do
+			if id == packageId then
+				return true
+			end
+		end
+		
+		return false
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer SavePackagePurchase(string userId, string packageId)
+		local userStorage = _DataStorageService:GetUserDataStorage(userId)
+		local errCode, data = userStorage:GetAndWait("PURCHASED_PACKAGES")
+		
+		if errCode ~= 0 then
+			return errCode
+		end
+		
+		local newData = ""
+		if data == nil or data == "" then
+			newData = packageId
+		else
+			newData = data .. "," .. packageId
+		end
+		
+		return userStorage:SetAndWait("PURCHASED_PACKAGES", newData)
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean ProcessPackagePurchase(string userId, string productId)
+		log("[Package] ProcessPackagePurchase called - userId:", userId, "productId:", productId)
+		
+		-- 이미 구매했는지 확인
+		if self:IsPackagePurchased(userId, productId) then
+			log_error("[Package] Already purchased:", productId, "by user:", userId)
+			return false
+		end
+		
+		local item = self.PRODUCT_ID_DICT[productId]
+		if item == nil then
+			log_error("[Package] Invalid product:", productId)
+			return false
+		end
+		
+		log("[Package] Item found:", productId, "type:", item.type, "rewards count:", #item.reward)
+		
+		-- 보상 지급
+		for _, reward in pairs(item.reward) do
+			log("[Package] Processing reward - type:", reward.type, "value:", reward.value)
+			if reward.type == "dia_free" then
+				local result = _BillingService:AddFirstFreeCoin(userId, reward.value)
+				log("[Package] AddFirstFreeCoin result:", result)
+			elseif reward.type == "dia_paid" then
+				local result = _BillingService:AddFirstPaidCoin(userId, reward.value)
+				log("[Package] AddFirstPaidCoin result:", result)
+			elseif reward.type == "coin_free" then
+				local result = _BillingService:AddSecondFreeCoin(userId, reward.value)
+				log("[Package] AddSecondFreeCoin result:", result)
+			elseif reward.type == "coin_paid" then
+				local result = _BillingService:AddSecondPaidCoin(userId, reward.value)
+				log("[Package] AddSecondPaidCoin result:", result)
+			elseif reward.type == "meso_free" then
+				local result = _BillingService:AddThirdFreeCoin(userId, reward.value)
+				log("[Package] AddThirdFreeCoin result:", result)
+			elseif reward.type == "meso_paid" then
+				local result = _BillingService:AddThirdPaidCoin(userId, reward.value)
+				log("[Package] AddThirdPaidCoin result:", result)
+			else
+				log("[Package] Unknown reward type:", reward.type)
+			end
+		end
+		
+		-- 구매 기록 저장
+		local saveResult = self:SavePackagePurchase(userId, productId)
+		if saveResult ~= 0 then
+			log_error("[Package] Failed to save purchase record:", productId, "error:", saveResult)
+		end
+		
+		return true
+	end
+
+	@ExecSpace("Server")
+	method void CheckPackagePurchased(string packageId)
+		local userId = senderUserId
+		local purchased = self:IsPackagePurchased(userId, packageId)
+		if purchased then
+			self:HidePackageItem(packageId)
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void OnPackagePurchaseComplete(string userId, string packageId)
+		local userEntity = _UserService:GetUserEntityByUserId(userId)
+		if userEntity == nil then
+			return
+		end
+		self:HidePackageItem(packageId)
+	end
+
+	@ExecSpace("Client")
+	method void HidePackageItem(string packageId)
+		local packageParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/PackageParent")
+		if packageParent == nil then
+			return
+		end
+		
+		local children = packageParent.Children
+		for _, child in ipairs(children) do
+			local packageItem = child.PackageItem
+			if packageItem ~= nil and packageItem.itemID == packageId then
+				child.Enable = false
+				break
+			end
+		end
+		
+		-- 남은 활성 패키지가 있는지 체크
+		self:CheckPackageTabVisibility()
+	end
+
+	@ExecSpace("Client")
+	method void CheckPackageTabVisibility()
+		local packageParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/PackageParent")
+		if packageParent == nil then
+			return
+		end
+		
+		-- 활성화된 패키지 아이템이 있는지 확인
+		local hasActivePackage = false
+		local children = packageParent.Children
+		for _, child in ipairs(children) do
+			if child.Enable == true and child.PackageItem ~= nil then
+				hasActivePackage = true
+				break
+			end
+		end
+		
+		-- 활성 패키지가 없으면 패키지 탭 비활성화, 머쉬 다이아 탭 활성화
+		if not hasActivePackage then
+			local packageButton = _EntityService:GetEntityByPath("/ui/ShopUI/ShopMenu/ShopMenuGrid/PackageButton")
+			local mushDiaButton = _EntityService:GetEntityByPath("/ui/ShopUI/ShopMenu/ShopMenuGrid/MushDiaButton")
+		
+			if packageButton ~= nil then
+				packageButton.Enable = false
+			end
+		
+			-- 머쉬 다이아 탭 버튼 클릭 트리거
+			if mushDiaButton ~= nil and mushDiaButton.ButtonComponent ~= nil and mushDiaButton.Toggle ~= nil then
+				mushDiaButton.Toggle:Toggle()
+			end
+		end
 	end
 
 end
