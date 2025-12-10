@@ -63,11 +63,7 @@ script PlayerCharacter extends Component
 
 		log("[PlayerCharacter] isTermAgree: ", isTermAgree, ", isTutorial: ", isTutorial)
 
-		if isTermAgree == 0 then
-			_TermService:AgreePopupOn()
-		end
-
-		-- 신규 유저: Stage000 튜토리얼 스테이지로 이동
+		-- 신규 유저: 튜토리얼 시작
 		if isTutorial == 0 then
 			-- MainLobbyMap에서 진입한 경우 클라이언트에서 튜토리얼 시작
 			if enteredMap.Name == "MainLobbyMap" then
@@ -76,15 +72,11 @@ script PlayerCharacter extends Component
 				self:StartTutorialFromClient()
 			end
 		elseif isTutorial == 1 then
-			-- 인게임 튜토리얼 완료 후 로비 진입 시 로비 튜토리얼 시작
+			-- NewTutorial 완료 후 MainLobbyMap 입장 시 약관 동의 팝업 표시
 			if enteredMap.Name == "MainLobbyMap" then
-				local isLobbyTutorial = _TutorialService:LOAD_LOBBY(self.Entity.PlayerComponent.UserId)
-				log("[PlayerCharacter] isLobbyTutorial: ", isLobbyTutorial)
-				if isLobbyTutorial == 0 then
-					log("[Tutorial] Starting lobby tutorial...")
-					self:StartLobbyTutorialFromClient()
-				else
-					log("[Tutorial] Lobby tutorial already completed, skipping")
+				if isTermAgree == 0 then
+					log("[PlayerCharacter] Showing terms agreement popup...")
+					_TermService:AgreePopupOn()
 				end
 			end
 		else
@@ -104,21 +96,6 @@ script PlayerCharacter extends Component
 		_TimerService:SetTimerOnce(function()
 			_GameManager:StartTutorialGame()
 		end, 0.5)
-	end
-
-	-- 클라이언트에서 로비 튜토리얼 시작
-	@ExecSpace("Client")
-	method void StartLobbyTutorialFromClient()
-		log("[Tutorial] StartLobbyTutorialFromClient called")
-		-- 약간의 딜레이 후 시작 (UI 로드 완료 대기)
-		_TimerService:SetTimerOnce(function()
-			log("[Tutorial] Timer fired, calling StartLobbyTutorial...")
-			if _TutorialService ~= nil then
-				_TutorialService:StartLobbyTutorial(2)
-			else
-				log("[Tutorial] ERROR: _TutorialService is nil!")
-			end
-		end, 1.0)
 	end
 
 end

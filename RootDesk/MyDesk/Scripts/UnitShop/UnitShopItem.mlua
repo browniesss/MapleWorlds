@@ -120,6 +120,11 @@ script UnitShopItem extends Component
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
+		-- 튜토리얼 스텝 전환 쿨다운 중에는 터치 무시
+		if _TutorialService ~= nil and _TutorialService.isStepCooldown then
+			return
+		end
+
 		if not _SpawnManager:IsCanSpawn(self.price)then
 			return
 		end
@@ -168,11 +173,16 @@ script UnitShopItem extends Component
 	@EventSender("Service", "InputService")
 	handler HandleKeyDownEvent(KeyDownEvent event)
 		local isKeyDown = false
-		
+
 		if not _GameManager.isPlaying then
 			return
 		end
-		
+
+		-- 튜토리얼 진행 중이거나 스텝 전환 쿨다운 중에는 키 입력 무시
+		if _TutorialService ~= nil and (_TutorialService.isIngameTutorial or _TutorialService.isStepCooldown) then
+			return
+		end
+
 		if event.key == KeyboardKey.Q and self.shopItemIndex == 1 then
 			isKeyDown = true
 		elseif event.key == KeyboardKey.W and self.shopItemIndex == 2 then

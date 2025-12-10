@@ -253,7 +253,37 @@ script GameManager extends Logic
 		-- 닉네임 설정
 		local userNameUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/UserInfo/UserName")
 		userNameUI.TextComponent.Text = _UserService.LocalPlayer.PlayerComponent.Nickname
-		
+
+		-- Stage000 (튜토리얼 스테이지) 진입 시 인게임 튜토리얼 시작
+		if self.chapterIndex == 0 and self.mapIndex == 0 then
+			self.isTutorialMode = true
+
+			-- 튜토리얼용 덱 설정: 첫 번째 카드를 히어로로 스왑 (InitShop 전에 설정해야 함)
+			local player = _EntityService:GetEntityByTag("Player")
+			if player ~= nil and player.UserDeck ~= nil then
+				local heroId = "model://494916e1-eeaa-4318-b36f-95d40d6c5e91"
+				local userDeck = player.UserDeck.userDeck
+
+				-- 히어로가 덱에 있는지 찾기
+				local heroIndex = nil
+				for i = 1, 8 do
+					if userDeck[i] == heroId then
+						heroIndex = i
+						break
+					end
+				end
+
+				-- 히어로가 있으면 첫 번째 카드와 스왑
+				if heroIndex ~= nil and heroIndex ~= 1 then
+					userDeck[heroIndex] = userDeck[1]
+					userDeck[1] = heroId
+				elseif heroIndex == nil then
+					-- 히어로가 덱에 없으면 첫 번째 카드를 히어로로 교체
+					userDeck[1] = heroId
+				end
+			end
+		end
+
 		self.unitShop.UnitShop:InitShop()
 
 		for i = 1, 2 do
@@ -263,9 +293,8 @@ script GameManager extends Logic
 		    end
 		end
 
-		-- Stage000 (튜토리얼 스테이지) 진입 시 인게임 튜토리얼 시작
-		if self.chapterIndex == 0 and self.mapIndex == 0 then
-			self.isTutorialMode = true
+		-- 튜토리얼 모드일 때 튜토리얼 시작
+		if self.isTutorialMode then
 			-- 약간의 딜레이 후 튜토리얼 시작 (UI 로드 완료 대기)
 			_TimerService:SetTimerOnce(function()
 				if _TutorialService ~= nil then
