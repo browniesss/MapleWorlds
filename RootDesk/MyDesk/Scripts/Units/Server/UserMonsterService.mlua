@@ -175,7 +175,7 @@ script UserMonsterService extends Logic
 	end
 
 	@ExecSpace("ServerOnly")
-	method void LEVEL_UP(string uid, table idList)
+	method table LEVEL_UP(string uid, table idList)
 		local keyMap = {}
 		
 		for _, monsterId in ipairs(idList) do
@@ -188,18 +188,18 @@ script UserMonsterService extends Logic
 			data:DECODE(json)
 			data.level += 1
 			
-			log(monsterId .. " level : " .. (data.level -1) .. " -> " .. data.clevelunt)
+			log(monsterId .. " level : " .. (data.level -1) .. " -> " .. data.level)
 				
 			self.userMonsterDict[monsterId] = data:ENCODE()
 			
 			keyMap[monsterId]=true
 		end
 		
-		self:SAVE(uid, keyMap)
+		return self:SAVE(uid, keyMap)
 	end
 
 	@ExecSpace("ServerOnly")
-	method void LIMIT_BREAK(string uid, table idList)
+	method table LIMIT_BREAK(string uid, table idList)
 		local keyMap = {}
 		
 		for _, monsterId in ipairs(idList) do
@@ -225,7 +225,7 @@ script UserMonsterService extends Logic
 			keyMap[monsterId]=true
 		end
 		
-		self:SAVE(uid, keyMap)
+		return self:SAVE(uid, keyMap)
 	end
 
 	@EventSender("Service", "UserService")

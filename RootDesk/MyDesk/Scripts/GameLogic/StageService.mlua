@@ -65,6 +65,7 @@ script StageService extends Logic
 			stage["stage_desc"] = tostring(dataSet:GetCell(i,"stage_desc"))
 			stage["chapter_name"] = tostring(dataSet:GetCell(i,"chapter_name"))
 			stage["synergy_id"] = tostring(dataSet:GetCell(i,"synergy_id"))
+			stage["level"] = tonumber(dataSet:GetCell(i,"enemy_level"))
 			
 			self.data[i] = stage
 			self.idMap[stage.id] = i
@@ -82,16 +83,16 @@ script StageService extends Logic
 	method table GetNextOpenStageId(integer chapter, integer stage)
 		local id = tostring(stage + 100 * chapter)
 		local index = self.idMap[id]
-
+		
 		if index < #self.data then
 			local nextStage = self.data[index + 1]
-
+		
 			return {
 				chapter=nextStage.chapter,
 				stage=nextStage.stage
 			}
 		end
-
+		
 		return {
 			chapter=chapter,
 			stage=stage
@@ -102,16 +103,16 @@ script StageService extends Logic
 	method table GetNextOpenStageIdFromServer(integer chapter, integer stage)
 		local id = tostring(stage + 100 * chapter)
 		local index = self.idMap[id]
-
+		
 		if index < #self.data then
 			local nextStage = self.data[index + 1]
-
+		
 			return {
 				chapter=nextStage.chapter,
 				stage=nextStage.stage
 			}
 		end
-
+		
 		return {
 			chapter=chapter,
 			stage=stage

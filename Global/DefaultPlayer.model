@@ -27,7 +27,9 @@
         "MOD.Core.TagComponent",
         "script.UserDeck",
         "script.UserSkillDeck",
-        "script.UserSynergyComponent"
+        "script.UserSynergyComponent",
+        "script.UserUnitProtocol",
+        "script.UserUnitStore"
       ],
       "Properties": [],
       "Values": [
@@ -733,6 +735,24 @@
         },
         {
           "TargetType": "script.UserSynergyComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "script.UserUnitProtocol",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "script.UserUnitStore",
           "Name": "Enable",
           "ValueType": {
             "$type": "MODNativeType",

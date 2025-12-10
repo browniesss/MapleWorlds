@@ -1,0 +1,87 @@
+@Component
+script UserUnitProtocol extends CommonProtocol
+
+	@ExecSpace("Server")
+	method void GetUserUnitListCall()
+		self:CommonCall(senderUserId)
+		
+		local unitData = _UnitService:GetUnitAll()
+		_UserMonsterService:INIT(senderUserId)
+		local userMonsterData = _UserMonsterService.userMonsterDict
+		
+		local resp = {}
+		
+		for id, json in pairs(userMonsterData) do
+			local userUnitModel = UserUnitModel()
+			userUnitModel:DECODE(json)
+			
+			local buffedUnit = BuffedUnitModel()
+			buffedUnit:Init(unitData[id])
+			
+			
+			resp[id] = _BuffedUnitService:GetBuffedUnit(buffedUnit, userUnitModel.level, userUnitModel.limitBreak)
+		end
+		
+		self:GetUserUnitListBack(resp, senderUserId)
+	end
+
+	@ExecSpace("Client")
+	method void GetUserUnitListBack(table resp)
+		for id, data in pairs(resp) do
+			self.Entity.UserUnitStore:UpdateDictByKey(id, data)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void LevelUpUserUnitCall(string id)
+		self:CommonCall(senderUserId)
+		
+		local unitData = _UnitService:GetUnitAll()
+		local userMonsterData = _UserMonsterService.userMonsterDict
+		
+		local userUnitModel = UserUnitModel()
+		userUnitModel:DECODE(userMonsterData[id])
+		
+		local buffedUnit = BuffedUnitModel()
+		buffedUnit:Init(unitData[id])
+		
+		local nextLevel = userUnitModel.level + 1
+		local nextLevelData = _UnitLevelUpRepo:GetBuff(buffedUnit.jobId, buffedUnit.grade, nextLevel)
+		if nextLevelData == nil or nextLevelData.level == 0 then
+			log(senderUserId," max unit level ", id)
+			return
+		end
+		
+		local totalCoin = _BillingService.ThirdFreeCoin + _BillingService.ThirdPaidCoin
+		if totalCoin < nextLevelData.price then
+			self:LogAndKick(senderUserId, "not enough coin")
+			return
+		end
+		
+		local billingCode = _BillingService:UseThirdCoin(senderUserId, nextLevelData.price)
+		if not (billingCode == 0) then
+			self:LogAndKick(senderUserId, "fail to use thrid coin, code: " .. billingCode)
+			return
+		end
+		
+		local updateList = {}
+		updateList[1] = id
+		local saveResult = _UserMonsterService:LEVEL_UP(senderUserId, updateList)
+		if not (saveResult.code == 0) then
+			self:LogAndKick(senderUserId, "fail to level up, code: " .. saveResult.code)
+			return
+		end
+		
+		userMonsterData = _UserMonsterService.userMonsterDict
+		userUnitModel:DECODE(userMonsterData[id])
+		buffedUnit:Init(unitData[id])
+		
+		self:LevelUpUnitBack(_BuffedUnitService:GetBuffedUnit(buffedUnit, userUnitModel.level, userUnitModel.limitBreak))
+	end
+
+	@ExecSpace("Client")
+	method void LevelUpUnitBack(BuffedUnitModel data)
+		self.Entity.UserUnitStore:UpdateDictByKey(data.id, data)
+	end
+
+end

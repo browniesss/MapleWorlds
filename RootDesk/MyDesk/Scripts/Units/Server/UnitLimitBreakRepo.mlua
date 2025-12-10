@@ -1,0 +1,59 @@
+@Logic
+script UnitLimitBreakRepo extends Logic
+
+	property table dataMap = {}
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		for grade = 3, 5 do
+			self.dataMap[grade] = {}
+			local dataSet = _DataService:GetTable(string.format("LIMIT_BREAK_%s", grade))    
+			for index = 1, dataSet:GetRowCount() do
+			    local item = LimitBreakModel()
+				
+				item.id = "COMMON"
+				if grade == 5 then
+					item.id = tostring(dataSet:GetCell(index, 'id'))
+				end
+				item.limitBreak = tonumber(dataSet:GetCell(index, 'limitBreak'))
+				item.price = tonumber(dataSet:GetCell(index, 'price'))
+				item.hp = tonumber(dataSet:GetCell(index, 'hp'))
+				item.damage = tonumber(dataSet:GetCell(index, 'damage'))
+				item.skillID = tostring(dataSet:GetCell(index, 'skillID'))
+				item.passiveSkillID = tostring(dataSet:GetCell(index, 'passiveSkillID'))
+				item.summonCost = tonumber(dataSet:GetCell(index, 'summonCost'))
+				
+				if self.dataMap[grade][item.id] == nil then
+					self.dataMap[grade][item.id] = {}
+				end
+				
+				self.dataMap[grade][item.id][item.limitBreak] = item
+			end
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method LimitBreakModel GetBuff(integer grade, integer limitBreak, string id)
+		if grade < 5 then
+			id = "COMMON"
+		end
+		
+		local gradeMap = self.dataMap[tostring(grade)]
+		if gradeMap == nil then
+			return LimitBreakModel()
+		end
+		
+		local unitMap = gradeMap[tostring(id)]
+		if unitMap == nil then
+			return LimitBreakModel()
+		end
+		
+		local buffData = unitMap[limitBreak]
+		if buffData == nil then
+			return LimitBreakModel()
+		end
+		
+		return buffData
+	end
+
+end

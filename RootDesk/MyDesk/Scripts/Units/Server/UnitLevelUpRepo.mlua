@@ -1,0 +1,76 @@
+@Logic
+script UnitLevelUpRepo extends Logic
+
+	property table dataMap = {}
+
+	property string ARCHER = "ARCHER"
+
+	property string MAGICIAN = "MAGICIAN"
+
+	property string PIRATE = "PIRATE"
+
+	property string THIEF = "THIEF"
+
+	property string WARRIOR = "WARRIOR"
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		local jobIdDict = {}
+		jobIdDict["1"] = self.WARRIOR
+		jobIdDict["2"] = self.ARCHER
+		jobIdDict["3"] = self.MAGICIAN
+		jobIdDict["4"] = self.THIEF
+		jobIdDict["5"] = self.PIRATE
+		
+		self.dataMap["1"] = {}
+		self.dataMap["2"] = {}
+		self.dataMap["3"] = {}
+		self.dataMap["4"] = {}
+		self.dataMap["5"] = {}
+		
+		local gradeList = {}
+		gradeList[#gradeList + 1] = "3"
+		gradeList[#gradeList + 1] = "4"
+		gradeList[#gradeList + 1] = "5"
+		
+		for jobId, _ in pairs(self.dataMap) do
+			local job = jobIdDict[jobId]
+			
+			for _, grade in ipairs(gradeList) do
+				self.dataMap[jobId][grade] = {}
+				local dataSet = _DataService:GetTable(string.format("%s_%s", job, grade))    
+				for index = 1, dataSet:GetRowCount() do
+				    local item = LevelUpModel()
+					
+					item.level = tonumber(dataSet:GetCell(index, '레벨'))
+					item.hp = tonumber(dataSet:GetCell(index, '최대 체력'))
+					item.damage = tonumber(dataSet:GetCell(index, '공격력'))
+					item.price = tonumber(dataSet:GetCell(index, '가격'))
+					
+					self.dataMap[jobId][grade][item.level] = item
+				end
+			end
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method LevelUpModel GetBuff(integer jobId, integer grade, integer level)
+		local jobMap = self.dataMap[tostring(jobId)]
+		if jobMap == nil then
+			return LevelUpModel()
+		end
+		
+		local gradeMap = jobMap[tostring(grade)]
+		if gradeMap == nil then
+			return LevelUpModel()
+		end
+		
+		local data = gradeMap[level]
+		if data == nil then
+			return LevelUpModel()
+		end
+		
+		return data
+	end
+
+end

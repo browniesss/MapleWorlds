@@ -7,13 +7,13 @@ script UnitModel
 
 	property string spawnSkill = ""
 
-	property number isUsableCharacter = 0
+	property integer isUsableCharacter = 0
 
 	property string name = ""
 
 	property number passiveSkillID = 0
 
-	property number moveSpeed = 0
+	property integer moveSpeed = 0
 
 	property number hp = 0
 
@@ -55,6 +55,8 @@ script UnitModel
 
 	property number regionId = 0
 
+	property integer grade = 0
+
 	method void Init(table item)
 		self.id = tostring(item['id'])
 		self.skillID = tostring(item['skillID'])
@@ -80,6 +82,7 @@ script UnitModel
 		self.dieAudioClip = tostring(item['dieAudioClip'])
 		self.criticalRatio = tonumber(item['criticalRatio'])
 		self.criticalDamage = tonumber(item['criticalDamage'])
+		self.grade = tonumber(item['grade'])
 		
 		
 		local synergyData = _HttpService:JSONDecode(item['synergyData'])["synergyData"]

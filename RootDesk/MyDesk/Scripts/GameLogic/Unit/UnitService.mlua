@@ -37,6 +37,7 @@ script UnitService extends Logic
 			item['synergyData'] = tostring(dataSet:GetCell(index, 'synergyData'))
 			item['criticalRatio'] = tonumber(dataSet:GetCell(index, 'criticalRatio'))
 			item['criticalDamage'] = tonumber(dataSet:GetCell(index, 'criticalDamage'))
+			item['grade'] = tonumber(dataSet:GetCell(index, 'grade'))
 			
 			self.UnitTable[item['id']] = item
 		end

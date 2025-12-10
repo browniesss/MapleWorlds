@@ -1,0 +1,16 @@
+@Component
+script UserUnitStore extends Component
+
+	property table UserUnitMap = {}
+
+	@ExecSpace("ClientOnly")
+	method void UpdateDictByKey(string id, BuffedUnitModel data)
+		self.UserUnitMap[id] = data
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.Entity.UserUnitProtocol:GetUserUnitListCall()
+	end
+
+end
