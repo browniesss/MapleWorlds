@@ -13,6 +13,12 @@ script BillingService extends Logic
 	@Sync
 	property integer SecondPaidCoin = 0
 
+	@Sync
+	property integer ThirdFreeCoin = 0
+
+	@Sync
+	property integer ThirdPaidCoin = 0
+
 	@ExecSpace("ServerOnly")
 	method integer SAVE(string uid)
 		local ds = _DataStorageService:GetUserDataStorage(uid)
@@ -23,6 +29,8 @@ script BillingService extends Logic
 		data["FirstPaidCoin"] = tostring(self.FirstPaidCoin)
 		data["SecondFreeCoin"] = tostring(self.SecondFreeCoin)
 		data["SecondPaidCoin"] = tostring(self.SecondPaidCoin)
+		data["ThirdFreeCoin"] = tostring(self.ThirdFreeCoin)
+		data["ThirdPaidCoin"] = tostring(self.ThirdPaidCoin)
 		local save =  _HttpService:JSONEncode(data)
 		
 		return ds:SetAndWait("USER_COIN",save)
@@ -47,7 +55,9 @@ script BillingService extends Logic
 		self.FirstPaidCoin = resTable["FirstPaidCoin"]
 		self.SecondFreeCoin = resTable["SecondFreeCoin"]
 		self.SecondPaidCoin = resTable["SecondPaidCoin"]
-		
+		self.ThirdFreeCoin = resTable["ThirdFreeCoin"] or 0
+		self.ThirdPaidCoin = resTable["ThirdPaidCoin"] or 0
+
 		return 0
 	end
 
@@ -60,7 +70,9 @@ script BillingService extends Logic
 			self.FirstPaidCoin = 0
 			self.SecondFreeCoin = 0
 			self.SecondPaidCoin = 0
-			
+			self.ThirdFreeCoin = 0
+			self.ThirdPaidCoin = 0
+
 			return self:SAVE(uid)
 		end
 		
@@ -229,17 +241,59 @@ script BillingService extends Logic
 
 	@ExecSpace("ServerOnly")
 	method integer AddSecondFreeCoin(string userId, integer addCoin)
-		local loadErr =  self:LOAD(userId) 
+		local loadErr =  self:LOAD(userId)
 		if loadErr ~= 0 then
 			return loadErr
 		end
-		
+
 		if addCoin <= 0 then
 			return 12
 		end
-		
+
 		self.SecondFreeCoin += addCoin
-		
+
+		return self:SAVE(userId)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer UseThirdCoin(string userId, integer usage)
+		local loadErr = self:LOAD(userId)
+		if loadErr ~= 0 then
+			return loadErr
+		end
+
+		local freeCoin = self.ThirdFreeCoin
+		local paidCoin = self.ThirdPaidCoin
+		local totalCoin = freeCoin + paidCoin
+		if totalCoin < usage then
+			return -1
+		end
+
+		paidCoin -= usage
+		if paidCoin < 0 then
+			freeCoin += paidCoin
+			paidCoin = 0
+		end
+
+		self.ThirdFreeCoin = freeCoin
+		self.ThirdPaidCoin = paidCoin
+
+		return self:SAVE(userId)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer AddThirdFreeCoin(string userId, integer addCoin)
+		local loadErr = self:LOAD(userId)
+		if loadErr ~= 0 then
+			return loadErr
+		end
+
+		if addCoin <= 0 then
+			return 13
+		end
+
+		self.ThirdFreeCoin += addCoin
+
 		return self:SAVE(userId)
 	end
 

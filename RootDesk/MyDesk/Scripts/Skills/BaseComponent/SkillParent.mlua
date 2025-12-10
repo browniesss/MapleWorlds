@@ -151,4 +151,70 @@ script SkillParent extends Component
 		return false
 	end
 
+	method table GetClosestEnemies(integer count)
+		local pos = self.caster.TransformComponent.WorldPosition
+		local allEntities
+		
+		if self.caster.Unit.isEnemy then
+			allEntities = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/MyMonsterList').Children
+		else
+			allEntities = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/EnemyList').Children
+		end
+		
+		local enemiesWithDistance = {}
+		
+		for _, entity in ipairs(allEntities) do
+		    if entity ~= self.caster and entity.HitComponent and entity.Unit and entity.Unit.curState ~= "die" then
+		        local targetPos = entity.TransformComponent.WorldPosition
+		        local distance = math.abs((targetPos - pos).x)
+		        table.insert(enemiesWithDistance, {entity = entity, distance = distance})
+		    end
+		end
+		
+		-- 거리 오름차순 정렬 (가까운 순)
+		table.sort(enemiesWithDistance, function(a, b)
+			return a.distance < b.distance
+		end)
+		
+		local result = {}
+		for i = 1, math.min(count, #enemiesWithDistance) do
+			table.insert(result, enemiesWithDistance[i].entity)
+		end
+		
+		return result
+	end
+
+	method table GetFarthestEnemies(integer count)
+		local pos = self.caster.TransformComponent.WorldPosition
+		local allEntities
+		
+		if self.caster.Unit.isEnemy then
+			allEntities = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/MyMonsterList').Children
+		else
+			allEntities = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/EnemyList').Children
+		end
+		
+		local enemiesWithDistance = {}
+		
+		for _, entity in ipairs(allEntities) do
+		    if entity ~= self.caster and entity.HitComponent and entity.Unit and entity.Unit.curState ~= "die" then
+		        local targetPos = entity.TransformComponent.WorldPosition
+		        local distance = math.abs((targetPos - pos).x)
+		        table.insert(enemiesWithDistance, {entity = entity, distance = distance})
+		    end
+		end
+		
+		-- 거리 내림차순 정렬 (먼 순)
+		table.sort(enemiesWithDistance, function(a, b)
+			return a.distance > b.distance
+		end)
+		
+		local result = {}
+		for i = 1, math.min(count, #enemiesWithDistance) do
+			table.insert(result, enemiesWithDistance[i].entity)
+		end
+		
+		return result
+	end
+
 end

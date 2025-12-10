@@ -269,6 +269,9 @@ script BadgeConditionService extends Logic
 		elseif condition.reward_type == "SecondCoin" then
 			_BillingService:AddSecondFreeCoin(userId, condition.reward_amount)
 			log("[Badge] Added SecondCoin:", condition.reward_amount)
+		elseif condition.reward_type == "ThirdCoin" then
+			_BillingService:AddThirdFreeCoin(userId, condition.reward_amount)
+			log("[Badge] Added ThirdCoin:", condition.reward_amount)
 		end
 
 		self:SetRewardClaimed(userId, badgeId)

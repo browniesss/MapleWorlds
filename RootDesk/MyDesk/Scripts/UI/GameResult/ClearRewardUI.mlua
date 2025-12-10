@@ -19,9 +19,16 @@ script ClearRewardUI extends Component
 
 	property Entity enterCoinFrame = "5bb32834-b2e3-47c1-8c00-b2fc92b0223e"
 
+	property Entity mesoIcon = "1798de9f-feb8-4272-82c3-7705038d6f46"
+
+	property Entity mesoLabel = "33fa8b9c-48b9-4518-b1cd-193cf5e074a0"
+
+	property Entity mesoFrame = "3f647f06-dfea-4a54-bc24-cfc8f3f4e655"
+
 	method void RefreshUI(boolean isFirstClear)
 		local normalCoinAmount = 0
 		local specialCoinAmount = 0
+		local mesoAmount = 0
 		local enterCoinAmount = 1
 		
 		if isFirstClear then
@@ -34,6 +41,7 @@ script ClearRewardUI extends Component
 			
 			normalCoinAmount = 500
 			specialCoinAmount = 100
+			mesoAmount = 2000
 		else
 			self.specialCoinIcon.Visible = false
 			self.specialCoinLabel.Visible = false
@@ -43,11 +51,13 @@ script ClearRewardUI extends Component
 			self.enterCoinFrame.Visible = false
 			
 			normalCoinAmount = 100
+			mesoAmount = 500
 		end
 		
 		self.normalCoinLabel.TextComponent.Text = tostring(normalCoinAmount)
 		self.specialCoinLabel.TextComponent.Text = tostring(specialCoinAmount)
 		self.enterCoinLabel.TextComponent.Text = tostring(enterCoinAmount)
+		self.mesoLabel.TextComponent.Text = tostring(mesoAmount)
 	end
 
 	@EventSender("Entity", "6a4c9a1c-cc08-4753-8879-37c1ccc0f4a7")

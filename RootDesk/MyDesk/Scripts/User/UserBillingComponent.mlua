@@ -30,15 +30,32 @@ script UserBillingComponent extends Component
 		local uid = self.Entity.PlayerComponent.UserId
 		local freeCoin = _BillingService.SecondFreeCoin
 		local paidCoin = _BillingService.SecondPaidCoin
-		
+
 		if freeCoin < 0 then
 			return -1
 		end
-		
+
 		if paidCoin < 0 then
 			return -1
 		end
-		
+
+		return freeCoin + paidCoin
+	end
+
+	@ExecSpace("ClientOnly")
+	method integer GetThirdCoin()
+		local uid = self.Entity.PlayerComponent.UserId
+		local freeCoin = _BillingService.ThirdFreeCoin
+		local paidCoin = _BillingService.ThirdPaidCoin
+
+		if freeCoin < 0 then
+			return -1
+		end
+
+		if paidCoin < 0 then
+			return -1
+		end
+
 		return freeCoin + paidCoin
 	end
 
