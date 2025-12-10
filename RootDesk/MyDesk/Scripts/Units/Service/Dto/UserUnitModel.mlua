@@ -1,18 +1,21 @@
 @Struct
 script UserUnitModel
 
-	property number level = 0
+	property string id = ""
 
-	property number limitBreak = 0
+	property integer count = 0
 
-	property number count = 0
+	property integer level = 0
+
+	property integer limitBreak = 0
 
 	method string ENCODE()
-		local data = {}
-		
-		for k, v in pairs(self) do
-			data[k] = v
-		end
+		local data = {
+			id=self.id,
+			count=self.count,
+			level=self.level,
+			limitBreak=self.limitBreak,
+		}
 		
 		return _HttpService:JSONEncode(data)
 	end
@@ -23,9 +26,25 @@ script UserUnitModel
 			return false
 		end
 		
-		self.level = data["level"]
-		self.limitBreak = data["limitBreak"]
-		self.count = data["count"]
+		self.id = tostring(data["id"])
+		if self.id == nil then
+			return false
+		end
+		
+		self.level = tonumber(data["level"])
+		if self.level == nil then
+			return false
+		end
+		
+		self.count = tonumber(data["count"])
+		if self.count == nil then
+			return false
+		end
+		
+		self.limitBreak = tonumber(data["limitBreak"])
+		if self.limitBreak == nil then
+			self.limitBreak = 0
+		end
 		
 		return true
 	end

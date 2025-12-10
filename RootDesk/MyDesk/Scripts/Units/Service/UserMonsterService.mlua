@@ -29,7 +29,13 @@ script UserMonsterService extends Logic
 					continue
 				end
 				
-				local info = _HttpService:JSONDecode(data.Value)
+				local info = UserUnitModel() 
+				
+				if info:DECODE(data.Value) == false then
+					log_error(data.Value)
+					_UserService:KickUser(uid, KickReason.WorldError)
+					return
+				end
 				
 				userMosnterList[info.id] = info
 			end
@@ -56,22 +62,19 @@ script UserMonsterService extends Logic
 					continue
 				end
 				
-				local userMonster = {
-					id=unit,
-					level=1,
-					count=1
-				}
+				local userMonster = UserUnitModel()
+				userMonster.id = unit
 				
 				userMosnterList[unit] = userMonster
 				
-				local save = _HttpService:JSONEncode(userMonster)
+				local save = userMonster:ENCODE()
 				
 				ds:SetAsync("USER_" .. unit, save, function() end)
 			end
 		end
 		
 		for id, info in pairs(userMosnterList) do
-			self.userMonsterDict[id] = _HttpService:JSONEncode(info)
+			self.userMonsterDict[id] = info:ENCODE()
 		end
 	end
 
@@ -125,20 +128,17 @@ script UserMonsterService extends Logic
 		
 		for _, monsterId in ipairs(idList) do
 			local json = self.userMonsterDict[monsterId]
-			local data = {
-				id=monsterId,
-				level=1,
-				count=1
-			} 
-			
-			if json ~= nil then
-				data = _HttpService:JSONDecode(json)
-				data.count += 1
+			if json == nil then
+				continue
 			end
+			
+			local data = UserUnitModel()
+			data:DECODE(json)
+			data.count += 1
 			
 			log(monsterId .. " count : " .. (data.count -1) .. " -> " .. data.count)
 				
-			self.userMonsterDict[monsterId] = _HttpService:JSONEncode(data)
+			self.userMonsterDict[monsterId] = data:ENCODE()
 			
 			keyMap[monsterId]=true
 		end
@@ -174,20 +174,74 @@ script UserMonsterService extends Logic
 		return list
 	end
 
+	@ExecSpace("ServerOnly")
+	method void LEVEL_UP(string uid, table idList)
+		local keyMap = {}
+		
+		for _, monsterId in ipairs(idList) do
+			local json = self.userMonsterDict[monsterId]
+			if json == nil then
+				continue
+			end
+			
+			local data = UserUnitModel()
+			data:DECODE(json)
+			data.level += 1
+			
+			log(monsterId .. " level : " .. (data.level -1) .. " -> " .. data.clevelunt)
+				
+			self.userMonsterDict[monsterId] = data:ENCODE()
+			
+			keyMap[monsterId]=true
+		end
+		
+		self:SAVE(uid, keyMap)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void LIMIT_BREAK(string uid, table idList)
+		local keyMap = {}
+		
+		for _, monsterId in ipairs(idList) do
+			local json = self.userMonsterDict[monsterId]
+			if json == nil then
+				continue
+			end
+			
+			local data = UserUnitModel()
+			data:DECODE(json)
+			if data.count <= 1 then
+				_UserService:KickUser(uid, KickReason.RuleViolation)
+				continue
+			end
+			
+			data.count -= 1
+			data.limitBreak += 1
+			
+			log(monsterId .. " limitBreak : " .. (data.limitBreak - 1 ) .. " -> " .. data.limitBreak)
+				
+			self.userMonsterDict[monsterId] = data:ENCODE()
+			
+			keyMap[monsterId]=true
+		end
+		
+		self:SAVE(uid, keyMap)
+	end
+
 	@EventSender("Service", "UserService")
 	handler HandleUserEnterEvent(UserEnterEvent event)
 		--------------- Native Event Sender Info ----------------
 		-- Sender: UserService
 		-- Space: Server
 		---------------------------------------------------------
-
+		
 		-- Parameters
 		-- local ProfileCode = event.ProfileCode
 		-- local UserId = event.UserId
 		---------------------------------------------------------
-
+		
 		self:INIT(event.UserId)
-
+		
 		-- 유저 몬스터 데이터 로드 후 배지 체크 (기존 유저 배지 자동 지급)
 		_BadgeConditionService:CheckAllBadgesOnLogin(event.UserId)
 	end
