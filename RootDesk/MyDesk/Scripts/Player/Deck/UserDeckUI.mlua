@@ -16,14 +16,18 @@ script UserDeckUI extends Component
 		local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
 		 
 		for i = 1, 8 do
-			local unitData = _UnitService:GetUnitByIDFromClient(playerDeck.userDeck[i])
+			self.deckItems[i].DeckItem.itemIndex = i
+			local unitData = _EntityService:GetEntityByTag("Player").UserUnitStore.UserUnitMap[playerDeck.userDeck[i]]
+			if unitData == nil then
+				continue
+			end
+			
 			local skillData
 			if unitData ~= nil then
-				skillData = _SkillService:GetSkillByIDFromClient(unitData['skillID'])
+				skillData = _SkillService:GetSkillByIDFromClient(unitData.skillID)
 			end
 			
 			self.deckItems[i].DeckItem:Init(unitData, skillData)
-			self.deckItems[i].DeckItem.itemIndex = i
 		end
 	end
 

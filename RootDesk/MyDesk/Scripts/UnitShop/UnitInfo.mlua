@@ -13,7 +13,7 @@ script UnitInfo extends Component
 
 	property Entity unitName = nil
 
-	property table unitData = {}
+	property BuffedUnitModel unitData = BuffedUnitModel()
 
 	property table skillData = {}
 
@@ -27,7 +27,7 @@ script UnitInfo extends Component
 	end
 
 	@ExecSpace("Client")
-	method void UpdateInfo(table skillData, table unitData)
+	method void UpdateInfo(table skillData, BuffedUnitModel unitData)
 		self.unitData = unitData
 		self.skillData = skillData
 		

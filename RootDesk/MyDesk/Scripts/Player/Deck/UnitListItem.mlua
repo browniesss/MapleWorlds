@@ -1,7 +1,7 @@
 @Component
 script UnitListItem extends Component
 
-	property table unitData = {}
+	property BuffedUnitModel unitData = BuffedUnitModel()
 
 	property table skillData = {}
 
@@ -32,7 +32,7 @@ script UnitListItem extends Component
 
 	property SynergyComponentItem synergyComponentItem = nil
 
-	method void Init(table unitData, table skillData)
+	method void Init(BuffedUnitModel unitData, table skillData)
 		self.unitData = unitData
 		self.skillData = skillData
 		
@@ -64,7 +64,7 @@ script UnitListItem extends Component
 		
 		self.unitName.TextComponent.Text = self.unitData['name'].." X"..data['count']
 		self.skillDesc.TextComponent.Text = self.skillData['desc']
-		self.unitPriceLabel.TextComponent.Text = self.unitData['summonCost']
+		self.unitPriceLabel.TextComponent.Text = tostring(self.unitData.summonCost)
 		self.unitLevelLabel.TextComponent.Text = "Level: "..data['level'] 
 		
 		local test = _SpawnService:SpawnByModelId("model://c4e27100-4894-41a8-bb13-da550e47ddf3", "SynergyIcon", Vector3(-65, 70, 0), self.Entity)

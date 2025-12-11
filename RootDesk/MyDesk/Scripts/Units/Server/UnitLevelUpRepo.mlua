@@ -13,6 +13,8 @@ script UnitLevelUpRepo extends Logic
 
 	property string WARRIOR = "WARRIOR"
 
+	property integer UserMaxLevel = 10
+
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
 		local jobIdDict = {}

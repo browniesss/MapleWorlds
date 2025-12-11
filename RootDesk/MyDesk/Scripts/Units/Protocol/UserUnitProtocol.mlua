@@ -29,6 +29,7 @@ script UserUnitProtocol extends CommonProtocol
 		for id, data in pairs(resp) do
 			self.Entity.UserUnitStore:UpdateDictByKey(id, data)
 		end
+		self.Entity.UserUnitStore:UpdateDoneCallback()
 	end
 
 	@ExecSpace("Server")
@@ -44,10 +45,15 @@ script UserUnitProtocol extends CommonProtocol
 		local buffedUnit = BuffedUnitModel()
 		buffedUnit:Init(unitData[id])
 		
+		if userUnitModel.level >= _UnitLevelUpRepo.UserMaxLevel then
+			log(senderUserId," max user level ", id)
+			return
+		end
+		
 		local nextLevel = userUnitModel.level + 1
 		local nextLevelData = _UnitLevelUpRepo:GetBuff(buffedUnit.jobId, buffedUnit.grade, nextLevel)
 		if nextLevelData == nil or nextLevelData.level == 0 then
-			log(senderUserId," max unit level ", id)
+			log(senderUserId," max data level ", id)
 			return
 		end
 		
@@ -81,6 +87,7 @@ script UserUnitProtocol extends CommonProtocol
 	@ExecSpace("Client")
 	method void LevelUpUnitBack(BuffedUnitModel data)
 		self.Entity.UserUnitStore:UpdateDictByKey(data.id, data)
+		self.Entity.UserUnitStore:UpdateDoneCallback()
 	end
 
 end

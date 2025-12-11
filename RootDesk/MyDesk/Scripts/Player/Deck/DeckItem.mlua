@@ -1,7 +1,7 @@
 @Component
 script DeckItem extends Component
 
-	property table unitData = {}
+	property BuffedUnitModel unitData = BuffedUnitModel()
 
 	property table skillData = {}
 
@@ -36,7 +36,7 @@ script DeckItem extends Component
 	@HideFromInspector
 	property SynergyComponentItemRef synergyComponentItem = nil
 
-	method void Init(table unitData, table skillData)
+	method void Init(BuffedUnitModel unitData, table skillData)
 		self.unitData = unitData
 		self.skillData = skillData
 		
@@ -86,7 +86,7 @@ script DeckItem extends Component
 			-- 일반 프레임
 			self.unitFrameSprite.SpriteGUIRendererComponent.ImageRUID = "9cabdd08cb834cbab689c6219db5db05"
 			self.unitName.TextComponent.Text = self.unitData['name']
-			self.unitPriceLabel.TextComponent.Text = self.unitData['summonCost']
+			self.unitPriceLabel.TextComponent.Text = tostring(self.unitData.summonCost)
 			
 			if self.unitData['isUsableCharacter'] == 0 then
 				self.unitAvartarRenderer.Visible = false

@@ -1,7 +1,7 @@
 @Component
 script UnitInfoPanel extends Component
 
-	property table unitData = {}
+	property BuffedUnitModel unitData = BuffedUnitModel()
 
 	property table skillData = {}
 
@@ -16,7 +16,9 @@ script UnitInfoPanel extends Component
 	@Sync
 	property integer itemIndex = 0
 
-	method void Init(table unitData, table normalSkillData, table spawnSkillData, integer itemIndex)
+	property ButtonComponent LevelUpButton = "cb420390-263e-45f2-a6e8-4bafacbc4efc"
+
+	method void Init(BuffedUnitModel unitData, table normalSkillData, table spawnSkillData, integer itemIndex)
 		self.unitData = unitData
 		self.skillData = normalSkillData
 		self.spawnSkillData = spawnSkillData
@@ -34,6 +36,11 @@ script UnitInfoPanel extends Component
 			self.spawnSkillInfo.UnitSkillInfo:Init(self.spawnSkillData)	
 		end
 		
+		self.LevelUpButton.Enable = true
+		if unitData.level >= _UnitLevelUpRepo.UserMaxLevel then
+			self.LevelUpButton.Enable = false
+		end
+		
 	end
 
 	@EventSender("Entity", "12461fd8-902c-4e93-bccd-0008d63b5b34")
@@ -43,6 +50,21 @@ script UnitInfoPanel extends Component
 		userDeckUI.unitListUI.Enable = true
 		userDeckUI.unitListUI.UnitListUI:OpenListUI(self.itemIndex)
 		userDeckUI.unitListUI.Visible = true
+	end
+
+	@EventSender("Entity", "cb420390-263e-45f2-a6e8-4bafacbc4efc")
+	handler HandleButtonClickEvent2(ButtonClickEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: ButtonComponent
+		-- Space: Client
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local Entity = event.Entity
+		---------------------------------------------------------
+		
+		local user = _UserService.LocalPlayer
+		user.UserUnitProtocol:LevelUpUserUnitCall(self.unitData.id)
 	end
 
 end

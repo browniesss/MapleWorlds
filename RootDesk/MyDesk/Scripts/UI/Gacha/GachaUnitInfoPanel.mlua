@@ -18,7 +18,9 @@ script GachaUnitInfoPanel extends Component
 		self.skillData = normalSkillData
 		self.spawnSkillData = spawnSkillData
 		
-		self.unitDetailInfo.UnitDetailInfo:Init(self.unitData)
+		local buffedModel = BuffedUnitModel()
+		buffedModel:Init(unitData)
+		self.unitDetailInfo.UnitDetailInfo:Init(buffedModel)
 		self.normalSkillInfo.UnitSkillInfo:Init(self.skillData)
 		
 		if spawnSkillData == nil then

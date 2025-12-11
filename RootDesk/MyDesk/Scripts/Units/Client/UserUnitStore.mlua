@@ -3,6 +3,8 @@ script UserUnitStore extends Component
 
 	property table UserUnitMap = {}
 
+	property Entity UserDeckUI = "b4891055-14b0-4f0a-86e0-bac32bb50af8"
+
 	@ExecSpace("ClientOnly")
 	method void UpdateDictByKey(string id, BuffedUnitModel data)
 		self.UserUnitMap[id] = data
@@ -11,6 +13,27 @@ script UserUnitStore extends Component
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		self.Entity.UserUnitProtocol:GetUserUnitListCall()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void UpdateDoneCallback()
+		if self.UserDeckUI.Enable and self.UserDeckUI.Visible then
+			local infoPanel = self.UserDeckUI.Children[1]
+			if infoPanel.Enable and infoPanel.Visible then
+				local unit = self.UserUnitMap[infoPanel.UnitInfoPanel.unitData.id]
+				local skill = infoPanel.UnitInfoPanel.skillData
+				local spawnSkill = infoPanel.UnitInfoPanel.spawnSkillData
+				local index = infoPanel.UnitInfoPanel.itemIndex
+				
+				infoPanel.UnitInfoPanel:Init(
+					unit,
+					skill,
+					spawnSkill,
+					index
+				) 
+			end
+			self.UserDeckUI.Children[2].UserDeckUI:OpenUserDeckUI()
+		end
 	end
 
 end

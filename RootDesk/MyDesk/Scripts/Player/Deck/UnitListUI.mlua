@@ -42,6 +42,8 @@ script UnitListUI extends Component
 		    -- unitData['id']가 있으면 그걸 우선 사용, 없으면 key 사용
 		    local data = _HttpService:JSONDecode(jsonStr)
 			local unitData = _UnitService:GetUnitByIDFromClient(unitId)
+			local buffedUnitData = BuffedUnitModel()
+			buffedUnitData:Init(unitData)
 		
 		    -- 덱에 있는 유닛이면 스킵
 		    if data and not equipped[unitId] and unitData['isUsableCharacter'] == 1 then
@@ -51,7 +53,7 @@ script UnitListUI extends Component
 		        end
 		
 		        local button = _SpawnService:SpawnByEntity(self.buttonPrefab, "button", Vector3.zero, self.characterUIScroll)
-		        button.UnitListItem:Init(unitData, skillData)
+		        button.UnitListItem:Init(buffedUnitData, skillData)
 		    end
 		end
 		
@@ -75,6 +77,8 @@ script UnitListUI extends Component
 		    -- unitData['id']가 있으면 그걸 우선 사용, 없으면 key 사용
 		    local data = _HttpService:JSONDecode(jsonStr)
 			local unitData = _UnitService:GetUnitByIDFromClient(unitId)
+			local buffedUnitData = BuffedUnitModel()
+			buffedUnitData:Init(unitData)
 		
 		    -- 덱에 있는 유닛이면 스킵
 		    if data and not equipped[unitId] and unitData['isUsableCharacter'] == 0 then
@@ -84,7 +88,7 @@ script UnitListUI extends Component
 		        end
 		
 		        local button = _SpawnService:SpawnByEntity(self.buttonPrefab, "button", Vector3.zero, self.monsterUIScroll)
-		        button.UnitListItem:Init(unitData, skillData)
+		        button.UnitListItem:Init(buffedUnitData, skillData)
 		    end
 		end
 	end

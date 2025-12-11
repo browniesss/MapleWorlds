@@ -34,20 +34,10 @@ script SynergyComponentItem extends Component
 		self.spriteRegion.SpriteGUIRendererComponent.ImageRUID = regionRuid
 	end
 
-	method void SetSynergyData(table unitData)
-		local synergyDataJson = unitData["synergyData"]
-		
-		if synergyDataJson == "" then
-			self.Entity.Enable = false
-			return
-		end
-		
-		local res = _HttpService:JSONDecode(synergyDataJson)
-		local synergyData = res["synergyData"]
-		
-		local jobRuid = _SynergyRepo:GetSynergyData(synergyData['jobId']).RUID
-		local countryRuid = _SynergyRepo:GetSynergyData(synergyData['countryId']).RUID
-		local regionRuid = _SynergyRepo:GetSynergyData(synergyData['regionId']).RUID
+	method void SetSynergyData(BuffedUnitModel unitData)
+		local jobRuid = _SynergyRepo:GetSynergyData(unitData.jobId).RUID
+		local countryRuid = _SynergyRepo:GetSynergyData(unitData.countryId).RUID
+		local regionRuid = _SynergyRepo:GetSynergyData(unitData.regionId).RUID
 		
 		self:SetJobSprite(jobRuid)
 		self:SetCountrySprite(countryRuid)
