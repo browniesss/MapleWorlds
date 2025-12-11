@@ -90,21 +90,12 @@ script MonsterSpawnService extends Component
 	end
 
 	@ExecSpace("ClientOnly")
-	method void OnUpdate(number delta)
-		-- 
-		if true then
+	method void OnMapEnter(Entity enteredMap)
+		if string.find(enteredMap.Name, "Stage") == nil then
 			return
 		end
 		
-		self.curTimeTs = self.curTimeTs + delta
-		if self.curTimeTs > 3 then
-			self:OnDamage()
-		end
-	end
-
-	@ExecSpace("ClientOnly")
-	method void OnMapEnter(Entity enteredMap)
-		if string.find(enteredMap.Name, "Stage") == nil then
+		if enteredMap.Name == "Stage000" then
 			return
 		end
 		

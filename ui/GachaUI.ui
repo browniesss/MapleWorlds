@@ -24,7 +24,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 16,
+          "displayOrder": 17,
           "pathConstraints": "//",
           "revision": 1,
           "origin": {
@@ -84,7 +84,7 @@
             {
               "@type": "MOD.Core.UIGroupComponent",
               "DefaultShow": false,
-              "GroupOrder": 16,
+              "GroupOrder": 17,
               "GroupType": 2,
               "Enable": true
             },
@@ -6764,12 +6764,12 @@
         }
       },
       {
-        "id": "93d3f15c-1dd0-49bb-b6c2-a4e900cd799f",
-        "path": "/ui/GachaUI/TopBar/LobbyToggle/MainButton",
+        "id": "4ddec886-0abf-4cbf-96d2-d9f5c07d3adb",
+        "path": "/ui/GachaUI/TopBar/LobbyToggle/ShopButton",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.Toggle,script.ExtendToggleUIPanel",
         "jsonString": {
-          "name": "MainButton",
-          "path": "/ui/GachaUI/TopBar/LobbyToggle/MainButton",
+          "name": "ShopButton",
+          "path": "/ui/GachaUI/TopBar/LobbyToggle/ShopButton",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -6918,293 +6918,6 @@
               "ImageEntity": {
                 "tempEntityId": null,
                 "IsRelative": false,
-                "EntityId": "93d3f15c-1dd0-49bb-b6c2-a4e900cd799f"
-              },
-              "OnRUID": "d3db062ac46c472ebf0310a02b584c59",
-              "OffRUID": "f9929119a4e14af69cfcd5607ddd85da",
-              "ActionTargetEntity": {
-                "IsRelative": false,
-                "ComponentId": "93d3f15c-1dd0-49bb-b6c2-a4e900cd799f:ToggleAction"
-              }
-            },
-            {
-              "@type": "script.ExtendToggleUIPanel",
-              "Enable": true,
-              "panelIndex": 1.0,
-              "ToggleGroup": null,
-              "TargetPanelEntity": {
-                "tempEntityId": null,
-                "IsRelative": false,
-                "EntityId": "701c6938-68d9-499a-b153-57f6aee2bcaf"
-              }
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "59b4a537-4c0b-45c0-aca4-e56114336119",
-        "path": "/ui/GachaUI/TopBar/LobbyToggle/MainButton/UIText",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
-        "jsonString": {
-          "name": "UIText",
-          "path": "/ui/GachaUI/TopBar/LobbyToggle/MainButton/UIText",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 0,
-          "pathConstraints": "//////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uitext",
-            "sub_entity_id": null
-          },
-          "modelId": "uitext",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 0,
-              "AnchorsMax": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "AnchorsMin": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": 100.0,
-                "y": 76.25
-              },
-              "OffsetMin": {
-                "x": -100.0,
-                "y": 13.75
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 200.0,
-                "y": 62.5
-              },
-              "UIMode": 1,
-              "UIScale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": 0.0,
-                "y": 45.0
-              },
-              "Position": {
-                "x": 0.0,
-                "y": 48.25,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "OverrideSorting": false,
-              "SortingLayer": "MapLayer0",
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.TextComponent",
-              "Font": 3,
-              "FontColor": {
-                "r": 1.0,
-                "g": 1.0,
-                "b": 1.0,
-                "a": 1.0
-              },
-              "FontSize": 42,
-              "MaxSize": 44,
-              "MinSize": 10,
-              "OutlineDistance": {
-                "x": 1.0,
-                "y": -1.0
-              },
-              "OverrideSorting": false,
-              "Text": "메인",
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "4ddec886-0abf-4cbf-96d2-d9f5c07d3adb",
-        "path": "/ui/GachaUI/TopBar/LobbyToggle/ShopButton",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.Toggle,script.ExtendToggleUIPanel",
-        "jsonString": {
-          "name": "ShopButton",
-          "path": "/ui/GachaUI/TopBar/LobbyToggle/ShopButton",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 1,
-          "pathConstraints": "/////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uibutton",
-            "sub_entity_id": null
-          },
-          "modelId": "uibutton",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 6,
-              "AnchorsMax": {
-                "x": 0.5,
-                "y": 0.0
-              },
-              "AnchorsMin": {
-                "x": 0.5,
-                "y": 0.0
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": 100.0,
-                "y": 6.5
-              },
-              "OffsetMin": {
-                "x": -100.0,
-                "y": 0.0
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.0
-              },
-              "RectSize": {
-                "x": 200.0,
-                "y": 6.5
-              },
-              "UIMode": 1,
-              "UIScale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": 0.0,
-                "y": 0.0
-              },
-              "Rotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-              },
-              "Position": {
-                "x": 0.0,
-                "y": -35.0,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": -1.0
-              },
-              "Scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "ZRotation": 0.0,
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "ImageRUID": {
-                "DataId": "f9929119a4e14af69cfcd5607ddd85da"
-              },
-              "OverrideSorting": false,
-              "SortingLayer": "MapLayer0",
-              "Color": {
-                "r": 1.0,
-                "g": 1.0,
-                "b": 1.0,
-                "a": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.ButtonComponent",
-              "Colors": {
-                "NormalColor": {
-                  "r": 1.0,
-                  "g": 1.0,
-                  "b": 1.0,
-                  "a": 1.0
-                },
-                "HighlightedColor": {
-                  "r": 0.9607843,
-                  "g": 0.9607843,
-                  "b": 0.9607843,
-                  "a": 1.0
-                },
-                "PressedColor": {
-                  "r": 1.0,
-                  "g": 1.0,
-                  "b": 1.0,
-                  "a": 1.0
-                },
-                "SelectedColor": {
-                  "r": 0.9607843,
-                  "g": 0.9607843,
-                  "b": 0.9607843,
-                  "a": 1.0
-                },
-                "DisabledColor": {
-                  "r": 1.0,
-                  "g": 1.0,
-                  "b": 1.0,
-                  "a": 1.0
-                },
-                "ColorMultiplier": 1.0,
-                "FadeDuration": 0.1
-              },
-              "ImageRUIDs": {
-                "HighlightedSprite": null,
-                "PressedSprite": null,
-                "SelectedSprite": null,
-                "DisabledSprite": null
-              },
-              "OverrideSorting": false,
-              "Enable": true
-            },
-            {
-              "@type": "script.Toggle",
-              "Enable": true,
-              "ToggleGroupEntity": {
-                "tempEntityId": null,
-                "IsRelative": false,
-                "EntityId": "a054e2de-d23f-435c-808f-67a3df70726c"
-              },
-              "ImageEntity": {
-                "tempEntityId": null,
-                "IsRelative": false,
                 "EntityId": "4ddec886-0abf-4cbf-96d2-d9f5c07d3adb"
               },
               "OnRUID": "d3db062ac46c472ebf0310a02b584c59",
@@ -7217,7 +6930,7 @@
             {
               "@type": "script.ExtendToggleUIPanel",
               "Enable": true,
-              "panelIndex": 2.0,
+              "panelIndex": 1.0,
               "ToggleGroup": null,
               "TargetPanelEntity": {
                 "tempEntityId": null,
@@ -7348,7 +7061,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 2,
+          "displayOrder": 1,
           "pathConstraints": "/////",
           "revision": 1,
           "origin": {
@@ -7371,11 +7084,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 300.0,
+                "x": 100.0,
                 "y": 6.5
               },
               "OffsetMin": {
-                "x": 100.0,
+                "x": -100.0,
                 "y": 0.0
               },
               "Pivot": {
@@ -7394,7 +7107,7 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 200.0,
+                "x": 0.0,
                 "y": 0.0
               },
               "Rotation": {
@@ -7403,7 +7116,7 @@
                 "z": 0.0
               },
               "Position": {
-                "x": 200.0,
+                "x": 0.0,
                 "y": -35.0,
                 "z": 0.0
               },
@@ -7504,7 +7217,7 @@
             {
               "@type": "script.ExtendToggleUIPanel",
               "Enable": true,
-              "panelIndex": 3.0,
+              "panelIndex": 2.0,
               "ToggleGroup": null,
               "TargetPanelEntity": {
                 "tempEntityId": null,
@@ -7619,6 +7332,151 @@
               "OverrideSorting": false,
               "Text": "뽑기",
               "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "a55880db-ae2c-4a08-a57f-a808a8e0799d",
+        "path": "/ui/GachaUI/TopBar/UICloseButton_1",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.EnableButton",
+        "jsonString": {
+          "name": "UICloseButton_1",
+          "path": "/ui/GachaUI/TopBar/UICloseButton_1",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 5,
+          "pathConstraints": "////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uibutton",
+            "sub_entity_id": null
+          },
+          "modelId": "uibutton",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 5,
+              "AnchorsMax": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "AnchorsMin": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": -10.0,
+                "y": -10.0
+              },
+              "OffsetMin": {
+                "x": -110.0,
+                "y": -110.0
+              },
+              "Pivot": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "RectSize": {
+                "x": 100.0,
+                "y": 100.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": -10.0,
+                "y": -10.0
+              },
+              "Position": {
+                "x": 950.0,
+                "y": -10.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "2a5f62c692cd4f6a8acd11649916ed09"
+              },
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ButtonComponent",
+              "Colors": {
+                "NormalColor": {
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                },
+                "HighlightedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "PressedColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 1.0
+                },
+                "SelectedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "DisabledColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 0.5019608
+                },
+                "ColorMultiplier": 1.0,
+                "FadeDuration": 0.1
+              },
+              "ImageRUIDs": {
+                "HighlightedSprite": null,
+                "PressedSprite": null,
+                "SelectedSprite": null,
+                "DisabledSprite": null
+              },
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "script.EnableButton",
+              "Enable": true,
+              "EnableTarget": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "1c801a28-6e22-4b4c-9db9-fa27a84a9a02"
+              }
             }
           ],
           "@version": 1

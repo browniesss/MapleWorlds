@@ -12,7 +12,7 @@ script Power_Strike extends SkillParent
 		_EffectService:PlayEffectAttached("aae5027da69747d3b2cd2bd0f26987e0", self.caster, Vector3.zero , 0, Vector3.one, false, options)
 		
 		local function attackFunction()
-			self.target.Unit:OnHit(self.caster, self.skillAmount, false, 1)
+			self.target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 1)
 			
 			_EffectService:PlayEffectAttached("88a17d40d6e34abd948cac09724b22fa", self.target, Vector3.zero , 0, Vector3.one, false, options)
 		end

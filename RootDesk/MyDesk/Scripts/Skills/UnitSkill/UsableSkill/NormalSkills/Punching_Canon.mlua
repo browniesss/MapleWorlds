@@ -15,7 +15,7 @@ script Punching_Canon extends SkillParent
 		_EffectService:PlayEffectAttached("68fc685a9b9d41e796a5527a0eeb2ed9", self.caster, Vector3(0.3, 0, 0) , 0, Vector3.one, false, options)
 		
 		local function attackFunction()
-			self.target.Unit:OnHit(self.caster, self.skillAmount, false, 1)
+			self.target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 1)
 		end
 		
 		-- 첫 번째 공격

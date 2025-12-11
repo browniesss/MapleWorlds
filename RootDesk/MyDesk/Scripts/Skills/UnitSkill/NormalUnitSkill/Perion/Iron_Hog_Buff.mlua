@@ -22,7 +22,7 @@ script Iron_Hog_Buff extends SkillParent
 				return
 			end
 			
-			self.caster.Unit.hp += self.skillAmount
+			self.caster.Unit.hp += self.caster.Unit.damage * self.skillAmount
 			healCount += 1
 		end
 		

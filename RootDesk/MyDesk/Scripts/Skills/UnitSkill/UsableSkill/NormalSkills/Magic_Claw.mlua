@@ -25,7 +25,7 @@ script Magic_Claw extends SkillParent
 			_EffectService:PlayEffectAttached("a5cf9699c4884016b08da58213ad82a7", self.caster, Vector3(0, 0.1, 0) , 0, Vector3.one, false, options)
 			_EffectService:PlayEffectAttached("64096440f11f4c9b9c96df38e0e3852e", self.target, self.target.Unit:GetTargetingPos() , 0, Vector3.one)
 			
-			self.target.Unit:OnHit(self.caster, self.skillAmount, false, 2)
+			self.target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 2)
 		end
 		
 		-- 시전 딜레이 후 스킬 실행

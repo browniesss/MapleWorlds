@@ -65,23 +65,33 @@ script SkillSlot extends Component
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
+		-- 튜토리얼 진행 중이거나 스텝 전환 쿨다운 중에는 터치 무시
+		if _TutorialService ~= nil and (_TutorialService.isIngameTutorial or _TutorialService.isStepCooldown) then
+			return
+		end
+
 		self:UseSkill()
 	end
 
 	@EventSender("Service", "InputService")
 	handler HandleKeyDownEvent(KeyDownEvent event)
+		-- 튜토리얼 진행 중이거나 스텝 전환 쿨다운 중에는 키 입력 무시
+		if _TutorialService ~= nil and (_TutorialService.isIngameTutorial or _TutorialService.isStepCooldown) then
+			return
+		end
+
 		local isKeyDown = false
-		
+
 		if event.key == KeyboardKey.D and self.skillIndex == 1 then
 			isKeyDown = true
 		elseif event.key == KeyboardKey.F and self.skillIndex == 2 then
 			isKeyDown = true
 		end
-		
+
 		if not isKeyDown or _UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill then
 			return
 		end
-		
+
 		self:UseSkill()
 	end
 

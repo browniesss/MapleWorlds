@@ -25,7 +25,7 @@ script Genuine_Encore extends SkillParent
 				end
 				
 				if monster.Enable then
-					monster.Unit:OnHit(self.caster, self.skillAmount, true, 10)
+					monster.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, true, 10)
 				end
 			end
 		end

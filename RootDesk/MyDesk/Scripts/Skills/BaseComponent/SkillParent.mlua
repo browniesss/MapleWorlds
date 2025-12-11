@@ -112,7 +112,7 @@ script SkillParent extends Component
 		
 		-- 데미지 주기
 		for _, target in ipairs(selected) do
-		    target.Unit:OnHit(self.caster, self.skillAmount, false, attackCount)
+		    target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, attackCount)
 		end
 	end
 

@@ -56,6 +56,12 @@ script GameManager extends Logic
 
 	property Entity mapTextUI = "1374988d-d50e-4f9c-8bb8-e158f9b3decf"
 
+	-- 튜토리얼 관련 프로퍼티
+	@Sync
+	property boolean isTutorialMode = false
+	@Sync
+	property boolean isTutorialPaused = false
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		-- 스킬 선택 UI 비활성화
@@ -247,14 +253,54 @@ script GameManager extends Logic
 		-- 닉네임 설정
 		local userNameUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/UserInfo/UserName")
 		userNameUI.TextComponent.Text = _UserService.LocalPlayer.PlayerComponent.Nickname
-		
+
+		-- Stage000 (튜토리얼 스테이지) 진입 시 인게임 튜토리얼 시작
+		if self.chapterIndex == 0 and self.mapIndex == 0 then
+			self.isTutorialMode = true
+
+			-- 튜토리얼용 덱 설정: 첫 번째 카드를 히어로로 스왑 (InitShop 전에 설정해야 함)
+			local player = _EntityService:GetEntityByTag("Player")
+			if player ~= nil and player.UserDeck ~= nil then
+				local heroId = "model://494916e1-eeaa-4318-b36f-95d40d6c5e91"
+				local userDeck = player.UserDeck.userDeck
+
+				-- 히어로가 덱에 있는지 찾기
+				local heroIndex = nil
+				for i = 1, 8 do
+					if userDeck[i] == heroId then
+						heroIndex = i
+						break
+					end
+				end
+
+				-- 히어로가 있으면 첫 번째 카드와 스왑
+				if heroIndex ~= nil and heroIndex ~= 1 then
+					userDeck[heroIndex] = userDeck[1]
+					userDeck[1] = heroId
+				elseif heroIndex == nil then
+					-- 히어로가 덱에 없으면 첫 번째 카드를 히어로로 교체
+					userDeck[1] = heroId
+				end
+			end
+		end
+
 		self.unitShop.UnitShop:InitShop()
-		
+
 		for i = 1, 2 do
 		    local child = self.skillSlots.Children[i]
 		    if child ~= nil then
 				child.SkillSlot:Initialize()
 		    end
+		end
+
+		-- 튜토리얼 모드일 때 튜토리얼 시작
+		if self.isTutorialMode then
+			-- 약간의 딜레이 후 튜토리얼 시작 (UI 로드 완료 대기)
+			_TimerService:SetTimerOnce(function()
+				if _TutorialService ~= nil then
+					_TutorialService:StartIngameTutorial(1)
+				end
+			end, 0.5)
 		end
 	end
 
@@ -397,6 +443,13 @@ script GameManager extends Logic
 
 	@ExecSpace("Server")
 	method void StageClearServer(integer clearedChapter, integer clearedStage)
+		-- 튜토리얼 스테이지(0,0)는 보상/랭킹/진행도 저장 없이 UI만 표시
+		if clearedChapter == 0 and clearedStage == 0 then
+			log("[GameManager] Tutorial stage clear - skipping rewards and progression")
+			self:StageClearClientCallback(false, senderUserId)
+			return
+		end
+
 		local user = _UserService:GetUserEntityByUserId(senderUserId)
 		local userStage = user.UserStage
 		local userName = user.PlayerComponent.Nickname
@@ -577,6 +630,31 @@ script GameManager extends Logic
 		popupUI.Visible = true
 	end
 
+	-- 튜토리얼 스테이지(Stage000) 게임 시작
+	@ExecSpace("Client")
+	method void StartTutorialGame()
+		print("[Tutorial] StartTutorialGame called")
+
+		-- MainLobbyUI 비활성화
+		local mainLobbyUI = _EntityService:GetEntityByPath("/ui/MainLobbyUI")
+		if mainLobbyUI ~= nil then
+			mainLobbyUI.Enable = false
+			mainLobbyUI.Visible = false
+		end
+
+		self:ShowLoadingScreen()
+
+		local ruids = self:GetPreLoadAssetRuid()
+
+		_ResourceService:PreloadAsync(ruids, function()
+			_TimerService:ClearTimer(self.loadingTimer)
+
+			_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage000")
+			self:GameStart(0, 0)
+			self:HideLoadingScreen()
+		end)
+	end
+
 	@ExecSpace("Server")
 	method void Log_NormalStageClear()
 		local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
@@ -618,6 +696,11 @@ script GameManager extends Logic
 		
 		if event.key == KeyboardKey.G and Environment:IsMakerPlay() then
 			self:StageClear()
+		end
+
+		-- T키: 튜토리얼 데이터 리셋 (개발용)
+		if event.key == KeyboardKey.T and Environment:IsMakerPlay() then
+			_TutorialService:ResetTutorialData()
 		end
 	end
 

@@ -1,0 +1,63 @@
+@Component
+script NPCClickHandler extends Component
+
+	property string targetUIPath = ""
+
+	property Entity targetUIEntity = nil
+
+	property string closeUIPath1 = ""
+
+	property string closeUIPath2 = ""
+
+	property string closeUIPath3 = ""
+
+	method void OnBeginPlay()
+		-- targetUIPath가 설정되어 있으면 해당 경로로 Entity 가져오기
+		if self.targetUIPath ~= "" then
+			self.targetUIEntity = _EntityService:GetEntityByPath(self.targetUIPath)
+		end
+	end
+
+	method void OpenTargetUI()
+		-- 닫아야 할 UI들 처리
+		self:CloseUI(self.closeUIPath1)
+		self:CloseUI(self.closeUIPath2)
+		self:CloseUI(self.closeUIPath3)
+		
+		-- 타겟 UI 열기
+		if self.targetUIEntity ~= nil then
+			self.targetUIEntity.Enable = true
+			self.targetUIEntity.Visible = true
+		end
+	end
+
+	method void CloseUI(string uiPath)
+		if uiPath ~= "" then
+			local ui = _EntityService:GetEntityByPath(uiPath)
+			if ui ~= nil then
+				ui.Enable = false
+				ui.Visible = false
+			end
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	@EventSender("Self")
+	handler HandleTouchEvent(TouchEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: TouchReceiveComponent
+		-- Space: Client
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local Entity = event.Entity
+		-- local TouchPhase = event.TouchPhase
+		-- local Position = event.Position
+		---------------------------------------------------------
+		
+		if event.TouchId == 1 then -- TouchPhase.Began (클릭 시작)
+			self:OpenTargetUI()
+		end
+	end
+
+end

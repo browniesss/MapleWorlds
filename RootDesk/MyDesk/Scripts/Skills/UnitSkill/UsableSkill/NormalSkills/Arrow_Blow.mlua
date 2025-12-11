@@ -29,7 +29,7 @@ script Arrow_Blow extends SkillParent
 			missile.SpriteRendererComponent.SpriteRUID = "64142d933e854590a67af044f3d091fb"
 			missile.Projectile:SetCaster(self.caster)
 			missile.Projectile:SetShoot("64142d933e854590a67af044f3d091fb", self:IsTargetOnRight(self.target), self.skillProjectileSpeed
-			, self.target, false, self.skillAmount)
+			, self.target, false, self.caster.Unit.damage * self.skillAmount)
 		end
 		
 		-- 첫 번째 발사: 공격 모션 발생

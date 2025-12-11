@@ -29,7 +29,7 @@ script Lucky_Seven extends SkillParent
 			missile.SpriteRendererComponent.SpriteRUID = "bfa25e5caf38486a943c8468383715fb"
 			missile.Projectile:SetCaster(self.caster)
 			missile.Projectile:SetShoot("bfa25e5caf38486a943c8468383715fb", self:IsTargetOnRight(self.target), self.skillProjectileSpeed
-			, self.target, false, self.skillAmount)
+			, self.target, false, self.caster.Unit.damage * self.skillAmount)
 		end
 		
 		-- 첫 번째 발사: 공격 모션 발생

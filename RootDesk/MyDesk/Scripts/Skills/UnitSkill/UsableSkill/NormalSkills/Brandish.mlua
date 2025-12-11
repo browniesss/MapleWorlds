@@ -12,7 +12,7 @@ script Brandish extends SkillParent
 		_EffectService:PlayEffectAttached("5c2c13c481ba476294bff7e9e04df837", self.caster, Vector3.zero , 0, Vector3.one, false, options)
 		
 		local function attackFunction()
-			self.target.Unit:OnHit(self.caster, self.skillAmount, false, 1)
+			self.target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 1)
 		end
 		
 		-- 첫 번째 공격

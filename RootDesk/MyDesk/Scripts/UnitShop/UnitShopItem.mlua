@@ -120,13 +120,29 @@ script UnitShopItem extends Component
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
+		-- 튜토리얼 스텝 전환 쿨다운 중에는 터치 무시
+		if _TutorialService ~= nil and _TutorialService.isStepCooldown then
+			return
+		end
+
 		if not _SpawnManager:IsCanSpawn(self.price)then
 			return
 		end
-		
+
 		_SpawnManager:Spawn(self.unitData['id'], self.price, Vector3.zero)
-		
+
 		self.shop:OnSpawn(self.id, self.price)
+
+		-- 인게임 튜토리얼 중 소환 이벤트 알림
+		print("[UnitShopItem] ButtonClick - Checking tutorial...")
+		print("  _TutorialService exists: " .. tostring(_TutorialService ~= nil))
+		if _TutorialService ~= nil then
+			print("  isIngameTutorial: " .. tostring(_TutorialService.isIngameTutorial))
+			if _TutorialService.isIngameTutorial then
+				print("[UnitShopItem] Calling OnUnitSummoned...")
+				_TutorialService:OnUnitSummoned()
+			end
+		end
 	end
 
 	@EventSender("Self")
@@ -157,11 +173,16 @@ script UnitShopItem extends Component
 	@EventSender("Service", "InputService")
 	handler HandleKeyDownEvent(KeyDownEvent event)
 		local isKeyDown = false
-		
+
 		if not _GameManager.isPlaying then
 			return
 		end
-		
+
+		-- 튜토리얼 진행 중이거나 스텝 전환 쿨다운 중에는 키 입력 무시
+		if _TutorialService ~= nil and (_TutorialService.isIngameTutorial or _TutorialService.isStepCooldown) then
+			return
+		end
+
 		if event.key == KeyboardKey.Q and self.shopItemIndex == 1 then
 			isKeyDown = true
 		elseif event.key == KeyboardKey.W and self.shopItemIndex == 2 then
@@ -175,10 +196,17 @@ script UnitShopItem extends Component
 		if not isKeyDown or not _SpawnManager:IsCanSpawn(self.price) or  _UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill then
 			return
 		end
-		
+
 		_SpawnManager:Spawn(self.unitData['id'], self.price, Vector3.zero)
-		
+
 		self.shop:OnSpawn(self.id, self.price)
+
+		-- 인게임 튜토리얼 중 소환 이벤트 알림
+		print("[UnitShopItem] KeyDown - Checking tutorial...")
+		if _TutorialService ~= nil and _TutorialService.isIngameTutorial then
+			print("[UnitShopItem] Calling OnUnitSummoned from KeyDown...")
+			_TutorialService:OnUnitSummoned()
+		end
 	end
 
 end

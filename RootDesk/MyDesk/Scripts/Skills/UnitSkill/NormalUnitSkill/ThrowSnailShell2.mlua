@@ -29,7 +29,7 @@ script ThrowSnailShell2 extends SkillParent
 		        self.skillProjectileSpeed,
 		        self.target,
 		        false,
-		        self.skillAmount)
+		        self.caster.Unit.damage * self.skillAmount)
 		
 			-- 스킬 사용 완료 처리
 			if self.caster.Unit.curState == "die" then
