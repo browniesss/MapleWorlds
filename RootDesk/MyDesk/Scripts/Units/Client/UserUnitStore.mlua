@@ -18,7 +18,7 @@ script UserUnitStore extends Component
 	@ExecSpace("ClientOnly")
 	method void UpdateDoneCallback()
 		if self.UserDeckUI.Enable and self.UserDeckUI.Visible then
-			local infoPanel = self.UserDeckUI.Children[1]
+			local infoPanel = self.UserDeckUI.Children[2]
 			if infoPanel.Enable and infoPanel.Visible then
 				local unit = self.UserUnitMap[infoPanel.UnitInfoPanel.unitData.id]
 				local skill = infoPanel.UnitInfoPanel.skillData
@@ -32,7 +32,7 @@ script UserUnitStore extends Component
 					index
 				) 
 			end
-			self.UserDeckUI.Children[2].UserDeckUI:OpenUserDeckUI()
+			self.UserDeckUI.Children[3].UserDeckUI:OpenUserDeckUI()
 		end
 	end
 
