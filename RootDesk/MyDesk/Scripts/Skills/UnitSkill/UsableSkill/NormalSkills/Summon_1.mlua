@@ -18,7 +18,7 @@ script Summon_1 extends SkillParent
 			_SpawnManager:SpawnEnemy(model, pos)
 		else
 			pos = Vector3(self.caster.TransformComponent.Position.x - 0.5, self.caster.TransformComponent.Position.y, 0)
-			_SpawnManager:Spawn(model, 0, pos)
+			_SpawnManager:SkillSpawn(model, self.caster.Unit.id, pos)
 		end
 			
 		_EffectService:PlayEffect("bbe813c49cd84df9b59feeedb8dcba84", self.caster, pos , 0, Vector3.one)

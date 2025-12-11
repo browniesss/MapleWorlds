@@ -9,6 +9,8 @@ script MonsterSpawnService extends Component
 
 	property number curTimeTs = 0
 
+	property integer stageId = 0
+
 	@ExecSpace("Server")
 	method integer GroupSummon(table group)
 		if group == nil then
@@ -192,9 +194,19 @@ script MonsterSpawnService extends Component
 
 	@ExecSpace("Server")
 	method void InitServer()
+		if senderUserId == nil then
+			return
+		end
+		
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		local userStage = user.UserStage
+		
+		self.stageId = userStage.selectChapter * 100 + userStage.selectStage
+		
 		for i, id in ipairs(self.timerIdList) do
 			_TimerService:ClearTimer(id)
 		end
+		
 		
 		self.loopGroup = {}
 		self.eventGroup = {}

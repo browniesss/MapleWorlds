@@ -176,32 +176,42 @@ script Unit extends Component
 	@Sync
 	property number healDecreaseTimerID = 0
 
+	@Sync
+	property integer level = 1
+
+	@Sync
+	property integer limitBreak = 1
+
+	@Sync
+	property string id = ""
+
 	@ExecSpace("Server")
-	method void Spawn(table unitData, table skillData)
-		self.moveSpeed = unitData["moveSpeed"]
-		self.originMoveSpeed = unitData["moveSpeed"]
-		self.hp = unitData["hp"]
-		self.maxHP = unitData["hp"]
-		self.originMaxHP = unitData["hp"]
-		self.damage = unitData["damage"]
-		self.originDamage = unitData["damage"]
-		self.attackRange = unitData["attackRange"]
-		self.attackSpeed = unitData["attackSpeed"]
-		self.originAttackSpeed = unitData["attackSpeed"]
-		self.projectileSpeed = unitData["projectileSpeed"]
-		self.attackTiming = unitData["attackTiming"]
-		self.maxMP = unitData["maxMp"]
-		self.mp = unitData["startMp"]
-		self.damage = unitData["damage"]
-		self.projectileSpriteRUID = unitData["projectileSpriteRUID"]
-		self.unitName = unitData["name"]
-		self.animationName = unitData["animationName"]
-		self.unitScale = unitData["unitScale"]
-		local isUsableCharacter = unitData["isUsableCharacter"]
+	method void Spawn(BuffedUnitModel unitData, table skillData)
+		self.id = unitData.id
+		self.moveSpeed = unitData.moveSpeed
+		self.originMoveSpeed = unitData.moveSpeed
+		self.hp = unitData.hp
+		self.maxHP = unitData.hp
+		self.originMaxHP = unitData.hp
+		self.damage = unitData.damage
+		self.originDamage = unitData.damage
+		self.attackRange = unitData.attackRange
+		self.attackSpeed = unitData.attackSpeed
+		self.originAttackSpeed = unitData.attackSpeed
+		self.projectileSpeed = unitData.projectileSpeed
+		self.attackTiming = unitData.attackTiming
+		self.maxMP = unitData.maxMp
+		self.mp = unitData.startMp
+		self.damage = unitData.damage
+		self.projectileSpriteRUID = unitData.projectileSpriteRUID
+		self.unitName = unitData.name
+		self.animationName = unitData.animationName
+		self.unitScale = unitData.unitScale
+		local isUsableCharacter = unitData.isUsableCharacter
 		self.isUsableCharacter = isUsableCharacter == 1
-		self.dieAudioClip = unitData["dieAudioClip"]
-		self.criticalRatio = unitData["criticalRatio"]
-		self.criticalDamage = unitData["criticalDamage"]
+		self.dieAudioClip = unitData.dieAudioClip
+		self.criticalRatio = unitData.criticalRatio
+		self.criticalDamage = unitData.criticalDamage
 		
 		self.skillID = skillData['id']
 		self.skillDesc = skillData['desc']
@@ -211,8 +221,8 @@ script Unit extends Component
 		self.skillTime = skillData['skillTime']
 		self.skillAttackTiming = skillData['skillAttackTiming']
 		
-		if unitData["spawnSkill"] ~= nil then
-			self.spawnSkillData = _SkillService:GetSkillByIDFromServer(unitData["spawnSkill"])
+		if unitData.spawnSkill~= nil then
+			self.spawnSkillData = _SkillService:GetSkillByIDFromServer(unitData.spawnSkill)
 		end
 		
 		self:InitTagData()
@@ -840,6 +850,10 @@ script Unit extends Component
 			end
 		end
 		
+		if attacker.Unit ~= nil and attacker.Unit.unitName == "비숍" then
+		    damage = 0
+		end
+		
 		if attacker.CriticalAttack ~=  nil then
 			local criticalResult = attacker.CriticalAttack:OnHit(attacker, damage, isCritical, attackCount)
 			damage = criticalResult.damage
@@ -1123,28 +1137,31 @@ script Unit extends Component
 		self.activeSkill.SkillParent:UseSkill(self.Entity, self.curTarget, self.skillArea, self.skillAmount, self.skillProjectileSpeed, self.skillTime, self.skillAttackTiming)
 	end
 
-	method void SpawnEnemy(table unitData, table skillData)
-		self.moveSpeed = unitData["moveSpeed"]
-		self.originMoveSpeed = unitData["moveSpeed"]
-		self.hp = unitData["hp"]
-		self.maxHP = unitData["hp"]
-		self.originMaxHP = unitData["hp"]
-		self.damage = unitData["damage"]
-		self.attackRange = unitData["attackRange"]
-		self.attackSpeed = unitData["attackSpeed"]
-		self.originAttackSpeed = unitData["attackSpeed"]
-		self.projectileSpeed = unitData["projectileSpeed"]
-		self.attackTiming = unitData["attackTiming"]
-		self.maxMP = unitData["maxMp"]
-		self.mp = unitData["startMp"]
-		self.damage = unitData["damage"]
-		self.projectileSpriteRUID = unitData["projectileSpriteRUID"]
-		self.unitName = unitData["name"]
-		self.animationName = unitData["animationName"]
-		self.unitScale = unitData["unitScale"]
-		local isUsableCharacter = unitData["isUsableCharacter"]
+	method void SpawnEnemy(BuffedUnitModel unitData, table skillData)
+		self.id = unitData.id
+		self.moveSpeed = unitData.moveSpeed
+		self.originMoveSpeed = unitData.moveSpeed
+		self.hp = unitData.hp
+		self.maxHP = unitData.hp
+		self.originMaxHP = unitData.hp
+		self.damage = unitData.damage
+		self.attackRange = unitData.attackRange
+		self.attackSpeed = unitData.attackSpeed
+		self.originAttackSpeed = unitData.attackSpeed
+		self.projectileSpeed = unitData.projectileSpeed
+		self.attackTiming = unitData.attackTiming
+		self.maxMP = unitData.maxMp
+		self.mp = unitData.startMp
+		self.damage = unitData.damage
+		self.projectileSpriteRUID = unitData.projectileSpriteRUID
+		self.unitName = unitData.name
+		self.animationName = unitData.animationName
+		self.unitScale = unitData.unitScale
+		local isUsableCharacter = unitData.isUsableCharacter
 		self.isUsableCharacter = isUsableCharacter == 1
-		self.dieAudioClip = unitData["dieAudioClip"]
+		self.dieAudioClip = unitData.dieAudioClip
+		self.level = unitData.level
+		self.limitBreak = unitData.limitBreak
 		
 		self.skillID = skillData['id']
 		self.skillDesc = skillData['desc']
@@ -1154,8 +1171,8 @@ script Unit extends Component
 		self.skillTime = skillData['skillTime']
 		self.skillAttackTiming = skillData['skillAttackTiming']
 		
-		if unitData["spawnSkill"] ~= nil then
-			self.spawnSkillData = _SkillService:GetSkillByIDFromServer(unitData["spawnSkill"])
+		if unitData.spawnSkill ~= nil then
+			self.spawnSkillData = _SkillService:GetSkillByIDFromServer(unitData.spawnSkill)
 		end
 		
 		self:InitEnemyTagData()

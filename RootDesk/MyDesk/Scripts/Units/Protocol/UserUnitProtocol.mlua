@@ -18,8 +18,7 @@ script UserUnitProtocol extends CommonProtocol
 			local buffedUnit = BuffedUnitModel()
 			buffedUnit:Init(unitData[id])
 			
-			
-			resp[id] = _BuffedUnitService:GetBuffedUnit(buffedUnit, userUnitModel.level, userUnitModel.limitBreak)
+			resp[id] = _BuffedUnitService:SetUnitBuff(buffedUnit, userUnitModel.level, userUnitModel.limitBreak)
 		end
 		
 		self:GetUserUnitListBack(resp, senderUserId)
@@ -76,7 +75,7 @@ script UserUnitProtocol extends CommonProtocol
 		userUnitModel:DECODE(userMonsterData[id])
 		buffedUnit:Init(unitData[id])
 		
-		self:LevelUpUnitBack(_BuffedUnitService:GetBuffedUnit(buffedUnit, userUnitModel.level, userUnitModel.limitBreak))
+		self:LevelUpUnitBack(_BuffedUnitService:SetUnitBuff(buffedUnit, userUnitModel.level, userUnitModel.limitBreak))
 	end
 
 	@ExecSpace("Client")

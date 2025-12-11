@@ -24,7 +24,7 @@ script SpawnSnail extends SkillParent
 				_SpawnManager:SpawnEnemy(selectedModel, pos)
 			else
 				pos = Vector3(self.caster.TransformComponent.Position.x - 0.5, self.caster.TransformComponent.Position.y, 0)
-				_SpawnManager:Spawn(selectedModel, 0, pos)
+				_SpawnManager:SkillSpawn(selectedModel, self.caster.Unit.id, pos)
 			end
 			
 		end

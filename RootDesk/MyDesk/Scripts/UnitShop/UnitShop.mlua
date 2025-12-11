@@ -20,19 +20,17 @@ script UnitShop extends Component
 		for slot = 1, 4 do
 			local poolIndex	= self.summonDeck[slot]
 			local unitID	= poolIndex and self.summonPools[poolIndex]
-			local unitData	= unitID and _UnitService:GetUnitByIDFromClient(unitID) or nil
+			local unitData	= unitID and user.UserUnitStore.UserUnitMap[unitID] or nil
 			local skillData	= (unitData and unitData.skillID) and _SkillService:GetSkillByIDFromClient(unitData.skillID) or nil
 			
-			local synergeDataMap = _HttpService:JSONDecode(unitData.synergyData)
-			local unitSynergyData = synergeDataMap.synergyData
 			local price = unitData.summonCost
-		    local count = user.UserSynergyComponent.countMap[tostring(unitSynergyData.countryId)]
+		    local count = user.UserSynergyComponent.countMap[unitData.countryId]
 			
 			if count == nil then
 				count = 0
 			end
 			
-		    local synergy = _SynergyRepo:GetSynergyList(tonumber(unitSynergyData.countryId))
+		    local synergy = _SynergyRepo:GetSynergyList(tonumber(unitData.countryId))
 			local maxCount = 0
 		    for i = 1, synergy:length() do
 				local item = synergy:Get(i)
@@ -57,18 +55,16 @@ script UnitShop extends Component
 		-- 5: 다음 카드 미리보기 (큐의 맨 앞)
 		local previewIdx	= self.summonQueue[1]
 		local previewID		= previewIdx and self.summonPools[previewIdx]
-		local previewUD		= previewID and _UnitService:GetUnitByIDFromClient(previewID) or nil
+		local previewUD		= previewID and user.UserUnitStore.UserUnitMap[previewID] or nil
 		local previewSD		= (previewUD and previewUD.skillID) and _SkillService:GetSkillByIDFromClient(previewUD.skillID) or nil
 		
-		local synergeDataMap = _HttpService:JSONDecode(previewUD.synergyData)
-		local unitSynergyData = synergeDataMap.synergyData
 		local price = previewUD.summonCost
-		local count = user.UserSynergyComponent.countMap[tostring(unitSynergyData.countryId)]
+		local count = user.UserSynergyComponent.countMap[previewUD.countryId]
 		if count == nil then
 			count = 0
 		end
 		    
-		local synergy = _SynergyRepo:GetSynergyList(tonumber(unitSynergyData.countryId))
+		local synergy = _SynergyRepo:GetSynergyList(tonumber(previewUD.countryId))
 		        
 		local maxCount = 0
 		for i = 1, synergy:length() do
