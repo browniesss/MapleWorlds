@@ -1,0 +1,588 @@
+@Logic
+script ReelsTutorialService extends Logic
+
+	property Entity reelsTutorialUI = nil
+
+	property Entity tutorialBackground = nil
+
+	property Entity leftClickArea = nil
+
+	property Entity rightClickArea = nil
+
+	property Entity closeButton = nil
+
+	property Entity progressBarGrid = nil
+
+	property Entity progressBarTemplate = nil
+
+	property table tutorialData = {}
+
+	property table mainSteps = {}
+
+	property integer currentMainStep = 1
+
+	property integer currentSubStep = 1
+
+	property integer totalMainSteps = 0
+
+	property integer currentGroupId = 0
+
+	property boolean isActive = false
+
+	property table progressBars = {}
+
+	property integer subStepTimerId = 0
+
+	property integer fillTimerId = 0
+
+	property number fillStartTime = 0
+
+	property number currentDuration = 0
+
+	property number totalMainStepDuration = 0
+
+	property number elapsedBeforeCurrentSubStep = 0
+
+	property any leftClickHandler = nil
+
+	property any rightClickHandler = nil
+
+	property any closeButtonHandler = nil
+
+	property table viewedSubSteps = {}
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.reelsTutorialUI = _EntityService:GetEntityByPath("/ui/ReelsTutorialUI")
+		self.tutorialBackground = _EntityService:GetEntityByPath("/ui/ReelsTutorialUI/TutorialBackground")
+		self.leftClickArea = _EntityService:GetEntityByPath("/ui/ReelsTutorialUI/LeftClickArea")
+		self.rightClickArea = _EntityService:GetEntityByPath("/ui/ReelsTutorialUI/RightClickArea")
+		self.closeButton = _EntityService:GetEntityByPath("/ui/ReelsTutorialUI/CloseButton")
+		self.progressBarGrid = _EntityService:GetEntityByPath("/ui/ReelsTutorialUI/TopUI/Grid")
+		self.progressBarTemplate = _EntityService:GetEntityByPath("/ui/ReelsTutorialUI/TopUI/Grid/TutorialBar")
+	end
+
+	@ExecSpace("Client")
+	method void StartReelsTutorial(integer groupId)
+		if self.isActive then
+			return
+		end
+		
+		self.currentGroupId = groupId
+		self:LoadTutorialData(groupId)
+		
+		if self.totalMainSteps == 0 then
+			log("[ReelsTutorialService] No tutorial data found for groupId: " .. tostring(groupId))
+			return
+		end
+		
+		-- Seen 저장
+		local userId = _UserService.LocalPlayer.PlayerComponent.UserId
+		self:SAVE_SEEN(userId, groupId)
+		
+		self:SetupProgressBars()
+		self.currentMainStep = 1
+		self.currentSubStep = 1
+		self.isActive = true
+		self.viewedSubSteps = {}
+		
+		-- UI 표시
+		if self.reelsTutorialUI ~= nil and self.reelsTutorialUI.UIGroupComponent ~= nil then
+			self.reelsTutorialUI.UIGroupComponent:Show()
+		end
+		
+		-- 이벤트 핸들러 연결
+		self:ConnectEventHandlers()
+		
+		self:ShowCurrentStep()
+	end
+
+	@ExecSpace("Client")
+	method void LoadTutorialData(integer groupId)
+		local dataSet = _DataService:GetTable("ReelsTutorial")
+		if dataSet == nil then
+			log("[ReelsTutorialService] ReelsTutorial DataSet not found")
+			return
+		end
+		
+		self.tutorialData = {}
+		self.mainSteps = {}
+		
+		for i = 1, dataSet:GetRowCount() do
+			local gId = tonumber(dataSet:GetCell(i, "groupId"))
+			if gId == groupId then
+				local step = {}
+				step["id"] = tonumber(dataSet:GetCell(i, "id"))
+				step["stepOrder"] = tonumber(dataSet:GetCell(i, "stepOrder"))
+				step["subStepOrder"] = tonumber(dataSet:GetCell(i, "subStepOrder"))
+				step["imageRUID"] = tostring(dataSet:GetCell(i, "imageRUID"))
+				step["duration"] = tonumber(dataSet:GetCell(i, "duration"))
+		
+				table.insert(self.tutorialData, step)
+		
+				-- 메인 스텝별 그룹화
+				local stepOrder = step["stepOrder"]
+				if self.mainSteps[stepOrder] == nil then
+					self.mainSteps[stepOrder] = {}
+				end
+				table.insert(self.mainSteps[stepOrder], step)
+			end
+		end
+		
+		-- 메인 스텝 개수 계산
+		self.totalMainSteps = 0
+		for k, v in pairs(self.mainSteps) do
+			if k > self.totalMainSteps then
+				self.totalMainSteps = k
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void SetupProgressBars()
+		-- 기존 동적 생성된 프로그레스 바 정리
+		for i = 2, #self.progressBars do
+			local bar = self.progressBars[i]
+			if bar ~= nil and bar.IsValid then
+				bar:Destroy()
+			end
+		end
+		self.progressBars = {}
+		
+		if self.progressBarTemplate == nil then
+			log("[ReelsTutorialService] Progress bar template not found")
+			return
+		end
+		
+		-- 템플릿을 첫 번째로 사용
+		self.progressBarTemplate.Enable = true
+		if self.progressBarTemplate.SpriteGUIRendererComponent ~= nil then
+			self.progressBarTemplate.SpriteGUIRendererComponent.FillAmount = 0
+		end
+		table.insert(self.progressBars, self.progressBarTemplate)
+		
+		-- 메인 스텝 개수만큼 추가 생성
+		for i = 2, self.totalMainSteps do
+			local newBar = _EntityService:CreateEntity("TutorialBar_" .. tostring(i), self.progressBarGrid)
+			if newBar ~= nil then
+				newBar:AddComponent(UITransformComponent)
+				newBar:AddComponent(SpriteGUIRendererComponent)
+		
+				-- UITransformComponent 설정
+				if newBar.UITransformComponent ~= nil then
+					newBar.UITransformComponent.RectSize = Vector2(300, 10)
+				end
+		
+				-- SpriteGUIRendererComponent 설정
+				if newBar.SpriteGUIRendererComponent ~= nil then
+					newBar.SpriteGUIRendererComponent.FillAmount = 0
+					newBar.SpriteGUIRendererComponent.Color = Color(1, 1, 1, 1)
+				end
+		
+				table.insert(self.progressBars, newBar)
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void ConnectEventHandlers()
+		-- 왼쪽 클릭 영역
+		if self.leftClickArea ~= nil and self.leftClickArea.ButtonComponent ~= nil then
+			self.leftClickHandler = self.leftClickArea.ButtonComponent.OnClick:Connect(function()
+				self:OnLeftClick()
+			end)
+		end
+		
+		-- 오른쪽 클릭 영역
+		if self.rightClickArea ~= nil and self.rightClickArea.ButtonComponent ~= nil then
+			self.rightClickHandler = self.rightClickArea.ButtonComponent.OnClick:Connect(function()
+				self:OnRightClick()
+			end)
+		end
+		
+		-- 닫기 버튼
+		if self.closeButton ~= nil and self.closeButton.ButtonComponent ~= nil then
+			self.closeButtonHandler = self.closeButton.ButtonComponent.OnClick:Connect(function()
+				self:OnCloseClick()
+			end)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void DisconnectEventHandlers()
+		if self.leftClickHandler ~= nil then
+			self.leftClickHandler:Disconnect()
+			self.leftClickHandler = nil
+		end
+		
+		if self.rightClickHandler ~= nil then
+			self.rightClickHandler:Disconnect()
+			self.rightClickHandler = nil
+		end
+		
+		if self.closeButtonHandler ~= nil then
+			self.closeButtonHandler:Disconnect()
+			self.closeButtonHandler = nil
+		end
+	end
+
+	@ExecSpace("Client")
+	method void ShowCurrentStep()
+		local subSteps = self.mainSteps[self.currentMainStep]
+		if subSteps == nil then
+			log("[ReelsTutorialService] No substeps found for mainStep: " .. tostring(self.currentMainStep))
+			return
+		end
+		
+		local currentData = subSteps[self.currentSubStep]
+		if currentData == nil then
+			log("[ReelsTutorialService] No data found for subStep: " .. tostring(self.currentSubStep))
+			return
+		end
+		
+		-- 배경 이미지 변경
+		if self.tutorialBackground ~= nil and self.tutorialBackground.SpriteGUIRendererComponent ~= nil then
+			local imageRUID = currentData["imageRUID"]
+			if imageRUID ~= nil and imageRUID ~= "" then
+				self.tutorialBackground.SpriteGUIRendererComponent.ImageRUID = imageRUID
+			end
+		end
+		
+		-- 현재 메인 스텝의 전체 duration 계산
+		self:CalculateMainStepDuration()
+		
+		-- 프로그레스 바 업데이트
+		self:UpdateProgressBar()
+		
+		-- 서브 스텝 타이머 시작
+		self:StartSubStepTimer()
+	end
+
+	@ExecSpace("Client")
+	method void CalculateMainStepDuration()
+		local subSteps = self.mainSteps[self.currentMainStep]
+		if subSteps == nil then
+			return
+		end
+		
+		self.totalMainStepDuration = 0
+		self.elapsedBeforeCurrentSubStep = 0
+		
+		for i, step in ipairs(subSteps) do
+			local duration = step["duration"] or 3000
+			self.totalMainStepDuration = self.totalMainStepDuration + duration
+		
+			if i < self.currentSubStep then
+				self.elapsedBeforeCurrentSubStep = self.elapsedBeforeCurrentSubStep + duration
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void UpdateProgressBar()
+		-- 이전 메인 스텝들은 꽉 채움
+		for i = 1, self.currentMainStep - 1 do
+			if self.progressBars[i] ~= nil and self.progressBars[i].SpriteGUIRendererComponent ~= nil then
+				self.progressBars[i].SpriteGUIRendererComponent.FillAmount = 1.0
+			end
+		end
+		
+		-- 현재 메인 스텝 이후는 비움
+		for i = self.currentMainStep + 1, self.totalMainSteps do
+			if self.progressBars[i] ~= nil and self.progressBars[i].SpriteGUIRendererComponent ~= nil then
+				self.progressBars[i].SpriteGUIRendererComponent.FillAmount = 0.0
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void UpdateCurrentFillAmount()
+		if self.totalMainStepDuration <= 0 then
+			return
+		end
+		
+		local currentTime = _UtilLogic:GetTime()
+		local elapsedInCurrentSubStep = (currentTime - self.fillStartTime) * 1000
+		local totalElapsed = self.elapsedBeforeCurrentSubStep + elapsedInCurrentSubStep
+		
+		local fillAmount = totalElapsed / self.totalMainStepDuration
+		if fillAmount > 1.0 then
+			fillAmount = 1.0
+		end
+		
+		if self.progressBars[self.currentMainStep] ~= nil and self.progressBars[self.currentMainStep].SpriteGUIRendererComponent ~= nil then
+			self.progressBars[self.currentMainStep].SpriteGUIRendererComponent.FillAmount = fillAmount
+		end
+	end
+
+	@ExecSpace("Client")
+	method void StartSubStepTimer()
+		self:StopSubStepTimer()
+		
+		local subSteps = self.mainSteps[self.currentMainStep]
+		if subSteps == nil then
+			return
+		end
+		
+		local currentData = subSteps[self.currentSubStep]
+		if currentData == nil then
+			return
+		end
+		
+		self.currentDuration = currentData["duration"] or 3000
+		self.fillStartTime = _UtilLogic:GetTime()
+		
+		-- FillAmount 업데이트 타이머 (50ms 간격)
+		self.fillTimerId = _TimerService:SetTimerRepeat(function()
+			self:UpdateCurrentFillAmount()
+		end, 0.05)
+		
+		-- 서브 스텝 완료 타이머
+		local durationInSeconds = self.currentDuration / 1000
+		self.subStepTimerId = _TimerService:SetTimerOnce(function()
+			self:OnSubStepComplete()
+		end, durationInSeconds)
+	end
+
+	@ExecSpace("Client")
+	method void StopSubStepTimer()
+		if self.subStepTimerId ~= 0 then
+			_TimerService:ClearTimer(self.subStepTimerId)
+			self.subStepTimerId = 0
+		end
+		
+		if self.fillTimerId ~= 0 then
+			_TimerService:ClearTimer(self.fillTimerId)
+			self.fillTimerId = 0
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnSubStepComplete()
+		-- 현재 서브 스텝을 봤음으로 표시
+		if self.viewedSubSteps[self.currentMainStep] == nil then
+			self.viewedSubSteps[self.currentMainStep] = {}
+		end
+		self.viewedSubSteps[self.currentMainStep][self.currentSubStep] = true
+		
+		local subSteps = self.mainSteps[self.currentMainStep]
+		if subSteps == nil then
+			return
+		end
+		
+		if self.currentSubStep < #subSteps then
+			-- 다음 서브 스텝으로
+			self.currentSubStep = self.currentSubStep + 1
+			self:ShowCurrentStep()
+		else
+			-- 다음 메인 스텝으로
+			self:GoToNextMainStep(true)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void GoToNextMainStep(boolean isAutoComplete)
+		if self.currentMainStep >= self.totalMainSteps then
+			-- 마지막 스텝이면 종료
+			if isAutoComplete then
+				self:EndTutorial(true)
+			else
+				self:EndTutorial(false)
+			end
+			return
+		end
+		
+		self.currentMainStep = self.currentMainStep + 1
+		self.currentSubStep = 1
+		self:ShowCurrentStep()
+	end
+
+	@ExecSpace("Client")
+	method void GoToPrevMainStep()
+		if self.currentMainStep <= 1 then
+			-- 첫 스텝이면 현재 스텝 재시작
+			self.currentSubStep = 1
+			self:ShowCurrentStep()
+			return
+		end
+		
+		self.currentMainStep = self.currentMainStep - 1
+		self.currentSubStep = 1
+		self:ShowCurrentStep()
+	end
+
+	@ExecSpace("Client")
+	method void OnLeftClick()
+		if not self.isActive then
+			return
+		end
+		self:GoToPrevMainStep()
+	end
+
+	@ExecSpace("Client")
+	method void OnRightClick()
+		if not self.isActive then
+			return
+		end
+		self:GoToNextMainStep(false)
+	end
+
+	@ExecSpace("Client")
+	method void OnCloseClick()
+		if not self.isActive then
+			return
+		end
+		-- X 버튼으로 닫을 때도 Complete 체크
+		local shouldComplete = self:CheckAllViewed()
+		self:EndTutorial(shouldComplete)
+	end
+
+	@ExecSpace("Client")
+	method boolean CheckAllViewed()
+		for mainStep = 1, self.totalMainSteps do
+			local subSteps = self.mainSteps[mainStep]
+			if subSteps ~= nil then
+				for subStep = 1, #subSteps do
+					if self.viewedSubSteps[mainStep] == nil then
+						return false
+					end
+					if self.viewedSubSteps[mainStep][subStep] ~= true then
+						return false
+					end
+				end
+			end
+		end
+		return true
+	end
+
+	@ExecSpace("Client")
+	method void EndTutorial(boolean shouldSaveComplete)
+		self:StopSubStepTimer()
+		self:DisconnectEventHandlers()
+		self.isActive = false
+		
+		-- Complete 저장
+		if shouldSaveComplete then
+			local userId = _UserService.LocalPlayer.PlayerComponent.UserId
+			self:SAVE_COMPLETE(userId, self.currentGroupId)
+		end
+		
+		-- UI 숨김
+		if self.reelsTutorialUI ~= nil and self.reelsTutorialUI.UIGroupComponent ~= nil then
+			self.reelsTutorialUI.UIGroupComponent:Hide()
+		end
+		
+		-- 데이터 초기화
+		self.tutorialData = {}
+		self.mainSteps = {}
+		self.progressBars = {}
+		self.viewedSubSteps = {}
+		self.currentMainStep = 1
+		self.currentSubStep = 1
+		self.totalMainSteps = 0
+	end
+
+	@ExecSpace("Client")
+	method void CheckAndShowTutorial(integer groupId)
+		local userId = _UserService.LocalPlayer.PlayerComponent.UserId
+		self:RequestCheckShouldShow(userId, groupId)
+	end
+
+	@ExecSpace("Server")
+	method void RequestCheckShouldShow(string uid, integer groupId)
+		local shouldShow = self:CHECK_SHOULD_SHOW(uid, groupId)
+		local player = _UserService:GetUserByUserId(uid)
+		if player ~= nil then
+			self:ResponseCheckShouldShow(player, groupId, shouldShow)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void ResponseCheckShouldShow(integer groupId, boolean shouldShow)
+		if shouldShow then
+			self:StartReelsTutorial(groupId)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void SAVE_SEEN(string uid, integer groupId)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local errCode, res = ds:GetAndWait("USER_REELS_TUTORIAL")
+		
+		local data = {}
+		if res ~= nil then
+			data = _HttpService:JSONDecode(res)
+		end
+		
+		if data["seen"] == nil then
+			data["seen"] = {}
+		end
+		data["seen"][tostring(groupId)] = true
+		
+		local save = _HttpService:JSONEncode(data)
+		ds:SetAndWait("USER_REELS_TUTORIAL", save)
+	end
+
+	@ExecSpace("Server")
+	method void SAVE_COMPLETE(string uid, integer groupId)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local errCode, res = ds:GetAndWait("USER_REELS_TUTORIAL")
+		
+		local data = {}
+		if res ~= nil then
+			data = _HttpService:JSONDecode(res)
+		end
+		
+		if data["complete"] == nil then
+			data["complete"] = {}
+		end
+		data["complete"][tostring(groupId)] = true
+		
+		local save = _HttpService:JSONEncode(data)
+		ds:SetAndWait("USER_REELS_TUTORIAL", save)
+	end
+
+	@ExecSpace("Server")
+	method table LOAD(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local errCode, res = ds:GetAndWait("USER_REELS_TUTORIAL")
+		
+		if res == nil then
+			return { seen = {}, complete = {} }
+		end
+		
+		return _HttpService:JSONDecode(res)
+	end
+
+	@ExecSpace("Server")
+	method boolean CHECK_SHOULD_SHOW(string uid, integer groupId)
+		local data = self:LOAD(uid)
+		
+		if data["seen"] ~= nil and data["seen"][tostring(groupId)] == true then
+			return false
+		end
+		
+		return true
+	end
+
+	@ExecSpace("Server")
+	method boolean CHECK_COMPLETE(string uid, integer groupId)
+		local data = self:LOAD(uid)
+		
+		if data["complete"] ~= nil and data["complete"][tostring(groupId)] == true then
+			return true
+		end
+		
+		return false
+	end
+
+	@ExecSpace("Server")
+	method void RESET(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local data = { seen = {}, complete = {} }
+		local save = _HttpService:JSONEncode(data)
+		ds:SetAndWait("USER_REELS_TUTORIAL", save)
+		log("[ReelsTutorialService] RESET tutorial data for user: " .. uid)
+	end
+
+end
