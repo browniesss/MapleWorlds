@@ -23,7 +23,7 @@ script True_Sniping extends SkillParent
 		local damageFunction = function()
 			for _, target in ipairs(targetList) do
 			    if isvalid(target) and target.Unit and target.Unit.curState ~= "die" then
-					target.Unit:OnHit(self.caster, self.skillAmount, false, 1)
+					target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 1)
 					_EffectService:PlayEffectAttached("3cb38c4ac87045ab892cd9ff235e261e", target, Vector3.zero , 0, Vector3.one, false)
 				end
 			end

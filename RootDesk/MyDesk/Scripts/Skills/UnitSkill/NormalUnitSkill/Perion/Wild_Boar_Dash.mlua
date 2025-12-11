@@ -30,7 +30,7 @@ script Wild_Boar_Dash extends SkillParent
 		
 		local function attackFunction()
 			_EffectService:PlayEffectAttached("cba42a77a12e48059240908f043a86d8", self.caster, Vector3.zero , 0, Vector3.one, false, options)
-			self.target.Unit:OnHit(self.caster, self.skillAmount, false, 1)
+			self.target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 1)
 			tween:RestartFromCurrentPosition()
 		
 			self:SkillEnd()

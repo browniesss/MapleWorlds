@@ -12,7 +12,7 @@ script Phantom_Blow extends SkillParent
 		_EffectService:PlayEffectAttached("42b6deb653a84c06abd29d667370bd81", self.caster, Vector3.zero , 0, Vector3.one, false, options)
 		
 		local function attackFunction()
-			self.target.Unit:OnHit(self.caster, self.skillAmount, false, 6)
+			self.target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 6)
 		end
 		
 		-- 첫 번째 공격

@@ -29,7 +29,7 @@ script Double_Fire extends SkillParent
 			missile.SpriteRendererComponent.SpriteRUID = "a87a9f7db5c5485593ab6640b7e4e9a9"
 			missile.Projectile:SetCaster(self.caster)
 			missile.Projectile:SetShoot("a87a9f7db5c5485593ab6640b7e4e9a9", self:IsTargetOnRight(self.target), self.skillProjectileSpeed
-			, self.target, false, self.skillAmount)
+			, self.target, false, self.caster.Unit.damage * self.skillAmount)
 		end
 		
 		-- 첫 번째 발사: 공격 모션 발생

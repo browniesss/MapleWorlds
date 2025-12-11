@@ -39,7 +39,7 @@ script Fire_Pillar extends SkillParent
 					continue
 				end
 				
-			    target.Unit:OnHit(self.caster, self.skillAmount, false, 3)
+			    target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 3)
 			end
 		end
 		

@@ -51,10 +51,10 @@ script LoopAttackComponent extends Component
 		    else
 				if self.isHeal then
 					-- 힐 적용
-					target.Unit:OnHeal(self.caster, self.attackDamage)
+					target.Unit:OnHeal(self.caster, self.caster.Unit.damage * self.attackDamage)
 				else
 					-- 공격 적용
-					target.Unit:OnHit(self.caster, self.attackDamage, false, 1)
+					target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.attackDamage, false, 1)
 				end
 		
 				if activeFunc ~= nil then

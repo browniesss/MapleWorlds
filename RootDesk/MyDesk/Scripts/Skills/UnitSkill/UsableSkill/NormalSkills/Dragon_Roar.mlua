@@ -35,7 +35,7 @@ script Dragon_Roar extends SkillParent
 				end
 				
 				_EffectService:PlayEffectAttached("01c803531e2c4e5aa3c3ef66f14711b8", target, target.Unit:GetTargetingPos() , 0, Vector3.one)
-			    target.Unit:OnHit(self.caster, self.skillAmount, false, 3)
+			    target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 3)
 			end
 		end
 		

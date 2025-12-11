@@ -30,7 +30,7 @@ script Triple_Throw extends SkillParent
 			missile.SpriteRendererComponent.SpriteRUID = "08694ba6e39d44b3a82c4079ef7cd0fc"
 			missile.Projectile:SetCaster(self.caster)
 			missile.Projectile:SetShoot("08694ba6e39d44b3a82c4079ef7cd0fc", self:IsTargetOnRight(self.target), self.skillProjectileSpeed
-			, self.target, false, self.skillAmount)
+			, self.target, false, self.caster.Unit.damage * self.skillAmount)
 		end
 		
 		-- 첫 번째 발사: 공격 모션 발생

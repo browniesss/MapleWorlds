@@ -12,7 +12,7 @@ script Savage_Blow extends SkillParent
 		_EffectService:PlayEffectAttached("895ac1e384ea42ca8dd084f54ff3346b", self.caster, Vector3.zero , 0, Vector3.one, false, options)
 		
 		local function attackFunction()
-			self.target.Unit:OnHit(self.caster, self.skillAmount, false, 6)
+			self.target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 6)
 			
 			_EffectService:PlayEffectAttached("f342e1d9953f46e9ab003ba0e363ee2a", self.target, Vector3.zero , 0, Vector3.one, false, options)
 		end
