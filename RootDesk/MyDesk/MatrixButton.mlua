@@ -1,0 +1,16 @@
+@Component
+script MatrixButton extends Component
+
+	@Sync
+	property integer matrixIndex = 0
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		if self.matrixIndex <= 0 then
+			return
+		end
+		
+		_MatrixService:SelectMatrixByIndex(self.matrixIndex)
+	end
+
+end
