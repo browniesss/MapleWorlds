@@ -1,0 +1,48 @@
+@Component
+script NightLord_Origin extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		_UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill = true
+		_UserService.LocalPlayer.PlayerCharacter.isLimitBreakSkill = true
+		
+		local enemyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
+		local enemies = enemyListParent.Children
+		local player = _EntityService:GetEntityByTag("Player")
+		local entity = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group")
+		
+		_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = "faea96f94c5f4ee6ba9291d850049836"
+		_GameManager.screenSkillUI.SpriteGUIRendererComponent.LocalScale = Vector2(1.08, 1.15)
+		_GameManager.screenSkillUI.Enable = true
+		_GameManager.screenSkillUI.Visible = true
+		
+		local hitFunction = function()
+			for index in ipairs(enemies) do
+				local monster = enemies[index]
+			
+				if monster.Name == "EnemySpawnPoint" then
+					continue
+				end
+				
+				if monster.Enable then
+					monster.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, true, 20)
+				end
+			end
+		end
+		
+		local deleteFunction = function()
+			_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = ""
+			_GameManager.screenSkillUI.Enable = false	
+			_GameManager.screenSkillUI.Visible = false
+			_GameManager.screenSkillUI.SpriteGUIRendererComponent.LocalScale = Vector2.one
+			_UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill = false
+			_UserService.LocalPlayer.PlayerCharacter.isLimitBreakSkill = false
+		end
+		
+		_TimerService:SetTimerOnce(hitFunction, self.skillAttackTiming)
+		_TimerService:SetTimerOnce(deleteFunction, self.skillTime)
+	end
+
+end
