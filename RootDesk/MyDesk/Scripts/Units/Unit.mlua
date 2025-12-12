@@ -185,6 +185,9 @@ script Unit extends Component
 	@Sync
 	property string id = ""
 
+	@Sync
+	property string breakLimitSkill = ""
+
 	@ExecSpace("Server")
 	method void Spawn(BuffedUnitModel unitData, table skillData)
 		self.id = unitData.id
@@ -212,6 +215,7 @@ script Unit extends Component
 		self.dieAudioClip = unitData.dieAudioClip
 		self.criticalRatio = unitData.criticalRatio
 		self.criticalDamage = unitData.criticalDamage
+		self.breakLimitSkill = unitData.LimitBreakActiveSkill
 		
 		self.skillID = skillData['id']
 		self.skillDesc = skillData['desc']
@@ -944,6 +948,9 @@ script Unit extends Component
 		else
 			-- attacker.Projectile.caster.Unit.curTarget = nil
 		end
+		
+		-- 돌파 스킬 비활성화
+		_UserService.LocalPlayer.UserBreakLimitSkillClient:DeactivateSkill(self.breakLimitSkill)
 	end
 
 	method void GetDebuff(number debuffType, number debuffAmount, number debuffTime)
