@@ -5,6 +5,10 @@ script BuffedUnitModel extends UnitModel
 
 	property string LimitBreakPassiveSkill = ""
 
+	property integer LimitBreakCountryId = 0
+
+	property integer LimitBreakJobId = 0
+
 	property integer level = 1
 
 	property integer limitBreak = 1
@@ -22,6 +26,9 @@ script BuffedUnitModel extends UnitModel
 		
 		self.LimitBreakActiveSkill = model.skillID
 		self.LimitBreakPassiveSkill = model.passiveSkillID
+		
+		self.LimitBreakJobId = model.jobId
+		self.LimitBreakCountryId = model.countryId
 		self.limitBreak = model.limitBreak
 	end
 

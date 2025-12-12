@@ -1,0 +1,60 @@
+@Component
+script UserBreakLimitSkillServer extends Component
+
+	property table skillMap = {}
+
+	@ExecSpace("ServerOnly")
+	method void SetSkill(string id, integer count)
+		local item = BreakSkillInfo()
+		item:Init(id, count)
+		
+		self.skillMap[id] = item
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean UseSkill(string id)
+		local item = self.skillMap[id]
+		
+		if item == nil then
+			return false
+		end
+		
+		return item:UseSkill()
+	end
+
+	@ExecSpace("ServerOnly")
+	method void ResetSkill(string id)
+		local item = self.skillMap[id]
+		
+		if item == nil then
+			return
+		end
+		
+		item:Reset()
+	end
+
+	@ExecSpace("ServerOnly")
+	method void RemoveSkill(string id)
+		self.skillMap[id] = nil
+	end
+
+	@ExecSpace("ServerOnly")
+	method table GetIdList()
+		local resp = {}
+		
+		for key, item in pairs(self.skillMap) do
+			if item == nil then
+				continue
+			end
+			
+			if item.UseCount >= item.MaxUseCount then
+				continue
+			end
+			
+			resp[#resp + 1] = key
+		end
+		
+		return resp
+	end
+
+end

@@ -210,12 +210,11 @@ script UserMonsterService extends Logic
 			
 			local data = UserUnitModel()
 			data:DECODE(json)
-			if data.count <= 1 then
+			if data.count < data.limitBreak then
 				_UserService:KickUser(uid, KickReason.RuleViolation)
 				continue
 			end
 			
-			data.count -= 1
 			data.limitBreak += 1
 			
 			log(monsterId .. " limitBreak : " .. (data.limitBreak - 1 ) .. " -> " .. data.limitBreak)

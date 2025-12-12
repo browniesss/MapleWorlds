@@ -1,0 +1,78 @@
+@Component
+script UserBreakLimitSkillProtocol extends Component
+
+	@ExecSpace("Server")
+	method void InitCall()
+		_ProtocolService:CommonCall(senderUserId)
+		
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		local eventService = user.UserBreakLimitSkillServer
+		
+		local unitData = _UnitService:GetUnitAll()
+		_UserMonsterService:INIT(senderUserId)
+		local userMonsterData = _UserMonsterService.userMonsterDict
+		
+		-- 기존 데이터 초기화
+		for _, id in ipairs(eventService:GetIdList()) do
+			eventService:RemoveSkill(id)
+		end
+		
+		-- 데이터 설정
+		for id, json in pairs(userMonsterData) do
+			local userUnitModel = UserUnitModel()
+			userUnitModel:DECODE(json)
+			
+			local buffedUnit = BuffedUnitModel()
+			buffedUnit:Init(unitData[id])
+			
+			buffedUnit = _BuffedUnitService:SetUnitBuff(buffedUnit, userUnitModel.level, userUnitModel.limitBreak)
+			
+			if buffedUnit.LimitBreakActiveSkill == nil or buffedUnit.LimitBreakActiveSkill == "" then
+				continue
+			end
+			
+			eventService:SetSkill(buffedUnit.LimitBreakActiveSkill, 1)
+		end
+		
+		for _, id in ipairs({"111","222","333"}) do
+			eventService:SetSkill(id, 1)
+		end
+		
+		local resp = eventService:GetIdList()
+		self:InitBack(resp, senderUserId)
+	end
+
+	@ExecSpace("Client")
+	method void InitBack(table resp)
+		self.Entity.UserBreakLimitSkillClient:SetSkill(resp)
+	end
+
+	@ExecSpace("Server")
+	method void UseSkillCall(string id)
+		_ProtocolService:CommonCall(senderUserId)
+		
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		
+		-- 스킬 사용 가능한지 확인
+		if user.UserBreakLimitSkillServer:UseSkill(id) == false then
+			_ProtocolService:LogAndKick(senderUserId, "unavailable skill " .. id)
+			return
+		end
+		
+		-- 스킬 사용
+		
+		
+		local resp = UseSkillResp()
+		resp.RemainSkillList = user.UserBreakLimitSkillServer:GetIdList()
+		resp.UseSkill = id
+		
+		self:UseSkillBack(resp)
+	end
+
+	@ExecSpace("Client")
+	method void UseSkillBack(UseSkillResp resp)
+		self.Entity.UserBreakLimitSkillClient:SetSkill(resp.RemainSkillList)
+		self.Entity.UserBreakLimitSkillClient:UseSkill(resp.UseSkill)
+	end
+
+end

@@ -3,11 +3,11 @@ script UserUnitModel
 
 	property string id = ""
 
-	property integer count = 0
+	property integer count = 1
 
-	property integer level = 0
+	property integer level = 1
 
-	property integer limitBreak = 0
+	property integer limitBreak = 1
 
 	method string ENCODE()
 		local data = {
@@ -43,7 +43,7 @@ script UserUnitModel
 		
 		self.limitBreak = tonumber(data["limitBreak"])
 		if self.limitBreak == nil then
-			self.limitBreak = 0
+			self.limitBreak = 1
 		end
 		
 		return true

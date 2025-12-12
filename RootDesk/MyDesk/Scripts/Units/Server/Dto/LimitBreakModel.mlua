@@ -3,9 +3,9 @@ script LimitBreakModel
 
 	property string id = ""
 
-	property number limitBreak = 0
+	property integer limitBreak = 0
 
-	property number price = 0
+	property integer price = 0
 
 	property string skillID = ""
 
@@ -15,7 +15,11 @@ script LimitBreakModel
 
 	property number damage = 0
 
-	property number summonCost = 0
+	property integer summonCost = 0
+
+	property integer countryId = 0
+
+	property integer jobId = 0
 
 	method void Init(table data)
 		self.id = tostring(data["id"])
@@ -26,6 +30,8 @@ script LimitBreakModel
 		self.hp = tonumber(data["hp"])
 		self.damage = tonumber(data["damage"])
 		self.summonCost = tonumber(data["summonCost"])
+		self.countryId = tonumber(data["countryId"])
+		self.jobId = tonumber(data["jobId"])
 	end
 
 end

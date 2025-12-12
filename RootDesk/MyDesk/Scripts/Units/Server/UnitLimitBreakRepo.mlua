@@ -6,7 +6,7 @@ script UnitLimitBreakRepo extends Logic
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
 		for grade = 3, 5 do
-			self.dataMap[grade] = {}
+			self.dataMap[tostring(grade)] = {}
 			local dataSet = _DataService:GetTable(string.format("LIMIT_BREAK_%s", grade))    
 			for index = 1, dataSet:GetRowCount() do
 			    local item = LimitBreakModel()
@@ -23,11 +23,11 @@ script UnitLimitBreakRepo extends Logic
 				item.passiveSkillID = tostring(dataSet:GetCell(index, 'passiveSkillID'))
 				item.summonCost = tonumber(dataSet:GetCell(index, 'summonCost'))
 				
-				if self.dataMap[grade][item.id] == nil then
-					self.dataMap[grade][item.id] = {}
+				if self.dataMap[tostring(grade)][item.id] == nil then
+					self.dataMap[tostring(grade)][item.id] = {}
 				end
 				
-				self.dataMap[grade][item.id][item.limitBreak] = item
+				self.dataMap[tostring(grade)][item.id][tostring(item.limitBreak)] = item
 			end
 		end
 	end
@@ -48,7 +48,7 @@ script UnitLimitBreakRepo extends Logic
 			return LimitBreakModel()
 		end
 		
-		local buffData = unitMap[limitBreak]
+		local buffData = unitMap[tostring(limitBreak)]
 		if buffData == nil then
 			return LimitBreakModel()
 		end

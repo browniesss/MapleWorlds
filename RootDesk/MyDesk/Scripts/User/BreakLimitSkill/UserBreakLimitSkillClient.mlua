@@ -1,0 +1,68 @@
+@Component
+script UserBreakLimitSkillClient extends Component
+
+	property table limitBreakSkillList = {}
+
+	property Entity ScrollUI = "86a1d64d-8a2e-4a90-82e8-60d831b0911f"
+
+	property Entity DefaultItem = "a1e940ba-fb0c-46db-9c2a-41fc15859853"
+
+	@ExecSpace("ClientOnly")
+	method void SetSkill(table list)
+		self.limitBreakSkillList = list
+		
+		for i, item in ipairs(self.ScrollUI.Children) do
+			item.UI_BreakLimitSkillUseItem:Disable()
+			item.Enable = false
+			item.Visible = false
+		end
+		
+		for i, id in ipairs(list) do
+			if i > #self.ScrollUI.Children then
+				local item = _SpawnService:SpawnByEntity(self.DefaultItem, "item", Vector3.zero, self.ScrollUI, true)
+				item.Enable = true
+				item.Visible = true
+				item.UI_BreakLimitSkillUseItem:Init(id, self.Entity.UserBreakLimitSkillProtocol, item.Children[2])
+				item.Children[1].TextComponent.Text = id
+				continue
+			end
+			
+			local item = self.ScrollUI.Children[i]
+			item.Enable = true
+			item.Visible = true
+			item.UI_BreakLimitSkillUseItem:Init(id, self.Entity.UserBreakLimitSkillProtocol, item.Children[2])
+			item.Children[1].TextComponent.Text = id
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void UseSkill(string id)
+		-- 나중에 서버 공간으로 옮길것
+		log("skill use ", id)
+	end
+
+	@ExecSpace("Client")
+	method void ActivateSkill(string targetId)
+		for i, id in ipairs(self.limitBreakSkillList) do
+			if not (id == targetId) then
+				continue
+			end
+			
+			local item = self.ScrollUI.Children[i]
+			item.UI_BreakLimitSkillUseItem:ActivateButton()
+		end
+	end
+
+	@ExecSpace("Client")
+	method void DeactivateSkill(string targetId)
+		for i, id in ipairs(self.limitBreakSkillList) do
+			if not (id == targetId) then
+				continue
+			end
+			
+			local item = self.ScrollUI.Children[i]
+			item.UI_BreakLimitSkillUseItem:DeactivateButton()
+		end
+	end
+
+end

@@ -6,7 +6,10 @@ script SpawnManager extends Logic
 
 	@ExecSpace("Server")
 	method void Spawn(string modelID, integer price, Vector3 pos)
+		_ProtocolService:CommonCall(senderUserId)
+		
 		local unitModel = _BuffedUnitService:GetBuffedUnitModel(senderUserId, modelID)
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
 		
 		if not self:IsCanSpawn(price) then
 			return
@@ -22,49 +25,51 @@ script SpawnManager extends Logic
 		local spawnEntity = _SpawnService:SpawnByModelId(modelID, "Pig", pos, spawnParent)
 		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
 		
-		if senderUserId ~= nil  then
-			local user = _UserService:GetUserEntityByUserId(senderUserId)
-			local jobID = tostring(unitModel.jobId)
-			local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(unitModel.jobId)
-			local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(jobID, count)
+		local jobID = tostring(unitModel.jobId)
+		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(unitModel.jobId)
+		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(jobID, count)
 			
-			if synergy:length() > 0 then
-				local item = synergy:Get(1)
-				
-				if jobID == "1" then
-					spawnEntity:RemoveComponent("IncreaseHpByTime")
-					spawnEntity:AddComponent("IncreaseHpByTime")
-					spawnEntity.IncreaseHpByTime.Enable = true
-					spawnEntity.IncreaseHpByTime.type = item.type
-					spawnEntity.IncreaseHpByTime.value = item.value
-				end
+		if synergy:length() > 0 then
+			local item = synergy:Get(1)
 			
-				if jobID == "2" then
-					spawnEntity:RemoveComponent("CriticalAttack")
-					spawnEntity:AddComponent("CriticalAttack")
-					spawnEntity.CriticalAttack.Enable = true
-					spawnEntity.CriticalAttack.type = item.type
-					spawnEntity.CriticalAttack.value = item.value
-				end
-				
-				if jobID == "3" then
-					spawnEntity:RemoveComponent("IncreaseMpByTime")
-					spawnEntity:AddComponent("IncreaseMpByTime")
-					spawnEntity.IncreaseMpByTime.Enable = true
-					spawnEntity.IncreaseMpByTime.type = item.type
-					spawnEntity.IncreaseMpByTime.value = item.value
-				end
+			if jobID == "1" then
+				spawnEntity:RemoveComponent("IncreaseHpByTime")
+				spawnEntity:AddComponent("IncreaseHpByTime")
+				spawnEntity.IncreaseHpByTime.Enable = true
+				spawnEntity.IncreaseHpByTime.type = item.type
+				spawnEntity.IncreaseHpByTime.value = item.value
+			end
+		
+			if jobID == "2" then
+				spawnEntity:RemoveComponent("CriticalAttack")
+				spawnEntity:AddComponent("CriticalAttack")
+				spawnEntity.CriticalAttack.Enable = true
+				spawnEntity.CriticalAttack.type = item.type
+				spawnEntity.CriticalAttack.value = item.value
+			end
 			
-				if jobID == "4" then
-					spawnEntity:RemoveComponent("AddSummonPointAfterKill")
-					spawnEntity:AddComponent("AddSummonPointAfterKill")
-					spawnEntity.AddSummonPointAfterKill.Enable = true
-					spawnEntity.AddSummonPointAfterKill.type = item.type
-					spawnEntity.AddSummonPointAfterKill.value = item.value
-					spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet()
-				end
+			if jobID == "3" then
+				spawnEntity:RemoveComponent("IncreaseMpByTime")
+				spawnEntity:AddComponent("IncreaseMpByTime")
+				spawnEntity.IncreaseMpByTime.Enable = true
+				spawnEntity.IncreaseMpByTime.type = item.type
+				spawnEntity.IncreaseMpByTime.value = item.value
+			end
+		
+			if jobID == "4" then
+				spawnEntity:RemoveComponent("AddSummonPointAfterKill")
+				spawnEntity:AddComponent("AddSummonPointAfterKill")
+				spawnEntity.AddSummonPointAfterKill.Enable = true
+				spawnEntity.AddSummonPointAfterKill.type = item.type
+				spawnEntity.AddSummonPointAfterKill.value = item.value
+				spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet()
 			end
 		end
+		
+		local userUnitModel = UserUnitModel()
+		userUnitModel:DECODE(_UserMonsterService.userMonsterDict[unitModel.id])
+		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, userUnitModel.level, userUnitModel.limitBreak)
+		user.UserBreakLimitSkillClient:ActivateSkill(unitModel.LimitBreakActiveSkill)
 		spawnEntity.Unit:Spawn(unitModel, skillData)
 				
 		self:GetUserWallet().MesoWallet:UseMeso(price)
