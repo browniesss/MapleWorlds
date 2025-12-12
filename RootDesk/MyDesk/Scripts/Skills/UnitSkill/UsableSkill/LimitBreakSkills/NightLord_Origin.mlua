@@ -26,6 +26,9 @@ script NightLord_Origin extends SkillParent
 					continue
 				end
 				
+				local user = self.caster
+				local unit = user.UserUnitStore.UserUnitMap["model://079e4d9b-f128-47ff-bc19-ea9c819925a3"]
+				
 				if monster.Enable then
 					monster.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, true, 20)
 				end

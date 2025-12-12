@@ -25,6 +25,9 @@ script Viper_Origin extends SkillParent
 					continue
 				end
 				
+				local user = self.caster
+				local unit = user.UserUnitStore.UserUnitMap["model://1b254db4-577b-423f-b439-3e1b3475991a"]
+				
 				if monster.Enable then
 					monster.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, true, 10)
 				end

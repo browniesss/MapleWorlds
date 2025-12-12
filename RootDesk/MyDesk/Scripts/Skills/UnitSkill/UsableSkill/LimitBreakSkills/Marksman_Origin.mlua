@@ -26,6 +26,9 @@ script Marksman_Origin extends SkillParent
 					continue
 				end
 				
+				local user = self.caster
+				local unit = user.UserUnitStore.UserUnitMap["model://21ada8e1-bc61-4683-8c6a-7105d7a65f9c"]
+				
 				if monster.Enable then
 					monster.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, true, 25)
 				end

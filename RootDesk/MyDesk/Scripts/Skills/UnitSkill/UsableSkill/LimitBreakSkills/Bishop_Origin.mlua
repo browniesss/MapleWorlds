@@ -26,8 +26,11 @@ script Bishop_Origin extends SkillParent
 					continue
 				end
 				
+				local user = self.caster
+				local unit = user.UserUnitStore.UserUnitMap["model://591e85e8-1e69-4c41-a3c0-9be24579501b"]
+				
 				if monster.Enable then
-					monster.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, true, 2)
+					monster.Unit:OnHit(self.caster, unit.damage * self.skillAmount, true, 2)
 				end
 			end
 		end

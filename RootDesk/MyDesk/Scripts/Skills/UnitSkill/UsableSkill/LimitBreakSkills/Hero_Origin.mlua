@@ -25,8 +25,11 @@ script Hero_Origin extends SkillParent
 					continue
 				end
 				
+				local user = self.caster
+				local unit = user.UserUnitStore.UserUnitMap["model://494916e1-eeaa-4318-b36f-95d40d6c5e91"]
+				
 				if monster.Enable then
-					monster.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, true, 10)
+					monster.Unit:OnHit(self.caster, unit.damage * self.skillAmount, true, 10)
 				end
 			end
 		end
