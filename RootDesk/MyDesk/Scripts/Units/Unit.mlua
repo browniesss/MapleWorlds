@@ -825,6 +825,10 @@ script Unit extends Component
 			return
 		end
 		
+		if _UserService.LocalPlayer.PlayerCharacter.isLimitBreakSkill and self.Entity.TagComponent.Tags[2] == "Tower" and not self.isEnemy then
+			return
+		end
+		
 		if self.damageAvoidAmount > 0 then
 			local damageSkin
 			if self.isEnemy then
