@@ -34,10 +34,6 @@ script UserBreakLimitSkillProtocol extends Component
 			eventService:SetSkill(buffedUnit.LimitBreakActiveSkill, 1)
 		end
 		
-		for _, id in ipairs({"111","222","333"}) do
-			eventService:SetSkill(id, 1)
-		end
-		
 		local resp = eventService:GetIdList()
 		self:InitBack(resp, senderUserId)
 	end
