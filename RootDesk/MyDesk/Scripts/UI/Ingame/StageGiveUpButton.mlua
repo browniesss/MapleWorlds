@@ -6,6 +6,12 @@ script StageGiveUpButton extends Component
 		log("[StageGiveUpButton] Button clicked!")
 		log("[StageGiveUpButton] _GameManager exists: ", _GameManager ~= nil)
 
+		-- 인게임 튜토리얼 진행 중에는 버튼 비활성화
+		if _TutorialService ~= nil and _TutorialService.isIngameTutorial and _TutorialService.isActive then
+			log("[StageGiveUpButton] Tutorial in progress, button disabled")
+			return
+		end
+
 		-- 튜토리얼 모드(Stage000)에서 포기한 경우 체크
 		-- chapterIndex와 mapIndex로 직접 판단 (동기화 문제 해결)
 		local wasTutorialMode = false
