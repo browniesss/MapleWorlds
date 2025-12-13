@@ -28,6 +28,8 @@ script UnitLimitBreakRepo extends Logic
 				item.summonCost = tonumber(dataSet:GetCell(index, 'summonCost'))
 				item.countryId = tonumber(dataSet:GetCell(index, 'countryId'))
 				item.jobId = tonumber(dataSet:GetCell(index, 'jobId'))
+				item.buttonRUID = tostring(dataSet:GetCell(index, 'buttonRUID') or "")
+				
 				if self.dataMap[tostring(grade)][item.id] == nil then
 					self.dataMap[tostring(grade)][item.id] = {}
 				end
