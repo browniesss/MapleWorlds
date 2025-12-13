@@ -23,6 +23,8 @@ script LimitBreakModel
 
 	property integer mp = 0
 
+	property string buttonRUID = ""
+
 	method void Init(table data)
 		self.id = tostring(data["id"])
 		self.limitBreak = tonumber(data["limitBreak"])
