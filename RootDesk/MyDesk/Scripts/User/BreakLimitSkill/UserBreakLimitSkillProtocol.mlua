@@ -28,6 +28,8 @@ script UserBreakLimitSkillProtocol extends Component
 
 		-- 돌파스킬 ruids 수집용
 		local ruids = {}
+		-- 스킬ID -> buttonRUID 매핑
+		local buttonRuidMap = {}
 
 		-- 데이터 설정
 		for id, json in pairs(userMonsterData) do
@@ -45,6 +47,11 @@ script UserBreakLimitSkillProtocol extends Component
 
 			eventService:SetSkill(buffedUnit.LimitBreakActiveSkill, 1)
 
+			-- buttonRUID 매핑 저장
+			if buffedUnit.LimitBreakButtonRUID ~= nil and buffedUnit.LimitBreakButtonRUID ~= "" then
+				buttonRuidMap[buffedUnit.LimitBreakActiveSkill] = buffedUnit.LimitBreakButtonRUID
+			end
+
 			-- 돌파스킬의 ruids 수집
 			local skillData = _SkillService:GetSkillByIDFromServer(buffedUnit.LimitBreakActiveSkill)
 			if skillData ~= nil and skillData["ruids"] ~= nil and skillData["ruids"] ~= "" then
@@ -56,14 +63,14 @@ script UserBreakLimitSkillProtocol extends Component
 		end
 
 		local resp = eventService:GetIdList()
-		self:InitBack(resp, ruids, senderUserId)
+		self:InitBack(resp, ruids, buttonRuidMap, senderUserId)
 	end
 
 	@ExecSpace("Client")
-	method void InitBack(table resp, table ruids)
+	method void InitBack(table resp, table ruids, table buttonRuidMap)
 		self.limitBreakSkillRuids = ruids
 		self.isPreloadReady = true
-		self.Entity.UserBreakLimitSkillClient:SetSkill(resp)
+		self.Entity.UserBreakLimitSkillClient:SetSkill(resp, buttonRuidMap)
 
 		-- 콜백이 설정되어 있으면 호출
 		if self.onInitCompleteCallback ~= nil then
