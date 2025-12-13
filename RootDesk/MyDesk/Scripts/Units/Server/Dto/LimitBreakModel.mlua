@@ -7,9 +7,9 @@ script LimitBreakModel
 
 	property integer price = 0
 
-	property string skillID = ""
+	property string skillID = "0"
 
-	property string passiveSkillID = ""
+	property string passiveSkillID = "0"
 
 	property number hp = 0
 
@@ -49,17 +49,18 @@ script LimitBreakModel
 		
 		if not (self.countryId == 0) then
 			local synergyData = _SynergyRepo:GetSynergyData(self.countryId)
-			desc += string.format("\n추가 지역 시너지: %s", synergyData.name)
+			desc = desc .. string.format("\n추가 지역 시너지: %s", synergyData.name)
 		end
 		
 		if not (self.jobId == 0) then
 			local synergyData = _SynergyRepo:GetSynergyData(self.jobId)
-			desc += string.format("\n추가 직업 시너지: %s", synergyData.name)
+			desc = desc .. string.format("\n추가 직업 시너지: %s", synergyData.name)
 		end
 		
 		if not (self.skillID == "0") then
+			log("LimitBreakSkill desc ",self.skillID)
 			local skillData = _SkillService:GetSkillByIDFromClient(self.skillID)
-			desc += string.format("\n오리진 스킬 추가: %s", skillData.name)
+			desc = desc .. string.format("\n오리진 스킬 추가: %s", skillData.skillName)
 		end
 		
 		return desc
