@@ -99,14 +99,16 @@ script UnitDetailInfo extends Component
 
 	method void SetLabel()
 		local data = _UserMonsterService:GetOne(self.unitData.id)
-		local count = 1
+		local count = ""
 		local level = 1
 		if not (data == nil) then
-			count = data.count
+			if data.limitBreak > 2 then
+				count = " X" .. (data.limitBreak - 1)
+			end
 			level = data.level
 		end
 		
-		self.unitName.TextComponent.Text = self.unitData['name'].." X".. count
+		self.unitName.TextComponent.Text = self.unitData['name'] .. count
 		self.powerLabel.TextComponent.Text = self.unitData['damage']
 		self.hpLabel.TextComponent.Text = self.unitData['hp']
 		self.moveSpeedLabel.TextComponent.Text = self.unitData['moveSpeed']
