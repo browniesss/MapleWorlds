@@ -3928,7 +3928,7 @@
       {
         "id": "88f0a3c4-4a31-42cf-9476-a068595af6eb",
         "path": "/maps/MainLobbyMap/Potal",
-        "componentNames": "MOD.Core.TransformComponent,MOD.Core.SpriteRendererComponent,script.LobbyPortal,MOD.Core.PortalComponent",
+        "componentNames": "MOD.Core.TransformComponent,MOD.Core.SpriteRendererComponent,script.LobbyPortal,MOD.Core.PortalComponent,MOD.Core.NameTagComponent",
         "jsonString": {
           "name": "Potal",
           "path": "/maps/MainLobbyMap/Potal",
@@ -3995,6 +3995,22 @@
                 "tempEntityId": null,
                 "IsRelative": false,
                 "EntityId": "88f0a3c4-4a31-42cf-9476-a068595af6eb"
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.NameTagComponent",
+              "Bold": true,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 1.5,
+              "Name": "스테이지",
+              "NameTagRUID": {
+                "DataId": "00979fba88d44334919ffae68082369d"
               },
               "Enable": true
             }
@@ -4476,9 +4492,10 @@
             },
             {
               "@type": "MOD.Core.NameTagComponent",
+              "FontSize": 1.5,
               "Name": "머쉬 상인",
               "NameTagRUID": {
-                "DataId": "9bf18287398c44699c20fc5123d1a1ae"
+                "DataId": "1eeec783e6b14503a36f9f58f9605196"
               },
               "Enable": true
             },
