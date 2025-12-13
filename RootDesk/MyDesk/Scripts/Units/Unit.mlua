@@ -188,8 +188,12 @@ script Unit extends Component
 	@Sync
 	property string breakLimitSkill = ""
 
+	property BuffedUnitModel baseData = BuffedUnitModel()
+
 	@ExecSpace("Server")
 	method void Spawn(BuffedUnitModel unitData, table skillData)
+		self.baseData = unitData
+		
 		self.id = unitData.id
 		self.moveSpeed = unitData.moveSpeed
 		self.originMoveSpeed = unitData.moveSpeed
@@ -955,6 +959,9 @@ script Unit extends Component
 		
 		-- 돌파 스킬 비활성화
 		_UserService.LocalPlayer.UserBreakLimitSkillClient:DeactivateSkill(self.breakLimitSkill)
+		
+		-- 소환 포인트 반환
+		self:ReturnMeso()
 	end
 
 	method void GetDebuff(number debuffType, number debuffAmount, number debuffTime)
@@ -1149,6 +1156,8 @@ script Unit extends Component
 	end
 
 	method void SpawnEnemy(BuffedUnitModel unitData, table skillData)
+		self.baseData = unitData
+		
 		self.id = unitData.id
 		self.moveSpeed = unitData.moveSpeed
 		self.originMoveSpeed = unitData.moveSpeed
@@ -1386,6 +1395,15 @@ script Unit extends Component
 	@ExecSpace("Server")
 	method void SyncPos(Vector3 pos)
 		self.Entity.TransformComponent.Position = pos
+	end
+
+	@ExecSpace("Server")
+	method void ReturnMeso()
+		if self.baseData.returnCost <= 0 then
+			return
+		end
+		
+		_SpawnManager:GetUserWallet().MesoWallet:AddMeso(self.baseData.returnCost)
 	end
 
 	@EventSender("Self")
