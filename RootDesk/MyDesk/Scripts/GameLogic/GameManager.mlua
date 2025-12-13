@@ -612,17 +612,24 @@ script GameManager extends Logic
 		end
 		
 		self:ShowLoadingScreen()
-		_UserService.LocalPlayer.UserBreakLimitSkillProtocol:InitCall()
 		
-		local ruids = self:GetPreLoadAssetRuid()
+		-- 돌파스킬 초기화 완료 후 프리로드 시작
+		_UserService.LocalPlayer.UserBreakLimitSkillProtocol:InitCallWithCallback(function(limitBreakRuids)
+			local ruids = self:GetPreLoadAssetRuid()
 		
-		_ResourceService:PreloadAsync(ruids, function()
-			_TimerService:ClearTimer(self.loadingTimer)
-			
-			_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage".. userStage.selectChapter.."0"..userStage.selectStage)
-			self:GameStart(userStage.selectChapter, userStage.selectStage)
-			self:HideLoadingScreen()
-		end) 
+			-- 돌파스킬 ruids 추가
+			for _, ruid in ipairs(limitBreakRuids) do
+				table.insert(ruids, ruid)
+			end
+		
+			_ResourceService:PreloadAsync(ruids, function()
+				_TimerService:ClearTimer(self.loadingTimer)
+		
+				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage".. userStage.selectChapter.."0"..userStage.selectStage)
+				self:GameStart(userStage.selectChapter, userStage.selectStage)
+				self:HideLoadingScreen()
+			end)
+		end)
 	end
 
 	@ExecSpace("Client")
@@ -644,14 +651,22 @@ script GameManager extends Logic
 		
 		self:ShowLoadingScreen()
 		
-		local ruids = self:GetPreLoadAssetRuid()
+		-- 돌파스킬 초기화 완료 후 프리로드 시작
+		_UserService.LocalPlayer.UserBreakLimitSkillProtocol:InitCallWithCallback(function(limitBreakRuids)
+			local ruids = self:GetPreLoadAssetRuid()
 		
-		_ResourceService:PreloadAsync(ruids, function()
-			_TimerService:ClearTimer(self.loadingTimer)
+			-- 돌파스킬 ruids 추가
+			for _, ruid in ipairs(limitBreakRuids) do
+				table.insert(ruids, ruid)
+			end
 		
-			_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage000")
-			self:GameStart(0, 0)
-			self:HideLoadingScreen()
+			_ResourceService:PreloadAsync(ruids, function()
+				_TimerService:ClearTimer(self.loadingTimer)
+		
+				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage000")
+				self:GameStart(0, 0)
+				self:HideLoadingScreen()
+			end)
 		end)
 	end
 
