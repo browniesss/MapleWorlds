@@ -23,6 +23,8 @@ script UI_LimitBreak extends Component
 
 	property string upgrade_next = "18901fa75d52410fa90dbdd89abbba2c"
 
+	property Entity desc = "67706ba6-a5cc-44f8-956b-62329f6f3c09"
+
 	@ExecSpace("ClientOnly")
 	method void InitPanel(BuffedUnitModel unit)
 		self.unitData = unit
@@ -62,8 +64,6 @@ script UI_LimitBreak extends Component
 		self.AvailableNotification.Enable = true
 		self.AvailableNotification.Visible = true
 		self.LevelUpButton.Enable = true
-		
-		
 			
 		for i, entity in ipairs(self.itemList.Children) do
 			if i > userUnitModel.limitBreak then
@@ -84,6 +84,17 @@ script UI_LimitBreak extends Component
 			self.AvailableNotification.Visible = false
 			self.LevelUpButton.Enable = false
 		end
+		
+		
+		for i = 2, _UnitLimitBreakRepo.UserMaxLevel do
+			local pivot = _UnitLimitBreakRepo:FindBuffInClient(unit.grade, i - 1, unit.id)
+			local target = _UnitLimitBreakRepo:FindBuffInClient(unit.grade, i, unit.id)
+			
+			local diff = target:Diff(pivot)
+			diff.limitBreak = i - 1
+			
+			self.desc.Children[2].Children[i-1].TextComponent.Text = diff:GetDesc()
+		end
 	end
 
 	@EventSender("Entity", "98595bff-8504-4358-9e57-6ecf3396bdcd")
@@ -98,6 +109,35 @@ script UI_LimitBreak extends Component
 		---------------------------------------------------------
 		local unit = _UserService.LocalPlayer.UserUnitProtocol
 		unit:BreakLimitUnitCall(self.unitData.id)
+	end
+
+	@EventSender("Entity", "833b55bf-0f6c-4d67-96fa-830edc912f80")
+	handler HandleButtonClickEvent2(ButtonClickEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: ButtonComponent
+		-- Space: Client
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local Entity = event.Entity
+		---------------------------------------------------------
+		log("open limit break desc")
+		self.desc.Enable = true
+		self.desc.Visible = true
+	end
+
+	@EventSender("Entity", "83553900-825f-4d49-87a9-179901b4dbdd")
+	handler HandleButtonClickEvent3(ButtonClickEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: ButtonComponent
+		-- Space: Client
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local Entity = event.Entity
+		---------------------------------------------------------
+		self.desc.Enable = false
+		self.desc.Visible = false
 	end
 
 end
