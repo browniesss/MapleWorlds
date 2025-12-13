@@ -13,7 +13,7 @@ script UnitLevelUpRepo extends Logic
 
 	property string WARRIOR = "WARRIOR"
 
-	property integer UserMaxLevel = 10
+	property integer UserMaxLevel = 30
 
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
@@ -57,6 +57,32 @@ script UnitLevelUpRepo extends Logic
 
 	@ExecSpace("ServerOnly")
 	method LevelUpModel GetBuff(integer jobId, integer grade, integer level)
+		local jobMap = self.dataMap[tostring(jobId)]
+		if jobMap == nil then
+			return LevelUpModel()
+		end
+		
+		local gradeMap = jobMap[tostring(grade)]
+		if gradeMap == nil then
+			return LevelUpModel()
+		end
+		
+		local data = gradeMap[level]
+		if data == nil then
+			return LevelUpModel()
+		end
+		
+		return data
+	end
+
+	@ExecSpace("Client")
+	method void SyncData(table data)
+		self.dataMap = data
+	end
+
+	@ExecSpace("ClientOnly")
+	method LevelUpModel FindBuffInClient(integer jobId, integer grade, integer level)
+		log(jobId, "-", grade, "-", level)
 		local jobMap = self.dataMap[tostring(jobId)]
 		if jobMap == nil then
 			return LevelUpModel()

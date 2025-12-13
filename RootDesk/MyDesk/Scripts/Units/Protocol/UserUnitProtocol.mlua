@@ -5,9 +5,9 @@ script UserUnitProtocol extends CommonProtocol
 	method void GetUserUnitListCall()
 		self:CommonCall(senderUserId)
 		
-		local unitData = _UnitService:GetUnitAll()
 		_UserMonsterService:INIT(senderUserId)
 		local userMonsterData = _UserMonsterService.userMonsterDict
+		local unitData = _UnitService:GetUnitAll()
 		
 		local resp = {}
 		
@@ -15,12 +15,15 @@ script UserUnitProtocol extends CommonProtocol
 			local userUnitModel = UserUnitModel()
 			userUnitModel:DECODE(json)
 			
+			log(id, "-", json)
 			local buffedUnit = BuffedUnitModel()
 			buffedUnit:Init(unitData[id])
 			
 			resp[id] = _BuffedUnitService:SetUnitBuff(buffedUnit, userUnitModel.level, userUnitModel.limitBreak)
 		end
 		
+		_UnitLevelUpRepo:SyncData(_UnitLevelUpRepo.dataMap, senderUserId)
+		_UnitLimitBreakRepo:SyncData(_UnitLimitBreakRepo.dataMap, senderUserId)
 		self:GetUserUnitListBack(resp, senderUserId)
 	end
 
@@ -86,6 +89,57 @@ script UserUnitProtocol extends CommonProtocol
 
 	@ExecSpace("Client")
 	method void LevelUpUnitBack(BuffedUnitModel data)
+		self.Entity.UserUnitStore:UpdateDictByKey(data.id, data)
+		self.Entity.UserUnitStore:UpdateDoneCallback()
+	end
+
+	@ExecSpace("Server")
+	method void BreakLimitUnitCall(string id)
+		self:CommonCall(senderUserId)
+		
+		local unitData = _UnitService:GetUnitAll()
+		local userMonsterData = _UserMonsterService.userMonsterDict
+		
+		local userUnitModel = UserUnitModel()
+		userUnitModel:DECODE(userMonsterData[id])
+		
+		local buffedUnit = BuffedUnitModel()
+		buffedUnit:Init(unitData[id])
+		
+		if userUnitModel.limitBreak >= _UnitLimitBreakRepo.UserMaxLevel then
+			log(senderUserId," max user limit break ", id)
+			return
+		end
+		
+		local nextLimitBreak = userUnitModel.limitBreak + 1
+		local nextData = _UnitLimitBreakRepo:GetBuff(buffedUnit.grade, nextLimitBreak, buffedUnit.id)
+		if nextData == nil or nextData.limitBreak == 0 then
+			log(senderUserId," max data limit break ", id)
+			return
+		end
+		
+		if userUnitModel.count <= userUnitModel.limitBreak then
+			self:LogAndKick(senderUserId, "not enough count")
+			return
+		end
+		
+		local updateList = {}
+		updateList[1] = id
+		local saveResult = _UserMonsterService:LIMIT_BREAK(senderUserId, updateList)
+		if not (saveResult.code == 0) then
+			self:LogAndKick(senderUserId, "fail to level up, code: " .. saveResult.code)
+			return
+		end
+		
+		userMonsterData = _UserMonsterService.userMonsterDict
+		userUnitModel:DECODE(userMonsterData[id])
+		buffedUnit:Init(unitData[id])
+		
+		self:BreakLimitUnitBack(_BuffedUnitService:SetUnitBuff(buffedUnit, userUnitModel.level, userUnitModel.limitBreak))
+	end
+
+	@ExecSpace("Client")
+	method void BreakLimitUnitBack(BuffedUnitModel data)
 		self.Entity.UserUnitStore:UpdateDictByKey(data.id, data)
 		self.Entity.UserUnitStore:UpdateDoneCallback()
 	end

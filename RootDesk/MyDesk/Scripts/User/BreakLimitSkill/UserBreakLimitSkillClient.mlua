@@ -7,31 +7,45 @@ script UserBreakLimitSkillClient extends Component
 
 	property Entity DefaultItem = "a1e940ba-fb0c-46db-9c2a-41fc15859853"
 
+	-- buttonRuidMap 저장용
+	property table buttonRuidMap = {}
+
 	@ExecSpace("ClientOnly")
-	method void SetSkill(table list)
+	method void SetSkill(table list, table buttonRuidMapParam)
 		self.limitBreakSkillList = list
-		
+
+		-- buttonRuidMap 파라미터가 있으면 저장
+		if buttonRuidMapParam ~= nil then
+			self.buttonRuidMap = buttonRuidMapParam
+		end
+
 		for i, item in ipairs(self.ScrollUI.Children) do
 			item.UI_BreakLimitSkillUseItem:Disable()
 			item.Enable = false
 			item.Visible = false
 		end
-		
+
 		for i, id in ipairs(list) do
+			local buttonRUID = self.buttonRuidMap[id] or ""
+
 			if i > #self.ScrollUI.Children then
 				local item = _SpawnService:SpawnByEntity(self.DefaultItem, "item", Vector3.zero, self.ScrollUI, true)
 				item.Enable = true
 				item.Visible = true
 				item.UI_BreakLimitSkillUseItem:Init(id, self.Entity.UserBreakLimitSkillProtocol, item.Children[2])
-				item.Children[1].TextComponent.Text = id
+				if buttonRUID ~= "" then
+					item.Children[2].SpriteGUIRendererComponent.ImageRUID = buttonRUID
+				end
 				continue
 			end
-			
+
 			local item = self.ScrollUI.Children[i]
 			item.Enable = true
 			item.Visible = true
 			item.UI_BreakLimitSkillUseItem:Init(id, self.Entity.UserBreakLimitSkillProtocol, item.Children[2])
-			item.Children[1].TextComponent.Text = id
+			if buttonRUID ~= "" then
+				item.Children[2].SpriteGUIRendererComponent.ImageRUID = buttonRUID
+			end
 		end
 	end
 

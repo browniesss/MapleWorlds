@@ -3,6 +3,8 @@ script UnitLimitBreakRepo extends Logic
 
 	property table dataMap = {}
 
+	property integer UserMaxLevel = 6
+
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
 		for grade = 3, 5 do
@@ -18,11 +20,15 @@ script UnitLimitBreakRepo extends Logic
 				item.limitBreak = tonumber(dataSet:GetCell(index, 'limitBreak'))
 				item.price = tonumber(dataSet:GetCell(index, 'price'))
 				item.hp = tonumber(dataSet:GetCell(index, 'hp'))
+				item.mp = tonumber(dataSet:GetCell(index, 'mp'))
 				item.damage = tonumber(dataSet:GetCell(index, 'damage'))
 				item.skillID = tostring(dataSet:GetCell(index, 'skillID'))
 				item.passiveSkillID = tostring(dataSet:GetCell(index, 'passiveSkillID'))
 				item.summonCost = tonumber(dataSet:GetCell(index, 'summonCost'))
-				
+				item.countryId = tonumber(dataSet:GetCell(index, 'countryId'))
+				item.jobId = tonumber(dataSet:GetCell(index, 'jobId'))
+				item.buttonRUID = tostring(dataSet:GetCell(index, 'buttonRUID') or "")
+
 				if self.dataMap[tostring(grade)][item.id] == nil then
 					self.dataMap[tostring(grade)][item.id] = {}
 				end
@@ -37,6 +43,37 @@ script UnitLimitBreakRepo extends Logic
 		if grade < 5 then
 			id = "COMMON"
 		end
+		
+		local gradeMap = self.dataMap[tostring(grade)]
+		if gradeMap == nil then
+			return LimitBreakModel()
+		end
+		
+		local unitMap = gradeMap[tostring(id)]
+		if unitMap == nil then
+			return LimitBreakModel()
+		end
+		
+		local buffData = unitMap[tostring(limitBreak)]
+		if buffData == nil then
+			return LimitBreakModel()
+		end
+		
+		return buffData
+	end
+
+	@ExecSpace("Client")
+	method void SyncData(table data)
+		self.dataMap = data
+	end
+
+	@ExecSpace("ClientOnly")
+	method LimitBreakModel FindBuffInClient(integer grade, integer limitBreak, string id)
+		if grade < 5 then
+			id = "COMMON"
+		end
+		
+		log(id, "-", grade, "-", limitBreak)
 		
 		local gradeMap = self.dataMap[tostring(grade)]
 		if gradeMap == nil then

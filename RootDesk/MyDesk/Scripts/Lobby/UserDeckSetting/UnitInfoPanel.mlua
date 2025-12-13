@@ -37,9 +37,6 @@ script UnitInfoPanel extends Component
 		end
 		
 		self.LevelUpButton.Enable = true
-		if unitData.level >= _UnitLevelUpRepo.UserMaxLevel then
-			self.LevelUpButton.Enable = false
-		end
 		
 	end
 
@@ -50,21 +47,6 @@ script UnitInfoPanel extends Component
 		userDeckUI.unitListUI.Enable = true
 		userDeckUI.unitListUI.UnitListUI:OpenListUI(self.itemIndex)
 		userDeckUI.unitListUI.Visible = true
-	end
-
-	@EventSender("Entity", "cb420390-263e-45f2-a6e8-4bafacbc4efc")
-	handler HandleButtonClickEvent2(ButtonClickEvent event)
-		--------------- Native Event Sender Info ----------------
-		-- Sender: ButtonComponent
-		-- Space: Client
-		---------------------------------------------------------
-		
-		-- Parameters
-		-- local Entity = event.Entity
-		---------------------------------------------------------
-		
-		local user = _UserService.LocalPlayer
-		user.UserUnitProtocol:LevelUpUserUnitCall(self.unitData.id)
 	end
 
 end
