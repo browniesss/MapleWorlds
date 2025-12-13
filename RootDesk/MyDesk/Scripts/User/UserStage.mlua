@@ -164,8 +164,8 @@ script UserStage extends Component
 		end
 		log("[MesoReward] Total cleared stages:", clearedCount)
 		
-		-- 보상 지급 (스테이지당 2500 메소)
-		local rewardAmount = clearedCount * 2500
+		-- 보상 지급
+		local rewardAmount = clearedCount * 4000
 		log("[MesoReward] Calculated reward amount:", rewardAmount)
 		
 		if rewardAmount > 0 then

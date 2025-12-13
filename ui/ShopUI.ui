@@ -2586,7 +2586,7 @@
             {
               "@type": "script.ExtendToggleShopMenu",
               "Enable": true,
-              "panelIndex": 2.0,
+              "panelIndex": 1.0,
               "ToggleGroup": null,
               "ShopItemGrid": {
                 "tempEntityId": null,
@@ -2944,7 +2944,7 @@
             {
               "@type": "script.ExtendToggleShopMenu",
               "Enable": true,
-              "panelIndex": 1.0,
+              "panelIndex": 2.0,
               "ToggleGroup": null,
               "ShopItemGrid": {
                 "tempEntityId": null,
@@ -4254,6 +4254,7 @@
             {
               "@type": "MOD.Core.TextComponent",
               "Alignment": 3,
+              "BestFit": true,
               "Bold": true,
               "Font": 3,
               "FontColor": {
@@ -4263,7 +4264,7 @@
                 "a": 1.0
               },
               "FontSize": 30,
-              "MaxSize": 60,
+              "MaxSize": 30,
               "MinSize": 10,
               "OutlineDistance": {
                 "x": 1.0,
@@ -4785,12 +4786,12 @@
         }
       },
       {
-        "id": "c438c78a-bb6b-40d5-b784-0500ee20a41d",
-        "path": "/ui/ShopUI/ShopItemParent/MushDiaPassParent/PassItemScroll/PassItem/LockedIcon",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "id": "e7a2c586-c4e9-4717-8082-50c77f07a646",
+        "path": "/ui/ShopUI/ShopItemParent/MushDiaPassParent/PassItemScroll/PassItem/AmountText",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
-          "name": "LockedIcon",
-          "path": "/ui/ShopUI/ShopItemParent/MushDiaPassParent/PassItemScroll/PassItem/LockedIcon",
+          "name": "AmountText",
+          "path": "/ui/ShopUI/ShopItemParent/MushDiaPassParent/PassItemScroll/PassItem/AmountText",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -4800,30 +4801,30 @@
           "revision": 1,
           "origin": {
             "type": "Model",
-            "entry_id": "uisprite",
+            "entry_id": "uitext",
             "sub_entity_id": null
           },
-          "modelId": "uisprite",
+          "modelId": "uitext",
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 15,
+              "AlignmentOption": 0,
               "AnchorsMax": {
-                "x": 1.0,
-                "y": 1.0
+                "x": 0.5,
+                "y": 0.5
               },
               "AnchorsMin": {
-                "x": 0.0,
-                "y": 0.0
+                "x": 0.5,
+                "y": 0.5
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 0.0,
-                "y": 0.0
+                "x": 100.0,
+                "y": -95.0
               },
               "OffsetMin": {
-                "x": 0.0,
-                "y": 0.0
+                "x": -100.0,
+                "y": -145.0
               },
               "Pivot": {
                 "x": 0.5,
@@ -4831,17 +4832,17 @@
               },
               "RectSize": {
                 "x": 200.0,
-                "y": 280.0
+                "y": 50.0
               },
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": 0.0,
-                "y": 0.0
+                "y": -120.0
               },
               "Position": {
                 "x": 0.0,
-                "y": 0.0,
+                "y": -120.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -4854,11 +4855,34 @@
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "ImageRUID": {
-                "DataId": "f5863ca0d0124585bedf9b48ddba233a"
-              },
               "OverrideSorting": false,
               "SortingLayer": "MapLayer0",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "BestFit": true,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "MaxSize": 30,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "OverrideSorting": false,
+              "Text": "500",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -4947,12 +4971,12 @@
         }
       },
       {
-        "id": "e7a2c586-c4e9-4717-8082-50c77f07a646",
-        "path": "/ui/ShopUI/ShopItemParent/MushDiaPassParent/PassItemScroll/PassItem/AmountText",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "id": "c438c78a-bb6b-40d5-b784-0500ee20a41d",
+        "path": "/ui/ShopUI/ShopItemParent/MushDiaPassParent/PassItemScroll/PassItem/LockedIcon",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
-          "name": "AmountText",
-          "path": "/ui/ShopUI/ShopItemParent/MushDiaPassParent/PassItemScroll/PassItem/AmountText",
+          "name": "LockedIcon",
+          "path": "/ui/ShopUI/ShopItemParent/MushDiaPassParent/PassItemScroll/PassItem/LockedIcon",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -4962,30 +4986,30 @@
           "revision": 1,
           "origin": {
             "type": "Model",
-            "entry_id": "uitext",
+            "entry_id": "uisprite",
             "sub_entity_id": null
           },
-          "modelId": "uitext",
+          "modelId": "uisprite",
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 0,
+              "AlignmentOption": 15,
               "AnchorsMax": {
-                "x": 0.5,
-                "y": 0.5
+                "x": 1.0,
+                "y": 1.0
               },
               "AnchorsMin": {
-                "x": 0.5,
-                "y": 0.5
+                "x": 0.0,
+                "y": 0.0
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 100.0,
-                "y": -95.0
+                "x": 0.0,
+                "y": 0.0
               },
               "OffsetMin": {
-                "x": -100.0,
-                "y": -145.0
+                "x": 0.0,
+                "y": 0.0
               },
               "Pivot": {
                 "x": 0.5,
@@ -4993,17 +5017,17 @@
               },
               "RectSize": {
                 "x": 200.0,
-                "y": 50.0
+                "y": 280.0
               },
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": 0.0,
-                "y": -120.0
+                "y": 0.0
               },
               "Position": {
                 "x": 0.0,
-                "y": -120.0,
+                "y": 0.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -5016,34 +5040,15 @@
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "f5863ca0d0124585bedf9b48ddba233a"
+              },
+              "LocalScale": {
+                "x": 1.0,
+                "y": 0.6
+              },
               "OverrideSorting": false,
               "SortingLayer": "MapLayer0",
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.TextComponent",
-              "BestFit": true,
-              "Font": 3,
-              "FontColor": {
-                "r": 1.0,
-                "g": 1.0,
-                "b": 1.0,
-                "a": 1.0
-              },
-              "MaxSize": 30,
-              "OutlineColor": {
-                "r": 0.0,
-                "g": 0.0,
-                "b": 0.0,
-                "a": 1.0
-              },
-              "OutlineDistance": {
-                "x": 1.0,
-                "y": -1.0
-              },
-              "OverrideSorting": false,
-              "Text": "500",
-              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -5721,6 +5726,192 @@
         }
       },
       {
+        "id": "437d9b33-4a1f-48fd-b36d-8d7b931b06d8",
+        "path": "/ui/ShopUI/ShopItemParent/MushDiaPassParent/RibbonSprite",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "jsonString": {
+          "name": "RibbonSprite",
+          "path": "/ui/ShopUI/ShopItemParent/MushDiaPassParent/RibbonSprite",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 7,
+          "pathConstraints": "/////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uisprite",
+            "sub_entity_id": null
+          },
+          "modelId": "uisprite",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 710.0,
+                "y": 381.0775
+              },
+              "OffsetMin": {
+                "x": 360.0,
+                "y": 256.0775
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 350.0,
+                "y": 125.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 535.0,
+                "y": 318.5775
+              },
+              "Position": {
+                "x": 535.0,
+                "y": 318.5775,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "73f10d7f63214b5c81b040b653b7f6f9"
+              },
+              "OverrideSorting": false,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "7746b5ed-8821-4145-9650-0a9a85789965",
+        "path": "/ui/ShopUI/ShopItemParent/MushDiaPassParent/RibbonSprite/RibbonText",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "RibbonText",
+          "path": "/ui/ShopUI/ShopItemParent/MushDiaPassParent/RibbonSprite/RibbonText",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "//////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 150.0,
+                "y": 45.0
+              },
+              "OffsetMin": {
+                "x": -150.0,
+                "y": -5.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 300.0,
+                "y": 50.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 20.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 20.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "BestFit": true,
+              "Bold": true,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 50,
+              "MaxSize": 50,
+              "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "OverrideSorting": false,
+              "Text": "330% 효율!!",
+              "UseOutLine": false,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
         "id": "95af2b38-1427-488c-bcf2-084c4affc3b0",
         "path": "/ui/ShopUI/ShopItemParent/PackageParent",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.ScrollLayoutGroupComponent",
@@ -6075,7 +6266,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "500",
+              "Text": "3,000",
               "Enable": true
             }
           ],
@@ -6176,7 +6367,8 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "머쉬 다이아 특별 패키지 ",
+              "Text": "머쉬 다이아 특별 패키지 1",
+              "UseNBSP": true,
               "Enable": true
             }
           ],
@@ -6521,7 +6713,7 @@
               },
               "OverrideSorting": false,
               "SizeFit": false,
-              "Text": "300",
+              "Text": "800",
               "UseConstraintX": false,
               "UseConstraintY": false,
               "Enable": true
@@ -6656,11 +6848,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 74.9999847,
+                "x": 75.9999847,
                 "y": 49.9999771
               },
               "OffsetMin": {
-                "x": -75.0000153,
+                "x": -74.0000153,
                 "y": -50.0000229
               },
               "Pivot": {
@@ -6674,11 +6866,11 @@
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -1.43051138E-05,
+                "x": 0.9999857,
                 "y": -2.34750587E-05
               },
               "Position": {
-                "x": -1.43051138E-05,
+                "x": 0.9999857,
                 "y": -2.34750587E-05,
                 "z": 0.0
               },
@@ -6719,7 +6911,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "400% 효율!!",
+              "Text": "<color=#FFB300>225% </color>효율!!",
               "UseNBSP": false,
               "UseOutLine": true,
               "Enable": true
@@ -6919,7 +7111,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "1회 한정 구매 가능 !",
+              "Text": "<color=#FFD700>1회 한정</color> 구매 가능 !",
               "UseOutLine": false,
               "Enable": true
             }
@@ -7188,7 +7380,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "500",
+              "Text": "7,000",
               "Enable": true
             }
           ],
@@ -7289,7 +7481,8 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "머쉬 다이아 특별 패키지 ",
+              "Text": "머쉬 다이아 특별 패키지 2",
+              "UseNBSP": true,
               "Enable": true
             }
           ],
@@ -7634,7 +7827,7 @@
               },
               "OverrideSorting": false,
               "SizeFit": false,
-              "Text": "300",
+              "Text": "2,500",
               "UseConstraintX": false,
               "UseConstraintY": false,
               "Enable": true
@@ -7759,11 +7952,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 74.9999847,
+                "x": 75.9999847,
                 "y": 49.9999771
               },
               "OffsetMin": {
-                "x": -75.0000153,
+                "x": -74.0000153,
                 "y": -50.0000229
               },
               "Pivot": {
@@ -7777,11 +7970,11 @@
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -1.43051138E-05,
+                "x": 0.9999857,
                 "y": -2.34750587E-05
               },
               "Position": {
-                "x": -1.43051138E-05,
+                "x": 0.9999857,
                 "y": -2.34750587E-05,
                 "z": 0.0
               },
@@ -7822,7 +8015,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "400% 효율",
+              "Text": "<color=#FFB300>168% </color>효율!!",
               "UseNBSP": false,
               "UseOutLine": true,
               "Enable": true
@@ -8012,7 +8205,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "1회 한정 구매 가능 !",
+              "Text": "<color=#FFD700>1회 한정</color> 구매 가능 !",
               "UseOutLine": false,
               "Enable": true
             }
@@ -8281,7 +8474,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "500",
+              "Text": "10,000",
               "Enable": true
             }
           ],
@@ -8382,7 +8575,8 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "머쉬 골드 특별 패키지",
+              "Text": "머쉬 골드 특별 패키지 1",
+              "UseNBSP": true,
               "Enable": true
             }
           ],
@@ -8727,7 +8921,7 @@
               },
               "OverrideSorting": false,
               "SizeFit": false,
-              "Text": "300",
+              "Text": "500",
               "UseConstraintX": false,
               "UseConstraintY": false,
               "Enable": true
@@ -8852,11 +9046,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 74.9999847,
+                "x": 75.9999847,
                 "y": 49.9999771
               },
               "OffsetMin": {
-                "x": -75.0000153,
+                "x": -74.0000153,
                 "y": -50.0000229
               },
               "Pivot": {
@@ -8870,11 +9064,11 @@
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -1.43051138E-05,
+                "x": 0.9999857,
                 "y": -2.34750587E-05
               },
               "Position": {
-                "x": -1.43051138E-05,
+                "x": 0.9999857,
                 "y": -2.34750587E-05,
                 "z": 0.0
               },
@@ -8915,7 +9109,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "400% 효율",
+              "Text": "<color=#FFB300>400% </color>효율!!",
               "UseNBSP": false,
               "UseOutLine": true,
               "Enable": true
@@ -9105,7 +9299,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "1회 한정 구매 가능 !",
+              "Text": "<color=#FFD700>1회 한정</color> 구매 가능 !",
               "UseOutLine": false,
               "Enable": true
             }
@@ -9374,7 +9568,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "500",
+              "Text": "30,000",
               "Enable": true
             }
           ],
@@ -9475,7 +9669,8 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "머쉬 골드 특별 패키지",
+              "Text": "머쉬 골드 특별 패키지 2",
+              "UseNBSP": true,
               "Enable": true
             }
           ],
@@ -9820,7 +10015,7 @@
               },
               "OverrideSorting": false,
               "SizeFit": false,
-              "Text": "300",
+              "Text": "2,000",
               "UseConstraintX": false,
               "UseConstraintY": false,
               "Enable": true
@@ -9945,11 +10140,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 74.9999847,
+                "x": 75.9999847,
                 "y": 49.9999771
               },
               "OffsetMin": {
-                "x": -75.0000153,
+                "x": -74.0000153,
                 "y": -50.0000229
               },
               "Pivot": {
@@ -9963,11 +10158,11 @@
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -1.43051138E-05,
+                "x": 0.9999857,
                 "y": -2.34750587E-05
               },
               "Position": {
-                "x": -1.43051138E-05,
+                "x": 0.9999857,
                 "y": -2.34750587E-05,
                 "z": 0.0
               },
@@ -10007,7 +10202,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "400% 효율",
+              "Text": "<color=#FFB300>300% </color>효율!!",
               "UseNBSP": false,
               "UseOutLine": true,
               "Enable": true
@@ -10197,7 +10392,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "1회 한정 구매 가능 !",
+              "Text": "<color=#FFD700>1회 한정</color> 구매 가능 !",
               "UseOutLine": false,
               "Enable": true
             }
@@ -10466,7 +10661,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "500",
+              "Text": "80,000",
               "Enable": true
             }
           ],
@@ -10567,7 +10762,8 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "머쉬 골드 특별 패키지",
+              "Text": "유닛 레벨업 특별 패키지 1",
+              "UseNBSP": true,
               "Enable": true
             }
           ],
@@ -10912,7 +11108,7 @@
               },
               "OverrideSorting": false,
               "SizeFit": false,
-              "Text": "300",
+              "Text": "500",
               "UseConstraintX": false,
               "UseConstraintY": false,
               "Enable": true
@@ -11037,11 +11233,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 74.9999847,
+                "x": 75.9999847,
                 "y": 49.9999771
               },
               "OffsetMin": {
-                "x": -75.0000153,
+                "x": -74.0000153,
                 "y": -50.0000229
               },
               "Pivot": {
@@ -11055,11 +11251,11 @@
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -1.43051138E-05,
+                "x": 0.9999857,
                 "y": -2.34750587E-05
               },
               "Position": {
-                "x": -1.43051138E-05,
+                "x": 0.9999857,
                 "y": -2.34750587E-05,
                 "z": 0.0
               },
@@ -11100,7 +11296,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "400% 효율",
+              "Text": "<color=#FFB300>400% </color>효율!!",
               "UseNBSP": false,
               "UseOutLine": true,
               "Enable": true
@@ -11290,7 +11486,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "1회 한정 구매 가능 !",
+              "Text": "<color=#FFD700>1회 한정</color> 구매 가능 !",
               "UseOutLine": false,
               "Enable": true
             }
@@ -11559,7 +11755,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "500",
+              "Text": "200,000",
               "Enable": true
             }
           ],
@@ -11660,7 +11856,8 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "머쉬 골드 특별 패키지",
+              "Text": "유닛 레벨업 특별 패키지 2",
+              "UseNBSP": true,
               "Enable": true
             }
           ],
@@ -12005,7 +12202,7 @@
               },
               "OverrideSorting": false,
               "SizeFit": false,
-              "Text": "300",
+              "Text": "1,000",
               "UseConstraintX": false,
               "UseConstraintY": false,
               "Enable": true
@@ -12130,11 +12327,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 74.9999847,
+                "x": 75.9999847,
                 "y": 49.9999771
               },
               "OffsetMin": {
-                "x": -75.0000153,
+                "x": -74.0000153,
                 "y": -50.0000229
               },
               "Pivot": {
@@ -12148,11 +12345,11 @@
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -1.43051138E-05,
+                "x": 0.9999857,
                 "y": -2.34750587E-05
               },
               "Position": {
-                "x": -1.43051138E-05,
+                "x": 0.9999857,
                 "y": -2.34750587E-05,
                 "z": 0.0
               },
@@ -12193,7 +12390,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "400% 효율",
+              "Text": "<color=#FFB300>300% </color>효율!!",
               "UseNBSP": false,
               "UseOutLine": true,
               "Enable": true
@@ -12383,7 +12580,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
-              "Text": "1회 한정 구매 가능 !",
+              "Text": "<color=#FFD700>1회 한정</color> 구매 가능 !",
               "UseOutLine": false,
               "Enable": true
             }
