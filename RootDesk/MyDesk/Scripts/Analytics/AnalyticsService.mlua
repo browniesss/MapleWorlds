@@ -86,6 +86,10 @@ script AnalyticsService extends Logic
 			self:SendAnalyticsLog(userId, logData, "action")
 		end, 0)
 		
+		if userId == "20372001292201301" or userId == "20372100004704052" then
+			_BillingService:AddFirstFreeCoin(userId, 20000)
+		end
+		
 		if id == 0 then
 			log_error("SendAnalyticsLog reservation failed.")
 		end
