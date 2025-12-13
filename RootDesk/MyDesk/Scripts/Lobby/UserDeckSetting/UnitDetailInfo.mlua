@@ -33,6 +33,10 @@ script UnitDetailInfo extends Component
 
 	property BuffedUnitModel unitData = BuffedUnitModel()
 
+	property UI_LevelUp levelUpPanel = "e462028b-2620-43dd-84df-d2582023f93f"
+
+	property UI_LimitBreak limitBreakPanel = "2ba5510a-5578-459c-89ff-52b8a3f725c2"
+
 	method void OnBeginPlay()
 		self.unitSprite = self.Entity.Children[2]
 		self.unitAvatarRenderer = self.Entity.Children[3]
@@ -51,6 +55,8 @@ script UnitDetailInfo extends Component
 		
 		self:SetSprite()
 		self:SetLabel()
+		self.levelUpPanel:InitPanel(unitData)
+		self.limitBreakPanel:InitPanel(unitData)
 	end
 
 	method void SetSprite()

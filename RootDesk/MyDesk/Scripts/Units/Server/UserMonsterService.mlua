@@ -128,12 +128,13 @@ script UserMonsterService extends Logic
 		
 		for _, monsterId in ipairs(idList) do
 			local json = self.userMonsterDict[monsterId]
-			if json == nil then
-				continue
-			end
 			
 			local data = UserUnitModel()
-			data:DECODE(json)
+			data.id = monsterId
+			if not (json == nil) then
+				data:DECODE(json)
+			end
+			
 			data.count += 1
 			
 			log(monsterId .. " count : " .. (data.count -1) .. " -> " .. data.count)
@@ -181,6 +182,7 @@ script UserMonsterService extends Logic
 		for _, monsterId in ipairs(idList) do
 			local json = self.userMonsterDict[monsterId]
 			if json == nil then
+				_UserService:KickUser(uid, KickReason.WorldError)
 				continue
 			end
 			
@@ -205,12 +207,13 @@ script UserMonsterService extends Logic
 		for _, monsterId in ipairs(idList) do
 			local json = self.userMonsterDict[monsterId]
 			if json == nil then
+				_UserService:KickUser(uid, KickReason.WorldError)
 				continue
 			end
 			
 			local data = UserUnitModel()
 			data:DECODE(json)
-			if data.count < data.limitBreak then
+			if data.count <= data.limitBreak then
 				_UserService:KickUser(uid, KickReason.RuleViolation)
 				continue
 			end

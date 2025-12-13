@@ -1,0 +1,78 @@
+@Component
+script UI_LevelUp extends Component
+
+	property TextComponent current = "4d52f710-0a11-40f8-b428-3cda4f61dc7a"
+
+	property TextComponent next = "b1355e93-bf59-452c-b553-e787bee1c41b"
+
+	property Entity LevelUp = "4d1e26c5-ad52-4543-bfd9-bc2f01f417d8"
+
+	property Entity MaxLevel = "663d42a6-3907-437a-bd79-1a0ebb838878"
+
+	property TextComponent Price = "3afdd39b-449e-4d34-9510-0a78ba7958d0"
+
+	property Entity AvailableNotification = "c98f8471-6019-483e-9bac-dbc4febdfb16"
+
+	property BuffedUnitModel unitData = BuffedUnitModel()
+
+	property ButtonComponent LevelUpButton = "6a1e81b7-0319-4820-8fa2-9b4d608cb1a3"
+
+	@ExecSpace("ClientOnly")
+	method void InitPanel(BuffedUnitModel unit)
+		self.unitData = unit
+		if unit.level >= _UnitLevelUpRepo.UserMaxLevel then
+			self.LevelUp.Visible = false
+			self.LevelUp.Enable = false
+			
+			self.MaxLevel.Visible = true
+			self.MaxLevel.Enable = true
+			
+			self.Price.Text = "MAX LEVEL"
+			
+			self.AvailableNotification.Enable = false
+			self.AvailableNotification.Visible = false
+			
+			self.LevelUpButton.Enable = false
+			return
+		end
+		
+		self.LevelUp.Visible = true
+		self.LevelUp.Enable = true
+		
+		self.MaxLevel.Visible = false
+		self.MaxLevel.Enable = false
+		
+		local level = _UnitLevelUpRepo:FindBuffInClient(unit.jobId, unit.grade, unit.level + 1)
+		
+		local totalCoin = _BillingService.ThirdFreeCoin + _BillingService.ThirdPaidCoin
+		self.Price.Text = string.format("%d / %d", totalCoin, level.price)
+		
+		self.current.Text = "레벨 " .. tostring(unit.level) 
+		self.next.Text = "레벨 " .. tostring(unit.level + 1)
+		
+		self.AvailableNotification.Enable = true
+		self.AvailableNotification.Visible = true
+		self.LevelUpButton.Enable = true
+		
+		if totalCoin < level.price then
+			self.AvailableNotification.Enable = false
+			self.AvailableNotification.Visible = false
+			self.LevelUpButton.Enable = false
+		end
+	end
+
+	@EventSender("Entity", "6a1e81b7-0319-4820-8fa2-9b4d608cb1a3")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: ButtonComponent
+		-- Space: Client
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local Entity = event.Entity
+		---------------------------------------------------------
+		local unit = _UserService.LocalPlayer.UserUnitProtocol
+		unit:LevelUpUserUnitCall(self.unitData.id)
+	end
+
+end

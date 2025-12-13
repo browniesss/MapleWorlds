@@ -26,6 +26,7 @@ script UserDeckService extends Logic
 	method integer LOAD()
 		local ds = _DataStorageService:GetUserDataStorage(senderUserId)
 		local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
+		_UserMonsterService:INIT(senderUserId)
 		
 		local errCode, res = ds:GetAndWait("USER_DECK")
 		if errCode ~= 0 then

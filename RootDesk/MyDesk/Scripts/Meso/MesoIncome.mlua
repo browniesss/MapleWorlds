@@ -102,4 +102,9 @@ script MesoIncome extends Component
 		return self.incomeData[1]
 	end
 
+	@ExecSpace("ServerOnly")
+	method void ReturnMeso(integer meso)
+		self.UserWallet:AddMeso(meso)
+	end
+
 end

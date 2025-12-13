@@ -1,0 +1,103 @@
+@Component
+script UI_LimitBreak extends Component
+
+	property TextComponent current = "a0d2d0e1-1bc4-4b29-a4c3-60d203eef531"
+
+	property TextComponent next = "0a9f14ca-e0da-4a69-a90a-f8d607465956"
+
+	property Entity LevelInfo = "aa6cee81-bcfe-489f-8735-0044e3a746d2"
+
+	property Entity MaxLevel = "64928d7f-0f4c-4440-b9ce-74414cbc7719"
+
+	property Entity AvailableNotification = "11f8c173-bd30-405a-9239-3fd02130794a"
+
+	property BuffedUnitModel unitData = BuffedUnitModel()
+
+	property ButtonComponent LevelUpButton = "98595bff-8504-4358-9e57-6ecf3396bdcd"
+
+	property Entity itemList = "a866a13a-c6c3-4444-b13c-714c7d22fd7d"
+
+	property string upgrade_done = "8fbce797cb234b9da09a93a73c40036f"
+
+	property string upgrade_current = "f08c662e220a472a8e26ccaeee8fef86"
+
+	property string upgrade_next = "18901fa75d52410fa90dbdd89abbba2c"
+
+	@ExecSpace("ClientOnly")
+	method void InitPanel(BuffedUnitModel unit)
+		self.unitData = unit
+		local userUnitModel = UserUnitModel()
+		userUnitModel:DECODE(_UserMonsterService.userMonsterDict[unit.id])
+		
+		if userUnitModel.limitBreak >= _UnitLimitBreakRepo.UserMaxLevel then
+			self.LevelInfo.Visible = false
+			self.LevelInfo.Enable = false
+			
+			self.MaxLevel.Visible = true
+			self.MaxLevel.Enable = true
+			
+			self.AvailableNotification.Enable = false
+			self.AvailableNotification.Visible = false
+			
+			self.LevelUpButton.Enable = false
+			
+			for i, entity in ipairs(self.itemList.Children) do
+				entity.SpriteGUIRendererComponent.ImageRUID = self.upgrade_done
+			end
+			
+			return
+		end
+		
+		self.LevelInfo.Visible = true
+		self.LevelInfo.Enable = true
+		
+		self.MaxLevel.Visible = false
+		self.MaxLevel.Enable = false
+		
+		local level = _UnitLimitBreakRepo:FindBuffInClient(unit.grade, unit.limitBreak + 1, unit.id)
+		
+		self.current.Text = tostring(userUnitModel.limitBreak - 1) 
+		self.next.Text = tostring(userUnitModel.limitBreak)
+		
+		self.AvailableNotification.Enable = true
+		self.AvailableNotification.Visible = true
+		self.LevelUpButton.Enable = true
+		
+		
+			
+		for i, entity in ipairs(self.itemList.Children) do
+			if i > userUnitModel.limitBreak then
+				entity.SpriteGUIRendererComponent.ImageRUID = self.upgrade_next
+				continue
+			end
+			
+			if i == userUnitModel.limitBreak then
+				entity.SpriteGUIRendererComponent.ImageRUID = self.upgrade_current
+				continue
+			end
+			
+			entity.SpriteGUIRendererComponent.ImageRUID = self.upgrade_done
+		end
+		
+		if userUnitModel.count <= userUnitModel.limitBreak then
+			self.AvailableNotification.Enable = false
+			self.AvailableNotification.Visible = false
+			self.LevelUpButton.Enable = false
+		end
+	end
+
+	@EventSender("Entity", "98595bff-8504-4358-9e57-6ecf3396bdcd")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: ButtonComponent
+		-- Space: Client
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local Entity = event.Entity
+		---------------------------------------------------------
+		local unit = _UserService.LocalPlayer.UserUnitProtocol
+		unit:BreakLimitUnitCall(self.unitData.id)
+	end
+
+end
