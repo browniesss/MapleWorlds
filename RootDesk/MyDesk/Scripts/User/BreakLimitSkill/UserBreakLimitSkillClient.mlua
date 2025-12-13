@@ -7,7 +7,6 @@ script UserBreakLimitSkillClient extends Component
 
 	property Entity DefaultItem = "a1e940ba-fb0c-46db-9c2a-41fc15859853"
 
-	-- buttonRuidMap 저장용
 	property table buttonRuidMap = {}
 
 	@ExecSpace("ClientOnly")
@@ -25,10 +24,17 @@ script UserBreakLimitSkillClient extends Component
 			item.Visible = false
 		end
 
+		local itemIndex = 0
 		for i, id in ipairs(list) do
 			local buttonRUID = self.buttonRuidMap[id] or ""
 
-			if i > #self.ScrollUI.Children then
+			if buttonRUID == "" then
+				continue
+			end
+
+			itemIndex = itemIndex + 1
+
+			if itemIndex > #self.ScrollUI.Children then
 				local item = _SpawnService:SpawnByEntity(self.DefaultItem, "item", Vector3.zero, self.ScrollUI, true)
 				item.Enable = true
 				item.Visible = true
@@ -39,7 +45,7 @@ script UserBreakLimitSkillClient extends Component
 				continue
 			end
 
-			local item = self.ScrollUI.Children[i]
+			local item = self.ScrollUI.Children[itemIndex]
 			item.Enable = true
 			item.Visible = true
 			item.UI_BreakLimitSkillUseItem:Init(id, self.Entity.UserBreakLimitSkillProtocol, item.Children[2])
