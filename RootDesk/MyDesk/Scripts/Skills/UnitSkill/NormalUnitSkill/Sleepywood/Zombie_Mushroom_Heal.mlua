@@ -1,0 +1,29 @@
+@Component
+script Zombie_Mushroom_Heal extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		-- e81f0ba3f2b545d7895b98b1cf9be879
+		local healCount = 0
+		local effectID = 0
+		local healFunctionTimerID = 0
+		
+		local healFunction = function()
+			if healCount >= self.skillTime or isvalid(self.caster) == false or self.caster.Unit.curState == "die" then
+				_TimerService:ClearTimer(healFunctionTimerID)
+				_EffectService:RemoveEffect(effectID)
+				return
+			end
+			
+			self.caster.Unit.hp += self.skillAmount
+			healCount += 1
+			effectID = _EffectService:PlayEffectAttached("e81f0ba3f2b545d7895b98b1cf9be879", self.caster, Vector3.zero, 0, Vector3.one, false)
+		end
+		
+		healFunctionTimerID = _TimerService:SetTimerRepeat(healFunction, self.skillAttackTiming)
+		self:SkillEnd()
+	end
+
+end
