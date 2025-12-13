@@ -5,6 +5,10 @@ script AttendanceEventButton extends Component
 
 	@EventSender("Self")
 	handler HandleTouchEvent(TouchEvent event)
+		if _PopupManager:IsOpenPopup() then
+			return
+		end
+		
 		if event.TouchId == 1 then
 			_AttendanceEventService:OpenUI()
 		end

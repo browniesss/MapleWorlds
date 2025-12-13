@@ -30,6 +30,10 @@ script LobbyPortal extends Component
 
 	@EventSender("Self")
 	handler HandlePortalUseEvent(PortalUseEvent event)
+		if _PopupManager:IsOpenPopup() then
+			return
+		end
+		
 		if self.lobbyInfoUI == nil or self.lobbyInfoUI.EnabledInHierarchy then
 			return
 		end

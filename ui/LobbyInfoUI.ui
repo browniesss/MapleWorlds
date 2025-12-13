@@ -16,7 +16,7 @@
       {
         "id": "701c6938-68d9-499a-b153-57f6aee2bcaf",
         "path": "/ui/LobbyInfoUI",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.UIGroupComponent,MOD.Core.CanvasGroupComponent,MOD.Core.SoundComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.UIGroupComponent,MOD.Core.CanvasGroupComponent,MOD.Core.SoundComponent,MOD.Core.TagComponent",
         "jsonString": {
           "name": "LobbyInfoUI",
           "path": "/ui/LobbyInfoUI",
@@ -97,6 +97,13 @@
               "AudioClipRUID": "3135c14fc97b457ea91ae6b0adae3355",
               "Bgm": true,
               "Loop": true,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TagComponent",
+              "Tags": [
+                "LobbyPopup"
+              ],
               "Enable": true
             }
           ],
@@ -8950,7 +8957,7 @@
               "MobileOnly": false,
               "OffsetMax": {
                 "x": 362.343384,
-                "y": -20.0000019
+                "y": -20.0000057
               },
               "OffsetMin": {
                 "x": 20.0000153,
@@ -8973,7 +8980,7 @@
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": 191.171692,
-                "y": -41.7071877
+                "y": -41.70719
               },
               "Position": {
                 "x": 191.171692,
