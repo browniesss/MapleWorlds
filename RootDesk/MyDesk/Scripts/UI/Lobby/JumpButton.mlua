@@ -1,0 +1,32 @@
+@Component
+script JumpButton extends Component
+
+	@ExecSpace("ClientOnly")
+	method void OnMapEnter(Entity enteredMap)
+		if enteredMap.Name == "MainLobbyMap" then
+			self.Entity.Enable = true
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnMapLeave(Entity leftMap)
+		if leftMap.Name == "MainLobbyMap" then
+			self.Entity.Enable = false
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		if Environment:IsMobilePlatform() then
+			self.Entity.Enable = true
+		end
+	end
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		local player = _UserService.LocalPlayer.MovementComponent
+		
+		player:Jump()
+	end
+
+end

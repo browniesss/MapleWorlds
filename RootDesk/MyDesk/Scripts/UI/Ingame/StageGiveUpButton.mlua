@@ -5,13 +5,13 @@ script StageGiveUpButton extends Component
 	handler HandleButtonClickEvent(ButtonClickEvent event)
 		log("[StageGiveUpButton] Button clicked!")
 		log("[StageGiveUpButton] _GameManager exists: ", _GameManager ~= nil)
-
+		
 		-- 인게임 튜토리얼 진행 중에는 버튼 비활성화
 		if _TutorialService ~= nil and _TutorialService.isIngameTutorial and _TutorialService.isActive then
 			log("[StageGiveUpButton] Tutorial in progress, button disabled")
 			return
 		end
-
+		
 		-- 튜토리얼 모드(Stage000)에서 포기한 경우 체크
 		-- chapterIndex와 mapIndex로 직접 판단 (동기화 문제 해결)
 		local wasTutorialMode = false
@@ -22,18 +22,24 @@ script StageGiveUpButton extends Component
 			log("[StageGiveUpButton] chapterIndex: ", chapterIndex, ", mapIndex: ", mapIndex)
 			log("[StageGiveUpButton] wasTutorialMode (calculated): ", wasTutorialMode)
 		end
-
+		
 		_GameManager:GameEnd()
 		_GameManager:Log_NormalStageFail()
 		_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "MainLobbyMap")
-
+		
 		-- MainLobbyUI 다시 활성화
 		local mainLobbyUI = _EntityService:GetEntityByPath("/ui/MainLobbyUI")
 		if mainLobbyUI ~= nil then
 			mainLobbyUI.Enable = true
 			mainLobbyUI.Visible = true
 		end
-
+		
+		local lobbyJoyStick = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIJoystick")
+		local lobbyJumpButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/JumpButton")
+		
+		lobbyJoyStick.Enable = true
+		lobbyJumpButton.Enable = true
+		
 		-- 튜토리얼 모드였다면 로비 진입 후 로비 튜토리얼 시작
 		log("[StageGiveUpButton] wasTutorialMode = ", wasTutorialMode)
 		if wasTutorialMode then

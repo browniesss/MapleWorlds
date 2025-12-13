@@ -13,18 +13,24 @@ script FailPopup extends Component
 			log("[FailPopup] chapterIndex: ", chapterIndex, ", mapIndex: ", mapIndex)
 			log("[FailPopup] wasTutorialMode (calculated): ", wasTutorialMode)
 		end
-
+		
 		_GameManager:GameEnd()
-
+		
 		_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "MainLobbyMap")
-
+		
 		-- MainLobbyUI 다시 활성화
 		local mainLobbyUI = _EntityService:GetEntityByPath("/ui/MainLobbyUI")
 		if mainLobbyUI ~= nil then
 			mainLobbyUI.Enable = true
 			mainLobbyUI.Visible = true
 		end
-
+		
+		local lobbyJoyStick = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIJoystick")
+		local lobbyJumpButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/JumpButton")
+		
+		lobbyJoyStick.Enable = true
+		lobbyJumpButton.Enable = true
+		
 		-- 튜토리얼 모드였다면 로비 진입 후 로비 튜토리얼 시작
 		if wasTutorialMode then
 			log("[FailPopup] Tutorial mode detected, starting lobby tutorial after delay...")

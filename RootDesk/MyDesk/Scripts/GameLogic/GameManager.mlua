@@ -613,6 +613,12 @@ script GameManager extends Logic
 		end
 		
 		_EntityService:GetEntityByPath("/ui/LobbyInfoUI").Enable = false
+		local lobbyJoyStick = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIJoystick")
+		local lobbyJumpButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/JumpButton")
+		
+		lobbyJoyStick.Enable = false
+		lobbyJumpButton.Enable = false
+		
 		self:ShowLoadingScreen()
 		
 		-- 돌파스킬 초기화 완료 후 프리로드 시작
