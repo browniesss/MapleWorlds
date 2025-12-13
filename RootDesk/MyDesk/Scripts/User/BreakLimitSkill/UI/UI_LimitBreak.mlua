@@ -31,6 +31,16 @@ script UI_LimitBreak extends Component
 		local userUnitModel = UserUnitModel()
 		userUnitModel:DECODE(_UserMonsterService.userMonsterDict[unit.id])
 		
+		for i = 2, _UnitLimitBreakRepo.UserMaxLevel do
+			local pivot = _UnitLimitBreakRepo:FindBuffInClient(unit.grade, i - 1, unit.id)
+			local target = _UnitLimitBreakRepo:FindBuffInClient(unit.grade, i, unit.id)
+			
+			local diff = target:Diff(pivot)
+			diff.limitBreak = i - 1
+			
+			self.desc.Children[2].Children[i-1].TextComponent.Text = diff:GetDesc()
+		end
+		
 		if userUnitModel.limitBreak >= _UnitLimitBreakRepo.UserMaxLevel then
 			self.LevelInfo.Visible = false
 			self.LevelInfo.Enable = false
@@ -83,17 +93,6 @@ script UI_LimitBreak extends Component
 			self.AvailableNotification.Enable = false
 			self.AvailableNotification.Visible = false
 			self.LevelUpButton.Enable = false
-		end
-		
-		
-		for i = 2, _UnitLimitBreakRepo.UserMaxLevel do
-			local pivot = _UnitLimitBreakRepo:FindBuffInClient(unit.grade, i - 1, unit.id)
-			local target = _UnitLimitBreakRepo:FindBuffInClient(unit.grade, i, unit.id)
-			
-			local diff = target:Diff(pivot)
-			diff.limitBreak = i - 1
-			
-			self.desc.Children[2].Children[i-1].TextComponent.Text = diff:GetDesc()
 		end
 	end
 
