@@ -49,17 +49,17 @@ script LimitBreakModel
 		
 		if not (self.countryId == 0) then
 			local synergyData = _SynergyRepo:GetSynergyData(self.countryId)
-			desc = desc .. string.format("\n추가 지역 시너지: %s", synergyData.name)
+			desc += string.format("\n추가 지역 시너지: %s", synergyData.name)
 		end
 		
 		if not (self.jobId == 0) then
 			local synergyData = _SynergyRepo:GetSynergyData(self.jobId)
-			desc = desc .. string.format("\n추가 직업 시너지: %s", synergyData.name)
+			desc += string.format("\n추가 직업 시너지: %s", synergyData.name)
 		end
 		
 		if not (self.skillID == "0") then
 			local skillData = _SkillService:GetSkillByIDFromClient(self.skillID)
-			desc = desc .. string.format("\n오리진 스킬 추가: %s", skillData.name)
+			desc += string.format("\n오리진 스킬 추가: %s", skillData.name)
 		end
 		
 		return desc
