@@ -23,6 +23,7 @@ script BuffedUnitModel extends UnitModel
 
 	method void SetLimitBreakBuff(LimitBreakModel model)
 		self.hp += model.hp
+		self.maxMp += model.mp
 		self.damage += model.damage
 		self.returnCost = model.summonCost
 		

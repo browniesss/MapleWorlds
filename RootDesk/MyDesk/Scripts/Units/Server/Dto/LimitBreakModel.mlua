@@ -21,6 +21,8 @@ script LimitBreakModel
 
 	property integer jobId = 0
 
+	property integer mp = 0
+
 	method void Init(table data)
 		self.id = tostring(data["id"])
 		self.limitBreak = tonumber(data["limitBreak"])
@@ -28,6 +30,7 @@ script LimitBreakModel
 		self.skillID = tostring(data["skillID"])
 		self.passiveSkillID = tostring(data["passiveSkillID"])
 		self.hp = tonumber(data["hp"])
+		self.mp = tonumber(data["mp"])
 		self.damage = tonumber(data["damage"])
 		self.summonCost = tonumber(data["summonCost"])
 		self.countryId = tonumber(data["countryId"])

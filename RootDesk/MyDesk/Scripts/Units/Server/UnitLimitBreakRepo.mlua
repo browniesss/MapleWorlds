@@ -20,6 +20,7 @@ script UnitLimitBreakRepo extends Logic
 				item.limitBreak = tonumber(dataSet:GetCell(index, 'limitBreak'))
 				item.price = tonumber(dataSet:GetCell(index, 'price'))
 				item.hp = tonumber(dataSet:GetCell(index, 'hp'))
+				item.mp = tonumber(dataSet:GetCell(index, 'mp'))
 				item.damage = tonumber(dataSet:GetCell(index, 'damage'))
 				item.skillID = tostring(dataSet:GetCell(index, 'skillID'))
 				item.passiveSkillID = tostring(dataSet:GetCell(index, 'passiveSkillID'))
