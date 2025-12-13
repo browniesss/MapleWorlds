@@ -447,6 +447,7 @@ script GameManager extends Logic
 		if clearedChapter == 0 and clearedStage == 0 then
 			log("[GameManager] Tutorial stage clear - skipping rewards and progression")
 			self:StageClearClientCallback(false, senderUserId)
+			_UserService:GetUserEntityByUserId(senderUserId).UserStage:SetClearStage(1, 1)
 			return
 		end
 		

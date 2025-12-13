@@ -103,8 +103,8 @@ script UserStage extends Component
 		if self:LOAD() ~= 0 then
 			self.openStage = 1
 			self.openChapter = 1
-			self.selectStage = 1
-			self.selectChapter = 1
+			self.selectStage = 0
+			self.selectChapter = 0
 			self:SAVE()
 		end
 		
