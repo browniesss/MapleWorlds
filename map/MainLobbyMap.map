@@ -4012,6 +4012,7 @@
               "NameTagRUID": {
                 "DataId": "00979fba88d44334919ffae68082369d"
               },
+              "OffsetY": -0.05,
               "Enable": true
             }
           ],
@@ -4082,8 +4083,8 @@
             {
               "@type": "MOD.Core.TransformComponent",
               "Position": {
-                "x": -6.9313,
-                "y": 1.4205,
+                "x": -6.908,
+                "y": 1.419,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -4157,10 +4158,19 @@
             },
             {
               "@type": "MOD.Core.NameTagComponent",
+              "Bold": true,
+              "FontColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
+              "FontSize": 1.5,
               "Name": "운영자",
               "NameTagRUID": {
-                "DataId": "9bf18287398c44699c20fc5123d1a1ae"
+                "DataId": "5999d6dacbd84081b47b81ee8ef02697"
               },
+              "OffsetY": -0.02,
               "Enable": true
             }
           ],
@@ -4191,8 +4201,8 @@
             {
               "@type": "MOD.Core.TransformComponent",
               "Position": {
-                "x": -4.6619,
-                "y": 1.3841,
+                "x": -5.5126,
+                "y": 1.3888,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -4264,10 +4274,17 @@
             },
             {
               "@type": "MOD.Core.NameTagComponent",
-              "Name": "이벤트 운영자",
-              "NameTagRUID": {
-                "DataId": "9bf18287398c44699c20fc5123d1a1ae"
+              "Bold": true,
+              "FontOffset": {
+                "x": 0.02,
+                "y": -0.02
               },
+              "FontSize": 1.5,
+              "Name": "카산드라",
+              "NameTagRUID": {
+                "DataId": "548b3b9fe71843b1bfd48520de3feac3"
+              },
+              "OffsetY": 0.05,
               "Enable": true
             },
             {
@@ -4466,6 +4483,7 @@
             {
               "@type": "MOD.Core.ChatBalloonComponent",
               "AutoShowEnabled": true,
+              "BalloonScale": 2.0,
               "ChatBalloonRUID": {
                 "DataId": "7b6bd117bd0446a5bacec8ea6831c997"
               },
@@ -4477,7 +4495,8 @@
                 "a": 1.0
               },
               "FontSize": 1.5,
-              "Message": "안녕?",
+              "Message": "동료를 영입하려면 나를 클릭해 봐",
+              "Offset": -2.0,
               "Enable": true
             },
             {
@@ -4492,11 +4511,23 @@
             },
             {
               "@type": "MOD.Core.NameTagComponent",
-              "FontSize": 1.5,
-              "Name": "머쉬 상인",
-              "NameTagRUID": {
-                "DataId": "1eeec783e6b14503a36f9f58f9605196"
+              "Bold": true,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
               },
+              "FontOffset": {
+                "x": 0.02,
+                "y": -0.01
+              },
+              "FontSize": 1.5,
+              "Name": "상점 상인",
+              "NameTagRUID": {
+                "DataId": "4e15326a29ee491a89a7fbcd9fa7913c"
+              },
+              "OffsetY": -0.01,
               "Enable": true
             },
             {
@@ -4647,7 +4678,7 @@
           "path": "/maps/MainLobbyMap/object-7428",
           "nameEditable": true,
           "enable": true,
-          "visible": true,
+          "visible": false,
           "localize": false,
           "displayOrder": 7,
           "pathConstraints": "///",
