@@ -5,7 +5,6 @@ script StartUI extends Component
 	handler HandleButtonClickEvent(ButtonClickEvent event)
 		if _PlayCoinService:IsUseCoin() then
 			_PlayCoinService:StartNormalGame()
-			_EntityService:GetEntityByPath("/ui/LobbyInfoUI").Enable = false
 		end
 	end
 

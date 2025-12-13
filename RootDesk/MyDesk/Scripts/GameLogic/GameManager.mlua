@@ -612,6 +612,7 @@ script GameManager extends Logic
 			return
 		end
 		
+		_EntityService:GetEntityByPath("/ui/LobbyInfoUI").Enable = false
 		self:ShowLoadingScreen()
 		
 		-- 돌파스킬 초기화 완료 후 프리로드 시작

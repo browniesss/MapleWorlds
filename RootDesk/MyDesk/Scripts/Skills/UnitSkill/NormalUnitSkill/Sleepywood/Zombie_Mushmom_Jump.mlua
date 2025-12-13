@@ -1,0 +1,28 @@
+@Component
+script Zombie_Mushmom_Jump extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		-- 점프: y 좌표 올리기
+		local originPos = self.caster.TransformComponent.WorldPosition
+		local jumpPos = Vector2(originPos.x, originPos.y + 1)
+		_TweenLogic:MoveTo(self.caster, jumpPos, 0.25, EaseType.Linear)
+		
+		-- 1초 후 아래로 떨어지며 공격
+		_TimerService:SetTimerOnce(function()
+			local dropPos = Vector2(originPos.x, originPos.y)
+			_TweenLogic:MoveTo(self.caster, dropPos, 0.25, EaseType.Linear)
+		    
+			-- Tween 끝난 뒤 후처리
+		    _TimerService:SetTimerOnce(function()
+				_EffectService:PlayEffectAttached("aa91560d7d294867926b243397598c09", self.caster, Vector3.zero, 0, Vector3.one * 2)
+		
+				self:AttackNearByEnemies(1, 20)
+				self:SkillEnd()
+		    end, 0.3)
+		end, 1)
+	end
+
+end

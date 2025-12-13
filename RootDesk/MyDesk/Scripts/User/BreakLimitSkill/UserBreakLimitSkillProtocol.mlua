@@ -21,6 +21,15 @@ script UserBreakLimitSkillProtocol extends Component
 		_UserMonsterService:INIT(senderUserId)
 		local userMonsterData = _UserMonsterService.userMonsterDict
 
+		-- 유저 덱 정보 가져오기
+		local userDeck = user.UserDeck.userDeck
+		local deckUnitSet = {}
+		for _, unitId in ipairs(userDeck) do
+			if unitId ~= nil and unitId ~= "" then
+				deckUnitSet[unitId] = true
+			end
+		end
+
 		-- 기존 데이터 초기화
 		for _, id in ipairs(eventService:GetIdList()) do
 			eventService:RemoveSkill(id)
@@ -31,8 +40,13 @@ script UserBreakLimitSkillProtocol extends Component
 		-- 스킬ID -> buttonRUID 매핑
 		local buttonRuidMap = {}
 
-		-- 데이터 설정
+		-- 데이터 설정 (덱에 포함된 유닛만)
 		for id, json in pairs(userMonsterData) do
+			-- 덱에 없는 유닛은 스킵
+			if not deckUnitSet[id] then
+				continue
+			end
+
 			local userUnitModel = UserUnitModel()
 			userUnitModel:DECODE(json)
 
@@ -41,7 +55,7 @@ script UserBreakLimitSkillProtocol extends Component
 
 			buffedUnit = _BuffedUnitService:SetUnitBuff(buffedUnit, userUnitModel.level, userUnitModel.limitBreak)
 
-			if buffedUnit.LimitBreakActiveSkill == nil or buffedUnit.LimitBreakActiveSkill == "" then
+			if buffedUnit.LimitBreakActiveSkill == nil or buffedUnit.LimitBreakActiveSkill == "" or buffedUnit.LimitBreakActiveSkill == "0" then
 				continue
 			end
 
