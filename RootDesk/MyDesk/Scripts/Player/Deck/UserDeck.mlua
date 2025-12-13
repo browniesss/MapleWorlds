@@ -3,6 +3,7 @@ script UserDeck extends Component
 
 	property table userDeck = {}
 
+	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		_UserDeckService:LOAD()
 	end

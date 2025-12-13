@@ -17,6 +17,12 @@ script UserStage extends Component
 
 	property table clearedStages = {}
 
+	@Sync
+	property integer lastClearChapter = 0
+
+	@Sync
+	property integer lastClearStage = 0
+
 	@ExecSpace("Server")
 	method integer SAVE()
 		local data = {}
@@ -25,6 +31,8 @@ script UserStage extends Component
 		data["openChapter"] = self.openChapter
 		data["selectStage"] = self.selectStage
 		data["selectChapter"] = self.selectChapter
+		data["lastClearStage"] = self.lastClearStage
+		data["lastClearChapter"] = self.lastClearChapter
 		
 		-- clearedStages를 문자열로 변환 (예: "101,102,201,506")
 		local clearedList = {}
@@ -60,6 +68,8 @@ script UserStage extends Component
 		self.openChapter = tonumber(data["openChapter"])
 		self.selectStage = tonumber(data["selectStage"])
 		self.selectChapter = tonumber(data["selectChapter"])
+		self.lastClearStage = tonumber(data["lastClearStage"] or data["openStage"])
+		self.lastClearChapter = tonumber(data["lastClearChapter"] or data["openChapter"])
 		
 		-- cleared 문자열을 테이블로 변환
 		self.clearedStages = {}
@@ -71,7 +81,7 @@ script UserStage extends Component
 		else
 			-- 기존 유저: openChapter/openStage 이전 스테이지를 모두 클리어한 것으로 간주
 			self:GenerateClearedFromOpenStage()
-		end
+		end 
 		
 		return 0
 	end
@@ -110,14 +120,30 @@ script UserStage extends Component
 		
 		-- 메소 업데이트 이후 최초 접속 보상 체크
 		self:CheckMesoInitialReward()
+		
+		local updatedOpenData = _StageService:GetNextOpenStageIdFromServer(self.lastClearChapter, self.lastClearStage)
+		self.openChapter = updatedOpenData.chapter
+		self.openStage = updatedOpenData.stage
 	end
 
 	@ExecSpace("Server")
 	method void SetClearStage(integer selectChapter, integer selectStage)
+		if self.lastClearChapter < self.openChapter then
+			self.lastClearChapter = self.openChapter
+			self.lastClearStage = self.openStage
+		end
+		
+		if self.lastClearChapter == self.openChapter then
+			if self.lastClearStage < self.openStage then
+				self.lastClearStage = self.openStage
+			end
+		end
+		
 		self.openChapter = selectChapter
 		self.openStage = selectStage
 		self.selectChapter = selectChapter
 		self.selectStage = selectStage
+		
 		self:SAVE()
 	end
 
