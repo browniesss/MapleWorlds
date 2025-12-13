@@ -1,46 +1,82 @@
 @Component
 script UserBreakLimitSkillProtocol extends Component
 
+	-- 클라이언트에서 프리로드용으로 사용할 돌파스킬 ruids
+	property table limitBreakSkillRuids = {}
+
+	-- 프리로드 완료 여부
+	property boolean isPreloadReady = false
+
+	-- InitCall 완료 후 호출될 콜백
+	property any onInitCompleteCallback = nil
+
 	@ExecSpace("Server")
 	method void InitCall()
 		_ProtocolService:CommonCall(senderUserId)
-		
+
 		local user = _UserService:GetUserEntityByUserId(senderUserId)
 		local eventService = user.UserBreakLimitSkillServer
-		
+
 		local unitData = _UnitService:GetUnitAll()
 		_UserMonsterService:INIT(senderUserId)
 		local userMonsterData = _UserMonsterService.userMonsterDict
-		
+
 		-- 기존 데이터 초기화
 		for _, id in ipairs(eventService:GetIdList()) do
 			eventService:RemoveSkill(id)
 		end
-		
+
+		-- 돌파스킬 ruids 수집용
+		local ruids = {}
+
 		-- 데이터 설정
 		for id, json in pairs(userMonsterData) do
 			local userUnitModel = UserUnitModel()
 			userUnitModel:DECODE(json)
-			
+
 			local buffedUnit = BuffedUnitModel()
 			buffedUnit:Init(unitData[id])
-			
+
 			buffedUnit = _BuffedUnitService:SetUnitBuff(buffedUnit, userUnitModel.level, userUnitModel.limitBreak)
-			
+
 			if buffedUnit.LimitBreakActiveSkill == nil or buffedUnit.LimitBreakActiveSkill == "" then
 				continue
 			end
-			
+
 			eventService:SetSkill(buffedUnit.LimitBreakActiveSkill, 1)
+
+			-- 돌파스킬의 ruids 수집
+			local skillData = _SkillService:GetSkillByIDFromServer(buffedUnit.LimitBreakActiveSkill)
+			if skillData ~= nil and skillData["ruids"] ~= nil and skillData["ruids"] ~= "" then
+				local ruidString = skillData["ruids"]
+				for ruid in string.gmatch(ruidString, "([^,]+)") do
+					table.insert(ruids, ruid)
+				end
+			end
 		end
-		
+
 		local resp = eventService:GetIdList()
-		self:InitBack(resp, senderUserId)
+		self:InitBack(resp, ruids, senderUserId)
 	end
 
 	@ExecSpace("Client")
-	method void InitBack(table resp)
+	method void InitBack(table resp, table ruids)
+		self.limitBreakSkillRuids = ruids
+		self.isPreloadReady = true
 		self.Entity.UserBreakLimitSkillClient:SetSkill(resp)
+
+		-- 콜백이 설정되어 있으면 호출
+		if self.onInitCompleteCallback ~= nil then
+			self.onInitCompleteCallback(ruids)
+			self.onInitCompleteCallback = nil
+		end
+	end
+
+	-- 콜백과 함께 InitCall 호출 (프리로드용)
+	@ExecSpace("ClientOnly")
+	method void InitCallWithCallback(any callback)
+		self.onInitCompleteCallback = callback
+		self:InitCall()
 	end
 
 	@ExecSpace("Server")
