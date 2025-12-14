@@ -37,11 +37,16 @@ script StageClearButton extends Component
 			mainLobbyUI.Visible = true
 		end
 		
-		local lobbyJoyStick = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIJoystick")
-		local lobbyJumpButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/JumpButton")
+		local lobbyBadgeButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton")
+		lobbyBadgeButton.Enable = true
 		
-		lobbyJoyStick.Enable = true
-		lobbyJumpButton.Enable = true
+		if Environment:IsMobilePlatform() then
+			local lobbyJoyStick = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIJoystick")
+			local lobbyJumpButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/JumpButton")
+		
+			lobbyJoyStick.Enable = true
+			lobbyJumpButton.Enable = true
+		end
 		
 		-- 튜토리얼 모드였다면 로비 진입 후 로비 튜토리얼 시작
 		log("[StageClearButton] wasTutorialMode = ", wasTutorialMode)
