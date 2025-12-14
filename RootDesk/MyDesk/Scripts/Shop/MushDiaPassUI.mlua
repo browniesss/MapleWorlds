@@ -26,17 +26,19 @@ script MushDiaPassUI extends Component
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		-- UI 요소 찾기
-		self.purchaseButton = self.Entity:GetChildByName("PurchaseButton")
-		self.claimButton = self.Entity:GetChildByName("ClaimButton")
+		local uiRoot = self.Entity:GetChildByName("PassBackground")
+		
+		self.purchaseButton = uiRoot:GetChildByName("PurchaseButton")
+		self.claimButton = uiRoot:GetChildByName("ClaimButton")
 		
 		-- DayText는 DayTextBackground 하위에 있음
-		local dayTextBackground = self.Entity:GetChildByName("DayTextBackground")
+		local dayTextBackground = uiRoot:GetChildByName("DayTextBackground")
 		if dayTextBackground ~= nil then
 			self.dayText = dayTextBackground:GetChildByName("DayText")
 		end
 		
 		-- PassItemScroll과 템플릿 찾기
-		self.passItemScroll = self.Entity:GetChildByName("PassItemScroll")
+		self.passItemScroll = uiRoot:GetChildByName("PassItemScroll")
 		if self.passItemScroll ~= nil then
 			self.passItemTemplate = self.passItemScroll:GetChildByName("PassItem")
 		end
@@ -157,7 +159,7 @@ script MushDiaPassUI extends Component
 		if not self.isInitialized then
 			return
 		end
-
+		
 		for day = 1, 14 do
 			local item = self.passItems[day]
 			if item ~= nil and item.PassItem ~= nil then
@@ -166,7 +168,6 @@ script MushDiaPassUI extends Component
 		end
 	end
 
-	-- 테스트용: P 키를 누르면 패스 날짜를 하루 앞당김
 	@EventSender("Service", "InputService")
 	handler HandleKeyDownEvent(KeyDownEvent event)
 		if event.key == KeyboardKey.P and Environment:IsMakerPlay() then

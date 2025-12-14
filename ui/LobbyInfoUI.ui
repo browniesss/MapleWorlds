@@ -144,20 +144,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 0.0,
-                "y": 0.0
+                "x": 200.0,
+                "y": 200.0
               },
               "OffsetMin": {
-                "x": 0.0,
-                "y": 0.0
+                "x": -200.0,
+                "y": -200.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 1920.0,
-                "y": 1080.0
+                "x": 2320.0,
+                "y": 1480.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -219,22 +219,22 @@
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 3,
+              "AlignmentOption": 9,
               "AnchorsMax": {
-                "x": 0.5,
+                "x": 1.0,
                 "y": 1.0
               },
               "AnchorsMin": {
-                "x": 0.5,
+                "x": 0.0,
                 "y": 1.0
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 960.0,
+                "x": 0.0,
                 "y": 0.0
               },
               "OffsetMin": {
-                "x": -960.0,
+                "x": 0.0,
                 "y": -130.0
               },
               "Pivot": {
@@ -380,18 +380,90 @@
         }
       },
       {
-        "id": "d6cdc4b8-15ff-4e7a-9817-122f7b2acf7e",
-        "path": "/ui/LobbyInfoUI/TopBar/UIPlayCoinPanel",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "id": "6d97fba1-c505-4aec-bf95-30dd3f4d3daa",
+        "path": "/ui/LobbyInfoUI/TopBar/UICoin_Root",
+        "componentNames": "MOD.Core.UITransformComponent",
         "jsonString": {
-          "name": "UIPlayCoinPanel",
-          "path": "/ui/LobbyInfoUI/TopBar/UIPlayCoinPanel",
+          "name": "UICoin_Root",
+          "path": "/ui/LobbyInfoUI/TopBar/UICoin_Root",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 1,
           "pathConstraints": "////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uiempty",
+            "sub_entity_id": null
+          },
+          "modelId": "uiempty",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 9,
+              "AnchorsMax": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "AnchorsMin": {
+                "x": 0.0,
+                "y": 1.0
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "OffsetMin": {
+                "x": 1168.47339,
+                "y": -130.0
+              },
+              "Pivot": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "RectSize": {
+                "x": 751.5266,
+                "y": 130.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Position": {
+                "x": 960.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "d6cdc4b8-15ff-4e7a-9817-122f7b2acf7e",
+        "path": "/ui/LobbyInfoUI/TopBar/UICoin_Root/UIPlayCoinPanel",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "jsonString": {
+          "name": "UIPlayCoinPanel",
+          "path": "/ui/LobbyInfoUI/TopBar/UICoin_Root/UIPlayCoinPanel",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "/////",
           "revision": 0,
           "origin": {
             "type": "Model",
@@ -413,12 +485,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 212.769913,
-                "y": 24.0942
+                "x": -220.0,
+                "y": 25.0
               },
               "OffsetMin": {
-                "x": 12.7699127,
-                "y": -25.9058
+                "x": -420.0,
+                "y": -25.0
               },
               "Pivot": {
                 "x": 0.5,
@@ -436,12 +508,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 112.769913,
-                "y": -0.9058
+                "x": -320.0,
+                "y": 0.0
               },
               "Position": {
-                "x": 112.769913,
-                "y": -65.9058,
+                "x": -695.7633,
+                "y": -65.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -520,17 +592,17 @@
       },
       {
         "id": "dd871f73-f207-4f96-9c46-5d2e655aeaed",
-        "path": "/ui/LobbyInfoUI/TopBar/UIPlayCoinPanel/TextCoin",
+        "path": "/ui/LobbyInfoUI/TopBar/UICoin_Root/UIPlayCoinPanel/TextCoin",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
           "name": "TextCoin",
-          "path": "/ui/LobbyInfoUI/TopBar/UIPlayCoinPanel/TextCoin",
+          "path": "/ui/LobbyInfoUI/TopBar/UICoin_Root/UIPlayCoinPanel/TextCoin",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
-          "pathConstraints": "/////",
+          "pathConstraints": "//////",
           "revision": 0,
           "origin": {
             "type": "Model",
@@ -706,17 +778,17 @@
       },
       {
         "id": "c982839d-0805-40c8-9629-2a50bcad6ab9",
-        "path": "/ui/LobbyInfoUI/TopBar/UIFirstCoinPanel",
+        "path": "/ui/LobbyInfoUI/TopBar/UICoin_Root/UIFirstCoinPanel",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
           "name": "UIFirstCoinPanel",
-          "path": "/ui/LobbyInfoUI/TopBar/UIFirstCoinPanel",
+          "path": "/ui/LobbyInfoUI/TopBar/UICoin_Root/UIFirstCoinPanel",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 2,
-          "pathConstraints": "////",
+          "displayOrder": 1,
+          "pathConstraints": "/////",
           "revision": 0,
           "origin": {
             "type": "Model",
@@ -738,12 +810,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 435.696,
-                "y": 24.0942
+                "x": 3.18078613,
+                "y": 25.0
               },
               "OffsetMin": {
-                "x": 235.696014,
-                "y": -25.9058
+                "x": -196.819214,
+                "y": -25.0
               },
               "Pivot": {
                 "x": 0.5,
@@ -761,12 +833,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 335.696,
-                "y": -0.9058
+                "x": -96.8192139,
+                "y": 0.0
               },
               "Position": {
-                "x": 335.696,
-                "y": -65.9058,
+                "x": -472.58252,
+                "y": -65.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -845,17 +917,17 @@
       },
       {
         "id": "4be3e141-dcaa-4de2-82ca-6151ae1acb27",
-        "path": "/ui/LobbyInfoUI/TopBar/UIFirstCoinPanel/TextCoin",
+        "path": "/ui/LobbyInfoUI/TopBar/UICoin_Root/UIFirstCoinPanel/TextCoin",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
           "name": "TextCoin",
-          "path": "/ui/LobbyInfoUI/TopBar/UIFirstCoinPanel/TextCoin",
+          "path": "/ui/LobbyInfoUI/TopBar/UICoin_Root/UIFirstCoinPanel/TextCoin",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
-          "pathConstraints": "/////",
+          "pathConstraints": "//////",
           "revision": 0,
           "origin": {
             "type": "Model",
@@ -1031,17 +1103,17 @@
       },
       {
         "id": "5ad8ca31-f028-4515-ba44-a2078923a38f",
-        "path": "/ui/LobbyInfoUI/TopBar/UISecondCoinPanel",
+        "path": "/ui/LobbyInfoUI/TopBar/UICoin_Root/UISecondCoinPanel",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
           "name": "UISecondCoinPanel",
-          "path": "/ui/LobbyInfoUI/TopBar/UISecondCoinPanel",
+          "path": "/ui/LobbyInfoUI/TopBar/UICoin_Root/UISecondCoinPanel",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 3,
-          "pathConstraints": "////",
+          "displayOrder": 2,
+          "pathConstraints": "/////",
           "revision": 0,
           "origin": {
             "type": "Model",
@@ -1063,12 +1135,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 659.0297,
-                "y": 24.0942
+                "x": 226.514465,
+                "y": 25.0
               },
               "OffsetMin": {
-                "x": 459.029724,
-                "y": -25.9058
+                "x": 26.5144653,
+                "y": -25.0
               },
               "Pivot": {
                 "x": 0.5,
@@ -1086,12 +1158,12 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 559.0297,
-                "y": -0.9058
+                "x": 126.514465,
+                "y": 0.0
               },
               "Position": {
-                "x": 559.0297,
-                "y": -65.9058,
+                "x": -249.24884,
+                "y": -65.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -1170,17 +1242,17 @@
       },
       {
         "id": "0ede1639-7622-4f05-b131-fe2c8523b0d9",
-        "path": "/ui/LobbyInfoUI/TopBar/UISecondCoinPanel/TextCoin",
+        "path": "/ui/LobbyInfoUI/TopBar/UICoin_Root/UISecondCoinPanel/TextCoin",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
           "name": "TextCoin",
-          "path": "/ui/LobbyInfoUI/TopBar/UISecondCoinPanel/TextCoin",
+          "path": "/ui/LobbyInfoUI/TopBar/UICoin_Root/UISecondCoinPanel/TextCoin",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
-          "pathConstraints": "/////",
+          "pathConstraints": "//////",
           "revision": 0,
           "origin": {
             "type": "Model",
@@ -1365,7 +1437,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 4,
+          "displayOrder": 2,
           "pathConstraints": "////",
           "revision": 1,
           "origin": {
@@ -1728,7 +1800,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 5,
+          "displayOrder": 3,
           "pathConstraints": "////",
           "revision": 1,
           "origin": {
@@ -1885,23 +1957,23 @@
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 0,
+              "AlignmentOption": 15,
               "AnchorsMax": {
-                "x": 0.5,
-                "y": 0.5
+                "x": 1.0,
+                "y": 1.0
               },
               "AnchorsMin": {
-                "x": 0.5,
-                "y": 0.5
+                "x": 0.0,
+                "y": 0.0
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 960.0,
-                "y": 405.0
+                "x": 0.0,
+                "y": -135.0
               },
               "OffsetMin": {
-                "x": -960.0,
-                "y": -540.0
+                "x": 0.0,
+                "y": 0.0
               },
               "Pivot": {
                 "x": 0.5,
@@ -1961,13 +2033,13 @@
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 15,
+              "AlignmentOption": 14,
               "AnchorsMax": {
                 "x": 1.0,
                 "y": 1.0
               },
               "AnchorsMin": {
-                "x": 0.0,
+                "x": 1.0,
                 "y": 0.0
               },
               "MobileOnly": false,
@@ -1976,7 +2048,7 @@
                 "y": -10.0
               },
               "OffsetMin": {
-                "x": 1450.0,
+                "x": -480.0,
                 "y": 10.0
               },
               "Pivot": {
@@ -1984,7 +2056,7 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 460.0,
+                "x": 470.0,
                 "y": 925.0
               },
               "UIMode": 1,
@@ -1995,11 +2067,11 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 720.0,
+                "x": -245.0,
                 "y": 0.0
               },
               "Position": {
-                "x": 720.0,
+                "x": 715.0,
                 "y": 0.0,
                 "z": 0.0
               },
@@ -2051,31 +2123,31 @@
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 15,
+              "AlignmentOption": 0,
               "AnchorsMax": {
-                "x": 1.0,
-                "y": 1.0
+                "x": 0.5,
+                "y": 0.5
               },
               "AnchorsMin": {
-                "x": 0.0,
-                "y": 0.0
+                "x": 0.5,
+                "y": 0.5
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": -20.0,
-                "y": -810.0
+                "x": 215.0,
+                "y": -310.0
               },
               "OffsetMin": {
-                "x": 20.0,
-                "y": 0.0
+                "x": -215.0,
+                "y": -430.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 420.0,
-                "y": 115.0
+                "x": 430.0,
+                "y": 120.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -2086,11 +2158,11 @@
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": 0.0,
-                "y": -405.0
+                "y": -370.0
               },
               "Position": {
                 "x": 0.0,
-                "y": -405.0,
+                "y": -370.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -2213,8 +2285,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 420.0,
-                "y": 115.0
+                "x": 430.0,
+                "y": 120.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -2301,31 +2373,31 @@
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 15,
+              "AlignmentOption": 0,
               "AnchorsMax": {
-                "x": 1.0,
-                "y": 1.0
+                "x": 0.5,
+                "y": 0.5
               },
               "AnchorsMin": {
-                "x": 0.0,
-                "y": 0.0
+                "x": 0.5,
+                "y": 0.5
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 0.0,
-                "y": -135.0
+                "x": 234.7196,
+                "y": 301.0047
               },
               "OffsetMin": {
-                "x": 0.0,
-                "y": 135.0
+                "x": -234.7196,
+                "y": -301.0047
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 460.0,
-                "y": 655.0
+                "x": 469.4392,
+                "y": 602.0094
               },
               "UIMode": 1,
               "UIScale": {
@@ -2496,11 +2568,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 440.0,
+                "x": 444.0,
                 "y": 0.0
               },
               "OffsetMin": {
-                "x": 20.0,
+                "x": 24.0,
                 "y": -115.0
               },
               "Pivot": {
@@ -2519,11 +2591,11 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 230.0,
+                "x": 234.0,
                 "y": -57.5
               },
               "Position": {
-                "x": 230.0,
+                "x": 234.0,
                 "y": -57.5,
                 "z": 0.0
               },
@@ -3296,11 +3368,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 440.0,
+                "x": 444.0,
                 "y": -120.0
               },
               "OffsetMin": {
-                "x": 20.0,
+                "x": 24.0,
                 "y": -235.0
               },
               "Pivot": {
@@ -3319,11 +3391,11 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 230.0,
+                "x": 234.0,
                 "y": -177.5
               },
               "Position": {
-                "x": 230.0,
+                "x": 234.0,
                 "y": -177.5,
                 "z": 0.0
               },
@@ -4118,11 +4190,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 440.0,
+                "x": 444.0,
                 "y": -240.0
               },
               "OffsetMin": {
-                "x": 20.0,
+                "x": 24.0,
                 "y": -355.0
               },
               "Pivot": {
@@ -4141,11 +4213,11 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 230.0,
+                "x": 234.0,
                 "y": -297.5
               },
               "Position": {
-                "x": 230.0,
+                "x": 234.0,
                 "y": -297.5,
                 "z": 0.0
               },
@@ -4940,11 +5012,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 440.0,
+                "x": 444.0,
                 "y": -360.0
               },
               "OffsetMin": {
-                "x": 20.0,
+                "x": 24.0,
                 "y": -475.0
               },
               "Pivot": {
@@ -4963,11 +5035,11 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 230.0,
+                "x": 234.0,
                 "y": -417.5
               },
               "Position": {
-                "x": 230.0,
+                "x": 234.0,
                 "y": -417.5,
                 "z": 0.0
               },
@@ -5762,11 +5834,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 440.0,
+                "x": 444.0,
                 "y": -480.0
               },
               "OffsetMin": {
-                "x": 20.0,
+                "x": 24.0,
                 "y": -595.0
               },
               "Pivot": {
@@ -5785,11 +5857,11 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 230.0,
+                "x": 234.0,
                 "y": -537.5
               },
               "Position": {
-                "x": 230.0,
+                "x": 234.0,
                 "y": -537.5,
                 "z": 0.0
               },
@@ -6584,11 +6656,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 440.0,
+                "x": 444.0,
                 "y": -600.0
               },
               "OffsetMin": {
-                "x": 20.0,
+                "x": 24.0,
                 "y": -715.0
               },
               "Pivot": {
@@ -6607,11 +6679,11 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 230.0,
+                "x": 234.0,
                 "y": -657.5
               },
               "Position": {
-                "x": 230.0,
+                "x": 234.0,
                 "y": -657.5,
                 "z": 0.0
               },
@@ -7395,41 +7467,41 @@
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 15,
+              "AlignmentOption": 0,
               "AnchorsMax": {
-                "x": 1.0,
-                "y": 1.0
+                "x": 0.5,
+                "y": 0.5
               },
               "AnchorsMin": {
-                "x": 0.0,
-                "y": 0.0
+                "x": 0.5,
+                "y": 0.5
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 0.0,
-                "y": 0.0
+                "x": 235.0,
+                "y": 401.25
               },
               "OffsetMin": {
-                "x": 0.0,
-                "y": 810.0
+                "x": -235.0,
+                "y": 338.75
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 460.0,
-                "y": 115.0
+                "x": 470.0,
+                "y": 62.5
               },
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": 0.0,
-                "y": 405.0
+                "y": 370.0
               },
               "Position": {
                 "x": 0.0,
-                "y": 405.0,
+                "y": 370.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -7724,7 +7796,7 @@
                 "z": 0.0
               },
               "Position": {
-                "x": -190.0,
+                "x": -195.0,
                 "y": 0.0,
                 "z": 0.0
               },
@@ -7870,7 +7942,7 @@
                 "z": 0.0
               },
               "Position": {
-                "x": 190.0,
+                "x": 195.0,
                 "y": 0.0,
                 "z": 0.0
               },
