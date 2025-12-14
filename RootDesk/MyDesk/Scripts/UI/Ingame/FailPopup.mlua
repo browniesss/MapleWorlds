@@ -25,6 +25,12 @@ script FailPopup extends Component
 			mainLobbyUI.Visible = true
 		end
 		
+		local stageInfoUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI")
+		if stageInfoUI ~= nil then
+			stageInfoUI.Enable = true
+			stageInfoUI.Visible = true
+		end
+		
 		local lobbyBadgeButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton")
 		lobbyBadgeButton.Enable = true
 		
