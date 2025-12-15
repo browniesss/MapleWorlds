@@ -1,0 +1,47 @@
+@Component
+script Falling_Justice extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		-- 106efa3637a54c7bb4a0495fe461d470
+		
+		local basePos = self.Entity.TransformComponent.WorldPosition
+		local pos = Vector3(2, 2.5, 0)
+		
+		if self._T.projectileParent == nil then
+			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+		end
+		
+		local firstSpawnFunction = function()
+			_EffectService:PlayEffectAttached("106efa3637a54c7bb4a0495fe461d470", self._T.projectileParent, basePos + pos, 0, Vector3.one, false)
+		end
+		
+		local damageFunction = function()
+			self:AttackNearByEnemies(3, 10)
+		end
+		
+		local damageDecreaseFunction = function()
+			local nearByAllies = self:FindNearByAllies()
+			self.caster.Unit:GetBuff(_eBuffType.DamageDecreaseBuff, 100, 2)
+		
+			for _, target in ipairs(nearByAllies) do
+				if not isvalid(target) or target.Unit.curState == "die" then
+					continue
+				end
+				
+			    target.Unit:GetBuff(_eBuffType.DamageDecreaseBuff, 100, 2)
+			end
+		end
+		
+		local destroyFunction = function()
+			self:SkillEnd()
+		end
+		
+		_TimerService:SetTimerOnce(firstSpawnFunction, 0)
+		_TimerService:SetTimerOnce(damageFunction, 0.6)
+		_TimerService:SetTimerOnce(damageDecreaseFunction, 0.6)
+		_TimerService:SetTimerOnce(destroyFunction, 0.5)
+	end
+
+end

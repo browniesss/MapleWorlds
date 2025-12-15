@@ -1,0 +1,27 @@
+@Component
+script Cosmos extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		self:CallAnimation("5thCosmos")
+		
+		local basePos = self.Entity.TransformComponent.WorldPosition
+		local pos = Vector3(2, 2, 0)
+		if self._T.projectileParent == nil then
+			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+		end
+		
+		local spawnFunction = function()	
+			local fountain = _SpawnService:SpawnByModelId("model://b3911e66-5223-4a67-b925-d36081d912a7", "Cosmos_Object", basePos + pos, self._T.projectileParent)
+		
+			fountain.SpriteRendererComponent.FlipX = self.caster.Unit.isEnemy == false
+			fountain.LoopAttackComponent:Init(self.skillAmount, self.skillTime, self.skillAttackTiming, self.caster, nil, false)
+			self:SkillEnd()
+		end
+		
+		_TimerService:SetTimerOnce(spawnFunction, 0.7)
+	end
+
+end
