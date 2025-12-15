@@ -43,17 +43,6 @@ script GameManager extends Logic
 
 	property Entity screenSkillUI = "c735233f-679d-4f6d-a9c2-ab9db46c5bd6"
 
-	property Entity loadingUI = "8430a269-3cee-4cf9-a07c-ba7e814a8051"
-
-	@Sync
-	property number loadingTimer = 0
-
-	@Sync
-	property number timerStep = 0
-
-	@Sync
-	property number steps = 0
-
 	property Entity mapTextUI = "1374988d-d50e-4f9c-8bb8-e158f9b3decf"
 
 	@Sync
@@ -517,62 +506,6 @@ script GameManager extends Logic
 		_BadgeConditionService:CheckStageBadges(senderUserId, clearedChapter, clearedStage)
 	end
 
-	method void ShowLoadingScreen()
-		self.loadingUI.Enable = true
-		self.loadingUI.Visible = true
-		
-		local color = self.loadingUI.SpriteGUIRendererComponent.Color
-		self.loadingUI.SpriteGUIRendererComponent.Color = Color(color.r, color.g, color.b, 0)
-		self:FadeSprite(1, 0.35, false)
-	end
-
-	method void HideLoadingScreen()
-		local color = self.loadingUI.SpriteGUIRendererComponent.Color
-		self.loadingUI.SpriteGUIRendererComponent.Color = Color(color.r, color.g, color.b, 0)
-		self:FadeSprite(0, 0.35, true)
-	end
-
-	method void FadeSprite(number targetAlpha, number duration, boolean isFadeOut)
-		duration = duration or 0.35  -- 기본 0.35초
-		
-		local t, tick = 0, 1/60
-		
-		self.steps = math.ceil(duration / tick)
-		self.timerStep = 0
-		
-		self.loadingTimer = _TimerService:SetTimerRepeat(function()
-		    self.timerStep = self.timerStep + 1
-			
-		    local progress = math.min(self.timerStep / self.steps, 1.0)
-			local sprite = self.loadingUI.SpriteGUIRendererComponent
-			local slimeSprite = self.loadingUI.Children[1].SpriteGUIRendererComponent
-			local loadingText = self.loadingUI.Children[2].TextComponent
-			local startColor = sprite.Color
-			local endColor = Color(startColor.r, startColor.g, startColor.b, targetAlpha)
-			local startSlimeColor = slimeSprite.Color
-			local endSlimeColor = Color(startSlimeColor.r, startSlimeColor.g, startSlimeColor.b, targetAlpha)
-			local startTextColor = loadingText.FontColor
-			local endTextColor = Color(startTextColor.r, startTextColor.g, startTextColor.b, targetAlpha)
-			
-		    sprite.Color = Color.Lerp(startColor, endColor, progress)
-		    slimeSprite.Color = Color.Lerp(startSlimeColor, endSlimeColor, progress)
-		    loadingText.FontColor = Color.Lerp(startTextColor, endTextColor, progress)
-		
-		    -- 마지막 스텝이면 보장 처리
-		    if progress >= 1 then
-		        sprite.Color = endColor
-		        _TimerService:ClearTimer(self.loadingTimer)
-		    end
-		end, tick, 0)
-		
-		if isFadeOut then
-			_TimerService:SetTimerOnce(function()
-				self.loadingUI.Enable = false
-				self.loadingUI.Visible = false
-			end, self.steps * tick)
-		end
-	end
-
 	method table GetPreLoadAssetRuid()
 		local ruids = {}
 		local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
@@ -623,24 +556,21 @@ script GameManager extends Logic
 			lobbyJoyStick.Enable = false
 			lobbyJumpButton.Enable = false
 		end
-		
-		self:ShowLoadingScreen()
-		
+
+		_LoadingManager:Show()
+
 		-- 돌파스킬 초기화 완료 후 프리로드 시작
 		_UserService.LocalPlayer.UserBreakLimitSkillProtocol:InitCallWithCallback(function(limitBreakRuids)
 			local ruids = self:GetPreLoadAssetRuid()
-		
+
 			-- 돌파스킬 ruids 추가
 			for _, ruid in ipairs(limitBreakRuids) do
 				table.insert(ruids, ruid)
 			end
-		
+
 			_ResourceService:PreloadAsync(ruids, function()
-				_TimerService:ClearTimer(self.loadingTimer)
-		
 				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage".. userStage.selectChapter.."0"..userStage.selectStage)
 				self:GameStart(userStage.selectChapter, userStage.selectStage)
-				self:HideLoadingScreen()
 			end)
 		end)
 	end
@@ -654,31 +584,26 @@ script GameManager extends Logic
 	@ExecSpace("Client")
 	method void StartTutorialGame()
 		print("[Tutorial] StartTutorialGame called")
-		
+
 		-- MainLobbyUI 비활성화
 		local mainLobbyUI = _EntityService:GetEntityByPath("/ui/MainLobbyUI")
 		if mainLobbyUI ~= nil then
 			mainLobbyUI.Enable = false
 			mainLobbyUI.Visible = false
 		end
-		
-		self:ShowLoadingScreen()
-		
+
 		-- 돌파스킬 초기화 완료 후 프리로드 시작
 		_UserService.LocalPlayer.UserBreakLimitSkillProtocol:InitCallWithCallback(function(limitBreakRuids)
 			local ruids = self:GetPreLoadAssetRuid()
-		
+
 			-- 돌파스킬 ruids 추가
 			for _, ruid in ipairs(limitBreakRuids) do
 				table.insert(ruids, ruid)
 			end
-		
+
 			_ResourceService:PreloadAsync(ruids, function()
-				_TimerService:ClearTimer(self.loadingTimer)
-		
 				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage000")
 				self:GameStart(0, 0)
-				self:HideLoadingScreen()
 			end)
 		end)
 	end

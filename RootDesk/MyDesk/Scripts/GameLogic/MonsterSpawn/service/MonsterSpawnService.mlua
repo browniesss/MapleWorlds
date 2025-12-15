@@ -94,20 +94,20 @@ script MonsterSpawnService extends Component
 		if string.find(enteredMap.Name, "Stage") == nil then
 			return
 		end
-		
+
 		if enteredMap.Name == "Stage000" then
 			return
 		end
-		
+
 		for i, id in ipairs(self.timerIdList) do
 			_TimerService:ClearTimer(id)
 		end
-		
+
 		self.loopGroup = {}
 		self.eventGroup = {}
 		self.timerIdList = {}
 		self.curTimeTs = 0
-		
+
 		self:InitServer()
 		
 		local userStage = _UserService.LocalPlayer.UserStage
@@ -174,12 +174,12 @@ script MonsterSpawnService extends Component
 		for i, id in ipairs(self.timerIdList) do
 			_TimerService:ClearTimer(id)
 		end
-		
+
 		self.loopGroup = {}
 		self.eventGroup = {}
 		self.timerIdList = {}
 		self.curTimeTs = 0
-		
+
 		self:InitServer()
 	end
 

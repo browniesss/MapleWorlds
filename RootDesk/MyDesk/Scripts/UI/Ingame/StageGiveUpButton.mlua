@@ -25,6 +25,7 @@ script StageGiveUpButton extends Component
 		
 		_GameManager:GameEnd()
 		_GameManager:Log_NormalStageFail()
+		_LoadingManager:Show()
 		_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "MainLobbyMap")
 		
 		-- MainLobbyUI 다시 활성화

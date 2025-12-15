@@ -27,7 +27,8 @@ script StageClearButton extends Component
 		end
 		
 		_GameManager:GameEnd()
-		
+
+		_LoadingManager:Show()
 		_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "MainLobbyMap")
 		
 		-- MainLobbyUI 다시 활성화

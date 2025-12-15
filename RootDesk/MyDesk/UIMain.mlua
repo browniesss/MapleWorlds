@@ -6,19 +6,21 @@ script UIMain extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnMapEnter(Entity enteredMap)
+		_LoadingManager:Hide()
+
 		if enteredMap.Name == "LobbyTest" then
 			local MainUIEntity = _EntityService:GetEntityByPath("/ui/LobbyInfoUI")
 			MainUIEntity:SetEnable(true)
-			
+
 			local oldUIEntity = _EntityService:GetEntityByPath("/ui/Lobby_UI")
 			oldUIEntity:SetEnable(false)
-			
+
 			local userName = self.Entity.PlayerComponent.Nickname
 			_RankingService:InitUserPointMap(userName)
-			
+
 			local stageSelectUIEntity = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI")
 			stageSelectUIEntity.StageSelectorUI:SetUserStageComp(self.Entity)
-			
+
 			self.IsUserVisible = false
 		end
 	end
@@ -33,10 +35,10 @@ script UIMain extends Component
 		if leftMap.Name == "LobbyTest" then
 			local MainUIEntity = _EntityService:GetEntityByPath("/ui/LobbyInfoUI")
 			MainUIEntity:SetEnable(false)
-			
+
 			local oldUIEntity = _EntityService:GetEntityByPath("/ui/Lobby_UI")
 			oldUIEntity:SetEnable(false)
-			
+
 			self.IsUserVisible = true
 		end
 	end
