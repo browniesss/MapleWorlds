@@ -36,7 +36,7 @@ script StageGiveUpButton extends Component
 		end
 		
 		local stageInfoUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI")
-		if stageInfoUI ~= nil then
+		if stageInfoUI ~= nil and wasTutorialMode == false then
 			stageInfoUI.Enable = true
 			stageInfoUI.Visible = true
 		end

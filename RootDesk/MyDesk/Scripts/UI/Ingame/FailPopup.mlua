@@ -15,7 +15,7 @@ script FailPopup extends Component
 		end
 		
 		_GameManager:GameEnd()
-
+		
 		_LoadingManager:Show()
 		_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "MainLobbyMap")
 		
@@ -27,7 +27,7 @@ script FailPopup extends Component
 		end
 		
 		local stageInfoUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI")
-		if stageInfoUI ~= nil then
+		if stageInfoUI ~= nil and wasTutorialMode == false then
 			stageInfoUI.Enable = true
 			stageInfoUI.Visible = true
 		end
