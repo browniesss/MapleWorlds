@@ -133,9 +133,8 @@ script UserMonsterService extends Logic
 			data.id = monsterId
 			if not (json == nil) then
 				data:DECODE(json)
+				data.count += 1
 			end
-			
-			data.count += 1
 			
 			log(monsterId .. " count : " .. (data.count -1) .. " -> " .. data.count)
 				
