@@ -7,6 +7,8 @@ script UnitListItem extends Component
 
 	property table spawnSkillData = {}
 
+	property table limitBreakSkillData = {}
+
 	@Sync
 	property Entity unitSprite = nil
 
@@ -113,7 +115,15 @@ script UnitListItem extends Component
 			self.spawnSkillData = _SkillService:GetSkillByIDFromClient(self.unitData["spawnSkill"])
 		end
 		
-		unitInfoPanel.UnitInfoPanel:Init(self.unitData, self.skillData, self.spawnSkillData, index)
+		self.limitBreakSkillData = nil
+		if self.unitData.grade >= 5 then
+			local limitBreakData = _UnitLimitBreakRepo:FindBuffInClient(self.unitData.grade, 6, self.unitData.id)
+			if not (limitBreakData == nil or limitBreakData.limitBreak == 0) then
+				self.limitBreakSkillData = _SkillService:GetSkillByIDFromClient(limitBreakData.skillID)
+			end
+		end
+		
+		unitInfoPanel.UnitInfoPanel:Init(self.unitData, self.skillData, self.spawnSkillData, self.limitBreakSkillData, index)
 	end
 
 	@EventSender("Self")

@@ -26,4 +26,9 @@ script UnitSkillInfo extends Component
 		self.skillName.TextComponent.Text = skillData['skillName']
 	end
 
+	method void SetSkillCondition(integer limitBreakLevel)
+		self.skillName.TextComponent.Text = string.format("[%s 돌파]%s", limitBreakLevel, self.skillData['skillName']) 
+		self.skillDesc.TextComponent.Text = string.format("[%s 돌파] 이후 사용 가능", limitBreakLevel)
+	end
+
 end

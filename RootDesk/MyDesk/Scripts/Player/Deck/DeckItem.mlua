@@ -7,6 +7,8 @@ script DeckItem extends Component
 
 	property table spawnSkillData = {}
 
+	property table limitBreakSkillData = {}
+
 	@Sync
 	property Entity redDotSprite = nil
 
@@ -52,11 +54,19 @@ script DeckItem extends Component
 			self.spawnSkillData = _SkillService:GetSkillByIDFromClient(unitData["spawnSkill"])
 		end
 		
+		self.limitBreakSkillData = nil
+		if self.unitData.grade >= 5 then
+			local limitBreakData = _UnitLimitBreakRepo:FindBuffInClient(self.unitData.grade, 6, self.unitData.id)
+			if not (limitBreakData == nil or limitBreakData.limitBreak == 0) then
+				self.limitBreakSkillData = _SkillService:GetSkillByIDFromClient(limitBreakData.skillID)
+			end
+		end
+		
 		self:RefreshUI()
 	end
 
 	@ExecSpace("Client")
-	method void SetDataInClient(table unitData, table skillData)
+	method void SetDataInClient(BuffedUnitModel unitData, table skillData)
 		self.unitData = unitData
 		self.skillData = skillData
 	end
@@ -135,7 +145,7 @@ script DeckItem extends Component
 		unitInfoPanel.Enable = true
 		unitInfoPanel.Visible = true
 		
-		unitInfoPanel.UnitInfoPanel:Init(self.unitData, self.skillData, self.spawnSkillData, self.itemIndex)
+		unitInfoPanel.UnitInfoPanel:Init(self.unitData, self.skillData, self.spawnSkillData, self.limitBreakSkillData, self.itemIndex)
 	end
 
 	@EventSender("Self")
