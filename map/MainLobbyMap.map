@@ -3928,7 +3928,7 @@
       {
         "id": "88f0a3c4-4a31-42cf-9476-a068595af6eb",
         "path": "/maps/MainLobbyMap/Potal",
-        "componentNames": "MOD.Core.TransformComponent,MOD.Core.SpriteRendererComponent,script.LobbyPortal,MOD.Core.PortalComponent,MOD.Core.NameTagComponent",
+        "componentNames": "MOD.Core.TransformComponent,MOD.Core.SpriteRendererComponent,script.LobbyPortal,MOD.Core.PortalComponent,MOD.Core.NameTagComponent,script.NPCClickHandler,MOD.Core.TouchReceiveComponent",
         "jsonString": {
           "name": "Potal",
           "path": "/maps/MainLobbyMap/Potal",
@@ -3965,9 +3965,10 @@
               "@type": "MOD.Core.SpriteRendererComponent",
               "ActionSheet": {},
               "EndFrameIndex": 2147483647,
+              "FlipX": true,
               "RenderSetting": 0,
               "SortingLayer": "Effect",
-              "SpriteRUID": "1e91ee7e727846139858c78d5d79feb3",
+              "SpriteRUID": "2c200582b13649069a1f8149c6430a49",
               "StartFrameIndex": 0,
               "Enable": true
             },
@@ -4013,6 +4014,20 @@
                 "DataId": "00979fba88d44334919ffae68082369d"
               },
               "OffsetY": -0.05,
+              "Enable": true
+            },
+            {
+              "@type": "script.NPCClickHandler",
+              "Enable": true,
+              "targetUIPath": "",
+              "targetUIEntity": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "701c6938-68d9-499a-b153-57f6aee2bcaf"
+              }
+            },
+            {
+              "@type": "MOD.Core.TouchReceiveComponent",
               "Enable": true
             }
           ],
