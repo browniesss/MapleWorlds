@@ -41,4 +41,17 @@ script LobbyPortal extends Component
 		self:SetStageUI()
 	end
 
+	@EventSender("Self")
+	handler HandleTouchEvent(TouchEvent event)
+		if _PopupManager:IsOpenPopup() then
+			return
+		end
+		
+		if self.lobbyInfoUI == nil or self.lobbyInfoUI.EnabledInHierarchy then
+			return
+		end
+		
+		self:SetStageUI()
+	end
+
 end
