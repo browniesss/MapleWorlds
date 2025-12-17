@@ -53,9 +53,9 @@ script LoadingManager extends Logic
 		self:SetRandomTip()
 		
 		local sprite = self.loadingUI.SpriteGUIRendererComponent
-		local slimeSprite = self.loadingUI.Children[1].SpriteGUIRendererComponent
-		local loadingText = self.loadingUI.Children[2].TextComponent
-		local tipText = self.loadingUI.Children[3].TextComponent
+		local slimeSprite = self.loadingUI.Children[2].SpriteGUIRendererComponent
+		local loadingText = self.loadingUI.Children[3].TextComponent
+		local tipText = self.loadingUI.Children[4].TextComponent
 		
 		sprite.Color = Color(sprite.Color.r, sprite.Color.g, sprite.Color.b, 1)
 		slimeSprite.Color = Color(slimeSprite.Color.r, slimeSprite.Color.g, slimeSprite.Color.b, 1)
@@ -63,8 +63,8 @@ script LoadingManager extends Logic
 		tipText.FontColor = Color(tipText.FontColor.r, tipText.FontColor.g, tipText.FontColor.b, 1)
 		
 		-- CanvasGroupComponent의 GroupAlpha도 1로 초기화
-		local loadingTextEntity = self.loadingUI.Children[2]
-		local tipTextEntity = self.loadingUI.Children[3]
+		local loadingTextEntity = self.loadingUI.Children[3]
+		local tipTextEntity = self.loadingUI.Children[4]
 		if loadingTextEntity.CanvasGroupComponent ~= nil then
 			loadingTextEntity.CanvasGroupComponent.GroupAlpha = 1
 		end
@@ -111,8 +111,8 @@ script LoadingManager extends Logic
 		local textSteps = math.ceil(duration / tick)
 		local textTimerStep = 0
 		
-		local loadingTextEntity = self.loadingUI.Children[2]
-		local tipTextEntity = self.loadingUI.Children[3]
+		local loadingTextEntity = self.loadingUI.Children[3]
+		local tipTextEntity = self.loadingUI.Children[4]
 		
 		-- CanvasGroupComponent가 있으면 GroupAlpha 사용 (리치 텍스트 지원)
 		local loadingCanvas = loadingTextEntity.CanvasGroupComponent
@@ -153,7 +153,7 @@ script LoadingManager extends Logic
 	method void SetRandomTip()
 		if self.loadingUI == nil then return end
 		
-		local tipText = self.loadingUI.Children[3].TextComponent
+		local tipText = self.loadingUI.Children[4].TextComponent
 		local dataSet = _DataService:GetTable("TipData")
 		
 		if dataSet == nil or dataSet:GetRowCount() == 0 then
@@ -182,7 +182,7 @@ script LoadingManager extends Logic
 		
 			local progress = math.min(self.timerStep / self.steps, 1.0)
 			local sprite = self.loadingUI.SpriteGUIRendererComponent
-			local slimeSprite = self.loadingUI.Children[1].SpriteGUIRendererComponent
+			local slimeSprite = self.loadingUI.Children[2].SpriteGUIRendererComponent
 		
 			local startColor = sprite.Color
 			local endColor = Color(startColor.r, startColor.g, startColor.b, targetAlpha)
