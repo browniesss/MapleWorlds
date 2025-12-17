@@ -7,21 +7,26 @@ script UnitInfoPanel extends Component
 
 	property table spawnSkillData = {}
 
+	property table limitBreakSkillData = {}
+
 	property Entity unitDetailInfo = "ccaa0ea2-8d4c-421d-a982-0fa92d80b5cf"
 
 	property Entity normalSkillInfo = "3dc8e662-7f62-4bb3-8edb-5f29d4e4f1a4"
 
 	property Entity spawnSkillInfo = "3b2cce00-067b-49f4-83fa-717ef4cc50ee"
 
+	property Entity limitBreakSkillInfo = "d051c3b9-94fc-4a37-b61c-3f9fed2a9898"
+
 	@Sync
 	property integer itemIndex = 0
 
 	property ButtonComponent LevelUpButton = "cb420390-263e-45f2-a6e8-4bafacbc4efc"
 
-	method void Init(BuffedUnitModel unitData, table normalSkillData, table spawnSkillData, integer itemIndex)
+	method void Init(BuffedUnitModel unitData, table normalSkillData, table spawnSkillData, table limitBreakSkillData, integer itemIndex)
 		self.unitData = unitData
 		self.skillData = normalSkillData
 		self.spawnSkillData = spawnSkillData
+		self.limitBreakSkillData = limitBreakSkillData
 		self.itemIndex = itemIndex
 		
 		self.unitDetailInfo.UnitDetailInfo:Init(self.unitData)
@@ -34,6 +39,17 @@ script UnitInfoPanel extends Component
 			self.spawnSkillInfo.Enable = true
 			self.spawnSkillInfo.Visible = true
 			self.spawnSkillInfo.UnitSkillInfo:Init(self.spawnSkillData)	
+		end
+		
+		self.limitBreakSkillInfo.Enable = false
+		self.limitBreakSkillInfo.Visible = false
+		if not (limitBreakSkillData == nil or limitBreakSkillData.limitBreak == 0) then
+			self.limitBreakSkillInfo.UnitSkillInfo:Init(self.limitBreakSkillData)
+			if self.unitData.limitBreak < 6 then
+				self.limitBreakSkillInfo.UnitSkillInfo:SetSkillCondition(5)
+			end
+			self.limitBreakSkillInfo.Enable = true
+			self.limitBreakSkillInfo.Visible = true
 		end
 		
 		self.LevelUpButton.Enable = true

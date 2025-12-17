@@ -118,4 +118,11 @@ script UnitDetailInfo extends Component
 		self.levelLabel.TextComponent.Text = "Level: ".. level
 	end
 
+	method void InitForGacha(BuffedUnitModel unitData)
+		self.unitData = unitData
+		
+		self:SetSprite()
+		self:SetLabel()
+	end
+
 end

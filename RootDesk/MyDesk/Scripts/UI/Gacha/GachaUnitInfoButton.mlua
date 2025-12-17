@@ -23,8 +23,16 @@ script GachaUnitInfoButton extends Component
 			local unitData = _UnitService:GetUnitByIDFromClient(self.unitID)
 			local normalSkillData = _SkillService:GetSkillByIDFromClient(unitData["skillID"])
 			local spawnSkillData = _SkillService:GetSkillByIDFromClient(unitData["spawnSkill"])
+			local limitBreakSkillData = LimitBreakModel()
 			
-			gachaUnitInfoPanel.GachaUnitInfoPanel:Init(unitData, normalSkillData, spawnSkillData)
+			if unitData.grade >= 5 then
+				local limitBreakData = _UnitLimitBreakRepo:FindBuffInClient(unitData.grade, 6, self.unitID)
+				if not (limitBreakData == nil or limitBreakData.limitBreak == 0) then
+					limitBreakSkillData = _SkillService:GetSkillByIDFromClient(limitBreakData.skillID)
+				end
+			end
+			
+			gachaUnitInfoPanel.GachaUnitInfoPanel:Init(unitData, normalSkillData, spawnSkillData, limitBreakSkillData)
 		end 
 	end
 
