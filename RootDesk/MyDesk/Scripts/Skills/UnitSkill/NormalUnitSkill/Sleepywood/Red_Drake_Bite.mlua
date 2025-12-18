@@ -1,0 +1,17 @@
+@Component
+script Red_Drake_Bite extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		-- Tween 끝난 뒤 후처리
+		_TimerService:SetTimerOnce(function()
+		    _EffectService:PlayEffectAttached("65d678f3062b4d2cadb129770f732498", self.target, Vector3.zero, 0, Vector3.one)
+			self.target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 1)
+		
+			self:SkillEnd()
+		end, self.skillAttackTiming)
+	end
+
+end
