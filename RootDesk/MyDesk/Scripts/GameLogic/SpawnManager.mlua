@@ -8,6 +8,12 @@ script SpawnManager extends Logic
 	method void Spawn(string modelID, integer price, Vector3 pos)
 		_ProtocolService:CommonCall(senderUserId)
 		
+		if modelID == "model://6194a4e3-0eb4-417a-92b5-891af548b672" then
+			log("Cygnus spawn")
+			self:SpawnCygnus(pos, senderUserId)
+			return
+		end
+		
 		local unitModel = _BuffedUnitService:GetBuffedUnitModel(senderUserId, modelID)
 		local user = _UserService:GetUserEntityByUserId(senderUserId)
 		
@@ -190,6 +196,87 @@ script SpawnManager extends Logic
 				end
 			end
 		end
+		spawnEntity.Unit:Spawn(unitModel, skillData)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void SpawnCygnus(Vector3 pos, string userID)
+		local modelID = "model://6194a4e3-0eb4-417a-92b5-891af548b672"
+		local unitModel = _BuffedUnitService:GetBuffedUnitModel(userID, modelID)
+		local user = _UserService:GetUserEntityByUserId(userID)
+		
+		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(102)
+		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE("102", count)
+		
+		if synergy:length() <= 0 then
+			return
+		end
+		
+		local item = synergy:Get(1)
+		
+		
+		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, math.floor(item.value), 1)
+		local price = unitModel.summonCost
+		
+		if not self:IsCanSpawn(price) then
+			return
+		end
+				
+		self:GetUserWallet().MesoWallet:UseMeso(price)
+		
+		local spawnParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/MyMonsterList')
+		local spawnPos = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList/MySpawnPoint")
+		
+		if pos == Vector3.zero then
+			pos = spawnPos.TransformComponent.Position
+		end
+		
+		local spawnEntity = _SpawnService:SpawnByModelId(modelID, unitModel.name, pos, spawnParent)
+		
+		for i = 1, 4 do
+			local jobID = tostring(i)
+			local jobCount = user.UserSynergyComponent:GET_SYNERGY_COUNT(i)
+			local jobSynergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(jobID, jobCount)
+				
+			if jobSynergy:length() > 0 then
+				local jobItem = jobSynergy:Get(1)
+				
+				if jobID == "1" then
+					spawnEntity:RemoveComponent("IncreaseHpByTime")
+					spawnEntity:AddComponent("IncreaseHpByTime")
+					spawnEntity.IncreaseHpByTime.Enable = true
+					spawnEntity.IncreaseHpByTime.type = jobItem.type
+					spawnEntity.IncreaseHpByTime.value = jobItem.value
+				end
+			
+				if jobID == "2" then
+					spawnEntity:RemoveComponent("CriticalAttack")
+					spawnEntity:AddComponent("CriticalAttack")
+					spawnEntity.CriticalAttack.Enable = true
+					spawnEntity.CriticalAttack.type = jobItem.type
+					spawnEntity.CriticalAttack.value = jobItem.value
+				end
+				
+				if jobID == "3" then
+					spawnEntity:RemoveComponent("IncreaseMpByTime")
+					spawnEntity:AddComponent("IncreaseMpByTime")
+					spawnEntity.IncreaseMpByTime.Enable = true
+					spawnEntity.IncreaseMpByTime.type = jobItem.type
+					spawnEntity.IncreaseMpByTime.value = jobItem.value
+				end
+			
+				if jobID == "4" then
+					spawnEntity:RemoveComponent("AddSummonPointAfterKill")
+					spawnEntity:AddComponent("AddSummonPointAfterKill")
+					spawnEntity.AddSummonPointAfterKill.Enable = true
+					spawnEntity.AddSummonPointAfterKill.type = jobItem.type
+					spawnEntity.AddSummonPointAfterKill.value = jobItem.value
+					spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet()
+				end
+			end
+		end
+		
+		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
 		spawnEntity.Unit:Spawn(unitModel, skillData)
 	end
 
