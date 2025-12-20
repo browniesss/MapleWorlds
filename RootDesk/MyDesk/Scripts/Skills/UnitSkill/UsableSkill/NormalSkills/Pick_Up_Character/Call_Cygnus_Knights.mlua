@@ -32,7 +32,7 @@ script Call_Cygnus_Knights extends SkillParent
 		end
 		
 		if self.caster.Unit.isEnemy == false then
-			local pos = Vector3(self.caster.TransformComponent.Position.x - 0.5, self.caster.TransformComponent.Position.y, 0)
+			local pos = Vector3(self.caster.TransformComponent.Position.x - 0.5, self.caster.TransformComponent.Position.y + 0.5, 0)
 			_SpawnManager:CygnusSkillSpawn(model, pos)
 		end
 		
