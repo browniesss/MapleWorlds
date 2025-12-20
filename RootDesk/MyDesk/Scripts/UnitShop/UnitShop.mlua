@@ -21,6 +21,11 @@ script UnitShop extends Component
 			local poolIndex	= self.summonDeck[slot]
 			local unitID	= poolIndex and self.summonPools[poolIndex]
 			local unitData	= unitID and user.UserUnitStore.UserUnitMap[unitID] or nil
+			if unitID == "model://6194a4e3-0eb4-417a-92b5-891af548b672" then
+				unitData = BuffedUnitModel()
+				local unitInfo = _UnitService:GetUnitByIDFromClient(unitID)
+				unitData:Init(unitInfo)
+			end
 			local skillData	= (unitData and unitData.skillID) and _SkillService:GetSkillByIDFromClient(unitData.skillID) or nil
 			
 			local price = unitData.summonCost
@@ -56,6 +61,11 @@ script UnitShop extends Component
 		local previewIdx	= self.summonQueue[1]
 		local previewID		= previewIdx and self.summonPools[previewIdx]
 		local previewUD		= previewID and user.UserUnitStore.UserUnitMap[previewID] or nil
+			if previewID == "model://6194a4e3-0eb4-417a-92b5-891af548b672" then
+				previewUD = BuffedUnitModel()
+				local unitInfo = _UnitService:GetUnitByIDFromClient(previewID)
+				previewUD:Init(unitInfo)
+			end
 		local previewSD		= (previewUD and previewUD.skillID) and _SkillService:GetSkillByIDFromClient(previewUD.skillID) or nil
 		
 		local price = previewUD.summonCost
@@ -109,16 +119,16 @@ script UnitShop extends Component
 		table.clear(self.summonPools)
 		table.clear(self.summonQueue)
 		table.clear(self.summonDeck)
-
+		
 		local shopItems = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group/UnitShop")
 		local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
 		local deckList = playerDeck.userDeck
-
+		
 		-- UI 슬롯 연결 (4 + 1 preview)
 		for i = 1, 5 do
 			self.shopItems[i] = shopItems.Children[i]
 		end
-
+		
 		-- 덱(최대 8장) -> 풀에 채우기
 		for i = 1, 8 do
 			local modelId = deckList[i]
@@ -126,7 +136,15 @@ script UnitShop extends Component
 				table.insert(self.summonPools, modelId)
 			end
 		end
-
+		
+		-- 서브 덱
+		for i, modelId in ipairs(playerDeck.userSubDeck) do
+			log("init shop with Cygnus ", modelId)
+			if modelId and modelId ~= "" then
+				table.insert(self.summonPools, modelId)
+			end
+		end
+		
 		-- 튜토리얼 모드가 아닐 때만 셔플
 		if not _GameManager.isTutorialMode then
 			math.randomseed(os.time())
@@ -135,15 +153,15 @@ script UnitShop extends Component
 				self.summonPools[i], self.summonPools[j] = self.summonPools[j], self.summonPools[i]
 			end
 		end
-
+		
 		-- 앞 4장은 화면, 나머지는 큐
 		for i = 1, 4 do
 			self.summonDeck[i] = i
 		end
-		for i = 4 + 1, 8 do
+		for i = 4 + 1, 8 + #playerDeck.userSubDeck do
 			table.insert(self.summonQueue, i)
 		end
-
+		
 		self:SetShop()
 	end
 
@@ -164,6 +182,14 @@ script UnitShop extends Component
 			end
 		end
 		
+		-- 서브 덱
+		for i, modelId in ipairs(playerDeck.userSubDeck) do
+			log("init shop with Cygnus ", modelId)
+			if modelId and modelId ~= 0 then
+				table.insert(self.summonPools, modelId)
+			end
+		end
+		
 		-- 셔플 
 		math.randomseed(os.time())
 		for i = #self.summonPools, 2, -1 do
@@ -175,7 +201,7 @@ script UnitShop extends Component
 		for i = 1, 4 do
 			self.summonDeck[i] = i
 		end
-		for i = 4 + 1, 8 do
+		for i = 4 + 1, 8 + #playerDeck.userSubDeck do
 			table.insert(self.summonQueue, i)
 		end
 		

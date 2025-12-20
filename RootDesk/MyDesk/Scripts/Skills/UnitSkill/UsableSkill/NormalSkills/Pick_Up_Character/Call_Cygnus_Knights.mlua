@@ -1,0 +1,44 @@
+@Component
+script Call_Cygnus_Knights extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		local kightsMap = {}
+		kightsMap["model://9835b280-7553-451d-bab0-b480c97aeb18"] = true
+		
+		-- 모델 변경 필요
+		local targetIdList = {}
+		local userDeck = _UserService.LocalPlayer.UserDeck.userDeck
+		for _, id in ipairs(userDeck) do
+			if kightsMap[id] == true then
+				targetIdList[#targetIdList + 1] = id
+			end
+		end
+		
+		if #targetIdList == 0 then
+			log_error("fail to pick unit")
+			return
+		end
+		
+		math.randomseed(os.time())
+		local model = targetIdList[math.random(1, #targetIdList)]
+		
+		_EffectService:PlayEffectAttached("43450388baeb4418907d8d143e422e64", self.caster, Vector3.zero, 0, Vector3.one)
+		
+		if self.caster.Unit.isEnemy == true then
+			-- TODO: 스킬 추가하기 
+		end
+		
+		if self.caster.Unit.isEnemy == false then
+			local pos = Vector3(self.caster.TransformComponent.Position.x - 0.5, self.caster.TransformComponent.Position.y, 0)
+			_SpawnManager:CygnusSkillSpawn(model, pos)
+		end
+		
+		-- 스킬 사용 종료 처리
+		self.caster.Unit.isUsingSkill = false
+		self.caster.Unit:SetState("move")
+	end
+
+end

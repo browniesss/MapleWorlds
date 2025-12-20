@@ -494,7 +494,9 @@ script GameManager extends Logic
 		local isChapterComplete = false
 		if clearedChapter == 1 and clearedStage == 5 then
 			isChapterComplete = true
-		elseif clearedChapter >= 2 and clearedStage == 6 then
+		elseif clearedChapter == 8 and clearedStage == 4 then
+			isChapterComplete = true
+		elseif clearedChapter >= 2 and clearedChapter ~= 8 and clearedStage == 6 then
 			isChapterComplete = true
 		end
 		

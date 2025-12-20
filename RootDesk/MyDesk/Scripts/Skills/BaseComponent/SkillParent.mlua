@@ -119,15 +119,15 @@ script SkillParent extends Component
 	method table FindNearByEnemies()
 		local pos = self.caster.TransformComponent.WorldPosition
 		local allEntities
-		
+
 		if self.caster.Unit.isEnemy then
 			allEntities = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/MyMonsterList').Children
 		else
 			allEntities = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/EnemyList').Children
 		end
-		
+
 		local nearbyEnemies = {}
-		
+
 		for _, entity in ipairs(allEntities) do
 		    if entity ~= self.caster and entity.HitComponent then
 		        local targetPos = entity.TransformComponent.WorldPosition
@@ -137,8 +137,33 @@ script SkillParent extends Component
 		        end
 		    end
 		end
-		
+
 		return nearbyEnemies
+	end
+
+	method table FindNearByAllies()
+		local pos = self.caster.TransformComponent.WorldPosition
+		local allEntities
+
+		if self.caster.Unit.isEnemy then
+			allEntities = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/EnemyList').Children
+		else
+			allEntities = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/MyMonsterList').Children
+		end
+
+		local nearbyAllies = {}
+
+		for _, entity in ipairs(allEntities) do
+		    if entity ~= self.caster and entity.HitComponent and entity.Unit and entity.Unit.curState ~= "die" then
+		        local targetPos = entity.TransformComponent.WorldPosition
+		        local distance = math.abs((targetPos - pos).x)
+		        if distance <= self.skillArea then
+		            table.insert(nearbyAllies, entity)
+		        end
+		    end
+		end
+
+		return nearbyAllies
 	end
 
 	method boolean tableContains(table tbl, Entity element)

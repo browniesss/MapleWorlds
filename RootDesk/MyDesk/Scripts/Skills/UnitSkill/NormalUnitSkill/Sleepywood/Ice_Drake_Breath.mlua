@@ -1,0 +1,36 @@
+@Component
+script Ice_Drake_Breath extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		local damageCount = 0
+		local effectID = 0
+		local damageFunctionTimerID = 0
+		local options = {}
+		
+		if self.caster.Unit.isEnemy == false then
+			options = {
+		    	FlipX = true,  -- 좌우 반전
+			}
+		end
+		
+		_EffectService:PlayEffectAttached("82faaa3358324d5ab259a72ae9a8c05e", self.caster, Vector3.zero, 0, Vector3.one, false, options)
+		
+		local damageFunction = function()
+			if damageCount >= self.skillTime or isvalid(self.caster) == false or self.caster.Unit.curState == "die" then
+				_TimerService:ClearTimer(damageFunctionTimerID)
+				_EffectService:RemoveEffect(effectID)
+				self:SkillEnd()
+				return
+			end
+			
+			self:AttackNearByEnemies(2, 20)
+			damageCount += 1
+		end
+		
+		damageFunctionTimerID = _TimerService:SetTimerRepeat(damageFunction, self.skillAttackTiming)
+	end
+
+end
