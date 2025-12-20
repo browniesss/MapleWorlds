@@ -190,6 +190,12 @@ script Unit extends Component
 
 	property BuffedUnitModel baseData = BuffedUnitModel()
 
+	@Sync
+	property boolean isNotTargetUnit = false
+
+	@Sync
+	property integer effectId = 0
+
 	@ExecSpace("Server")
 	method void Spawn(BuffedUnitModel unitData, table skillData)
 		self.baseData = unitData
@@ -383,6 +389,10 @@ script Unit extends Component
 		end
 		
 		for _, enemy in ipairs(enemies) do
+			if enemy.isNotTargetUnit == true then
+				continue
+			end
+			
 			local enemyPos = enemy.TransformComponent.WorldPosition
 			local distance = math.abs((enemyPos - myPos).x)
 			
@@ -475,6 +485,10 @@ script Unit extends Component
 		if self.mp >= self.maxMP and self.curTarget.TagComponent.Tags[2] ~= "Tower" and self.debuffState ~= _eDebuffType.Silence then
 			self:SetState("useSkill")
 			return
+		end
+		
+		if self.isNotTargetUnit == true then
+			self:OnRemove()
 		end
 		
 		self.attackTimer += delta;
@@ -835,6 +849,10 @@ script Unit extends Component
 			return
 		end
 		
+		if self.isNotTargetUnit == true then
+			return
+		end
+		
 		if _UserService.LocalPlayer.PlayerCharacter.isLimitBreakSkill and self.Entity.TagComponent.Tags[2] == "Tower" and not self.isEnemy then
 			return
 		end
@@ -1154,7 +1172,12 @@ script Unit extends Component
 		self.mp = 0
 		self.isUsingSkill = true
 		
+		
 		self.activeSkill.SkillParent:UseSkill(self.Entity, self.curTarget, self.skillArea, self.skillAmount, self.skillProjectileSpeed, self.skillTime, self.skillAttackTiming)
+		
+		if self.isNotTargetUnit == true then
+			self:OnRemove()
+		end
 	end
 
 	method void SpawnEnemy(BuffedUnitModel unitData, table skillData)
@@ -1406,6 +1429,26 @@ script Unit extends Component
 		end
 		
 		_SpawnManager:GetUserWallet().MesoWallet:AddMeso(self.baseData.returnCost)
+	end
+
+	method void OnRemove()
+		if self.isNotTargetUnit == false then
+			return
+		end
+		
+		self.attackRange = 0
+		self.Entity.Visible = false
+		self.Entity.TransformComponent.Position.y = -500
+		
+		_EffectService:RemoveEffect(self.effectId)
+		local map = _EntityService:GetEntityByPath(_GameManager:GetGameMapName())
+		map.MinimapManager:RemoveEntityList(self.Entity)
+		
+		_TimerService:SetTimerOnce(function()
+			self:SetState("die")
+			self:ClearSkill()
+			self:DestroyProjectile()
+		end, 4)
 	end
 
 	@EventSender("Self")

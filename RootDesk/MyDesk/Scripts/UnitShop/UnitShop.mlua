@@ -158,7 +158,7 @@ script UnitShop extends Component
 		for i = 1, 4 do
 			self.summonDeck[i] = i
 		end
-		for i = 4 + 1, 8 do
+		for i = 4 + 1, 8 + #playerDeck.userSubDeck do
 			table.insert(self.summonQueue, i)
 		end
 		

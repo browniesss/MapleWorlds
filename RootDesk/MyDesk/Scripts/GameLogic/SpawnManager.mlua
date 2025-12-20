@@ -280,4 +280,55 @@ script SpawnManager extends Logic
 		spawnEntity.Unit:Spawn(unitModel, skillData)
 	end
 
+	@ExecSpace("Server")
+	method void CygnusSkillSpawn(string modelID, Vector3 pos)
+		_ProtocolService:CommonCall(senderUserId)
+		
+		local unitModel = _BuffedUnitService:GetBuffedUnitModel(senderUserId, modelID)
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		
+		local summoner = _BuffedUnitService:GetBuffedUnitModel(senderUserId, "model://6194a4e3-0eb4-417a-92b5-891af548b672")
+		
+		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(102)
+		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE("102", count)
+		
+		if synergy:length() <= 0 then
+			return
+		end
+		
+		local item = synergy:Get(1)
+		
+		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, math.floor(item.value), 1)
+		
+		local spawnParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/MyMonsterList')
+		local spawnPos = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList/MySpawnPoint")
+		
+		if pos == Vector3.zero then
+			pos = spawnPos.TransformComponent.Position
+		end
+		
+		local spawnEntity = _SpawnService:SpawnByModelId(modelID, unitModel.name, pos, spawnParent)
+		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
+		local effectId = _EffectService:PlayEffectAttached("e0054745636944e091b5f3830b8be73a", spawnEntity, Vector3.zero, 0, Vector3.one, true)
+		
+		unitModel.spawnSkill = ""
+		unitModel.startMp = unitModel.maxMp + 1
+		spawnEntity.Unit:Spawn(unitModel, skillData)
+		spawnEntity.Unit.isNotTargetUnit = true
+		spawnEntity.Unit.effectId = effectId
+		
+		_TimerService:SetTimerOnce(
+			function()
+				if spawnEntity.Unit.curState == "useSkill" then
+					return
+				end
+				
+				spawnEntity.Unit:OnRemove()
+			end,
+			5
+		)
+		
+		
+	end
+
 end
