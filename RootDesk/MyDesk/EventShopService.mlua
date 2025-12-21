@@ -1,0 +1,264 @@
+@Logic
+script EventShopService extends Logic
+
+	@Sync
+	property SyncTable<string, string> eventShopItems
+
+	property string PRICE_CURRENCY = "SECOND_COIN"
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		self:LoadEventShopItems()
+	end
+
+	@ExecSpace("ServerOnly")
+	method void LoadEventShopItems()
+		local dataSet = _DataService:GetTable("event_shop_items")
+		if dataSet == nil then
+			log("[EventShop] Warning: event_shop_items dataset not found")
+			return
+		end
+		
+		local count = dataSet:GetRowCount()
+		log("[EventShop] Loading event shop items:", count)
+		
+		for i = 1, count do
+			local item = {}
+			item["id"] = tostring(dataSet:GetCell(i, "id"))
+			item["name"] = tostring(dataSet:GetCell(i, "name"))
+			item["type"] = tostring(dataSet:GetCell(i, "type"))
+			item["reward_type"] = tostring(dataSet:GetCell(i, "reward_type"))
+			item["reward_value"] = tostring(dataSet:GetCell(i, "reward_value"))
+			item["price"] = tonumber(dataSet:GetCell(i, "price"))
+			item["max_count"] = tonumber(dataSet:GetCell(i, "max_count"))
+			item["amount_label"] = tostring(dataSet:GetCell(i, "amount_label") or "")
+		
+			local json = _HttpService:JSONEncode(item)
+			self.eventShopItems[item["id"]] = json
+		
+			log("[EventShop] Loaded item:", item["id"], "name:", item["name"])
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method table GetItemData(string itemId)
+		local json = self.eventShopItems[itemId]
+		if json == nil then
+			return nil
+		end
+		return _HttpService:JSONDecode(json)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer GetPurchaseCount(string userId, string itemId)
+		local userStorage = _DataStorageService:GetUserDataStorage(userId)
+		local errCode, data = userStorage:GetAndWait("EVENT_SHOP_" .. itemId)
+		
+		if errCode ~= 0 or data == nil or data == "" then
+			return 0
+		end
+		
+		return tonumber(data) or 0
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer SavePurchaseCount(string userId, string itemId, integer count)
+		local userStorage = _DataStorageService:GetUserDataStorage(userId)
+		return userStorage:SetAndWait("EVENT_SHOP_" .. itemId, tostring(count))
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean CanPurchase(string userId, string itemId)
+		local itemData = self:GetItemData(itemId)
+		if itemData == nil then
+			return false
+		end
+		
+		local maxCount = itemData["max_count"]
+		-- -1은 무제한
+		if maxCount == -1 then
+			return true
+		end
+		
+		local currentCount = self:GetPurchaseCount(userId, itemId)
+		return currentCount < maxCount
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean DeductCurrency(string userId, integer price)
+		-- 현재는 2차 재화(머쉬코인) 사용
+		-- 이후 이벤트 재화로 교체 시 이 부분만 수정
+		if self.PRICE_CURRENCY == "SECOND_COIN" then
+			local result = _BillingService:UseSecondCoin(userId, price)
+			return result == 0
+		end
+		
+		-- 향후 이벤트 재화 추가 시
+		-- if self.PRICE_CURRENCY == "EVENT_COIN" then
+		--     return _EventCoinService:UseCoin(userId, price) == 0
+		-- end
+		
+		return false
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean GiveReward(string userId, table itemData)
+		local rewardType = itemData["reward_type"]
+		local rewardValue = itemData["reward_value"]
+		
+		log("[EventShop] GiveReward - type:", rewardType, "value:", rewardValue)
+		
+		if rewardType == "unit" then
+			-- 유닛 지급 (가챠와 동일한 방식)
+			_UserMonsterService:AddCount(userId, {rewardValue})
+			-- 뱃지 체크
+			_BadgeConditionService:CheckPickupBadges(userId, rewardValue)
+			return true
+		elseif rewardType == "dia_free" then
+			local result = _BillingService:AddFirstFreeCoin(userId, tonumber(rewardValue))
+			return result == 0
+		elseif rewardType == "dia_paid" then
+			local result = _BillingService:AddFirstPaidCoin(userId, tonumber(rewardValue))
+			return result == 0
+		elseif rewardType == "coin_free" then
+			local result = _BillingService:AddSecondFreeCoin(userId, tonumber(rewardValue))
+			return result == 0
+		elseif rewardType == "coin_paid" then
+			local result = _BillingService:AddSecondPaidCoin(userId, tonumber(rewardValue))
+			return result == 0
+		elseif rewardType == "meso_free" then
+			local result = _BillingService:AddThirdFreeCoin(userId, tonumber(rewardValue))
+			return result == 0
+		elseif rewardType == "meso_paid" then
+			local result = _BillingService:AddThirdPaidCoin(userId, tonumber(rewardValue))
+			return result == 0
+		end
+		
+		log_error("[EventShop] Unknown reward type:", rewardType)
+		return false
+	end
+
+	@ExecSpace("Server")
+	method void PurchaseItem(string itemId)
+		local userId = senderUserId
+		log("[EventShop] PurchaseItem - userId:", userId, "itemId:", itemId)
+		
+		-- 상품 데이터 확인
+		local itemData = self:GetItemData(itemId)
+		if itemData == nil then
+			log_error("[EventShop] Item not found:", itemId)
+			self:OnPurchaseComplete(itemId, false, "", "ITEM_NOT_FOUND")
+			return
+		end
+		
+		-- 구매 가능 여부 확인 (횟수 제한)
+		if not self:CanPurchase(userId, itemId) then
+			log("[EventShop] Purchase limit reached:", itemId)
+			self:OnPurchaseComplete(itemId, false, itemData["name"], "LIMIT_REACHED")
+			return
+		end
+		
+		-- 재화 차감
+		local price = itemData["price"]
+		if not self:DeductCurrency(userId, price) then
+			log("[EventShop] Insufficient currency for:", itemId)
+			self:OnPurchaseComplete(itemId, false, itemData["name"], "INSUFFICIENT_CURRENCY")
+			return
+		end
+		
+		-- 보상 지급
+		if not self:GiveReward(userId, itemData) then
+			log_error("[EventShop] Failed to give reward:", itemId)
+			-- 재화 환불 (실패 시)
+			if self.PRICE_CURRENCY == "SECOND_COIN" then
+				_BillingService:AddSecondFreeCoin(userId, price)
+			end
+			self:OnPurchaseComplete(itemId, false, itemData["name"], "REWARD_FAILED")
+			return
+		end
+		
+		-- 구매 횟수 증가
+		local currentCount = self:GetPurchaseCount(userId, itemId)
+		self:SavePurchaseCount(userId, itemId, currentCount + 1)
+		
+		log("[EventShop] Purchase success:", itemId, "count:", currentCount + 1)
+		self:OnPurchaseComplete(itemId, true, itemData["name"], "")
+	end
+
+	@ExecSpace("Client")
+	method void OnPurchaseComplete(string itemId, boolean success, string itemName, string errorCode)
+		log("[EventShop] OnPurchaseComplete - itemId:", itemId, "success:", success, "itemName:", itemName)
+		
+		-- 결과 팝업 표시
+		local eventShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/EventShopParent")
+		if eventShopParent ~= nil then
+			local popup = eventShopParent:GetChildByName("EventShopPopup")
+			if popup ~= nil and popup.EventShopPopup ~= nil then
+				popup.EventShopPopup:Show(itemName, success, errorCode)
+			end
+		end
+		
+		-- 아이템 UI 갱신
+		if success then
+			self:RefreshItemUI(itemId)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void RefreshItemUI(string itemId)
+		-- 해당 아이템 UI 갱신 (구매 횟수 초과 시 비활성화)
+		local eventShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/EventShopParent")
+		if eventShopParent == nil then
+			return
+		end
+		
+		local itemContainer = eventShopParent:GetChildByName("ItemContainer")
+		if itemContainer == nil then
+			return
+		end
+		
+		for _, child in ipairs(itemContainer.Children) do
+			if child.EventShopItem ~= nil and child.EventShopItem.itemID == itemId then
+				child.EventShopItem:OnPurchaseSuccess()
+				break
+			end
+		end
+	end
+
+	@ExecSpace("Server")
+	method void RequestItemStatus(string itemId)
+		local userId = senderUserId
+		local purchaseCount = self:GetPurchaseCount(userId, itemId)
+		self:OnItemStatusReceived(itemId, purchaseCount)
+	end
+
+	@ExecSpace("Client")
+	method void OnItemStatusReceived(string itemId, integer purchaseCount)
+		local eventShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/EventShopParent")
+		if eventShopParent == nil then
+			return
+		end
+		
+		local itemContainer = eventShopParent:GetChildByName("ItemContainer")
+		if itemContainer == nil then
+			return
+		end
+		
+		for _, child in ipairs(itemContainer.Children) do
+			if child.EventShopItem ~= nil and child.EventShopItem.itemID == itemId then
+				child.EventShopItem:UpdatePurchaseCount(purchaseCount)
+				break
+			end
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method table GetItemDataClient(string itemId)
+		local json = self.eventShopItems[itemId]
+		if json == nil then
+			return nil
+		end
+		return _HttpService:JSONDecode(json)
+	end
+
+end
