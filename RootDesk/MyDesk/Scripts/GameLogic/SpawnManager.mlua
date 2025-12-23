@@ -95,16 +95,25 @@ script SpawnManager extends Logic
 		end
 		
 		local stageLevel = 1
-		local stageId = _GameManager.chapterIndex * 100 + _GameManager.mapIndex
-		local curStage = _StageService:GetStageByIdFromServer(tostring(stageId))
+		local curStage
+		local stageId
+
+		if _GameManager.isEventMode then
+			stageId = _GameManager.mapIndex
+			curStage = _EventService:GetEventStageByIdFromServer(tostring(stageId))
+		else
+			stageId = _GameManager.chapterIndex * 100 + _GameManager.mapIndex
+			curStage = _StageService:GetStageByIdFromServer(tostring(stageId))
+		end
+
 		if not (curStage == nil or curStage["level"] == nil) then
 			stageLevel = tonumber(curStage["level"])
 		end
-		
+
 		if stageLevel < 1 then
 			stageLevel = 1
 		end
-		
+
 		log("SpawnEnemy at ", stageId, " stageLevel ", stageLevel)
 		local buffedUnit = BuffedUnitModel()
 		buffedUnit:Init(unitData)

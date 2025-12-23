@@ -1,0 +1,156 @@
+@Component
+script UserEventStage extends Component
+
+	@Sync
+	property integer eventVersion = 1
+
+	@Sync
+	property integer openStage = 0
+
+	@Sync
+	property integer openChapter = 0
+
+	@Sync
+	property integer selectStage = 0
+
+	@Sync
+	property integer selectChapter = 0
+
+	property table updateList = {}
+
+	property table clearedEventStages = {}
+
+	@ExecSpace("Server")
+	method integer SAVE()
+		local data = {}
+		
+		data["eventVersion"] = self.eventVersion
+		data["openStage"] = self.openStage
+		data["openChapter"] = self.openChapter
+		data["selectStage"] = self.selectStage
+		data["selectChapter"] = self.selectChapter
+		
+		local clearedList = {}
+		for key, _ in pairs(self.clearedEventStages) do
+			clearedList[#clearedList + 1] = key
+		end
+		data["cleared"] = table.concat(clearedList, ",")
+		
+		local jsonData = _HttpService:JSONEncode(data)
+		
+		local userStorage = _DataStorageService:GetUserDataStorage(self.Entity.PlayerComponent.UserId)
+		
+		return userStorage:SetAndWait("USER_EVENT_STAGE", jsonData)
+	end
+
+	@ExecSpace("Server")
+	method integer LOAD()
+		local userStorage = _DataStorageService:GetUserDataStorage(self.Entity.PlayerComponent.UserId)
+		
+		local getErr, jsonData = userStorage:GetAndWait("USER_EVENT_STAGE")
+		
+		if getErr ~= 0 then
+			return getErr
+		end
+		
+		if jsonData == nil then
+			return 100012
+		end
+		
+		local data = _HttpService:JSONDecode(jsonData)
+		
+		self.eventVersion = tonumber(data["eventVersion"]) or 1
+		self.openStage = tonumber(data["openStage"])
+		self.openChapter = tonumber(data["openChapter"])
+		self.selectStage = tonumber(data["selectStage"])
+		self.selectChapter = tonumber(data["selectChapter"])
+		
+		self.clearedEventStages = {}
+		local clearedStr = data["cleared"]
+		if clearedStr ~= nil and clearedStr ~= "" then
+			for stageId in string.gmatch(clearedStr, "[^,]+") do
+				self.clearedEventStages[stageId] = true
+			end
+		end
+		
+		return 0
+	end
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		if self:LOAD() ~= 0 then
+			self.eventVersion = _EventService.currentEventVersion
+			self.openStage = 1
+			self.openChapter = 1
+			self.selectStage = 1
+			self.selectChapter = 1
+			self:SAVE()
+		else
+			self:CheckAndResetForNewVersion()
+		end
+	end
+
+	@ExecSpace("Server")
+	method void CheckAndResetForNewVersion()
+		local serverVersion = _EventService.currentEventVersion
+		
+		if self.eventVersion ~= serverVersion then
+			self:ResetForNewEvent(serverVersion)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void ResetForNewEvent(integer newVersion)
+		self.eventVersion = newVersion
+		self.openStage = 1
+		self.openChapter = 1
+		self.selectStage = 1
+		self.selectChapter = 1
+		self.clearedEventStages = {}
+		self:SAVE()
+	end
+
+	@ExecSpace("Server")
+	method void SetClearEventStage(integer selectChapter, integer selectStage)
+		self.openChapter = selectChapter
+		self.openStage = selectStage
+		self.selectChapter = selectChapter
+		self.selectStage = selectStage
+		self:SAVE()
+	end
+
+	@ExecSpace("Server")
+	method void AddClearedEventStage(integer chapter, integer stage)
+		local stageId = tostring(chapter * 100 + stage)
+		self.clearedEventStages[stageId] = true
+		self:SAVE()
+	end
+
+	@ExecSpace("Server")
+	method boolean IsEventStageCleared(integer chapter, integer stage)
+		local stageId = tostring(chapter * 100 + stage)
+		return self.clearedEventStages[stageId] == true
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnSyncProperty(string name, any value)
+		if name == "openStage" or name == "openChapter" or name == "selectStage" or name == "selectChapter" or name == "eventVersion" then
+			for i, cb in ipairs(self.updateList) do
+				cb()
+			end
+		end
+	end
+
+	method boolean isLastEventStageSelected()
+		if self.openChapter ~= self.selectChapter then
+			return false
+		end
+		
+		if self.openStage ~= self.selectStage then
+			return false
+		end
+		
+		return true
+	end
+
+end

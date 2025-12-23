@@ -1,0 +1,145 @@
+@Component
+script ExtendEventSelectorUI extends StageSelectorUI
+
+	property Entity StageInfoPanel = "5f69a9d9-77bc-4a0a-a4b5-50e716d89fd9"
+
+	property table SelectButtonList = {}
+
+	property Entity StageDescText = "a01f8bbc-b99c-4d90-b8dd-00ea86c1d2c6"
+
+	property Entity StageNameText = "4b93ee72-e145-42b2-a05d-71c26a074741"
+
+	property Entity ChapterNameText = "1765f459-5e4b-4daf-bbc7-4111dac6fa83"
+
+	property Entity ChapterNumberText = "1bff1959-6f73-4835-9f9c-bab498943744"
+
+	property Entity nextButton = nil
+
+	property Entity prevButton = nil
+
+	method void UpdateData(EntityRef userStageEntity)
+		local path = self.Entity.Path
+
+		local userEventStage = userStageEntity.UserEventStage
+
+		local openStage = userEventStage.openStage
+		local selectStage = userEventStage.selectStage
+		local selectChapter = userEventStage.selectChapter
+		local openChapter = userEventStage.openChapter
+
+		local eventStageDataList = _EventService:GetEventStageByChapter(selectChapter)
+		local stageCount = #eventStageDataList
+
+		self.StageInfoPanel = _EntityService:GetEntityByPath(path .. "/StageInfoPanel/panel")
+
+		for i = 1, 6 do
+			local entity = _EntityService:GetEntityByPath(path .. "/SelectPanel/StageSelectScroll/Select_" .. tostring(i))
+			if i > stageCount then
+				entity:SetEnable(false)
+				continue
+			end
+			entity:SetEnable(true)
+
+			entity.StageSelectItemUI:Init()
+			self.SelectButtonList[i] = entity
+			entity.StageSelectItemUI:AddCallback(function()
+				self:ClickButtonHanddler(i, userStageEntity)
+			end)
+
+			entity.StageSelectItemUI:SetImage(eventStageDataList[i].button)
+			entity.StageSelectItemUI:SetId(eventStageDataList[i].stage)
+			entity.StageSelectItemUI:SetName(eventStageDataList[i].stage_name)
+
+			if i <= openStage or selectChapter ~= openChapter then
+				entity.StageSelectItemUI:SetNotSelected()
+			end
+
+			if (i > openStage and selectChapter == openChapter) or selectChapter > openChapter then
+				entity.StageSelectItemUI:SetLocked()
+			end
+
+			if i == selectStage and selectChapter <= openChapter then
+				entity.StageSelectItemUI:SetSelected()
+				self.StageInfoPanel.SpriteGUIRendererComponent.ImageRUID = eventStageDataList[i].info
+				self.StageDescText.TextComponent.Text = eventStageDataList[i].stage_desc
+				self.StageNameText.TextComponent.Text = eventStageDataList[i].stage_name
+				self.ChapterNameText.TextComponent.Text = eventStageDataList[i].chapter_name
+				self.ChapterNumberText.TextComponent.Text = "EVENT " .. tostring(selectChapter)
+			end
+		end
+
+		if selectChapter > openChapter then
+			self.StageInfoPanel.SpriteGUIRendererComponent.ImageRUID = eventStageDataList[1].info
+			self.StageDescText.TextComponent.Text = eventStageDataList[1].stage_desc
+			self.StageNameText.TextComponent.Text = eventStageDataList[1].stage_name
+			self.ChapterNameText.TextComponent.Text = eventStageDataList[1].chapter_name
+			self.ChapterNumberText.TextComponent.Text = "EVENT " .. tostring(selectChapter)
+		end
+
+		if self.nextButton ~= nil then
+			self.nextButton.ButtonComponent.Enable = (selectChapter < _EventService.lastChapter)
+		end
+		if self.prevButton ~= nil then
+			self.prevButton.ButtonComponent.Enable = (selectChapter > 1)
+		end
+	end
+
+	method void ClickButtonHanddler(integer id, EntityRef userStageEntity)
+		local userEventStage = userStageEntity.UserEventStage
+
+		local openStage = userEventStage.openStage
+		local selectStage = userEventStage.selectStage
+		local selectChapter = userEventStage.selectChapter
+		local openChapter = userEventStage.openChapter
+
+		local eventStageDataList = _EventService:GetEventStageByChapter(selectChapter)
+
+		for i, entity in ipairs(self.SelectButtonList) do
+			if i > openStage and selectChapter == openChapter then
+				continue
+			end
+			entity.StageSelectItemUI:SetNotSelected()
+			if i == id then
+				entity.StageSelectItemUI:SetSelected()
+				self.StageInfoPanel.SpriteGUIRendererComponent.ImageRUID = eventStageDataList[i].info
+				self.StageDescText.TextComponent.Text = eventStageDataList[i].stage_desc
+				self.StageNameText.TextComponent.Text = eventStageDataList[i].stage_name
+				self.ChapterNameText.TextComponent.Text = eventStageDataList[i].chapter_name
+				self.ChapterNumberText.TextComponent.Text = "EVENT " .. tostring(selectChapter)
+				userEventStage.selectStage = eventStageDataList[i].stage
+			end
+		end
+	end
+
+	method void SetUserStageComp(EntityRef newEntity)
+		local newComp = newEntity.UserEventStage
+		newComp.updateList[#newComp.updateList + 1] = function() self:UpdateData(newEntity) end
+
+		if self.nextButton ~= nil then
+			self.nextButton.CallBackButton.callback = function()
+				if newComp.selectChapter >= _EventService.lastChapter then
+					return
+				end
+
+				newComp.selectChapter += 1
+				newComp.selectStage = 1
+				self:UpdateData(newEntity)
+			end
+		end
+
+		if self.prevButton ~= nil then
+			self.prevButton.CallBackButton.callback = function()
+				if newComp.selectChapter <= 1 then
+					return
+				end
+
+				newComp.selectChapter -= 1
+				newComp.selectStage = 1
+				self:UpdateData(newEntity)
+			end
+		end
+
+		self:UpdateData(newEntity)
+	end
+
+end

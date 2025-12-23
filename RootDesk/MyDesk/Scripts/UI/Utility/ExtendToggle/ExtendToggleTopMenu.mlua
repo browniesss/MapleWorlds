@@ -1,0 +1,36 @@
+@Component
+script ExtendToggleTopMenu extends ToggleAction
+
+	property number panelIndex = 0
+
+	property Entity targetTopMenu = nil
+
+	property Entity eventBackground = nil
+
+	method void ExecuteOnLogic(Toggle sender)
+		__base:ExecuteOnLogic(sender)
+		
+		if self.targetTopMenu then
+			self.targetTopMenu.Enable = true
+			
+			self:SetEventBackground(true)
+		end
+	end
+
+	method void ExecuteOffLogic(Toggle sender)
+		__base:ExecuteOffLogic(sender)
+		
+		if self.targetTopMenu then
+			self.targetTopMenu.Enable = false
+		end
+		
+		self:SetEventBackground(false)
+	end
+
+	method void SetEventBackground(boolean active)
+		if self.panelIndex == 3 and self.eventBackground ~= nil then
+			self.eventBackground.Enable = active
+		end
+	end
+
+end

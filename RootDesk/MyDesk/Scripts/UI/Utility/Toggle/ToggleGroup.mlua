@@ -6,12 +6,12 @@ script ToggleGroup extends Component
 	property table ToggleButtons = {}
 
 	method void InitializeRadioMode()
-		local firstToggle = self.ToggleButtons[1] 
-				
+		local firstToggle = self.ToggleButtons[1]
+
 		if firstToggle then
 			-- 첫 번째 버튼만 강제로 ON 상태로 설정합니다.
 			firstToggle:SetState(true)
-			
+
 			-- 나머지 버튼들을 OFF 상태로 설정합니다.
 			for i = 2, #self.ToggleButtons do
 				local otherToggle = self.ToggleButtons[i]

@@ -66,16 +66,22 @@ script MonsterSpawnService extends Component
 	end
 
 	method void LoopGroupSummon(number group)
-		local group_data = _groupRepo:GetGroupById(group)
+		local group_data
+		if _GameManager.isEventMode then
+			group_data = _eventGroupRepo:GetGroupById(group)
+		else
+			group_data = _groupRepo:GetGroupById(group)
+		end
+
 		local groupTable = {}
 		for i, g in ipairs(group_data) do
 			local value = {}
 			value['unit'] = g.unit
 			value['delayTs'] = g.delayTs
-			
+
 			table.insert(groupTable, value)
 		end
-		
+
 		self.timerIdList[#self.timerIdList + 1] = _TimerService:SetTimerOnce(
 			function() self:GroupSummon(groupTable) end,
 			0
@@ -91,7 +97,10 @@ script MonsterSpawnService extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnMapEnter(Entity enteredMap)
-		if string.find(enteredMap.Name, "Stage") == nil then
+		local isStageMap = string.find(enteredMap.Name, "Stage") ~= nil
+		local isEventMap = string.find(enteredMap.Name, "Event") ~= nil
+
+		if not isStageMap and not isEventMap then
 			return
 		end
 
@@ -109,56 +118,80 @@ script MonsterSpawnService extends Component
 		self.curTimeTs = 0
 
 		self:InitServer()
-		
-		local userStage = _UserService.LocalPlayer.UserStage
-		
-		self:SetStage(userStage.selectChapter, userStage.selectStage)
+
+		if _GameManager.isEventMode then
+			local userEventStage = _UserService.LocalPlayer.UserEventStage
+			self:SetStage(userEventStage.selectChapter, userEventStage.selectStage)
+		else
+			local userStage = _UserService.LocalPlayer.UserStage
+			self:SetStage(userStage.selectChapter, userStage.selectStage)
+		end
 	end
 
 	method void SetStage(integer targetChapter, integer targetStage)
-		local target = tostring(targetStage + 100 * targetChapter)
-		
-		local settingFunction = function() 
-			local patterns = _patternRepo:GetPatternByStage(target)
+		local target
+		if _GameManager.isEventMode then
+			target = tostring(targetStage)
+		else
+			target = tostring(targetStage + 100 * targetChapter)
+		end
+
+		local settingFunction = function()
+			local patterns
+			if _GameManager.isEventMode then
+				patterns = _eventPatternRepo:GetPatternByStage(target)
+			else
+				patterns = _patternRepo:GetPatternByStage(target)
+			end
+
 			self.curTimeTs = 0
-		
+
+			if patterns == nil then
+				return
+			end
+
 			for i, pattern in ipairs(patterns) do
 				if pattern.type == 'LOOP' then
 					local setting = _settingRepo:GetSettingByTypeAndId('LOOP', pattern.setting)
-				
+
 					local id = _TimerService:SetTimerRepeat(
-						function() 
+						function()
 							self:LoopGroupSummon(pattern.group)
-						end, 
-						setting.delayTs, 
+						end,
+						setting.delayTs,
 						setting.startTs)
 					self.timerIdList[#self.timerIdList + 1] = id
 					self.timerIdList[#self.timerIdList + 1] = _TimerService:SetTimerOnce(
-						function() 
-							_TimerService:ClearTimer(id) 
+						function()
+							_TimerService:ClearTimer(id)
 						end,
 						setting.endTs)
 				end
-			
+
 				if pattern.type == 'EVENT' then
 					local setting = _settingRepo:GetSettingByTypeAndId('EVENT', pattern.setting)
-					local group_data = _groupRepo:GetGroupById(pattern.group)
-				
+					local group_data
+					if _GameManager.isEventMode then
+						group_data = _eventGroupRepo:GetGroupById(pattern.group)
+					else
+						group_data = _groupRepo:GetGroupById(pattern.group)
+					end
+
 					if self.eventGroup[setting.type] == nil then
 						self.eventGroup[setting.type] = {}
 					end
-				
+
 					local id = #self.eventGroup[setting.type] + 1
-				
+
 					local item = {}
 					item['count'] = 0
 					item['delayTs'] = setting.delayTs
 					item['maxCount'] = setting.count
 					item['lastTs'] = -1
 					item['group'] = {}
-				
+
 					self.eventGroup[setting.type][id] = item
-				
+
 					for i, g in ipairs(group_data) do
 						table.insert(self.eventGroup[setting.type][id].group, g)
 					end
@@ -188,17 +221,21 @@ script MonsterSpawnService extends Component
 		if senderUserId == nil then
 			return
 		end
-		
+
 		local user = _UserService:GetUserEntityByUserId(senderUserId)
-		local userStage = user.UserStage
-		
-		self.stageId = userStage.selectChapter * 100 + userStage.selectStage
-		
+
+		if _GameManager.isEventMode then
+			local userEventStage = user.UserEventStage
+			self.stageId = userEventStage.selectStage
+		else
+			local userStage = user.UserStage
+			self.stageId = userStage.selectChapter * 100 + userStage.selectStage
+		end
+
 		for i, id in ipairs(self.timerIdList) do
 			_TimerService:ClearTimer(id)
 		end
-		
-		
+
 		self.loopGroup = {}
 		self.eventGroup = {}
 		self.timerIdList = {}

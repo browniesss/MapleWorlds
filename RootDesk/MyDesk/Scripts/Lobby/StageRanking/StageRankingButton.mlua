@@ -3,14 +3,15 @@ script StageRankingButton extends Component
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
-		local rankingUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
+		local rankingUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
+		if rankingUI == nil then
+			return
+		end
+
 		local player = _EntityService:GetEntityByTag("Player")
-		
-		
+
 		local key = _RankingService:GetRankKeyByTable({chapter=player.UserStage.selectChapter, stage=player.UserStage.selectStage})
-		
-		-- _RankingService:FETCH(key)
-		-- rankingUI.StageRankingListUI:RefreshRankListItem(key)
+
 		rankingUI.StageRankingListUI:ShowRank()
 		rankingUI.Enable = true
 		rankingUI.Visible = true

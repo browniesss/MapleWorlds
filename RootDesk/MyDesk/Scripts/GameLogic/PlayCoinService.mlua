@@ -113,13 +113,25 @@ script PlayCoinService extends Logic
 	@ExecSpace("Server")
 	method integer StartNormalGame()
 		local useCoinCode = self:UseCoin(senderUserId)
-		
+
 		if useCoinCode ~= 0 then
 			_GameManager:OpenZeroEnterCoinUI()
 			return -1
 		end
-		
+
 		_GameManager:LocalGameStart()
+	end
+
+	@ExecSpace("Server")
+	method integer StartEventGame()
+		local useCoinCode = self:UseCoin(senderUserId)
+
+		if useCoinCode ~= 0 then
+			_GameManager:OpenZeroEnterCoinUI()
+			return -1
+		end
+
+		_GameManager:LocalEventGameStart()
 	end
 
 	@ExecSpace("Client")
@@ -128,11 +140,25 @@ script PlayCoinService extends Logic
 		if userStage.openChapter < userStage.selectChapter then
 			return false
 		end
-		
+
 		if userStage.openChapter == userStage.selectChapter and userStage.openStage < userStage.selectStage then
 			return false
 		end
-		
+
+		return true
+	end
+
+	@ExecSpace("Client")
+	method boolean IsUseEventCoin()
+		local userEventStage = _UserService.LocalPlayer.UserEventStage
+		if userEventStage.openChapter < userEventStage.selectChapter then
+			return false
+		end
+
+		if userEventStage.openChapter == userEventStage.selectChapter and userEventStage.openStage < userEventStage.selectStage then
+			return false
+		end
+
 		return true
 	end
 

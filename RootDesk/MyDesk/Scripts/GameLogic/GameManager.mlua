@@ -51,6 +51,9 @@ script GameManager extends Logic
 	@Sync
 	property boolean isTutorialPaused = false
 
+	@Sync
+	property boolean isEventMode = false
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		-- 스킬 선택 UI 비활성화
@@ -162,7 +165,12 @@ script GameManager extends Logic
 		self:GameStartDataInClient(chapterIndex, mapIndex)
 		self:EnableUI()
 		
-		local stageData = _StageService:GetStageByIdFromServer(tostring(mapIndex + 100 * chapterIndex))
+		local stageData
+		if self.isEventMode then
+			stageData = _EventService:GetEventStageByIdFromServer(tostring(mapIndex))
+		else
+			stageData = _StageService:GetStageByIdFromServer(tostring(mapIndex + 100 * chapterIndex))
+		end
 		local playerTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/PlayerTower")
 		local enemyTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/EnemyTower")
 		local ourHealthBar = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/Player_HP_bar")
@@ -180,15 +188,23 @@ script GameManager extends Logic
 	method void GameStartDataInClient(integer chapterIndex, integer mapIndex)
 		self.chapterIndex = chapterIndex
 		self.mapIndex = mapIndex
-		
+
 		local ourHealthBarUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/Player_HP_bar")
 		local enemyHealthBarUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/EnemyHealthBar")
 		local playerTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/PlayerTower")
 		local enemyTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/EnemyTower")
-		
+
 		ourHealthBarUI.OurHealthBar.tower = playerTower
 		enemyHealthBarUI.EnemyHealthBar.tower = enemyTower
-		self.mapTextUI.TextComponent.Text = _StageService:GetStageById(tostring(chapterIndex * 100 + mapIndex)).name
+
+		if self.isEventMode then
+			local eventStage = _EventService:GetEventStageById(tostring(mapIndex))
+			if eventStage ~= nil then
+				self.mapTextUI.TextComponent.Text = eventStage.name
+			end
+		else
+			self.mapTextUI.TextComponent.Text = _StageService:GetStageById(tostring(chapterIndex * 100 + mapIndex)).name
+		end
 	end
 
 	method void GameEnd()
@@ -201,7 +217,9 @@ script GameManager extends Logic
 		self.gameClearResult.Visible = false
 		self.failPopupUI.Enable = false
 		self.failPopupUI.Visible = false
-		
+
+		self.isEventMode = false
+
 		self:ClearObjects()
 		self:ClearTimer()
 		self:ClearGameData()
@@ -212,7 +230,11 @@ script GameManager extends Logic
 		if self.isTest then
 			return "/maps/TestMap"
 		end
-		
+
+		if self.isEventMode then
+			return "/maps/Event" .. string.format("%02d", self.chapterIndex) .. string.format("%02d", self.mapIndex)
+		end
+
 		return "/maps/Stage"..self.chapterIndex.."0"..self.mapIndex
 	end
 
@@ -581,6 +603,106 @@ script GameManager extends Logic
 	method void OpenZeroEnterCoinUI()
 		local popupUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/ZeroEnterCoinUI")
 		popupUI.Visible = true
+	end
+
+	@ExecSpace("Client")
+	method void LocalEventGameStart()
+		local userEventStage = _UserService.LocalPlayer.UserEventStage
+		if userEventStage.openChapter < userEventStage.selectChapter then
+			return
+		end
+
+		if userEventStage.openChapter == userEventStage.selectChapter and userEventStage.openStage < userEventStage.selectStage then
+			return
+		end
+
+		_EntityService:GetEntityByPath("/ui/LobbyInfoUI").Enable = false
+		local lobbyBadgeButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton")
+		lobbyBadgeButton.Enable = false
+
+		if Environment:IsMobilePlatform() then
+			local lobbyJoyStick = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIJoystick")
+			local lobbyJumpButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/JumpButton")
+
+			lobbyJoyStick.Enable = false
+			lobbyJumpButton.Enable = false
+		end
+
+		_LoadingManager:Show()
+
+		_UserService.LocalPlayer.UserBreakLimitSkillProtocol:InitCallWithCallback(function(limitBreakRuids)
+			local ruids = self:GetPreLoadAssetRuid()
+
+			for _, ruid in ipairs(limitBreakRuids) do
+				table.insert(ruids, ruid)
+			end
+
+			_ResourceService:PreloadAsync(ruids, function()
+				local mapName = "Event" .. string.format("%02d", userEventStage.selectChapter) .. string.format("%02d", userEventStage.selectStage)
+				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, mapName)
+				self:EventGameStart(userEventStage.selectChapter, userEventStage.selectStage)
+			end)
+		end)
+	end
+
+	@ExecSpace("Server")
+	method void EventGameStart(integer chapterIndex, integer mapIndex)
+		self.isEventMode = true
+		self:GameStart(chapterIndex, mapIndex)
+	end
+
+	@ExecSpace("Client")
+	method void EventStageClear()
+		local userEventStage = _UserService.LocalPlayer.UserEventStage
+
+		self:Log_EventStageClear()
+
+		local clearedChapter = userEventStage.selectChapter
+		local clearedStage = userEventStage.selectStage
+
+		self:EventStageClearServer(clearedChapter, clearedStage)
+	end
+
+	@ExecSpace("Server")
+	method void EventStageClearServer(integer clearedChapter, integer clearedStage)
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		local userEventStage = user.UserEventStage
+		local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
+
+		local isFirstClear = false
+		local isNewStage = (clearedChapter > userEventStage.openChapter) or
+			(clearedChapter == userEventStage.openChapter and clearedStage >= userEventStage.openStage)
+		local isNotCleared = not userEventStage:IsEventStageCleared(clearedChapter, clearedStage)
+
+		if isNewStage and isNotCleared then
+			isFirstClear = true
+		end
+
+		self:StageClearClientCallback(isFirstClear, senderUserId)
+
+		userEventStage:AddClearedEventStage(clearedChapter, clearedStage)
+
+		local nextStage = _EventService:GetNextOpenEventStageIdFromServer(userEventStage.openChapter, userEventStage.openStage)
+		if nextStage.chapter ~= userEventStage.openChapter or nextStage.stage ~= userEventStage.openStage then
+			userEventStage:SetClearEventStage(nextStage.chapter, nextStage.stage)
+		end
+
+		if isFirstClear then
+			_BillingService:AddSecondFreeCoin(senderUserId, 300)
+			_BillingService:AddThirdFreeCoin(senderUserId, 2000)
+		else
+			_BillingService:AddThirdFreeCoin(senderUserId, 300)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void Log_EventStageClear()
+		local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
+		local userEntity = _UserService:GetUserEntityByUserId(senderUserId)
+		local selectStageId = self.mapIndex
+		local userDeck = userEntity.UserDeck.userDeck
+		local userSkill = userEntity.UserSkillDeck.userSkillDeck
+		_AnalyticsService:GameEnd(senderUserId, playTime, selectStageId, userDeck, userSkill, true)
 	end
 
 	@ExecSpace("Client")

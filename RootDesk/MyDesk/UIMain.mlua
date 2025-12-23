@@ -18,8 +18,15 @@ script UIMain extends Component
 			local userName = self.Entity.PlayerComponent.Nickname
 			_RankingService:InitUserPointMap(userName)
 
-			local stageSelectUIEntity = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI")
-			stageSelectUIEntity.StageSelectorUI:SetUserStageComp(self.Entity)
+			local stageSelectUIEntity = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/StageSelectUI")
+			if stageSelectUIEntity ~= nil then
+				stageSelectUIEntity.StageSelectorUI:SetUserStageComp(self.Entity)
+			end
+
+			local eventStageSelectUIEntity = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/EventSelectUI")
+			if eventStageSelectUIEntity ~= nil and eventStageSelectUIEntity.ExtendEventSelectorUI ~= nil then
+				eventStageSelectUIEntity.ExtendEventSelectorUI:SetUserStageComp(self.Entity)
+			end
 
 			self.IsUserVisible = false
 		end
