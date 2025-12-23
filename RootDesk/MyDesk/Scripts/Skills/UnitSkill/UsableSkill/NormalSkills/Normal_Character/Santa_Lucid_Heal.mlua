@@ -1,0 +1,22 @@
+@Component
+script Santa_Lucid_Heal extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		_EffectService:PlayEffectAttached("b98fb045b4864fad953fc55af0417482", self.caster, Vector3.zero, 0, Vector3.one)
+		local nearByAllies = self:FindNearByAllies()
+		
+		for _, target in ipairs(nearByAllies) do
+			if not isvalid(target) or target.Unit.curState == "die" then
+				continue
+			end
+				
+		    target.Unit:OnHeal(self.caster, self.caster.Unit.damage * self.skillAmount)
+		end
+		
+		self:SkillEnd()
+	end
+
+end

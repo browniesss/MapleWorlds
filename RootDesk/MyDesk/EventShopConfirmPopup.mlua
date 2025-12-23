@@ -1,0 +1,89 @@
+@Component
+script EventShopConfirmPopup extends Component
+
+	property Entity itemNameLabel = nil
+
+	property Entity priceLabel = nil
+
+	property Entity confirmButton = nil
+
+	property Entity cancelButton = nil
+
+	property string currentItemId = ""
+
+	property table currentItemData = {}
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		-- 자식 엔티티 탐색
+		if self.itemNameLabel == nil then
+			self.itemNameLabel = self.Entity:GetChildByName("ItemNameLabel")
+		end
+		if self.priceLabel == nil then
+			self.priceLabel = self.Entity:GetChildByName("PriceLabel")
+		end
+		if self.confirmButton == nil then
+			self.confirmButton = self.Entity:GetChildByName("ConfirmButton")
+		end
+		if self.cancelButton == nil then
+			self.cancelButton = self.Entity:GetChildByName("CancelButton")
+		end
+		
+		-- 확인 버튼 이벤트
+		if self.confirmButton ~= nil then
+			self.confirmButton:ConnectEvent(ButtonClickEvent, function()
+				self:OnConfirm()
+			end)
+		end
+		
+		-- 취소 버튼 이벤트
+		if self.cancelButton ~= nil then
+			self.cancelButton:ConnectEvent(ButtonClickEvent, function()
+				self:Hide()
+			end)
+		end
+		
+		-- 초기에는 숨김
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+	end
+
+	method void Show(string itemId, table itemData)
+		self.currentItemId = itemId
+		self.currentItemData = itemData
+		
+		-- 아이템 이름 표시
+		if self.itemNameLabel ~= nil then
+			self.itemNameLabel.TextComponent.Text = (itemData["name"] or "") .. "를 구매하시겠습니까?"
+		end
+		
+		-- 가격 표시
+		if self.priceLabel ~= nil then
+			self.priceLabel.TextComponent.Text = tostring(itemData["price"] or 0)
+		end
+		
+		self.Entity.Enable = true
+		self.Entity.Visible = true
+	end
+
+	method void Hide()
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+		self.currentItemId = ""
+		self.currentItemData = {}
+	end
+
+	method void OnConfirm()
+		if self.currentItemId == "" then
+			self:Hide()
+			return
+		end
+		
+		-- 서버에 구매 요청
+		_EventShopService:PurchaseItem(self.currentItemId)
+		
+		-- 팝업 닫기
+		self:Hide()
+	end
+
+end
