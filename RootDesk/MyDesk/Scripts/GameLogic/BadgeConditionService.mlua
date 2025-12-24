@@ -76,6 +76,9 @@ script BadgeConditionService extends Logic
 			passed = self:CheckChapterClear(userId, condition)
 		elseif condition.type == "PICKUP_CHAR" then
 			passed = self:CheckPickupChar(userId, condition)
+		elseif condition.type == "NPC" then
+			-- NPC 타입은 BadgeNpc에서 직접 호출하므로 바로 통과
+			passed = true
 		end
 
 		log("[Badge] Condition check result for", badgeId, ":", passed)
