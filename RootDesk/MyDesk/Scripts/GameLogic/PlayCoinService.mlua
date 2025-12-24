@@ -150,12 +150,12 @@ script PlayCoinService extends Logic
 
 	@ExecSpace("Client")
 	method boolean IsUseEventCoin()
-		local userEventStage = _UserService.LocalPlayer.UserEventStage
-		if userEventStage.openChapter < userEventStage.selectChapter then
+		local userStage = _UserService.LocalPlayer.UserStage
+		if userStage.eventOpenChapter < userStage.eventSelectChapter then
 			return false
 		end
 
-		if userEventStage.openChapter == userEventStage.selectChapter and userEventStage.openStage < userEventStage.selectStage then
+		if userStage.eventOpenChapter == userStage.eventSelectChapter and userStage.eventOpenStage < userStage.eventSelectStage then
 			return false
 		end
 

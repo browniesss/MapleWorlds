@@ -16,6 +16,9 @@ script UserEventStage extends Component
 	@Sync
 	property integer selectChapter = 0
 
+	@Sync
+	property string clearedEventStagesSync = ""
+
 	property table updateList = {}
 
 	property table clearedEventStages = {}
@@ -72,7 +75,14 @@ script UserEventStage extends Component
 				self.clearedEventStages[stageId] = true
 			end
 		end
-		
+
+		-- 클라이언트 동기화 문자열 초기화
+		local clearedList = {}
+		for key, _ in pairs(self.clearedEventStages) do
+			clearedList[#clearedList + 1] = key
+		end
+		self.clearedEventStagesSync = table.concat(clearedList, ",")
+
 		return 0
 	end
 
@@ -123,6 +133,14 @@ script UserEventStage extends Component
 	method void AddClearedEventStage(integer chapter, integer stage)
 		local stageId = tostring(chapter * 100 + stage)
 		self.clearedEventStages[stageId] = true
+
+		-- 클라이언트 동기화를 위한 문자열 업데이트
+		local clearedList = {}
+		for key, _ in pairs(self.clearedEventStages) do
+			clearedList[#clearedList + 1] = key
+		end
+		self.clearedEventStagesSync = table.concat(clearedList, ",")
+
 		self:SAVE()
 	end
 
@@ -132,9 +150,26 @@ script UserEventStage extends Component
 		return self.clearedEventStages[stageId] == true
 	end
 
+	@ExecSpace("Client")
+	method boolean IsEventStageClearedClient(integer chapter, integer stage)
+		local stageId = tostring(chapter * 100 + stage)
+
+		if self.clearedEventStagesSync == "" then
+			return false
+		end
+
+		for id in string.gmatch(self.clearedEventStagesSync, "[^,]+") do
+			if id == stageId then
+				return true
+			end
+		end
+
+		return false
+	end
+
 	@ExecSpace("ClientOnly")
 	method void OnSyncProperty(string name, any value)
-		if name == "openStage" or name == "openChapter" or name == "selectStage" or name == "selectChapter" or name == "eventVersion" then
+		if name == "openStage" or name == "openChapter" or name == "selectStage" or name == "selectChapter" or name == "eventVersion" or name == "clearedEventStagesSync" then
 			for i, cb in ipairs(self.updateList) do
 				cb()
 			end

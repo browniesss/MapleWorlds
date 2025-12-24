@@ -57,14 +57,32 @@ script EventService extends Logic
 
 	@ExecSpace("ServerOnly")
 	method void LoadEventData(string eventId)
+		log("[EventService] Loading event data: " .. eventId)
 		local dataSet = _DataService:GetTable(eventId)
-		
+
 		if dataSet == nil then
-			log("EVENT SERVICE: DataSet not found - " .. eventId)
-			return
+			log("[EventService] ERROR: DataSet not found - " .. eventId)
+			log("[EventService] Trying alternative table names...")
+
+			-- 대체 테이블명 시도
+			local alternatives = {"event", "Event/event_1", "Event_event_1"}
+			for _, altName in ipairs(alternatives) do
+				log("[EventService] Trying: " .. altName)
+				dataSet = _DataService:GetTable(altName)
+				if dataSet ~= nil then
+					log("[EventService] SUCCESS: Found data with table name: " .. altName)
+					break
+				end
+			end
+
+			if dataSet == nil then
+				log("[EventService] FATAL: No event data found with any table name!")
+				return
+			end
 		end
-		
+
 		local stageCount = dataSet:GetRowCount()
+		log("[EventService] Loaded " .. tostring(stageCount) .. " event stages")
 		
 		self.data = {}
 		self.idMap = {}

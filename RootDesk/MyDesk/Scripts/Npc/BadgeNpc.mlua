@@ -9,17 +9,17 @@ script BadgeNpc extends Component
 		if self.badgeID == "" then
 			return
 		end
-
+		
 		local entity = event.TriggerBodyEntity
 		if entity == nil or entity.PlayerComponent == nil then
 			return
 		end
-
+		
 		local userId = entity.PlayerComponent.UserId
 		if userId == nil or userId == "" then
 			return
 		end
-
+		
 		_BadgeConditionService:CheckAndAwardBadge(userId, self.badgeID)
 	end
 

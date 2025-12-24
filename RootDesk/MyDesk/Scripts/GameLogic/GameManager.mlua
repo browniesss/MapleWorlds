@@ -607,12 +607,12 @@ script GameManager extends Logic
 
 	@ExecSpace("Client")
 	method void LocalEventGameStart()
-		local userEventStage = _UserService.LocalPlayer.UserEventStage
-		if userEventStage.openChapter < userEventStage.selectChapter then
+		local userStage = _UserService.LocalPlayer.UserStage
+		if userStage.eventOpenChapter < userStage.eventSelectChapter then
 			return
 		end
 
-		if userEventStage.openChapter == userEventStage.selectChapter and userEventStage.openStage < userEventStage.selectStage then
+		if userStage.eventOpenChapter == userStage.eventSelectChapter and userStage.eventOpenStage < userStage.eventSelectStage then
 			return
 		end
 
@@ -638,9 +638,9 @@ script GameManager extends Logic
 			end
 
 			_ResourceService:PreloadAsync(ruids, function()
-				local mapName = "Event" .. string.format("%02d", userEventStage.selectChapter) .. string.format("%02d", userEventStage.selectStage)
+				local mapName = "Event" .. string.format("%02d", userStage.eventSelectChapter) .. string.format("%02d", userStage.eventSelectStage)
 				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, mapName)
-				self:EventGameStart(userEventStage.selectChapter, userEventStage.selectStage)
+				self:EventGameStart(userStage.eventSelectChapter, userStage.eventSelectStage)
 			end)
 		end)
 	end
@@ -653,12 +653,12 @@ script GameManager extends Logic
 
 	@ExecSpace("Client")
 	method void EventStageClear()
-		local userEventStage = _UserService.LocalPlayer.UserEventStage
+		local userStage = _UserService.LocalPlayer.UserStage
 
 		self:Log_EventStageClear()
 
-		local clearedChapter = userEventStage.selectChapter
-		local clearedStage = userEventStage.selectStage
+		local clearedChapter = userStage.eventSelectChapter
+		local clearedStage = userStage.eventSelectStage
 
 		self:EventStageClearServer(clearedChapter, clearedStage)
 	end
@@ -666,13 +666,13 @@ script GameManager extends Logic
 	@ExecSpace("Server")
 	method void EventStageClearServer(integer clearedChapter, integer clearedStage)
 		local user = _UserService:GetUserEntityByUserId(senderUserId)
-		local userEventStage = user.UserEventStage
+		local userStage = user.UserStage
 		local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
 
 		local isFirstClear = false
-		local isNewStage = (clearedChapter > userEventStage.openChapter) or
-			(clearedChapter == userEventStage.openChapter and clearedStage >= userEventStage.openStage)
-		local isNotCleared = not userEventStage:IsEventStageCleared(clearedChapter, clearedStage)
+		local isNewStage = (clearedChapter > userStage.eventOpenChapter) or
+			(clearedChapter == userStage.eventOpenChapter and clearedStage >= userStage.eventOpenStage)
+		local isNotCleared = not userStage:IsEventStageCleared(clearedChapter, clearedStage)
 
 		if isNewStage and isNotCleared then
 			isFirstClear = true
@@ -680,11 +680,11 @@ script GameManager extends Logic
 
 		self:StageClearClientCallback(isFirstClear, senderUserId)
 
-		userEventStage:AddClearedEventStage(clearedChapter, clearedStage)
+		userStage:AddClearedEventStage(clearedChapter, clearedStage)
 
-		local nextStage = _EventService:GetNextOpenEventStageIdFromServer(userEventStage.openChapter, userEventStage.openStage)
-		if nextStage.chapter ~= userEventStage.openChapter or nextStage.stage ~= userEventStage.openStage then
-			userEventStage:SetClearEventStage(nextStage.chapter, nextStage.stage)
+		local nextStage = _EventService:GetNextOpenEventStageIdFromServer(userStage.eventOpenChapter, userStage.eventOpenStage)
+		if nextStage.chapter ~= userStage.eventOpenChapter or nextStage.stage ~= userStage.eventOpenStage then
+			userStage:SetClearEventStage(nextStage.chapter, nextStage.stage)
 		end
 
 		if isFirstClear then

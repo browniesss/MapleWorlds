@@ -9,11 +9,38 @@ script ExtendToggleTopMenu extends ToggleAction
 
 	method void ExecuteOnLogic(Toggle sender)
 		__base:ExecuteOnLogic(sender)
-		
+
+		log("[ExtendToggleTopMenu] ExecuteOnLogic called - panelIndex: " .. tostring(self.panelIndex))
+
 		if self.targetTopMenu then
 			self.targetTopMenu.Enable = true
-			
+			log("[ExtendToggleTopMenu] targetTopMenu enabled")
+
 			self:SetEventBackground(true)
+
+			-- 이벤트 스테이지 탭 활성화 시 초기화
+			if self.panelIndex == 3 then
+				log("[ExtendToggleTopMenu] panelIndex is 3, initializing ExtendEventSelectorUI")
+
+				-- targetTopMenu에서 직접 컴포넌트 찾기 (비활성화된 엔티티도 접근 가능)
+				if self.targetTopMenu.ExtendEventSelectorUI ~= nil then
+					log("[ExtendToggleTopMenu] Found ExtendEventSelectorUI component in targetTopMenu")
+					log("[ExtendToggleTopMenu] About to call SetUserEventStageComp")
+
+					local success, err = pcall(function()
+						self.targetTopMenu.ExtendEventSelectorUI:SetUserEventStageComp(_UserService.LocalPlayer)
+					end)
+
+					if not success then
+						log("[ExtendToggleTopMenu] ERROR calling SetUserEventStageComp: " .. tostring(err))
+					else
+						log("[ExtendToggleTopMenu] SetUserEventStageComp called successfully")
+					end
+				else
+					log("[ExtendToggleTopMenu] ERROR: ExtendEventSelectorUI component not found in targetTopMenu")
+					log("[ExtendToggleTopMenu] targetTopMenu path: " .. self.targetTopMenu.Path)
+				end
+			end
 		end
 	end
 

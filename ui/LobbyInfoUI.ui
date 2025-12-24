@@ -2710,7 +2710,7 @@
           "name": "StageSelectUI",
           "path": "/ui/LobbyInfoUI/SelectUI/StageSelectUI",
           "nameEditable": true,
-          "enable": true,
+          "enable": false,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
@@ -2737,11 +2737,11 @@
               "MobileOnly": false,
               "OffsetMax": {
                 "x": 0.0,
-                "y": 0.0
+                "y": -67.5
               },
               "OffsetMin": {
                 "x": 0.0,
-                "y": 0.0
+                "y": 67.5
               },
               "Pivot": {
                 "x": 0.5,
@@ -2749,7 +2749,7 @@
               },
               "RectSize": {
                 "x": 1920.0,
-                "y": 945.0
+                "y": 810.0
               },
               "UIMode": 1,
               "UIScale": {
@@ -2829,11 +2829,11 @@
               "MobileOnly": false,
               "OffsetMax": {
                 "x": -10.0,
-                "y": -10.0
+                "y": 57.5
               },
               "OffsetMin": {
                 "x": -480.0,
-                "y": 10.0
+                "y": -57.5
               },
               "Pivot": {
                 "x": 0.5,
@@ -8840,11 +8840,11 @@
               "MobileOnly": false,
               "OffsetMax": {
                 "x": -490.0,
-                "y": -10.0
+                "y": 57.5
               },
               "OffsetMin": {
                 "x": 10.0,
-                "y": 10.0
+                "y": -57.5
               },
               "Pivot": {
                 "x": 0.5,
@@ -12255,7 +12255,7 @@
           "name": "EventSelectUI",
           "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI",
           "nameEditable": true,
-          "enable": false,
+          "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 1,
@@ -17885,11 +17885,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 150.0,
+                "x": 225.0,
                 "y": 40.0
               },
               "OffsetMin": {
-                "x": -150.0,
+                "x": -225.0,
                 "y": -50.0
               },
               "Pivot": {
@@ -17897,7 +17897,7 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 300.0,
+                "x": 450.0,
                 "y": 90.0
               },
               "UIMode": 1,
@@ -17959,6 +17959,7 @@
                 "y": -1.0
               },
               "OverrideSorting": false,
+              "Text": "루시드의 크리스마스",
               "Enable": true
             }
           ],
@@ -18044,14 +18045,16 @@
               "BestFit": false,
               "Bold": false,
               "ConstraintY": 29.0,
+              "Font": 3,
               "FontColor": {
                 "r": 1.0,
                 "g": 1.0,
                 "b": 1.0,
                 "a": 1.0
               },
+              "FontSize": 25,
               "IsRichText": false,
-              "MaxSize": 20,
+              "MaxSize": 28,
               "MinSize": 20,
               "OutlineDistance": {
                 "x": 1.0,
@@ -18059,6 +18062,7 @@
               },
               "OverrideSorting": false,
               "SizeFit": false,
+              "Text": "Event Stage",
               "UseConstraintX": false,
               "UseConstraintY": false,
               "Enable": true
@@ -20132,7 +20136,7 @@
               },
               "OutlineWidth": 2.0,
               "OverrideSorting": false,
-              "Text": "공략 보상",
+              "Text": "이벤트 상점",
               "UseOutLine": false,
               "Enable": true
             }
@@ -20141,12 +20145,12 @@
         }
       },
       {
-        "id": "5ddfffad-c257-409f-bdff-f772f5b621f7",
-        "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI/StageInfoPanel/userPanel/top/UIEventReward/UIEventRewardRoot",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.ScrollLayoutGroupComponent",
+        "id": "6da69c94-9f7b-405d-9ea2-4a27e78e0076",
+        "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI/StageInfoPanel/userPanel/top/UIEventReward/UIEventShopButton",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
         "jsonString": {
-          "name": "UIEventRewardRoot",
-          "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI/StageInfoPanel/userPanel/top/UIEventReward/UIEventRewardRoot",
+          "name": "UIEventShopButton",
+          "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI/StageInfoPanel/userPanel/top/UIEventReward/UIEventShopButton",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -20156,10 +20160,10 @@
           "revision": 1,
           "origin": {
             "type": "Model",
-            "entry_id": "uiempty",
+            "entry_id": "uibutton",
             "sub_entity_id": null
           },
-          "modelId": "uiempty",
+          "modelId": "uibutton",
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
@@ -20174,125 +20178,30 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 384.98938,
-                "y": 164.999939
+                "x": 170.0,
+                "y": 170.0
               },
               "OffsetMin": {
-                "x": 1.05023193,
-                "y": 0.4282608
+                "x": 20.0,
+                "y": 20.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 383.939148,
-                "y": 164.571671
+                "x": 150.0,
+                "y": 150.0
               },
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 193.0198,
-                "y": 82.7140961
+                "x": 95.0,
+                "y": 95.0
               },
               "Position": {
-                "x": 193.0198,
-                "y": -54.7859039,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.ScrollLayoutGroupComponent",
-              "CellSize": {
-                "x": 142.0,
-                "y": 140.0
-              },
-              "ConstraintCount": 2,
-              "GridChildAlignment": 3,
-              "GridSpacing": {
-                "x": 10.0,
-                "y": 0.0
-              },
-              "OverrideSorting": false,
-              "Padding": {
-                "left": 10,
-                "right": 10,
-                "top": 0,
-                "bottom": 0
-              },
-              "Type": 2,
-              "UseScroll": false,
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "e219e5ec-8f71-40c1-8817-17b949fbbcbe",
-        "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI/StageInfoPanel/userPanel/top/UIEventReward/UIEventRewardRoot/UIRewardBackground",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
-        "jsonString": {
-          "name": "UIRewardBackground",
-          "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI/StageInfoPanel/userPanel/top/UIEventReward/UIEventRewardRoot/UIRewardBackground",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 0,
-          "pathConstraints": "//////////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uisprite",
-            "sub_entity_id": null
-          },
-          "modelId": "uisprite",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 4,
-              "AnchorsMax": {
-                "x": 0.0,
-                "y": 1.0
-              },
-              "AnchorsMin": {
-                "x": 0.0,
-                "y": 1.0
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": 152.0,
-                "y": -12.0
-              },
-              "OffsetMin": {
-                "x": 10.0,
-                "y": -152.0
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 142.0,
-                "y": 140.0
-              },
-              "UIMode": 1,
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": 81.0,
-                "y": -82.0
-              },
-              "Position": {
-                "x": 81.0,
-                "y": -82.0,
+                "x": 95.0,
+                "y": -42.5,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -20310,24 +20219,69 @@
               },
               "OverrideSorting": false,
               "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ButtonComponent",
+              "Colors": {
+                "NormalColor": {
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                },
+                "HighlightedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "PressedColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 1.0
+                },
+                "SelectedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "DisabledColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 0.5019608
+                },
+                "ColorMultiplier": 1.0,
+                "FadeDuration": 0.1
+              },
+              "ImageRUIDs": {
+                "HighlightedSprite": null,
+                "PressedSprite": null,
+                "SelectedSprite": null,
+                "DisabledSprite": null
+              },
+              "OverrideSorting": false,
+              "Enable": true
             }
           ],
           "@version": 1
         }
       },
       {
-        "id": "2f092617-6333-4b1a-b2ee-100c35d2f5c5",
-        "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI/StageInfoPanel/userPanel/top/UIEventReward/UIEventRewardRoot/UIRewardBackground/UIReward",
+        "id": "9e0b65af-4524-47c2-865d-905702ee0714",
+        "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI/StageInfoPanel/userPanel/top/UIEventReward/UIEventShopButton/UISprite",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
-          "name": "UIReward",
-          "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI/StageInfoPanel/userPanel/top/UIEventReward/UIEventRewardRoot/UIRewardBackground/UIReward",
+          "name": "UISprite",
+          "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI/StageInfoPanel/userPanel/top/UIEventReward/UIEventShopButton/UISprite",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
-          "pathConstraints": "///////////",
+          "pathConstraints": "//////////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -20349,20 +20303,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 55.0,
-                "y": 55.0
+                "x": 60.0,
+                "y": 60.0
               },
               "OffsetMin": {
-                "x": -55.0,
-                "y": -55.0
+                "x": -60.0,
+                "y": -60.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 110.0,
-                "y": 110.0
+                "x": 120.0,
+                "y": 120.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -20389,397 +20343,6 @@
                 "DataId": "4d47277890a14fe88aaf7ec4140e8451"
               },
               "OverrideSorting": false,
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "b82b49cf-c687-4ca0-8f75-f5e154d224d9",
-        "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI/StageInfoPanel/userPanel/top/UIEventReward/UIEventRewardRoot/UIRewardBackground/UIText",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
-        "jsonString": {
-          "name": "UIText",
-          "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI/StageInfoPanel/userPanel/top/UIEventReward/UIEventRewardRoot/UIRewardBackground/UIText",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 1,
-          "pathConstraints": "///////////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uitext",
-            "sub_entity_id": null
-          },
-          "modelId": "uitext",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 8,
-              "AnchorsMax": {
-                "x": 1.0,
-                "y": 0.0
-              },
-              "AnchorsMin": {
-                "x": 1.0,
-                "y": 0.0
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": -15.9999008,
-                "y": 40.9286
-              },
-              "OffsetMin": {
-                "x": -115.9999,
-                "y": 10.9286
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 100.0,
-                "y": 30.0
-              },
-              "UIMode": 1,
-              "UIScale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": -65.9999,
-                "y": 25.9286
-              },
-              "Position": {
-                "x": 5.000099,
-                "y": -44.0714,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "OverrideSorting": false,
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.TextComponent",
-              "Alignment": 5,
-              "FontColor": {
-                "r": 1.0,
-                "g": 1.0,
-                "b": 1.0,
-                "a": 1.0
-              },
-              "FontSize": 25,
-              "MaxSize": 40,
-              "MinSize": 10,
-              "OutlineColor": {
-                "r": 0.0,
-                "g": 0.0,
-                "b": 0.0,
-                "a": 1.0
-              },
-              "OutlineDistance": {
-                "x": 1.0,
-                "y": -1.0
-              },
-              "OverrideSorting": false,
-              "Text": "1",
-              "UseOutLine": true,
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "1cbbb29a-d2ec-4f04-8f25-b86d45722de0",
-        "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI/StageInfoPanel/userPanel/top/UIEventReward/UIEventRewardRoot/UIRewardBackground_1",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
-        "jsonString": {
-          "name": "UIRewardBackground_1",
-          "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI/StageInfoPanel/userPanel/top/UIEventReward/UIEventRewardRoot/UIRewardBackground_1",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 1,
-          "pathConstraints": "//////////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uisprite",
-            "sub_entity_id": null
-          },
-          "modelId": "uisprite",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 4,
-              "AnchorsMax": {
-                "x": 0.0,
-                "y": 1.0
-              },
-              "AnchorsMin": {
-                "x": 0.0,
-                "y": 1.0
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": 304.0,
-                "y": -12.0
-              },
-              "OffsetMin": {
-                "x": 162.0,
-                "y": -152.0
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 142.0,
-                "y": 140.0
-              },
-              "UIMode": 1,
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": 233.0,
-                "y": -82.0
-              },
-              "Position": {
-                "x": 233.0,
-                "y": -82.0,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "ImageRUID": {
-                "DataId": "3581d1606a2141a987c7686cad1e0ae3"
-              },
-              "OverrideSorting": false,
-              "SortingLayer": "MapLayer0",
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "18cfb783-8baf-4864-99f5-d7a0d4f931a3",
-        "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI/StageInfoPanel/userPanel/top/UIEventReward/UIEventRewardRoot/UIRewardBackground_1/UIReward",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
-        "jsonString": {
-          "name": "UIReward",
-          "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI/StageInfoPanel/userPanel/top/UIEventReward/UIEventRewardRoot/UIRewardBackground_1/UIReward",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 0,
-          "pathConstraints": "///////////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uisprite",
-            "sub_entity_id": null
-          },
-          "modelId": "uisprite",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 0,
-              "AnchorsMax": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "AnchorsMin": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": 36.0,
-                "y": 40.0
-              },
-              "OffsetMin": {
-                "x": -36.0,
-                "y": -40.0
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 72.0,
-                "y": 80.0
-              },
-              "UIMode": 1,
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": 0.0,
-                "y": 0.0
-              },
-              "Position": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "ImageRUID": {
-                "DataId": "78fb3b54f37c41cc920aa5b34667efc8"
-              },
-              "OverrideSorting": false,
-              "SortingLayer": "MapLayer0",
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "7bfdbdd7-59f2-4324-996b-75a8c9cb957f",
-        "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI/StageInfoPanel/userPanel/top/UIEventReward/UIEventRewardRoot/UIRewardBackground_1/UIText",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
-        "jsonString": {
-          "name": "UIText",
-          "path": "/ui/LobbyInfoUI/SelectUI/EventSelectUI/StageInfoPanel/userPanel/top/UIEventReward/UIEventRewardRoot/UIRewardBackground_1/UIText",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 1,
-          "pathConstraints": "///////////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uitext",
-            "sub_entity_id": null
-          },
-          "modelId": "uitext",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 8,
-              "AnchorsMax": {
-                "x": 1.0,
-                "y": 0.0
-              },
-              "AnchorsMin": {
-                "x": 1.0,
-                "y": 0.0
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": -8.999901,
-                "y": 45.8571
-              },
-              "OffsetMin": {
-                "x": -108.9999,
-                "y": 15.8571014
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 100.0,
-                "y": 30.0
-              },
-              "UIMode": 1,
-              "UIScale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": -58.9999,
-                "y": 30.8571014
-              },
-              "Position": {
-                "x": 12.0000992,
-                "y": -39.1429,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "OverrideSorting": false,
-              "SortingLayer": "MapLayer0",
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.TextComponent",
-              "Alignment": 5,
-              "FontColor": {
-                "r": 1.0,
-                "g": 1.0,
-                "b": 1.0,
-                "a": 1.0
-              },
-              "FontSize": 25,
-              "MaxSize": 40,
-              "MinSize": 10,
-              "OutlineColor": {
-                "r": 0.0,
-                "g": 0.0,
-                "b": 0.0,
-                "a": 1.0
-              },
-              "OutlineDistance": {
-                "x": 1.0,
-                "y": -1.0
-              },
-              "OverrideSorting": false,
-              "Text": "1000",
-              "UseOutLine": true,
               "Enable": true
             }
           ],

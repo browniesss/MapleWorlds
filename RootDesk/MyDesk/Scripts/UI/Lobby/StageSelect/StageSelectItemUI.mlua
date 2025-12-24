@@ -15,8 +15,18 @@ script StageSelectItemUI extends Component
 	property Entity StageNameText = nil
 
 	method void SetImage(string newImageRUID)
+		log("[StageSelectItemUI] SetImage called with RUID: " .. tostring(newImageRUID))
+		if self.EnabledButton == nil then
+			log("[StageSelectItemUI] ERROR: EnabledButton is nil in SetImage!")
+			return
+		end
+		if self.DisabledButton == nil then
+			log("[StageSelectItemUI] ERROR: DisabledButton is nil in SetImage!")
+			return
+		end
 		self.EnabledButton.SpriteGUIRendererComponent.ImageRUID = newImageRUID
 		self.DisabledButton.SpriteGUIRendererComponent.ImageRUID = newImageRUID
+		log("[StageSelectItemUI] SetImage complete")
 	end
 
 	method void SetSelected()
@@ -40,18 +50,30 @@ script StageSelectItemUI extends Component
 		self.DisabledButton:SetEnable(true)
 	end
 
+	method void SetCleared()
+		-- 클리어된 스테이지는 "열린 상태"와 동일하게 표시
+		self.LockImage:SetVisible(false)
+		self.SelectImage:SetVisible(false)
+		self.EnabledButton:SetEnable(true)
+		self.DisabledButton:SetEnable(false)
+	end
+
 	method void AddCallback(any callback)
 		self.EnabledButton.StageSelectorClickHandler:AddCallback(callback)
 	end
 
 	method void Init()
 		local selfPath = self.Entity.Path
+		log("[StageSelectItemUI] Init - Path: " .. selfPath)
+
 		self.LockImage = _EntityService:GetEntityByPath(selfPath .. "/LockImage")
 		self.SelectImage = _EntityService:GetEntityByPath(selfPath .. "/SelectImage")
 		self.EnabledButton = _EntityService:GetEntityByPath(selfPath .. "/SelectButtonEnable")
 		self.DisabledButton = _EntityService:GetEntityByPath(selfPath .. "/SelectButtonDisable")
 		self.StageNameText = _EntityService:GetEntityByPath(selfPath .. "/StageName")
 		self.StageIdText = _EntityService:GetEntityByPath(selfPath .. "/StageId")
+
+		log("[StageSelectItemUI] Init complete - EnabledButton: " .. tostring(self.EnabledButton ~= nil) .. ", DisabledButton: " .. tostring(self.DisabledButton ~= nil))
 	end
 
 	method void SetName(string name)
@@ -59,7 +81,7 @@ script StageSelectItemUI extends Component
 	end
 
 	method void SetId(integer id)
-		self.StageIdText.TextComponent.Text = "STAGE " .. tostring(id) 
+		self.StageIdText.TextComponent.Text = "STAGE " .. tostring(id)
 	end
 
 end

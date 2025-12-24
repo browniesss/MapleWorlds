@@ -13,54 +13,96 @@ script UserStage extends Component
 	@Sync
 	property integer selectChapter = 0
 
+	-- 이벤트 스테이지 관련 프로퍼티
+	@Sync
+	property integer eventVersion = 1
+
+	@Sync
+	property integer eventOpenStage = 0
+
+	@Sync
+	property integer eventOpenChapter = 0
+
+	@Sync
+	property integer eventSelectStage = 0
+
+	@Sync
+	property integer eventSelectChapter = 0
+
+	@Sync
+	property string clearedEventStagesSync = ""
+
 	property table updateList = {}
 
 	property table clearedStages = {}
 
+	property table clearedEventStages = {}
+
 	@ExecSpace("Server")
 	method integer SAVE()
 		local data = {}
-		
+
 		data["openStage"] = self.openStage
 		data["openChapter"] = self.openChapter
 		data["selectStage"] = self.selectStage
 		data["selectChapter"] = self.selectChapter
-		
+
+		-- 이벤트 스테이지 데이터
+		data["eventVersion"] = self.eventVersion
+		data["eventOpenStage"] = self.eventOpenStage
+		data["eventOpenChapter"] = self.eventOpenChapter
+		data["eventSelectStage"] = self.eventSelectStage
+		data["eventSelectChapter"] = self.eventSelectChapter
+
 		-- clearedStages를 문자열로 변환 (예: "101,102,201,506")
 		local clearedList = {}
 		for key, _ in pairs(self.clearedStages) do
 			clearedList[#clearedList + 1] = key
 		end
 		data["cleared"] = table.concat(clearedList, ",")
-		
+
+		-- clearedEventStages를 문자열로 변환
+		local clearedEventList = {}
+		for key, _ in pairs(self.clearedEventStages) do
+			clearedEventList[#clearedEventList + 1] = key
+		end
+		data["clearedEvent"] = table.concat(clearedEventList, ",")
+
 		local jsonData = _HttpService:JSONEncode(data)
-		
+
 		local userStorage = _DataStorageService:GetUserDataStorage(self.Entity.PlayerComponent.UserId)
-		
+
 		return userStorage:SetAndWait("USER_STAGE", jsonData)
 	end
 
 	@ExecSpace("Server")
 	method integer LOAD()
 		local userStorage = _DataStorageService:GetUserDataStorage(self.Entity.PlayerComponent.UserId)
-		
+
 		local getErr, jsonData = userStorage:GetAndWait("USER_STAGE")
-		
+
 		if getErr ~= 0 then
 			return getErr
 		end
-		
+
 		if jsonData == nil then
 			return 100012
 		end
-		
+
 		local data = _HttpService:JSONDecode(jsonData)
-		
+
 		self.openStage = tonumber(data["openStage"])
 		self.openChapter = tonumber(data["openChapter"])
 		self.selectStage = tonumber(data["selectStage"])
 		self.selectChapter = tonumber(data["selectChapter"])
-		
+
+		-- 이벤트 스테이지 데이터 로드 (기본값 1로 설정)
+		self.eventVersion = tonumber(data["eventVersion"]) or 1
+		self.eventOpenStage = tonumber(data["eventOpenStage"]) or 1
+		self.eventOpenChapter = tonumber(data["eventOpenChapter"]) or 1
+		self.eventSelectStage = tonumber(data["eventSelectStage"]) or 1
+		self.eventSelectChapter = tonumber(data["eventSelectChapter"]) or 1
+
 		-- cleared 문자열을 테이블로 변환
 		self.clearedStages = {}
 		local clearedStr = data["cleared"]
@@ -72,7 +114,23 @@ script UserStage extends Component
 			-- 기존 유저: openChapter/openStage 이전 스테이지를 모두 클리어한 것으로 간주
 			self:GenerateClearedFromOpenStage()
 		end
-		
+
+		-- clearedEvent 문자열을 테이블로 변환
+		self.clearedEventStages = {}
+		local clearedEventStr = data["clearedEvent"]
+		if clearedEventStr ~= nil and clearedEventStr ~= "" then
+			for stageId in string.gmatch(clearedEventStr, "[^,]+") do
+				self.clearedEventStages[stageId] = true
+			end
+		end
+
+		-- 클라이언트 동기화 문자열 초기화
+		local clearedEventList = {}
+		for key, _ in pairs(self.clearedEventStages) do
+			clearedEventList[#clearedEventList + 1] = key
+		end
+		self.clearedEventStagesSync = table.concat(clearedEventList, ",")
+
 		return 0
 	end
 
@@ -105,9 +163,16 @@ script UserStage extends Component
 			self.openChapter = 1
 			self.selectStage = 0
 			self.selectChapter = 0
+			self.eventOpenStage = 1
+			self.eventOpenChapter = 1
+			self.eventSelectStage = 1
+			self.eventSelectChapter = 1
 			self:SAVE()
+		else
+			-- 이벤트 버전 체크 및 리셋
+			self:CheckAndResetForNewVersion()
 		end
-		
+
 		-- 메소 업데이트 이후 최초 접속 보상 체크
 		self:CheckMesoInitialReward()
 	end
@@ -207,7 +272,9 @@ script UserStage extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnSyncProperty(string name, any value)
-		if name == "openStage" or name == "openChapter" or name == "selectStage" or name == "selectChapter" then
+		if name == "openStage" or name == "openChapter" or name == "selectStage" or name == "selectChapter" or
+		   name == "eventOpenStage" or name == "eventOpenChapter" or name == "eventSelectStage" or name == "eventSelectChapter" or
+		   name == "eventVersion" or name == "clearedEventStagesSync" then
 			for i, cb in ipairs(self.updateList) do
 				cb()
 			end
@@ -218,11 +285,92 @@ script UserStage extends Component
 		if self.openChapter ~= self.selectChapter then
 			return false
 		end
-		
+
 		if self.openStage ~= self.selectStage then
 			return false
 		end
-		
+
+		return true
+	end
+
+	-- 이벤트 스테이지 관련 메서드
+	@ExecSpace("Server")
+	method void CheckAndResetForNewVersion()
+		local serverVersion = _EventService.currentEventVersion
+
+		if self.eventVersion ~= serverVersion then
+			self:ResetForNewEvent(serverVersion)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void ResetForNewEvent(integer newVersion)
+		self.eventVersion = newVersion
+		self.eventOpenStage = 1
+		self.eventOpenChapter = 1
+		self.eventSelectStage = 1
+		self.eventSelectChapter = 1
+		self.clearedEventStages = {}
+		self.clearedEventStagesSync = ""
+		self:SAVE()
+	end
+
+	@ExecSpace("Server")
+	method void SetClearEventStage(integer selectChapter, integer selectStage)
+		self.eventOpenChapter = selectChapter
+		self.eventOpenStage = selectStage
+		self.eventSelectChapter = selectChapter
+		self.eventSelectStage = selectStage
+		self:SAVE()
+	end
+
+	@ExecSpace("Server")
+	method void AddClearedEventStage(integer chapter, integer stage)
+		local stageId = tostring(chapter * 100 + stage)
+		self.clearedEventStages[stageId] = true
+
+		-- 클라이언트 동기화를 위한 문자열 업데이트
+		local clearedList = {}
+		for key, _ in pairs(self.clearedEventStages) do
+			clearedList[#clearedList + 1] = key
+		end
+		self.clearedEventStagesSync = table.concat(clearedList, ",")
+
+		self:SAVE()
+	end
+
+	@ExecSpace("Server")
+	method boolean IsEventStageCleared(integer chapter, integer stage)
+		local stageId = tostring(chapter * 100 + stage)
+		return self.clearedEventStages[stageId] == true
+	end
+
+	@ExecSpace("Client")
+	method boolean IsEventStageClearedClient(integer chapter, integer stage)
+		local stageId = tostring(chapter * 100 + stage)
+
+		if self.clearedEventStagesSync == "" then
+			return false
+		end
+
+		for id in string.gmatch(self.clearedEventStagesSync, "[^,]+") do
+			if id == stageId then
+				return true
+			end
+		end
+
+		return false
+	end
+
+	method boolean isLastEventStageSelected()
+		if self.eventOpenChapter ~= self.eventSelectChapter then
+			return false
+		end
+
+		if self.eventOpenStage ~= self.eventSelectStage then
+			return false
+		end
+
 		return true
 	end
 

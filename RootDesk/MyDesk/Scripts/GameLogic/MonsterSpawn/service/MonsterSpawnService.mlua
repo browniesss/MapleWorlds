@@ -120,8 +120,8 @@ script MonsterSpawnService extends Component
 		self:InitServer()
 
 		if _GameManager.isEventMode then
-			local userEventStage = _UserService.LocalPlayer.UserEventStage
-			self:SetStage(userEventStage.selectChapter, userEventStage.selectStage)
+			local userStage = _UserService.LocalPlayer.UserStage
+			self:SetStage(userStage.eventSelectChapter, userStage.eventSelectStage)
 		else
 			local userStage = _UserService.LocalPlayer.UserStage
 			self:SetStage(userStage.selectChapter, userStage.selectStage)
@@ -225,8 +225,8 @@ script MonsterSpawnService extends Component
 		local user = _UserService:GetUserEntityByUserId(senderUserId)
 
 		if _GameManager.isEventMode then
-			local userEventStage = user.UserEventStage
-			self.stageId = userEventStage.selectStage
+			local userStage = user.UserStage
+			self.stageId = userStage.eventSelectStage
 		else
 			local userStage = user.UserStage
 			self.stageId = userStage.selectChapter * 100 + userStage.selectStage
