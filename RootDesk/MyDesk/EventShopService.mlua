@@ -4,8 +4,6 @@ script EventShopService extends Logic
 	@Sync
 	property SyncTable<string, string> eventShopItems
 
-	property string PRICE_CURRENCY = "SECOND_COIN"
-
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
 		self:LoadEventShopItems()
@@ -86,19 +84,8 @@ script EventShopService extends Logic
 
 	@ExecSpace("ServerOnly")
 	method boolean DeductCurrency(string userId, integer price)
-		-- 현재는 2차 재화(머쉬코인) 사용
-		-- 이후 이벤트 재화로 교체 시 이 부분만 수정
-		if self.PRICE_CURRENCY == "SECOND_COIN" then
-			local result = _BillingService:UseSecondCoin(userId, price)
-			return result == 0
-		end
-		
-		-- 향후 이벤트 재화 추가 시
-		-- if self.PRICE_CURRENCY == "EVENT_COIN" then
-		--     return _EventCoinService:UseCoin(userId, price) == 0
-		-- end
-		
-		return false
+		local result = _BillingService:UseEventToken(userId, price)
+		return result == 0
 	end
 
 	@ExecSpace("ServerOnly")
@@ -170,9 +157,7 @@ script EventShopService extends Logic
 		if not self:GiveReward(userId, itemData) then
 			log_error("[EventShop] Failed to give reward:", itemId)
 			-- 재화 환불 (실패 시)
-			if self.PRICE_CURRENCY == "SECOND_COIN" then
-				_BillingService:AddSecondFreeCoin(userId, price)
-			end
+			_BillingService:AddEventToken(userId, price)
 			self:OnPurchaseComplete(itemId, false, itemData["name"], "REWARD_FAILED")
 			return
 		end

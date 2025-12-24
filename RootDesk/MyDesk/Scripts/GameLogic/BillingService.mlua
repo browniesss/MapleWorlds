@@ -22,6 +22,27 @@ script BillingService extends Logic
 	@Sync
 	property integer EventCoin = 0
 
+	property table eventCoinCallbacks = {}
+
+	@ExecSpace("ClientOnly")
+	method void OnSyncProperty(string name, any value)
+		if name == "EventCoin" then
+			for _, callback in pairs(self.eventCoinCallbacks) do
+				callback(value)
+			end
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void AddEventCoinCallback(string key, any callback)
+		self.eventCoinCallbacks[key] = callback
+	end
+
+	@ExecSpace("ClientOnly")
+	method void RemoveEventCoinCallback(string key)
+		self.eventCoinCallbacks[key] = nil
+	end
+
 	@ExecSpace("ServerOnly")
 	method integer SAVE(string uid)
 		local ds = _DataStorageService:GetUserDataStorage(uid)

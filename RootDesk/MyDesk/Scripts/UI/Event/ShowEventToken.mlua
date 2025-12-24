@@ -12,13 +12,24 @@ script ShowEventToken extends Component
 		if labelEntity ~= nil then
 			self.EventLabel = labelEntity.TextComponent
 		end
-		
+
 		local iconEntity = self.Entity:GetChildByName("EventIcon")
 		if iconEntity ~= nil then
 			self.EventIcon = iconEntity.SpriteGUIRendererComponent
 		end
-		
+
+		-- EventCoin 변경 콜백 등록
+		_BillingService:AddEventCoinCallback(self.Entity.Id, function(value)
+			self:RefreshUI()
+		end)
+
 		self:RefreshUI()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnEndPlay()
+		-- EventCoin 변경 콜백 해제
+		_BillingService:RemoveEventCoinCallback(self.Entity.Id)
 	end
 
 	@ExecSpace("ClientOnly")
