@@ -25,33 +25,139 @@ script ClearRewardUI extends Component
 
 	property Entity mesoFrame = "3f647f06-dfea-4a54-bc24-cfc8f3f4e655"
 
-	method void RefreshUI(boolean isFirstClear)
+	property Entity eventTokenIcon = "e7873c5d-e70d-435c-978b-d4333f89ad3c"
+
+	property Entity eventTokenLabel = "5f47e43b-64d2-41da-b34d-29d3a292bf42"
+
+	property Entity eventTokenFrame = "3b785f16-6eb0-429d-97d6-65d07484777f"
+
+	method void RefreshUI(boolean isFirstClear, boolean isEventMode, integer eventToken)
 		local normalCoinAmount = 0
 		local specialCoinAmount = 0
 		local mesoAmount = 0
 		local enterCoinAmount = 1
 		
-		if isFirstClear then
-			self.specialCoinIcon.Visible = true
-			self.specialCoinLabel.Visible = true
-			self.specialCoinFrame.Visible = true
-			self.enterCoinIcon.Visible = true
-			self.enterCoinLabel.Visible = true
-			self.enterCoinFrame.Visible = true
-			
-			normalCoinAmount = 500
-			specialCoinAmount = 100
-			mesoAmount = 4000
+		if isEventMode == nil then
+			isEventMode = false
+		end
+		
+		if eventToken == nil then
+			eventToken = 0
+		end
+		
+		-- 이벤트 토큰 Entity 기본 비활성화
+		if self.eventTokenIcon ~= nil then
+			self.eventTokenIcon.Enable = false
+			self.eventTokenIcon.Visible = false
+		end
+		if self.eventTokenLabel ~= nil then
+			self.eventTokenLabel.Enable = false
+			self.eventTokenLabel.Visible = false
+		end
+		if self.eventTokenFrame ~= nil then
+			self.eventTokenFrame.Enable = false
+			self.eventTokenFrame.Visible = false
+		end
+		
+		if isEventMode then
+			-- 이벤트 모드: EventData에서 token_ruid 가져오기
+			local tokenRuid = nil
+			local currentEventVersion = _EventService:GetCurrentEventVersion()
+			local eventDataSet = _DataService:GetTable("EventData")
+
+			if eventDataSet ~= nil then
+				for index = 1, eventDataSet:GetRowCount() do
+					local eventId = tonumber(eventDataSet:GetCell(index, "id"))
+					if eventId == currentEventVersion then
+						tokenRuid = eventDataSet:GetCell(index, "token_ruid")
+						break
+					end
+				end
+			end
+
+			-- 이벤트 토큰 Entity 활성화 및 아이콘 설정
+			if self.eventTokenIcon ~= nil and tokenRuid ~= nil then
+				self.eventTokenIcon.Enable = true
+				self.eventTokenIcon.Visible = true
+				self.eventTokenIcon.SpriteGUIRendererComponent.ImageRUID = tokenRuid
+			end
+			if self.eventTokenLabel ~= nil then
+				self.eventTokenLabel.Enable = true
+				self.eventTokenLabel.Visible = true
+				self.eventTokenLabel.TextComponent.Text = tostring(eventToken)
+			end
+			if self.eventTokenFrame ~= nil then
+				self.eventTokenFrame.Enable = true
+				self.eventTokenFrame.Visible = true
+			end
+		
+			if isFirstClear then
+				-- 최초 클리어: 티켓 + 이벤트 토큰
+				self.normalCoinIcon.Visible = true
+				self.normalCoinLabel.Visible = true
+				self.normalCoinFrame.Visible = true
+				self.specialCoinIcon.Visible = false
+				self.specialCoinLabel.Visible = false
+				self.specialCoinFrame.Visible = false
+				self.enterCoinIcon.Visible = false
+				self.enterCoinLabel.Visible = false
+				self.enterCoinFrame.Visible = false
+				self.mesoIcon.Visible = false
+				self.mesoLabel.Visible = false
+				self.mesoFrame.Visible = false
+		
+				normalCoinAmount = 300  -- 티켓
+			else
+				-- 재클리어: 이벤트 토큰만
+				self.normalCoinIcon.Visible = false
+				self.normalCoinLabel.Visible = false
+				self.normalCoinFrame.Visible = false
+				self.specialCoinIcon.Visible = false
+				self.specialCoinLabel.Visible = false
+				self.specialCoinFrame.Visible = false
+				self.enterCoinIcon.Visible = false
+				self.enterCoinLabel.Visible = false
+				self.enterCoinFrame.Visible = false
+				self.mesoIcon.Visible = false
+				self.mesoLabel.Visible = false
+				self.mesoFrame.Visible = false
+			end
 		else
-			self.specialCoinIcon.Visible = false
-			self.specialCoinLabel.Visible = false
-			self.specialCoinFrame.Visible = false
-			self.enterCoinIcon.Visible = false
-			self.enterCoinLabel.Visible = false
-			self.enterCoinFrame.Visible = false
-			
-			normalCoinAmount = 100
-			mesoAmount = 500
+			-- 일반 모드
+			if isFirstClear then
+				self.specialCoinIcon.Visible = true
+				self.specialCoinLabel.Visible = true
+				self.specialCoinFrame.Visible = true
+				self.enterCoinIcon.Visible = true
+				self.enterCoinLabel.Visible = true
+				self.enterCoinFrame.Visible = true
+				self.normalCoinIcon.Visible = true
+				self.normalCoinLabel.Visible = true
+				self.normalCoinFrame.Visible = true
+				self.mesoIcon.Visible = true
+				self.mesoLabel.Visible = true
+				self.mesoFrame.Visible = true
+		
+				normalCoinAmount = 500
+				specialCoinAmount = 100
+				mesoAmount = 4000
+			else
+				self.specialCoinIcon.Visible = false
+				self.specialCoinLabel.Visible = false
+				self.specialCoinFrame.Visible = false
+				self.enterCoinIcon.Visible = false
+				self.enterCoinLabel.Visible = false
+				self.enterCoinFrame.Visible = false
+				self.normalCoinIcon.Visible = true
+				self.normalCoinLabel.Visible = true
+				self.normalCoinFrame.Visible = true
+				self.mesoIcon.Visible = true
+				self.mesoLabel.Visible = true
+				self.mesoFrame.Visible = true
+		
+				normalCoinAmount = 100
+				mesoAmount = 500
+			end
 		end
 		
 		self.normalCoinLabel.TextComponent.Text = tostring(normalCoinAmount)

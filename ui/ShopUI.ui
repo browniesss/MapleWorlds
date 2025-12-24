@@ -4321,7 +4321,7 @@
           "name": "MushDiaPassParent",
           "path": "/ui/ShopUI/ShopItemParent/MushDiaPassParent",
           "nameEditable": true,
-          "enable": true,
+          "enable": false,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
@@ -17769,7 +17769,7 @@
           "name": "EventShopParent",
           "path": "/ui/ShopUI/ShopItemParent/EventShopParent",
           "nameEditable": true,
-          "enable": false,
+          "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 3,
@@ -22975,6 +22975,394 @@
               "OverrideSorting": false,
               "Text": "확인",
               "UseOutLine": true,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "262d114c-6eee-44e1-a7ac-5558c23e688c",
+        "path": "/ui/ShopUI/ShopItemParent/EventShopParent/EventTokenRoot",
+        "componentNames": "MOD.Core.UITransformComponent,script.ShowEventToken",
+        "jsonString": {
+          "name": "EventTokenRoot",
+          "path": "/ui/ShopUI/ShopItemParent/EventShopParent/EventTokenRoot",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 4,
+          "pathConstraints": "/////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uiempty",
+            "sub_entity_id": null
+          },
+          "modelId": "uiempty",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 50.0000267,
+                "y": 50.0
+              },
+              "OffsetMin": {
+                "x": -49.9999733,
+                "y": -50.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 100.0,
+                "y": 100.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 2.55026371E-05,
+                "y": 0.0
+              },
+              "Position": {
+                "x": 2.55026371E-05,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "script.ShowEventToken",
+              "Enable": true,
+              "EventLabel": {
+                "IsRelative": false,
+                "ComponentId": "73bc8aa4-772e-449d-b28b-a328d0a182d9:TextComponent"
+              },
+              "EventIcon": {
+                "IsRelative": false,
+                "ComponentId": "9f17e7d7-c42d-46e8-9ab9-2e48134fbee5:SpriteGUIRendererComponent"
+              }
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "7c279f91-7e5b-4d6f-b618-3a32f67af2ed",
+        "path": "/ui/ShopUI/ShopItemParent/EventShopParent/EventTokenRoot/EventFrame",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "jsonString": {
+          "name": "EventFrame",
+          "path": "/ui/ShopUI/ShopItemParent/EventShopParent/EventTokenRoot/EventFrame",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "//////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uisprite",
+            "sub_entity_id": null
+          },
+          "modelId": "uisprite",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 689.2677,
+                "y": 461.691742
+              },
+              "OffsetMin": {
+                "x": 489.2677,
+                "y": 389.691742
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 200.0,
+                "y": 72.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 589.2677,
+                "y": 425.691742
+              },
+              "Position": {
+                "x": 589.2677,
+                "y": 425.691742,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "e363fe71863482e40954b62b58bf4ac8"
+              },
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Type": 1,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "73bc8aa4-772e-449d-b28b-a328d0a182d9",
+        "path": "/ui/ShopUI/ShopItemParent/EventShopParent/EventTokenRoot/EventLabel",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "EventLabel",
+          "path": "/ui/ShopUI/ShopItemParent/EventShopParent/EventTokenRoot/EventLabel",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 1,
+          "pathConstraints": "//////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 689.2677,
+                "y": 475.691742
+              },
+              "OffsetMin": {
+                "x": 489.2677,
+                "y": 375.691742
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 200.0,
+                "y": 100.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 589.2677,
+                "y": 425.691742
+              },
+              "Position": {
+                "x": 589.2677,
+                "y": 425.691742,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "BestFit": true,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "IsRichText": true,
+              "MaxSize": 40,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "OutlineWidth": 2.0,
+              "OverrideSorting": false,
+              "Text": "30",
+              "UseOutLine": true,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "9f17e7d7-c42d-46e8-9ab9-2e48134fbee5",
+        "path": "/ui/ShopUI/ShopItemParent/EventShopParent/EventTokenRoot/EventIcon",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "jsonString": {
+          "name": "EventIcon",
+          "path": "/ui/ShopUI/ShopItemParent/EventShopParent/EventTokenRoot/EventIcon",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 2,
+          "pathConstraints": "//////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uisprite",
+            "sub_entity_id": null
+          },
+          "modelId": "uisprite",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 459.267456,
+                "y": 449.891754
+              },
+              "OffsetMin": {
+                "x": 419.267456,
+                "y": 411.49173
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 40.0,
+                "y": 38.4
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 439.267456,
+                "y": 430.691742
+              },
+              "Position": {
+                "x": 439.267456,
+                "y": 430.691742,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "fb9dd55406a04662b53ac056ef5820a3"
+              },
+              "LocalScale": {
+                "x": 2.25,
+                "y": 2.25
+              },
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Type": 0,
               "Enable": true
             }
           ],

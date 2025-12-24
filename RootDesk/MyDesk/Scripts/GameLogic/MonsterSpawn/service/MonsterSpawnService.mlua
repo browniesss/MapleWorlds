@@ -119,15 +119,27 @@ script MonsterSpawnService extends Component
 
 		self:InitServer()
 
-		if _GameManager.isEventMode then
-			local userStage = _UserService.LocalPlayer.UserStage
-			self:SetStage(userStage.eventSelectChapter, userStage.eventSelectStage)
-		else
-			local userStage = _UserService.LocalPlayer.UserStage
-			self:SetStage(userStage.selectChapter, userStage.selectStage)
-		end
+		-- GameManager의 값과 isEventMode가 설정될 때까지 대기 후 SetStage 호출
+		-- 서버-클라이언트 동기화 시간 고려하여 1.5초 대기
+		local targetMapName = enteredMap.Name  -- 진입한 맵 이름 캡처
+		local initTimerId = _TimerService:SetTimerOnce(function()
+			local currentMapName = _GameManager:GetGameMapName()
+
+			-- 타이머가 실행될 때 여전히 같은 맵에 있는지 확인
+			if not string.find(currentMapName, targetMapName) then
+				return
+			end
+
+			if _GameManager.chapterIndex ~= nil and _GameManager.mapIndex ~= nil then
+				self:SetStage(_GameManager.chapterIndex, _GameManager.mapIndex)
+			end
+		end, 1.5)
+
+		-- 초기화 타이머도 timerIdList에 추가하여 맵 전환 시 정리되도록 함
+		self.timerIdList[#self.timerIdList + 1] = initTimerId
 	end
 
+	@ExecSpace("ClientOnly")
 	method void SetStage(integer targetChapter, integer targetStage)
 		local target
 		if _GameManager.isEventMode then
@@ -151,25 +163,26 @@ script MonsterSpawnService extends Component
 			end
 
 			for i, pattern in ipairs(patterns) do
-				if pattern.type == 'LOOP' then
-					local setting = _settingRepo:GetSettingByTypeAndId('LOOP', pattern.setting)
-
-					local id = _TimerService:SetTimerRepeat(
-						function()
-							self:LoopGroupSummon(pattern.group)
-						end,
-						setting.delayTs,
-						setting.startTs)
-					self.timerIdList[#self.timerIdList + 1] = id
-					self.timerIdList[#self.timerIdList + 1] = _TimerService:SetTimerOnce(
-						function()
-							_TimerService:ClearTimer(id)
-						end,
-						setting.endTs)
+				if pattern.type == 'LOOP' or pattern.type == 'EVENT_LOOP' then
+					local setting = _settingRepo:GetSettingByTypeAndIdForEvent(pattern.type, pattern.setting, _GameManager.isEventMode)
+					if setting ~= nil then
+						local id = _TimerService:SetTimerRepeat(
+							function()
+								self:LoopGroupSummon(pattern.group)
+							end,
+							setting.delayTs,
+							setting.startTs)
+						self.timerIdList[#self.timerIdList + 1] = id
+						self.timerIdList[#self.timerIdList + 1] = _TimerService:SetTimerOnce(
+							function()
+								_TimerService:ClearTimer(id)
+							end,
+							setting.endTs)
+					end
 				end
 
 				if pattern.type == 'EVENT' then
-					local setting = _settingRepo:GetSettingByTypeAndId('EVENT', pattern.setting)
+					local setting = _settingRepo:GetSettingByTypeAndIdForEvent('EVENT', pattern.setting, _GameManager.isEventMode)
 					local group_data
 					if _GameManager.isEventMode then
 						group_data = _eventGroupRepo:GetGroupById(pattern.group)
@@ -222,6 +235,9 @@ script MonsterSpawnService extends Component
 			return
 		end
 
+		-- 기존 스폰된 몬스터 정리
+		self:ClearAllEnemiesServer()
+
 		local user = _UserService:GetUserEntityByUserId(senderUserId)
 
 		if _GameManager.isEventMode then
@@ -240,6 +256,17 @@ script MonsterSpawnService extends Component
 		self.eventGroup = {}
 		self.timerIdList = {}
 		self.curTimeTs = 0
+	end
+
+	@ExecSpace("Server")
+	method void ClearAllEnemiesServer()
+		local mapName = _GameManager:GetGameMapName()
+		local myMonsterList = _EntityService:GetEntityByPath(mapName .. "/MyMonsterList")
+		local enemyList = _EntityService:GetEntityByPath(mapName .. "/EnemyList")
+
+		-- GameManager의 DestroyChildren 메서드 활용 (첫 번째 자식 유지)
+		_GameManager:DestroyChildren(myMonsterList, true)
+		_GameManager:DestroyChildren(enemyList, true)
 	end
 
 end

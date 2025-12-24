@@ -13,6 +13,8 @@ script EventService extends Logic
 
 	property integer currentEventVersion = 1
 
+	property table eventDataMap = {}
+
 	@ExecSpace("Client")
 	method table GetAllEventStages()
 		return self.data
@@ -59,19 +61,16 @@ script EventService extends Logic
 
 	@ExecSpace("ServerOnly")
 	method void LoadEventData(string eventId)
-		log("[EventService] Loading event data: " .. eventId)
-
 		-- EventData 테이블 로드
 		local eventDataSet = _DataService:GetTable("EventData")
-		local eventDataMap = {}
+		self.eventDataMap = {}
 
 		if eventDataSet ~= nil then
 			local eventDataCount = eventDataSet:GetRowCount()
-			log("[EventService] Loaded " .. tostring(eventDataCount) .. " event data entries")
 
 			for i = 1, eventDataCount do
 				local eventIdValue = tostring(eventDataSet:GetCell(i, "id"))
-				eventDataMap[eventIdValue] = {
+				self.eventDataMap[eventIdValue] = {
 					start_ts = tonumber(eventDataSet:GetCell(i, "start_ts")),
 					end_ts = tonumber(eventDataSet:GetCell(i, "end_ts")),
 					ruid_info = tostring(eventDataSet:GetCell(i, "ruid_info")),
@@ -79,36 +78,27 @@ script EventService extends Logic
 					chapter_name = tostring(eventDataSet:GetCell(i, "chapter_name"))
 				}
 			end
-		else
-			log("[EventService] WARNING: EventData table not found")
 		end
 
 		-- 이벤트 스테이지 테이블 로드
 		local dataSet = _DataService:GetTable(eventId)
 
 		if dataSet == nil then
-			log("[EventService] ERROR: DataSet not found - " .. eventId)
-			log("[EventService] Trying alternative table names...")
-
 			-- 대체 테이블명 시도
 			local alternatives = {"event", "Event/event_1", "Event_event_1"}
 			for _, altName in ipairs(alternatives) do
-				log("[EventService] Trying: " .. altName)
 				dataSet = _DataService:GetTable(altName)
 				if dataSet ~= nil then
-					log("[EventService] SUCCESS: Found data with table name: " .. altName)
 					break
 				end
 			end
 
 			if dataSet == nil then
-				log("[EventService] FATAL: No event data found with any table name!")
 				return
 			end
 		end
 
 		local stageCount = dataSet:GetRowCount()
-		log("[EventService] Loaded " .. tostring(stageCount) .. " event stages")
 
 		self.data = {}
 		self.idMap = {}
@@ -128,7 +118,7 @@ script EventService extends Logic
 			stage["name"] = tostring(dataSet:GetCell(i,"name"))
 
 			-- EventData에서 가져올 데이터
-			local eventData = eventDataMap[eventIdValue]
+			local eventData = self.eventDataMap[eventIdValue]
 
 			if eventData ~= nil then
 				stage["info"] = eventData.ruid_info
@@ -138,7 +128,6 @@ script EventService extends Logic
 				stage["stage_name"] = _Utils:FormatEventPeriod(eventData.start_ts, eventData.end_ts)
 			else
 				-- EventData를 찾지 못한 경우 기본값 사용
-				log("[EventService] WARNING: EventData not found for id: " .. eventIdValue)
 				stage["info"] = ""
 				stage["stage_desc"] = ""
 				stage["chapter_name"] = ""
@@ -150,6 +139,8 @@ script EventService extends Logic
 			stage["enemy_tower_hp"] = tonumber(dataSet:GetCell(i,"enemy_tower_hp"))
 			stage["synergy_id"] = tostring(dataSet:GetCell(i,"synergy_id"))
 			stage["level"] = tonumber(dataSet:GetCell(i,"enemy_level"))
+			stage["get_first_event_token"] = tonumber(dataSet:GetCell(i,"get_first_event_token"))
+			stage["get_event_token"] = tonumber(dataSet:GetCell(i,"get_event_token"))
 
 			self.data[i] = stage
 
@@ -177,37 +168,40 @@ script EventService extends Logic
 		return self.currentEventVersion
 	end
 
+	@ExecSpace("Server")
+	method boolean IsEventActive(string eventId)
+		local eventData = self.eventDataMap[eventId]
+
+		if eventData == nil then
+			return false
+		end
+
+		local currentTime = os.time()
+		local endTs = eventData.end_ts
+
+		if endTs == nil or endTs == 0 then
+			return true
+		end
+
+		return currentTime <= endTs
+	end
+
 	@ExecSpace("Client")
 	method table GetNextOpenEventStageId(integer chapter, integer stage)
-		local currentStage = nil
-		
-		for i, s in pairs(self.data) do
-			if s["chapter"] == chapter and s["stage"] == stage then
-				currentStage = s
-				break
-			end
-		end
-		
-		if currentStage == nil then
-			return {
-				chapter=chapter,
-				stage=stage
-			}
-		end
-		
-		local currentId = tonumber(currentStage["id"])
-		local nextId = tostring(currentId + 1)
-		local index = self.idMap[nextId]
-		
+		local eventIdValue = tostring(self.currentEventVersion)
+		local nextStageNum = stage + 1
+		local mapKey = eventIdValue .. "_" .. tostring(chapter) .. "_" .. tostring(nextStageNum)
+		local index = self.idMap[mapKey]
+
 		if index ~= nil and index <= #self.data then
 			local nextStage = self.data[index]
-		
+
 			return {
 				chapter=nextStage.chapter,
 				stage=nextStage.stage
 			}
 		end
-		
+
 		return {
 			chapter=chapter,
 			stage=stage
@@ -216,35 +210,20 @@ script EventService extends Logic
 
 	@ExecSpace("Server")
 	method table GetNextOpenEventStageIdFromServer(integer chapter, integer stage)
-		local currentStage = nil
-		
-		for i, s in pairs(self.data) do
-			if s["chapter"] == chapter and s["stage"] == stage then
-				currentStage = s
-				break
-			end
-		end
-		
-		if currentStage == nil then
-			return {
-				chapter=chapter,
-				stage=stage
-			}
-		end
-		
-		local currentId = tonumber(currentStage["id"])
-		local nextId = tostring(currentId + 1)
-		local index = self.idMap[nextId]
-		
+		local eventIdValue = tostring(self.currentEventVersion)
+		local nextStageNum = stage + 1
+		local mapKey = eventIdValue .. "_" .. tostring(chapter) .. "_" .. tostring(nextStageNum)
+		local index = self.idMap[mapKey]
+
 		if index ~= nil and index <= #self.data then
 			local nextStage = self.data[index]
-		
+
 			return {
 				chapter=nextStage.chapter,
 				stage=nextStage.stage
 			}
 		end
-		
+
 		return {
 			chapter=chapter,
 			stage=stage

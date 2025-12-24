@@ -7,10 +7,9 @@ script eventPatternRepo extends Logic
 	method void OnBeginPlay()
 		local dataSet = _DataService:GetTable("EventSpawnPattern")
 		if dataSet == nil then
-			log("EventSpawnPattern DataSet not found")
 			return
 		end
-		
+
 		for index = 1, dataSet:GetRowCount() do
 			local item = {
 				id = tonumber(dataSet:GetCell(index, 'id')),
@@ -19,11 +18,11 @@ script eventPatternRepo extends Logic
 				type = tostring(dataSet:GetCell(index, 'type')),
 				setting = tonumber(dataSet:GetCell(index, 'setting')),
 			}
-		
+
 			if self.patternRepo[item.stage] == nil then
 				self.patternRepo[item.stage] = {}
 			end
-		
+
 			table.insert(self.patternRepo[item.stage], item)
 		end
 	end

@@ -18,14 +18,11 @@ script ExtendEventSelectorUI extends StageSelectorUI
 	property Entity prevButton = nil
 
 	method void UpdateData(EntityRef userStageEntity)
-		log("[ExtendEventSelectorUI] UpdateData START")
 		local path = self.Entity.Path
-		log("[ExtendEventSelectorUI] Path: " .. path)
 
 		local userStage = userStageEntity.UserStage
 
 		if userStage == nil then
-			log("[ExtendEventSelectorUI] ERROR: userStage is nil!")
 			return
 		end
 
@@ -35,18 +32,13 @@ script ExtendEventSelectorUI extends StageSelectorUI
 		local selectChapter = userStage.eventSelectChapter
 		local openChapter = userStage.eventOpenChapter
 
-		log("[ExtendEventSelectorUI] eventOpenChapter: " .. tostring(openChapter) .. ", eventOpenStage: " .. tostring(openStage))
-		log("[ExtendEventSelectorUI] eventSelectChapter: " .. tostring(selectChapter) .. ", eventSelectStage: " .. tostring(selectStage))
-
 		local eventStageDataList = _EventService:GetEventStageByChapter(selectChapter)
 		local stageCount = #eventStageDataList
-		log("[ExtendEventSelectorUI] Got " .. tostring(stageCount) .. " stages for chapter " .. tostring(selectChapter))
 
 		self.StageInfoPanel = _EntityService:GetEntityByPath(path .. "/StageInfoPanel/panel")
 
 		for i = 1, 6 do
 			local entity = _EntityService:GetEntityByPath(path .. "/SelectPanel/StageSelectScroll/Select_" .. tostring(i))
-			log("[ExtendEventSelectorUI] Processing Select_" .. tostring(i) .. ", entity: " .. tostring(entity ~= nil))
 
 			if i > stageCount then
 				entity:SetEnable(false)
@@ -54,17 +46,14 @@ script ExtendEventSelectorUI extends StageSelectorUI
 			end
 			entity:SetEnable(true)
 
-			log("[ExtendEventSelectorUI] Calling Init for Select_" .. tostring(i))
 			entity.StageSelectItemUI:Init()
 
 			self.SelectButtonList[i] = entity
 
-			log("[ExtendEventSelectorUI] Adding callback for Select_" .. tostring(i))
 			entity.StageSelectItemUI:AddCallback(function()
 				self:ClickButtonHanddler(i, userStageEntity)
 			end)
 
-			log("[ExtendEventSelectorUI] Setting data - button: " .. tostring(eventStageDataList[i].button) .. ", stage: " .. tostring(eventStageDataList[i].stage))
 			entity.StageSelectItemUI:SetImage(eventStageDataList[i].button)
 			entity.StageSelectItemUI:SetId(eventStageDataList[i].stage)
 			entity.StageSelectItemUI:SetName(eventStageDataList[i].name)
@@ -112,8 +101,6 @@ script ExtendEventSelectorUI extends StageSelectorUI
 		if self.prevButton ~= nil then
 			self.prevButton.ButtonComponent.Enable = (selectChapter > 1)
 		end
-
-		log("[ExtendEventSelectorUI] ========== UpdateData COMPLETE ==========")
 	end
 
 	method void ClickButtonHanddler(integer id, EntityRef userStageEntity)
@@ -144,21 +131,16 @@ script ExtendEventSelectorUI extends StageSelectorUI
 	end
 
 	method void SetUserEventStageComp(EntityRef newEntity)
-		log("[ExtendEventSelectorUI] ========== SetUserEventStageComp START ==========")
-
 		-- UserStage 컴포넌트 사용 (이벤트 필드 포함)
 		local newComp = newEntity.UserStage
 
 		if newComp == nil then
-			log("[ExtendEventSelectorUI] ERROR: UserStage component not found!")
 			return
 		end
 
-		log("[ExtendEventSelectorUI] Adding update callback")
 		newComp.updateList[#newComp.updateList + 1] = function() self:UpdateData(newEntity) end
 
 		-- UI 포커싱 시 가장 난이도 높은 스테이지(현재 진행 중인 스테이지) 선택
-		log("[ExtendEventSelectorUI] Setting initial selection - eventOpenChapter: " .. tostring(newComp.eventOpenChapter) .. ", eventOpenStage: " .. tostring(newComp.eventOpenStage))
 		newComp.eventSelectChapter = newComp.eventOpenChapter
 		newComp.eventSelectStage = newComp.eventOpenStage
 

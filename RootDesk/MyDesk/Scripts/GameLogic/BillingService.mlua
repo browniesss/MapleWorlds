@@ -19,6 +19,9 @@ script BillingService extends Logic
 	@Sync
 	property integer ThirdPaidCoin = 0
 
+	@Sync
+	property integer EventCoin = 0
+
 	@ExecSpace("ServerOnly")
 	method integer SAVE(string uid)
 		local ds = _DataStorageService:GetUserDataStorage(uid)
@@ -369,6 +372,97 @@ script BillingService extends Logic
 	end
 
 	@ExecSpace("ServerOnly")
+	method integer EVENT_SAVE(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local data = {}
+		
+		data["EventCoin"] = self.EventCoin
+		local save =  _HttpService:JSONEncode(data)
+		
+		local eventIndex = _EventService.currentEventId
+		
+		return ds:SetAndWait(eventIndex,save)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer EVENT_LOAD(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local eventIndex = _EventService.currentEventId
+		
+		local errCode, res = ds:GetAndWait(eventIndex)
+		if errCode ~= 0 then
+			return errCode
+		end
+		
+		if res == nil then
+			return 1000002
+		end
+		
+		local resTable = _HttpService:JSONDecode(res)
+		
+		self.EventCoin = resTable["EventCoin"]
+		
+		log("_BillingService.EventCoin ", self.EventCoin)
+		
+		return 0
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer EVENT_LOAD_OR_INIT(string uid)
+		local errCode = self:EVENT_LOAD(uid)
+		
+		if errCode == 1000002 then
+			self.EventCoin = 0
+			return self:EVENT_SAVE(uid)
+		end
+		
+		if errCode > 0 then
+			log_error(uid, "BILLING SERVICE EVENT FAIL TO GET OR CREATE, code: ", errCode)
+		end
+		
+		return errCode
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer UseEventToken(string userId, integer usage)
+		local loadErr = self:EVENT_LOAD(userId)
+		if loadErr ~= 0 then
+			return loadErr
+		end
+		
+		local eventCoin = self.EventCoin
+		
+		if eventCoin < usage then
+			return -1
+		end
+		
+		eventCoin -= usage
+		
+		self.EventCoin = eventCoin
+		
+		return self:EVENT_SAVE(userId)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer AddEventToken(string userId, integer addCoin)
+		local loadErr = self:EVENT_LOAD(userId)
+		if loadErr ~= 0 then
+			return loadErr
+		end
+		
+		if addCoin <= 0 then
+			return 17
+		end
+		
+		self.EventCoin += addCoin
+		log("[EventCoin] AddEventCoin - userId:", userId, "added:", addCoin, "total:", self.EventCoin)
+		
+		return self:EVENT_SAVE(userId)
+	end
+
+	@ExecSpace("ServerOnly")
 	@EventSender("Service", "UserService")
 	handler HandleUserLeaveEvent(UserLeaveEvent event)
 		--------------- Native Event Sender Info ----------------
@@ -381,6 +475,7 @@ script BillingService extends Logic
 		local UserId = event.UserId
 		
 		self:SAVE(UserId)
+		self:EVENT_SAVE(UserId)
 	end
 
 end

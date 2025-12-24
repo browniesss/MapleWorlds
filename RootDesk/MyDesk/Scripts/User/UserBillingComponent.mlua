@@ -6,6 +6,8 @@ script UserBillingComponent extends Component
 		local uid = self.Entity.PlayerComponent.UserId
 		local res = _BillingService:LOAD_OR_INIT(uid)
 		log(uid, " result of _BillingService:LOAD_OR_INIT ", res)
+		res = _BillingService:EVENT_LOAD_OR_INIT(uid)
+		log(uid, " result of _BillingService:EVENT_LOAD_OR_INIT ", res)
 	end
 
 	@ExecSpace("ClientOnly")
@@ -30,15 +32,15 @@ script UserBillingComponent extends Component
 		local uid = self.Entity.PlayerComponent.UserId
 		local freeCoin = _BillingService.SecondFreeCoin
 		local paidCoin = _BillingService.SecondPaidCoin
-
+		
 		if freeCoin < 0 then
 			return -1
 		end
-
+		
 		if paidCoin < 0 then
 			return -1
 		end
-
+		
 		return freeCoin + paidCoin
 	end
 
@@ -47,16 +49,28 @@ script UserBillingComponent extends Component
 		local uid = self.Entity.PlayerComponent.UserId
 		local freeCoin = _BillingService.ThirdFreeCoin
 		local paidCoin = _BillingService.ThirdPaidCoin
-
+		
 		if freeCoin < 0 then
 			return -1
 		end
-
+		
 		if paidCoin < 0 then
 			return -1
 		end
-
+		
 		return freeCoin + paidCoin
+	end
+
+	@ExecSpace("ClientOnly")
+	method integer GetEventCoin()
+		local uid = self.Entity.PlayerComponent.UserId
+		local eventCoin = _BillingService.EventCoin
+		
+		if eventCoin < 0 then
+			return -1
+		end
+		
+		return eventCoin
 	end
 
 end

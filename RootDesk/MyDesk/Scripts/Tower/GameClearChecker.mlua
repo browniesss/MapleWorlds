@@ -9,12 +9,18 @@ script GameClearChecker extends Component
 		if self.isClear then
 			return
 		end
-		
+
 		local hp = self.Entity.Unit.hp
-		
+
 		if hp <= 0 then
 			self.isClear = true
-			_GameManager:StageClear()
+
+			-- 이벤트 모드와 일반 모드에 따라 다른 클리어 메서드 호출
+			if _GameManager.isEventMode then
+				_GameManager:EventStageClear()
+			else
+				_GameManager:StageClear()
+			end
 		end
 	end
 
