@@ -67,7 +67,7 @@ script ExtendEventSelectorUI extends StageSelectorUI
 			log("[ExtendEventSelectorUI] Setting data - button: " .. tostring(eventStageDataList[i].button) .. ", stage: " .. tostring(eventStageDataList[i].stage))
 			entity.StageSelectItemUI:SetImage(eventStageDataList[i].button)
 			entity.StageSelectItemUI:SetId(eventStageDataList[i].stage)
-			entity.StageSelectItemUI:SetName(eventStageDataList[i].stage_name)
+			entity.StageSelectItemUI:SetName(eventStageDataList[i].name)
 
 			local currentChapter = eventStageDataList[i].chapter
 			local currentStage = eventStageDataList[i].stage
