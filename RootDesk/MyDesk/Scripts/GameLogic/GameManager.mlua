@@ -119,11 +119,13 @@ script GameManager extends Logic
 	end
 
 	@ExecSpace("Server")
-	method void GameStart(integer chapterIndex, integer mapIndex)
+	method void GameStart(integer chapterIndex, integer mapIndex, boolean isEventMode)
 		self.chapterIndex = chapterIndex
 		self.mapIndex = mapIndex
 		self.isPlaying = true
 		self.playStartTs = DateTime.UtcNow.Elapsed
+		self.isEventMode = isEventMode
+		self:SyncEventMode(isEventMode)
 		
 		local userIncome = _SpawnManager:GetUserIncome()
 		local baseIncomeData = userIncome.MesoIncome:GetMesoData()
@@ -518,12 +520,13 @@ script GameManager extends Logic
 		self:StageClearClientCallback(isFirstClear, 0, senderUserId)
 		
 		-- 최초 클리어: cleared 목록에 추가 및 다음 스테이지 오픈
-		userStage:AddClearedStage(clearedChapter, clearedStage)
-		
-		local nextStage = _StageService:GetNextOpenStageIdFromServer(userStage.openChapter, userStage.openStage)
-		if nextStage.chapter ~= userStage.openChapter or nextStage.stage ~= userStage.openStage then
-			userStage:SetClearStage(nextStage.chapter, nextStage.stage)
+		if userStage:IsClearStage(clearedChapter, clearedStage) == false then
+			local nextStage = _StageService:GetNextOpenStageIdFromServer(userStage.openChapter, userStage.openStage)
+			if nextStage.chapter ~= userStage.openChapter or nextStage.stage ~= userStage.openStage then
+				userStage:SetClearStage(nextStage.chapter, nextStage.stage)
+			end
 		end
+		userStage:AddClearedStage(clearedChapter, clearedStage)
 		
 		
 		if isFirstClear == false then
@@ -622,7 +625,7 @@ script GameManager extends Logic
 		
 			_ResourceService:PreloadAsync(ruids, function()
 				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage".. userStage.selectChapter.."0"..userStage.selectStage)
-				self:GameStart(userStage.selectChapter, userStage.selectStage)
+				self:GameStart(userStage.selectChapter, userStage.selectStage, false)
 			end)
 		end)
 	end
@@ -675,9 +678,7 @@ script GameManager extends Logic
 
 	@ExecSpace("Server")
 	method void EventGameStart(integer chapterIndex, integer mapIndex)
-		self.isEventMode = true
-		self:SyncEventMode(true)
-		self:GameStart(chapterIndex, mapIndex)
+		self:GameStart(chapterIndex, mapIndex, true)
 	end
 
 	@ExecSpace("Client")
@@ -772,7 +773,7 @@ script GameManager extends Logic
 		
 			_ResourceService:PreloadAsync(ruids, function()
 				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage000")
-				self:GameStart(0, 0)
+				self:GameStart(0, 0, false)
 			end)
 		end)
 	end
