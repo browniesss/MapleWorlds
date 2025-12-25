@@ -223,6 +223,7 @@ script GameManager extends Logic
 		self.failPopupUI.Visible = false
 		
 		self.isEventMode = false
+		self:SyncEventMode(false)
 		
 		self:ClearObjects()
 		self:ClearTimer()
@@ -236,7 +237,15 @@ script GameManager extends Logic
 		end
 		
 		if self.isEventMode then
-			return "/maps/Event" .. string.format("%02d", self.chapterIndex) .. string.format("%02d", self.mapIndex)
+			local chapterStr = "" .. self.chapterIndex
+			local mapStr = "" .. self.mapIndex
+			if self.chapterIndex < 10 then
+				chapterStr = "0" .. self.chapterIndex
+			end
+			if self.mapIndex < 10 then
+				mapStr = "0" .. self.mapIndex
+			end
+			return "/maps/Event" .. chapterStr .. mapStr
 		end
 		
 		return "/maps/Stage"..self.chapterIndex.."0"..self.mapIndex
@@ -446,15 +455,15 @@ script GameManager extends Logic
 	method void StageClearClientCallback(boolean isFirstClear, integer eventToken)
 		local userAvatar = _EntityService:GetEntityByPath("/ui/GameClearUI/Frame/UserAvatar/UnitAvartar")
 		local clearRewardUI = _EntityService:GetEntityByPath("/ui/GameClearUI/Frame/ClearReward")
-
+		
 		if eventToken == nil then
 			eventToken = 0
 		end
-
+		
 		self.gameClearResult.Enable = true
 		self.gameClearResult.Visible = true
 		clearRewardUI.ClearRewardUI:RefreshUI(isFirstClear, self.isEventMode, eventToken)
-
+		
 		-- 이벤트 모드에서는 랭킹 UI 비활성화
 		if self.rankUI ~= nil then
 			local rankEntity = self.rankUI.Entity
@@ -466,9 +475,9 @@ script GameManager extends Logic
 				rankEntity.Visible = true
 			end
 		end
-
+		
 		_Utils:FadeIn(self.gameClearResult, 0.5)
-
+		
 		userAvatar.AvatarGUIRendererComponent:PlayEmotion(EmotionalType.Love, 100)
 	end
 
@@ -688,25 +697,25 @@ script GameManager extends Logic
 		local user = _UserService:GetUserEntityByUserId(senderUserId)
 		local userStage = user.UserStage
 		local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
-
+		
 		local isFirstClear = false
 		local isNewStage = (clearedChapter > userStage.eventOpenChapter) or
 			(clearedChapter == userStage.eventOpenChapter and clearedStage >= userStage.eventOpenStage)
 		local isNotCleared = not userStage:IsEventStageCleared(clearedChapter, clearedStage)
-
+		
 		if isNewStage and isNotCleared then
 			isFirstClear = true
 		end
-
+		
 		-- 이벤트 스테이지 데이터에서 토큰 정보 가져오기
 		local eventIdValue = tostring(_EventService.currentEventVersion)
 		local eventStageData = _EventService:GetEventStageByIdFromServer(eventIdValue, clearedChapter, clearedStage)
 		local eventToken = 0
-
+		
 		if isFirstClear then
 			-- 최초 클리어 보상
 			_BillingService:AddSecondFreeCoin(senderUserId, 300)
-
+		
 			-- 이벤트 토큰 지급 (최초 클리어)
 			if eventStageData ~= nil and eventStageData.get_first_event_token ~= nil then
 				eventToken = eventStageData.get_first_event_token
@@ -719,7 +728,7 @@ script GameManager extends Logic
 				_BillingService:AddEventToken(senderUserId, eventToken)
 			end
 		end
-
+		
 		-- 클라이언트 UI 업데이트 콜백 (이벤트 토큰 전달)
 		self:StageClearClientCallback(isFirstClear, eventToken, senderUserId)
 		
