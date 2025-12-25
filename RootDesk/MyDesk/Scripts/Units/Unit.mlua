@@ -882,7 +882,7 @@ script Unit extends Component
 			end
 		end
 		
-		if attacker.Unit ~= nil and attacker.Unit.unitName == "비숍" or attacker.Unit.unitName == "산타 루시드" then
+		if attacker.Unit ~= nil and (attacker.Unit.unitName == "비숍" or attacker.Unit.unitName == "산타 루시드") then
 		    damage = 0
 		end
 		
