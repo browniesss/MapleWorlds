@@ -59,15 +59,15 @@ script AdventureButton extends Component
 		---------------------------------------------------------
 		_LobbyManager.lobbyUI.Enable = false
 		_LobbyManager.lobbyTopUI.Enable = false
-
+		
 		self:Function1()
 		-- 데이터 세팅 필요
-
+		
 		local ruids = _GameManager:GetPreLoadAssetRuid()
-
+		
 		_ResourceService:PreloadAsync(ruids, function()
 			_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "TestMap")
-			_GameManager:GameStart(1, 1)
+			_GameManager:GameStart(1, 1, false)
 		end)
 	end
 

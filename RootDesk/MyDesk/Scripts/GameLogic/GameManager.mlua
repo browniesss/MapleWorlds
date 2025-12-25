@@ -119,11 +119,13 @@ script GameManager extends Logic
 	end
 
 	@ExecSpace("Server")
-	method void GameStart(integer chapterIndex, integer mapIndex)
+	method void GameStart(integer chapterIndex, integer mapIndex, boolean isEventMode)
 		self.chapterIndex = chapterIndex
 		self.mapIndex = mapIndex
 		self.isPlaying = true
 		self.playStartTs = DateTime.UtcNow.Elapsed
+		self.isEventMode = isEventMode
+		self:SyncEventMode(isEventMode)
 		
 		local userIncome = _SpawnManager:GetUserIncome()
 		local baseIncomeData = userIncome.MesoIncome:GetMesoData()
@@ -446,15 +448,15 @@ script GameManager extends Logic
 	method void StageClearClientCallback(boolean isFirstClear, integer eventToken)
 		local userAvatar = _EntityService:GetEntityByPath("/ui/GameClearUI/Frame/UserAvatar/UnitAvartar")
 		local clearRewardUI = _EntityService:GetEntityByPath("/ui/GameClearUI/Frame/ClearReward")
-
+		
 		if eventToken == nil then
 			eventToken = 0
 		end
-
+		
 		self.gameClearResult.Enable = true
 		self.gameClearResult.Visible = true
 		clearRewardUI.ClearRewardUI:RefreshUI(isFirstClear, self.isEventMode, eventToken)
-
+		
 		-- 이벤트 모드에서는 랭킹 UI 비활성화
 		if self.rankUI ~= nil then
 			local rankEntity = self.rankUI.Entity
@@ -466,9 +468,9 @@ script GameManager extends Logic
 				rankEntity.Visible = true
 			end
 		end
-
+		
 		_Utils:FadeIn(self.gameClearResult, 0.5)
-
+		
 		userAvatar.AvatarGUIRendererComponent:PlayEmotion(EmotionalType.Love, 100)
 	end
 
@@ -613,7 +615,7 @@ script GameManager extends Logic
 		
 			_ResourceService:PreloadAsync(ruids, function()
 				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage".. userStage.selectChapter.."0"..userStage.selectStage)
-				self:GameStart(userStage.selectChapter, userStage.selectStage)
+				self:GameStart(userStage.selectChapter, userStage.selectStage, false)
 			end)
 		end)
 	end
@@ -666,9 +668,7 @@ script GameManager extends Logic
 
 	@ExecSpace("Server")
 	method void EventGameStart(integer chapterIndex, integer mapIndex)
-		self.isEventMode = true
-		self:SyncEventMode(true)
-		self:GameStart(chapterIndex, mapIndex)
+		self:GameStart(chapterIndex, mapIndex, true)
 	end
 
 	@ExecSpace("Client")
@@ -688,25 +688,25 @@ script GameManager extends Logic
 		local user = _UserService:GetUserEntityByUserId(senderUserId)
 		local userStage = user.UserStage
 		local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
-
+		
 		local isFirstClear = false
 		local isNewStage = (clearedChapter > userStage.eventOpenChapter) or
 			(clearedChapter == userStage.eventOpenChapter and clearedStage >= userStage.eventOpenStage)
 		local isNotCleared = not userStage:IsEventStageCleared(clearedChapter, clearedStage)
-
+		
 		if isNewStage and isNotCleared then
 			isFirstClear = true
 		end
-
+		
 		-- 이벤트 스테이지 데이터에서 토큰 정보 가져오기
 		local eventIdValue = tostring(_EventService.currentEventVersion)
 		local eventStageData = _EventService:GetEventStageByIdFromServer(eventIdValue, clearedChapter, clearedStage)
 		local eventToken = 0
-
+		
 		if isFirstClear then
 			-- 최초 클리어 보상
 			_BillingService:AddSecondFreeCoin(senderUserId, 300)
-
+		
 			-- 이벤트 토큰 지급 (최초 클리어)
 			if eventStageData ~= nil and eventStageData.get_first_event_token ~= nil then
 				eventToken = eventStageData.get_first_event_token
@@ -719,7 +719,7 @@ script GameManager extends Logic
 				_BillingService:AddEventToken(senderUserId, eventToken)
 			end
 		end
-
+		
 		-- 클라이언트 UI 업데이트 콜백 (이벤트 토큰 전달)
 		self:StageClearClientCallback(isFirstClear, eventToken, senderUserId)
 		
@@ -763,7 +763,7 @@ script GameManager extends Logic
 		
 			_ResourceService:PreloadAsync(ruids, function()
 				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage000")
-				self:GameStart(0, 0)
+				self:GameStart(0, 0, false)
 			end)
 		end)
 	end
