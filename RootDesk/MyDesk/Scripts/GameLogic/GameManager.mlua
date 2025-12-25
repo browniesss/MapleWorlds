@@ -511,12 +511,13 @@ script GameManager extends Logic
 		self:StageClearClientCallback(isFirstClear, 0, senderUserId)
 		
 		-- 최초 클리어: cleared 목록에 추가 및 다음 스테이지 오픈
-		userStage:AddClearedStage(clearedChapter, clearedStage)
-		
-		local nextStage = _StageService:GetNextOpenStageIdFromServer(userStage.openChapter, userStage.openStage)
-		if nextStage.chapter ~= userStage.openChapter or nextStage.stage ~= userStage.openStage then
-			userStage:SetClearStage(nextStage.chapter, nextStage.stage)
+		if userStage:IsClearStage(clearedChapter, clearedStage) == false then
+			local nextStage = _StageService:GetNextOpenStageIdFromServer(userStage.openChapter, userStage.openStage)
+			if nextStage.chapter ~= userStage.openChapter or nextStage.stage ~= userStage.openStage then
+				userStage:SetClearStage(nextStage.chapter, nextStage.stage)
+			end
 		end
+		userStage:AddClearedStage(clearedChapter, clearedStage)
 		
 		
 		if isFirstClear == false then
