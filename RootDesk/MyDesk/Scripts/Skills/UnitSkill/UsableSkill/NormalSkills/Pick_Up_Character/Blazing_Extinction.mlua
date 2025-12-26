@@ -1,0 +1,26 @@
+@Component
+script Blazing_Extinction extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		self:CallAnimation(self.caster.Unit.animationName)
+		
+		local options = {
+		    FlipX = true,  -- 좌우 반전
+		}
+		_EffectService:PlayEffectAttached("f50a966f54374b0cb25060aa35edaea4", self.caster, Vector3(-0.1, 0.5, 0) , 0, Vector3.one, false, options)
+		
+		local function spawnBlaze()
+			local projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			local blazing_extinction = _SpawnService:SpawnByModelId("model://a8768175-e6ee-4d5f-b159-8b2cb7ff06e0", "Blazing_Extinction", self.caster.TransformComponent.WorldPosition + Vector3(1, 0.5, 0), projectileParent)
+		
+			blazing_extinction.NonTargetProjectile:Init(self.caster, self.skillAmount, self.skillTime, self.caster.Unit.isEnemy, self.skillProjectileSpeed, false)
+		end
+		
+		-- 첫 번째 발사: 공격 모션 발생
+		_TimerService:SetTimerOnce(spawnBlaze, self.skillAttackTiming)
+	end
+
+end

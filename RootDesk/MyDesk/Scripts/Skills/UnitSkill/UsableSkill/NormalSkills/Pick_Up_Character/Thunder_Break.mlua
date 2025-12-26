@@ -1,0 +1,59 @@
+@Component
+script Thunder_Break extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		-- 57cbc4a4d5c34961947adca1a9e285c2 번개 이펙트
+		-- 818bffaf68bc4b1cbe3fef1a64bb29f1 생성 이펙트
+		-- model://eb55c750-4f90-4c56-ac8e-366cee24430f 모델
+		
+		self:CallAnimation(self.caster.Unit.animationName)
+		
+		if self._T.projectileParent == nil then
+			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+		end
+		
+		local options = {
+		    FlipX = true,  -- 좌우 반전
+			OrderInLayer = 0,
+		}
+		
+		_EffectService:PlayEffectAttached("818bffaf68bc4b1cbe3fef1a64bb29f1", self.caster, Vector3(0, 0, 0) , 0, Vector3.one, false, options)
+		
+		-- 기본 위치와 방향 설정
+		local index = 1
+		local timer
+		
+		local function SpawnThunder()
+			local spawnOffset = Vector3(-2 + (3 * index), 0, 0)  -- 거리 간격 조절
+		    local spawnPosition = self.caster.TransformComponent.WorldPosition + spawnOffset
+			
+		    local wave = _SpawnService:SpawnByModelId("model://eb55c750-4f90-4c56-ac8e-366cee24430f", "Thunder"..index, spawnPosition, self._T.projectileParent)
+		    local deleteTime = _Utils:GetRUIDTime(wave.SpriteRendererComponent.SpriteRUID)
+		
+		    wave.DelayAttackComponent:Init(self.skillAmount, self.caster, false)
+		
+		    local damageFunction = function()
+		        wave.TriggerComponent.Enable = true
+		    end
+		
+		    local deleteFunction = function()
+		        _EntityService:Destroy(wave)
+		    end
+		
+		    _TimerService:SetTimerOnce(damageFunction, 0.2)
+		    _TimerService:SetTimerOnce(deleteFunction, deleteTime)
+			
+			index += 1
+			
+			if index == 5 then
+				_TimerService:ClearTimer(timer)
+			end
+		end
+		
+		timer = _TimerService:SetTimerRepeat(SpawnThunder, 0.35)
+	end
+
+end

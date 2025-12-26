@@ -23,6 +23,7 @@ script NonTargetProjectile extends Component
 	property boolean isHitDestroy = false
 
 	method void Init(Entity caster, number damage, number destroyTime, boolean isEnemy, number moveSpeed, boolean isHitDestroy)
+		self.Entity.TriggerComponent.Enable = true
 		self.caster = caster;
 		self.damage = damage;
 		self.destroyTime = destroyTime;
