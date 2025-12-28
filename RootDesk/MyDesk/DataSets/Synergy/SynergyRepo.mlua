@@ -123,6 +123,9 @@ script SynergyRepo extends Logic
 
 	method SynergyList GetSynergyList(number id)
 		local synergy = self.ClientData[tostring(id)]
+		if synergy == nil then
+			return SynergyList()
+		end
 		
 		local synergyList = SynergyList()
 		synergyList:SynergyList_DECODE(synergy)
