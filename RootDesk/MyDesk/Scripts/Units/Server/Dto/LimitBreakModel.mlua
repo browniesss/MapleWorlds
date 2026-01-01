@@ -1,0 +1,117 @@
+@Struct
+script LimitBreakModel
+
+	property string id = ""
+
+	property integer limitBreak = 0
+
+	property integer price = 0
+
+	property string skillID = "0"
+
+	property string passiveSkillID = "0"
+
+	property number hp = 0
+
+	property number damage = 0
+
+	property integer summonCost = 0
+
+	property integer countryId = 0
+
+	property integer jobId = 0
+
+	property integer mp = 0
+
+	property string buttonRUID = ""
+
+	method void Init(table data)
+		self.id = tostring(data["id"])
+		self.limitBreak = tonumber(data["limitBreak"])
+		self.price = tonumber(data["price"])
+		self.skillID = tostring(data["skillID"])
+		self.passiveSkillID = tostring(data["passiveSkillID"])
+		self.hp = tonumber(data["hp"])
+		self.mp = tonumber(data["mp"])
+		self.damage = tonumber(data["damage"])
+		self.summonCost = tonumber(data["summonCost"])
+		self.countryId = tonumber(data["countryId"])
+		self.jobId = tonumber(data["jobId"])
+	end
+
+	method string GetDesc()
+		local desc = "돌파 " .. self.limitBreak
+		
+		desc = self:isNilNumber(desc, self.hp, "최대 체력 증가")
+		desc = self:isNilNumber(desc, self.mp, "스킬 사용 비용 감소")
+		desc = self:isNilNumber(desc, self.damage, "데미지 증가")
+		desc = self:isNilNumber(desc, self.summonCost, "사망시 반환 비용")
+		
+		if not (self.countryId == 0) then
+			local synergyData = _SynergyRepo:GetSynergyData(self.countryId)
+			desc = desc .. string.format("\n추가 지역 시너지: %s", synergyData.name)
+		end
+		
+		if not (self.jobId == 0) then
+			local synergyData = _SynergyRepo:GetSynergyData(self.jobId)
+			desc = desc .. string.format("\n추가 직업 시너지: %s", synergyData.name)
+		end
+		
+		if not (self.skillID == "0") then
+			log("LimitBreakSkill desc ",self.skillID)
+			local skillData = _SkillService:GetSkillByIDFromClient(self.skillID)
+			desc = desc .. string.format("\n오리진 스킬 추가: %s", skillData.skillName)
+		end
+		
+		return desc
+	end
+
+	method string isNilNumber(string desc, number data, string name)
+		if data == nil then
+			return desc
+		end
+		
+		if data == 0 then
+			return desc
+		end
+		
+		return string.format("%s\n%s: %s", desc, name, data)
+	end
+
+	method LimitBreakModel Diff(LimitBreakModel data)
+		local resp = LimitBreakModel()
+		
+		resp.limitBreak = self.limitBreak - data.limitBreak
+		resp.hp = self.hp - data.hp
+		if resp.hp > 0 then
+			resp.hp = self.hp
+		end
+		resp.mp = self.mp - data.mp
+		if resp.mp > 0 then
+			resp.mp = self.mp
+		end
+		resp.damage = self.damage - data.damage
+		if resp.damage > 0 then
+			resp.damage = self.damage
+		end
+		resp.summonCost = self.summonCost - data.summonCost
+		if resp.summonCost > 0 then
+			resp.summonCost = self.summonCost
+		end
+		resp.countryId = self.countryId - data.countryId
+		if resp.countryId > 0 then
+			resp.countryId = self.countryId
+		end
+		resp.jobId = self.jobId - data.jobId
+		if resp.jobId > 0 then
+			resp.jobId = self.jobId
+		end
+		resp.skillID = data.skillID
+		if not (self.skillID == data.skillID) then
+			resp.skillID = self.skillID
+		end
+		
+		return resp
+	end
+
+end

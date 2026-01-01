@@ -1,0 +1,209 @@
+@Logic
+script LoadingManager extends Logic
+
+	property Entity loadingUI = nil
+
+	property number loadingTimer = 0
+
+	property number textTimer = 0
+
+	property number hideDelayTimer = 0
+
+	property number spriteFadeDelayTimer = 0
+
+	property number timerStep = 0
+
+	property number steps = 0
+
+	property number loadingStartTime = 0
+
+	method void OnBeginPlay()
+		self.loadingUI = _EntityService:GetEntityByPath("/ui/LoadingUI")
+	end
+
+	@ExecSpace("Client")
+	method void Show()
+		if self.loadingUI == nil then
+			self.loadingUI = _EntityService:GetEntityByPath("/ui/LoadingUI")
+		end
+		if self.loadingUI == nil then return end
+		
+		-- 기존 타이머들 취소
+		if self.loadingTimer ~= 0 then
+			_TimerService:ClearTimer(self.loadingTimer)
+			self.loadingTimer = 0
+		end
+		if self.textTimer ~= 0 then
+			_TimerService:ClearTimer(self.textTimer)
+			self.textTimer = 0
+		end
+		if self.hideDelayTimer ~= 0 then
+			_TimerService:ClearTimer(self.hideDelayTimer)
+			self.hideDelayTimer = 0
+		end
+		if self.spriteFadeDelayTimer ~= 0 then
+			_TimerService:ClearTimer(self.spriteFadeDelayTimer)
+			self.spriteFadeDelayTimer = 0
+		end
+		
+		self.loadingStartTime = os.clock()
+		self.loadingUI.Enable = true
+		self.loadingUI.Visible = true
+		
+		self:SetRandomTip()
+		
+		local sprite = self.loadingUI.SpriteGUIRendererComponent
+		local slimeSprite = self.loadingUI.Children[2].SpriteGUIRendererComponent
+		local loadingText = self.loadingUI.Children[3].TextComponent
+		local tipText = self.loadingUI.Children[4].TextComponent
+		
+		sprite.Color = Color(sprite.Color.r, sprite.Color.g, sprite.Color.b, 1)
+		slimeSprite.Color = Color(slimeSprite.Color.r, slimeSprite.Color.g, slimeSprite.Color.b, 1)
+		loadingText.FontColor = Color(loadingText.FontColor.r, loadingText.FontColor.g, loadingText.FontColor.b, 1)
+		tipText.FontColor = Color(tipText.FontColor.r, tipText.FontColor.g, tipText.FontColor.b, 1)
+		
+		-- CanvasGroupComponent의 GroupAlpha도 1로 초기화
+		local loadingTextEntity = self.loadingUI.Children[3]
+		local tipTextEntity = self.loadingUI.Children[4]
+		if loadingTextEntity.CanvasGroupComponent ~= nil then
+			loadingTextEntity.CanvasGroupComponent.GroupAlpha = 1
+		end
+		if tipTextEntity.CanvasGroupComponent ~= nil then
+			tipTextEntity.CanvasGroupComponent.GroupAlpha = 1
+		end
+	end
+
+	@ExecSpace("Client")
+	method void Hide()
+		local MIN_LOADING_TIME = 1
+		local elapsedTime = os.clock() - self.loadingStartTime
+		local remainingTime = MIN_LOADING_TIME - elapsedTime
+		
+		if remainingTime > 0 then
+			self.hideDelayTimer = _TimerService:SetTimerOnce(function()
+				self.hideDelayTimer = 0
+				self:DoHide()
+			end, remainingTime)
+		else
+			self:DoHide()
+		end
+	end
+
+	@ExecSpace("Client")
+	method void DoHide()
+		if self.loadingUI == nil then return end
+		
+		-- 텍스트 먼저 1초에 걸쳐 페이드아웃
+		self:FadeText(0, 1)
+		
+		-- 텍스트 페이드아웃 후 나머지 요소 페이드아웃
+		self.spriteFadeDelayTimer = _TimerService:SetTimerOnce(function()
+			self.spriteFadeDelayTimer = 0
+			self:FadeSprite(0, 1, true)
+		end, 1)
+	end
+
+	@ExecSpace("Client")
+	method void FadeText(number targetAlpha, number duration)
+		if self.loadingUI == nil then return end
+		
+		local tick = 1/60
+		local textSteps = math.ceil(duration / tick)
+		local textTimerStep = 0
+		
+		local loadingTextEntity = self.loadingUI.Children[3]
+		local tipTextEntity = self.loadingUI.Children[4]
+		
+		-- CanvasGroupComponent가 있으면 GroupAlpha 사용 (리치 텍스트 지원)
+		local loadingCanvas = loadingTextEntity.CanvasGroupComponent
+		local tipCanvas = tipTextEntity.CanvasGroupComponent
+		
+		self.textTimer = _TimerService:SetTimerRepeat(function()
+			textTimerStep = textTimerStep + 1
+		
+			local progress = math.min(textTimerStep / textSteps, 1.0)
+			local currentAlpha = 1 - progress * (1 - targetAlpha)
+		
+			if loadingCanvas ~= nil then
+				loadingCanvas.GroupAlpha = currentAlpha
+			else
+				local loadingText = loadingTextEntity.TextComponent
+				local startTextColor = loadingText.FontColor
+				local endTextColor = Color(startTextColor.r, startTextColor.g, startTextColor.b, targetAlpha)
+				loadingText.FontColor = Color.Lerp(startTextColor, endTextColor, progress)
+			end
+		
+			if tipCanvas ~= nil then
+				tipCanvas.GroupAlpha = currentAlpha
+			else
+				local tipText = tipTextEntity.TextComponent
+				local startTipColor = tipText.FontColor
+				local endTipColor = Color(startTipColor.r, startTipColor.g, startTipColor.b, targetAlpha)
+				tipText.FontColor = Color.Lerp(startTipColor, endTipColor, progress)
+			end
+		
+			if progress >= 1 then
+				_TimerService:ClearTimer(self.textTimer)
+				self.textTimer = 0
+			end
+		end, tick, 0)
+	end
+
+	@ExecSpace("Client")
+	method void SetRandomTip()
+		if self.loadingUI == nil then return end
+		
+		local tipText = self.loadingUI.Children[4].TextComponent
+		local dataSet = _DataService:GetTable("TipData")
+		
+		if dataSet == nil or dataSet:GetRowCount() == 0 then
+			tipText.Text = ""
+			return
+		end
+		
+		local randomIndex = math.random(1, dataSet:GetRowCount())
+		local row = dataSet:GetRow(randomIndex)
+		tipText.Text = "Tip. " .. row:GetItem("tip")
+	end
+
+	@ExecSpace("Client")
+	method void FadeSprite(number targetAlpha, number duration, boolean isFadeOut)
+		if self.loadingUI == nil then return end
+		
+		duration = duration or 0.35
+		
+		local t, tick = 0, 1/60
+		
+		self.steps = math.ceil(duration / tick)
+		self.timerStep = 0
+		
+		self.loadingTimer = _TimerService:SetTimerRepeat(function()
+			self.timerStep = self.timerStep + 1
+		
+			local progress = math.min(self.timerStep / self.steps, 1.0)
+			local sprite = self.loadingUI.SpriteGUIRendererComponent
+			local slimeSprite = self.loadingUI.Children[2].SpriteGUIRendererComponent
+		
+			local startColor = sprite.Color
+			local endColor = Color(startColor.r, startColor.g, startColor.b, targetAlpha)
+			local startSlimeColor = slimeSprite.Color
+			local endSlimeColor = Color(startSlimeColor.r, startSlimeColor.g, startSlimeColor.b, targetAlpha)
+		
+			sprite.Color = Color.Lerp(startColor, endColor, progress)
+			slimeSprite.Color = Color.Lerp(startSlimeColor, endSlimeColor, progress)
+		
+			if progress >= 1 then
+				sprite.Color = endColor
+				_TimerService:ClearTimer(self.loadingTimer)
+			end
+		end, tick, 0)
+		
+		if isFadeOut then
+			_TimerService:SetTimerOnce(function()
+				self.loadingUI.Visible = false
+				self.loadingUI.Enable = false
+			end, self.steps * tick)
+		end
+	end
+
+end

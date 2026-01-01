@@ -7,18 +7,25 @@ script GachaUnitInfoPanel extends Component
 
 	property table spawnSkillData = {}
 
+	property table limitBreakSkillData = {}
+
 	property Entity unitDetailInfo = "05879926-07e0-412f-aa4d-43c8a8258596"
 
 	property Entity normalSkillInfo = "88caa43e-4764-4a16-9af4-84db6016774c"
 
 	property Entity spawnSkillInfo = "7afb82e1-511b-4884-8f65-f5da1e804a21"
 
-	method void Init(table unitData, table normalSkillData, table spawnSkillData)
+	property Entity limitBreakSkillInfo = "4f41e3cf-6a68-4f45-a770-0782ab3995d4"
+
+	method void Init(table unitData, table normalSkillData, table spawnSkillData, table limitBreakSkillData)
 		self.unitData = unitData
 		self.skillData = normalSkillData
 		self.spawnSkillData = spawnSkillData
+		self.limitBreakSkillData = limitBreakSkillData
 		
-		self.unitDetailInfo.UnitDetailInfo:Init(self.unitData)
+		local buffedModel = BuffedUnitModel()
+		buffedModel:Init(unitData)
+		self.unitDetailInfo.UnitDetailInfo:InitForGacha(buffedModel)
 		self.normalSkillInfo.UnitSkillInfo:Init(self.skillData)
 		
 		if spawnSkillData == nil then
@@ -28,6 +35,14 @@ script GachaUnitInfoPanel extends Component
 			self.spawnSkillInfo.Enable = true
 			self.spawnSkillInfo.Visible = true
 			self.spawnSkillInfo.UnitSkillInfo:Init(self.spawnSkillData)	
+		end
+		
+		self.limitBreakSkillInfo.Enable = false
+		self.limitBreakSkillInfo.Visible = false
+		if not (limitBreakSkillData == nil or limitBreakSkillData.limitBreak == 0) then
+			self.limitBreakSkillInfo.UnitSkillInfo:Init(self.limitBreakSkillData)
+			self.limitBreakSkillInfo.Enable = true
+			self.limitBreakSkillInfo.Visible = true
 		end
 		
 	end

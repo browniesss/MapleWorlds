@@ -16,7 +16,7 @@
       {
         "id": "0e4ac076-9137-454a-a6b8-588d189e26c3",
         "path": "/ui/RewardPopupUI",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.UIGroupComponent,MOD.Core.CanvasGroupComponent,script.RewardPopupUI",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.UIGroupComponent,MOD.Core.CanvasGroupComponent,script.RewardPopupUI,MOD.Core.TagComponent",
         "jsonString": {
           "name": "RewardPopupUI",
           "path": "/ui/RewardPopupUI",
@@ -24,7 +24,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 24,
+          "displayOrder": 23,
           "pathConstraints": "//",
           "revision": 1,
           "origin": {
@@ -84,7 +84,7 @@
             {
               "@type": "MOD.Core.UIGroupComponent",
               "DefaultShow": false,
-              "GroupOrder": 24,
+              "GroupOrder": 23,
               "GroupType": 2,
               "Enable": true
             },
@@ -94,6 +94,13 @@
             },
             {
               "@type": "script.RewardPopupUI",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TagComponent",
+              "Tags": [
+                "LobbyPopup"
+              ],
               "Enable": true
             }
           ],

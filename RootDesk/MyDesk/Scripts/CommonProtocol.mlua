@@ -1,0 +1,25 @@
+@Component
+script CommonProtocol extends Component
+
+	@ExecSpace("ServerOnly")
+	method void CommonCall(string uid)
+		-- 프로토콜 콜 공통 로직
+		if uid == nil then
+			self:LogAndKick(uid, "user id is empty")
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void CommonBack(table resp)
+		-- 프로토콜 콜 공통 로직
+	end
+
+	@ExecSpace("ServerOnly")
+	method void LogAndKick(string uid, string msg)
+		-- 로그를 남기고 유저에게 제트킥
+		-- TODO: 로그 남기는 부분을 외부로 뺴거나 보강 필요함
+		log_error(uid, " is kicked: ", msg)
+		_UserService:KickUser(uid, KickReason.WorldError)
+	end
+
+end

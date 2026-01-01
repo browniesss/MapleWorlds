@@ -1,0 +1,50 @@
+@Component
+script Paladin_Origin extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		_UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill = true
+		_UserService.LocalPlayer.PlayerCharacter.isLimitBreakSkill = true
+		
+		local enemyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
+		local enemies = enemyListParent.Children
+		local player = _EntityService:GetEntityByTag("Player")
+		local entity = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group")
+		
+		_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = "6d2d7e4af0ff4823b1397d0db836c2b8"
+		_GameManager.screenSkillUI.SpriteGUIRendererComponent.LocalScale = Vector2(1.2, 1.2)
+		_GameManager.screenSkillUI.Enable = true
+		_GameManager.screenSkillUI.Visible = true
+		
+		local hitFunction = function()
+			for index in ipairs(enemies) do
+				local monster = enemies[index]
+			
+				if monster.Name == "EnemySpawnPoint" then
+					continue
+				end
+				
+				local user = self.caster
+				local unit = user.UserUnitStore.UserUnitMap["model://4bceb5e7-5fc1-4768-b152-63ba57a12101"]
+				
+				if monster.Enable then
+					monster.Unit:OnHit(self.caster, unit.damage * self.skillAmount, true, 10)
+				end
+			end
+		end
+		
+		local deleteFunction = function()
+			_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = ""
+			_GameManager.screenSkillUI.Enable = false	
+			_GameManager.screenSkillUI.Visible = false
+			_UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill = false
+			_UserService.LocalPlayer.PlayerCharacter.isLimitBreakSkill = false
+		end
+		
+		_TimerService:SetTimerOnce(hitFunction, self.skillAttackTiming)
+		_TimerService:SetTimerOnce(deleteFunction, self.skillTime)
+	end
+
+end

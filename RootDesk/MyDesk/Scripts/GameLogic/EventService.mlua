@@ -1,0 +1,270 @@
+@Logic
+script EventService extends Logic
+
+	property table data = {}
+
+	property table idMap = {}
+
+	property integer lastChapter = 0
+
+	property integer lastStageIndex = 0
+
+	property string currentEventId = "event_1"
+
+	property integer currentEventVersion = 1
+
+	property table eventDataMap = {}
+
+	@ExecSpace("Client")
+	method table GetAllEventStages()
+		return self.data
+	end
+
+	@ExecSpace("Client")
+	method table GetEventStageByChapter(integer chapter)
+		local list = {}
+		
+		for id, stage in pairs(self.data) do
+			if stage["chapter"] ~= chapter then
+				continue
+			end
+		
+			list[#list + 1] = stage
+		end
+		
+		return list
+	end
+
+	@ExecSpace("Client")
+	method table GetEventStageById(string id, integer chapter, integer stage)
+		local mapKey = id .. "_" .. tostring(chapter) .. "_" .. tostring(stage)
+		local index = self.idMap[mapKey]
+		local target = self.data[index]
+
+		return target
+	end
+
+	@ExecSpace("Server")
+	method table GetEventStageByIdFromServer(string id, integer chapter, integer stage)
+		local mapKey = id .. "_" .. tostring(chapter) .. "_" .. tostring(stage)
+		local index = self.idMap[mapKey]
+		local target = self.data[index]
+
+		return target
+	end
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		self:LoadEventData(self.currentEventId)
+		log("EVENT SERVICE INIT DONE")
+	end
+
+	@ExecSpace("ServerOnly")
+	method void LoadEventData(string eventId)
+		-- EventData 테이블 로드
+		local eventDataSet = _DataService:GetTable("EventData")
+		self.eventDataMap = {}
+
+		if eventDataSet ~= nil then
+			local eventDataCount = eventDataSet:GetRowCount()
+
+			for i = 1, eventDataCount do
+				local eventIdValue = tostring(eventDataSet:GetCell(i, "id"))
+				self.eventDataMap[eventIdValue] = {
+					start_ts = tonumber(eventDataSet:GetCell(i, "start_ts")),
+					end_ts = tonumber(eventDataSet:GetCell(i, "end_ts")),
+					ruid_info = tostring(eventDataSet:GetCell(i, "ruid_info")),
+					stage_desc = tostring(eventDataSet:GetCell(i, "stage_desc")),
+					chapter_name = tostring(eventDataSet:GetCell(i, "chapter_name"))
+				}
+			end
+		end
+
+		-- 이벤트 스테이지 테이블 로드
+		local dataSet = _DataService:GetTable(eventId)
+
+		if dataSet == nil then
+			-- 대체 테이블명 시도
+			local alternatives = {"event", "Event/event_1", "Event_event_1"}
+			for _, altName in ipairs(alternatives) do
+				dataSet = _DataService:GetTable(altName)
+				if dataSet ~= nil then
+					break
+				end
+			end
+
+			if dataSet == nil then
+				return
+			end
+		end
+
+		local stageCount = dataSet:GetRowCount()
+
+		self.data = {}
+		self.idMap = {}
+		self.lastChapter = 0
+		self.lastStageIndex = 0
+
+		for i = 1, stageCount do
+			local stage = {}
+
+			-- event_1.csv의 id는 EventData의 id와 매칭
+			local eventIdValue = tostring(dataSet:GetCell(i,"id"))
+			stage["id"] = eventIdValue
+			stage["chapter"] = tonumber(dataSet:GetCell(i,"chapter"))
+			stage["stage"] = tonumber(dataSet:GetCell(i,"stage"))
+
+			-- event_1.csv에서 name 가져오기
+			stage["name"] = tostring(dataSet:GetCell(i,"name"))
+
+			-- EventData에서 가져올 데이터
+			local eventData = self.eventDataMap[eventIdValue]
+
+			if eventData ~= nil then
+				stage["info"] = eventData.ruid_info
+				stage["stage_desc"] = eventData.stage_desc
+				stage["chapter_name"] = eventData.chapter_name
+				-- 날짜 형식으로 변환된 스테이지 이름
+				stage["stage_name"] = _Utils:FormatEventPeriod(eventData.start_ts, eventData.end_ts)
+			else
+				-- EventData를 찾지 못한 경우 기본값 사용
+				stage["info"] = ""
+				stage["stage_desc"] = ""
+				stage["chapter_name"] = ""
+				stage["stage_name"] = stage["name"]
+			end
+
+			-- event_1.csv에서 직접 가져올 데이터
+			stage["button"] = tostring(dataSet:GetCell(i,"ruid_button"))
+			stage["enemy_tower_hp"] = tonumber(dataSet:GetCell(i,"enemy_tower_hp"))
+			stage["synergy_id"] = tostring(dataSet:GetCell(i,"synergy_id"))
+			stage["level"] = tonumber(dataSet:GetCell(i,"enemy_level"))
+			stage["get_first_event_token"] = tonumber(dataSet:GetCell(i,"get_first_event_token"))
+			stage["get_event_token"] = tonumber(dataSet:GetCell(i,"get_event_token"))
+
+			self.data[i] = stage
+
+			-- idMap은 인덱스 기반으로 생성 (같은 id가 여러 개 있을 수 있으므로)
+			local mapKey = eventIdValue .. "_" .. tostring(stage["chapter"]) .. "_" .. tostring(stage["stage"])
+			self.idMap[mapKey] = i
+
+			if self.lastChapter < stage.chapter then
+				self.lastChapter = stage.chapter
+			end
+
+			self.lastStageIndex = i
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void SetCurrentEvent(integer version)
+		self.currentEventVersion = version
+		self.currentEventId = "event_" .. tostring(version)
+		self:LoadEventData(self.currentEventId)
+	end
+
+	@ExecSpace("Client")
+	method integer GetCurrentEventVersion()
+		return self.currentEventVersion
+	end
+
+	@ExecSpace("Server")
+	method boolean IsEventActive(string eventId)
+		local eventData = self.eventDataMap[eventId]
+
+		if eventData == nil then
+			return false
+		end
+
+		local currentTime = os.time()
+		local endTs = eventData.end_ts
+
+		if endTs == nil or endTs == 0 then
+			return true
+		end
+
+		return currentTime <= endTs
+	end
+
+	@ExecSpace("Client")
+	method table GetNextOpenEventStageId(integer chapter, integer stage)
+		local eventIdValue = tostring(self.currentEventVersion)
+		local nextStageNum = stage + 1
+		local mapKey = eventIdValue .. "_" .. tostring(chapter) .. "_" .. tostring(nextStageNum)
+		local index = self.idMap[mapKey]
+
+		if index ~= nil and index <= #self.data then
+			local nextStage = self.data[index]
+
+			return {
+				chapter=nextStage.chapter,
+				stage=nextStage.stage
+			}
+		end
+
+		return {
+			chapter=chapter,
+			stage=stage
+		}
+	end
+
+	@ExecSpace("Server")
+	method table GetNextOpenEventStageIdFromServer(integer chapter, integer stage)
+		local eventIdValue = tostring(self.currentEventVersion)
+		local nextStageNum = stage + 1
+		local mapKey = eventIdValue .. "_" .. tostring(chapter) .. "_" .. tostring(nextStageNum)
+		local index = self.idMap[mapKey]
+
+		if index ~= nil and index <= #self.data then
+			local nextStage = self.data[index]
+
+			return {
+				chapter=nextStage.chapter,
+				stage=nextStage.stage
+			}
+		end
+
+		return {
+			chapter=chapter,
+			stage=stage
+		}
+	end
+
+	@ExecSpace("Server")
+	method void ReqUpdateClient()
+		self:UpdateClientCallback(_HttpService:JSONEncode(self.data), self.currentEventVersion, senderUserId)
+	end
+
+	@ExecSpace("Client")
+	method void UpdateClientCallback(string json, integer version)
+		if json == nil then
+			return
+		end
+		
+		self.currentEventVersion = version
+		self.currentEventId = "event_" .. tostring(version)
+		
+		local serverData = _HttpService:JSONDecode(json)
+		self.data = {}
+		self.idMap = {}
+		self.lastChapter = 0
+		self.lastStageIndex = 0
+		
+		for i, stage in ipairs(serverData) do
+			self.data[#self.data + 1] = stage
+			self.idMap[stage.id] = i
+		
+			if self.lastChapter < stage.chapter then
+				self.lastChapter = stage.chapter
+			end
+		
+			self.lastStageIndex = i
+		end
+	end
+
+	@EventSender("Service", "UserService")
+	handler HandleUserEnterEvent(UserEnterEvent event)
+		self:ReqUpdateClient()
+	end
+
+end

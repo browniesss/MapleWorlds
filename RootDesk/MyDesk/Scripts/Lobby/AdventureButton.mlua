@@ -63,14 +63,12 @@ script AdventureButton extends Component
 		self:Function1()
 		-- 데이터 세팅 필요
 		
-		_GameManager:ShowLoadingScreen()
-		
 		local ruids = _GameManager:GetPreLoadAssetRuid()
 		
 		_ResourceService:PreloadAsync(ruids, function()
 			_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "TestMap")
-			_GameManager:GameStart(1, 1)
-		end) 
+			_GameManager:GameStart(1, 1, false)
+		end)
 	end
 
 end

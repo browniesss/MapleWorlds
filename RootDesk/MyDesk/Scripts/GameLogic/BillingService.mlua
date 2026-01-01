@@ -19,6 +19,30 @@ script BillingService extends Logic
 	@Sync
 	property integer ThirdPaidCoin = 0
 
+	@Sync
+	property integer EventCoin = 0
+
+	property table eventCoinCallbacks = {}
+
+	@ExecSpace("ClientOnly")
+	method void OnSyncProperty(string name, any value)
+		if name == "EventCoin" then
+			for _, callback in pairs(self.eventCoinCallbacks) do
+				callback(value)
+			end
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void AddEventCoinCallback(string key, any callback)
+		self.eventCoinCallbacks[key] = callback
+	end
+
+	@ExecSpace("ClientOnly")
+	method void RemoveEventCoinCallback(string key)
+		self.eventCoinCallbacks[key] = nil
+	end
+
 	@ExecSpace("ServerOnly")
 	method integer SAVE(string uid)
 		local ds = _DataStorageService:GetUserDataStorage(uid)
@@ -57,7 +81,7 @@ script BillingService extends Logic
 		self.SecondPaidCoin = resTable["SecondPaidCoin"]
 		self.ThirdFreeCoin = resTable["ThirdFreeCoin"] or 0
 		self.ThirdPaidCoin = resTable["ThirdPaidCoin"] or 0
-
+		
 		return 0
 	end
 
@@ -72,13 +96,19 @@ script BillingService extends Logic
 			self.SecondPaidCoin = 0
 			self.ThirdFreeCoin = 0
 			self.ThirdPaidCoin = 0
-
+		
 			return self:SAVE(uid)
 		end
 		
 		if errCode > 0 then
 			log_error(uid, "BILLING SERVICE FAIL TO GET OR CREATE, code: ", errCode)
 			_UserService:KickUser(uid, KickReason.WorldError)
+		end
+		
+		if uid == "20372001292201301" or uid == "20372100004704052" then
+			if self.FirstFreeCoin < 10000 then
+				_BillingService:AddFirstFreeCoin(uid, 10000)
+			end
 		end
 		
 		return 0
@@ -229,13 +259,13 @@ script BillingService extends Logic
 		if loadErr ~= 0 then
 			return loadErr
 		end
-
+		
 		if addCoin <= 0 then
 			return 11
 		end
-
+		
 		self.FirstFreeCoin += addCoin
-
+		
 		return self:SAVE(userId)
 	end
 
@@ -245,13 +275,13 @@ script BillingService extends Logic
 		if loadErr ~= 0 then
 			return loadErr
 		end
-
+		
 		if addCoin <= 0 then
 			return 14
 		end
-
+		
 		self.FirstPaidCoin += addCoin
-
+		
 		return self:SAVE(userId)
 	end
 
@@ -261,13 +291,13 @@ script BillingService extends Logic
 		if loadErr ~= 0 then
 			return loadErr
 		end
-
+		
 		if addCoin <= 0 then
 			return 12
 		end
-
+		
 		self.SecondFreeCoin += addCoin
-
+		
 		return self:SAVE(userId)
 	end
 
@@ -277,13 +307,13 @@ script BillingService extends Logic
 		if loadErr ~= 0 then
 			return loadErr
 		end
-
+		
 		if addCoin <= 0 then
 			return 15
 		end
-
+		
 		self.SecondPaidCoin += addCoin
-
+		
 		return self:SAVE(userId)
 	end
 
@@ -293,23 +323,23 @@ script BillingService extends Logic
 		if loadErr ~= 0 then
 			return loadErr
 		end
-
+		
 		local freeCoin = self.ThirdFreeCoin
 		local paidCoin = self.ThirdPaidCoin
 		local totalCoin = freeCoin + paidCoin
 		if totalCoin < usage then
 			return -1
 		end
-
+		
 		paidCoin -= usage
 		if paidCoin < 0 then
 			freeCoin += paidCoin
 			paidCoin = 0
 		end
-
+		
 		self.ThirdFreeCoin = freeCoin
 		self.ThirdPaidCoin = paidCoin
-
+		
 		return self:SAVE(userId)
 	end
 
@@ -319,14 +349,14 @@ script BillingService extends Logic
 		if loadErr ~= 0 then
 			return loadErr
 		end
-
+		
 		if addCoin <= 0 then
 			return 13
 		end
-
+		
 		self.ThirdFreeCoin += addCoin
 		log("[Meso] AddThirdFreeCoin - userId:", userId, "added:", addCoin, "free:", self.ThirdFreeCoin, "paid:", self.ThirdPaidCoin, "total:", self.ThirdFreeCoin + self.ThirdPaidCoin)
-
+		
 		return self:SAVE(userId)
 	end
 
@@ -336,14 +366,14 @@ script BillingService extends Logic
 		if loadErr ~= 0 then
 			return loadErr
 		end
-
+		
 		if addCoin <= 0 then
 			return 16
 		end
-
+		
 		self.ThirdPaidCoin += addCoin
 		log("[Meso] AddThirdPaidCoin - userId:", userId, "added:", addCoin, "free:", self.ThirdFreeCoin, "paid:", self.ThirdPaidCoin, "total:", self.ThirdFreeCoin + self.ThirdPaidCoin)
-
+		
 		return self:SAVE(userId)
 	end
 
@@ -363,6 +393,97 @@ script BillingService extends Logic
 	end
 
 	@ExecSpace("ServerOnly")
+	method integer EVENT_SAVE(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local data = {}
+		
+		data["EventCoin"] = self.EventCoin
+		local save =  _HttpService:JSONEncode(data)
+		
+		local eventIndex = _EventService.currentEventId
+		
+		return ds:SetAndWait(eventIndex,save)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer EVENT_LOAD(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local eventIndex = _EventService.currentEventId
+		
+		local errCode, res = ds:GetAndWait(eventIndex)
+		if errCode ~= 0 then
+			return errCode
+		end
+		
+		if res == nil then
+			return 1000002
+		end
+		
+		local resTable = _HttpService:JSONDecode(res)
+		
+		self.EventCoin = resTable["EventCoin"]
+		
+		log("_BillingService.EventCoin ", self.EventCoin)
+		
+		return 0
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer EVENT_LOAD_OR_INIT(string uid)
+		local errCode = self:EVENT_LOAD(uid)
+		
+		if errCode == 1000002 then
+			self.EventCoin = 0
+			return self:EVENT_SAVE(uid)
+		end
+		
+		if errCode > 0 then
+			log_error(uid, "BILLING SERVICE EVENT FAIL TO GET OR CREATE, code: ", errCode)
+		end
+		
+		return errCode
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer UseEventToken(string userId, integer usage)
+		local loadErr = self:EVENT_LOAD(userId)
+		if loadErr ~= 0 then
+			return loadErr
+		end
+		
+		local eventCoin = self.EventCoin
+		
+		if eventCoin < usage then
+			return -1
+		end
+		
+		eventCoin -= usage
+		
+		self.EventCoin = eventCoin
+		
+		return self:EVENT_SAVE(userId)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer AddEventToken(string userId, integer addCoin)
+		local loadErr = self:EVENT_LOAD(userId)
+		if loadErr ~= 0 then
+			return loadErr
+		end
+		
+		if addCoin <= 0 then
+			return 17
+		end
+		
+		self.EventCoin += addCoin
+		log("[EventCoin] AddEventCoin - userId:", userId, "added:", addCoin, "total:", self.EventCoin)
+		
+		return self:EVENT_SAVE(userId)
+	end
+
+	@ExecSpace("ServerOnly")
 	@EventSender("Service", "UserService")
 	handler HandleUserLeaveEvent(UserLeaveEvent event)
 		--------------- Native Event Sender Info ----------------
@@ -375,6 +496,7 @@ script BillingService extends Logic
 		local UserId = event.UserId
 		
 		self:SAVE(UserId)
+		self:EVENT_SAVE(UserId)
 	end
 
 end

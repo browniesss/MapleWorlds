@@ -24,7 +24,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 15,
+          "displayOrder": 24,
           "pathConstraints": "//",
           "revision": 1,
           "origin": {
@@ -84,12 +84,13 @@
             {
               "@type": "MOD.Core.UIGroupComponent",
               "DefaultShow": false,
-              "GroupOrder": 15,
+              "GroupOrder": 24,
               "GroupType": 2,
               "Enable": true
             },
             {
               "@type": "MOD.Core.CanvasGroupComponent",
+              "GroupAlpha": 1.0,
               "Enable": true
             },
             {
@@ -108,6 +109,89 @@
         }
       },
       {
+        "id": "f7917d52-61c9-41ca-9211-e7a645737caa",
+        "path": "/ui/LoadingUI/UISprite",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "jsonString": {
+          "name": "UISprite",
+          "path": "/ui/LoadingUI/UISprite",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "///",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uisprite",
+            "sub_entity_id": null
+          },
+          "modelId": "uisprite",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 15,
+              "AnchorsMax": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "AnchorsMin": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 200.0,
+                "y": 200.000031
+              },
+              "OffsetMin": {
+                "x": -200.0,
+                "y": -199.999969
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 2320.0,
+                "y": 1480.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 3.05175781E-05
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "Color": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
         "id": "976218f3-458d-40b0-927d-3fc06a1af87c",
         "path": "/ui/LoadingUI/SlimeSprite",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
@@ -118,7 +202,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 0,
+          "displayOrder": 1,
           "pathConstraints": "///",
           "revision": 1,
           "origin": {
@@ -141,11 +225,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 50.0001335,
+                "x": 50.0,
                 "y": 200.0
               },
               "OffsetMin": {
-                "x": -49.9998665,
+                "x": -50.0,
                 "y": 100.0
               },
               "Pivot": {
@@ -159,11 +243,11 @@
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 0.000131827328,
+                "x": 0.0,
                 "y": 150.0
               },
               "Position": {
-                "x": 0.000131827328,
+                "x": 0.0,
                 "y": 150.0,
                 "z": 0.0
               },
@@ -199,16 +283,16 @@
       },
       {
         "id": "55e55ea4-220e-44aa-b437-20fdf0f8464c",
-        "path": "/ui/LoadingUI/UIText",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "path": "/ui/LoadingUI/UILoading",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent,MOD.Core.CanvasGroupComponent",
         "jsonString": {
-          "name": "UIText",
-          "path": "/ui/LoadingUI/UIText",
+          "name": "UILoading",
+          "path": "/ui/LoadingUI/UILoading",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 1,
+          "displayOrder": 2,
           "pathConstraints": "///",
           "revision": 1,
           "origin": {
@@ -232,11 +316,11 @@
               "MobileOnly": false,
               "OffsetMax": {
                 "x": 200.000137,
-                "y": -50.0
+                "y": 0.0
               },
               "OffsetMin": {
                 "x": -199.999863,
-                "y": -150.0
+                "y": -100.0
               },
               "Pivot": {
                 "x": 0.5,
@@ -250,11 +334,11 @@
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": 0.000131827328,
-                "y": -100.0
+                "y": -50.0
               },
               "Position": {
                 "x": 0.000131827328,
-                "y": -100.0,
+                "y": -50.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -294,6 +378,110 @@
               },
               "OverrideSorting": false,
               "Text": "Loading...",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.CanvasGroupComponent",
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "32a727dc-89e8-495a-ac8d-30a3b8ee796c",
+        "path": "/ui/LoadingUI/TipUI",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent,MOD.Core.CanvasGroupComponent",
+        "jsonString": {
+          "name": "TipUI",
+          "path": "/ui/LoadingUI/TipUI",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 3,
+          "pathConstraints": "///",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 500.0,
+                "y": -75.0
+              },
+              "OffsetMin": {
+                "x": -500.0,
+                "y": -225.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 1000.0,
+                "y": 150.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": -150.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": -150.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 32,
+              "MaxSize": 40,
+              "MinSize": 10,
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.CanvasGroupComponent",
               "Enable": true
             }
           ],

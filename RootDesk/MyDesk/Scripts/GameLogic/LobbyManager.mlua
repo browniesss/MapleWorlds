@@ -18,7 +18,7 @@ script LobbyManager extends Logic
 		-- 데이터 세팅 필요
 		
 		_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Chapter"..chapterIndex)
-		_GameManager:GameStart(chapterIndex, mapIndex)
+		_GameManager:GameStart(chapterIndex, mapIndex, false)
 	end
 
 end

@@ -2508,7 +2508,22 @@
             },
             {
               "@type": "script.ClearRewardUI",
-              "Enable": true
+              "Enable": true,
+              "eventTokenIcon": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "e7873c5d-e70d-435c-978b-d4333f89ad3c"
+              },
+              "eventTokenLabel": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "5f47e43b-64d2-41da-b34d-29d3a292bf42"
+              },
+              "eventTokenFrame": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "3b785f16-6eb0-429d-97d6-65d07484777f"
+              }
             }
           ],
           "@version": 1
@@ -3631,6 +3646,280 @@
               },
               "Position": {
                 "x": 300.0,
+                "y": -250.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "e363fe71863482e40954b62b58bf4ac8"
+              },
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Type": 1,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "e7873c5d-e70d-435c-978b-d4333f89ad3c",
+        "path": "/ui/GameClearUI/Frame/ClearReward/EventIcon",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "jsonString": {
+          "name": "EventIcon",
+          "path": "/ui/GameClearUI/Frame/ClearReward/EventIcon",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 12,
+          "pathConstraints": "/////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uisprite",
+            "sub_entity_id": null
+          },
+          "modelId": "uisprite",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": -130.0,
+                "y": -225.8
+              },
+              "OffsetMin": {
+                "x": -170.0,
+                "y": -264.2
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 40.0,
+                "y": 38.4
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": -150.0,
+                "y": -245.0
+              },
+              "Position": {
+                "x": -150.0,
+                "y": -245.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "fb9dd55406a04662b53ac056ef5820a3"
+              },
+              "LocalScale": {
+                "x": 2.25,
+                "y": 2.25
+              },
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Type": 0,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "5f47e43b-64d2-41da-b34d-29d3a292bf42",
+        "path": "/ui/GameClearUI/Frame/ClearReward/EventLabel",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "EventLabel",
+          "path": "/ui/GameClearUI/Frame/ClearReward/EventLabel",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 13,
+          "pathConstraints": "/////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 100.0,
+                "y": -200.0
+              },
+              "OffsetMin": {
+                "x": -100.0,
+                "y": -300.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 200.0,
+                "y": 100.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": -250.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": -250.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "BestFit": true,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "IsRichText": true,
+              "MaxSize": 40,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "OutlineWidth": 2.0,
+              "OverrideSorting": false,
+              "Text": "30",
+              "UseOutLine": true,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "3b785f16-6eb0-429d-97d6-65d07484777f",
+        "path": "/ui/GameClearUI/Frame/ClearReward/EventFrame",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "jsonString": {
+          "name": "EventFrame",
+          "path": "/ui/GameClearUI/Frame/ClearReward/EventFrame",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 14,
+          "pathConstraints": "/////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uisprite",
+            "sub_entity_id": null
+          },
+          "modelId": "uisprite",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 100.0,
+                "y": -214.0
+              },
+              "OffsetMin": {
+                "x": -100.0,
+                "y": -286.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 200.0,
+                "y": 72.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": -250.0
+              },
+              "Position": {
+                "x": 0.0,
                 "y": -250.0,
                 "z": 0.0
               },

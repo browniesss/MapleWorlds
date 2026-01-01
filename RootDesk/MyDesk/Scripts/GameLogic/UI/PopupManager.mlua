@@ -1,0 +1,16 @@
+@Logic
+script PopupManager extends Logic
+
+	method boolean IsOpenPopup()
+		local popupTable = _EntityService:GetEntitiesByTag("LobbyPopup")
+		
+		for i, popup in pairs(popupTable) do 
+			if popup.EnabledInHierarchy then
+				return true
+			end
+		end
+		
+		return false
+	end
+
+end

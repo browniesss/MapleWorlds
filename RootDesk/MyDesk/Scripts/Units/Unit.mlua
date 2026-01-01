@@ -176,32 +176,58 @@ script Unit extends Component
 	@Sync
 	property number healDecreaseTimerID = 0
 
+	@Sync
+	property integer level = 1
+
+	@Sync
+	property integer limitBreak = 1
+
+	@Sync
+	property string id = ""
+
+	@Sync
+	property string breakLimitSkill = ""
+
+	property BuffedUnitModel baseData = BuffedUnitModel()
+
+	@Sync
+	property boolean isNotTargetUnit = false
+
+	@Sync
+	property integer effectId = 0
+
 	@ExecSpace("Server")
-	method void Spawn(table unitData, table skillData)
-		self.moveSpeed = unitData["moveSpeed"]
-		self.originMoveSpeed = unitData["moveSpeed"]
-		self.hp = unitData["hp"]
-		self.maxHP = unitData["hp"]
-		self.originMaxHP = unitData["hp"]
-		self.damage = unitData["damage"]
-		self.originDamage = unitData["damage"]
-		self.attackRange = unitData["attackRange"]
-		self.attackSpeed = unitData["attackSpeed"]
-		self.originAttackSpeed = unitData["attackSpeed"]
-		self.projectileSpeed = unitData["projectileSpeed"]
-		self.attackTiming = unitData["attackTiming"]
-		self.maxMP = unitData["maxMp"]
-		self.mp = unitData["startMp"]
-		self.damage = unitData["damage"]
-		self.projectileSpriteRUID = unitData["projectileSpriteRUID"]
-		self.unitName = unitData["name"]
-		self.animationName = unitData["animationName"]
-		self.unitScale = unitData["unitScale"]
-		local isUsableCharacter = unitData["isUsableCharacter"]
+	method void Spawn(BuffedUnitModel unitData, table skillData)
+		self.baseData = unitData
+		
+		self.id = unitData.id
+		self.moveSpeed = unitData.moveSpeed
+		self.originMoveSpeed = unitData.moveSpeed
+		self.hp = unitData.hp
+		self.maxHP = unitData.hp
+		self.originMaxHP = unitData.hp
+		self.damage = unitData.damage
+		self.originDamage = unitData.damage
+		self.attackRange = unitData.attackRange
+		self.attackSpeed = unitData.attackSpeed
+		self.originAttackSpeed = unitData.attackSpeed
+		self.projectileSpeed = unitData.projectileSpeed
+		self.attackTiming = unitData.attackTiming
+		self.maxMP = unitData.maxMp
+		self.mp = unitData.startMp
+		self.damage = unitData.damage
+		self.projectileSpriteRUID = unitData.projectileSpriteRUID
+		self.unitName = unitData.name
+		self.animationName = unitData.animationName
+		self.unitScale = unitData.unitScale
+		local isUsableCharacter = unitData.isUsableCharacter
 		self.isUsableCharacter = isUsableCharacter == 1
-		self.dieAudioClip = unitData["dieAudioClip"]
-		self.criticalRatio = unitData["criticalRatio"]
-		self.criticalDamage = unitData["criticalDamage"]
+		self.dieAudioClip = unitData.dieAudioClip
+		self.criticalRatio = unitData.criticalRatio
+		self.criticalDamage = unitData.criticalDamage
+		self.breakLimitSkill = unitData.LimitBreakActiveSkill
+		self.level = unitData.level
+		self.limitBreak = unitData.limitBreak
 		
 		self.skillID = skillData['id']
 		self.skillDesc = skillData['desc']
@@ -211,8 +237,8 @@ script Unit extends Component
 		self.skillTime = skillData['skillTime']
 		self.skillAttackTiming = skillData['skillAttackTiming']
 		
-		if unitData["spawnSkill"] ~= nil then
-			self.spawnSkillData = _SkillService:GetSkillByIDFromServer(unitData["spawnSkill"])
+		if unitData.spawnSkill~= nil then
+			self.spawnSkillData = _SkillService:GetSkillByIDFromServer(unitData.spawnSkill)
 		end
 		
 		self:InitTagData()
@@ -363,6 +389,10 @@ script Unit extends Component
 		end
 		
 		for _, enemy in ipairs(enemies) do
+			if enemy.isNotTargetUnit == true then
+				continue
+			end
+			
 			local enemyPos = enemy.TransformComponent.WorldPosition
 			local distance = math.abs((enemyPos - myPos).x)
 			
@@ -455,6 +485,10 @@ script Unit extends Component
 		if self.mp >= self.maxMP and self.curTarget.TagComponent.Tags[2] ~= "Tower" and self.debuffState ~= _eDebuffType.Silence then
 			self:SetState("useSkill")
 			return
+		end
+		
+		if self.isNotTargetUnit == true then
+			self:OnRemove()
 		end
 		
 		self.attackTimer += delta;
@@ -815,6 +849,14 @@ script Unit extends Component
 			return
 		end
 		
+		if self.isNotTargetUnit == true then
+			return
+		end
+		
+		if _UserService.LocalPlayer.PlayerCharacter.isLimitBreakSkill and self.Entity.TagComponent.Tags[2] == "Tower" and not self.isEnemy then
+			return
+		end
+		
 		if self.damageAvoidAmount > 0 then
 			local damageSkin
 			if self.isEnemy then
@@ -838,6 +880,10 @@ script Unit extends Component
 			if damage <= 1 then
 				damage = 1
 			end
+		end
+		
+		if attacker.Unit ~= nil and (attacker.Unit.unitName == "비숍" or attacker.Unit.unitName == "산타 루시드") then
+		    damage = 0
 		end
 		
 		if attacker.CriticalAttack ~=  nil then
@@ -930,6 +976,12 @@ script Unit extends Component
 		else
 			-- attacker.Projectile.caster.Unit.curTarget = nil
 		end
+		
+		-- 돌파 스킬 비활성화
+		_UserService.LocalPlayer.UserBreakLimitSkillClient:DeactivateSkill(self.breakLimitSkill)
+		
+		-- 소환 포인트 반환
+		self:ReturnMeso()
 	end
 
 	method void GetDebuff(number debuffType, number debuffAmount, number debuffTime)
@@ -1120,31 +1172,41 @@ script Unit extends Component
 		self.mp = 0
 		self.isUsingSkill = true
 		
+		
 		self.activeSkill.SkillParent:UseSkill(self.Entity, self.curTarget, self.skillArea, self.skillAmount, self.skillProjectileSpeed, self.skillTime, self.skillAttackTiming)
+		
+		if self.isNotTargetUnit == true then
+			self:OnRemove()
+		end
 	end
 
-	method void SpawnEnemy(table unitData, table skillData)
-		self.moveSpeed = unitData["moveSpeed"]
-		self.originMoveSpeed = unitData["moveSpeed"]
-		self.hp = unitData["hp"]
-		self.maxHP = unitData["hp"]
-		self.originMaxHP = unitData["hp"]
-		self.damage = unitData["damage"]
-		self.attackRange = unitData["attackRange"]
-		self.attackSpeed = unitData["attackSpeed"]
-		self.originAttackSpeed = unitData["attackSpeed"]
-		self.projectileSpeed = unitData["projectileSpeed"]
-		self.attackTiming = unitData["attackTiming"]
-		self.maxMP = unitData["maxMp"]
-		self.mp = unitData["startMp"]
-		self.damage = unitData["damage"]
-		self.projectileSpriteRUID = unitData["projectileSpriteRUID"]
-		self.unitName = unitData["name"]
-		self.animationName = unitData["animationName"]
-		self.unitScale = unitData["unitScale"]
-		local isUsableCharacter = unitData["isUsableCharacter"]
+	method void SpawnEnemy(BuffedUnitModel unitData, table skillData)
+		self.baseData = unitData
+		
+		self.id = unitData.id
+		self.moveSpeed = unitData.moveSpeed
+		self.originMoveSpeed = unitData.moveSpeed
+		self.hp = unitData.hp
+		self.maxHP = unitData.hp
+		self.originMaxHP = unitData.hp
+		self.damage = unitData.damage
+		self.attackRange = unitData.attackRange
+		self.attackSpeed = unitData.attackSpeed
+		self.originAttackSpeed = unitData.attackSpeed
+		self.projectileSpeed = unitData.projectileSpeed
+		self.attackTiming = unitData.attackTiming
+		self.maxMP = unitData.maxMp
+		self.mp = unitData.startMp
+		self.damage = unitData.damage
+		self.projectileSpriteRUID = unitData.projectileSpriteRUID
+		self.unitName = unitData.name
+		self.animationName = unitData.animationName
+		self.unitScale = unitData.unitScale
+		local isUsableCharacter = unitData.isUsableCharacter
 		self.isUsableCharacter = isUsableCharacter == 1
-		self.dieAudioClip = unitData["dieAudioClip"]
+		self.dieAudioClip = unitData.dieAudioClip
+		self.level = unitData.level
+		self.limitBreak = unitData.limitBreak
 		
 		self.skillID = skillData['id']
 		self.skillDesc = skillData['desc']
@@ -1154,8 +1216,8 @@ script Unit extends Component
 		self.skillTime = skillData['skillTime']
 		self.skillAttackTiming = skillData['skillAttackTiming']
 		
-		if unitData["spawnSkill"] ~= nil then
-			self.spawnSkillData = _SkillService:GetSkillByIDFromServer(unitData["spawnSkill"])
+		if unitData.spawnSkill ~= nil then
+			self.spawnSkillData = _SkillService:GetSkillByIDFromServer(unitData.spawnSkill)
 		end
 		
 		self:InitEnemyTagData()
@@ -1358,6 +1420,35 @@ script Unit extends Component
 	@ExecSpace("Server")
 	method void SyncPos(Vector3 pos)
 		self.Entity.TransformComponent.Position = pos
+	end
+
+	@ExecSpace("Server")
+	method void ReturnMeso()
+		if self.baseData.returnCost <= 0 then
+			return
+		end
+		
+		_SpawnManager:GetUserWallet().MesoWallet:AddMeso(self.baseData.returnCost)
+	end
+
+	method void OnRemove()
+		if self.isNotTargetUnit == false then
+			return
+		end
+		
+		self.attackRange = 0
+		self.Entity.Visible = false
+		self.Entity.TransformComponent.Position.y = -500
+		
+		_EffectService:RemoveEffect(self.effectId)
+		local map = _EntityService:GetEntityByPath(_GameManager:GetGameMapName())
+		map.MinimapManager:RemoveEntityList(self.Entity)
+		
+		_TimerService:SetTimerOnce(function()
+			self:SetState("die")
+			self:ClearSkill()
+			self:DestroyProjectile()
+		end, 4)
 	end
 
 	@EventSender("Self")

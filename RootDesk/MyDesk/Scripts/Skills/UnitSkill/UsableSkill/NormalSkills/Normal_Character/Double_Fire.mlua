@@ -1,0 +1,41 @@
+@Component
+script Double_Fire extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		if self._T.projectileParent == nil then
+			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+		end
+		
+		self:CallAnimation("doublefire")
+		
+		local basePos = self.Entity.TransformComponent.WorldPosition
+		
+		local options = {
+		    FlipX = true,  -- 좌우 반전
+		}
+		_EffectService:PlayEffectAttached("21d3f2eb72284632b9916896cbf8aaf6", self.caster, Vector3(0, 0, 0) , 0, Vector3.one, false, options)
+		
+		local function spawnMissile()
+			local missile = _SpawnService:SpawnByModelId(
+				"model://cd38ad89-1c52-45f2-8d86-d6be27475ba9",
+				"bullet",
+				basePos,
+				self._T.projectileParent
+			)
+		
+			missile.SpriteRendererComponent.SpriteRUID = "a87a9f7db5c5485593ab6640b7e4e9a9"
+			missile.Projectile:SetCaster(self.caster)
+			missile.Projectile:SetShoot("a87a9f7db5c5485593ab6640b7e4e9a9", self:IsTargetOnRight(self.target), self.skillProjectileSpeed
+			, self.target, false, self.caster.Unit.damage * self.skillAmount)
+		end
+		
+		-- 첫 번째 발사: 공격 모션 발생
+		_TimerService:SetTimerOnce(spawnMissile, self.caster.Unit.attackTiming)
+		-- 두 번째 발사: 공격 모션 발생 0.15초 후
+		_TimerService:SetTimerOnce(spawnMissile, 0.15 + self.caster.Unit.attackTiming)
+	end
+
+end

@@ -25,9 +25,9 @@ script DelayAttackComponent extends Component
 		
 		
 		if self.caster.Unit.isEnemy and event.TriggerBodyEntity.Unit.isEnemy == false then -- 적 유닛이 발사했으면서 아군 유닛일 경우
-			event.TriggerBodyEntity.Unit:OnHit(self.caster, self.attackDamage, false, 3)
+			event.TriggerBodyEntity.Unit:OnHit(self.caster, self.caster.Unit.damage * self.attackDamage, false, 3)
 		elseif self.caster.Unit.isEnemy == false and event.TriggerBodyEntity.Unit.isEnemy then -- 아군 유닛이 발사했으면서 적 유닛일 경우
-			event.TriggerBodyEntity.Unit:OnHit(self.caster, self.attackDamage, false, 3)
+			event.TriggerBodyEntity.Unit:OnHit(self.caster, self.caster.Unit.damage * self.attackDamage, false, 3)
 		end
 	end
 

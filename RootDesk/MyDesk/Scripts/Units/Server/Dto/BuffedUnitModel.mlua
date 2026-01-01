@@ -1,0 +1,49 @@
+@Struct
+script BuffedUnitModel extends UnitModel
+
+	property string LimitBreakActiveSkill = ""
+
+	property string LimitBreakPassiveSkill = ""
+
+	property integer LimitBreakCountryId = 0
+
+	property integer LimitBreakJobId = 0
+
+	property integer level = 1
+
+	property integer limitBreak = 1
+
+	property integer returnCost = 0
+
+	property string LimitBreakButtonRUID = ""
+
+	method void SetLevelBuff(LevelUpModel model)
+		self.hp += model.hp
+		self.damage += model.damage
+		self.level = model.level
+	end
+
+	method void SetLimitBreakBuff(LimitBreakModel model)
+		self.hp += model.hp
+		self.maxMp += model.mp
+		self.damage += model.damage
+		self.returnCost = model.summonCost
+
+		self.LimitBreakActiveSkill = model.skillID
+		self.LimitBreakPassiveSkill = model.passiveSkillID
+
+		self.LimitBreakJobId = model.jobId
+		self.LimitBreakCountryId = model.countryId
+		self.limitBreak = model.limitBreak
+
+		-- buttonRUID는 누적하지 않고 최신 값으로 갱신
+		if model.buttonRUID ~= nil and model.buttonRUID ~= "" then
+			self.LimitBreakButtonRUID = model.buttonRUID
+		end
+	end
+
+	method void SetSynergyBuff()
+		
+	end
+
+end

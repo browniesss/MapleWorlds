@@ -1,0 +1,81 @@
+@Component
+script ShowEventToken extends Component
+
+	property TextComponent EventLabel = nil
+
+	property SpriteGUIRendererComponent EventIcon = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		-- UI 컴포넌트 자동 연결
+		local labelEntity = self.Entity:GetChildByName("EventLabel")
+		if labelEntity ~= nil then
+			self.EventLabel = labelEntity.TextComponent
+		end
+
+		local iconEntity = self.Entity:GetChildByName("EventIcon")
+		if iconEntity ~= nil then
+			self.EventIcon = iconEntity.SpriteGUIRendererComponent
+		end
+
+		-- EventCoin 변경 콜백 등록
+		_BillingService:AddEventCoinCallback(self.Entity.Id, function(value)
+			self:RefreshUI()
+		end)
+
+		self:RefreshUI()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnEndPlay()
+		-- EventCoin 변경 콜백 해제
+		_BillingService:RemoveEventCoinCallback(self.Entity.Id)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void RefreshUI()
+		-- UserBillingComponent를 통해 EventCoin 가져오기
+		local localPlayer = _UserService.LocalPlayer
+		if localPlayer == nil or not isvalid(localPlayer) then
+			return
+		end
+		
+		local userBilling = localPlayer.UserBillingComponent
+		if userBilling == nil then
+			return
+		end
+		
+		local eventCoin = _BillingService.EventCoin
+		
+		-- 이벤트 코인 수량 표시
+		if self.EventLabel ~= nil then
+			self.EventLabel.Text = tostring(eventCoin)
+		end
+		
+		-- EventData에서 token_ruid 가져오기 (ClearRewardUI 패턴)
+		local currentEventVersion = _EventService:GetCurrentEventVersion()
+		local eventDataSet = _DataService:GetTable("EventData")
+		
+		if eventDataSet ~= nil and self.EventIcon ~= nil then
+			for index = 1, eventDataSet:GetRowCount() do
+				local eventId = tonumber(eventDataSet:GetCell(index, "id"))
+				if eventId == currentEventVersion then
+					local tokenRuid = eventDataSet:GetCell(index, "token_ruid")
+					if tokenRuid ~= nil and tokenRuid ~= "" then
+						self.EventIcon.ImageRUID = tokenRuid
+					end
+					break
+				end
+			end
+		end
+	end
+
+	@EventSender("Self")
+	handler HandleComponentEnabledInHierarchyChangedEvent(ComponentEnabledInHierarchyChangedEvent event)
+		-- Entity가 활성화될 때 UI 갱신
+		if event.EnabledInHierarchy then
+			self:RefreshUI()
+		end
+	end
+
+end

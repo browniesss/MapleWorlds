@@ -1,0 +1,16 @@
+@Component
+script Tauro_Masis_Booster extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		_EffectService:PlayEffectAttached("5616238281764381a1facde231b97c88", self.caster, Vector3(0, 0, 0) , 0, Vector3.one)
+		self.caster.Unit:GetBuff(_eBuffType.AttackSpeedBuff, self.skillAmount, self.skillTime)
+		
+		-- 스킬 사용 종료 처리
+		self.caster.Unit.isUsingSkill = false
+		self.caster.Unit:SetState("move")
+	end
+
+end

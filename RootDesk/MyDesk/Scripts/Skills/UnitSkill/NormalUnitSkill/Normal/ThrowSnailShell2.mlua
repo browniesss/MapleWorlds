@@ -1,0 +1,45 @@
+@Component
+script ThrowSnailShell2 extends SkillParent
+
+	property table spawnedMissiles = {}
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		if self._T.projectileParent == nil then
+			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+		end
+		
+		local basePos = self.Entity.TransformComponent.WorldPosition
+		
+		-- 발사체 1개 생성
+		local missile = _SpawnService:SpawnByModelId("model://cd38ad89-1c52-45f2-8d86-d6be27475ba9",
+		     "snailShell_2",
+		     basePos + Vector3(-0.2, 0.2, 0),
+		     self._T.projectileParent)
+		
+		missile.SpriteRendererComponent.SpriteRUID = "949561b1a5cf40ca8de72e66b9df3e6d"
+		missile.Projectile:SetCaster(self.Entity.Parent)
+		
+		-- 0.25초 후 발사
+		_TimerService:SetTimerOnce(function()
+		    missile.Projectile:SetShoot("949561b1a5cf40ca8de72e66b9df3e6d",
+		        self:IsTargetOnRight(self.target),
+		        self.skillProjectileSpeed,
+		        self.target,
+		        false,
+		        self.caster.Unit.damage * self.skillAmount)
+		
+			-- 스킬 사용 완료 처리
+			if self.caster.Unit.curState == "die" then
+				return
+			end
+		
+		    -- 스킬 사용 완료 처리
+			self.caster.Unit.isUsingSkill = false
+			self.caster.Unit.curState = "attack"
+		end, 0.25)
+	end
+
+end

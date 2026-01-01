@@ -1,0 +1,19 @@
+@Struct
+script LevelUpModel
+
+	property number level = 0
+
+	property number damage = 0
+
+	property number hp = 0
+
+	property number price = 0
+
+	method void Init(table data)
+		self.level = tonumber(data["level"])
+		self.damage = tonumber(data["damage"])
+		self.hp = tonumber(data["hp"])
+		self.price = tonumber(data["price"])
+	end
+
+end

@@ -1,11 +1,13 @@
 @Component
 script UnitListItem extends Component
 
-	property table unitData = {}
+	property BuffedUnitModel unitData = BuffedUnitModel()
 
 	property table skillData = {}
 
 	property table spawnSkillData = {}
+
+	property table limitBreakSkillData = {}
 
 	@Sync
 	property Entity unitSprite = nil
@@ -32,7 +34,7 @@ script UnitListItem extends Component
 
 	property SynergyComponentItem synergyComponentItem = nil
 
-	method void Init(table unitData, table skillData)
+	method void Init(BuffedUnitModel unitData, table skillData)
 		self.unitData = unitData
 		self.skillData = skillData
 		
@@ -64,7 +66,7 @@ script UnitListItem extends Component
 		
 		self.unitName.TextComponent.Text = self.unitData['name'].." X"..data['count']
 		self.skillDesc.TextComponent.Text = self.skillData['desc']
-		self.unitPriceLabel.TextComponent.Text = self.unitData['summonCost']
+		self.unitPriceLabel.TextComponent.Text = tostring(self.unitData.summonCost)
 		self.unitLevelLabel.TextComponent.Text = "Level: "..data['level'] 
 		
 		local test = _SpawnService:SpawnByModelId("model://c4e27100-4894-41a8-bb13-da550e47ddf3", "SynergyIcon", Vector3(-65, 70, 0), self.Entity)
@@ -113,7 +115,15 @@ script UnitListItem extends Component
 			self.spawnSkillData = _SkillService:GetSkillByIDFromClient(self.unitData["spawnSkill"])
 		end
 		
-		unitInfoPanel.UnitInfoPanel:Init(self.unitData, self.skillData, self.spawnSkillData, index)
+		self.limitBreakSkillData = nil
+		if self.unitData.grade >= 5 then
+			local limitBreakData = _UnitLimitBreakRepo:FindBuffInClient(self.unitData.grade, 6, self.unitData.id)
+			if not (limitBreakData == nil or limitBreakData.limitBreak == 0) then
+				self.limitBreakSkillData = _SkillService:GetSkillByIDFromClient(limitBreakData.skillID)
+			end
+		end
+		
+		unitInfoPanel.UnitInfoPanel:Init(self.unitData, self.skillData, self.spawnSkillData, self.limitBreakSkillData, index)
 	end
 
 	@EventSender("Self")

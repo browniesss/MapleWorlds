@@ -1,0 +1,190 @@
+@Component
+script ExtendEventSelectorUI extends StageSelectorUI
+
+	property Entity StageInfoPanel = "5f69a9d9-77bc-4a0a-a4b5-50e716d89fd9"
+
+	property table SelectButtonList = {}
+
+	property Entity StageDescText = "a01f8bbc-b99c-4d90-b8dd-00ea86c1d2c6"
+
+	property Entity StageNameText = "4b93ee72-e145-42b2-a05d-71c26a074741"
+
+	property Entity ChapterNameText = "1765f459-5e4b-4daf-bbc7-4111dac6fa83"
+
+	property Entity ChapterNumberText = "1bff1959-6f73-4835-9f9c-bab498943744"
+
+	property Entity nextButton = nil
+
+	property Entity prevButton = nil
+
+	method void UpdateData(EntityRef userStageEntity)
+		local path = self.Entity.Path
+
+		local userStage = userStageEntity.UserStage
+
+		if userStage == nil then
+			return
+		end
+
+		-- 이벤트 스테이지 필드 사용
+		local openStage = userStage.eventOpenStage
+		local selectStage = userStage.eventSelectStage
+		local selectChapter = userStage.eventSelectChapter
+		local openChapter = userStage.eventOpenChapter
+
+		local eventStageDataList = _EventService:GetEventStageByChapter(selectChapter)
+		local stageCount = #eventStageDataList
+
+		self.StageInfoPanel = _EntityService:GetEntityByPath(path .. "/StageInfoPanel/panel")
+
+		for i = 1, 6 do
+			local entity = _EntityService:GetEntityByPath(path .. "/SelectPanel/StageSelectScroll/Select_" .. tostring(i))
+
+			if i > stageCount then
+				entity:SetEnable(false)
+				continue
+			end
+			entity:SetEnable(true)
+
+			entity.StageSelectItemUI:Init()
+
+			self.SelectButtonList[i] = entity
+
+			entity.StageSelectItemUI:AddCallback(function()
+				self:ClickButtonHanddler(i, userStageEntity)
+			end)
+
+			entity.StageSelectItemUI:SetImage(eventStageDataList[i].button)
+			entity.StageSelectItemUI:SetId(eventStageDataList[i].stage)
+			entity.StageSelectItemUI:SetName(eventStageDataList[i].name)
+
+			local currentChapter = eventStageDataList[i].chapter
+			local currentStage = eventStageDataList[i].stage
+
+			-- 클리어 상태 확인
+			local isCleared = userStage:IsEventStageClearedClient(currentChapter, currentStage)
+
+			-- 잠금 상태 확인
+			local isLocked = (i > openStage and selectChapter == openChapter) or selectChapter > openChapter
+
+			-- 선택 상태 확인
+			local isSelected = (i == selectStage and selectChapter <= openChapter)
+
+			-- 우선순위: 선택됨 > 잠김 > 클리어됨 > 일반
+			if isSelected then
+				entity.StageSelectItemUI:SetSelected()
+				self.StageInfoPanel.SpriteGUIRendererComponent.ImageRUID = eventStageDataList[i].info
+				self.StageDescText.TextComponent.Text = eventStageDataList[i].stage_desc
+				self.StageNameText.TextComponent.Text = eventStageDataList[i].stage_name
+				self.ChapterNameText.TextComponent.Text = eventStageDataList[i].chapter_name
+				self.ChapterNumberText.TextComponent.Text = "EVENT " .. tostring(selectChapter)
+			elseif isLocked then
+				entity.StageSelectItemUI:SetLocked()
+			elseif isCleared then
+				entity.StageSelectItemUI:SetCleared()
+			else
+				entity.StageSelectItemUI:SetNotSelected()
+			end
+		end
+		
+		if selectChapter > openChapter then
+			self.StageInfoPanel.SpriteGUIRendererComponent.ImageRUID = eventStageDataList[1].info
+			self.StageDescText.TextComponent.Text = eventStageDataList[1].stage_desc
+			self.StageNameText.TextComponent.Text = eventStageDataList[1].stage_name
+			self.ChapterNameText.TextComponent.Text = eventStageDataList[1].chapter_name
+			self.ChapterNumberText.TextComponent.Text = "EVENT " .. tostring(selectChapter)
+		end
+		
+		if self.nextButton ~= nil then
+			self.nextButton.ButtonComponent.Enable = (selectChapter < _EventService.lastChapter)
+		end
+		if self.prevButton ~= nil then
+			self.prevButton.ButtonComponent.Enable = (selectChapter > 1)
+		end
+	end
+
+	method void ClickButtonHanddler(integer id, EntityRef userStageEntity)
+		local userStage = userStageEntity.UserStage
+
+		local openStage = userStage.eventOpenStage
+		local selectStage = userStage.eventSelectStage
+		local selectChapter = userStage.eventSelectChapter
+		local openChapter = userStage.eventOpenChapter
+		
+		local eventStageDataList = _EventService:GetEventStageByChapter(selectChapter)
+		
+		for i, entity in ipairs(self.SelectButtonList) do
+			if i > openStage and selectChapter == openChapter then
+				continue
+			end
+			entity.StageSelectItemUI:SetNotSelected()
+			if i == id then
+				entity.StageSelectItemUI:SetSelected()
+				self.StageInfoPanel.SpriteGUIRendererComponent.ImageRUID = eventStageDataList[i].info
+				self.StageDescText.TextComponent.Text = eventStageDataList[i].stage_desc
+				self.StageNameText.TextComponent.Text = eventStageDataList[i].stage_name
+				self.ChapterNameText.TextComponent.Text = eventStageDataList[i].chapter_name
+				self.ChapterNumberText.TextComponent.Text = "EVENT " .. tostring(selectChapter)
+				userStage.eventSelectStage = eventStageDataList[i].stage
+			end
+		end
+	end
+
+	method void SetUserEventStageComp(EntityRef newEntity)
+		-- UserStage 컴포넌트 사용 (이벤트 필드 포함)
+		local newComp = newEntity.UserStage
+
+		if newComp == nil then
+			return
+		end
+
+		newComp.updateList[#newComp.updateList + 1] = function() self:UpdateData(newEntity) end
+
+		-- UI 포커싱 시 가장 난이도 높은 스테이지(현재 진행 중인 스테이지) 선택
+		newComp.eventSelectChapter = newComp.eventOpenChapter
+		newComp.eventSelectStage = newComp.eventOpenStage
+
+		if self.nextButton ~= nil then
+			self.nextButton.CallBackButton.callback = function()
+				if newComp.eventSelectChapter >= _EventService.lastChapter then
+					return
+				end
+
+				newComp.eventSelectChapter += 1
+				newComp.eventSelectStage = 1
+				self:UpdateData(newEntity)
+			end
+		end
+
+		if self.prevButton ~= nil then
+			self.prevButton.CallBackButton.callback = function()
+				if newComp.eventSelectChapter <= 1 then
+					return
+				end
+
+				newComp.eventSelectChapter -= 1
+				newComp.eventSelectStage = 1
+				self:UpdateData(newEntity)
+			end
+		end
+
+		self:UpdateData(newEntity)
+	end
+
+	@EventSender("Entity", "6da69c94-9f7b-405d-9ea2-4a27e78e0076")
+	handler HandleShopButtonClickEvent(ButtonClickEvent event)
+		local shopUI = _EntityService:GetEntityByPath("/ui/ShopUI")
+		
+		if shopUI then
+			shopUI.Enable = true
+			shopUI.Visible = true
+		
+			local mushGoldButton = _EntityService:GetEntityByPath("/ui/ShopUI/ShopMenu/ShopMenuGrid/MushGoldButton")
+		
+			if mushGoldButton and mushGoldButton.Toggle then
+				mushGoldButton.Toggle:SetState(true)
+			end
+		end
+	end
+
+end

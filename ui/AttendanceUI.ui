@@ -16,7 +16,7 @@
       {
         "id": "2f136b34-8578-48bd-a286-b4050cc2b6ec",
         "path": "/ui/AttendanceUI",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.UIGroupComponent,MOD.Core.CanvasGroupComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.UIGroupComponent,MOD.Core.CanvasGroupComponent,MOD.Core.TagComponent",
         "jsonString": {
           "name": "AttendanceUI",
           "path": "/ui/AttendanceUI",
@@ -24,7 +24,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 21,
+          "displayOrder": 20,
           "pathConstraints": "//",
           "revision": 1,
           "origin": {
@@ -84,12 +84,19 @@
             {
               "@type": "MOD.Core.UIGroupComponent",
               "DefaultShow": false,
-              "GroupOrder": 21,
+              "GroupOrder": 20,
               "GroupType": 2,
               "Enable": true
             },
             {
               "@type": "MOD.Core.CanvasGroupComponent",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TagComponent",
+              "Tags": [
+                "LobbyPopup"
+              ],
               "Enable": true
             }
           ],

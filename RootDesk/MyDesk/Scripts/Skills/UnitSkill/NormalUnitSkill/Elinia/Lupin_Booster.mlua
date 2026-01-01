@@ -5,8 +5,6 @@ script Lupin_Booster extends SkillParent
 	method void ActivateSkill()
 		__base:ActivateSkill()
 		
-		__base:ActivateSkill()
-		
 		_EffectService:PlayEffectAttached("527057596a264ff5b1e44733d06f6996", self.caster, Vector3(0, 0, 0) , 0, Vector3.one)
 		self.caster.Unit:GetBuff(_eBuffType.AttackSpeedBuff, self.skillAmount, self.skillTime)
 		self.caster.Unit:GetBuff(_eBuffType.MoveSpeedBuff, self.skillAmount, self.skillTime)

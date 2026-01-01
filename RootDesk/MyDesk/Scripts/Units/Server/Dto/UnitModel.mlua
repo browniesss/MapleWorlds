@@ -1,0 +1,96 @@
+@Struct
+script UnitModel
+
+	property string id = ""
+
+	property string skillID = ""
+
+	property string spawnSkill = ""
+
+	property integer isUsableCharacter = 0
+
+	property string name = ""
+
+	property number passiveSkillID = 0
+
+	property number moveSpeed = 0
+
+	property number hp = 0
+
+	property number damage = 0
+
+	property number attackRange = 0
+
+	property number attackSpeed = 0
+
+	property number projectileSpeed = 0
+
+	property number attackTiming = 0
+
+	property number maxMp = 0
+
+	property number startMp = 0
+
+	property integer summonCost = 0
+
+	property integer summonDelay = 0
+
+	property string ImageRUID = ""
+
+	property string projectileSpriteRUID = ""
+
+	property string animationName = ""
+
+	property number unitScale = 0
+
+	property string dieAudioClip = ""
+
+	property integer criticalRatio = 0
+
+	property integer criticalDamage = 0
+
+	property integer jobId = 0
+
+	property integer countryId = 0
+
+	property integer regionId = 0
+
+	property integer grade = 0
+
+	method void Init(table item)
+		self.id = tostring(item['id'])
+		self.skillID = tostring(item['skillID'])
+		self.spawnSkill = tostring(item['spawnSkill'])
+		self.isUsableCharacter = tonumber(item['isUsableCharacter'])
+		self.passiveSkillID= tonumber(item['passiveSkillID'])
+		self.moveSpeed = tonumber(item['moveSpeed'])
+		self.hp = tonumber(item['hp'])
+		self.damage = tonumber(item['damage'])
+		self.attackRange = tonumber(item['attackRange'])
+		self.attackSpeed = tonumber(item['attackSpeed'])
+		self.projectileSpeed= tonumber(item['projectileSpeed'])
+		self.attackTiming = tonumber(item['attackTiming'])
+		self.maxMp = tonumber(item['maxMp'])
+		self.startMp = tonumber(item['startMp'])
+		self.summonCost = tonumber(item['summonCost'] )
+		self.summonDelay = tonumber(item['summonDelay'])
+		self.ImageRUID = tostring(item['ImageRUID'])
+		self.projectileSpriteRUID = tostring(item['projectileSpriteRUID'])
+		self.name = tostring(item['name'])
+		self.animationName = tostring(item['animationName'] )
+		self.unitScale = tonumber(item['unitScale'])
+		self.dieAudioClip = tostring(item['dieAudioClip'])
+		self.criticalRatio = tonumber(item['criticalRatio'])
+		self.criticalDamage = tonumber(item['criticalDamage'])
+		self.grade = tonumber(item['grade'])
+		
+		
+		local synergyData = _HttpService:JSONDecode(item['synergyData'])["synergyData"]
+		if not (synergyData == nil) then
+			self.jobId = synergyData["jobId"]
+			self.countryId = synergyData["countryId"]
+			self.regionId = synergyData["regionId"]
+		end
+	end
+
+end

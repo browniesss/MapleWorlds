@@ -3,6 +3,8 @@ script UserDeck extends Component
 
 	property table userDeck = {}
 
+	property table userSubDeck = {}
+
 	method void OnBeginPlay()
 		_UserDeckService:LOAD()
 	end
@@ -17,10 +19,15 @@ script UserDeck extends Component
 		self.userDeck[index] = unitID
 		self:SetDeckItemInClient(unitID, index)
 		
+		self.userSubDeck = {}
 		local userSynergy = self.Entity.UserSynergyComponent
 		if userSynergy ~= nil then
 			userSynergy:SET_SYNERGY(self.userDeck)
+			if userSynergy:GET_SYNERGY_COUNT(102) > 0 then
+				self.userSubDeck[#self.userSubDeck + 1] = "model://6194a4e3-0eb4-417a-92b5-891af548b672"
+			end
 		end
+		self:SetSubDeckItemInClient(self.userSubDeck)
 	end
 
 	@ExecSpace("Server")
@@ -28,15 +35,25 @@ script UserDeck extends Component
 		self.userDeck = deckData
 		self:LoadUserDeck(deckData)
 		
+		self.userSubDeck = {}
 		local userSynergy = self.Entity.UserSynergyComponent
 		if userSynergy ~= nil then
 			userSynergy:SET_SYNERGY(deckData)
+			if userSynergy:GET_SYNERGY_COUNT(102) > 0 then
+				self.userSubDeck[#self.userSubDeck + 1] = "model://6194a4e3-0eb4-417a-92b5-891af548b672"
+			end
 		end
+		self:SetSubDeckItemInClient(self.userSubDeck)
 	end
 
 	@ExecSpace("Client")
 	method void SetDeckItemInClient(string unitID, integer index)
 		self.userDeck[index] = unitID
+	end
+
+	@ExecSpace("Client")
+	method void SetSubDeckItemInClient(table data)
+		self.userSubDeck = data
 	end
 
 end

@@ -19,7 +19,7 @@ script AllAttack extends SkillParent
 				end
 				
 				if monster.Enable then
-					monster.Unit:OnHit(self.caster, self.skillAmount, true, 5)
+					monster.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, true, 5)
 				end
 			end
 		end

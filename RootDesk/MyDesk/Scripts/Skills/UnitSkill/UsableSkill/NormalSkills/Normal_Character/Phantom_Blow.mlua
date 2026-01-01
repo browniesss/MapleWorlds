@@ -1,0 +1,22 @@
+@Component
+script Phantom_Blow extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		self:CallAnimation("phantomBlow")
+		local options = {
+		    FlipX = true,  -- 좌우 반전
+		}
+		_EffectService:PlayEffectAttached("42b6deb653a84c06abd29d667370bd81", self.caster, Vector3.zero , 0, Vector3.one, false, options)
+		
+		local function attackFunction()
+			self.target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 6)
+		end
+		
+		-- 첫 번째 공격
+		_TimerService:SetTimerOnce(attackFunction, self.skillAttackTiming)
+	end
+
+end

@@ -2,7 +2,7 @@
 script UserSynergyComponent extends Component
 
 	@Sync
-	property SyncTable<number, number> countMap
+	property SyncTable<number, integer> countMap
 
 	property table synergyTable = {}
 
@@ -17,7 +17,7 @@ script UserSynergyComponent extends Component
 
 	@ExecSpace("ServerOnly")
 	method void SET_SYNERGY(table deck)
-		local syncCols = {"jobId","countryId","regionId"}
+		local syncCols = {"jobId","countryId","regionId", "LimitBreakCountryId", "LimitBreakJobId"}
 		
 		for k, v in pairs(self.countMap) do
 			self.countMap[k] = 0
@@ -25,25 +25,27 @@ script UserSynergyComponent extends Component
 		
 		for i, id in ipairs(deck) do
 			local unit = _UnitService:GetUnitByIDFromServer(id)
-			local unitSynergyData = _HttpService:JSONDecode(unit.synergyData)
 			
-			if unitSynergyData == nil then
-				continue
-			end
+			local unitJson = _UserMonsterService.userMonsterDict[id]
+			local userUnitData = UserUnitModel()
+			userUnitData:DECODE(unitJson)
 			
-			local item = unitSynergyData.synergyData
+			local buffedUnit = BuffedUnitModel()
+			buffedUnit:Init(unit)
+			
+			buffedUnit = _BuffedUnitService:SetUnitBuff(buffedUnit, userUnitData.level, userUnitData.limitBreak)
 			
 			for i, col in ipairs(syncCols) do
 				
-				if item[col] == nil then
+				if buffedUnit[col] == nil then
 					continue
 				end
 				
-				if item[col] == 0 then
+				if buffedUnit[col] == 0 then
 					continue
 				end
 				
-				self:AddCount(item[col])
+				self:AddCount(buffedUnit[col])
 			end
 		end
 	end
@@ -55,6 +57,10 @@ script UserSynergyComponent extends Component
 		end
 		
 		self.countMap[key] += 1
+		
+		if key == 102 then
+			log("Cygnus synergy ", self.countMap[102])
+		end
 	end
 
 	@ExecSpace("ClientOnly")

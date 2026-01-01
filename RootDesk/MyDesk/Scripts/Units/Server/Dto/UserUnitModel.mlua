@@ -1,0 +1,52 @@
+@Struct
+script UserUnitModel
+
+	property string id = ""
+
+	property integer count = 1
+
+	property integer level = 1
+
+	property integer limitBreak = 1
+
+	method string ENCODE()
+		local data = {
+			id=self.id,
+			count=self.count,
+			level=self.level,
+			limitBreak=self.limitBreak,
+		}
+		
+		return _HttpService:JSONEncode(data)
+	end
+
+	method boolean DECODE(string json)
+		local data = _HttpService:JSONDecode(json)
+		if data == nil then
+			return false
+		end
+		
+		self.id = tostring(data["id"])
+		if self.id == nil then
+			return false
+		end
+		
+		self.level = tonumber(data["level"])
+		if self.level == nil then
+			return false
+		end
+		
+		self.count = tonumber(data["count"])
+		if self.count == nil then
+			return false
+		end
+		
+		self.limitBreak = tonumber(data["limitBreak"])
+		if self.limitBreak == nil then
+			self.limitBreak = 1
+		end
+		
+		return true
+	end
+
+end

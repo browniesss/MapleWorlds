@@ -1,0 +1,266 @@
+@Logic
+script UserMonsterService extends Logic
+
+	@Sync
+	property SyncTable<string, string> userMonsterDict
+
+	@ExecSpace("ServerOnly")
+	method void INIT(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local allUnit = _UnitService:GetUnitList()
+		local keyList = {}
+		for i, v in ipairs(allUnit) do
+			keyList[#keyList + 1] = "USER_" .. v.id
+		end
+		
+		local errCode, userAnimalPages = ds:BatchGetAndWait(keyList)
+		if errCode ~= 0 then
+			return
+		end
+		
+		local userMosnterList = {}
+		
+		while true do
+			-- 현재 페이지의 목록을 가져옵니다.
+			local datas = userAnimalPages:GetCurrentPageDatas()
+			for _, data in pairs(datas) do
+				if data.Value == nil then
+					continue
+				end
+				
+				local info = UserUnitModel() 
+				
+				if info:DECODE(data.Value) == false then
+					log_error(data.Value)
+					_UserService:KickUser(uid, KickReason.WorldError)
+					return
+				end
+				
+				userMosnterList[info.id] = info
+			end
+			     
+			-- 현재 페이지가 마지막 페이지인지 확인합니다.
+			if userAnimalPages.IsLastPage == true then
+				break
+			end
+			     
+			-- 다음 페이지의 데이터를 미리 불러오고 다음 페이지가 유효하지 않은 경우 조회를 마칩니다.
+			local loadResultCode = userAnimalPages:LoadNextPageAndWait()
+			if loadResultCode ~= 0 then
+				return
+			end
+			     
+			-- 다음 페이지로 이동합니다.
+			userAnimalPages:MoveToNextPageAndWait()
+		end
+		
+		local defaultUnitList = _UnitService:GetDefaultUnitList()
+		if #userMosnterList < #defaultUnitList then
+			for i, unit in ipairs(defaultUnitList) do
+				if userMosnterList[unit] ~= nil then
+					continue
+				end
+				
+				local userMonster = UserUnitModel()
+				userMonster.id = unit
+				
+				userMosnterList[unit] = userMonster
+				
+				local save = userMonster:ENCODE()
+				
+				ds:SetAsync("USER_" .. unit, save, function() end)
+			end
+		end
+		
+		for id, info in pairs(userMosnterList) do
+			self.userMonsterDict[id] = info:ENCODE()
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method table SAVE(string uid, table keyMap)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local data = {}
+		
+		for monsterId, monsterInfo in pairs(keyMap) do
+			if self.userMonsterDict[monsterId] == nil then
+				continue
+			end
+			
+			data["USER_" .. monsterId] = self.userMonsterDict[monsterId]
+		end
+		
+		local code, keys = ds:BatchSetAndWait(data)
+		
+		local res = {
+			code=code,
+			body=keys
+		}
+		
+		return res
+	end
+
+	@ExecSpace("ServerOnly")
+	method table SAVE_ALL(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local data = {}
+		
+		for monsterId, monsterInfo in pairs(self.userMonsterDict) do
+			data["USER_" .. monsterId] = monsterInfo
+		end
+		
+		local code, keys = ds:BatchSetAndWait(data)
+		
+		local res = {
+			code=code,
+			body=keys
+		}
+		
+		return res
+	end
+
+	@ExecSpace("ServerOnly")
+	method void AddCount(string uid, table idList)
+		local keyMap = {}
+		
+		for _, monsterId in ipairs(idList) do
+			local json = self.userMonsterDict[monsterId]
+			
+			local data = UserUnitModel()
+			data.id = monsterId
+			if not (json == nil) then
+				data:DECODE(json)
+				data.count += 1
+			end
+			
+			log(monsterId .. " count : " .. (data.count -1) .. " -> " .. data.count)
+				
+			self.userMonsterDict[monsterId] = data:ENCODE()
+			
+			keyMap[monsterId]=true
+		end
+		
+		self:SAVE(uid, keyMap)
+	end
+
+	@ExecSpace("ClientOnly")
+	method table GetOne(string id)
+		local json = self.userMonsterDict[id]
+		
+		if json == nil then
+			return nil
+		end 
+		
+		return _HttpService:JSONDecode(json)
+	end
+
+	@ExecSpace("ClientOnly")
+	method table GetList()
+		local list = {}
+		
+		for id, json in pairs(self.userMonsterDict) do
+			local data = _HttpService:JSONDecode(json)
+			
+			list[#list + 1] = {
+				id=id,
+				level=data.level,
+				count=data.count
+			}
+		end
+		
+		return list
+	end
+
+	@ExecSpace("ServerOnly")
+	method table LEVEL_UP(string uid, table idList)
+		local keyMap = {}
+		
+		for _, monsterId in ipairs(idList) do
+			local json = self.userMonsterDict[monsterId]
+			if json == nil then
+				_UserService:KickUser(uid, KickReason.WorldError)
+				continue
+			end
+			
+			local data = UserUnitModel()
+			data:DECODE(json)
+			data.level += 1
+			
+			log(monsterId .. " level : " .. (data.level -1) .. " -> " .. data.level)
+				
+			self.userMonsterDict[monsterId] = data:ENCODE()
+			
+			keyMap[monsterId]=true
+		end
+		
+		return self:SAVE(uid, keyMap)
+	end
+
+	@ExecSpace("ServerOnly")
+	method table LIMIT_BREAK(string uid, table idList)
+		local keyMap = {}
+		
+		for _, monsterId in ipairs(idList) do
+			local json = self.userMonsterDict[monsterId]
+			if json == nil then
+				_UserService:KickUser(uid, KickReason.WorldError)
+				continue
+			end
+			
+			local data = UserUnitModel()
+			data:DECODE(json)
+			if data.count <= data.limitBreak then
+				_UserService:KickUser(uid, KickReason.RuleViolation)
+				continue
+			end
+			
+			data.limitBreak += 1
+			
+			log(monsterId .. " limitBreak : " .. (data.limitBreak - 1 ) .. " -> " .. data.limitBreak)
+				
+			self.userMonsterDict[monsterId] = data:ENCODE()
+			
+			keyMap[monsterId]=true
+		end
+		
+		return self:SAVE(uid, keyMap)
+	end
+
+	@EventSender("Service", "UserService")
+	handler HandleUserEnterEvent(UserEnterEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: UserService
+		-- Space: Server
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local ProfileCode = event.ProfileCode
+		-- local UserId = event.UserId
+		---------------------------------------------------------
+		
+		self:INIT(event.UserId)
+		
+		-- 유저 몬스터 데이터 로드 후 배지 체크 (기존 유저 배지 자동 지급)
+		_BadgeConditionService:CheckAllBadgesOnLogin(event.UserId)
+	end
+
+	@EventSender("Service", "UserService")
+	handler HandleUserLeaveEvent(UserLeaveEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: UserService
+		-- Space: Server
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local ProfileCode = event.ProfileCode
+		-- local UserId = event.UserId
+		---------------------------------------------------------
+		
+		self:SAVE_ALL(event.UserId)
+		
+	end
+
+end

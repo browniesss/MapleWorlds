@@ -34,8 +34,10 @@ script StageSelectorUI extends Component
 		
 		local key = _RankingService:GetRankKeyByTable({chapter=selectChapter, stage=selectStage})
 		
-		local rankingListUI =  _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
-		rankingListUI.StageRankingListUI:RefreshRankListItem(key)
+		local rankingListUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
+		if rankingListUI ~= nil then
+			rankingListUI.StageRankingListUI:RefreshRankListItem(key)
+		end
 		
 		for i = 1, 6 do
 			local entity = _EntityService:GetEntityByPath(path .. "/SelectPanel/StageSelectScroll/Select_" .. tostring(i))
@@ -96,8 +98,8 @@ script StageSelectorUI extends Component
 		
 		local stageDataList = _StageService:GetStageByChapter(selectChapter)
 		
-		local rankingListUI =  _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
-		
+		local rankingListUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
+
 		for i, entity in ipairs(self.SelectButtonList) do
 			if i > openStage and selectChapter == openChapter then
 				continue
@@ -113,8 +115,10 @@ script StageSelectorUI extends Component
 				userStage.selectStage = stageDataList[i].stage
 				
 				local key = _RankingService:GetRankKeyByTable({chapter=selectChapter, stage=stageDataList[i].stage})
-			
-				rankingListUI.StageRankingListUI:RefreshRankListItem(key)
+
+				if rankingListUI ~= nil then
+					rankingListUI.StageRankingListUI:RefreshRankListItem(key)
+				end
 			end
 		end
 	end

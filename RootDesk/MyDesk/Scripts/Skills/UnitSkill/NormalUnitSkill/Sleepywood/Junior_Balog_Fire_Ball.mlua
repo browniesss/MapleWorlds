@@ -1,0 +1,36 @@
+@Component
+script Junior_Balog_Fire_Ball extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		if self._T.projectileParent == nil then
+			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+		end
+		
+		local basePos = self.Entity.TransformComponent.WorldPosition
+		
+		local function spawnMissile()
+			local missile = _SpawnService:SpawnByModelId(
+				"model://cd38ad89-1c52-45f2-8d86-d6be27475ba9",
+				"ninja_stars",
+				basePos + Vector3(-1, 1, 0),
+				self._T.projectileParent
+			)
+			
+			missile.TransformComponent.Scale = Vector3(3,3,1)
+			missile.SpriteRendererComponent.SpriteRUID = "ce8efcea81b747f9ad6f9918ab3c7cd9"
+			missile.Projectile:SetCaster(self.caster)
+			missile.Projectile:SetShoot("ce8efcea81b747f9ad6f9918ab3c7cd9", self:IsTargetOnRight(self.target), self.skillProjectileSpeed
+			, self.target, false, self.caster.Unit.damage * self.skillAmount)
+		
+			self:SkillEnd()
+		end
+		
+		-- 첫 번째 발사: 공격 모션 발생
+		_TimerService:SetTimerOnce(spawnMissile, self.caster.Unit.attackTiming)
+		
+	end
+
+end

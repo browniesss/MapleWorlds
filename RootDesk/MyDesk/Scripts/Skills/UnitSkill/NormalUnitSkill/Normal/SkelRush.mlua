@@ -1,0 +1,44 @@
+@Component
+script SkelRush extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		local tween = self.caster.TweenLineComponent
+		
+		-- 트윈 설정
+		local tweenDir = 0
+		if self.caster.Unit.isEnemy then
+			tweenDir = -1
+		else
+			tweenDir = 1	
+		end
+		
+		tween.DestinationCoordinateType = CoordinateType.Absolute
+		tween.Positions = { Vector2(self.Entity.TransformComponent.WorldPosition.x + tweenDir, self.Entity.TransformComponent.WorldPosition.y) }
+		tween.Duration = 0.1 -- 이동 시간 설정
+		tween.UseReturnTweenType = true -- 반환 동작 설정
+		tween.ReturnDuration = 0.1 -- 돌아올 때의 이동 시간 설정
+		tween.ReturnTweenType = EaseType.Linear -- 되돌아올 때 보간 설정
+		
+		-- 트윈 시작
+		
+		local options = {
+		    FlipX = true,  -- 좌우 반전
+		}
+		
+		local function attackFunction()
+			_EffectService:PlayEffectAttached("cba42a77a12e48059240908f043a86d8", self.caster, Vector3.zero , 0, Vector3.one, false, options)
+			self.target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 1)
+			tween:RestartFromCurrentPosition()
+		
+			self:SkillEnd()
+		end
+		
+		-- 첫 번째 발사: 공격 모션 발생
+		_TimerService:SetTimerOnce(attackFunction, self.skillAttackTiming)
+		
+	end
+
+end

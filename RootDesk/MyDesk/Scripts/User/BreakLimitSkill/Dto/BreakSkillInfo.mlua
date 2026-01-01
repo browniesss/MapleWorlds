@@ -1,0 +1,30 @@
+@Struct
+script BreakSkillInfo
+
+	property string id = ""
+
+	property integer MaxUseCount = 1
+
+	property integer UseCount = 0
+
+	method void Init(string id, integer count)
+		self.id = id
+		self.MaxUseCount = count
+		self.UseCount = 0
+	end
+
+	method void Reset()
+		self.UseCount = 0
+	end
+
+	method boolean UseSkill()
+		if self.UseCount >= self.MaxUseCount then
+			return false
+		end
+		
+		self.UseCount += 1
+		
+		return true
+	end
+
+end

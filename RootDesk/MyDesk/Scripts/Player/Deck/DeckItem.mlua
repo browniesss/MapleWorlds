@@ -1,11 +1,13 @@
 @Component
 script DeckItem extends Component
 
-	property table unitData = {}
+	property BuffedUnitModel unitData = BuffedUnitModel()
 
 	property table skillData = {}
 
 	property table spawnSkillData = {}
+
+	property table limitBreakSkillData = {}
 
 	@Sync
 	property Entity redDotSprite = nil
@@ -36,7 +38,7 @@ script DeckItem extends Component
 	@HideFromInspector
 	property SynergyComponentItemRef synergyComponentItem = nil
 
-	method void Init(table unitData, table skillData)
+	method void Init(BuffedUnitModel unitData, table skillData)
 		self.unitData = unitData
 		self.skillData = skillData
 		
@@ -52,11 +54,19 @@ script DeckItem extends Component
 			self.spawnSkillData = _SkillService:GetSkillByIDFromClient(unitData["spawnSkill"])
 		end
 		
+		self.limitBreakSkillData = nil
+		if self.unitData.grade >= 5 then
+			local limitBreakData = _UnitLimitBreakRepo:FindBuffInClient(self.unitData.grade, 6, self.unitData.id)
+			if not (limitBreakData == nil or limitBreakData.limitBreak == 0) then
+				self.limitBreakSkillData = _SkillService:GetSkillByIDFromClient(limitBreakData.skillID)
+			end
+		end
+		
 		self:RefreshUI()
 	end
 
 	@ExecSpace("Client")
-	method void SetDataInClient(table unitData, table skillData)
+	method void SetDataInClient(BuffedUnitModel unitData, table skillData)
 		self.unitData = unitData
 		self.skillData = skillData
 	end
@@ -86,7 +96,7 @@ script DeckItem extends Component
 			-- 일반 프레임
 			self.unitFrameSprite.SpriteGUIRendererComponent.ImageRUID = "9cabdd08cb834cbab689c6219db5db05"
 			self.unitName.TextComponent.Text = self.unitData['name']
-			self.unitPriceLabel.TextComponent.Text = self.unitData['summonCost']
+			self.unitPriceLabel.TextComponent.Text = tostring(self.unitData.summonCost)
 			
 			if self.unitData['isUsableCharacter'] == 0 then
 				self.unitAvartarRenderer.Visible = false
@@ -135,7 +145,7 @@ script DeckItem extends Component
 		unitInfoPanel.Enable = true
 		unitInfoPanel.Visible = true
 		
-		unitInfoPanel.UnitInfoPanel:Init(self.unitData, self.skillData, self.spawnSkillData, self.itemIndex)
+		unitInfoPanel.UnitInfoPanel:Init(self.unitData, self.skillData, self.spawnSkillData, self.limitBreakSkillData, self.itemIndex)
 	end
 
 	@EventSender("Self")

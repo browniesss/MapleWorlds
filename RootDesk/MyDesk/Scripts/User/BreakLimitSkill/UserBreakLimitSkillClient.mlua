@@ -1,0 +1,95 @@
+@Component
+script UserBreakLimitSkillClient extends Component
+
+	property table limitBreakSkillList = {}
+
+	property Entity ScrollUI = "86a1d64d-8a2e-4a90-82e8-60d831b0911f"
+
+	property Entity DefaultItem = "a1e940ba-fb0c-46db-9c2a-41fc15859853"
+
+	property table buttonRuidMap = {}
+
+	@ExecSpace("ClientOnly")
+	method void SetSkill(table list, table buttonRuidMapParam)
+		self.limitBreakSkillList = list
+
+		-- buttonRuidMap 파라미터가 있으면 저장
+		if buttonRuidMapParam ~= nil then
+			self.buttonRuidMap = buttonRuidMapParam
+		end
+
+		for i, item in ipairs(self.ScrollUI.Children) do
+			item.UI_BreakLimitSkillUseItem:Disable()
+			item.Enable = false
+			item.Visible = false
+		end
+
+		local itemIndex = 0
+		for i, id in ipairs(list) do
+			local buttonRUID = self.buttonRuidMap[id] or ""
+
+			if buttonRUID == "" then
+				continue
+			end
+
+			itemIndex = itemIndex + 1
+
+			if itemIndex > #self.ScrollUI.Children then
+				local item = _SpawnService:SpawnByEntity(self.DefaultItem, "item", Vector3.zero, self.ScrollUI, true)
+				item.Enable = true
+				item.Visible = true
+				item.UI_BreakLimitSkillUseItem:Init(id, self.Entity.UserBreakLimitSkillProtocol, item.Children[2])
+				if buttonRUID ~= "" then
+					item.Children[2].SpriteGUIRendererComponent.ImageRUID = buttonRUID
+				end
+				continue
+			end
+
+			local item = self.ScrollUI.Children[itemIndex]
+			item.Enable = true
+			item.Visible = true
+			item.UI_BreakLimitSkillUseItem:Init(id, self.Entity.UserBreakLimitSkillProtocol, item.Children[2])
+			if buttonRUID ~= "" then
+				item.Children[2].SpriteGUIRendererComponent.ImageRUID = buttonRUID
+			end
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void UseSkill(string id)
+		-- 나중에 서버 공간으로 옮길것
+		log("skill use ", id)
+		local skillData = _SkillService:GetSkillByIDFromClient(id)
+		if skillData ~= nil then
+			local spawnSkillEntity = _SpawnService:SpawnByModelId(skillData["id"], skillData['skillDesc'], Vector3.zero, self.Entity)
+			_TimerService:SetTimerOnce(function()
+				spawnSkillEntity.SkillParent:UseSkill(self.Entity, nil, skillData['skillArea'], skillData['skillAmount'], skillData['skillProjectileSpeed'], skillData['skillTime'], skillData['skillAttackTiming'])
+			end, 0.1)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void ActivateSkill(string targetId)
+		for i, id in ipairs(self.limitBreakSkillList) do
+			if not (id == targetId) then
+				continue
+			end
+			
+			local item = self.ScrollUI.Children[i]
+			item.UI_BreakLimitSkillUseItem:ActivateButton()
+		end
+	end
+
+	@ExecSpace("Client")
+	method void DeactivateSkill(string targetId)
+		for i, id in ipairs(self.limitBreakSkillList) do
+			if not (id == targetId) then
+				continue
+			end
+			
+			local item = self.ScrollUI.Children[i]
+			item.UI_BreakLimitSkillUseItem:DeactivateButton()
+		end
+	end
+
+end

@@ -6,7 +6,7 @@ script Zombie_Lupin_Heal extends SkillParent
 		__base:ActivateSkill()
 		
 		_EffectService:PlayEffectAttached("93f3cd96f3b1432693e5d2765d396338", self.caster, Vector3(0, 0, 0) , 0, Vector3.one)
-		self.caster.Unit.hp += self.skillAmount
+		self.caster.Unit.hp += self.caster.Unit.damage * self.skillAmount
 		self:SkillEnd()
 	end
 

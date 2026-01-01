@@ -1,0 +1,31 @@
+@Component
+script Summon_1 extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		-- 모델 변경 필요
+		local model = "model://c57eb6a8-03e3-4115-999a-8b8c607e79da"
+		
+		_EffectService:PlayEffectAttached("bbe813c49cd84df9b59feeedb8dcba84", self.caster, Vector3.zero, 0, Vector3.one)
+		
+		local pos
+		local parent
+			
+		if self.caster.Unit.isEnemy then
+			pos = Vector3(self.caster.TransformComponent.Position.x + 0.5, self.caster.TransformComponent.Position.y + 0.5, 0)
+			_SpawnManager:SpawnEnemy(model, pos)
+		else
+			pos = Vector3(self.caster.TransformComponent.Position.x - 0.5, self.caster.TransformComponent.Position.y + 0.5, 0)
+			_SpawnManager:SkillSpawn(model, self.caster.Unit.id, pos)
+		end
+			
+		_EffectService:PlayEffect("bbe813c49cd84df9b59feeedb8dcba84", self.caster, pos , 0, Vector3.one)
+		
+		-- 스킬 사용 종료 처리
+		self.caster.Unit.isUsingSkill = false
+		self.caster.Unit:SetState("move")
+	end
+
+end

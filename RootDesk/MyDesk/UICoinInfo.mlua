@@ -13,9 +13,9 @@ script UICoinInfo extends Component
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		local currentPath = self.Entity.Path
-		self.FirstCoin = _EntityService:GetEntityByPath(currentPath .. "/UIFirstCoinPanel/TextCoin").TextComponent
-		self.SecondCoin = _EntityService:GetEntityByPath(currentPath .. "/UISecondCoinPanel/TextCoin").TextComponent
-		self.PlayCoin = _EntityService:GetEntityByPath(currentPath .. "/UIPlayCoinPanel/TextCoin").TextComponent
+		self.FirstCoin = _EntityService:GetEntityByPath(currentPath .. "/UICoin_Root/UIFirstCoinPanel/TextCoin").TextComponent
+		self.SecondCoin = _EntityService:GetEntityByPath(currentPath .. "/UICoin_Root/UISecondCoinPanel/TextCoin").TextComponent
+		self.PlayCoin = _EntityService:GetEntityByPath(currentPath .. "/UICoin_Root/UIPlayCoinPanel/TextCoin").TextComponent
 	end
 
 	@ExecSpace("ClientOnly")

@@ -1,0 +1,39 @@
+@Component
+script Arrow_Blow extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		if self._T.projectileParent == nil then
+			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+		end
+		
+		self:CallAnimation(self.caster.Unit.animationName)
+		
+		local basePos = self.Entity.TransformComponent.WorldPosition
+		
+		local options = {
+		    FlipX = true,  -- 좌우 반전
+		}
+		_EffectService:PlayEffectAttached("2ed6be9152eb4bf0b22f4ca6e6fff9fe", self.caster, Vector3(0, 0.1, 0) , 0, Vector3.one, false, options)
+		
+		local function spawnMissile()
+			local missile = _SpawnService:SpawnByModelId(
+				"model://cd38ad89-1c52-45f2-8d86-d6be27475ba9",
+				"arrow_blow",
+				basePos + (Vector3.up * 0.3),
+				self._T.projectileParent
+			)
+		
+			missile.SpriteRendererComponent.SpriteRUID = "64142d933e854590a67af044f3d091fb"
+			missile.Projectile:SetCaster(self.caster)
+			missile.Projectile:SetShoot("64142d933e854590a67af044f3d091fb", self:IsTargetOnRight(self.target), self.skillProjectileSpeed
+			, self.target, false, self.caster.Unit.damage * self.skillAmount)
+		end
+		
+		-- 첫 번째 발사: 공격 모션 발생
+		_TimerService:SetTimerOnce(spawnMissile, self.skillAttackTiming)
+	end
+
+end

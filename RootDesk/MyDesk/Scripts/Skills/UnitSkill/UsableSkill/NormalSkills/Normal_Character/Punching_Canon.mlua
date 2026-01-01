@@ -1,0 +1,25 @@
+@Component
+script Punching_Canon extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		-- 68fc685a9b9d41e796a5527a0eeb2ed9
+		self:CallAnimation("cannon")
+		local options = {
+		    FlipX = true,  -- 좌우 반전
+			OrderInLayer = 0,
+		}
+		
+		_EffectService:PlayEffectAttached("68fc685a9b9d41e796a5527a0eeb2ed9", self.caster, Vector3(0.3, 0, 0) , 0, Vector3.one, false, options)
+		
+		local function attackFunction()
+			self.target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 1)
+		end
+		
+		-- 첫 번째 공격
+		_TimerService:SetTimerOnce(attackFunction, self.skillAttackTiming)
+	end
+
+end

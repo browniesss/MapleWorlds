@@ -1,0 +1,39 @@
+@Component
+script True_Sniping extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		-- 64224b19c0aa4359963ab551d5862cfd
+		-- 3cb38c4ac87045ab892cd9ff235e261e
+		
+		self:CallAnimation("6thSniping")
+		
+		local targetList = self:GetFarthestEnemies(3)
+		log(targetList)
+		local effectFunction = function()
+			for _, target in ipairs(targetList) do
+			    if isvalid(target) and target.Unit and target.Unit.curState ~= "die" then
+					_EffectService:PlayEffectAttached("64224b19c0aa4359963ab551d5862cfd", target, Vector3.zero , 0, Vector3.one, false)
+				end
+			end
+		end
+		
+		local damageFunction = function()
+			for _, target in ipairs(targetList) do
+			    if isvalid(target) and target.Unit and target.Unit.curState ~= "die" then
+					target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 1)
+					_EffectService:PlayEffectAttached("3cb38c4ac87045ab892cd9ff235e261e", target, Vector3.zero , 0, Vector3.one, false)
+				end
+			end
+		end
+		
+		_TimerService:SetTimerOnce(effectFunction, 0)
+		_TimerService:SetTimerOnce(damageFunction, self.skillAttackTiming)
+		_TimerService:SetTimerOnce(function()
+			self:SkillEnd()
+		end, self.skillTime)
+	end
+
+end

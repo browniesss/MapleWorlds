@@ -1,0 +1,34 @@
+@Component
+script UI_BreakLimitSkillUseItem extends Component
+
+	property string id = ""
+
+	property Entity button = nil
+
+	property any handlerId = nil
+
+	method void Init(string id, UserBreakLimitSkillProtocolRef protocol, EntityRef button)
+		self.id = id
+		self.button = button
+		button.ButtonComponent.Enable = false
+		
+		self.handlerId = button:ConnectEvent(ButtonClickEvent, function()
+			protocol:UseSkillCall(self.id)
+			self.Entity.Enable = false
+			self.Entity.Visible = false
+		end)
+	end
+
+	method void Disable()
+		self.button:DisconnectEvent(ButtonClickEvent, self.handlerId)
+	end
+
+	method void ActivateButton()
+		self.button.ButtonComponent.Enable = true
+	end
+
+	method void DeactivateButton()
+		self.button.ButtonComponent.Enable = false
+	end
+
+end

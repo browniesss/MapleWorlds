@@ -1,0 +1,32 @@
+@Logic
+script BuffedUnitService extends Logic
+
+	@ExecSpace("ServerOnly")
+	method BuffedUnitModel SetUnitBuff(BuffedUnitModel model, integer level, integer limitBreak)
+		local levelBuff = _UnitLevelUpRepo:GetBuff(model.jobId, model.grade, level)
+		if not (levelBuff == nil) then
+			model:SetLevelBuff(levelBuff)
+		end
+		
+		local limitBreakBuff = _UnitLimitBreakRepo:GetBuff(model.grade, limitBreak, model.id)
+		if not (limitBreakBuff == nil) then
+			model:SetLimitBreakBuff(limitBreakBuff)
+		end
+		
+		return model
+	end
+
+	@ExecSpace("ServerOnly")
+	method BuffedUnitModel GetBuffedUnitModel(string uid, string id)
+		local unitData = _UnitService:GetUnitByIDFromServer(id)
+		
+		local buffedUnit = BuffedUnitModel()
+		if unitData == nil then
+			return buffedUnit
+		end
+		buffedUnit:Init(unitData)
+		
+		return buffedUnit
+	end
+
+end

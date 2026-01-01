@@ -1,0 +1,11 @@
+@Component
+script EventStartUI extends Component
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		if _PlayCoinService:IsUseEventCoin() then
+			_PlayCoinService:StartEventGame()
+		end
+	end
+
+end

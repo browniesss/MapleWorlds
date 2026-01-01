@@ -1,0 +1,34 @@
+@Logic
+script eventGroupRepo extends Logic
+
+	property table groupTable = {}
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		local dataSet = _DataService:GetTable("EventSpawnGroup")
+		if dataSet == nil then
+			log("EventSpawnGroup DataSet not found")
+			return
+		end
+		
+		for index = 1, dataSet:GetRowCount() do
+			local item = {}
+		
+			item['id'] = tonumber(dataSet:GetCell(index, 'id'))
+			item['group'] = tonumber(dataSet:GetCell(index, 'group'))
+			item['unit'] = tostring(dataSet:GetCell(index, 'unit'))
+			item['delayTs'] = tonumber(dataSet:GetCell(index, 'delay'))
+		
+			if self.groupTable[item.group] == nil then
+				self.groupTable[item.group] = {}
+			end
+		
+			table.insert(self.groupTable[item.group], item)
+		end
+	end
+
+	method table GetGroupById(integer group)
+		return self.groupTable[group]
+	end
+
+end

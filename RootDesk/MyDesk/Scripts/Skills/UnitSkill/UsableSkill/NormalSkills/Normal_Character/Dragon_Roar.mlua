@@ -1,0 +1,47 @@
+@Component
+script Dragon_Roar extends SkillParent
+
+	property table nearByEnemies = {}
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		-- 5468cadd2f60428e925bc368968e1a1e
+		-- 01c803531e2c4e5aa3c3ef66f14711b8
+		
+		self:CallAnimation("alert")
+		
+		-- 공격 처리 함수
+		local function CreateEffect()
+			if not isvalid(self.target) or self.target.Unit.curState == "die" and self.caster.Unit.curTarget ~= nil then
+				self.target = self.caster.Unit.curTarget
+			end
+		
+			local myPos = self.caster.TransformComponent.WorldPosition
+			local targetPos = self.target.TransformComponent.WorldPosition
+			self.nearByEnemies = self:FindNearByEnemies()
+		
+			local options = {
+		    	FlipX = true,  -- 좌우 반전
+			}
+			_EffectService:PlayEffectAttached("5468cadd2f60428e925bc368968e1a1e", self.caster, Vector3(0, 0.1, 0) , 0, Vector3.one, false, options)
+		end
+		
+		local function EffectDamage()
+			for _, target in ipairs(self.nearByEnemies) do
+				if not isvalid(target) or target.Unit.curState == "die" then
+					continue
+				end
+				
+				_EffectService:PlayEffectAttached("01c803531e2c4e5aa3c3ef66f14711b8", target, target.Unit:GetTargetingPos() , 0, Vector3.one)
+			    target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 3)
+			end
+		end
+		
+		-- 시전 딜레이 후 스킬 실행
+		_TimerService:SetTimerOnce(CreateEffect, 0)
+		_TimerService:SetTimerOnce(EffectDamage, self.skillAttackTiming)
+	end
+
+end

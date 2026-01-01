@@ -1,0 +1,25 @@
+@Component
+script Brandish extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		self:CallAnimation("brandish2")
+		local options = {
+		    FlipX = true,  -- 좌우 반전
+		}
+		_EffectService:PlayEffectAttached("5c2c13c481ba476294bff7e9e04df837", self.caster, Vector3.zero , 0, Vector3.one, false, options)
+		
+		local function attackFunction()
+			self.target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 1)
+		end
+		
+		-- 첫 번째 공격
+		_TimerService:SetTimerOnce(attackFunction, self.skillAttackTiming)
+		
+		-- 두 번째 공격
+		_TimerService:SetTimerOnce(attackFunction, self.skillAttackTiming * 2)
+	end
+
+end

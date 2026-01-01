@@ -6,7 +6,7 @@ script settingRepo extends Logic
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		self.settingTable['LOOP'] = {}
-		local loopSet = _DataService:GetTable("LOOP")    
+		local loopSet = _DataService:GetTable("LOOP")
 		for index = 1, loopSet:GetRowCount() do
 		    local item = {
 				id = tonumber(loopSet:GetCell(index, 'id')),
@@ -14,12 +14,38 @@ script settingRepo extends Logic
 				endTs = tonumber(loopSet:GetCell(index, 'end')),
 				delayTs = tonumber(loopSet:GetCell(index, 'delay'))
 			}
-			
+
 			self.settingTable['LOOP'][item.id] = item
 		end
-		
+
+		-- EventData 테이블에서 모든 이벤트 ID 로드
+		local eventDataSet = _DataService:GetTable("EventData")
+		if eventDataSet ~= nil then
+			for index = 1, eventDataSet:GetRowCount() do
+				local eventId = tostring(eventDataSet:GetCell(index, "id"))
+				local eventLoopTableName = "EVENT_LOOP_" .. eventId
+
+				-- 각 이벤트 ID에 대한 EVENT_LOOP 테이블 로드
+				self.settingTable[eventLoopTableName] = {}
+				local eventLoopSet = _DataService:GetTable(eventLoopTableName)
+
+				if eventLoopSet ~= nil then
+					for loopIndex = 1, eventLoopSet:GetRowCount() do
+						local item = {
+							id = tonumber(eventLoopSet:GetCell(loopIndex, 'id')),
+							startTs = tonumber(eventLoopSet:GetCell(loopIndex, 'start')),
+							endTs = tonumber(eventLoopSet:GetCell(loopIndex, 'end')),
+							delayTs = tonumber(eventLoopSet:GetCell(loopIndex, 'delay'))
+						}
+
+						self.settingTable[eventLoopTableName][item.id] = item
+					end
+				end
+			end
+		end
+
 		self.settingTable['EVENT'] = {}
-		local eventSet = _DataService:GetTable("EVENT")    
+		local eventSet = _DataService:GetTable("EVENT")
 		for index = 1, eventSet:GetRowCount() do
 		    local item = {
 				id = tonumber(eventSet:GetCell(index, 'id')),
@@ -27,13 +53,30 @@ script settingRepo extends Logic
 				count = tonumber(eventSet:GetCell(index, 'count')),
 				delayTs = tonumber(eventSet:GetCell(index, 'delay')),
 			}
-			
+
 			self.settingTable['EVENT'][item.id] = item
 		end
 	end
 
 	method table GetSettingByTypeAndId(string type, integer id)
 		return self.settingTable[type][id]
+	end
+
+	method table GetSettingByTypeAndIdForEvent(string type, integer id, boolean isEventMode)
+		if isEventMode and (type == 'LOOP' or type == 'EVENT_LOOP') then
+			-- 이벤트 모드일 때는 현재 이벤트 버전에 맞는 EVENT_LOOP 테이블 사용
+			local currentEventVersion = _EventService:GetCurrentEventVersion()
+			local eventLoopTableName = "EVENT_LOOP_" .. tostring(currentEventVersion)
+
+			local eventLoopTable = self.settingTable[eventLoopTableName]
+			if eventLoopTable ~= nil then
+				return eventLoopTable[id]
+			else
+				return self.settingTable['LOOP'][id]
+			end
+		else
+			return self.settingTable[type][id]
+		end
 	end
 
 end

@@ -1,0 +1,75 @@
+@Component
+script ExtendToggleTopMenu extends ToggleAction
+
+	property number panelIndex = 0
+
+	property Entity targetTopMenu = nil
+
+	property Entity eventBackground = nil
+
+	property Entity normalStartButton = nil
+
+	property Entity eventStartButton = nil
+
+	method void ExecuteOnLogic(Toggle sender)
+		__base:ExecuteOnLogic(sender)
+
+		if self.targetTopMenu then
+			self.targetTopMenu.Enable = true
+
+			self:SetEventBackground(true)
+
+			-- 이벤트 스테이지 탭 활성화 시 초기화
+			if self.panelIndex == 3 then
+				-- targetTopMenu에서 직접 컴포넌트 찾기 (비활성화된 엔티티도 접근 가능)
+				if self.targetTopMenu.ExtendEventSelectorUI ~= nil then
+					pcall(function()
+						self.targetTopMenu.ExtendEventSelectorUI:SetUserEventStageComp(_UserService.LocalPlayer)
+					end)
+				end
+
+				-- 이벤트 스테이지 탭일 때 시작 버튼 교체
+				self:SwapStartButtons(true)
+			else
+				-- 일반 스테이지 탭일 때 시작 버튼 복구
+				self:SwapStartButtons(false)
+			end
+		end
+	end
+
+	method void ExecuteOffLogic(Toggle sender)
+		__base:ExecuteOffLogic(sender)
+
+		if self.targetTopMenu then
+			self.targetTopMenu.Enable = false
+		end
+
+		self:SetEventBackground(false)
+	end
+
+	method void SetEventBackground(boolean active)
+		if self.panelIndex == 3 and self.eventBackground ~= nil then
+			self.eventBackground.Enable = active
+		end
+	end
+
+	method void SwapStartButtons(boolean isEventMode)
+		-- 일반 시작 버튼과 이벤트 시작 버튼 교체
+		if self.normalStartButton ~= nil and self.eventStartButton ~= nil then
+			if isEventMode then
+				-- 이벤트 모드: 일반 버튼 비활성화, 이벤트 버튼 활성화
+				self.normalStartButton.Enable = false
+				self.normalStartButton.Visible = false
+				self.eventStartButton.Enable = true
+				self.eventStartButton.Visible = true
+			else
+				-- 일반 모드: 일반 버튼 활성화, 이벤트 버튼 비활성화
+				self.normalStartButton.Enable = true
+				self.normalStartButton.Visible = true
+				self.eventStartButton.Enable = false
+				self.eventStartButton.Visible = false
+			end
+		end
+	end
+
+end

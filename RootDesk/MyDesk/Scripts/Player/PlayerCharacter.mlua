@@ -22,6 +22,9 @@ script PlayerCharacter extends Component
 	@Sync
 	property boolean isPlayingUISkill = false
 
+	@Sync
+	property boolean isLimitBreakSkill = false
+
 	method void SetSkill(table skillData1, table skillData2)
 		self.skillData1 = skillData1
 		self.skillData2 = skillData2
@@ -53,16 +56,16 @@ script PlayerCharacter extends Component
 	@ExecSpace("ServerOnly")
 	method void OnMapEnter(Entity enteredMap)
 		log("[PlayerCharacter] OnMapEnter called, map: ", enteredMap.Name)
-
+		
 		if enteredMap.Name == "LobbyScene" then
 			self.Entity.Visible = false
 		end
-
+		
 		local isTermAgree = _TermService:LOAD(self.Entity.PlayerComponent.UserId)
 		local isTutorial = _TutorialService:LOAD(self.Entity.PlayerComponent.UserId)
-
+		
 		log("[PlayerCharacter] isTermAgree: ", isTermAgree, ", isTutorial: ", isTutorial)
-
+		
 		-- 신규 유저: 튜토리얼 시작
 		if isTutorial == 0 then
 			-- MainLobbyMap에서 진입한 경우
@@ -73,7 +76,7 @@ script PlayerCharacter extends Component
 				if userStage ~= nil then
 					hasCleared101 = userStage:IsStageCleared(1, 1)
 				end
-
+		
 				if hasCleared101 then
 					-- Stage 101을 클리어한 기존 유저: 튜토리얼 건너뛰고 완료 처리
 					log("[Tutorial] User has cleared Stage 101, skipping tutorial...")
@@ -106,7 +109,6 @@ script PlayerCharacter extends Component
 		self.ingameSkills[skillID] = skillLevel;
 	end
 
-	-- 클라이언트에서 튜토리얼 게임 시작
 	@ExecSpace("Client")
 	method void StartTutorialFromClient()
 		log("[Tutorial] StartTutorialFromClient called")

@@ -15,21 +15,40 @@ script LobbyPortal extends Component
 	method void SetStageUI()
 		local MainUIEntity = _EntityService:GetEntityByPath("/ui/LobbyInfoUI")
 		MainUIEntity:SetEnable(true)
-		
+
 		local oldUIEntity = _EntityService:GetEntityByPath("/ui/Lobby_UI")
 		oldUIEntity:SetEnable(false)
-		
+
 		local userName = _UserService.LocalPlayer.Name
 		_RankingService:InitUserPointMap(userName)
-		
-		local stageSelectUIEntity = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/StageSelectUI")
-		stageSelectUIEntity.StageSelectorUI:SetUserStageComp(_UserService.LocalPlayer)
-		
+
+		local stageSelectUIEntity = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/StageSelectUI")
+		if stageSelectUIEntity ~= nil then
+			stageSelectUIEntity.StageSelectorUI:SetUserStageComp(_UserService.LocalPlayer)
+		end
+
 		self.IsUserVisible = false
 	end
 
 	@EventSender("Self")
 	handler HandlePortalUseEvent(PortalUseEvent event)
+		if _PopupManager:IsOpenPopup() then
+			return
+		end
+		
+		if self.lobbyInfoUI == nil or self.lobbyInfoUI.EnabledInHierarchy then
+			return
+		end
+		
+		self:SetStageUI()
+	end
+
+	@EventSender("Self")
+	handler HandleTouchEvent(TouchEvent event)
+		if _PopupManager:IsOpenPopup() then
+			return
+		end
+		
 		if self.lobbyInfoUI == nil or self.lobbyInfoUI.EnabledInHierarchy then
 			return
 		end

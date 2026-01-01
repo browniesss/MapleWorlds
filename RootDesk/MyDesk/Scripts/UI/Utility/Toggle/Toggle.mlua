@@ -66,9 +66,9 @@ script Toggle extends Component
 		if self.isOn == true then
 			targetRuid = self.OnRUID
 		end
-		
+
 		if self.ImageEntity and self.ImageEntity.SpriteGUIRendererComponent then
-			self.ImageEntity.SpriteGUIRendererComponent.ImageRUID = targetRuid 
+			self.ImageEntity.SpriteGUIRendererComponent.ImageRUID = targetRuid
 		end
 	end
 
