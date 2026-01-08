@@ -1,0 +1,521 @@
+@Logic
+script MonsterCodexService extends Logic
+
+	@Sync
+	property SyncTable<string, string> codexData
+
+	property table userKillData = {}
+
+	property string STORAGE_KEY = "MONSTER_CODEX_DATA"
+
+	-- 클라이언트 로컬 킬 데이터 (게임 세션 동안만 유지)
+	property table localKillData = {}
+
+	-- 클라이언트가 받은 초기 유저 데이터
+	property table initialUserData = {}
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		self:LoadCodexData()
+	end
+
+	@ExecSpace("ServerOnly")
+	method void LoadCodexData()
+		local dataSet = _DataService:GetTable("monster_codex")
+		if dataSet == nil then
+			log("[MonsterCodex] Warning: monster_codex dataset not found")
+			return
+		end
+
+		local count = dataSet:GetRowCount()
+		log("[MonsterCodex] Loading codex data:", count)
+
+		for i = 1, count do
+			local id = tonumber(dataSet:GetCell(i, "id"))
+			local monsterId = tostring(dataSet:GetCell(i, "monster_id"))
+			local requiredKills = tonumber(dataSet:GetCell(i, "required_kills"))
+			local rewardAmount = tonumber(dataSet:GetCell(i, "reward_amount"))
+
+			-- JSON 문자열 직접 생성 (빈 테이블 문제 회피)
+			local json = string.format('{"id":%d,"monster_id":"%s","required_kills":%d,"reward_amount":%d}',
+				id, monsterId, requiredKills, rewardAmount)
+			self.codexData[monsterId] = json
+
+			log("[MonsterCodex] Loaded:", monsterId, "required:", requiredKills)
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method table GetCodexInfo(string monsterId)
+		local json = self.codexData[monsterId]
+		if json == nil then
+			return nil
+		end
+		return _HttpService:JSONDecode(json)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void LoadUserData(string userId)
+		local ds = _DataStorageService:GetUserDataStorage(userId)
+		local errCode, data = ds:GetAndWait(self.STORAGE_KEY)
+		
+		if errCode ~= 0 or data == nil or data == "" then
+			-- 초기 데이터 생성
+			self.userKillData[userId] = {
+				kills = {},
+				claimed = {}
+			}
+			return
+		end
+		
+		local decoded = _HttpService:JSONDecode(data)
+		self.userKillData[userId] = decoded
+		log("[MonsterCodex] Loaded user data for:", userId)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void SaveUserData(string userId)
+		if self.userKillData[userId] == nil then
+			return
+		end
+
+		local ds = _DataStorageService:GetUserDataStorage(userId)
+		local json = self:EncodeUserData(userId)
+		ds:SetAndWait(self.STORAGE_KEY, json)
+		log("[MonsterCodex] Saved user data for:", userId)
+	end
+
+	@ExecSpace("ServerOnly")
+	method string EncodeUserData(string userId)
+		local data = self.userKillData[userId]
+		if data == nil then
+			return '{"kills":{},"claimed":{}}'
+		end
+
+		-- kills 부분 생성
+		local killParts = {}
+		if data["kills"] ~= nil then
+			for monsterId, count in pairs(data["kills"]) do
+				table.insert(killParts, string.format('"%s":%d', monsterId, count))
+			end
+		end
+		local killsJson = "{" .. table.concat(killParts, ",") .. "}"
+
+		-- claimed 부분 생성
+		local claimParts = {}
+		if data["claimed"] ~= nil then
+			for monsterId, claimed in pairs(data["claimed"]) do
+				if claimed == true then
+					table.insert(claimParts, string.format('"%s":true', monsterId))
+				end
+			end
+		end
+		local claimedJson = "{" .. table.concat(claimParts, ",") .. "}"
+
+		return string.format('{"kills":%s,"claimed":%s}', killsJson, claimedJson)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer GetKillCount(string userId, string monsterId)
+		if self.userKillData[userId] == nil then
+			return 0
+		end
+		
+		local kills = self.userKillData[userId]["kills"]
+		if kills == nil then
+			return 0
+		end
+		
+		return kills[monsterId] or 0
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean IsCompleted(string userId, string monsterId)
+		local codexInfo = self:GetCodexInfo(monsterId)
+		if codexInfo == nil then
+			return false
+		end
+		
+		local killCount = self:GetKillCount(userId, monsterId)
+		return killCount >= codexInfo["required_kills"]
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean IsRewardClaimed(string userId, string monsterId)
+		if self.userKillData[userId] == nil then
+			return false
+		end
+		
+		local claimed = self.userKillData[userId]["claimed"]
+		if claimed == nil then
+			return false
+		end
+		
+		return claimed[monsterId] == true
+	end
+
+	-- 기존 OnMonsterKilled는 더 이상 사용하지 않음 (클라이언트에서 OnLocalMonsterKilled 호출)
+	-- 서버 킬 처리가 필요한 경우를 대비해 유지 (매 킬마다 저장하지 않음)
+	@ExecSpace("Server")
+	method void OnMonsterKilled(string monsterId)
+		local userId = senderUserId
+
+		-- 도감에 등록된 몬스터인지 확인
+		local codexInfo = self:GetCodexInfo(monsterId)
+		if codexInfo == nil then
+			return
+		end
+
+		-- 유저 데이터 확인
+		if self.userKillData[userId] == nil then
+			self:LoadUserData(userId)
+		end
+
+		-- 이미 달성했으면 카운트만 증가 (알림 X)
+		local wasCompleted = self:IsCompleted(userId, monsterId)
+
+		-- 처치 수 증가 (메모리에만 저장, DB 저장 X)
+		if self.userKillData[userId]["kills"] == nil then
+			self.userKillData[userId]["kills"] = {}
+		end
+
+		local currentKills = self.userKillData[userId]["kills"][monsterId] or 0
+		self.userKillData[userId]["kills"][monsterId] = currentKills + 1
+
+		-- 새로 달성했는지 확인 - 달성 시에만 저장
+		local isNowCompleted = self:IsCompleted(userId, monsterId)
+		if not wasCompleted and isNowCompleted then
+			-- DB 저장 (달성 시에만)
+			self:SaveUserData(userId)
+
+			-- Unit 테이블에서 이름 가져오기
+			local unitData = _UnitService:GetUnitByIDFromServer(monsterId)
+			local monsterName = ""
+			if unitData ~= nil then
+				monsterName = unitData["name"] or ""
+			end
+			-- 달성 알림 보내기 (첫 번째 파라미터가 targetUserId)
+			self:NotifyCodexCompleted(userId, monsterId, monsterName)
+		end
+	end
+
+	-- 클라이언트에서 도감 달성 시 서버에 알림 (DB 저장용)
+	@ExecSpace("Server")
+	method void NotifyCodexAchieved(string monsterId)
+		local userId = senderUserId
+
+		-- 유저 데이터 확인
+		if self.userKillData[userId] == nil then
+			self:LoadUserData(userId)
+		end
+
+		-- 도감 정보 확인
+		local codexInfo = self:GetCodexInfo(monsterId)
+		if codexInfo == nil then
+			return
+		end
+
+		-- 이미 달성했으면 무시 (중복 저장 방지)
+		if self:IsCompleted(userId, monsterId) then
+			return
+		end
+
+		-- 달성 처리를 위해 킬 카운트를 required_kills로 설정
+		if self.userKillData[userId]["kills"] == nil then
+			self.userKillData[userId]["kills"] = {}
+		end
+		self.userKillData[userId]["kills"][monsterId] = codexInfo["required_kills"]
+
+		-- DB 저장
+		self:SaveUserData(userId)
+		log("[MonsterCodex] Codex achieved and saved:", monsterId)
+	end
+
+	-- 클라이언트에서 게임 종료 시 킬 데이터 동기화
+	@ExecSpace("Server")
+	method void SyncKillData(string killDataJson)
+		local userId = senderUserId
+
+		-- 유저 데이터 확인
+		if self.userKillData[userId] == nil then
+			self:LoadUserData(userId)
+		end
+
+		-- JSON 파싱
+		local killData = _HttpService:JSONDecode(killDataJson)
+		if killData == nil then
+			return
+		end
+
+		-- 킬 데이터 병합
+		if self.userKillData[userId]["kills"] == nil then
+			self.userKillData[userId]["kills"] = {}
+		end
+
+		for monsterId, count in pairs(killData) do
+			local currentKills = self.userKillData[userId]["kills"][monsterId] or 0
+			self.userKillData[userId]["kills"][monsterId] = currentKills + count
+		end
+
+		-- DB 저장
+		self:SaveUserData(userId)
+		log("[MonsterCodex] Kill data synced for:", userId)
+	end
+
+	@ExecSpace("Client")
+	method void NotifyCodexCompleted(string odataUserId, string monsterId, string monsterName)
+		log("[MonsterCodex] NotifyCodexCompleted called - monsterId:", monsterId, "monsterName:", monsterName)
+
+		-- 배너 표시
+		local banner = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/MonsterCodexBanner")
+		log("[MonsterCodex] banner entity:", banner)
+		if banner ~= nil and banner.MonsterCodexBanner ~= nil then
+			log("[MonsterCodex] Calling banner Show")
+			banner.MonsterCodexBanner:Show(monsterName, monsterId)
+		else
+			log_error("[MonsterCodex] Banner not found or component is nil")
+		end
+		
+		-- 이펙트 표시 (플레이어 위치)
+		local player = _UserService.LocalPlayer
+		if player ~= nil then
+			_EffectService:PlayEffectAttached("93f3cd96f3b1432693e5d2765d396338", player, Vector3(0, 100, 0), 2, Vector3.one)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void ClaimReward(string monsterId)
+		local userId = senderUserId
+		log("[MonsterCodex] ClaimReward - userId:", userId, "monsterId:", monsterId)
+
+		-- 도감 정보 확인
+		local codexInfo = self:GetCodexInfo(monsterId)
+		if codexInfo == nil then
+			log_error("[MonsterCodex] Codex info not found:", monsterId)
+			self:OnClaimRewardResult(userId, monsterId, false, "NOT_FOUND")
+			return
+		end
+
+		-- 유저 데이터 확인
+		if self.userKillData[userId] == nil then
+			self:LoadUserData(userId)
+		end
+
+		-- 달성 여부 확인
+		if not self:IsCompleted(userId, monsterId) then
+			log("[MonsterCodex] Not completed:", monsterId)
+			self:OnClaimRewardResult(userId, monsterId, false, "NOT_COMPLETED")
+			return
+		end
+
+		-- 이미 수령했는지 확인
+		if self:IsRewardClaimed(userId, monsterId) then
+			log("[MonsterCodex] Already claimed:", monsterId)
+			self:OnClaimRewardResult(userId, monsterId, false, "ALREADY_CLAIMED")
+			return
+		end
+
+		-- 보상 지급 (머쉬다이아)
+		local rewardAmount = codexInfo["reward_amount"]
+		local result = _BillingService:AddFirstFreeCoin(userId, rewardAmount)
+		if result ~= 0 then
+			log_error("[MonsterCodex] Failed to add reward:", result)
+			self:OnClaimRewardResult(userId, monsterId, false, "REWARD_FAILED")
+			return
+		end
+
+		-- 수령 완료 표시
+		if self.userKillData[userId]["claimed"] == nil then
+			self.userKillData[userId]["claimed"] = {}
+		end
+		self.userKillData[userId]["claimed"][monsterId] = true
+		self:SaveUserData(userId)
+
+		log("[MonsterCodex] Reward claimed:", monsterId, "amount:", rewardAmount)
+		self:OnClaimRewardResult(userId, monsterId, true, "")
+	end
+
+	@ExecSpace("Client")
+	method void OnClaimRewardResult(string odataUserId, string monsterId, boolean success, string errorCode)
+		log("[MonsterCodex] OnClaimRewardResult:", monsterId, success, errorCode)
+		
+		-- 팝업 표시
+		local codexUI = _EntityService:GetEntityByPath("/ui/MonsterCodexUI")
+		if codexUI ~= nil and codexUI.MonsterCodexUI ~= nil then
+			codexUI.MonsterCodexUI:OnClaimResult(monsterId, success, errorCode)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void RequestUserData()
+		local userId = senderUserId
+
+		-- 유저 데이터 로드
+		if self.userKillData[userId] == nil then
+			self:LoadUserData(userId)
+		end
+
+		-- 클라이언트에 전송
+		local json = self:EncodeUserData(userId)
+		self:OnUserDataReceived(userId, json)
+	end
+
+	@ExecSpace("Client")
+	method void OnUserDataReceived(string odataUserId, string json)
+		log("[MonsterCodex] OnUserDataReceived")
+
+		local data = _HttpService:JSONDecode(json)
+
+		-- 초기 유저 데이터 저장 (클라이언트 로컬 킬 카운트 계산용)
+		self.initialUserData = data or {kills = {}, claimed = {}}
+		-- 로컬 킬 데이터 초기화
+		self.localKillData = {}
+
+		-- 도감 UI가 보이는 상태일 때만 새로고침 (게임 시작 시 불필요한 에러 방지)
+		local codexUI = _EntityService:GetEntityByPath("/ui/MonsterCodexUI")
+		if codexUI ~= nil and codexUI.MonsterCodexUI ~= nil and codexUI.Visible then
+			codexUI.MonsterCodexUI:RefreshWithData(data)
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method table GetCodexInfoClient(string monsterId)
+		local json = self.codexData[monsterId]
+		if json == nil then
+			return nil
+		end
+		return _HttpService:JSONDecode(json)
+	end
+
+	@ExecSpace("ClientOnly")
+	method table GetAllCodexList()
+		local list = {}
+		for monsterId, json in pairs(self.codexData) do
+			local data = _HttpService:JSONDecode(json)
+			table.insert(list, data)
+		end
+		-- id 순으로 정렬
+		table.sort(list, function(a, b)
+			return a["id"] < b["id"]
+		end)
+		return list
+	end
+
+	-- 클라이언트에서 몬스터 처치 시 호출 (로컬 처리)
+	@ExecSpace("ClientOnly")
+	method void OnLocalMonsterKilled(string monsterId)
+		-- 도감에 등록된 몬스터인지 확인
+		local codexInfo = self:GetCodexInfoClient(monsterId)
+		if codexInfo == nil then
+			return
+		end
+
+		-- 로컬 킬 카운트 증가
+		if self.localKillData[monsterId] == nil then
+			self.localKillData[monsterId] = 0
+		end
+		self.localKillData[monsterId] = self.localKillData[monsterId] + 1
+
+		-- 총 킬 카운트 계산 (초기 데이터 + 로컬)
+		local initialKills = 0
+		if self.initialUserData["kills"] ~= nil and self.initialUserData["kills"][monsterId] ~= nil then
+			initialKills = self.initialUserData["kills"][monsterId]
+		end
+		local totalKills = initialKills + self.localKillData[monsterId]
+		local prevTotalKills = totalKills - 1  -- 이번 킬 이전까지의 총 카운트
+
+		-- 이미 달성했는지 확인
+		local wasClaimed = self.initialUserData["claimed"] ~= nil and self.initialUserData["claimed"][monsterId] == true
+		local requiredKills = codexInfo["required_kills"]
+		local wasAlreadyCompleted = prevTotalKills >= requiredKills  -- 이전 킬까지 이미 달성했는지
+
+		-- 새로 달성했는지 확인 (이번 킬로 처음 달성한 경우에만)
+		if not wasAlreadyCompleted and not wasClaimed and totalKills >= requiredKills then
+			-- Unit 정보에서 이름 가져오기
+			local unitInfo = _UnitService:GetUnitByIDFromClient(monsterId)
+			local monsterName = ""
+			if unitInfo ~= nil then
+				monsterName = unitInfo["name"] or ""
+			end
+
+			-- 배너 표시 (클라이언트에서 직접)
+			local banner = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/MonsterCodexBanner")
+			if banner ~= nil and banner.MonsterCodexBanner ~= nil then
+				banner.MonsterCodexBanner:Show(monsterName, monsterId)
+			end
+
+			-- 이펙트 표시
+			local player = _UserService.LocalPlayer
+			if player ~= nil then
+				_EffectService:PlayEffectAttached("93f3cd96f3b1432693e5d2765d396338", player, Vector3(0, 100, 0), 2, Vector3.one)
+			end
+
+			-- 서버에 달성 알림 (DB 저장용)
+			self:NotifyCodexAchieved(monsterId)
+		end
+	end
+
+	-- 클라이언트 킬 데이터를 서버로 동기화
+	@ExecSpace("ClientOnly")
+	method void SyncKillDataToServer()
+		-- 로컬 킬 데이터가 없으면 스킵
+		local hasData = false
+		for k, v in pairs(self.localKillData) do
+			hasData = true
+			break
+		end
+
+		if not hasData then
+			return
+		end
+
+		-- JSON 인코딩
+		local parts = {}
+		for monsterId, count in pairs(self.localKillData) do
+			table.insert(parts, string.format('"%s":%d', monsterId, count))
+		end
+		local json = "{" .. table.concat(parts, ",") .. "}"
+
+		-- 서버로 전송
+		self:SyncKillData(json)
+
+		-- initialUserData에 로컬 킬 데이터 병합 (다음 스테이지를 위해)
+		if self.initialUserData["kills"] == nil then
+			self.initialUserData["kills"] = {}
+		end
+		for monsterId, count in pairs(self.localKillData) do
+			local currentKills = self.initialUserData["kills"][monsterId] or 0
+			self.initialUserData["kills"][monsterId] = currentKills + count
+		end
+
+		-- 로컬 데이터 초기화
+		self.localKillData = {}
+	end
+
+	-- 클라이언트 총 킬 카운트 조회 (UI용)
+	@ExecSpace("ClientOnly")
+	method integer GetTotalKillCountClient(string monsterId)
+		local initialKills = 0
+		if self.initialUserData["kills"] ~= nil and self.initialUserData["kills"][monsterId] ~= nil then
+			initialKills = self.initialUserData["kills"][monsterId]
+		end
+
+		local localKills = self.localKillData[monsterId] or 0
+		return initialKills + localKills
+	end
+
+	@EventSender("Service", "UserService")
+	handler HandleUserEnterEvent(UserEnterEvent event)
+		self:LoadUserData(event.UserId)
+
+		-- 클라이언트에 초기 데이터 전송
+		local json = self:EncodeUserData(event.UserId)
+		self:OnUserDataReceived(event.UserId, json)
+	end
+
+	@EventSender("Service", "UserService")
+	handler HandleUserLeaveEvent(UserLeaveEvent event)
+		self:SaveUserData(event.UserId)
+	end
+
+end

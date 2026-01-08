@@ -1,0 +1,57 @@
+@Component
+script MonsterCodexPopup extends Component
+
+	property Entity messageLabel = nil
+
+	property Entity rewardLabel = nil
+
+	property Entity closeButton = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		if self.messageLabel == nil then
+			self.messageLabel = self.Entity:GetChildByName("MessageLabel")
+		end
+		if self.rewardLabel == nil then
+			self.rewardLabel = self.Entity:GetChildByName("RewardLabel")
+		end
+		if self.closeButton == nil then
+			self.closeButton = self.Entity:GetChildByName("PopupCloseButton")
+		end
+		
+		-- 닫기 버튼
+		if self.closeButton ~= nil then
+			self.closeButton:ConnectEvent(ButtonClickEvent, function()
+				self:Hide()
+			end)
+		end
+		
+		-- 초기에는 숨김
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+	end
+
+	method void Show(string monsterName, integer rewardAmount)
+		if self.messageLabel ~= nil then
+			self.messageLabel.TextComponent.Text = monsterName .. " 도감 보상 수령 완료!"
+		end
+		
+		if self.rewardLabel ~= nil then
+			self.rewardLabel.TextComponent.Text = "머쉬다이아 +" .. tostring(rewardAmount)
+		end
+		
+		self.Entity.Enable = true
+		self.Entity.Visible = true
+	end
+
+	method void Hide()
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+	end
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		self:Hide()
+	end
+
+end
