@@ -3,17 +3,12 @@ script MonsterCodexPopup extends Component
 
 	property Entity messageLabel = nil
 
-	property Entity rewardLabel = nil
-
 	property Entity closeButton = nil
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		if self.messageLabel == nil then
 			self.messageLabel = self.Entity:GetChildByName("MessageLabel")
-		end
-		if self.rewardLabel == nil then
-			self.rewardLabel = self.Entity:GetChildByName("RewardLabel")
 		end
 		if self.closeButton == nil then
 			self.closeButton = self.Entity:GetChildByName("PopupCloseButton")
@@ -33,13 +28,9 @@ script MonsterCodexPopup extends Component
 
 	method void Show(string monsterName, integer rewardAmount)
 		if self.messageLabel ~= nil then
-			self.messageLabel.TextComponent.Text = monsterName .. " 도감 보상 수령 완료!"
+			self.messageLabel.TextComponent.Text = "도감 달성완료 보상으로 " .. tostring(rewardAmount) .. " 머쉬다이아를 획득했습니다 !"
 		end
-		
-		if self.rewardLabel ~= nil then
-			self.rewardLabel.TextComponent.Text = "머쉬다이아 +" .. tostring(rewardAmount)
-		end
-		
+
 		self.Entity.Enable = true
 		self.Entity.Visible = true
 	end
