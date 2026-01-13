@@ -14,45 +14,55 @@ script UserMonsterService extends Logic
 			keyList[#keyList + 1] = "USER_" .. v.id
 		end
 		
-		local errCode, userAnimalPages = ds:BatchGetAndWait(keyList)
-		if errCode ~= 0 then
-			return
-		end
-		
 		local userMosnterList = {}
 		
-		while true do
-			-- 현재 페이지의 목록을 가져옵니다.
-			local datas = userAnimalPages:GetCurrentPageDatas()
-			for _, data in pairs(datas) do
-				if data.Value == nil then
-					continue
-				end
-				
-				local info = UserUnitModel() 
-				
-				if info:DECODE(data.Value) == false then
-					log_error(data.Value)
-					_UserService:KickUser(uid, KickReason.WorldError)
-					return
-				end
-				
-				userMosnterList[info.id] = info
+		-- 100개씩 배치 처리
+		local batchSize = 100
+		for batchStart = 1, #keyList, batchSize do
+			local batchKeys = {}
+			local batchEnd = math.min(batchStart + batchSize - 1, #keyList)
+			for i = batchStart, batchEnd do
+				batchKeys[#batchKeys + 1] = keyList[i]
 			end
-			     
-			-- 현재 페이지가 마지막 페이지인지 확인합니다.
-			if userAnimalPages.IsLastPage == true then
-				break
-			end
-			     
-			-- 다음 페이지의 데이터를 미리 불러오고 다음 페이지가 유효하지 않은 경우 조회를 마칩니다.
-			local loadResultCode = userAnimalPages:LoadNextPageAndWait()
-			if loadResultCode ~= 0 then
+		
+			local errCode, userAnimalPages = ds:BatchGetAndWait(batchKeys)
+			if errCode ~= 0 then
 				return
 			end
-			     
-			-- 다음 페이지로 이동합니다.
-			userAnimalPages:MoveToNextPageAndWait()
+		
+			while true do
+				-- 현재 페이지의 목록을 가져옵니다.
+				local datas = userAnimalPages:GetCurrentPageDatas()
+				for _, data in pairs(datas) do
+					if data.Value == nil then
+						continue
+					end
+		
+					local info = UserUnitModel()
+		
+					if info:DECODE(data.Value) == false then
+						log_error(data.Value)
+						_UserService:KickUser(uid, KickReason.WorldError)
+						return
+					end
+		
+					userMosnterList[info.id] = info
+				end
+		
+				-- 현재 페이지가 마지막 페이지인지 확인합니다.
+				if userAnimalPages.IsLastPage == true then
+					break
+				end
+		
+				-- 다음 페이지의 데이터를 미리 불러오고 다음 페이지가 유효하지 않은 경우 조회를 마칩니다.
+				local loadResultCode = userAnimalPages:LoadNextPageAndWait()
+				if loadResultCode ~= 0 then
+					return
+				end
+		
+				-- 다음 페이지로 이동합니다.
+				userAnimalPages:MoveToNextPageAndWait()
+			end
 		end
 		
 		local defaultUnitList = _UnitService:GetDefaultUnitList()
@@ -106,17 +116,39 @@ script UserMonsterService extends Logic
 	method table SAVE_ALL(string uid)
 		local ds = _DataStorageService:GetUserDataStorage(uid)
 		
-		local data = {}
-		
+		-- 먼저 전체 데이터를 배열로 변환
+		local allData = {}
 		for monsterId, monsterInfo in pairs(self.userMonsterDict) do
-			data["USER_" .. monsterId] = monsterInfo
+			allData[#allData + 1] = {key = "USER_" .. monsterId, value = monsterInfo}
 		end
 		
-		local code, keys = ds:BatchSetAndWait(data)
+		local lastCode = 0
+		local allKeys = {}
+		
+		-- 100개씩 배치 처리
+		local batchSize = 100
+		for batchStart = 1, #allData, batchSize do
+			local batchData = {}
+			local batchEnd = math.min(batchStart + batchSize - 1, #allData)
+			for i = batchStart, batchEnd do
+				batchData[allData[i].key] = allData[i].value
+			end
+		
+			local code, keys = ds:BatchSetAndWait(batchData)
+			if code ~= 0 then
+				lastCode = code
+				log_error("[UserMonsterService] SAVE_ALL BatchSetAndWait failed:", code)
+			end
+			if keys ~= nil then
+				for _, k in ipairs(keys) do
+					allKeys[#allKeys + 1] = k
+				end
+			end
+		end
 		
 		local res = {
-			code=code,
-			body=keys
+			code = lastCode,
+			body = allKeys
 		}
 		
 		return res
