@@ -1,0 +1,28 @@
+@Component
+script MonsterCodexOpenButton extends Component
+
+	property Entity RedDot = nil
+
+	property any buttonHandler = nil
+
+	method void OnBeginPlay()
+		self.RedDot = self.Entity:GetChildByName("RedDotSprite", false)
+		
+		-- 초기 상태: 레드닷 숨김 (서버 응답 후 표시)
+		if self.RedDot ~= nil then
+			self.RedDot.Enable = false
+			self.RedDot.Visible = false
+		end
+		
+		self.buttonHandler = self.Entity:ConnectEvent(ButtonClickEvent, self.OnClickButton)
+		
+		-- self:UpdateRedDot()
+	end
+
+	method void OnClickButton()
+		local monsterCodexUI = _EntityService:GetEntityByPath("/ui/MonsterCodexUI")
+		
+		monsterCodexUI.MonsterCodexUI:Show()
+	end
+
+end

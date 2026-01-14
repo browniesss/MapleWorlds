@@ -1,0 +1,169 @@
+@Component
+script MonsterCodexUI extends Component
+
+	property Entity itemContainer = nil
+
+	property Entity closeButton = nil
+
+	property Entity popup = nil
+
+	property Entity itemTemplate = nil
+
+	property table userData = {}
+
+	property table createdItems = {}
+
+	property boolean isInitialized = false
+
+	property string ITEM_MODEL_ID = "model://dd5811c1-c97b-4fef-9dd0-f6a734a2848d"
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		if self.itemContainer == nil then
+			self.itemContainer = self.Entity:GetChildByName("ItemContainer")
+		end
+		if self.closeButton == nil then
+			self.closeButton = self.Entity:GetChildByName("CloseButton")
+		end
+		if self.popup == nil then
+			self.popup = self.Entity:GetChildByName("MonsterCodexPopup")
+		end
+		
+		-- 닫기 버튼
+		if self.closeButton ~= nil then
+			self.closeButton:ConnectEvent(ButtonClickEvent, function()
+				self:Hide()
+			end)
+		end
+		
+		-- 초기에는 숨김
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+	end
+
+	method void Show()
+		self.Entity.Enable = true
+		self.Entity.Visible = true
+		
+		-- 서버에 유저 데이터 요청
+		_MonsterCodexService:RequestUserData()
+	end
+
+	method void Hide()
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+	end
+
+	method void RefreshWithData(table data)
+		self.userData = data or {kills = {}, claimed = {}}
+
+		-- 기존 아이템 삭제 후 다시 생성 (정렬 적용)
+		self:ClearItems()
+		self:CreateSortedItems()
+	end
+
+	method void ClearItems()
+		for monsterId, itemEntity in pairs(self.createdItems) do
+			if itemEntity ~= nil and _EntityService:IsValid(itemEntity) then
+				itemEntity:Destroy()
+			end
+		end
+		self.createdItems = {}
+	end
+
+	method void CreateSortedItems()
+		if self.itemContainer == nil then
+			log_error("[MonsterCodexUI] itemContainer is nil!")
+			return
+		end
+
+		-- 도감 목록 가져오기
+		local codexList = _MonsterCodexService:GetAllCodexList()
+		if codexList == nil or #codexList == 0 then
+			return
+		end
+
+		-- 정렬을 위한 리스트 생성
+		local sortedList = {}
+		for _, codexData in ipairs(codexList) do
+			local monsterId = codexData["monster_id"]
+			local killCount = self.userData["kills"] and self.userData["kills"][monsterId] or 0
+			local isClaimed = self.userData["claimed"] and self.userData["claimed"][monsterId] == true or false
+			local requiredKills = codexData["required_kills"] or 0
+			local isCompleted = killCount >= requiredKills
+
+			-- 정렬 우선순위: 1=수령가능, 2=이미수령, 3=미달성
+			local sortPriority = 3
+			if isCompleted and not isClaimed then
+				sortPriority = 1  -- 수령 가능
+			elseif isClaimed then
+				sortPriority = 2  -- 이미 수령
+			end
+
+			table.insert(sortedList, {
+				monsterId = monsterId,
+				killCount = killCount,
+				isClaimed = isClaimed,
+				sortPriority = sortPriority,
+				codexId = codexData["id"] or 0
+			})
+		end
+
+		-- 정렬: 우선순위 > id 순
+		table.sort(sortedList, function(a, b)
+			if a.sortPriority ~= b.sortPriority then
+				return a.sortPriority < b.sortPriority
+			end
+			return a.codexId < b.codexId
+		end)
+
+		-- 정렬된 순서로 아이템 생성
+		for i, data in ipairs(sortedList) do
+			local itemEntity = _SpawnService:SpawnByModelId(self.ITEM_MODEL_ID, "MonsterCodexItem_" .. i, Vector3.zero, self.itemContainer)
+			if itemEntity ~= nil and itemEntity.MonsterCodexItem ~= nil then
+				itemEntity.MonsterCodexItem.monsterId = data.monsterId
+				itemEntity.MonsterCodexItem:LoadCodexInfo()
+				itemEntity.MonsterCodexItem:UpdateStatus(data.killCount, data.isClaimed)
+				self.createdItems[data.monsterId] = itemEntity
+			end
+		end
+	end
+
+	method void OnClaimResult(string monsterId, boolean success, string errorCode)
+		log("[MonsterCodexUI] OnClaimResult:", monsterId, success, errorCode)
+		if success then
+			-- 팝업 표시
+			log("[MonsterCodexUI] popup:", self.popup)
+			if self.popup == nil then
+				self.popup = self.Entity:GetChildByName("MonsterCodexPopup")
+				log("[MonsterCodexUI] popup after GetChildByName:", self.popup)
+			end
+			if self.popup ~= nil and self.popup.MonsterCodexPopup ~= nil then
+				local codexInfo = _MonsterCodexService:GetCodexInfoClient(monsterId)
+				local unitInfo = _UnitService:GetUnitByIDFromClient(monsterId)
+				local monsterName = unitInfo and unitInfo["name"] or ""
+				local rewardAmount = codexInfo and codexInfo["reward_amount"] or 0
+				log("[MonsterCodexUI] Showing popup:", monsterName, rewardAmount)
+				self.popup.MonsterCodexPopup:Show(monsterName, rewardAmount)
+			else
+				log_error("[MonsterCodexUI] popup or MonsterCodexPopup component is nil")
+			end
+
+			-- 해당 아이템만 상태 갱신 (정렬하지 않음)
+			if self.userData["claimed"] == nil then
+				self.userData["claimed"] = {}
+			end
+			self.userData["claimed"][monsterId] = true
+
+			local itemEntity = self.createdItems[monsterId]
+			if itemEntity ~= nil and itemEntity.MonsterCodexItem ~= nil then
+				local killCount = self.userData["kills"] and self.userData["kills"][monsterId] or 0
+				itemEntity.MonsterCodexItem:UpdateStatus(killCount, true)
+			end
+		else
+			-- 에러 처리 (필요시)
+			log("[MonsterCodexUI] Claim failed:", errorCode)
+		end
+	end
+
+end

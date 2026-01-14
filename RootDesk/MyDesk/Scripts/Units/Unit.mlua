@@ -961,6 +961,9 @@ script Unit extends Component
 		-- 적 유닛이 죽으면 아이템 드롭
 		if self.isEnemy then
 			self:DropItem(self.Entity.TransformComponent.WorldPosition)
+
+			-- 몬스터 도감 처치 카운트 (클라이언트 로컬 처리)
+			_MonsterCodexService:OnLocalMonsterKilled(self.id)
 		end
 		
 		-- 죽는 애니메이션이 없는 경우 직접 처리

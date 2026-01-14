@@ -1,0 +1,159 @@
+@Component
+script MonsterCodexItem extends Component
+
+	property string monsterId = ""
+
+	property Entity iconImage = nil
+
+	property Entity nameLabel = nil
+
+	property Entity progressLabel = nil
+
+	property Entity claimButton = nil
+
+	property table codexInfo = {}
+
+	property table unitInfo = {}
+
+	property integer killCount = 0
+
+	property boolean isCompleted = false
+
+	property boolean isClaimed = false
+
+	property Color dimmedColor = Color(0.3, 0.3, 0.3, 1)
+
+	property Color normalColor = Color(1, 1, 1, 1)
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		-- 자식 엔티티 탐색
+		if self.iconImage == nil then
+			self.iconImage = self.Entity:GetChildByName("IconImage")
+		end
+		if self.nameLabel == nil then
+			self.nameLabel = self.Entity:GetChildByName("NameLabel")
+		end
+		if self.progressLabel == nil then
+			self.progressLabel = self.Entity:GetChildByName("ProgressLabel")
+		end
+		if self.claimButton == nil then
+			self.claimButton = self.Entity:GetChildByName("ClaimButton")
+		end
+		
+		-- 보상 수령 버튼 이벤트
+		if self.claimButton ~= nil then
+			self.claimButton:ConnectEvent(ButtonClickEvent, function()
+				self:OnClaimButtonClick()
+			end)
+		end
+		
+		-- 도감 정보 로드
+		self:LoadCodexInfo()
+	end
+
+	method void LoadCodexInfo()
+		if self.monsterId == "" then
+			return
+		end
+
+		self.codexInfo = _MonsterCodexService:GetCodexInfoClient(self.monsterId)
+		if self.codexInfo == nil then
+			log_error("[MonsterCodexItem] Codex info not found:", self.monsterId)
+			return
+		end
+
+		-- Unit 테이블에서 이름, 이미지 가져오기
+		self.unitInfo = _UnitService:GetUnitByIDFromClient(self.monsterId)
+		if self.unitInfo == nil then
+			log_error("[MonsterCodexItem] Unit info not found:", self.monsterId)
+		end
+
+		-- 기본 UI 설정
+		self:SetupUI()
+	end
+
+	method void SetupUI()
+		-- Unit 테이블에서 아이콘 이미지 가져오기
+		if self.iconImage ~= nil and self.unitInfo ~= nil then
+			local imageRUID = self.unitInfo["ImageRUID"]
+			if imageRUID ~= nil and imageRUID ~= "" then
+				self.iconImage.SpriteGUIRendererComponent.ImageRUID = imageRUID
+			end
+		end
+
+		-- Unit 테이블에서 이름 가져오기
+		if self.nameLabel ~= nil and self.unitInfo ~= nil then
+			self.nameLabel.TextComponent.Text = self.unitInfo["name"] or ""
+		end
+
+		-- 초기 상태 (딤드)
+		self:SetDimmed(true)
+
+		-- 보상 버튼 초기 상태 (비활성화)
+		if self.claimButton ~= nil and self.claimButton.ButtonComponent ~= nil then
+			self.claimButton.ButtonComponent.Enable = false
+		end
+	end
+
+	method void UpdateStatus(integer kills, boolean claimed)
+		self.killCount = kills
+		self.isClaimed = claimed
+		
+		local requiredKills = self.codexInfo["required_kills"] or 0
+		self.isCompleted = self.killCount >= requiredKills
+		
+		-- 진행률 표시
+		if self.progressLabel ~= nil then
+			local displayKills = math.min(self.killCount, requiredKills)
+			self.progressLabel.TextComponent.Text = string.format("%d/%d", displayKills, requiredKills)
+		end
+		
+		-- 딤드 해제 여부
+		self:SetDimmed(not self.isCompleted)
+		
+		-- 보상 버튼 상태
+		if self.claimButton ~= nil then
+			if self.isClaimed then
+				-- 이미 수령: 버튼 완전히 숨김
+				self.claimButton.Enable = false
+			elseif self.isCompleted then
+				-- 수령 가능: 버튼 표시 및 활성화
+				self.claimButton.Enable = true
+				if self.claimButton.ButtonComponent ~= nil then
+					self.claimButton.ButtonComponent.Enable = true
+				end
+			else
+				-- 미달성: 버튼 표시하되 비활성화
+				self.claimButton.Enable = true
+				if self.claimButton.ButtonComponent ~= nil then
+					self.claimButton.ButtonComponent.Enable = false
+				end
+			end
+		end
+	end
+
+	method void SetDimmed(boolean dimmed)
+		if self.iconImage ~= nil and self.iconImage.SpriteGUIRendererComponent ~= nil then
+			if dimmed then
+				self.iconImage.SpriteGUIRendererComponent.Color = self.dimmedColor
+			else
+				self.iconImage.SpriteGUIRendererComponent.Color = self.normalColor
+			end
+		end
+	end
+
+	method void OnClaimButtonClick()
+		if self.monsterId == "" then
+			return
+		end
+		
+		if not self.isCompleted or self.isClaimed then
+			return
+		end
+		
+		-- 서버에 보상 수령 요청
+		_MonsterCodexService:ClaimReward(self.monsterId)
+	end
+
+end

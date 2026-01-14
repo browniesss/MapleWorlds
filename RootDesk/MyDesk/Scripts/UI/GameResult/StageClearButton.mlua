@@ -50,6 +50,10 @@ script StageClearButton extends Component
 
 		local lobbyBadgeButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton")
 		lobbyBadgeButton.Enable = true
+		local lobbyCodexButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/CodexButton")
+		if lobbyCodexButton ~= nil then
+			lobbyCodexButton.Enable = true
+		end
 
 		if Environment:IsMobilePlatform() then
 			local lobbyJoyStick = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIJoystick")
