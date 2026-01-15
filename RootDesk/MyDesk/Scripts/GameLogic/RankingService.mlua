@@ -172,18 +172,23 @@ script RankingService extends Logic
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
 		local dataSet = _DataService:GetTable("stage")
-		
+
 		local stageCount = dataSet:GetRowCount()
-		
+
 		for i = 1, stageCount do
-			
+
 			local chapter = tonumber(dataSet:GetCell(i,"chapter"))
 			local stage = tonumber(dataSet:GetCell(i,"stage"))
-			
-			
-			local key = _RankingService:GetRankKeyByTable({chapter=chapter, stage=stage})
-			self.rankList[key] = {}
-			_TimerService:SetTimerOnce(function () self:FETCH(key) end, 0)
+
+			-- 노말 랭킹 키 (기존)
+			local normalKey = _RankingService:GetRankKeyByTable({chapter=chapter, stage=stage})
+			self.rankList[normalKey] = {}
+			_TimerService:SetTimerOnce(function () self:FETCH(normalKey) end, 0)
+
+			-- 하드 랭킹 키 (신규)
+			local hardKey = _RankingService:GetRankKeyByTable({chapter=chapter, stage=stage, mode="hard"})
+			self.rankList[hardKey] = {}
+			_TimerService:SetTimerOnce(function () self:FETCH(hardKey) end, 0)
 		end
 	end
 
@@ -225,18 +230,22 @@ script RankingService extends Logic
 	@ExecSpace("Server")
 	method void InitUserPointMap(string userName)
 		local dataSet = _DataService:GetTable("stage")
-		
+
 		local stageCount = dataSet:GetRowCount()
-		
+
 		for i = 1, stageCount do
 			local chapter = tonumber(dataSet:GetCell(i,"chapter"))
 			local stage = tonumber(dataSet:GetCell(i,"stage"))
-			
-			
-			local key = _RankingService:GetRankKeyByTable({chapter=chapter, stage=stage})
-			self.userPointMap[key] = 999999
-			
-			_TimerService:SetTimerOnce(function () self:FetchUserPoint(key, userName) end, 0)
+
+			-- 노말 랭킹 (기존)
+			local normalKey = _RankingService:GetRankKeyByTable({chapter=chapter, stage=stage})
+			self.userPointMap[normalKey] = 999999
+			_TimerService:SetTimerOnce(function () self:FetchUserPoint(normalKey, userName) end, 0)
+
+			-- 하드 랭킹 (신규)
+			local hardKey = _RankingService:GetRankKeyByTable({chapter=chapter, stage=stage, mode="hard"})
+			self.userPointMap[hardKey] = 999999
+			_TimerService:SetTimerOnce(function () self:FetchUserPoint(hardKey, userName) end, 0)
 		end
 	end
 

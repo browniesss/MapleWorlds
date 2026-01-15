@@ -54,6 +54,11 @@ script GameManager extends Logic
 	@Sync
 	property boolean isEventMode = false
 
+	@Sync
+	property boolean isHardMode = false
+
+	property string hardModeMaterialId = "c3d80f81-fdbe-4304-aeb6-4ee73d86f120"
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		-- 스킬 선택 UI 비활성화
@@ -119,12 +124,13 @@ script GameManager extends Logic
 	end
 
 	@ExecSpace("Server")
-	method void GameStart(integer chapterIndex, integer mapIndex, boolean isEventMode)
+	method void GameStart(integer chapterIndex, integer mapIndex, boolean isEventMode, boolean isHardMode)
 		self.chapterIndex = chapterIndex
 		self.mapIndex = mapIndex
 		self.isPlaying = true
 		self.playStartTs = DateTime.UtcNow.Elapsed
 		self.isEventMode = isEventMode
+		self.isHardMode = isHardMode or false
 		self:SyncEventMode(isEventMode)
 		
 		local userIncome = _SpawnManager:GetUserIncome()
@@ -216,7 +222,7 @@ script GameManager extends Logic
 	method void GameEnd()
 		-- 몬스터 도감 킬 데이터 서버로 동기화
 		_MonsterCodexService:SyncKillDataToServer()
-
+		
 		-- 인게임 UI 비활성화
 		self.shopUI.Enable = false
 		self.shopUI.Visible = false
@@ -226,10 +232,10 @@ script GameManager extends Logic
 		self.gameClearResult.Visible = false
 		self.failPopupUI.Enable = false
 		self.failPopupUI.Visible = false
-
+		
 		self.isEventMode = false
 		self:SyncEventMode(false)
-
+		
 		self:ClearObjects()
 		self:ClearTimer()
 		self:ClearGameData()
@@ -330,6 +336,52 @@ script GameManager extends Logic
 					_TutorialService:StartIngameTutorial(1)
 				end
 			end, 0.5)
+		end
+		
+		-- 하드모드 배경 Material 적용
+		self:ApplyHardModeBackgroundMaterial()
+	end
+
+	@ExecSpace("Client")
+	method void ApplyHardModeBackgroundMaterial()
+		-- 클라이언트에서 isHardMode 값 가져오기 (서버 동기화 전에 호출될 수 있으므로 StageSelectorUI에서 가져옴)
+		local isHardMode = false
+		local stageSelectUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/StageSelectUI")
+		if stageSelectUI ~= nil and stageSelectUI.StageSelectorUI ~= nil then
+			isHardMode = stageSelectUI.StageSelectorUI.isHardMode or false
+		end
+		
+		-- 현재 맵의 Background 엔티티 찾기
+		local mapPath = self:GetGameMapName()
+		local backgroundEntity = _EntityService:GetEntityByPath(mapPath .. "/Background")
+		
+		-- Background가 있고 Enable이 true인 경우 BackgroundComponent 사용
+		if backgroundEntity ~= nil and backgroundEntity.Enable == true then
+			if backgroundEntity.BackgroundComponent ~= nil then
+				if isHardMode then
+					backgroundEntity.BackgroundComponent.MaterialId = self.hardModeMaterialId
+				else
+					backgroundEntity.BackgroundComponent.MaterialId = ""
+				end
+				return
+			end
+		end
+
+		-- Background가 없거나 Enable이 false인 경우 TemporaryBackground들 처리
+		local tempBackgrounds = _EntityService:GetEntitiesByPath(mapPath .. "/TemporaryBackground")
+
+		if tempBackgrounds == nil or #tempBackgrounds == 0 then
+			return
+		end
+
+		for i, tempBg in ipairs(tempBackgrounds) do
+			if tempBg ~= nil and tempBg.BackgroundComponent ~= nil then
+				if isHardMode then
+					tempBg.BackgroundComponent.MaterialId = self.hardModeMaterialId
+				else
+					tempBg.BackgroundComponent.MaterialId = ""
+				end
+			end
 		end
 	end
 
@@ -499,7 +551,14 @@ script GameManager extends Logic
 		local userStage = user.UserStage
 		local userName = user.PlayerComponent.Nickname
 		local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
-		local key = _RankingService:GetRankKeyByTable({chapter=clearedChapter, stage=clearedStage})
+		
+		-- 하드모드 여부에 따라 랭킹 키 분기
+		local key = nil
+		if self.isHardMode then
+			key = _RankingService:GetRankKeyByTable({chapter=clearedChapter, stage=clearedStage, mode="hard"})
+		else
+			key = _RankingService:GetRankKeyByTable({chapter=clearedChapter, stage=clearedStage})
+		end
 		_RankingService:AddPoint(key, userName, playTime)
 		
 		self:UpdateRankData(userName, playTime, key, senderUserId)
@@ -531,19 +590,29 @@ script GameManager extends Logic
 		end
 		userStage:AddClearedStage(clearedChapter, clearedStage)
 		
+		-- 하드모드 클리어 기록 저장
+		if self.isHardMode then
+			userStage:AddClearedHardStage(clearedChapter, clearedStage)
+		end
+		
+		-- 하드모드 보상 배율
+		local rewardMultiplier = 1
+		if self.isHardMode then
+			rewardMultiplier = 2
+		end
 		
 		if isFirstClear == false then
-			_BillingService:AddSecondFreeCoin(senderUserId, 100)
-			_BillingService:AddThirdFreeCoin(senderUserId, 500)
+			_BillingService:AddSecondFreeCoin(senderUserId, 100 * rewardMultiplier)
+			_BillingService:AddThirdFreeCoin(senderUserId, 500 * rewardMultiplier)
 		
 			print("[GameManager] Not first clear, skipping badge check")
 			return
 		end
 		
 		_PlayCoinService:AddCoin(senderUserId, 1)
-		_BillingService:AddSecondFreeCoin(senderUserId, 500)
-		_BillingService:AddFirstFreeCoin(senderUserId, 100)
-		_BillingService:AddThirdFreeCoin(senderUserId, 4000)
+		_BillingService:AddSecondFreeCoin(senderUserId, 500 * rewardMultiplier)
+		_BillingService:AddFirstFreeCoin(senderUserId, 100 * rewardMultiplier)
+		_BillingService:AddThirdFreeCoin(senderUserId, 4000 * rewardMultiplier)
 		
 		print("[GameManager] First clear! Checking badges...")
 		
@@ -603,6 +672,13 @@ script GameManager extends Logic
 			return
 		end
 		
+		-- 하드모드 상태 가져오기
+		local isHardMode = false
+		local stageSelector = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/StageSelectUI")
+		if stageSelector ~= nil and stageSelector.StageSelectorUI ~= nil then
+			isHardMode = stageSelector.StageSelectorUI.isHardMode or false
+		end
+		
 		_EntityService:GetEntityByPath("/ui/LobbyInfoUI").Enable = false
 		local lobbyBadgeButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton")
 		lobbyBadgeButton.Enable = false
@@ -610,17 +686,17 @@ script GameManager extends Logic
 		if lobbyCodexButton ~= nil then
 			lobbyCodexButton.Enable = false
 		end
-
+		
 		if Environment:IsMobilePlatform() then
 			local lobbyJoyStick = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIJoystick")
 			local lobbyJumpButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/JumpButton")
-
+		
 			lobbyJoyStick.Enable = false
 			lobbyJumpButton.Enable = false
 		end
-
+		
 		_LoadingManager:Show()
-
+		
 		-- 돌파스킬 초기화 완료 후 프리로드 시작
 		_UserService.LocalPlayer.UserBreakLimitSkillProtocol:InitCallWithCallback(function(limitBreakRuids)
 			local ruids = self:GetPreLoadAssetRuid()
@@ -632,7 +708,7 @@ script GameManager extends Logic
 		
 			_ResourceService:PreloadAsync(ruids, function()
 				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage".. userStage.selectChapter.."0"..userStage.selectStage)
-				self:GameStart(userStage.selectChapter, userStage.selectStage, false)
+				self:GameStart(userStage.selectChapter, userStage.selectStage, false, isHardMode)
 			end)
 		end)
 	end
@@ -661,17 +737,17 @@ script GameManager extends Logic
 		if lobbyCodexButton ~= nil then
 			lobbyCodexButton.Enable = false
 		end
-
+		
 		if Environment:IsMobilePlatform() then
 			local lobbyJoyStick = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIJoystick")
 			local lobbyJumpButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/JumpButton")
-
+		
 			lobbyJoyStick.Enable = false
 			lobbyJumpButton.Enable = false
 		end
-
+		
 		_LoadingManager:Show()
-
+		
 		_UserService.LocalPlayer.UserBreakLimitSkillProtocol:InitCallWithCallback(function(limitBreakRuids)
 			local ruids = self:GetPreLoadAssetRuid()
 		
@@ -689,7 +765,7 @@ script GameManager extends Logic
 
 	@ExecSpace("Server")
 	method void EventGameStart(integer chapterIndex, integer mapIndex)
-		self:GameStart(chapterIndex, mapIndex, true)
+		self:GameStart(chapterIndex, mapIndex, true, false)
 	end
 
 	@ExecSpace("Client")
@@ -784,7 +860,7 @@ script GameManager extends Logic
 		
 			_ResourceService:PreloadAsync(ruids, function()
 				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage000")
-				self:GameStart(0, 0, false)
+				self:GameStart(0, 0, false, false)
 			end)
 		end)
 	end

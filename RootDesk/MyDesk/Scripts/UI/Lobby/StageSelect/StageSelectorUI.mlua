@@ -17,6 +17,17 @@ script StageSelectorUI extends Component
 
 	property Entity ChapterNumberText = "1e8431b8-0f5b-4005-815d-83973e0c8c7d"
 
+	-- 하드모드 관련 프로퍼티
+	property boolean isHardMode = false
+
+	property Entity difficultyToggleGroup = nil
+
+	-- 현재 유저 스테이지 엔티티 참조 (랭킹 갱신용)
+	property any currentUserStageEntity = nil
+
+	-- 하드모드 Material ID
+	property string hardModeMaterialId = "c3d80f81-fdbe-4304-aeb6-4ee73d86f120"
+
 	method void UpdateData(EntityRef userStageEntity)
 		local path = self.Entity.Path
 		
@@ -32,8 +43,14 @@ script StageSelectorUI extends Component
 		
 		self.StageInfoPanel = _EntityService:GetEntityByPath(path .. "/StageInfoPanel/panel")
 		
-		local key = _RankingService:GetRankKeyByTable({chapter=selectChapter, stage=selectStage})
-		
+		-- 하드모드 여부에 따라 랭킹 키 분기
+		local key = nil
+		if self.isHardMode then
+			key = _RankingService:GetRankKeyByTable({chapter=selectChapter, stage=selectStage, mode="hard"})
+		else
+			key = _RankingService:GetRankKeyByTable({chapter=selectChapter, stage=selectStage})
+		end
+
 		local rankingListUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
 		if rankingListUI ~= nil then
 			rankingListUI.StageRankingListUI:RefreshRankListItem(key)
@@ -114,7 +131,13 @@ script StageSelectorUI extends Component
 				self.ChapterNumberText.TextComponent.Text = "CHAPTER " .. tostring(selectChapter)
 				userStage.selectStage = stageDataList[i].stage
 				
-				local key = _RankingService:GetRankKeyByTable({chapter=selectChapter, stage=stageDataList[i].stage})
+				-- 하드모드 여부에 따라 랭킹 키 분기
+				local key = nil
+				if self.isHardMode then
+					key = _RankingService:GetRankKeyByTable({chapter=selectChapter, stage=stageDataList[i].stage, mode="hard"})
+				else
+					key = _RankingService:GetRankKeyByTable({chapter=selectChapter, stage=stageDataList[i].stage})
+				end
 
 				if rankingListUI ~= nil then
 					rankingListUI.StageRankingListUI:RefreshRankListItem(key)
@@ -124,19 +147,22 @@ script StageSelectorUI extends Component
 	end
 
 	method void SetUserStageComp(EntityRef newEntity)
+		-- 현재 유저 스테이지 엔티티 저장 (랭킹 갱신용)
+		self.currentUserStageEntity = newEntity
+
 		local newComp = newEntity.UserStage
 		newComp.updateList[#newComp.updateList + 1] = function() self:UpdateData(newEntity) end
-		
-		self.nextButton.CallBackButton.callback = function() 
+
+		self.nextButton.CallBackButton.callback = function()
 			if newComp.selectChapter >= _StageService.lastChapter then
 				return
 			end
-			
+
 			newComp.selectChapter += 1
 			newComp.selectStage = 1
 			self:UpdateData(newEntity)
 		end
-		
+
 		self.prevButton.CallBackButton.callback = function()
 			if newComp.selectChapter <= 1 then
 				return
@@ -147,8 +173,83 @@ script StageSelectorUI extends Component
 			self:UpdateData(newEntity)
 		end
 
+		-- 하드모드 토글 초기화
+		self:InitDifficultyToggle()
+
 		-- 즉시 UI 업데이트 호출
 		self:UpdateData(newEntity)
+	end
+
+	method void InitDifficultyToggle()
+		-- 난이도 토글 그룹 찾기
+		if self.difficultyToggleGroup == nil then
+			self.difficultyToggleGroup = self.Entity:GetChildByName("DifficultyToggle")
+		end
+
+		if self.difficultyToggleGroup == nil then
+			return
+		end
+
+		-- ToggleGroup 초기화 (첫 번째 버튼 = 노말 모드 활성화)
+		if self.difficultyToggleGroup.ToggleGroup ~= nil then
+			self.difficultyToggleGroup.ToggleGroup:InitToggleGroup()
+		end
+
+		-- 초기 상태 설정
+		self.isHardMode = false
+	end
+
+	method void ResetHardMode()
+		self.isHardMode = false
+		-- 노말 모드로 토글 초기화
+		if self.difficultyToggleGroup ~= nil and self.difficultyToggleGroup.ToggleGroup ~= nil then
+			self.difficultyToggleGroup.ToggleGroup:ActivateButtonByIndex(1)
+		end
+	end
+
+	method void RefreshRankingForCurrentMode()
+		-- 현재 선택된 챕터/스테이지로 랭킹 갱신
+		if self.currentUserStageEntity == nil then
+			return
+		end
+
+		local userStage = self.currentUserStageEntity.UserStage
+		if userStage == nil then
+			return
+		end
+
+		local selectChapter = userStage.selectChapter
+		local selectStage = userStage.selectStage
+
+		-- 하드모드 여부에 따라 랭킹 키 분기
+		local key = nil
+		if self.isHardMode then
+			key = _RankingService:GetRankKeyByTable({chapter=selectChapter, stage=selectStage, mode="hard"})
+		else
+			key = _RankingService:GetRankKeyByTable({chapter=selectChapter, stage=selectStage})
+		end
+
+		local rankingListUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
+		if rankingListUI ~= nil then
+			rankingListUI.StageRankingListUI:RefreshRankListItem(key)
+		end
+	end
+
+	method void UpdateHardModeMaterial()
+		-- StageInfoPanel에 하드모드 Material 적용/제거
+		if self.StageInfoPanel == nil then
+			return
+		end
+
+		if self.StageInfoPanel.SpriteGUIRendererComponent == nil then
+			return
+		end
+
+		if self.isHardMode then
+			self.StageInfoPanel.SpriteGUIRendererComponent.MaterialId = self.hardModeMaterialId
+		else
+			self.StageInfoPanel.SpriteGUIRendererComponent.MaterialId = ""
+		end
 	end
 
 end

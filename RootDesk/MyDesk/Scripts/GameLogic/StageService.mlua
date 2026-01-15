@@ -66,6 +66,7 @@ script StageService extends Logic
 			stage["chapter_name"] = tostring(dataSet:GetCell(i,"chapter_name"))
 			stage["synergy_id"] = tostring(dataSet:GetCell(i,"synergy_id"))
 			stage["level"] = tonumber(dataSet:GetCell(i,"enemy_level"))
+			stage["hard_level"] = tonumber(dataSet:GetCell(i,"hard_level"))
 			
 			self.data[i] = stage
 			self.idMap[stage.id] = i
