@@ -63,12 +63,17 @@ script SummonService extends Logic
 		
 		_UserMonsterService:AddCount(senderUserId, idList)
 		_UserSummonService:SET_SUMMON_COUNT(senderUserId, pool_id, userCount)
-
+		
 		for _, unitId in ipairs(idList) do
 			_BadgeConditionService:CheckPickupBadges(senderUserId, unitId)
 		end
-
+		
 		self.summonResult[pool_id] = _HttpService:JSONEncode(idList)
+		
+		local unitProtocol = _UserService:GetUserEntityByUserId(senderUserId).UserUnitProtocol
+		if unitProtocol then
+			unitProtocol:UpdateUserUnitList(senderUserId)
+		end
 	end
 
 	@ExecSpace("Server")
@@ -105,12 +110,17 @@ script SummonService extends Logic
 		
 		_UserMonsterService:AddCount(senderUserId, idList)
 		_UserSummonService:SET_SUMMON_COUNT(senderUserId, pool_id, userCount)
-
+		
 		for _, unitId in ipairs(idList) do
 			_BadgeConditionService:CheckPickupBadges(senderUserId, unitId)
 		end
-
+		
 		self.summonResult[pool_id] = _HttpService:JSONEncode(idList)
+		
+		local unitProtocol = _UserService:GetUserEntityByUserId(senderUserId).UserUnitProtocol
+		if unitProtocol then
+			unitProtocol:UpdateUserUnitList(senderUserId)
+		end
 	end
 
 	@ExecSpace("ServerOnly")

@@ -1,0 +1,53 @@
+@Component
+script Rapid_Throw extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		-- 연속 투척 5af81380418c44b5b973d0f55112a59b
+		-- 큰 표창 a05562ef3505427fa46ca83b31c9d799
+		-- 작은 표창 610e972a2ad84dd8ae7fc0fc657b0f88 model://1b22e1f8-d539-425c-bfec-60d5eab08947
+		
+		local spawnTimer
+		local loopEffect
+		
+		if self._T.projectileParent == nil then
+			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+		end
+		
+		self:CallLoopAnimation("5thRapidLoop")
+		
+		local basePos = self.Entity.TransformComponent.WorldPosition
+		
+		local options = {
+		    FlipX = true,  -- 좌우 반전
+		}
+		
+		loopEffect = _EffectService:PlayEffectAttached("5af81380418c44b5b973d0f55112a59b", self.caster, Vector3(0, 0.1, 0) , 0, Vector3.one, true, options)
+		
+		local function spawnMissile()
+			local projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			local arrow = _SpawnService:SpawnByModelId("model://1b22e1f8-d539-425c-bfec-60d5eab08947", "rapid_throw_small", self.caster.TransformComponent.Position + Vector3(0.5, 0.3, 0), projectileParent)
+		
+			arrow.NonTargetProjectile:Init(self.caster, self.skillAmount, self.skillTime, self.caster.Unit.isEnemy, 1.5, true)
+		end
+		
+		local function clearFunction()
+			local projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			local arrow = _SpawnService:SpawnByModelId("model://ff794c05-5f17-40bb-84d8-9301e3645144", "rapid_throw_big", self.caster.TransformComponent.Position + Vector3(0.5, 0.3, 0), projectileParent)
+		
+			arrow.NonTargetProjectile:Init(self.caster, self.skillAmount, self.skillTime, self.caster.Unit.isEnemy, 1.5, false)
+		
+			self:CallAnimation("stand2")
+			_EffectService:RemoveEffect(loopEffect)
+			_TimerService:ClearTimer(spawnTimer)
+		end
+		
+		spawnTimer = _TimerService:SetTimerRepeat(spawnMissile, 0.2, 0.3)
+		
+		-- 반복 종료
+		_TimerService:SetTimerOnce(clearFunction, self.skillTime)
+	end
+
+end
