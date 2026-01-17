@@ -30,14 +30,22 @@ script StageSelectorUI extends Component
 
 	method void UpdateData(EntityRef userStageEntity)
 		local path = self.Entity.Path
-		
+
 		local userStage = userStageEntity.UserStage
-		
-		local openStage = userStage.openStage
+
+		-- 하드모드일 때는 하드모드 진행 상태 사용
+		local openStage, openChapter
+		if self.isHardMode then
+			openStage = userStage.hardOpenStage
+			openChapter = userStage.hardOpenChapter
+		else
+			openStage = userStage.openStage
+			openChapter = userStage.openChapter
+		end
+
 		local selectStage = userStage.selectStage
 		local selectChapter = userStage.selectChapter
-		local openChapter = userStage.openChapter
-		
+
 		local stageDataList = _StageService:GetStageByChapter(selectChapter)
 		local stageCount = #stageDataList
 		
@@ -107,12 +115,20 @@ script StageSelectorUI extends Component
 
 	method void ClickButtonHanddler(integer id, EntityRef userStageEntity)
 		local userStage = userStageEntity.UserStage
-		
-		local openStage = userStage.openStage
+
+		-- 하드모드일 때는 하드모드 진행 상태 사용
+		local openStage, openChapter
+		if self.isHardMode then
+			openStage = userStage.hardOpenStage
+			openChapter = userStage.hardOpenChapter
+		else
+			openStage = userStage.openStage
+			openChapter = userStage.openChapter
+		end
+
 		local selectStage = userStage.selectStage
 		local selectChapter = userStage.selectChapter
-		local openChapter = userStage.openChapter
-		
+
 		local stageDataList = _StageService:GetStageByChapter(selectChapter)
 		
 		local rankingListUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
@@ -249,6 +265,42 @@ script StageSelectorUI extends Component
 			self.StageInfoPanel.SpriteGUIRendererComponent.MaterialId = self.hardModeMaterialId
 		else
 			self.StageInfoPanel.SpriteGUIRendererComponent.MaterialId = ""
+		end
+	end
+
+	method void AdjustSelectionForModeChange()
+		if self.currentUserStageEntity == nil then
+			return
+		end
+
+		local userStage = self.currentUserStageEntity.UserStage
+		if userStage == nil then
+			return
+		end
+
+		-- 현재 모드의 진행 상태 가져오기
+		local openStage, openChapter
+		if self.isHardMode then
+			openStage = userStage.hardOpenStage
+			openChapter = userStage.hardOpenChapter
+		else
+			openStage = userStage.openStage
+			openChapter = userStage.openChapter
+		end
+
+		local selectChapter = userStage.selectChapter
+
+		-- 현재 보고 있는 챕터가 오픈된 챕터보다 높으면 → 오픈 챕터로 이동
+		if selectChapter > openChapter then
+			userStage.selectChapter = openChapter
+			userStage.selectStage = openStage
+		-- 현재 챕터가 오픈 챕터와 같으면 → 오픈 스테이지 선택
+		elseif selectChapter == openChapter then
+			userStage.selectStage = openStage
+		-- 현재 챕터가 오픈 챕터보다 낮으면 → 해당 챕터의 마지막 스테이지 선택
+		else
+			local stageDataList = _StageService:GetStageByChapter(selectChapter)
+			userStage.selectStage = #stageDataList
 		end
 	end
 

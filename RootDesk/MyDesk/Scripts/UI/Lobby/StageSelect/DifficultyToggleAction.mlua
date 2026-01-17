@@ -20,6 +20,14 @@ script DifficultyToggleAction extends ToggleAction
 
 		-- 하드모드 Material 적용/제거
 		stageSelectUI.StageSelectorUI:UpdateHardModeMaterial()
+
+		-- 선택 스테이지 조정 (도전 가능한 스테이지로 자동 이동)
+		stageSelectUI.StageSelectorUI:AdjustSelectionForModeChange()
+
+		-- 스테이지 UI 갱신 (잠금 상태 반영)
+		if stageSelectUI.StageSelectorUI.currentUserStageEntity ~= nil then
+			stageSelectUI.StageSelectorUI:UpdateData(stageSelectUI.StageSelectorUI.currentUserStageEntity)
+		end
 	end
 
 	method void ExecuteOffLogic(Toggle sender)
