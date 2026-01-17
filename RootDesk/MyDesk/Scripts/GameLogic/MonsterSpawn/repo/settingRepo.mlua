@@ -52,6 +52,7 @@ script settingRepo extends Logic
 				type = tostring(eventSet:GetCell(index, 'type')),
 				count = tonumber(eventSet:GetCell(index, 'count')),
 				delayTs = tonumber(eventSet:GetCell(index, 'delay')),
+				threshold = tonumber(eventSet:GetCell(index, 'threshold')) or 50,
 			}
 
 			self.settingTable['EVENT'][item.id] = item
