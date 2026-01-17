@@ -200,6 +200,7 @@ script GameManager extends Logic
 		self.chapterIndex = chapterIndex
 		self.mapIndex = mapIndex
 		
+		
 		local ourHealthBarUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/Player_HP_bar")
 		local enemyHealthBarUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/EnemyHealthBar")
 		local playerTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/PlayerTower")
@@ -366,14 +367,14 @@ script GameManager extends Logic
 				return
 			end
 		end
-
+		
 		-- Background가 없거나 Enable이 false인 경우 TemporaryBackground들 처리
 		local tempBackgrounds = _EntityService:GetEntitiesByPath(mapPath .. "/TemporaryBackground")
-
+		
 		if tempBackgrounds == nil or #tempBackgrounds == 0 then
 			return
 		end
-
+		
 		for i, tempBg in ipairs(tempBackgrounds) do
 			if tempBg ~= nil and tempBg.BackgroundComponent ~= nil then
 				if isHardMode then
@@ -563,30 +564,43 @@ script GameManager extends Logic
 		
 		self:UpdateRankData(userName, playTime, key, senderUserId)
 		
-		-- 서버에서 최초 클리어 판정 (AND 조건)
-		-- 1. 기존 조건: openChapter/openStage가 현재 스테이지와 같거나 이전
-		-- 2. 새 조건: cleared 목록에 해당 스테이지가 없음
+		-- 서버에서 최초 클리어 판정 (하드/노말 분리)
 		local isFirstClear = false
-		local isNewStage = (clearedChapter > userStage.openChapter) or
-			(clearedChapter == userStage.openChapter and clearedStage >= userStage.openStage)
-		local isNotCleared = not userStage:IsStageCleared(clearedChapter, clearedStage)
-		
+		local isNewStage = false
+		local isNotCleared = false
+
+		if self.isHardMode then
+			-- 하드모드 기준
+			isNewStage = (clearedChapter > userStage.hardOpenChapter) or
+				(clearedChapter == userStage.hardOpenChapter and clearedStage >= userStage.hardOpenStage)
+			isNotCleared = not userStage:IsHardStageCleared(clearedChapter, clearedStage)
+		else
+			-- 노말모드 기준
+			isNewStage = (clearedChapter > userStage.openChapter) or
+				(clearedChapter == userStage.openChapter and clearedStage >= userStage.openStage)
+			isNotCleared = not userStage:IsStageCleared(clearedChapter, clearedStage)
+		end
+
 		if isNewStage and isNotCleared then
 			isFirstClear = true
 		end
 		
-		print(string.format("[GameManager] StageClearServer: userId=%s, isFirstClear=%s, clearedChapter=%s, clearedStage=%s",
-			senderUserId, tostring(isFirstClear), tostring(clearedChapter), tostring(clearedStage)))
+		print(string.format("[GameManager] StageClearServer: userId=%s, isHardMode=%s, isFirstClear=%s, clearedChapter=%s, clearedStage=%s, isNewStage=%s, isNotCleared=%s",
+			senderUserId, tostring(self.isHardMode), tostring(isFirstClear), tostring(clearedChapter), tostring(clearedStage), tostring(isNewStage), tostring(isNotCleared)))
 		
 		-- 클라이언트 UI 업데이트 콜백 (일반 모드는 토큰 0)
 		self:StageClearClientCallback(isFirstClear, 0, senderUserId)
-
+		
 		-- 최초 클리어: cleared 목록에 추가 및 다음 스테이지 오픈 (노말/하드 분리)
 		if self.isHardMode then
 			-- 하드모드 진행
+			print(string.format("[GameManager] Hard mode: current hardOpen=%d-%d, clearedStage=%d-%d, IsClearHardStage=%s",
+				userStage.hardOpenChapter, userStage.hardOpenStage, clearedChapter, clearedStage, tostring(userStage:IsClearHardStage(clearedChapter, clearedStage))))
 			if userStage:IsClearHardStage(clearedChapter, clearedStage) == false then
 				local nextStage = _StageService:GetNextOpenStageIdFromServer(userStage.hardOpenChapter, userStage.hardOpenStage)
+				print(string.format("[GameManager] Hard mode: nextStage=%d-%d", nextStage.chapter, nextStage.stage))
 				if nextStage.chapter ~= userStage.hardOpenChapter or nextStage.stage ~= userStage.hardOpenStage then
+					print(string.format("[GameManager] Hard mode: Opening next stage %d-%d", nextStage.chapter, nextStage.stage))
 					userStage:SetClearHardStage(nextStage.chapter, nextStage.stage)
 				end
 			end
@@ -605,7 +619,7 @@ script GameManager extends Logic
 		-- 하드모드 보상 배율
 		local rewardMultiplier = 1
 		if self.isHardMode then
-			rewardMultiplier = 2
+			rewardMultiplier = 1.5
 		end
 		
 		if isFirstClear == false then
