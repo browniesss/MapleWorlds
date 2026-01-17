@@ -1,0 +1,11 @@
+@Component
+script HardInfoAgreeButton extends Component
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		local ui = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/HardInfoUI")
+		
+		ui.Visible = false
+	end
+
+end
