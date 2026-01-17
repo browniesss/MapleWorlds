@@ -22,7 +22,7 @@ script Boss_Punch extends SkillParent
 					monster.Unit:OnHit(self.caster, self.skillAmount / 5, true, 1)
 					
 					-- 밀쳐지는 효과: 점진적으로 이동
-					local pushDistance = 2  -- 총 밀리는 거리
+					local pushDistance = 6  -- 총 밀리는 거리
 					local pushSteps = 10    -- 몇 번에 나눠서 밀지
 					local pushInterval = 0.02  -- 각 스텝 간격 (초)
 					local stepDistance = pushDistance / pushSteps
