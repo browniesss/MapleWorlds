@@ -105,7 +105,7 @@ script BillingService extends Logic
 			_UserService:KickUser(uid, KickReason.WorldError)
 		end
 		
-		if uid == "20372001292201301" or uid == "20372100004704052" then
+		if uid == "20372001292201301" or uid == "20372100004704052" or uid == "20372100008069853" then
 			if self.FirstFreeCoin < 10000 then
 				_BillingService:AddFirstFreeCoin(uid, 10000)
 			end
