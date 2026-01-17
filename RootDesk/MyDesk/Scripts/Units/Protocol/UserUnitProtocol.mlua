@@ -144,4 +144,27 @@ script UserUnitProtocol extends CommonProtocol
 		self.Entity.UserUnitStore:UpdateDoneCallback()
 	end
 
+	@ExecSpace("ServerOnly")
+	method void UpdateUserUnitList(string uid)
+		local userMonsterData = _UserMonsterService.userMonsterDict
+		local unitData = _UnitService:GetUnitAll()
+		
+		local resp = {}
+		
+		for id, json in pairs(userMonsterData) do
+			local userUnitModel = UserUnitModel()
+			userUnitModel:DECODE(json)
+			
+			log(id, "-", json)
+			local buffedUnit = BuffedUnitModel()
+			buffedUnit:Init(unitData[id])
+			
+			resp[id] = _BuffedUnitService:SetUnitBuff(buffedUnit, userUnitModel.level, userUnitModel.limitBreak)
+		end
+		
+		_UnitLevelUpRepo:SyncData(_UnitLevelUpRepo.dataMap, uid)
+		_UnitLimitBreakRepo:SyncData(_UnitLimitBreakRepo.dataMap, uid)
+		self:GetUserUnitListBack(resp, uid)
+	end
+
 end
