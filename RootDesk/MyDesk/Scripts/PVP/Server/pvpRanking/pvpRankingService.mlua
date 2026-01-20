@@ -5,28 +5,49 @@ script pvpRankingService extends Logic
 
 	property integer MAX = 200
 
+	property integer NEXT_UPDATE_TS = 0
+
+	property table cache = {}
+
 	@ExecSpace("ServerOnly")
 	method userRankList GET_LIST()
-		local ds = _DataStorageService:GetSortableDataStorage(self.PVP_RANK_KEY)
-		local errorCode, itemPages = ds:GetSortedAndWait(SortDirection.Descending, 0, 9999999)
+		local curTs = DateTime.UtcNow.Elapsed
+		
+		if curTs < self.NEXT_UPDATE_TS then
+			local list = userRankList()
+			list:INIT(self.MAX)
+			
+			for _, item in ipairs(self.cache) do
+				list:ADD(item.uid, item.score)
+			end
+			
+			return list
+		end
+		
+		self.NEXT_UPDATE_TS = curTs + 300000
 		local list = userRankList()
 		list:INIT(self.MAX)
+		
+		local ds = _DataStorageService:GetSortableDataStorage(self.PVP_RANK_KEY)
+		local errorCode, itemPages = ds:GetSortedAndWait(SortDirection.Descending, 0, 9999999)
 		
 		while true do
 		    local items = itemPages:GetCurrentPageDatas()
 		    for _, item in pairs(items) do
-				if #list.list >= self.MAX then
-					return list
-				end
 				list:ADD(item.KeyInfo.Key, item.Value)
 		    end
+			
+			if #list.list >= self.MAX then
+				break
+			end
 		     
 		    if itemPages.IsLastPage == true then
-				return list
+				break
 		    end
 		    itemPages:MoveToNextPageAndWait()
 		end
 		
+		self.cache = list.list
 		return list
 	end
 
