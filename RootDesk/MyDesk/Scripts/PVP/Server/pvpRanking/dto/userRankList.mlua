@@ -1,0 +1,58 @@
+@Struct
+script userRankList
+
+	property table list = {}
+
+	property integer Max = 200
+
+	method void INIT(integer max)
+		self.Max = max
+	end
+
+	method userRankDto GET(integer index)
+		if index < 1 then
+			return userRankDto()
+		end
+		
+		if index > #self.list then
+			return userRankDto()
+		end
+		
+		return self.list[index]
+	end
+
+	method integer ADD(string uid, integer score)
+		local rank = #self.list + 1
+		
+		if rank > self.Max then
+			return -1
+		end
+		
+		local item = userRankDto()
+		item.score = score
+		item.uid = uid
+		
+		self.list[rank] = item
+		
+		return rank
+	end
+
+	method integer SET(integer index, string uid, integer score)
+		if index < 1 then
+			return -1
+		end
+		
+		if index > #self.list then
+			return -1
+		end
+		
+		local item = userRankDto()
+		item.score = score
+		item.uid = uid
+		
+		self.list[index] = item
+		
+		return index
+	end
+
+end

@@ -1,0 +1,63 @@
+@Logic
+script pvpRankingService extends Logic
+
+	property string PVP_RANK_KEY = "pvp_mode_rank_ver_1"
+
+	property integer MAX = 200
+
+	@ExecSpace("ServerOnly")
+	method userRankList GET_LIST()
+		local ds = _DataStorageService:GetSortableDataStorage(self.PVP_RANK_KEY)
+		local errorCode, itemPages = ds:GetSortedAndWait(SortDirection.Descending, 0, 9999999)
+		local list = userRankList()
+		list:INIT(self.MAX)
+		
+		while true do
+		    local items = itemPages:GetCurrentPageDatas()
+		    for _, item in pairs(items) do
+				if #list.list >= self.MAX then
+					return list
+				end
+				list:ADD(item.KeyInfo.Key, item.Value)
+		    end
+		     
+		    if itemPages.IsLastPage == true then
+				return list
+		    end
+		    itemPages:MoveToNextPageAndWait()
+		end
+		
+		return list
+	end
+
+	@ExecSpace("ServerOnly")
+	method userRankDto GET_ONE(string uid)
+		local ds = _DataStorageService:GetSortableDataStorage(self.PVP_RANK_KEY)
+		local err, value = ds:GetAndWait(uid)
+		if err ~= 0 then
+			return userRankDto()
+		end
+		
+		local res = userRankDto()
+		res.uid = uid
+		res.score = value
+		
+		return res
+	end
+
+	@ExecSpace("ServerOnly")
+	method userRankDto ADD_POINT(string uid, integer score)
+		local ds = _DataStorageService:GetSortableDataStorage(self.PVP_RANK_KEY)
+		local err, value = ds:IncreaseAndWait(uid, score)
+		if err ~= 0 then
+			return userRankDto()
+		end
+		
+		local res = userRankDto()
+		res.uid = uid
+		res.score = value
+		
+		return res
+	end
+
+end
