@@ -1,0 +1,20 @@
+@Component
+script Salion_Damage extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		local function attackFunction()
+			self.target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 1)
+			self.target.Unit:GetStatusDebuff(_eStatusDebuffType.Burn, self.caster.Unit.damage * self.skillAmount * 0.25, self.skillTime, self.caster)
+			
+			self.caster.Unit.isUsingSkill = false
+			self.caster.Unit:SetState("move")
+		end
+		
+		-- 첫 번째 발사: 공격 모션 발생
+		_TimerService:SetTimerOnce(attackFunction, self.skillAttackTiming)
+	end
+
+end

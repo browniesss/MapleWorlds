@@ -6,7 +6,7 @@ script Melody_Curse extends SkillParent
 		__base:ActivateSkill()
 		
 		_EffectService:PlayEffectAttached("956beaca6eeb4b6fbd05ebb015a8f342", self.caster, Vector3(0.2, self.caster.Unit.imageSize.y, 0), 0, Vector3.one)
-		self.caster.Unit.curTarget.Unit:GetDebuff(_eDebuffType.Silence, self.skillAmount, self.skillTime)
+		self.caster.Unit.curTarget.Unit:GetStatusDebuff(_eStatusDebuffType.Silence, self.skillAmount, self.skillTime, self.caster)
 		self:SkillEnd()
 	end
 

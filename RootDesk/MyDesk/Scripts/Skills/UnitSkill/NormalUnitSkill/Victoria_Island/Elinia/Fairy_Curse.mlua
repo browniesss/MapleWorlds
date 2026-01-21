@@ -6,7 +6,7 @@ script Fairy_Curse extends SkillParent
 		__base:ActivateSkill()
 		
 		_EffectService:PlayEffectAttached("4642aa2c4b8640debc5f453c1a188c59", self.target, Vector3(0, 0, 0), 0, Vector3.one)
-		self.caster.Unit.curTarget.Unit:GetDebuff(_eDebuffType.AttackSpeedDecrease, self.skillAmount, self.skillTime)
+		self.caster.Unit.curTarget.Unit:GetStatusDebuff(_eStatusDebuffType.AttackSpeedDecrease, self.skillAmount, self.skillTime, self.caster)
 		self:SkillEnd()
 	end
 
