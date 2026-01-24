@@ -70,3 +70,101 @@
 -   **대체 방안**: 모든 데이터 조회 및 변경은 상술한 **`Protocol`을 통한 명시적인 `Call/Back` RPC 패턴**을 사용해야 합니다. 클라이언트가 데이터가 필요할 때 `...Call`로 서버에 요청하고, 서버는 처리 후 `...Back`으로 결과를 돌려주는 방식은 데이터 흐름을 명확하고 예측 가능하게 만듭니다.
 
 이 가이드를 통해 프로젝트의 아키텍처 일관성을 유지하고, 안정적이며 효율적인 코드를 작성할 수 있습니다.
+
+---
+
+## 6. 폴더 구조 및 역할별 스크립트 작성 가이드 (`Scripts/Units` 기준)
+
+`RootDesk/MyDesk/Scripts/Units` 디렉토리 내의 파일들은 역할에 따라 명확하게 구분됩니다. 각 분류별 작성 가이드는 다음과 같습니다.
+
+### 6.1. DTO (Data Transfer Object)
+데이터의 구조를 정의하고 서버와 클라이언트 간 데이터를 주고받을 때 사용되는 모델입니다.
+
+-   **위치**: `Server/Dto` 폴더
+-   **타입**: `@Struct` 어노테이션 사용
+-   **상속**: 없음 (기본) 또는 다른 모델 상속 (예: `extends UnitModel`)
+-   **작성 규칙**:
+    1.  **프로퍼티 정의**: 데이터 필드를 `property`로 정의합니다.
+    2.  **초기화 및 변환**: `Init(table data)`, `DECODE(string json)`, `ENCODE()` 메소드를 구현하여 JSON 직렬화/역직렬화를 지원해야 합니다.
+    3.  **로직 배제**: 복잡한 비즈니스 로직은 포함하지 않고, 데이터 홀더 역할에 집중합니다.
+
+    ```lua
+    @Struct
+    script UserUnitModel
+        property string id = ""
+        property integer level = 1
+
+        method string ENCODE()
+            -- JSON 인코딩 구현
+        end
+    end
+    ```
+
+### 6.2. Service & Repository (Server Logic)
+게임의 핵심 비즈니스 로직, 데이터베이스 접근, 데이터 캐싱을 담당합니다.
+
+-   **위치**: `Server` 폴더 (Repository는 주로 데이터를 로드하고 제공하는 역할)
+-   **타입**: `@Logic` 어노테이션 사용
+-   **상속**: `extends Logic`
+-   **작성 규칙**:
+    1.  **실행 공간**: 대부분의 메소드는 `@ExecSpace("ServerOnly")`로 지정하여 보안을 유지합니다.
+    2.  **데이터 접근**: `_DataStorageService` 등을 통해 DB에 접근하거나, `csv` 데이터를 로드하여 `table`에 캐싱합니다.
+    3.  **싱글톤 사용**: 다른 스크립트에서 `_서비스명`으로 접근합니다. (예: `_UserMonsterService`)
+
+    ```lua
+    @Logic
+    script UserMonsterService extends Logic
+        @ExecSpace("ServerOnly")
+        method void LEVEL_UP(string uid, table idList)
+            -- 레벨업 로직 및 DB 저장
+        end
+    end
+    ```
+
+### 6.3. Protocol
+클라이언트와 서버 간의 통신(RPC)을 담당하는 중계자입니다.
+
+-   **위치**: `Protocol` 폴더
+-   **타입**: `@Component` 어노테이션 사용
+-   **상속**: `extends CommonProtocol` (프로젝트 공통 프로토콜 상속)
+-   **작성 규칙**:
+    1.  **Call (Client -> Server)**: 함수명은 `...Call`로 끝나야 하며, `@ExecSpace("Server")`를 사용합니다. 내부에서 서비스를 호출합니다.
+    2.  **Back (Server -> Client)**: 함수명은 `...Back`으로 끝나야 하며, `@ExecSpace("Client")`를 사용합니다. 내부에서 Client 스크립트(Store)를 호출하여 UI를 갱신합니다.
+
+    ```lua
+    @Component
+    script UserUnitProtocol extends CommonProtocol
+        @ExecSpace("Server")
+        method void GetUserUnitListCall()
+            -- 서비스 호출 후 Back 호출
+        end
+
+        @ExecSpace("Client")
+        method void GetUserUnitListBack(table resp)
+            self.Entity.UserUnitStore:UpdateData(resp)
+        end
+    end
+    ```
+
+### 6.4. Client (Store & UI Controller)
+클라이언트의 상태 관리, UI 갱신, 사용자 입력을 처리합니다.
+
+-   **위치**: `Client` 폴더
+-   **타입**: `@Component` 어노테이션 사용
+-   **상속**: `extends Component`
+-   **작성 규칙**:
+    1.  **실행 공간**: `@ExecSpace("ClientOnly")`를 기본으로 사용합니다.
+    2.  **프로토콜 호출**: `OnBeginPlay`나 UI 이벤트 발생 시 `self.Entity.프로토콜명:MethodCall()`을 통해 서버에 요청합니다.
+    3.  **데이터 갱신**: 프로토콜로부터 데이터를 받아 로컬 프로퍼티(`property table DataMap`)를 갱신하고 UI를 업데이트합니다.
+
+    ```lua
+    @Component
+    script UserUnitStore extends Component
+        property table UserUnitMap = {}
+
+        @ExecSpace("ClientOnly")
+        method void OnBeginPlay()
+            self.Entity.UserUnitProtocol:GetUserUnitListCall()
+        end
+    end
+    ```
