@@ -1,0 +1,37 @@
+@Component
+script DifficultyToggleAction extends ToggleAction
+
+	method void ExecuteOnLogic(Toggle sender)
+		local stageSelectUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/StageSelectUI")
+		if stageSelectUI == nil or stageSelectUI.StageSelectorUI == nil then
+			return
+		end
+
+		if self.panelIndex == 1 then
+			-- 노말 모드
+			stageSelectUI.StageSelectorUI.isHardMode = false
+		elseif self.panelIndex == 2 then
+			-- 하드 모드
+			stageSelectUI.StageSelectorUI.isHardMode = true
+		end
+
+		-- 랭킹 UI 갱신
+		stageSelectUI.StageSelectorUI:RefreshRankingForCurrentMode()
+
+		-- 하드모드 Material 적용/제거
+		stageSelectUI.StageSelectorUI:UpdateHardModeMaterial()
+
+		-- 선택 스테이지 조정 (도전 가능한 스테이지로 자동 이동)
+		stageSelectUI.StageSelectorUI:AdjustSelectionForModeChange()
+
+		-- 스테이지 UI 갱신 (잠금 상태 반영)
+		if stageSelectUI.StageSelectorUI.currentUserStageEntity ~= nil then
+			stageSelectUI.StageSelectorUI:UpdateData(stageSelectUI.StageSelectorUI.currentUserStageEntity)
+		end
+	end
+
+	method void ExecuteOffLogic(Toggle sender)
+		-- OFF 로직은 라디오 모드에서는 사용하지 않음
+	end
+
+end

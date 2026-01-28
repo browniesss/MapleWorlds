@@ -64,7 +64,7 @@ script ClearRewardUI extends Component
 			local tokenRuid = nil
 			local currentEventVersion = _EventService:GetCurrentEventVersion()
 			local eventDataSet = _DataService:GetTable("EventData")
-
+		
 			if eventDataSet ~= nil then
 				for index = 1, eventDataSet:GetRowCount() do
 					local eventId = tonumber(eventDataSet:GetCell(index, "id"))
@@ -74,7 +74,7 @@ script ClearRewardUI extends Component
 					end
 				end
 			end
-
+		
 			-- 이벤트 토큰 Entity 활성화 및 아이콘 설정
 			if self.eventTokenIcon ~= nil and tokenRuid ~= nil then
 				self.eventTokenIcon.Enable = true
@@ -124,6 +124,12 @@ script ClearRewardUI extends Component
 			end
 		else
 			-- 일반 모드
+			-- 하드모드 보상 배율
+			local rewardMultiplier = 1
+			if _GameManager.isHardMode then
+				rewardMultiplier = 1.5
+			end
+		
 			if isFirstClear then
 				self.specialCoinIcon.Visible = true
 				self.specialCoinLabel.Visible = true
@@ -138,9 +144,9 @@ script ClearRewardUI extends Component
 				self.mesoLabel.Visible = true
 				self.mesoFrame.Visible = true
 		
-				normalCoinAmount = 500
-				specialCoinAmount = 100
-				mesoAmount = 4000
+				normalCoinAmount = 500 * rewardMultiplier
+				specialCoinAmount = 100 * rewardMultiplier
+				mesoAmount = 4000 * rewardMultiplier
 			else
 				self.specialCoinIcon.Visible = false
 				self.specialCoinLabel.Visible = false
@@ -155,8 +161,8 @@ script ClearRewardUI extends Component
 				self.mesoLabel.Visible = true
 				self.mesoFrame.Visible = true
 		
-				normalCoinAmount = 100
-				mesoAmount = 500
+				normalCoinAmount = 100 * rewardMultiplier
+				mesoAmount = 500 * rewardMultiplier
 			end
 		end
 		

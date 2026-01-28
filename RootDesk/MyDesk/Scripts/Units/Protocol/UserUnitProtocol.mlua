@@ -49,20 +49,20 @@ script UserUnitProtocol extends CommonProtocol
 		buffedUnit:Init(unitData[id])
 		
 		if userUnitModel.level >= _UnitLevelUpRepo.UserMaxLevel then
-			log(senderUserId," max user level ", id)
+			log_error(senderUserId," max user level ", id)
 			return
 		end
 		
 		local nextLevel = userUnitModel.level + 1
 		local nextLevelData = _UnitLevelUpRepo:GetBuff(buffedUnit.jobId, buffedUnit.grade, nextLevel)
 		if nextLevelData == nil or nextLevelData.level == 0 then
-			log(senderUserId," max data level ", id)
+			log_error(senderUserId," max data level ", id)
 			return
 		end
 		
 		local totalCoin = _BillingService.ThirdFreeCoin + _BillingService.ThirdPaidCoin
 		if totalCoin < nextLevelData.price then
-			self:LogAndKick(senderUserId, "not enough coin")
+			log_error(senderUserId, "not enough coin")
 			return
 		end
 		
@@ -107,19 +107,19 @@ script UserUnitProtocol extends CommonProtocol
 		buffedUnit:Init(unitData[id])
 		
 		if userUnitModel.limitBreak >= _UnitLimitBreakRepo.UserMaxLevel then
-			log(senderUserId," max user limit break ", id)
+			log_error(senderUserId," max user limit break ", id)
 			return
 		end
 		
 		local nextLimitBreak = userUnitModel.limitBreak + 1
 		local nextData = _UnitLimitBreakRepo:GetBuff(buffedUnit.grade, nextLimitBreak, buffedUnit.id)
 		if nextData == nil or nextData.limitBreak == 0 then
-			log(senderUserId," max data limit break ", id)
+			log_error(senderUserId," max data limit break ", id)
 			return
 		end
 		
 		if userUnitModel.count <= userUnitModel.limitBreak then
-			self:LogAndKick(senderUserId, "not enough count")
+			log_error(senderUserId, "not enough count")
 			return
 		end
 		
@@ -142,6 +142,29 @@ script UserUnitProtocol extends CommonProtocol
 	method void BreakLimitUnitBack(BuffedUnitModel data)
 		self.Entity.UserUnitStore:UpdateDictByKey(data.id, data)
 		self.Entity.UserUnitStore:UpdateDoneCallback()
+	end
+
+	@ExecSpace("ServerOnly")
+	method void UpdateUserUnitList(string uid)
+		local userMonsterData = _UserMonsterService.userMonsterDict
+		local unitData = _UnitService:GetUnitAll()
+		
+		local resp = {}
+		
+		for id, json in pairs(userMonsterData) do
+			local userUnitModel = UserUnitModel()
+			userUnitModel:DECODE(json)
+			
+			log(id, "-", json)
+			local buffedUnit = BuffedUnitModel()
+			buffedUnit:Init(unitData[id])
+			
+			resp[id] = _BuffedUnitService:SetUnitBuff(buffedUnit, userUnitModel.level, userUnitModel.limitBreak)
+		end
+		
+		_UnitLevelUpRepo:SyncData(_UnitLevelUpRepo.dataMap, uid)
+		_UnitLimitBreakRepo:SyncData(_UnitLimitBreakRepo.dataMap, uid)
+		self:GetUserUnitListBack(resp, uid)
 	end
 
 end

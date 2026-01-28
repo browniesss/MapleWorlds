@@ -48,6 +48,8 @@ script GameManager extends Logic
 	@Sync
 	property boolean isTutorialPaused = false
 
+	property string hardModeMaterialId = "c3d80f81-fdbe-4304-aeb6-4ee73d86f120"
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		-- 스킬 선택 UI 비활성화
@@ -113,18 +115,17 @@ script GameManager extends Logic
 	end
 
 	@ExecSpace("Server")
-	method void GameStart(integer chapterIndex, integer mapIndex, boolean isEventMode)
+	method void GameStart(integer chapterIndex, integer mapIndex, number gameMode)
 		self.chapterIndex = chapterIndex
 		self.mapIndex = mapIndex
 		self.isPlaying = true
 		self.playStartTs = DateTime.UtcNow.Elapsed
 
 		-- 모드 설정
-		if isEventMode then
-			self.currentGameMode = _eGameMode.Event
-		else
-			self.currentGameMode = _eGameMode.Normal
-		end
+		self.currentGameMode = gameMode
+		local isEventMode = (gameMode == _eGameMode.Event)
+		self.isEventMode = isEventMode
+		self:SyncEventMode(isEventMode)
 		
 		local userIncome = _SpawnManager:GetUserIncome()
 		local baseIncomeData = userIncome.MesoIncome:GetMesoData()
@@ -193,6 +194,7 @@ script GameManager extends Logic
 		self.chapterIndex = chapterIndex
 		self.mapIndex = mapIndex
 		
+		
 		local ourHealthBarUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/Player_HP_bar")
 		local enemyHealthBarUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/EnemyHealthBar")
 		local playerTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/PlayerTower")
@@ -215,7 +217,7 @@ script GameManager extends Logic
 	method void GameEnd()
 		-- 몬스터 도감 킬 데이터 서버로 동기화
 		_MonsterCodexService:SyncKillDataToServer()
-
+		
 		-- 인게임 UI 비활성화
 		self.shopUI.Enable = false
 		self.shopUI.Visible = false
@@ -329,6 +331,54 @@ script GameManager extends Logic
 					_TutorialService:StartIngameTutorial(1)
 				end
 			end, 0.5)
+		end
+		
+		-- 하드모드 배경 Material 적용
+		self:ApplyHardModeBackgroundMaterial()
+	end
+
+	@ExecSpace("Client")
+	method void ApplyHardModeBackgroundMaterial()
+		-- 하드모드 여부 확인 (서버 동기화 전에 호출될 수 있으므로 StageSelectorUI에서도 확인)
+		local isHardMode = (self.currentGameMode == _eGameMode.Hard)
+		if not isHardMode then
+			local stageSelectUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/StageSelectUI")
+			if stageSelectUI ~= nil and stageSelectUI.StageSelectorUI ~= nil then
+				isHardMode = stageSelectUI.StageSelectorUI.isHardMode or false
+			end
+		end
+
+		-- 현재 맵의 Background 엔티티 찾기
+		local mapPath = self:GetGameMapName()
+		local backgroundEntity = _EntityService:GetEntityByPath(mapPath .. "/Background")
+
+		-- Background가 있고 Enable이 true인 경우 BackgroundComponent 사용
+		if backgroundEntity ~= nil and backgroundEntity.Enable == true then
+			if backgroundEntity.BackgroundComponent ~= nil then
+				if isHardMode then
+					backgroundEntity.BackgroundComponent.MaterialId = self.hardModeMaterialId
+				else
+					backgroundEntity.BackgroundComponent.MaterialId = ""
+				end
+				return
+			end
+		end
+
+		-- Background가 없거나 Enable이 false인 경우 TemporaryBackground들 처리
+		local tempBackgrounds = _EntityService:GetEntitiesByPath(mapPath .. "/TemporaryBackground")
+
+		if tempBackgrounds == nil or #tempBackgrounds == 0 then
+			return
+		end
+
+		for i, tempBg in ipairs(tempBackgrounds) do
+			if tempBg ~= nil and tempBg.BackgroundComponent ~= nil then
+				if isHardMode then
+					tempBg.BackgroundComponent.MaterialId = self.hardModeMaterialId
+				else
+					tempBg.BackgroundComponent.MaterialId = ""
+				end
+			end
 		end
 	end
 
@@ -483,7 +533,117 @@ script GameManager extends Logic
 	-- [NormalGameService로 분리됨] - 래퍼 메서드
 	@ExecSpace("Server")
 	method void StageClearServer(integer clearedChapter, integer clearedStage)
-		_NormalGameService:ProcessStageClearServer(clearedChapter, clearedStage)
+		-- 튜토리얼 스테이지(0,0)는 보상/랭킹/진행도 저장 없이 UI만 표시
+		if clearedChapter == 0 and clearedStage == 0 then
+			self:StageClearClientCallback(false, 0, senderUserId)
+			_UserService:GetUserEntityByUserId(senderUserId).UserStage:SetClearStage(1, 1)
+			return
+		end
+		
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		local userStage = user.UserStage
+		local userName = user.PlayerComponent.Nickname
+		local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
+		
+		-- 하드모드 여부에 따라 랭킹 키 분기
+		local isHardMode = (self.currentGameMode == _eGameMode.Hard)
+		local key = nil
+		if isHardMode then
+			key = _RankingService:GetRankKeyByTable({chapter=clearedChapter, stage=clearedStage, mode="hard"})
+		else
+			key = _RankingService:GetRankKeyByTable({chapter=clearedChapter, stage=clearedStage})
+		end
+		_RankingService:AddPoint(key, userName, playTime)
+		
+		self:UpdateRankData(userName, playTime, key, senderUserId)
+		
+		-- 서버에서 최초 클리어 판정 (하드/노말 분리)
+		local isFirstClear = false
+		local isNewStage = false
+		local isNotCleared = false
+
+		if isHardMode then
+			-- 하드모드 기준
+			isNewStage = (clearedChapter > userStage.hardOpenChapter) or
+				(clearedChapter == userStage.hardOpenChapter and clearedStage >= userStage.hardOpenStage)
+			isNotCleared = not userStage:IsHardStageCleared(clearedChapter, clearedStage)
+		else
+			-- 노말모드 기준
+			isNewStage = (clearedChapter > userStage.openChapter) or
+				(clearedChapter == userStage.openChapter and clearedStage >= userStage.openStage)
+			isNotCleared = not userStage:IsStageCleared(clearedChapter, clearedStage)
+		end
+
+		if isNewStage and isNotCleared then
+			isFirstClear = true
+		end
+
+		print(string.format("[GameManager] StageClearServer: userId=%s, isHardMode=%s, isFirstClear=%s, clearedChapter=%s, clearedStage=%s, isNewStage=%s, isNotCleared=%s",
+			senderUserId, tostring(isHardMode), tostring(isFirstClear), tostring(clearedChapter), tostring(clearedStage), tostring(isNewStage), tostring(isNotCleared)))
+
+		-- 클라이언트 UI 업데이트 콜백 (일반 모드는 토큰 0)
+		self:StageClearClientCallback(isFirstClear, 0, senderUserId)
+
+		-- 최초 클리어: cleared 목록에 추가 및 다음 스테이지 오픈 (노말/하드 분리)
+		if isHardMode then
+			-- 하드모드 진행
+			print(string.format("[GameManager] Hard mode: current hardOpen=%d-%d, clearedStage=%d-%d, IsClearHardStage=%s",
+				userStage.hardOpenChapter, userStage.hardOpenStage, clearedChapter, clearedStage, tostring(userStage:IsClearHardStage(clearedChapter, clearedStage))))
+			if userStage:IsClearHardStage(clearedChapter, clearedStage) == false then
+				local nextStage = _StageService:GetNextOpenStageIdFromServer(userStage.hardOpenChapter, userStage.hardOpenStage)
+				print(string.format("[GameManager] Hard mode: nextStage=%d-%d", nextStage.chapter, nextStage.stage))
+				if nextStage.chapter ~= userStage.hardOpenChapter or nextStage.stage ~= userStage.hardOpenStage then
+					print(string.format("[GameManager] Hard mode: Opening next stage %d-%d", nextStage.chapter, nextStage.stage))
+					userStage:SetClearHardStage(nextStage.chapter, nextStage.stage)
+				end
+			end
+			userStage:AddClearedHardStage(clearedChapter, clearedStage)
+		else
+			-- 노말모드 진행
+			-- 기존 클리어 여부와 관계없이 다음 스테이지 오픈 체크 (새 챕터 추가 시 기존 유저도 다음 챕터 진행 가능하도록)
+			local nextStage = _StageService:GetNextOpenStageIdFromServer(userStage.openChapter, userStage.openStage)
+			if nextStage.chapter ~= userStage.openChapter or nextStage.stage ~= userStage.openStage then
+				userStage:SetClearStage(nextStage.chapter, nextStage.stage)
+			end
+			userStage:AddClearedStage(clearedChapter, clearedStage)
+		end
+		
+		-- 하드모드 보상 배율
+		local rewardMultiplier = 1
+		if isHardMode then
+			rewardMultiplier = 1.5
+		end
+		
+		if isFirstClear == false then
+			_BillingService:AddSecondFreeCoin(senderUserId, 100 * rewardMultiplier)
+			_BillingService:AddThirdFreeCoin(senderUserId, 500 * rewardMultiplier)
+		
+			print("[GameManager] Not first clear, skipping badge check")
+			return
+		end
+		
+		_PlayCoinService:AddCoin(senderUserId, 1)
+		_BillingService:AddSecondFreeCoin(senderUserId, 500 * rewardMultiplier)
+		_BillingService:AddFirstFreeCoin(senderUserId, 100 * rewardMultiplier)
+		_BillingService:AddThirdFreeCoin(senderUserId, 4000 * rewardMultiplier)
+		
+		print("[GameManager] First clear! Checking badges...")
+		
+		local isChapterComplete = false
+		if clearedChapter == 1 and clearedStage == 5 then
+			isChapterComplete = true
+		elseif clearedChapter == 8 and clearedStage == 4 then
+			isChapterComplete = true
+		elseif clearedChapter >= 2 and clearedChapter ~= 8 and clearedStage == 6 then
+			isChapterComplete = true
+		end
+		
+		if isChapterComplete then
+			print(string.format("[GameManager] Chapter %s completed! Checking chapter badge...", tostring(clearedChapter)))
+			_BadgeConditionService:CheckChapterBadges(senderUserId, clearedChapter)
+		end
+		
+		_BadgeConditionService:CheckStageBadges(senderUserId, clearedChapter, clearedStage)
 	end
 
 	method table GetPreLoadAssetRuid()
@@ -517,7 +677,89 @@ script GameManager extends Logic
 	-- [NormalGameService로 분리됨] - 래퍼 메서드
 	@ExecSpace("Client")
 	method void LocalGameStart()
-		_NormalGameService:StartGame()
+		local userStage = _UserService.LocalPlayer.UserStage
+
+		-- 게임 모드 가져오기 (StageSelectorUI에서 isHardMode 확인)
+		local gameMode = _eGameMode.Normal
+		local stageSelector = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/StageSelectUI")
+		if stageSelector ~= nil and stageSelector.StageSelectorUI ~= nil then
+			if stageSelector.StageSelectorUI.isHardMode then
+				gameMode = _eGameMode.Hard
+			end
+		end
+
+		if gameMode == _eGameMode.Hard then
+			-- 하드모드: 해당 스테이지의 노말모드가 클리어되어 있어야 함
+			-- 노말모드 클리어 여부는 openChapter/openStage로 판단
+			-- selectChapter < openChapter 이거나, selectChapter == openChapter and selectStage < openStage 이면 클리어됨
+			local isNormalCleared = (userStage.selectChapter < userStage.openChapter) or
+				(userStage.selectChapter == userStage.openChapter and userStage.selectStage < userStage.openStage)
+			if not isNormalCleared then
+				-- 노말모드 미클리어 시 안내 UI 표시
+				local hardInfoUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/HardInfoUI")
+				if hardInfoUI ~= nil then
+					hardInfoUI.Visible = true
+				end
+				return
+			end
+
+			-- 하드모드 오픈 상태 체크
+			if userStage.hardOpenChapter < userStage.selectChapter then
+				local hardInfoUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/HardInfoUI")
+				if hardInfoUI ~= nil then
+					hardInfoUI.Visible = true
+				end
+				return
+			end
+			if userStage.hardOpenChapter == userStage.selectChapter and userStage.hardOpenStage < userStage.selectStage then
+				local hardInfoUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/HardInfoUI")
+				if hardInfoUI ~= nil then
+					hardInfoUI.Visible = true
+				end
+				return
+			end
+		else
+			-- 노말모드: 기존 로직
+			if userStage.openChapter < userStage.selectChapter then
+				return
+			end
+			if userStage.openChapter == userStage.selectChapter and userStage.openStage < userStage.selectStage then
+				return
+			end
+		end
+
+		_EntityService:GetEntityByPath("/ui/LobbyInfoUI").Enable = false
+		local lobbyBadgeButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton")
+		lobbyBadgeButton.Enable = false
+		local lobbyCodexButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/CodexButton")
+		if lobbyCodexButton ~= nil then
+			lobbyCodexButton.Enable = false
+		end
+
+		if Environment:IsMobilePlatform() then
+			local lobbyJoyStick = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIJoystick")
+			local lobbyJumpButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/JumpButton")
+
+			lobbyJoyStick.Enable = false
+			lobbyJumpButton.Enable = false
+		end
+
+		_LoadingManager:Show()
+
+		-- 돌파스킬 초기화 완료 후 프리로드 시작
+		_UserService.LocalPlayer.UserBreakLimitSkillProtocol:InitCallWithCallback(function(limitBreakRuids)
+			local ruids = self:GetPreLoadAssetRuid()
+
+			-- 돌파스킬 ruids 추가
+			for _, ruid in ipairs(limitBreakRuids) do
+				table.insert(ruids, ruid)
+			end
+
+			_ResourceService:PreloadAsync(ruids, function()
+				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage".. userStage.selectChapter.."0"..userStage.selectStage)
+				self:GameStart(userStage.selectChapter, userStage.selectStage, gameMode)
+			end)
+		end)
 	end
 
 	@ExecSpace("Client")
@@ -534,6 +776,7 @@ script GameManager extends Logic
 
 	@ExecSpace("Server")
 	method void EventGameStart(integer chapterIndex, integer mapIndex)
+		self:GameStart(chapterIndex, mapIndex, _eGameMode.Event)
 		_EventGameService:EventGameStart(chapterIndex, mapIndex)
 	end
 
@@ -574,7 +817,7 @@ script GameManager extends Logic
 		
 			_ResourceService:PreloadAsync(ruids, function()
 				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage000")
-				self:GameStart(0, 0, false)
+				self:GameStart(0, 0, _eGameMode.Normal)
 			end)
 		end)
 	end

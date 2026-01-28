@@ -70,12 +70,12 @@ script NonTargetProjectile extends Component
 		if self.isEnemy and not event.TriggerBodyEntity.Unit.isEnemy then
 			event.TriggerBodyEntity.Unit:OnHit(self.caster, self.caster.Unit.damage * self.damage, false, 1)
 			destroyFunction()
+			return
 		elseif not self.isEnemy and event.TriggerBodyEntity.Unit.isEnemy then
 			event.TriggerBodyEntity.Unit:OnHit(self.caster, self.caster.Unit.damage * self.damage, false, 1)
 			destroyFunction()
+			return
 		end
-		
-		
 	end
 
 end

@@ -31,33 +31,41 @@ script MonsterSpawnService extends Component
 		)
 	end
 
-	method void OnDamage()
-		-- EVENT DAMAGED 시 호출되는 함수
+	method void OnDamage(number currentHpPercent)
 		local damageList = self.eventGroup['DAMAGED']
-		
+
+		if damageList == nil then
+			return
+		end
+
 		for i, g in ipairs(damageList) do
+			-- threshold 체크: 현재 체력 비율이 threshold 이하인지
+			if currentHpPercent > g.threshold then
+				continue
+			end
+
+			-- 이미 이 threshold에서 발동했는지 체크
+			if g.triggered == true then
+				continue
+			end
+
 			if g.count >= g.maxCount then
 				continue
 			end
-			
-			local delayEndTs = g.lastTs + g.delayTs
-			if self.curTimeTs < delayEndTs then
-				continue
-			end
-			
-			g.lastTs = self.curTimeTs
+
+			-- DAMAGED 이벤트는 HP 기반이므로 딜레이 체크 없이 즉시 발동
 			g.count = g.count + 1
-			
-			
+			g.triggered = true
+
 			local groupTable = {}
-			for i, g in ipairs(g.group) do
+			for j, groupItem in ipairs(g.group) do
 				local value = {}
-				value['unit'] = g.unit
-				value['delayTs'] = g.delayTs
-				
+				value['unit'] = groupItem.unit
+				value['delayTs'] = groupItem.delayTs
+
 				table.insert(groupTable, value)
 			end
-		
+
 			self.timerIdList[#self.timerIdList + 1] = _TimerService:SetTimerOnce(
 				function() self:GroupSummon(groupTable) end,
 				0
@@ -202,6 +210,8 @@ script MonsterSpawnService extends Component
 					item['maxCount'] = setting.count
 					item['lastTs'] = -1
 					item['group'] = {}
+					item['threshold'] = setting.threshold or 50
+					item['triggered'] = false
 
 					self.eventGroup[setting.type][id] = item
 

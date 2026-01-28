@@ -174,9 +174,6 @@ script Unit extends Component
 	property integer criticalDamage = 1
 
 	@Sync
-	property number healDecreaseTimerID = 0
-
-	@Sync
 	property integer level = 1
 
 	@Sync
@@ -195,6 +192,12 @@ script Unit extends Component
 
 	@Sync
 	property integer effectId = 0
+
+	@Sync
+	property number freezeTime = 0
+
+	@Sync
+	property number freezeTimeCounter = 0
 
 	@ExecSpace("Server")
 	method void Spawn(BuffedUnitModel unitData, table skillData)
@@ -316,6 +319,7 @@ script Unit extends Component
 		end
 		
 		self.Entity:AddComponent(HitComponent)
+		self.Entity:AddComponent(UnitDebuffComponent)
 		
 		if self.isUsableCharacter then
 			self.imageSize = Vector2.one * 0.5
@@ -371,9 +375,16 @@ script Unit extends Component
 		elseif self.curState == "stun" then
 			self:OnStun(delta)
 		elseif self.curState == "die" then
-			
+		
 		elseif self.curState == "fear" then
 			self:OnFear(delta)
+		elseif self.curState == "freeze" then
+			self:OnFreeze(delta)
+		end
+		
+		-- 비상태형 디버프 업데이트 (화상 틱 등)
+		if self.Entity.UnitDebuffComponent ~= nil then
+			self.Entity.UnitDebuffComponent:OnUpdateDebuff(delta)
 		end
 	end
 
@@ -938,6 +949,16 @@ script Unit extends Component
 			isCritical = criticalResult.isCritical
 			attackCount = criticalResult.attackCount
 		end
+		
+		-- 빙결 상태였다면
+		if self.curState == "freeze" then
+			damage *= 2
+		
+			self.curState = "stand"
+			self.curTarget = nil
+			self:SetMaterial("")
+			_EffectService:PlayEffectAttached("7b5e34498e934366b8ae61a2de66d42e", self.Entity, Vector3.zero, 0, Vector3.one)
+		end
 
 		-- 매트릭스 모드 OnHit 트리거 적용 (아군이 피격당할 때)
 		if not self.isEnemy and _MatrixAugmentService ~= nil then
@@ -946,6 +967,14 @@ script Unit extends Component
 
 		self.Entity.HitComponent:OnHit(attacker, damage, isCritical, "", attackCount)
 		self.hp -= damage
+		
+		-- 적 타워 체력 변화 시 EVENT DAMAGED 체크
+		if self.Entity.TagComponent.Tags[2] == "Tower" and self.isEnemy then
+			local currentHpPercent = (self.hp / self.maxHP) * 100
+			if self.Entity.MonsterSpawnService ~= nil then
+				self.Entity.MonsterSpawnService:OnDamage(currentHpPercent)
+			end
+		end
 
 		if self.hp <= 0 then
 			self:OnDie(attacker)
@@ -966,7 +995,7 @@ script Unit extends Component
 			return
 		end
 		
-		if self.debuffState == _eDebuffType.HealDecrease then
+		if self.Entity.UnitDebuffComponent ~= nil and self.Entity.UnitDebuffComponent:HasDebuff(_eStatusDebuffType.HealDecrease) then
 			healAmount = healAmount * 0.5
 		end
 		
@@ -1022,7 +1051,7 @@ script Unit extends Component
 		-- 적 유닛이 죽으면 아이템 드롭
 		if self.isEnemy then
 			self:DropItem(self.Entity.TransformComponent.WorldPosition)
-
+		
 			-- 몬스터 도감 처치 카운트 (클라이언트 로컬 처리)
 			_MonsterCodexService:OnLocalMonsterKilled(self.id)
 
@@ -1053,9 +1082,10 @@ script Unit extends Component
 		self:ReturnMeso()
 	end
 
+	-- 상태 변경형 디버프 (eDebuffType: Stun, Fear, Freeze)
 	method void GetDebuff(number debuffType, number debuffAmount, number debuffTime)
 		local deleteFunction
-		
+
 		if debuffType == _eDebuffType.Stun then
 			self.curState = "stun"
 			self.stunTimeCounter = 0
@@ -1065,79 +1095,39 @@ script Unit extends Component
 			self:SetAnimationState("move")
 			self.curTarget = nil
 			self.debuffEffectID = _EffectService:PlayEffectAttached("6875d10d332d42baa81c73347dd981f9", self.Entity, Vector3(0, self.imageSize.y, 0) , 0, Vector3.one, true)
-		
+
 			if self.fearTimerID ~= 0 then
 				_TimerService:ClearTimer(self.fearTimerID)
 				_EffectService:RemoveEffect(self.debuffEffectID)
 			end
-			
+
 			if debuffTime ~= 0 then
 				deleteFunction = function()
 					self.fearTimerID = 0
 					self:SetState("stand")
 					_EffectService:RemoveEffect(self.debuffEffectID)
-		
+
 					if self.isEnemy then
 						self.Entity.SpriteRendererComponent.FlipX = false
 					else
 						self.Entity.SpriteRendererComponent.FlipX = true
 					end
 				end
-				
+
 				self.fearTimerID = _TimerService:SetTimerOnce(deleteFunction, debuffTime)
 			end
-		elseif debuffType == _eDebuffType.Silence then
-			self.debuffState = debuffType
-			self.debuffEffectID = _EffectService:PlayEffectAttached("2dfb3187bc8f447f97ee6eeb51bbe039", self.Entity, Vector3(0, self.imageSize.y, 0) , 0, Vector3.one, true)
-		
-			if self.silenceTimerID ~= 0 then
-				_TimerService:ClearTimer(self.silenceTimerID)
-				_EffectService:RemoveEffect(self.debuffEffectID)
-			end
-			
-			if debuffTime ~= 0 then
-				deleteFunction = function()
-					self.silenceTimerID = 0
-					_EffectService:RemoveEffect(self.debuffEffectID)
-				end
-				
-				self.silenceTimerID = _TimerService:SetTimerOnce(deleteFunction, debuffTime)
-			end
-		elseif debuffType == _eDebuffType.AttackSpeedDecrease then
-			self.debuffEffectID = _EffectService:PlayEffectAttached("30e52f2d5dd04f96bdb41e9eb5c028e7", self.Entity, Vector3(0, 0, 0) , 0, Vector3.one, true)	
-			self.attackSpeed += debuffAmount
-			
-			if self.attackSpeedDecreaseTimerID ~= 0 then
-				_TimerService:ClearTimer(self.attackSpeedDecreaseTimerID)
-				_EffectService:RemoveEffect(self.debuffEffectID)
-			end
-			
-			if debuffTime ~= 0 then
-				deleteFunction = function()
-					self.attackSpeedDecreaseTimerID = 0
-					self.attackSpeed = self.originAttackSpeed
-					_EffectService:RemoveEffect(self.debuffEffectID)
-				end
-				
-				self.attackSpeedDecreaseTimerID = _TimerService:SetTimerOnce(deleteFunction, debuffTime)
-			end
-		elseif debuffType == _eDebuffType.HealDecrease then
-			self.debuffState = debuffType
-			self.debuffEffectID = _EffectService:PlayEffectAttached("b0577e63c40d4bceb28a571fc841e0b9", self.Entity, Vector3(0, 0, 0) , 0, Vector3.one, true)	
-			
-			if self.healDecreaseTimerID ~= 0 then
-				_TimerService:ClearTimer(self.healDecreaseTimerID)
-				_EffectService:RemoveEffect(self.debuffEffectID)
-			end
-			
-			if debuffTime ~= 0 then
-				deleteFunction = function()
-					self.healDecreaseTimerID = 0
-					_EffectService:RemoveEffect(self.debuffEffectID)
-				end
-				
-				self.healDecreaseTimerID = _TimerService:SetTimerOnce(deleteFunction, debuffTime)
-			end
+		elseif debuffType == _eDebuffType.Freeze then
+			self.curState = "freeze"
+			self.freezeTime = debuffTime
+			self.freezeTimeCounter = 0
+			self:SetMaterial("material://c55c81c1-8584-463a-9ba4-78dc1ba5b7a6")
+		end
+	end
+
+	-- 비상태형 디버프 (eStatusDebuffType: Silence, AttackSpeedDecrease, HealDecrease, Burn)
+	method void GetStatusDebuff(number debuffType, number debuffAmount, number debuffTime, Entity attacker)
+		if self.Entity.UnitDebuffComponent ~= nil then
+			self.Entity.UnitDebuffComponent:ApplyDebuff(debuffType, debuffAmount, debuffTime, attacker)
 		end
 	end
 
@@ -1160,20 +1150,10 @@ script Unit extends Component
 			end
 		end
 		
-		-- 침묵 초기화
-		if self.debuffState == _eDebuffType.Silence then
-			self.silenceTimerID = 0
-			_EffectService:RemoveEffect(self.debuffEffectID)
-			self.debuffState = 0
+		-- 비상태형 디버프는 컴포넌트에서 해제
+		if self.Entity.UnitDebuffComponent ~= nil then
+			self.Entity.UnitDebuffComponent:CleansAll()
 		end
-		
-		-- 공속 감소 디버프 초기화
-		if self.attackSpeedDecreaseTimerID ~= 0 then
-			self.attackSpeedDecreaseTimerID = 0
-			self.attackSpeed = self.originAttackSpeed
-			_EffectService:RemoveEffect(self.debuffEffectID)
-		end
-		
 	end
 
 	method void OnStun(number delta)
@@ -1530,6 +1510,29 @@ script Unit extends Component
 			self:ClearSkill()
 			self:DestroyProjectile()
 		end, 4)
+	end
+
+	method void OnFreeze(number delta)
+		if self.curState ~= "freeze" or self.curState == "die" then
+			return
+		end
+		
+		self.freezeTimeCounter += delta
+		
+		if self.freezeTimeCounter >= self.freezeTime then
+			self.curState = "stand"
+			self.curTarget = nil
+			
+			self:SetMaterial("")
+		end
+	end
+
+	method void SetMaterial(string materialID)
+		if self.isUsableCharacter then
+			self.Entity.AvatarRendererComponent.MaterialId = materialID
+		else
+			self.Entity.SpriteRendererComponent.MaterialID = materialID
+		end
 	end
 
 	@EventSender("Self")

@@ -1,0 +1,48 @@
+@Component
+script Boss_Punch extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		
+		local myMonsterList = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+		local myMonsters = myMonsterList.Children
+		
+		local pushFunction = function()
+			for index in ipairs(myMonsters) do
+				local monster = myMonsters[index]
+			
+				if monster.Name == "MySpawnPoint" then
+					continue
+				end
+				
+				if monster.Enable then
+					monster.Unit:GetDebuff(_eDebuffType.Stun, 0, 1)
+					monster.Unit:OnHit(self.caster, self.skillAmount / 5, true, 1)
+					
+					-- 밀쳐지는 효과: 점진적으로 이동
+					local pushDistance = 10  -- 총 밀리는 거리
+					local pushSteps = 10    -- 몇 번에 나눠서 밀지
+					local pushInterval = 0.02  -- 각 스텝 간격 (초)
+					local stepDistance = pushDistance / pushSteps
+					
+					for i = 1, pushSteps do
+						_TimerService:SetTimerOnce(function()
+							if isvalid(monster) and monster.Unit.curState ~= "die" then
+								local pos = monster.TransformComponent.WorldPosition
+								-- 점점 느려지는 효과 (이징)
+								local ratio = 1 - (i / pushSteps)
+								monster.TransformComponent.WorldPosition = Vector3(pos.x - (stepDistance * ratio * 2), pos.y, pos.z)
+							end
+						end, pushInterval * i)
+					end
+				end
+			end
+		end
+		
+		
+		_TimerService:SetTimerOnce(pushFunction, 0.1)
+	end
+
+end

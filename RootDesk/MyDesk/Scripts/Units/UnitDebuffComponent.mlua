@@ -1,0 +1,288 @@
+@Component
+script UnitDebuffComponent extends Component
+
+	property number debuffState = 0
+
+	property integer silenceTimerID = 0
+
+	property integer silenceEffectID = 0
+
+	property integer healDecreaseTimerID = 0
+
+	property integer healDecreaseEffectID = 0
+
+	property integer attackSpeedDecreaseTimerID = 0
+
+	property integer attackSpeedDecreaseEffectID = 0
+
+	property number burnDamage = 0
+
+	property number burnDuration = 0
+
+	property number burnTimeCounter = 0
+
+	property number burnTickCounter = 0
+
+	property integer burnEffectID = 0
+
+	property Entity burnAttacker = nil
+
+	method boolean HasDebuff(number debuffType)
+		return (self.debuffState & debuffType) ~= 0
+	end
+
+	method void ApplyDebuff(number debuffType, number amount, number duration, Entity attacker)
+		local unit = self.Entity.Unit
+		if unit == nil then
+			return
+		end
+		
+		if debuffType == _eStatusDebuffType.Silence then
+			self:ApplySilence(duration)
+		elseif debuffType == _eStatusDebuffType.HealDecrease then
+			self:ApplyHealDecrease(duration)
+		elseif debuffType == _eStatusDebuffType.AttackSpeedDecrease then
+			self:ApplyAttackSpeedDecrease(amount, duration)
+		elseif debuffType == _eStatusDebuffType.Burn then
+			self:ApplyBurn(amount, duration, attacker)
+		end
+	end
+
+	method void ApplySilence(number duration)
+		local unit = self.Entity.Unit
+		if unit == nil then
+			return
+		end
+		
+		-- 비트 OR로 추가
+		self.debuffState = self.debuffState | _eStatusDebuffType.Silence
+		
+		-- 기존 타이머/이펙트 정리
+		if self.silenceTimerID ~= 0 then
+			_TimerService:ClearTimer(self.silenceTimerID)
+		end
+		if self.silenceEffectID ~= 0 then
+			_EffectService:RemoveEffect(self.silenceEffectID)
+		end
+		
+		-- 이펙트 표시
+		self.silenceEffectID = _EffectService:PlayEffectAttached("2dfb3187bc8f447f97ee6eeb51bbe039", self.Entity, Vector3(0, unit.imageSize.y, 0), 0, Vector3.one, true)
+		
+		-- 타이머 설정
+		if duration ~= 0 then
+			local deleteFunction = function()
+				self.silenceTimerID = 0
+				self.debuffState = self.debuffState & ~_eStatusDebuffType.Silence
+				if self.silenceEffectID ~= 0 then
+					_EffectService:RemoveEffect(self.silenceEffectID)
+					self.silenceEffectID = 0
+				end
+			end
+			self.silenceTimerID = _TimerService:SetTimerOnce(deleteFunction, duration)
+		end
+	end
+
+	method void ApplyHealDecrease(number duration)
+		-- 비트 OR로 추가
+		self.debuffState = self.debuffState | _eStatusDebuffType.HealDecrease
+		
+		-- 기존 타이머/이펙트 정리
+		if self.healDecreaseTimerID ~= 0 then
+			_TimerService:ClearTimer(self.healDecreaseTimerID)
+		end
+		if self.healDecreaseEffectID ~= 0 then
+			_EffectService:RemoveEffect(self.healDecreaseEffectID)
+		end
+		
+		-- 이펙트 표시
+		self.healDecreaseEffectID = _EffectService:PlayEffectAttached("b0577e63c40d4bceb28a571fc841e0b9", self.Entity, Vector3(0, 0, 0), 0, Vector3.one, true)
+		
+		-- 타이머 설정
+		if duration ~= 0 then
+			local deleteFunction = function()
+				self.healDecreaseTimerID = 0
+				self.debuffState = self.debuffState & ~_eStatusDebuffType.HealDecrease
+				if self.healDecreaseEffectID ~= 0 then
+					_EffectService:RemoveEffect(self.healDecreaseEffectID)
+					self.healDecreaseEffectID = 0
+				end
+			end
+			self.healDecreaseTimerID = _TimerService:SetTimerOnce(deleteFunction, duration)
+		end
+	end
+
+	method void ApplyAttackSpeedDecrease(number amount, number duration)
+		local unit = self.Entity.Unit
+		if unit == nil then
+			return
+		end
+		
+		-- 비트 OR로 추가
+		self.debuffState = self.debuffState | _eStatusDebuffType.AttackSpeedDecrease
+		
+		-- 기존 타이머/이펙트 정리
+		if self.attackSpeedDecreaseTimerID ~= 0 then
+			_TimerService:ClearTimer(self.attackSpeedDecreaseTimerID)
+		end
+		if self.attackSpeedDecreaseEffectID ~= 0 then
+			_EffectService:RemoveEffect(self.attackSpeedDecreaseEffectID)
+		end
+		
+		-- 이펙트 표시
+		self.attackSpeedDecreaseEffectID = _EffectService:PlayEffectAttached("30e52f2d5dd04f96bdb41e9eb5c028e7", self.Entity, Vector3(0, 0, 0), 0, Vector3.one, true)
+		
+		-- 공격속도 변경
+		unit.attackSpeed = unit.attackSpeed + amount
+		
+		-- 타이머 설정
+		if duration ~= 0 then
+			local deleteFunction = function()
+				self.attackSpeedDecreaseTimerID = 0
+				self.debuffState = self.debuffState & ~_eStatusDebuffType.AttackSpeedDecrease
+				unit.attackSpeed = unit.originAttackSpeed
+				if self.attackSpeedDecreaseEffectID ~= 0 then
+					_EffectService:RemoveEffect(self.attackSpeedDecreaseEffectID)
+					self.attackSpeedDecreaseEffectID = 0
+				end
+			end
+			self.attackSpeedDecreaseTimerID = _TimerService:SetTimerOnce(deleteFunction, duration)
+		end
+	end
+
+	method void ApplyBurn(number damage, number duration, Entity attacker)
+		-- 비트 OR로 추가
+		self.debuffState = self.debuffState | _eStatusDebuffType.Burn
+		
+		-- 기존 이펙트 정리
+		if self.burnEffectID ~= 0 then
+			_EffectService:RemoveEffect(self.burnEffectID)
+		end
+		
+		-- 화상 데이터 설정
+		self.burnDamage = damage
+		self.burnDuration = duration
+		self.burnTimeCounter = 0
+		self.burnTickCounter = 0
+		self.burnAttacker = attacker
+		
+		-- 화상 이펙트 표시 (TODO: 적절한 RUID로 변경)
+		self.burnEffectID = _EffectService:PlayEffectAttached("38c686749a92408c86f339d556857797", self.Entity, Vector3(0, 0, 0), 0, Vector3.one, true)
+	end
+
+	method void RemoveDebuff(number debuffType)
+		if debuffType == _eStatusDebuffType.Silence then
+			self:RemoveSilence()
+		elseif debuffType == _eStatusDebuffType.HealDecrease then
+			self:RemoveHealDecrease()
+		elseif debuffType == _eStatusDebuffType.AttackSpeedDecrease then
+			self:RemoveAttackSpeedDecrease()
+		elseif debuffType == _eStatusDebuffType.Burn then
+			self:RemoveBurn()
+		end
+	end
+
+	method void RemoveSilence()
+		self.debuffState = self.debuffState & ~_eStatusDebuffType.Silence
+		if self.silenceTimerID ~= 0 then
+			_TimerService:ClearTimer(self.silenceTimerID)
+			self.silenceTimerID = 0
+		end
+		if self.silenceEffectID ~= 0 then
+			_EffectService:RemoveEffect(self.silenceEffectID)
+			self.silenceEffectID = 0
+		end
+	end
+
+	method void RemoveHealDecrease()
+		self.debuffState = self.debuffState & ~_eStatusDebuffType.HealDecrease
+		if self.healDecreaseTimerID ~= 0 then
+			_TimerService:ClearTimer(self.healDecreaseTimerID)
+			self.healDecreaseTimerID = 0
+		end
+		if self.healDecreaseEffectID ~= 0 then
+			_EffectService:RemoveEffect(self.healDecreaseEffectID)
+			self.healDecreaseEffectID = 0
+		end
+	end
+
+	method void RemoveAttackSpeedDecrease()
+		local unit = self.Entity.Unit
+		self.debuffState = self.debuffState & ~_eStatusDebuffType.AttackSpeedDecrease
+		if self.attackSpeedDecreaseTimerID ~= 0 then
+			_TimerService:ClearTimer(self.attackSpeedDecreaseTimerID)
+			self.attackSpeedDecreaseTimerID = 0
+		end
+		if unit ~= nil then
+			unit.attackSpeed = unit.originAttackSpeed
+		end
+		if self.attackSpeedDecreaseEffectID ~= 0 then
+			_EffectService:RemoveEffect(self.attackSpeedDecreaseEffectID)
+			self.attackSpeedDecreaseEffectID = 0
+		end
+	end
+
+	method void RemoveBurn()
+		self.debuffState = self.debuffState & ~_eStatusDebuffType.Burn
+		self.burnDamage = 0
+		self.burnDuration = 0
+		self.burnTimeCounter = 0
+		self.burnTickCounter = 0
+		self.burnAttacker = nil
+		if self.burnEffectID ~= 0 then
+			_EffectService:RemoveEffect(self.burnEffectID)
+			self.burnEffectID = 0
+		end
+	end
+
+	method void CleansAll()
+		if self:HasDebuff(_eStatusDebuffType.Silence) then
+			self:RemoveSilence()
+		end
+		if self:HasDebuff(_eStatusDebuffType.HealDecrease) then
+			self:RemoveHealDecrease()
+		end
+		if self:HasDebuff(_eStatusDebuffType.AttackSpeedDecrease) then
+			self:RemoveAttackSpeedDecrease()
+		end
+		if self:HasDebuff(_eStatusDebuffType.Burn) then
+			self:RemoveBurn()
+		end
+	end
+
+	method void OnUpdateDebuff(number delta)
+		-- 화상 처리
+		if self:HasDebuff(_eStatusDebuffType.Burn) then
+			self:ProcessBurn(delta)
+		end
+	end
+
+	method void ProcessBurn(number delta)
+		local unit = self.Entity.Unit
+		if unit == nil then
+			self:RemoveBurn()
+			return
+		end
+		
+		-- 화상을 적용시킨 공격자가 죽었으면 화상 해제
+		if self.burnAttacker == nil or self.burnAttacker.Unit == nil or self.burnAttacker.Unit.curState == "die" then
+			self:RemoveBurn()
+			return
+		end
+		
+		self.burnTimeCounter = self.burnTimeCounter + delta
+		self.burnTickCounter = self.burnTickCounter + delta
+		
+		-- 1초마다 틱 데미지 적용
+		if self.burnTickCounter >= 1 then
+			self.burnTickCounter = self.burnTickCounter - 1
+			-- OnHit(attacker, damage, isCritical, attackCount)
+			unit:OnHit(self.burnAttacker, self.burnDamage, false, 1)
+		end
+		
+		-- 지속시간 종료 시 해제
+		if self.burnTimeCounter >= self.burnDuration then
+			self:RemoveBurn()
+		end
+	end
+
+end
