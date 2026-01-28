@@ -126,7 +126,7 @@ script ClearRewardUI extends Component
 			-- 일반 모드
 			-- 하드모드 보상 배율
 			local rewardMultiplier = 1
-			if _GameManager.isHardMode then
+			if _GameManager.currentGameMode == _eGameMode.Hard then
 				rewardMultiplier = 1.5
 			end
 		

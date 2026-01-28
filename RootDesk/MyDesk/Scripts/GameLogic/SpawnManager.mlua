@@ -112,7 +112,8 @@ script SpawnManager extends Logic
 		end
 
 		-- 하드모드면 hard_level 값만큼 레벨 추가
-		if _GameManager.isHardMode then
+		local isHardMode = (_GameManager.currentGameMode == _eGameMode.Hard)
+		if isHardMode then
 			local hardLevelBonus = 0
 			if curStage ~= nil and curStage["hard_level"] ~= nil then
 				hardLevelBonus = tonumber(curStage["hard_level"]) or 0
@@ -124,7 +125,7 @@ script SpawnManager extends Logic
 			stageLevel = 1
 		end
 
-		log("SpawnEnemy at ", stageId, " stageLevel ", stageLevel, " isHardMode ", _GameManager.isHardMode)
+		log("SpawnEnemy at ", stageId, " stageLevel ", stageLevel, " isHardMode ", isHardMode)
 		local buffedUnit = BuffedUnitModel()
 		buffedUnit:Init(unitData)
 		log("SpawnEnemy before buff ", buffedUnit.hp)
