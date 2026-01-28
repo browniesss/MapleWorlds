@@ -98,7 +98,7 @@ script SpawnManager extends Logic
 		local curStage
 		local stageId
 
-		if _GameManager.isEventMode then
+		if (_GameManager.currentGameMode == _eGameMode.Event) then
 			stageId = _GameManager.mapIndex
 			local eventIdValue = tostring(_EventService.currentEventVersion)
 			curStage = _EventService:GetEventStageByIdFromServer(eventIdValue, _GameManager.chapterIndex, _GameManager.mapIndex)

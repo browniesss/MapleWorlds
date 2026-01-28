@@ -1,0 +1,51 @@
+@Logic
+script GameModeDispatcher extends Logic
+
+	-- 현재 유저의 게임 모드 반환
+	method string GetCurrentMode()
+		if _GameManager.currentGameMode == _eGameMode.Event then
+			return "EVENT"
+		elseif _GameManager.currentGameMode == _eGameMode.Matrix then
+			return "MATRIX"
+		elseif _GameManager.currentGameMode == _eGameMode.Tutorial then
+			return "NORMAL"  -- 튜토리얼은 일반 모드처럼 처리
+		end
+		return "NORMAL"
+	end
+
+	-- 게임 시작 (유저 상태에 따라 분기)
+	@ExecSpace("Client")
+	method void StartGame()
+		local mode = self:GetCurrentMode()
+		if mode == "EVENT" then
+			_EventGameService:StartGame()
+		elseif mode == "MATRIX" then
+			_MatrixGameService:StartGame()
+		elseif mode == "NORMAL" then
+			_NormalGameService:StartGame()
+		end
+	end
+
+	-- 스테이지 클리어 (유저 상태에 따라 분기)
+	@ExecSpace("Client")
+	method void OnStageClear()
+		local mode = self:GetCurrentMode()
+		if mode == "EVENT" then
+			_EventGameService:OnStageClear()
+		elseif mode == "NORMAL" then
+			_NormalGameService:OnStageClear()
+		end
+	end
+
+	-- 스테이지 실패 로그 (유저 상태에 따라 분기)
+	@ExecSpace("Server")
+	method void LogStageFail()
+		local mode = self:GetCurrentMode()
+		if mode == "EVENT" then
+			_EventGameService:LogStageFail()
+		elseif mode == "NORMAL" then
+			_NormalGameService:LogStageFail()
+		end
+	end
+
+end

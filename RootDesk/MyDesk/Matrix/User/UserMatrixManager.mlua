@@ -1,0 +1,134 @@
+@Component
+script UserMatrixManager extends Component
+
+	-- 유닛 전체 풀 (선택 페이즈에서 뽑힐 수 있는 전체 유닛)
+	property table unitPool = {}
+
+	-- 유저 보유 유닛 리스트 (최대 8개)
+	property table unitList = {}
+	property integer unitListCount = 0
+	property integer maxUnitListCount = 8
+
+	-- 증강 효과 목록
+	property table matrixEffects = {}
+
+	-- 매트릭스 플레이 시간 (초 단위, 맵 진입 시 초기화)
+	property number playTime = 0
+
+	-- ============================================
+	-- 유닛 풀 (UnitPool)
+	-- ============================================
+
+	method void AddUnitToPool(string unitId, table unitData)
+		self.unitPool[unitId] = unitData
+		log("[UserMatrixManager] UnitPool에 추가: " .. unitId)
+	end
+
+	method table GetUnitFromPool(string unitId)
+		return self.unitPool[unitId]
+	end
+
+	-- ============================================
+	-- 유닛 리스트 (UnitList, 최대 8개)
+	-- ============================================
+
+	method boolean AddUnitToList(string unitId, table unitData)
+		if self:IsUnitListFull() then
+			log("[UserMatrixManager] UnitList가 꽉 참. Swap 필요")
+			return false
+		end
+
+		self.unitList[unitId] = unitData
+		self.unitListCount = self.unitListCount + 1
+		log("[UserMatrixManager] UnitList에 추가: " .. unitId .. " (" .. tostring(self.unitListCount) .. "/" .. tostring(self.maxUnitListCount) .. ")")
+		return true
+	end
+
+	method void SwapUnitInList(string oldUnitId, string newUnitId, table newUnitData)
+		if self.unitList[oldUnitId] == nil then
+			log("[UserMatrixManager] Swap 실패 - 기존 유닛 없음: " .. oldUnitId)
+			return
+		end
+
+		self.unitList[oldUnitId] = nil
+		self.unitList[newUnitId] = newUnitData
+		log("[UserMatrixManager] UnitList Swap: " .. oldUnitId .. " → " .. newUnitId)
+	end
+
+	method table GetUnitFromList(string unitId)
+		return self.unitList[unitId]
+	end
+
+	method boolean IsUnitListFull()
+		return self.unitListCount >= self.maxUnitListCount
+	end
+
+	-- ============================================
+	-- 증강 (Matrix Effects)
+	-- ============================================
+
+	method void AddMatrix(table matrixData)
+		table.insert(self.matrixEffects, matrixData)
+		log("[UserMatrixManager] 증강 추가: " .. tostring(matrixData.name or matrixData.id))
+	end
+
+	method table GetMatrixEffects()
+		return self.matrixEffects
+	end
+
+	-- ============================================
+	-- 라이프사이클
+	-- ============================================
+
+	method void OnMapEnter(Entity enteredMap)
+		if enteredMap.Name == "MatrixStage" then
+			self.playTime = 0
+			self:LoadUnitPoolFromUser()
+
+			-- 맵 진입 시 게임 초기화 (맵이 로드된 후 호출되므로 엔티티 참조가 안전함)
+			if _MatrixGameManager ~= nil then
+				_MatrixGameManager:InitializeGame()
+			end
+		end
+	end
+
+	-- 유저가 보유한 전체 유닛을 unitPool에 로드
+	method void LoadUnitPoolFromUser()
+		self.unitPool = {}
+
+		local userUnitStore = self.Entity.UserUnitStore
+		if userUnitStore == nil then
+			log("[UserMatrixManager] UserUnitStore를 찾을 수 없습니다")
+			return
+		end
+
+		local count = 0
+		for unitId, unitData in pairs(userUnitStore.UserUnitMap) do
+			self.unitPool[unitId] = unitData
+			count = count + 1
+		end
+
+		log("[UserMatrixManager] UnitPool 로드 완료: " .. tostring(count) .. "개 유닛")
+	end
+
+	method void OnMapLeave(Entity leftMap)
+		if leftMap.Name == "MatrixStage" then
+			self:InitMatrixUserData()
+
+			-- 기존 덱 기반으로 시너지 복원
+			if self.Entity.UserSynergyComponent ~= nil then
+				self.Entity.UserSynergyComponent:RestoreSynergyFromDeck()
+			end
+		end
+	end
+
+	method void InitMatrixUserData()
+		self.unitPool = {}
+		self.unitList = {}
+		self.unitListCount = 0
+		self.matrixEffects = {}
+		self.playTime = 0
+		log("[UserMatrixManager] 매트릭스 유저 데이터 초기화 완료")
+	end
+
+end

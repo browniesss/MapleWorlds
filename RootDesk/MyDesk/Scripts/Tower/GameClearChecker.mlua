@@ -10,13 +10,18 @@ script GameClearChecker extends Component
 			return
 		end
 
+		-- Matrix 모드에서는 MatrixGameService가 타워 HP를 체크하므로 여기서는 처리하지 않음
+		if _GameManager.currentGameMode == _eGameMode.Matrix then
+			return
+		end
+
 		local hp = self.Entity.Unit.hp
 
 		if hp <= 0 then
 			self.isClear = true
 
 			-- 이벤트 모드와 일반 모드에 따라 다른 클리어 메서드 호출
-			if _GameManager.isEventMode then
+			if _GameManager.currentGameMode == _eGameMode.Event then
 				_GameManager:EventStageClear()
 			else
 				_GameManager:StageClear()

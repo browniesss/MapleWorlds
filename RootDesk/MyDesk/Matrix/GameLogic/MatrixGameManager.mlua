@@ -1,0 +1,632 @@
+@Logic
+script MatrixGameManager extends Logic
+
+	property Entity matrixUI = nil
+
+	property Entity ingameUI = nil
+
+	property Entity matrixSelectUI = nil
+
+	property Entity userDeckUI = nil
+
+	property Entity ingameInfoUI = nil
+
+	property Entity unitShop = nil
+
+	property Entity skillSlots = nil
+
+	property Entity coinBar = nil
+
+	property Entity joystick = nil
+
+	property Entity playerHPBar = nil
+
+	property Entity enemyHPBar = nil
+
+	property Entity timeText = nil
+
+	property Entity giveUpButton = nil
+
+	property Entity userNameText = nil
+
+	property Entity mapText = nil
+
+	property Entity completePopup = nil
+
+	@Sync
+	property boolean isPlaying = false
+
+	@Sync
+	property integer playStartTs = 0
+
+	@Sync
+	property integer timer = 0
+
+	@Sync
+	property boolean isPaused = false
+
+	property string mapPath = "/maps/MatrixStage"
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		-- UUID 기반 참조는 property에서 이미 설정됨
+		-- 하위 요소들은 동적으로 가져옴
+		self:RefreshUIReferences()
+	end
+
+	@ExecSpace("Client")
+	method void StartMatrixGame()
+		-- 로딩 화면 표시
+		if _LoadingManager ~= nil then
+			_LoadingManager:Show()
+		end
+
+		-- 프리로드 에셋
+		local ruids = self:GetPreLoadAssetRuid()
+		_ResourceService:PreloadAsync(ruids, function()
+			-- 텔레포트만 실행 (InitializeGame은 UserMatrixManager.OnMapEnter에서 호출)
+			_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "MatrixStage")
+		end)
+	end
+
+	@ExecSpace("Client")
+	method void InitializeGame()
+		-- 게임 상태 설정
+		_GameManager.currentGameMode = _eGameMode.Matrix
+		self.isPlaying = true
+		self.isPaused = false
+		self.playStartTs = DateTime.UtcNow.Elapsed
+
+		-- 서버에도 isPlaying 상태 동기화
+		self:SetPlayingStateOnServer(true)
+
+		-- 시너지 카운트 초기화 (기존 스테이지 데이터 제거)
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.UserSynergyComponent ~= nil then
+			user.UserSynergyComponent:ResetCountMapFromClient()
+		end
+
+		-- MatrixTimerService 초기화
+		if _MatrixTimerService ~= nil then
+			_MatrixTimerService:Reset()
+		end
+
+		-- UI 참조 다시 가져오기 (텔레포트 후 참조가 변경될 수 있음)
+		self:RefreshUIReferences()
+
+		-- 플레이어 캐릭터 설정
+		self:SetPlayerCharacter()
+
+		-- UI 활성화
+		self:EnableUI()
+
+		-- 타이머 시작
+		self:SetTimer()
+
+		-- 로딩 화면 숨김
+		if _LoadingManager ~= nil then
+			_LoadingManager:Hide()
+		end
+
+		-- MatrixGameService에서 게임 초기화 (라운드 시작)
+		if _MatrixGameService ~= nil then
+			_MatrixGameService:InitializeGameFromManager()
+		end
+	end
+
+	@ExecSpace("Server")
+	method void SetPlayingStateOnServer(boolean playing)
+		self.isPlaying = playing
+		if playing then
+			_GameManager.currentGameMode = _eGameMode.Matrix
+			self.playStartTs = DateTime.UtcNow.Elapsed
+		else
+			_GameManager.currentGameMode = _eGameMode.Normal
+		end
+	end
+
+	method void RefreshUIReferences()
+		-- MatrixUI 최상위
+		self.matrixUI = _EntityService:GetEntityByPath("/ui/MatrixUI")
+		if self.matrixUI == nil then
+			log("[MatrixGameManager] MatrixUI를 찾을 수 없습니다")
+			return
+		end
+		
+		-- IngameUI, MatrixSelectUI
+		self.ingameUI = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI")
+		self.matrixSelectUI = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI")
+		
+		-- IngameUI 하위 요소들
+		self.userDeckUI = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/UserDeckUI")
+		self.ingameInfoUI = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/IngameInfoUI")
+		
+		-- UserDeckUI 하위
+		self.unitShop = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/UserDeckUI/UnitShop")
+		self.skillSlots = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/UserDeckUI/SkillSlots")
+		self.coinBar = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/UserDeckUI/User_Coin_Bar")
+		
+		-- IngameInfoUI 하위
+		self.joystick = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/IngameInfoUI/UIJoystick")
+		self.playerHPBar = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/IngameInfoUI/Player_HP_bar")
+		self.enemyHPBar = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/IngameInfoUI/EnemyHealthBar")
+		self.timeText = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/IngameInfoUI/CenterUI/TimeText")
+		self.giveUpButton = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/IngameInfoUI/GiveUpButton")
+		self.userNameText = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/IngameInfoUI/UserInfo/UserName")
+		self.mapText = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/IngameInfoUI/UserInfo/MapText")
+
+		-- CompletePopup
+		self.completePopup = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/CompletePopup")
+
+		log("[MatrixGameManager] UI 참조 갱신 완료")
+	end
+
+	@ExecSpace("Client")
+	method void EnableUI()
+		-- 로비 UI 비활성화
+		local mainLobbyUI = _EntityService:GetEntityByPath("/ui/MainLobbyUI")
+		if mainLobbyUI ~= nil then
+			mainLobbyUI.Enable = false
+			mainLobbyUI.Visible = false
+		end
+
+		-- LobbyInfoUI 비활성화 (스테이지 선택 UI)
+		local lobbyInfoUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI")
+		if lobbyInfoUI ~= nil then
+			lobbyInfoUI.Enable = false
+		end
+
+		-- 뱃지 버튼 비활성화
+		local lobbyBadgeButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton")
+		if lobbyBadgeButton ~= nil then
+			lobbyBadgeButton.Enable = false
+		end
+
+		-- 모바일 환경 조이스틱/점프버튼 비활성화
+		if Environment:IsMobilePlatform() then
+			local lobbyJoyStick = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIJoystick")
+			local lobbyJumpButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/JumpButton")
+
+			if lobbyJoyStick ~= nil then
+				lobbyJoyStick.Enable = false
+			end
+			if lobbyJumpButton ~= nil then
+				lobbyJumpButton.Enable = false
+			end
+		end
+
+		-- 기존 인게임 UI 비활성화 (단축키 충돌 방지)
+		local ingameShopGroup = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group")
+		if ingameShopGroup ~= nil then
+			ingameShopGroup.Enable = false
+		end
+
+		local ingameInfoUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group")
+		if ingameInfoUI ~= nil then
+			ingameInfoUI.Enable = false
+		end
+
+		-- MatrixUI 전체 활성화
+		if self.matrixUI ~= nil then
+			self.matrixUI.Enable = true
+			self.matrixUI.Visible = true
+		end
+		
+		-- IngameUI 활성화
+		if self.ingameUI ~= nil then
+			self.ingameUI.Enable = true
+			self.ingameUI.Visible = true
+		end
+
+		-- CompletePopup 비활성화 (이전 게임의 팝업 초기화)
+		self:HideCompletePopup()
+
+		-- MatrixSelectUI 비활성화 (증강 선택 시에만 활성화)
+		if self.matrixSelectUI ~= nil then
+			self.matrixSelectUI.Enable = false
+			self.matrixSelectUI.Visible = false
+		end
+		
+		-- 조이스틱 (모바일 환경)
+		if self.joystick ~= nil then
+			if Environment:IsMobilePlatform() then
+				self.joystick.Enable = true
+				self.joystick.Visible = true
+			else
+				self.joystick.Enable = false
+				self.joystick.Visible = false
+			end
+		end
+		
+		-- 닉네임 설정
+		if self.userNameText ~= nil then
+			self.userNameText.TextComponent.Text = _UserService.LocalPlayer.PlayerComponent.Nickname
+		end
+		
+		-- 맵 이름 설정
+		if self.mapText ~= nil then
+			self.mapText.TextComponent.Text = "매트릭스 모드"
+		end
+		
+		-- HP 바 연결
+		self:SetupHPBars()
+		
+		-- 상점 초기화
+		self:InitializeShop()
+		
+		-- 스킬 슬롯 초기화
+		self:InitializeSkillSlots()
+	end
+
+	method void SetupHPBars()
+		local playerTower = _EntityService:GetEntityByPath(self.mapPath .. "/PlayerTower")
+		local enemyTower = _EntityService:GetEntityByPath(self.mapPath .. "/EnemyTower")
+		
+		if self.playerHPBar ~= nil and playerTower ~= nil then
+			if self.playerHPBar.OurHealthBar ~= nil then
+				self.playerHPBar.OurHealthBar.tower = playerTower
+			end
+		end
+		
+		if self.enemyHPBar ~= nil and enemyTower ~= nil then
+			if self.enemyHPBar.EnemyHealthBar ~= nil then
+				self.enemyHPBar.EnemyHealthBar.tower = enemyTower
+			end
+		end
+	end
+
+	method void InitializeShop()
+		if self.unitShop ~= nil and self.unitShop.MatrixExtendUnitShop ~= nil then
+			self.unitShop.MatrixExtendUnitShop:InitShopEmpty()
+		end
+	end
+
+	method void InitializeSkillSlots()
+		if self.skillSlots ~= nil then
+			for i = 1, 2 do
+				local child = self.skillSlots.Children[i]
+				if child ~= nil and child.SkillSlot ~= nil then
+					child.SkillSlot:Initialize()
+				end
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void SetPlayerCharacter()
+		local player = _UserService.LocalPlayer.UserSkillDeck
+		
+		local skill1 = _SkillService:GetSkillByIDFromClient(player.userSkillDeck[1])
+		local skill2 = _SkillService:GetSkillByIDFromClient(player.userSkillDeck[2])
+		
+		_UserService.LocalPlayer.PlayerCharacter:SetSkill(skill1, skill2)
+	end
+
+	method table GetPreLoadAssetRuid()
+		local ruids = {}
+		local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
+		
+		for i = 1, 8 do
+			local unitData = _UnitService:GetUnitByIDFromClient(playerDeck.userDeck[i])
+			if unitData ~= nil then
+				local skillData = _SkillService:GetSkillByIDFromClient(unitData["skillID"])
+				local spawnSkillData = _SkillService:GetSkillByIDFromClient(unitData["spawnSkill"])
+		
+				if skillData ~= nil then
+					local ruidString = skillData["ruids"] or ""
+					for ruid in string.gmatch(ruidString, "([^,]+)") do
+						table.insert(ruids, ruid)
+					end
+				end
+		
+				if spawnSkillData ~= nil then
+					local spawnSkillruidString = spawnSkillData["ruids"] or ""
+					for ruid in string.gmatch(spawnSkillruidString, "([^,]+)") do
+						table.insert(ruids, ruid)
+					end
+				end
+			end
+		end
+		
+		return ruids
+	end
+
+	@ExecSpace("Server")
+	method void SetTimer()
+		self.timer = _TimerService:SetTimerRepeat(function()
+			if self.isPaused then
+				return
+			end
+		
+			local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
+			self:SetTimeText(playTime)
+		end, 1.0, 0)
+	end
+
+	@ExecSpace("Client")
+	method void SetTimeText(integer playTime)
+		if self.timeText ~= nil then
+			self.timeText.TextComponent.Text = self:FormatMMSS(playTime / 1000)
+		end
+	end
+
+	method string FormatMMSS(number time)
+		local s = math.max(0, math.floor(time))
+		local m = math.floor(s / 60)
+		local ss = s % 60
+		
+		return string.format("%d:%02d", m, ss)
+	end
+
+	@ExecSpace("Client")
+	method void PauseGame()
+		self.isPaused = true
+		
+		if _MatrixTimerService ~= nil then
+			_MatrixTimerService:Pause()
+		end
+	end
+
+	@ExecSpace("Client")
+	method void ResumeGame()
+		self.isPaused = false
+		
+		if _MatrixTimerService ~= nil then
+			_MatrixTimerService:Resume()
+		end
+	end
+
+	@ExecSpace("Client")
+	method void ShowMatrixSelectUI()
+		self:PauseGame()
+		
+		if self.matrixSelectUI ~= nil then
+			self.matrixSelectUI.Enable = true
+			self.matrixSelectUI.Visible = true
+		end
+	end
+
+	@ExecSpace("Client")
+	method void HideMatrixSelectUI()
+		if self.matrixSelectUI ~= nil then
+			self.matrixSelectUI.Enable = false
+			self.matrixSelectUI.Visible = false
+		end
+
+		self:ResumeGame()
+	end
+
+	@ExecSpace("Client")
+	method void ShowCompletePopup()
+		self:PauseGame()
+
+		if self.completePopup ~= nil then
+			self.completePopup.Enable = true
+			self.completePopup.Visible = true
+		end
+	end
+
+	@ExecSpace("Client")
+	method void HideCompletePopup()
+		if self.completePopup ~= nil then
+			self.completePopup.Enable = false
+			self.completePopup.Visible = false
+		end
+	end
+
+	@ExecSpace("Client")
+	method void GameEnd()
+		self.isPlaying = false
+		self.isPaused = false
+
+		-- 서버에도 isPlaying 상태 동기화
+		self:SetPlayingStateOnServer(false)
+
+		-- 몬스터 도감 킬 데이터 동기화
+		if _MonsterCodexService ~= nil then
+			_MonsterCodexService:SyncKillDataToServer()
+		end
+
+		-- MatrixUI 전체 비활성화
+		if self.matrixUI ~= nil then
+			self.matrixUI.Enable = false
+			self.matrixUI.Visible = false
+		end
+
+		-- 하위 UI도 비활성화
+		if self.ingameUI ~= nil then
+			self.ingameUI.Enable = false
+			self.ingameUI.Visible = false
+		end
+
+		if self.matrixSelectUI ~= nil then
+			self.matrixSelectUI.Enable = false
+			self.matrixSelectUI.Visible = false
+		end
+		
+		-- 오브젝트 정리
+		self:ClearObjects()
+		
+		-- 타이머 정리
+		self:ClearTimer()
+		
+		-- MatrixTimerService 정리
+		if _MatrixTimerService ~= nil then
+			_MatrixTimerService:Reset()
+		end
+
+		-- MatrixUnitSelectService 정리
+		if _MatrixUnitSelectService ~= nil then
+			_MatrixUnitSelectService:Reset()
+		end
+
+		-- 시너지 카운트 초기화 (서버)
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.UserSynergyComponent ~= nil then
+			user.UserSynergyComponent:ResetCountMapFromClient()
+		end
+
+		-- 메소 초기화 (서버)
+		self:ClearMesoOnServer()
+
+		-- 스킬 쿨타임 초기화 (클라이언트)
+		self:ClearSkillCooltime()
+
+		-- 타워 초기화
+		self:ResetTowers()
+
+		-- 게임 모드 초기화
+		_GameManager.currentGameMode = _eGameMode.Normal
+	end
+
+	method void ResetTowers()
+		local playerTower = _EntityService:GetEntityByPath(self.mapPath .. "/PlayerTower")
+		local enemyTower = _EntityService:GetEntityByPath(self.mapPath .. "/EnemyTower")
+
+		-- 플레이어 타워 초기화
+		if playerTower ~= nil and playerTower.Unit ~= nil then
+			local defaultHP = 10000  -- 기본 HP 값
+			playerTower.Unit.maxHP = defaultHP
+			playerTower.Unit.hp = defaultHP
+			playerTower.Unit.curState = "stand"
+		end
+
+		-- 적 타워 초기화
+		if enemyTower ~= nil and enemyTower.Unit ~= nil then
+			local defaultHP = 10000  -- 기본 HP 값
+			enemyTower.Unit.maxHP = defaultHP
+			enemyTower.Unit.hp = defaultHP
+			enemyTower.Unit.curState = "stand"
+		end
+
+		log("[MatrixGameManager] 타워 HP 초기화 완료")
+	end
+
+	@ExecSpace("Server")
+	method void ClearMesoOnServer()
+		local mesoWallet = _EntityService:GetEntityByPath(self.mapPath .. "/userWallet")
+		if mesoWallet ~= nil and mesoWallet.MesoWallet ~= nil then
+			mesoWallet.MesoWallet:SetMeso(0)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void ClearSkillCooltime()
+		local skillSlots = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group/SkillSlots")
+		if skillSlots == nil then
+			return
+		end
+
+		for i = 1, 2 do
+			local slot = skillSlots.Children[i]
+			if slot ~= nil and slot.SkillSlot ~= nil then
+				slot.SkillSlot.remainingTime = 0
+				if slot.Children[2] ~= nil and slot.Children[2].SpriteGUIRendererComponent ~= nil then
+					slot.Children[2].SpriteGUIRendererComponent.FillAmount = 0
+				end
+			end
+		end
+	end
+
+	@ExecSpace("Server")
+	method void ClearTimer()
+		self.playStartTs = 0
+		if self.timer ~= 0 then
+			_TimerService:ClearTimer(self.timer)
+			self.timer = 0
+		end
+	end
+
+	method void ClearObjects()
+		local myMonsterList = _EntityService:GetEntityByPath(self.mapPath .. "/MyMonsterList")
+		local enemyList = _EntityService:GetEntityByPath(self.mapPath .. "/EnemyList")
+		local skillParent = _EntityService:GetEntityByPath(self.mapPath .. "/SkillParent")
+		local projectileParent = _EntityService:GetEntityByPath(self.mapPath .. "/ProjectileParent")
+		
+		-- 첫 번째 자식(스폰 포인트)은 유지
+		self:DestroyChildren(myMonsterList, true)
+		self:DestroyChildren(enemyList, true)
+		
+		-- 전부 삭제
+		self:DestroyChildren(skillParent, false)
+		self:DestroyChildren(projectileParent, false)
+		
+		-- 시간 텍스트 초기화
+		if self.timeText ~= nil then
+			self.timeText.TextComponent.Text = "0:00"
+		end
+	end
+
+	@ExecSpace("Server")
+	method void DestroyChildren(Entity entity, boolean keepFirst)
+		if not entity or not entity.Children then return end
+		local targets = {}
+		for idx, child in ipairs(entity.Children) do
+			if not keepFirst or idx ~= 1 then
+				table.insert(targets, child)
+			end
+		end
+		for _, e in ipairs(targets) do
+			if e and e.Destroy then
+				e:Destroy()
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void ReturnToLobby()
+		-- 게임 종료 처리
+		self:GameEnd()
+
+		-- MatrixUI 비활성화
+		if self.matrixUI ~= nil then
+			self.matrixUI.Enable = false
+			self.matrixUI.Visible = false
+		end
+
+		-- 로딩 화면 표시
+		if _LoadingManager ~= nil then
+			_LoadingManager:Show()
+		end
+
+		-- 로비로 이동
+		_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "MainLobbyMap")
+
+		-- 로비 UI 활성화
+		local mainLobbyUI = _EntityService:GetEntityByPath("/ui/MainLobbyUI")
+		if mainLobbyUI ~= nil then
+			mainLobbyUI.Enable = true
+			mainLobbyUI.Visible = true
+		end
+
+		-- LobbyInfoUI 활성화
+		local lobbyInfoUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI")
+		if lobbyInfoUI ~= nil then
+			lobbyInfoUI.Enable = true
+		end
+
+		-- 뱃지 버튼 활성화
+		local lobbyBadgeButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton")
+		if lobbyBadgeButton ~= nil then
+			lobbyBadgeButton.Enable = true
+		end
+
+		-- 모바일 환경 조이스틱/점프버튼 활성화
+		if Environment:IsMobilePlatform() then
+			local lobbyJoyStick = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIJoystick")
+			local lobbyJumpButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/JumpButton")
+
+			if lobbyJoyStick ~= nil then
+				lobbyJoyStick.Enable = true
+			end
+			if lobbyJumpButton ~= nil then
+				lobbyJumpButton.Enable = true
+			end
+		end
+	end
+
+	method string GetMapPath()
+		return self.mapPath
+	end
+
+end

@@ -55,25 +55,73 @@ script UserSynergyComponent extends Component
 		if self.countMap[key] == nil then
 			self.countMap[key] = 0
 		end
-		
+
 		self.countMap[key] += 1
-		
+
 		if key == 102 then
 			log("Cygnus synergy ", self.countMap[102])
 		end
 	end
 
+	@ExecSpace("Server")
+	method void AddCountFromClient(string unitId)
+		local unit = _UnitService:GetUnitByIDFromServer(unitId)
+		if unit == nil then
+			return
+		end
+
+		local syncCols = {"jobId", "countryId", "regionId", "LimitBreakCountryId", "LimitBreakJobId"}
+		local buffedUnit = BuffedUnitModel()
+		buffedUnit:Init(unit)
+
+		for i, col in ipairs(syncCols) do
+			if buffedUnit[col] == nil then
+				continue
+			end
+
+			if buffedUnit[col] == 0 then
+				continue
+			end
+
+			self:AddCount(buffedUnit[col])
+		end
+	end
+
+	@ExecSpace("Server")
+	method void ResetCountMapFromClient()
+		for k, v in pairs(self.countMap) do
+			self.countMap[k] = 0
+		end
+	end
+
+	@ExecSpace("Server")
+	method void RestoreSynergyFromDeck()
+		local userDeck = self.Entity.UserDeck
+		if userDeck ~= nil and userDeck.userDeck ~= nil then
+			self:SET_SYNERGY(userDeck.userDeck)
+		end
+	end
+
 	@ExecSpace("ClientOnly")
 	method void OnSyncProperty(string name, any value)
-		local callback = self.synergyTable[name]
-		
-		if callback ~= nil then
-			callback()
+		local callbacks = self.synergyTable[name]
+
+		if callbacks ~= nil then
+			for key, callback in pairs(callbacks) do
+				if callback ~= nil then
+					callback()
+				end
+			end
 		end
 	end
 
 	method void AddSynercyCallback(string name, any callback)
-		self.synergyTable[name] = callback
+		if self.synergyTable[name] == nil then
+			self.synergyTable[name] = {}
+		end
+
+		local callbackKey = tostring(callback)
+		self.synergyTable[name][callbackKey] = callback
 	end
 
 end

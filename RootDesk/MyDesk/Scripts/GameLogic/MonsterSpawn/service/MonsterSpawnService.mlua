@@ -67,7 +67,7 @@ script MonsterSpawnService extends Component
 
 	method void LoopGroupSummon(number group)
 		local group_data
-		if _GameManager.isEventMode then
+		if (_GameManager.currentGameMode == _eGameMode.Event) then
 			group_data = _eventGroupRepo:GetGroupById(group)
 		else
 			group_data = _groupRepo:GetGroupById(group)
@@ -142,7 +142,7 @@ script MonsterSpawnService extends Component
 	@ExecSpace("ClientOnly")
 	method void SetStage(integer targetChapter, integer targetStage)
 		local target
-		if _GameManager.isEventMode then
+		if (_GameManager.currentGameMode == _eGameMode.Event) then
 			target = tostring(targetStage)
 		else
 			target = tostring(targetStage + 100 * targetChapter)
@@ -150,7 +150,7 @@ script MonsterSpawnService extends Component
 
 		local settingFunction = function()
 			local patterns
-			if _GameManager.isEventMode then
+			if (_GameManager.currentGameMode == _eGameMode.Event) then
 				patterns = _eventPatternRepo:GetPatternByStage(target)
 			else
 				patterns = _patternRepo:GetPatternByStage(target)
@@ -164,7 +164,7 @@ script MonsterSpawnService extends Component
 
 			for i, pattern in ipairs(patterns) do
 				if pattern.type == 'LOOP' or pattern.type == 'EVENT_LOOP' then
-					local setting = _settingRepo:GetSettingByTypeAndIdForEvent(pattern.type, pattern.setting, _GameManager.isEventMode)
+					local setting = _settingRepo:GetSettingByTypeAndIdForEvent(pattern.type, pattern.setting, (_GameManager.currentGameMode == _eGameMode.Event))
 					if setting ~= nil then
 						local id = _TimerService:SetTimerRepeat(
 							function()
@@ -182,9 +182,9 @@ script MonsterSpawnService extends Component
 				end
 
 				if pattern.type == 'EVENT' then
-					local setting = _settingRepo:GetSettingByTypeAndIdForEvent('EVENT', pattern.setting, _GameManager.isEventMode)
+					local setting = _settingRepo:GetSettingByTypeAndIdForEvent('EVENT', pattern.setting, (_GameManager.currentGameMode == _eGameMode.Event))
 					local group_data
-					if _GameManager.isEventMode then
+					if (_GameManager.currentGameMode == _eGameMode.Event) then
 						group_data = _eventGroupRepo:GetGroupById(pattern.group)
 					else
 						group_data = _groupRepo:GetGroupById(pattern.group)
@@ -240,7 +240,7 @@ script MonsterSpawnService extends Component
 
 		local user = _UserService:GetUserEntityByUserId(senderUserId)
 
-		if _GameManager.isEventMode then
+		if (_GameManager.currentGameMode == _eGameMode.Event) then
 			local userStage = user.UserStage
 			self.stageId = userStage.eventSelectStage
 		else

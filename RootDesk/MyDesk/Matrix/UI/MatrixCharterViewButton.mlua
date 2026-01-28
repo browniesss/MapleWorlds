@@ -1,0 +1,16 @@
+@Component
+script MatrixCharterViewButton extends Component
+
+	@Sync
+	property integer charterIndex = 0
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		if self.charterIndex <= 0 then
+			return
+		end
+		
+		_MatrixUnitSelectService:SelectUnitByIndex(self.charterIndex)
+	end
+
+end

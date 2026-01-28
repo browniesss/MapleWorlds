@@ -37,7 +37,13 @@ script UnitShopItem extends Component
 	property Entity effectEntity = nil
 
 	@Sync
+	property Entity keySprite = nil
+
+	@Sync
 	property integer price = 0
+
+	@Sync
+	property boolean isEmpty = false
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
@@ -52,20 +58,48 @@ script UnitShopItem extends Component
 		self.unitAvartarRenderer = self.Entity.Children[4]
 		self.priceLabel = self.Entity.Children[5]
 		self.effectEntity = self.Entity.Children[1]
+		self.keySprite = self.Entity.Children[6]
 	end
 
 	@ExecSpace("Client")
 	method void Initialize(table unitData, integer id, UnitShop shop, table skillData, integer cost)
 		self.unitData = unitData
 		self.id = id
+		self.shopItemIndex = id
 		self.shop = shop
 		self.skillData = skillData
 		self.price = cost
-		
+		self.isEmpty = false
+
 		self:SetEntity()
 		self:SetSprite()
 		self:SetLabel()
 		self:SetEffect()
+
+		-- 모든 요소 활성화
+		self.effectEntity.Visible = true
+		self.priceSprite.Visible = true
+		self.priceLabel.Visible = true
+	end
+
+	@ExecSpace("Client")
+	method void InitializeEmpty(integer id, UnitShop shop)
+		self.id = id
+		self.shopItemIndex = id
+		self.shop = shop
+		self.isEmpty = true
+		self.unitData = {}
+		self.skillData = {}
+
+		self:SetEntity()
+
+		-- KeySprite만 활성화하고 나머지 비활성화
+		self.effectEntity.Visible = false
+		self.unitSprite.Visible = false
+		self.priceSprite.Visible = false
+		self.unitAvartarRenderer.Visible = false
+		self.priceLabel.Visible = false
+		self.keySprite.Visible = true
 	end
 
 	@ExecSpace("Client")
@@ -120,6 +154,11 @@ script UnitShopItem extends Component
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
+		-- Empty 상태면 무시
+		if self.isEmpty then
+			return
+		end
+
 		-- 튜토리얼 스텝 전환 쿨다운 중에는 터치 무시
 		if _TutorialService ~= nil and _TutorialService.isStepCooldown then
 			return
@@ -147,16 +186,21 @@ script UnitShopItem extends Component
 
 	@EventSender("Self")
 	handler HandleUITouchDownEvent(UITouchDownEvent event)
+		-- Empty 상태면 무시
+		if self.isEmpty then
+			return
+		end
+
 		if event.TouchId ~= -2 then
 			return
-		end 
-		
+		end
+
 		local iconTransform = self.frameSprite.UITransformComponent
 		local iconPos = iconTransform.anchoredPosition
-		
+
 		-- self.unitInfoUI.UITransformComponent.anchoredPosition = Vector2(iconPos.x, iconPos.y + 150)
 		self.unitInfoUI.UnitInfo:UpdateInfo(self.skillData, self.unitData)
-		
+
 		self.unitInfoUI.Visible = true
 	end
 
@@ -172,9 +216,30 @@ script UnitShopItem extends Component
 
 	@EventSender("Service", "InputService")
 	handler HandleKeyDownEvent(KeyDownEvent event)
+		-- Entity가 비활성화 상태면 무시 (Service 이벤트는 Enable과 무관하게 수신됨)
+		if not self.Entity.Enable then
+			return
+		end
+
+		-- shop이 nil이면 무시
+		if self.shop == nil then
+			return
+		end
+
+		-- Empty 상태면 무시
+		if self.isEmpty then
+			return
+		end
+
 		local isKeyDown = false
 
-		if not _GameManager.isPlaying then
+		-- 일반 모드 또는 매트릭스 모드 체크
+		local isPlaying = _GameManager.isPlaying
+		if _MatrixGameManager ~= nil and _MatrixGameManager.isPlaying then
+			isPlaying = true
+		end
+
+		if not isPlaying then
 			return
 		end
 

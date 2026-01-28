@@ -1,0 +1,73 @@
+@Component
+script MatrixSynergyUIManager extends Component
+
+	property Entity SynergyScrollView = nil
+
+	property table SynergyItemTable = {}
+
+	method SynergyDataItem GetSynergyDataItem(string id)
+		return _SynergyRepo:GetSynergyData(tonumber(id))
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.SynergyScrollView = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/MatrixSynergyUI/SynergyScroll_Layout")
+
+		_UserService.LocalPlayer.UserSynergyComponent:AddSynercyCallback("countMap", function() self:SetSynergyItem() end)
+
+		self:SetSynergyItem()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void SetSynergyItem()
+		if self.SynergyScrollView == nil then
+			return
+		end
+		
+		for k, v in pairs(self.SynergyItemTable) do
+			_EntityService:Destroy(self.SynergyItemTable[k])
+		end
+		self.SynergyItemTable = {}
+		
+		local activeSynergy = _UserService.LocalPlayer.UserSynergyComponent.countMap
+		
+		local keys = {}
+		for k, v in pairs(activeSynergy) do
+			table.insert(keys, {id = k, count = v})
+		end
+		
+		table.sort(keys, function(a, b)
+			if _SynergyRepo:IsSynergyActive(a.id, a.count) == false and _SynergyRepo:IsSynergyActive(b.id, b.count) then
+				return false
+			elseif _SynergyRepo:IsSynergyActive(a.id, a.count) and _SynergyRepo:IsSynergyActive(b.id, b.count) == false then
+				return true
+			else
+				if a.count == b.count then
+					return a.id < b.id
+				else
+					return a.count > b.count
+				end
+			end
+		end)
+		
+		for i, k in ipairs(keys) do
+			if k.count == 0 then
+				continue
+			end
+		
+			local synergyItem = _SpawnService:SpawnByModelId("model://cc4855ac-ec8c-49a4-a052-f7d62733133a", "SynergyItem", Vector3.zero, self.SynergyScrollView)
+		
+			synergyItem.SynergySettingItem:SetSynergyItem(self:GetSynergyDataItem(k.id), k.count)
+		
+			self.SynergyItemTable[k.id] = synergyItem
+		end
+	end
+
+	method void Reset()
+		for k, v in pairs(self.SynergyItemTable) do
+			_EntityService:Destroy(self.SynergyItemTable[k])
+		end
+		self.SynergyItemTable = {}
+	end
+
+end

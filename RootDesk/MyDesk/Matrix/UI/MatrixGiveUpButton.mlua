@@ -1,0 +1,11 @@
+@Component
+script MatrixGiveUpButton extends Component
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		if _MatrixGameManager ~= nil then
+			_MatrixGameManager:ReturnToLobby()
+		end
+	end
+
+end

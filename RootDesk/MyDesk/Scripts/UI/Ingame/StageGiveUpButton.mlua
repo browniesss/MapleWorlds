@@ -16,7 +16,7 @@ script StageGiveUpButton extends Component
 			local chapterIndex = _GameManager.chapterIndex
 			local mapIndex = _GameManager.mapIndex
 			wasTutorialMode = (chapterIndex == 0 and mapIndex == 0)
-			isEventMode = _GameManager.isEventMode
+			isEventMode = (_GameManager.currentGameMode == _eGameMode.Event)
 		end
 
 		_GameManager:GameEnd()

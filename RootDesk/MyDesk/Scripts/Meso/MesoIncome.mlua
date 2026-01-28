@@ -18,45 +18,73 @@ script MesoIncome extends Component
 	@Sync
 	property number currentTs = 0
 
+	property any gameManager = nil
+
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
+		-- 맵에 따라 gameManager 설정
+		local currentMap = self.Entity.CurrentMap
+		if currentMap ~= nil then
+			local mapPath = currentMap.Path
+			if string.find(mapPath, "MatrixStage") then
+				self.gameManager = _MatrixGameManager
+			else
+				self.gameManager = _GameManager
+			end
+		else
+			self.gameManager = _GameManager
+		end
+
 		local dataSet = _DataService:GetTable("meso")
 		for i = 1, dataSet:GetRowCount() do
 			local item = {}
-			
+
 			item["id"] = tonumber(dataSet:GetCell(i,"id"))
 			item["init"] = tonumber(dataSet:GetCell(i,"init"))
 			item["income"] = tonumber(dataSet:GetCell(i,"income"))
-			
+
 			self.incomeData[item["id"]] = item
-		end        
-		
+		end
+
 		self.UIController:UpdateMesoIncome(self.incomeData[1]["income"])
-		
+
 		self.UserWallet:SetMeso(self.incomeData[1]["init"])
-		
+
 		self.nextUpdateTs = self.incomeCooltime
 		self.currentTs = 0
 	end
 
 	@ExecSpace("ServerOnly")
 	method void OnUpdate(number delta)
-		if not _GameManager.isPlaying then
-			self.UserWallet:SetMeso(0)
+		-- 게임이 시작되지 않았으면 메소 수입 중단 (단, 기존 메소는 유지)
+		if self.gameManager == nil or not self.gameManager.isPlaying then
 			return
 		end
-		
+
+		-- MatrixAugmentService 일시정지 연동: 증강/유닛 선택 중이면 메소 수입 중단
+		if _MatrixAugmentService ~= nil and _MatrixAugmentService.isGamePaused then
+			return
+		end
+
 		self.currentTs = self.currentTs + delta
 		if self.currentTs > self.nextUpdateTs then
 			self.nextUpdateTs = self.nextUpdateTs + self.incomeCooltime
-			
+
 			self:AddMeso()
 		end
 	end
 
 	@ExecSpace("Server")
 	method void AddMeso()
-		self.UserWallet:AddMeso(self.incomeData[1]["income"])
+		local baseIncome = self.incomeData[1]["income"]
+		local finalIncome = baseIncome
+
+		-- MatrixAugmentService 배율 적용
+		if _MatrixAugmentService ~= nil and _MatrixAugmentService.mesoIncomeMultiplier ~= 1.0 then
+			finalIncome = math.floor(baseIncome * _MatrixAugmentService.mesoIncomeMultiplier)
+		end
+
+		self.UserWallet:AddMeso(finalIncome)
 	end
 
 	@ExecSpace("ServerOnly")
@@ -77,11 +105,11 @@ script MesoIncome extends Component
 			init=meso,
 			income=income
 		}
-		
+
 		self.UserWallet:SetMeso(meso)
 		self.UIController:UpdateMesoIncome(income)
-		
-		
+
+
 		self.nextUpdateTs = self.incomeCooltime
 		self.currentTs = 0
 	end
