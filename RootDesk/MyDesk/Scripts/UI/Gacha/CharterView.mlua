@@ -9,28 +9,40 @@ script CharterView extends Component
 
 	property Entity EffectEntity = nil
 
+	property Entity SynergyIcon = nil
+
 	method void InitGacha(table unitData)
 		self.EffectEntity.Visible = false
-		
+
 		-- 해당 슬롯에 장착한 유닛이 없을 경우
 		if unitData == nil then
 			self.Monster.Visible = false
 			self.Name.Visible = false
 			self.Charter.Visible = false
+			-- SynergyIcon 숨기기
+			if self.SynergyIcon ~= nil then
+				self.SynergyIcon.Enable = false
+			end
 		else
 			self.Monster.Visible = true
 			self.Name.Visible = true
 			self.Charter.Visible = true
 			-- 일반 프레임
 			self.Name.TextComponent.Text = unitData['name']
-			
+
+			-- SynergyIcon 설정
+			if self.SynergyIcon ~= nil and self.SynergyIcon.SynergyComponentItem ~= nil then
+				self.SynergyIcon.Enable = true
+				self.SynergyIcon.SynergyComponentItem:SetSynergyData(unitData)
+			end
+
 			if unitData['isUsableCharacter'] == 0 then
 				self.Charter.Visible = false
 				self.Monster.SpriteGUIRendererComponent.ImageRUID = unitData['ImageRUID']
 			else
 				self.Monster.Visible = false
 				self:SetCostume(unitData)
-		
+
 				if unitData['spawnSkill'] == "" then
 					self.EffectEntity.Visible = false
 				else

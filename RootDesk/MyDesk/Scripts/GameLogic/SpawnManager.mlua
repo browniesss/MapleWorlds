@@ -77,7 +77,10 @@ script SpawnManager extends Logic
 		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, userUnitModel.level, userUnitModel.limitBreak)
 		user.UserBreakLimitSkillClient:ActivateSkill(unitModel.LimitBreakActiveSkill)
 		spawnEntity.Unit:Spawn(unitModel, skillData)
-				
+
+		-- 매트릭스 증강 컴포넌트 적용
+		self:ApplyMatrixAugments(spawnEntity, user)
+
 		self:GetUserWallet().MesoWallet:UseMeso(price)
 	end
 
@@ -149,6 +152,84 @@ script SpawnManager extends Logic
 		return _EntityService:GetEntityByPath(_GameManager:GetGameMapName() .. "/ingameIncome")
 	end
 
+	-- ============================================
+	-- 매트릭스 증강 컴포넌트 적용
+	-- ============================================
+	method void ApplyMatrixAugments(Entity spawnEntity, Entity user)
+		-- 매트릭스 모드가 아니면 스킵
+		if _GameManager.currentGameMode ~= _eGameMode.Matrix then
+			return
+		end
+
+		if user == nil or user.UserMatrixManager == nil then
+			return
+		end
+
+		local matrixEffects = user.UserMatrixManager:GetMatrixEffects()
+		if matrixEffects == nil or #matrixEffects == 0 then
+			return
+		end
+
+		for _, matrix in ipairs(matrixEffects) do
+			self:ApplyAugmentComponent(spawnEntity, matrix)
+		end
+	end
+
+	method void ApplyAugmentComponent(Entity spawnEntity, table matrix)
+		local effectType = matrix.effectType
+		local componentName = self:GetAugmentComponentName(effectType)
+
+		if componentName == nil or componentName == "" then
+			return
+		end
+
+		-- 컴포넌트 추가
+		spawnEntity:RemoveComponent(componentName)
+		spawnEntity:AddComponent(componentName)
+
+		local component = spawnEntity[componentName]
+		if component == nil then
+			return
+		end
+
+		-- 컴포넌트 설정
+		component.Enable = true
+		component.calcType = matrix.calcType or "PERCENT"
+		component.value = matrix.value or 0
+		component.effectType = effectType
+		component.grade = matrix.grade or "RARE"
+
+		-- OnSpawn 호출 (STAT 버프 적용)
+		if component.OnSpawn ~= nil then
+			component:OnSpawn()
+		end
+
+		log("[SpawnManager] 증강 컴포넌트 적용: " .. componentName .. " (value=" .. tostring(matrix.value) .. ")")
+	end
+
+	method string GetAugmentComponentName(string effectType)
+		if effectType == "AttackDamageBuff" then
+			return "AttackDamageAugment"
+		elseif effectType == "MaxHealthMultiplyBuff" then
+			return "MaxHealthAugment"
+		elseif effectType == "AttackSpeedBuff" then
+			return "AttackSpeedAugment"
+		elseif effectType == "MoveSpeedBuff" then
+			return "MoveSpeedAugment"
+		elseif effectType == "DamageDecreaseBuff" then
+			return "DamageDecreaseAugment"
+		elseif effectType == "BonusDamage" then
+			return "BonusDamageAugment"
+		elseif effectType == "DamageReduction" then
+			return "DamageReductionAugment"
+		elseif effectType == "HealOnKill" then
+			return "HealOnKillAugment"
+		elseif effectType == "MpRecoveryBonus" then
+			return "MpRecoveryAugment"
+		end
+		return nil
+	end
+
 	@ExecSpace("Server")
 	method void SkillSpawn(string target, string summoner, Vector3 pos)
 		local unitData = _UnitService:GetUnitByIDFromServer(target)
@@ -215,6 +296,9 @@ script SpawnManager extends Logic
 					spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet()
 				end
 			end
+
+			-- 매트릭스 증강 컴포넌트 적용
+			self:ApplyMatrixAugments(spawnEntity, user)
 		end
 		spawnEntity.Unit:Spawn(unitModel, skillData)
 	end
@@ -295,7 +379,10 @@ script SpawnManager extends Logic
 				end
 			end
 		end
-		
+
+		-- 매트릭스 증강 컴포넌트 적용
+		self:ApplyMatrixAugments(spawnEntity, user)
+
 		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
 		spawnEntity.Unit:Spawn(unitModel, skillData)
 	end

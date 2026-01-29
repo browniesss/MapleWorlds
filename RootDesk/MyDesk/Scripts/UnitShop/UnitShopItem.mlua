@@ -76,8 +76,7 @@ script UnitShopItem extends Component
 		self:SetLabel()
 		self:SetEffect()
 
-		-- 모든 요소 활성화
-		self.effectEntity.Visible = true
+		-- 가격 요소 활성화 (effectEntity는 SetEffect에서 처리)
 		self.priceSprite.Visible = true
 		self.priceLabel.Visible = true
 	end

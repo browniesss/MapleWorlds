@@ -1,0 +1,51 @@
+@Component
+script PhaseUI extends Component
+
+	property Entity phaseText = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.phaseText = self.Entity:GetChildByName("PhaseText")
+		self:UpdatePhaseText()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnUpdate(number delta)
+		self:UpdatePhaseText()
+	end
+
+	method void UpdatePhaseText()
+		if self.phaseText == nil then
+			return
+		end
+
+		if _MatrixGameService == nil then
+			return
+		end
+
+		local phaseId = _MatrixGameService.currentPhaseId
+		local roundId = _MatrixGameService.currentRoundId
+
+		-- 페이즈 내에서의 라운드 번호 계산
+		local roundInPhase = self:GetRoundInPhase(phaseId, roundId)
+
+		local displayText = tostring(phaseId) .. "-" .. tostring(roundInPhase)
+		self.phaseText.TextComponent.Text = displayText
+	end
+
+	method integer GetRoundInPhase(integer phaseId, integer roundId)
+		-- 해당 페이즈의 첫 라운드 찾기
+		local firstRoundInPhase = roundId
+
+		for _, round in ipairs(_MatrixGameService.roundDataList) do
+			if round.phaseId == phaseId then
+				if firstRoundInPhase > round.roundId then
+					firstRoundInPhase = round.roundId
+				end
+			end
+		end
+
+		return roundId - firstRoundInPhase + 1
+	end
+
+end

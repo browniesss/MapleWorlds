@@ -1,0 +1,15 @@
+@Component
+script MoveSpeedAugment extends BaseMatrixAugmentComponent
+
+	method void OnSpawn()
+		local unit = self.Entity.Unit
+		if unit == nil then
+			return
+		end
+		
+		-- value가 1.1이면 10% 증가 → (1.1 - 1) * originMoveSpeed = 버프량
+		local buffAmount = unit.originMoveSpeed * (self.value - 1)
+		unit:GetBuff(_eBuffType.MoveSpeedBuff, buffAmount, 0)
+	end
+
+end

@@ -392,12 +392,6 @@ script MatrixGameService extends Logic
 	-- 증강 선택 완료 후 호출
 	@ExecSpace("Client")
 	method void OnAugmentSelected()
-		-- 현재 라운드의 메소 회복속도 보너스 적용
-		local roundData = self:GetRoundData(self.currentRoundId)
-		if roundData ~= nil and roundData.mesoIncome > 0 then
-			self:ApplyMesoIncomeBonus(roundData.mesoIncome)
-		end
-
 		-- 초기 증강 선택인 경우 (게임 시작 시)
 		if self.isInitialAugmentSelection then
 			self.isInitialAugmentSelection = false
@@ -417,15 +411,6 @@ script MatrixGameService extends Logic
 		else
 			-- 일반 페이즈: 다음 라운드
 			self:StartRound(self.currentRoundId + 1)
-		end
-	end
-
-	@ExecSpace("Server")
-	method void ApplyMesoIncomeBonus(number percent)
-		local mapPath = "/maps/MatrixStage"
-		local mesoIncomeEntity = _EntityService:GetEntityByPath(mapPath .. "/ingameIncome")
-		if mesoIncomeEntity ~= nil and mesoIncomeEntity.MesoIncome ~= nil then
-			mesoIncomeEntity.MesoIncome:IncreaseIncomeByPercent(percent)
 		end
 	end
 

@@ -1,0 +1,17 @@
+@Component
+script DamageReductionAugment extends BaseMatrixAugmentComponent
+
+	method number OnHit(Entity attacker, number incomingDamage)
+		if self.calcType == "PERCENT" then
+			return incomingDamage * self.value
+		elseif self.calcType == "FLAT" then
+			local reduced = incomingDamage - self.value
+			if reduced < 1 then
+				reduced = 1
+			end
+			return reduced
+		end
+		return incomingDamage
+	end
+
+end

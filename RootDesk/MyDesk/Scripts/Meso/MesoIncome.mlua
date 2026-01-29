@@ -13,7 +13,7 @@ script MesoIncome extends Component
 	property MesoWallet UserWallet = "cc1d0323-9041-4ead-8cde-646ca0b26e89"
 
 	@Sync
-	property number incomeCooltime = 0.5
+	property number incomeCooltime = 1.0
 
 	@Sync
 	property number currentTs = 0
@@ -150,14 +150,6 @@ script MesoIncome extends Component
 	@ExecSpace("ServerOnly")
 	method void ReturnMeso(integer meso)
 		self.UserWallet:AddMeso(meso)
-	end
-
-	@ExecSpace("ServerOnly")
-	method void IncreaseIncomeByPercent(number percent)
-		local currentIncome = self.incomeData[1]["income"]
-		local newIncome = currentIncome * (1 + percent / 100)
-		self.incomeData[1]["income"] = newIncome
-		self.UIController:UpdateMesoIncome(newIncome)
 	end
 
 end
