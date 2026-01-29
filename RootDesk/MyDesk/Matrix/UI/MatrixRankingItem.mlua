@@ -1,0 +1,70 @@
+@Component
+script MatrixRankingItem extends Component
+
+	property Entity frame = nil
+
+	property Entity rankText = nil
+
+	property Entity nameText = nil
+
+	property Entity scoreText = nil
+
+	method void OnBeginPlay()
+		-- 4개 자식 구조: Frame, RankText, NameText, ScoreText
+		self.frame = self.Entity:GetChildByName("FrameSprite")
+		self.rankText = self.Entity:GetChildByName("UserRank")
+		self.nameText = self.Entity:GetChildByName("UserName")
+		self.scoreText = self.Entity:GetChildByName("UserScore")
+		
+		-- 자식 인덱스로 접근 (이름이 없는 경우)
+		if self.frame == nil and #self.Entity.Children >= 1 then
+			self.frame = self.Entity.Children[1]
+		end
+		if self.rankText == nil and #self.Entity.Children >= 2 then
+			self.rankText = self.Entity.Children[2]
+		end
+		if self.nameText == nil and #self.Entity.Children >= 3 then
+			self.nameText = self.Entity.Children[3]
+		end
+		if self.scoreText == nil and #self.Entity.Children >= 4 then
+			self.scoreText = self.Entity.Children[4]
+		end
+	end
+
+	method void Init(string rank, string name, integer score)
+		self.Entity.Visible = true
+		self.Entity.Enable = true
+		
+		self:SetNormalFrame()
+		
+		if self.rankText ~= nil and self.rankText.TextComponent ~= nil then
+			self.rankText.TextComponent.Text = rank
+		end
+		
+		if self.nameText ~= nil and self.nameText.TextComponent ~= nil then
+			self.nameText.TextComponent.Text = name
+		end
+		
+		if self.scoreText ~= nil and self.scoreText.TextComponent ~= nil then
+			self.scoreText.TextComponent.Text = tostring(score)
+		end
+	end
+
+	method void SetUserFrame()
+		if self.frame ~= nil and self.frame.SpriteGUIRendererComponent ~= nil then
+			self.frame.SpriteGUIRendererComponent.ImageRUID = "32df20aa0c2943f3b9b8861f010cf394"
+		end
+	end
+
+	method void SetNormalFrame()
+		if self.frame ~= nil and self.frame.SpriteGUIRendererComponent ~= nil then
+			self.frame.SpriteGUIRendererComponent.ImageRUID = "1af2483d995549cfb457586797df8f88"
+		end
+	end
+
+	method void Hide()
+		self.Entity.Visible = false
+		self.Entity.Enable = false
+	end
+
+end

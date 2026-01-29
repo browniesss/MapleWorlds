@@ -16,7 +16,7 @@ script MatrixTimerService extends Logic
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
-		self.isPaused = false
+		self.isPaused = true  -- 게임 시작 전까지 일시정지
 		self.pendingTimers = {}
 		self.nextTimerId = 1
 		self.currentTime = 0.0
@@ -171,12 +171,20 @@ script MatrixTimerService extends Logic
 	-- 타이머 리셋 (게임 종료 시 사용)
 	-- ============================================
 	method void Reset()
-		self.isPaused = false
+		self.isPaused = true  -- 유닛/증강 선택 완료 전까지 일시정지
 		self.pendingTimers = {}
 		self.nextTimerId = 1
 		self.currentTime = 0.0
 		self.lastPlayTimeSecond = -1
-		log("[MatrixTimerService] 타이머 시스템 리셋")
+		log("[MatrixTimerService] 타이머 시스템 리셋 (일시정지 상태)")
+	end
+
+	-- ============================================
+	-- 타이머 시작 (게임 실제 시작 시 호출)
+	-- ============================================
+	method void StartTimer()
+		self.isPaused = false
+		log("[MatrixTimerService] 타이머 시작")
 	end
 
 end

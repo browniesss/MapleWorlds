@@ -1,0 +1,176 @@
+@Logic
+script MatrixRankingService extends Logic
+
+	property string STORAGE_KEY = "RANK_MATRIX_MODE"
+
+	property table rankList = {}
+
+	property table cacheRankList = {}
+
+	property integer cacheExpireTs = 0
+
+	property integer userScore = 0
+
+	-- 데이터 수신 여부 (-1: 미수신, 0 이상: 수신 완료)
+	property integer rankCount = -1
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		self.rankList = {}
+		self.cacheRankList = {}
+		self.cacheExpireTs = 0
+		self.rankCount = -1
+		_TimerService:SetTimerOnce(function() self:FETCH() end, 0)
+	end
+
+	@ExecSpace("Server")
+	method void AddScore(string userName, integer score)
+		local ds = _DataStorageService:GetSortableDataStorage(self.STORAGE_KEY)
+		
+		local getCode, lastScore = ds:GetAndWait(userName)
+		if getCode ~= 0 then
+			log("[MatrixRankingService] AddScore get err: " .. tostring(getCode))
+			return
+		end
+		
+		if lastScore == nil then
+			lastScore = 0
+		end
+		
+		-- 기존 점수보다 높은 경우에만 업데이트
+		if lastScore >= score then
+			self:UpdateUserScore(score)
+			return
+		end
+		
+		local setCode = ds:SetAndWait(userName, score)
+		if setCode ~= 0 then
+			log("[MatrixRankingService] AddScore set err: " .. tostring(setCode))
+		end
+		
+		self:UpdateUserScore(score)
+		log("[MatrixRankingService] 점수 저장: " .. userName .. " = " .. tostring(score))
+	end
+
+	@ExecSpace("Server")
+	method void FETCH()
+		local nowTs = DateTime.UtcNow.Elapsed
+		
+		-- 캐시 확인 (10분 TTL)
+		if self.cacheExpireTs > nowTs and #self.cacheRankList > 0 then
+			self:UpdateRankList(self.cacheRankList)
+			return
+		end
+		
+		local ds = _DataStorageService:GetSortableDataStorage(self.STORAGE_KEY)
+		local errorCode, itemPages = ds:GetSortedAndWait(SortDirection.Descending, 0, 999999999)
+		
+		if errorCode ~= 0 then
+			log("[MatrixRankingService] FETCH err: " .. tostring(errorCode))
+			return
+		end
+		
+		local rankList = {}
+		while true do
+			local items = itemPages:GetCurrentPageDatas()
+			for _, item in pairs(items) do
+				rankList[#rankList + 1] = {name = item.KeyInfo.Key, score = item.Value}
+			end
+		
+			if #rankList > 50 then
+				break
+			end
+		
+			if itemPages.IsLastPage == true then
+				break
+			end
+		
+			itemPages:MoveToNextPageAndWait()
+		end
+		
+		self.cacheRankList = rankList
+		self.cacheExpireTs = nowTs + 600000  -- 10분 캐시
+		
+		self:UpdateRankList(rankList)
+		log("[MatrixRankingService] 랭킹 조회 완료: " .. tostring(#rankList) .. "명")
+	end
+
+	@ExecSpace("Client")
+	method void UpdateRankList(table list)
+		self.rankList = list or {}
+		self.rankCount = #self.rankList
+
+		-- 내 점수 찾기
+		local userName = _UserService.LocalPlayer.PlayerComponent.Nickname
+		for _, data in ipairs(self.rankList) do
+			if data.name == userName then
+				self.userScore = data.score
+				break
+			end
+		end
+
+	end
+
+	@ExecSpace("Client")
+	method void UpdateUserScore(integer score)
+		self.userScore = score
+	end
+
+	@ExecSpace("ClientOnly")
+	method table GetTop50()
+		_TimerService:SetTimerOnce(function() self:FETCH() end, 0)
+		return self.rankList
+	end
+
+	@ExecSpace("ClientOnly")
+	method integer GetUserRank(string userName, integer currentScore)
+		local rank = 1
+		
+		for _, data in ipairs(self.rankList) do
+			if data.name == userName then
+				return rank
+			end
+			if data.score > currentScore then
+				rank = rank + 1
+			end
+		end
+		
+		-- 리스트에 없으면 현재 점수 기준 순위 반환
+		return rank
+	end
+
+	@ExecSpace("ClientOnly")
+	method integer GetRankCount()
+		return self.rankCount
+	end
+
+	@ExecSpace("ClientOnly")
+	method table AddUserScoreToRankTable(string userName, integer currentScore)
+		local newTable = {}
+		local isUserInTable = false
+		
+		for rank, data in ipairs(self.rankList) do
+			local newData = {name = data.name, score = data.score}
+		
+			if data.name == userName then
+				-- 기존 점수보다 높으면 업데이트
+				if currentScore > data.score then
+					newData.score = currentScore
+				end
+				isUserInTable = true
+			end
+		
+			newTable[rank] = newData
+		end
+		
+		if not isUserInTable then
+			newTable[#newTable + 1] = {name = userName, score = currentScore}
+		end
+		
+		-- 내림차순 정렬 (높은 점수가 상위)
+		table.sort(newTable, function(a, b) return a.score > b.score end)
+		
+		return newTable
+	end
+
+end

@@ -1,0 +1,145 @@
+@Component
+script MatrixRankingPanel extends Component
+
+	property table rankItems = {}
+
+	property Entity userRankItem = nil
+
+	property Entity closeButton = nil
+
+	property any closeButtonHandler = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		-- 랭킹 아이템 컨테이너 (첫 번째 자식을 템플릿으로 사용)
+		local container = self.Entity:GetChildByName("RankList")
+		if container == nil then
+			container = self.Entity.Children[1]
+		end
+		
+		if container ~= nil and #container.Children > 0 then
+			local templateItem = container.Children[1]
+			self.rankItems[1] = templateItem
+		
+			-- 50개 아이템 생성
+			for i = 2, 50 do
+				local rankItem = _SpawnService:SpawnByEntity(
+					templateItem,
+					string.format("MatrixRankItem_%d", i),
+					templateItem.TransformComponent.Position,
+					container,
+					true
+				)
+				self.rankItems[i] = rankItem
+			end
+		end
+		
+		-- 유저 랭킹 아이템 (하단 고정)
+		if self.userRankItem == nil then
+			self.userRankItem = self.Entity:GetChildByName("UserMatrixRank")
+		end
+		
+		-- 닫기 버튼 (선택사항)
+		self.closeButton = self.Entity:GetChildByName("CloseButton")
+		if self.closeButton ~= nil and self.closeButton.ButtonComponent ~= nil then
+			self.closeButtonHandler = self.closeButton.ButtonComponent.OnClick:Connect(function()
+				self:Hide()
+			end)
+		end
+		
+		-- 상시 표시: 시작 시 데이터 로드
+		self:InitCheckRankData(0)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnEndPlay()
+		if self.closeButtonHandler ~= nil then
+			self.closeButtonHandler:Disconnect()
+			self.closeButtonHandler = nil
+		end
+	end
+
+	method void Show()
+		self.Entity.Enable = true
+		self.Entity.Visible = true
+		self:RefreshRankList()
+	end
+
+	method void Hide()
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+	end
+
+	@ExecSpace("Client")
+	method void RefreshRankList()
+		if _MatrixRankingService == nil then
+			log("[MatrixRankingPanel] MatrixRankingService를 찾을 수 없습니다")
+			return
+		end
+		
+		local userName = _UserService.LocalPlayer.PlayerComponent.Nickname
+		local userScore = _MatrixRankingService.userScore or 0
+		local serverRankList = _MatrixRankingService:GetTop50()
+		
+		-- 서버 데이터가 없으면 모두 숨김
+		if #serverRankList == 0 then
+			for i, rankItem in pairs(self.rankItems) do
+				if rankItem.MatrixRankingItem ~= nil then
+					rankItem.MatrixRankingItem:Hide()
+				end
+			end
+			if self.userRankItem ~= nil then
+				self.userRankItem.Visible = false
+			end
+			return
+		end
+		
+		-- 유저 점수를 랭킹 테이블에 추가
+		local rankTable = _MatrixRankingService:AddUserScoreToRankTable(userName, userScore)
+		
+		local userRank = "50+"
+		
+		-- 랭킹 아이템 업데이트
+		for i, rankItem in pairs(self.rankItems) do
+			if rankItem.MatrixRankingItem == nil then
+				continue
+			end
+		
+			if i > #rankTable then
+				rankItem.MatrixRankingItem:Hide()
+			else
+				rankItem.MatrixRankingItem:Init(tostring(i), rankTable[i].name, rankTable[i].score)
+		
+				-- 유저인 경우 하이라이트
+				if rankTable[i].name == userName then
+					rankItem.MatrixRankingItem:SetUserFrame()
+					userRank = tostring(i)
+				end
+			end
+		end
+		
+		-- 하단 유저 랭킹 표시
+		if self.userRankItem ~= nil and self.userRankItem.MatrixRankingItem ~= nil then
+			self.userRankItem.MatrixRankingItem:Init(userRank, userName, userScore)
+			self.userRankItem.MatrixRankingItem:SetUserFrame()
+		end
+	end
+
+	@ExecSpace("Client")
+	method void InitCheckRankData(integer count)
+		if count > 5 then
+			self:RefreshRankList()
+			return
+		end
+		
+		if _MatrixRankingService == nil or _MatrixRankingService:GetRankCount() < 0 then
+			_TimerService:SetTimerOnce(function()
+				self:InitCheckRankData(count + 1)
+			end, 0.2)
+			return
+		end
+		
+		self:RefreshRankList()
+	end
+
+end

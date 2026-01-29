@@ -9506,12 +9506,12 @@
       {
         "id": "31593860-0e7f-4b84-8ac0-8e3ff6a77f8c",
         "path": "/ui/MatrixUI/IngameUI/CompletePopup",
-        "componentNames": "MOD.Core.UITransformComponent",
+        "componentNames": "MOD.Core.UITransformComponent,script.MatrixCompletePopup",
         "jsonString": {
           "name": "CompletePopup",
           "path": "/ui/MatrixUI/IngameUI/CompletePopup",
           "nameEditable": true,
-          "enable": false,
+          "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 3,
@@ -9572,6 +9572,28 @@
                 "w": 1.0
               },
               "Enable": true
+            },
+            {
+              "@type": "script.MatrixCompletePopup",
+              "Enable": true,
+              "rankUI": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "3b772f24-d315-4d81-8988-8f96d10ff977",
+                "Version2": false
+              },
+              "scoreText": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "bfce885d-dd0a-4cd2-8b66-25ea5e3f5d42",
+                "Version2": false
+              },
+              "rankText": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "bf67e5e7-3245-46d3-8a3d-eaff9b6cf399",
+                "Version2": false
+              }
             }
           ],
           "@version": 1
@@ -9613,11 +9635,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 1390.00012,
+                "x": 1390.0,
                 "y": 1010.0
               },
               "OffsetMin": {
-                "x": -1509.99988,
+                "x": -1510.0,
                 "y": -890.0
               },
               "Pivot": {
@@ -9636,11 +9658,11 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -59.9999,
+                "x": -59.99996,
                 "y": 60.0
               },
               "Position": {
-                "x": -59.9999,
+                "x": -59.99996,
                 "y": 60.0,
                 "z": 0.0
               },
@@ -9766,18 +9788,503 @@
         }
       },
       {
-        "id": "0e69d914-896e-4ef7-b336-0344f57dd399",
-        "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteTitle",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "id": "e9cd92f5-b778-4179-a6d6-8028e9a84644",
+        "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/UserAvatar",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,script.DeckItem,MOD.Core.ButtonComponent,MOD.Core.UITouchReceiveComponent",
         "jsonString": {
-          "name": "CompleteTitle",
-          "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteTitle",
+          "name": "UserAvatar",
+          "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/UserAvatar",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 2,
-          "pathConstraints": "/////",
+          "displayOrder": 0,
+          "pathConstraints": "//////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uisprite",
+            "sub_entity_id": null,
+            "root_entity_id": null,
+            "replaced_model_id": null
+          },
+          "modelId": "uisprite",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": -301.4659,
+                "y": 80.425
+              },
+              "OffsetMin": {
+                "x": -479.4659,
+                "y": -135.575
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 178.0,
+                "y": 216.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": -390.4659,
+                "y": -27.575
+              },
+              "Position": {
+                "x": -390.4659,
+                "y": -27.575,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "9cabdd08cb834cbab689c6219db5db05"
+              },
+              "LocalScale": {
+                "x": 1.25,
+                "y": 1.25
+              },
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "FlipX": false,
+              "Type": 0,
+              "Enable": false
+            },
+            {
+              "@type": "script.DeckItem",
+              "Enable": true,
+              "synergyComponentItem": {
+                "IsRelative": false,
+                "ComponentId": ":SynergyComponentItem",
+                "UseNested": false
+              }
+            },
+            {
+              "@type": "MOD.Core.ButtonComponent",
+              "Colors": {
+                "NormalColor": {
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                },
+                "HighlightedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "PressedColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 1.0
+                },
+                "SelectedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "DisabledColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 0.5019608
+                },
+                "ColorMultiplier": 1.0,
+                "FadeDuration": 0.1
+              },
+              "ImageRUIDs": {
+                "HighlightedSprite": null,
+                "PressedSprite": null,
+                "SelectedSprite": null,
+                "DisabledSprite": null
+              },
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.UITouchReceiveComponent",
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "5814b0c9-169b-4159-a71e-10d0ec984cbc",
+        "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/UserAvatar/ShadowSprite",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "jsonString": {
+          "name": "ShadowSprite",
+          "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/UserAvatar/ShadowSprite",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "///////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uisprite",
+            "sub_entity_id": null,
+            "root_entity_id": null,
+            "replaced_model_id": null
+          },
+          "modelId": "uisprite",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 100.0,
+                "y": -122.0
+              },
+              "OffsetMin": {
+                "x": -100.0,
+                "y": -138.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 200.0,
+                "y": 16.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": -130.0
+              },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": -130.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": -1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "41bf0d8c31cf41faa9746910510569c2"
+              },
+              "LocalScale": {
+                "x": 1.25,
+                "y": 1.25
+              },
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Type": 0,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "01e1fe8b-cb2f-41aa-bd8f-217d4875c55e",
+        "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/UserAvatar/UnitAvartar",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.AvatarGUIRendererComponent,MOD.Core.CostumeManagerComponent,MOD.Core.AvatarBodyActionSelectorComponent,MOD.Core.AvatarStateAnimationComponent,MOD.Core.StateComponent",
+        "jsonString": {
+          "name": "UnitAvartar",
+          "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/UserAvatar/UnitAvartar",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 1,
+          "pathConstraints": "///////",
+          "revision": 1,
+          "modelId": null,
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 155.0,
+                "y": 170.0
+              },
+              "OffsetMin": {
+                "x": -145.0,
+                "y": -130.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 300.0,
+                "y": 300.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 5.0,
+                "y": 20.0
+              },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "Position": {
+                "x": 5.0,
+                "y": 20.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.AvatarGUIRendererComponent",
+              "Color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FlipX": true,
+              "PreserveAvatar": 1,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.CostumeManagerComponent",
+              "DefaultEquipUserId": "",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.AvatarBodyActionSelectorComponent",
+              "ActionState": 1,
+              "StateActionDic": {
+                "Stand": [
+                  {
+                    "CoreActionName": "stand1",
+                    "PartsActionName": "",
+                    "PlayType": 2
+                  },
+                  {
+                    "CoreActionName": "stand2",
+                    "PartsActionName": "",
+                    "PlayType": 2
+                  }
+                ],
+                "Walk": [
+                  {
+                    "CoreActionName": "walk1",
+                    "PartsActionName": "",
+                    "PlayType": 1
+                  },
+                  {
+                    "CoreActionName": "walk2",
+                    "PartsActionName": "",
+                    "PlayType": 1
+                  }
+                ],
+                "Attack": [
+                  {
+                    "CoreActionName": "alert",
+                    "PartsActionName": "",
+                    "PlayType": 1
+                  }
+                ],
+                "Alert": [
+                  {
+                    "CoreActionName": "alert",
+                    "PartsActionName": "",
+                    "PlayType": 2
+                  }
+                ],
+                "Hit": [
+                  {
+                    "CoreActionName": "alert",
+                    "PartsActionName": "",
+                    "PlayType": 2
+                  }
+                ],
+                "Crouch": [
+                  {
+                    "CoreActionName": "prone",
+                    "PartsActionName": "",
+                    "PlayType": 1
+                  }
+                ],
+                "Fall": [
+                  {
+                    "CoreActionName": "jump",
+                    "PartsActionName": "",
+                    "PlayType": 1
+                  }
+                ],
+                "Sit": [
+                  {
+                    "CoreActionName": "sit",
+                    "PartsActionName": "",
+                    "PlayType": 1
+                  }
+                ],
+                "Rope": [
+                  {
+                    "CoreActionName": "rope",
+                    "PartsActionName": "",
+                    "PlayType": 1
+                  }
+                ],
+                "Ladder": [
+                  {
+                    "CoreActionName": "ladder",
+                    "PartsActionName": "",
+                    "PlayType": 1
+                  }
+                ],
+                "Dead": [
+                  {
+                    "CoreActionName": "dead",
+                    "PartsActionName": "stand1",
+                    "PlayType": 1
+                  }
+                ],
+                "Blink": [
+                  {
+                    "CoreActionName": "blink",
+                    "PartsActionName": "",
+                    "PlayType": 1
+                  }
+                ],
+                "Fly": [
+                  {
+                    "CoreActionName": "fly",
+                    "PartsActionName": "",
+                    "PlayType": 1
+                  }
+                ],
+                "Heal": [
+                  {
+                    "CoreActionName": "heal",
+                    "PartsActionName": "",
+                    "PlayType": 1
+                  }
+                ]
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.AvatarStateAnimationComponent",
+              "IsLegacy": false,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.StateComponent",
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "0e69d914-896e-4ef7-b336-0344f57dd399",
+        "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/CompleteTitle",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "CompleteTitle",
+          "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/CompleteTitle",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 1,
+          "pathConstraints": "//////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -9801,12 +10308,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 400.5,
-                "y": 123.9622
+                "x": 430.5,
+                "y": 185.9252
               },
               "OffsetMin": {
-                "x": -460.5,
-                "y": 59.9621964
+                "x": -430.5,
+                "y": 121.9252
               },
               "Pivot": {
                 "x": 0.5,
@@ -9824,37 +10331,31 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -30.0,
-                "y": 91.9622
-              },
-              "Rotation": {
                 "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
+                "y": 153.9252
               },
               "Position": {
-                "x": -30.0,
-                "y": 91.9622,
+                "x": 0.0,
+                "y": 153.9252,
                 "z": 0.0
               },
               "QuaternionRotation": {
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0,
-                "w": -1.0
+                "w": 1.0
               },
               "Scale": {
                 "x": 1.0,
                 "y": 1.0,
                 "z": 1.0
               },
-              "ZRotation": 0.0,
               "Enable": true
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
               "ImageRUID": {
-                "DataId": "99ac84188dd34c97aad729e0f91a4c70"
+                "DataId": "79eb616b238242a2ac9d53f204283b4d"
               },
               "OverrideSorting": false,
               "SortingLayer": "MapLayer0",
@@ -9865,7 +10366,7 @@
                 "a": 1.0
               },
               "Type": 0,
-              "Enable": false
+              "Enable": true
             },
             {
               "@type": "MOD.Core.TextComponent",
@@ -9886,7 +10387,7 @@
               },
               "OverrideSorting": false,
               "Text": "Complete",
-              "Enable": true
+              "Enable": false
             }
           ],
           "@version": 1
@@ -9894,17 +10395,17 @@
       },
       {
         "id": "04387d09-7ae1-4674-b56f-824a09d86f77",
-        "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteText",
+        "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/CompleteText",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
           "name": "CompleteText",
-          "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteText",
+          "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/CompleteText",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 3,
-          "pathConstraints": "/////",
+          "displayOrder": 2,
+          "pathConstraints": "//////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -9928,12 +10429,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 178.5,
-                "y": -0.537799835
+                "x": 208.5,
+                "y": 68.8301
               },
               "OffsetMin": {
-                "x": -238.5,
-                "y": -75.537796
+                "x": -208.5,
+                "y": -6.169901
               },
               "Pivot": {
                 "x": 0.5,
@@ -9951,31 +10452,25 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -30.0,
-                "y": -38.0378
-              },
-              "Rotation": {
                 "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
+                "y": 31.3301
               },
               "Position": {
-                "x": -30.0,
-                "y": -38.0378,
+                "x": 0.0,
+                "y": 31.3301,
                 "z": 0.0
               },
               "QuaternionRotation": {
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0,
-                "w": -1.0
+                "w": 1.0
               },
               "Scale": {
                 "x": 1.0,
                 "y": 1.0,
                 "z": 1.0
               },
-              "ZRotation": 0.0,
               "Enable": true
             },
             {
@@ -10020,18 +10515,365 @@
         }
       },
       {
+        "id": "3b772f24-d315-4d81-8988-8f96d10ff977",
+        "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/RankUI",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "jsonString": {
+          "name": "RankUI",
+          "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/RankUI",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 3,
+          "pathConstraints": "//////",
+          "revision": 0,
+          "origin": {
+            "type": "Model",
+            "entry_id": "UISprite",
+            "sub_entity_id": null,
+            "root_entity_id": null,
+            "replaced_model_id": null
+          },
+          "modelId": "uisprite",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 251.5055,
+                "y": -37.4969521
+              },
+              "OffsetMin": {
+                "x": -251.5055,
+                "y": -102.503052
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 503.011,
+                "y": 65.0060959
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": -70.0
+              },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": -70.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": -1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "AnimClipPlayType": 0,
+              "EndFrameIndex": 2147483647,
+              "ImageRUID": {
+                "DataId": "dc7ceba2f56e452f87dc110790b2efbe"
+              },
+              "LocalPosition": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "LocalScale": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "OverrideSorting": false,
+              "PlayRate": 1.0,
+              "SortingLayer": "MapLayer0",
+              "StartFrameIndex": 0,
+              "Color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "DropShadow": false,
+              "DropShadowAngle": 30.0,
+              "DropShadowColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.72
+              },
+              "DropShadowDistance": 32.0,
+              "FillAmount": 1.0,
+              "FillCenter": true,
+              "FillClockWise": true,
+              "FillMethod": 0,
+              "FillOrigin": 0,
+              "FlipX": false,
+              "FlipY": false,
+              "FrameColumn": 1,
+              "FrameRate": 0,
+              "FrameRow": 1,
+              "Outline": false,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
+              "OutlineWidth": 3.0,
+              "RaycastTarget": true,
+              "Type": 1,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "bf67e5e7-3245-46d3-8a3d-eaff9b6cf399",
+        "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/RankUI/RankText",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "RankText",
+          "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/RankUI/RankText",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "///////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null,
+            "root_entity_id": null,
+            "replaced_model_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 15,
+              "AnchorsMax": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "AnchorsMin": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": -391.474243,
+                "y": 0.0
+              },
+              "OffsetMin": {
+                "x": 19.99965,
+                "y": 0.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 91.53708,
+                "y": 65.0060959
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": -185.7373,
+                "y": 0.0
+              },
+              "Position": {
+                "x": -185.7373,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "Alignment": 5,
+              "BestFit": true,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 33,
+              "MaxSize": 45,
+              "MinSize": 10,
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "Overflow": 1,
+              "OverrideSorting": false,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "bfce885d-dd0a-4cd2-8b66-25ea5e3f5d42",
+        "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/RankUI/RankText/ScoreText",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "ScoreText",
+          "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/RankUI/RankText/ScoreText",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "////////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null,
+            "root_entity_id": "bfce885d-dd0a-4cd2-8b66-25ea5e3f5d42",
+            "replaced_model_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 2,
+              "AnchorsMax": {
+                "x": 1.0,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 1.0,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 365.2395,
+                "y": 32.5
+              },
+              "OffsetMin": {
+                "x": 9.999634,
+                "y": -32.5
+              },
+              "Pivot": {
+                "x": 0.0,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 355.239868,
+                "y": 65.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 9.999634,
+                "y": 0.0
+              },
+              "Position": {
+                "x": 55.7681732,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "Alignment": 4,
+              "BestFit": true,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "MaxSize": 50,
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "Overflow": 1,
+              "OverrideSorting": false,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
         "id": "2c591449-bfe4-4aab-bf4f-51a812af3767",
-        "path": "/ui/MatrixUI/IngameUI/CompletePopup/LobbyButton",
+        "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/LobbyButton",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.MatrixGiveUpButton",
         "jsonString": {
           "name": "LobbyButton",
-          "path": "/ui/MatrixUI/IngameUI/CompletePopup/LobbyButton",
+          "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/LobbyButton",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 4,
-          "pathConstraints": "/////",
+          "pathConstraints": "//////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -10055,12 +10897,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 145.0,
-                "y": -305.9296
+                "x": 175.0,
+                "y": -332.5001
               },
               "OffsetMin": {
-                "x": -205.0,
-                "y": -430.9296
+                "x": -175.0,
+                "y": -457.5001
               },
               "Pivot": {
                 "x": 0.5,
@@ -10078,31 +10920,25 @@
               },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -30.0,
-                "y": -368.4296
-              },
-              "Rotation": {
                 "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
+                "y": -395.0001
               },
               "Position": {
-                "x": -30.0,
-                "y": -368.4296,
+                "x": 0.0,
+                "y": -395.0001,
                 "z": 0.0
               },
               "QuaternionRotation": {
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0,
-                "w": -1.0
+                "w": 1.0
               },
               "Scale": {
                 "x": 1.0,
                 "y": 1.0,
                 "z": 1.0
               },
-              "ZRotation": 0.0,
               "Enable": true
             },
             {
@@ -10169,17 +11005,17 @@
       },
       {
         "id": "2f242379-e679-480c-ac22-787ee84bbdf0",
-        "path": "/ui/MatrixUI/IngameUI/CompletePopup/LobbyButton/LobbyText",
+        "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/LobbyButton/LobbyText",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
           "name": "LobbyText",
-          "path": "/ui/MatrixUI/IngameUI/CompletePopup/LobbyButton/LobbyText",
+          "path": "/ui/MatrixUI/IngameUI/CompletePopup/CompleteFrame/LobbyButton/LobbyText",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
-          "pathConstraints": "//////",
+          "pathConstraints": "///////",
           "revision": 1,
           "origin": {
             "type": "Model",

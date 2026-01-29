@@ -221,29 +221,32 @@ script MatrixMonsterSpawner extends Logic
 
 	@ExecSpace("Client")
 	method void OnEnemyDefeated(Entity enemy)
-		-- 현재 웨이브의 몬스터인지 확인
-		local found = false
-		for i, monster in ipairs(self.currentWaveMonsters) do
-			if monster == enemy then
-				table.remove(self.currentWaveMonsters, i)
-				found = true
-				break
-			end
+		-- 킬 포인트 추가 (현재 페이즈 기준) - 먼저 실행
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.UserMatrixManager ~= nil and _MatrixGameService ~= nil then
+			local phaseId = _MatrixGameService.currentPhaseId
+			user.UserMatrixManager:OnMonsterKilled(phaseId)
 		end
 
-		if not found then
-			return
-		end
+		-- 서버에 킬 카운트 동기화
+		self:OnEnemyDefeatedServer()
+	end
 
+	@ExecSpace("Server")
+	method void OnEnemyDefeatedServer()
 		self.totalAliveCount = self.totalAliveCount - 1
-		log("[MatrixMonsterSpawner] 몬스터 처치: 남은 적=" .. tostring(self.totalAliveCount))
 
 		-- 모든 적 처치 확인
 		if self.totalAliveCount <= 0 and not self.isSpawning then
-			log("[MatrixMonsterSpawner] 모든 적 처치 완료!")
-			if self.onAllEnemiesDefeatedCallback ~= nil then
-				self.onAllEnemiesDefeatedCallback()
-			end
+			self:OnAllEnemiesDefeatedClient()
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnAllEnemiesDefeatedClient()
+		log("[MatrixMonsterSpawner] 모든 적 처치 완료!")
+		if self.onAllEnemiesDefeatedCallback ~= nil then
+			self.onAllEnemiesDefeatedCallback()
 		end
 	end
 

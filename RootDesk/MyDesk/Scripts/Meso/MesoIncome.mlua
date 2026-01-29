@@ -152,4 +152,30 @@ script MesoIncome extends Component
 		self.UserWallet:AddMeso(meso)
 	end
 
+	-- meso.csv에서 기본값 다시 로드
+	@ExecSpace("Server")
+	method void ResetToDefault()
+		local dataSet = _DataService:GetTable("meso")
+		if dataSet == nil then
+			return
+		end
+
+		self.incomeData = {}
+		for i = 1, dataSet:GetRowCount() do
+			local item = {}
+			item["id"] = tonumber(dataSet:GetCell(i, "id"))
+			item["init"] = tonumber(dataSet:GetCell(i, "init"))
+			item["income"] = tonumber(dataSet:GetCell(i, "income"))
+			self.incomeData[item["id"]] = item
+		end
+
+		self.UserWallet:SetMeso(self.incomeData[1]["init"])
+		self.UIController:UpdateMesoIncome(self.incomeData[1]["income"])
+		self.currentTs = 0
+
+		if _MatrixGameManager ~= nil then
+			self.lastMatrixTime = _MatrixGameManager.matrixTime
+		end
+	end
+
 end

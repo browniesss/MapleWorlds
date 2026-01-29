@@ -103,6 +103,11 @@ script MatrixGameManager extends Logic
 		-- UI 활성화
 		self:EnableUI()
 
+		-- TimeText 0:00으로 초기화 (유닛/증강 선택 완료 전까지 0 유지)
+		if self.timeText ~= nil then
+			self.timeText.TextComponent.Text = "0:00"
+		end
+
 		-- 타이머 시작
 		self:SetTimer()
 
@@ -340,16 +345,16 @@ script MatrixGameManager extends Logic
 			if self.isPaused then
 				return
 			end
-		
-			local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
-			self:SetTimeText(playTime)
+
+			-- 매트릭스 타이머 시간 사용 (일시정지 시 자동 정지)
+			self:SetTimeText(self.matrixTime)
 		end, 1.0, 0)
 	end
 
 	@ExecSpace("Client")
-	method void SetTimeText(integer playTime)
+	method void SetTimeText(number playTime)
 		if self.timeText ~= nil then
-			self.timeText.TextComponent.Text = self:FormatMMSS(playTime / 1000)
+			self.timeText.TextComponent.Text = self:FormatMMSS(playTime)
 		end
 	end
 
@@ -406,6 +411,11 @@ script MatrixGameManager extends Logic
 		if self.completePopup ~= nil then
 			self.completePopup.Enable = true
 			self.completePopup.Visible = true
+
+			-- MatrixCompletePopup 컴포넌트의 ShowResult 호출
+			if self.completePopup.MatrixCompletePopup ~= nil then
+				self.completePopup.MatrixCompletePopup:ShowResult()
+			end
 		end
 	end
 
