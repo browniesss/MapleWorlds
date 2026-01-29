@@ -45,6 +45,9 @@ script MatrixGameManager extends Logic
 	@Sync
 	property boolean isPaused = false
 
+	@Sync
+	property number matrixTime = 0
+
 	property string mapPath = "/maps/MatrixStage"
 
 	@ExecSpace("ClientOnly")

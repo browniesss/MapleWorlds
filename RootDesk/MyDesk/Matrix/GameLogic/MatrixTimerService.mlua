@@ -33,6 +33,11 @@ script MatrixTimerService extends Logic
 		-- 현재 시간 업데이트
 		self.currentTime = self.currentTime + delta
 
+		-- MatrixGameManager에 시간 동기화 (서버로 전송)
+		if _MatrixGameManager ~= nil then
+			self:SyncMatrixTimeToServer(self.currentTime)
+		end
+
 		-- 매초 UserMatrixManager.playTime 업데이트
 		local currentSecond = math.floor(self.currentTime)
 		if currentSecond ~= self.lastPlayTimeSecond then
@@ -149,6 +154,16 @@ script MatrixTimerService extends Logic
 		local user = _UserService.LocalPlayer
 		if user ~= nil and user.UserMatrixManager ~= nil then
 			user.UserMatrixManager.playTime = self.currentTime
+		end
+	end
+
+	-- ============================================
+	-- 매트릭스 시간 서버 동기화
+	-- ============================================
+	@ExecSpace("Server")
+	method void SyncMatrixTimeToServer(number time)
+		if _MatrixGameManager ~= nil then
+			_MatrixGameManager.matrixTime = time
 		end
 	end
 

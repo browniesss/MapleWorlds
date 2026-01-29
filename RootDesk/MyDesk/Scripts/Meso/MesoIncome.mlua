@@ -20,6 +20,9 @@ script MesoIncome extends Component
 
 	property any gameManager = nil
 
+	-- 매트릭스 모드용: 마지막 매트릭스 시간
+	property number lastMatrixTime = 0
+
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
 		-- 맵에 따라 gameManager 설정
@@ -50,7 +53,6 @@ script MesoIncome extends Component
 
 		self.UserWallet:SetMeso(self.incomeData[1]["init"])
 
-		self.nextUpdateTs = self.incomeCooltime
 		self.currentTs = 0
 	end
 
@@ -61,16 +63,29 @@ script MesoIncome extends Component
 			return
 		end
 
-		-- MatrixAugmentService 일시정지 연동: 증강/유닛 선택 중이면 메소 수입 중단
-		if _MatrixAugmentService ~= nil and _MatrixAugmentService.isGamePaused then
-			return
-		end
+		-- 매트릭스 모드: matrixTime 기반으로 메소 추가
+		if self.gameManager == _MatrixGameManager then
+			local matrixTime = _MatrixGameManager.matrixTime
+			local matrixDelta = matrixTime - self.lastMatrixTime
+			self.lastMatrixTime = matrixTime
 
-		self.currentTs = self.currentTs + delta
-		if self.currentTs > self.nextUpdateTs then
-			self.nextUpdateTs = self.nextUpdateTs + self.incomeCooltime
+			-- 일시정지 중이면 delta가 0이므로 메소 추가 안됨
+			if matrixDelta <= 0 then
+				return
+			end
 
-			self:AddMeso()
+			self.currentTs = self.currentTs + matrixDelta
+			if self.currentTs >= self.incomeCooltime then
+				self.currentTs = 0
+				self:AddMeso()
+			end
+		else
+			-- 일반 모드: 실제 시간(delta) 기반
+			self.currentTs = self.currentTs + delta
+			if self.currentTs >= self.incomeCooltime then
+				self.currentTs = 0
+				self:AddMeso()
+			end
 		end
 	end
 
@@ -109,9 +124,11 @@ script MesoIncome extends Component
 		self.UserWallet:SetMeso(meso)
 		self.UIController:UpdateMesoIncome(income)
 
-
-		self.nextUpdateTs = self.incomeCooltime
 		self.currentTs = 0
+		-- 매트릭스 모드용 시간 동기화
+		if _MatrixGameManager ~= nil then
+			self.lastMatrixTime = _MatrixGameManager.matrixTime
+		end
 	end
 
 	@ExecSpace("ServerOnly")
@@ -133,6 +150,14 @@ script MesoIncome extends Component
 	@ExecSpace("ServerOnly")
 	method void ReturnMeso(integer meso)
 		self.UserWallet:AddMeso(meso)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void IncreaseIncomeByPercent(number percent)
+		local currentIncome = self.incomeData[1]["income"]
+		local newIncome = currentIncome * (1 + percent / 100)
+		self.incomeData[1]["income"] = newIncome
+		self.UIController:UpdateMesoIncome(newIncome)
 	end
 
 end

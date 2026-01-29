@@ -193,15 +193,22 @@ script MatrixGameService extends Logic
 		self.enemyTower.Unit.hp = finalTowerHP
 		self.enemyTower.Unit.curState = "stand"  -- 상태 리셋 (die → stand)
 		
-		-- 메소 초기화
-		if self.mesoIncome ~= nil and self.mesoIncome.MesoIncome ~= nil then
-			self.mesoIncome.MesoIncome:InitData(roundData.initMeso, roundData.mesoIncome)
-		end
+		-- 메소 초기화 (서버에서 실행) - 기본 회복속도는 1, 증강 선택 시 증가
+		self:InitMesoOnServer(roundData.initMeso, 1)
 		
 		log("라운드 " .. tostring(roundId) .. " 시작 (타워 HP: " .. tostring(finalTowerHP) .. ")")
-		
+
 		-- 첫 웨이브 시작
 		self:StartNextWave()
+	end
+
+	@ExecSpace("Server")
+	method void InitMesoOnServer(integer initMeso, integer mesoIncome)
+		local mapPath = "/maps/MatrixStage"
+		local mesoIncomeEntity = _EntityService:GetEntityByPath(mapPath .. "/ingameIncome")
+		if mesoIncomeEntity ~= nil and mesoIncomeEntity.MesoIncome ~= nil then
+			mesoIncomeEntity.MesoIncome:InitData(initMeso, mesoIncome)
+		end
 	end
 
 	@ExecSpace("Client")
@@ -385,6 +392,12 @@ script MatrixGameService extends Logic
 	-- 증강 선택 완료 후 호출
 	@ExecSpace("Client")
 	method void OnAugmentSelected()
+		-- 현재 라운드의 메소 회복속도 보너스 적용
+		local roundData = self:GetRoundData(self.currentRoundId)
+		if roundData ~= nil and roundData.mesoIncome > 0 then
+			self:ApplyMesoIncomeBonus(roundData.mesoIncome)
+		end
+
 		-- 초기 증강 선택인 경우 (게임 시작 시)
 		if self.isInitialAugmentSelection then
 			self.isInitialAugmentSelection = false
@@ -404,6 +417,15 @@ script MatrixGameService extends Logic
 		else
 			-- 일반 페이즈: 다음 라운드
 			self:StartRound(self.currentRoundId + 1)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void ApplyMesoIncomeBonus(number percent)
+		local mapPath = "/maps/MatrixStage"
+		local mesoIncomeEntity = _EntityService:GetEntityByPath(mapPath .. "/ingameIncome")
+		if mesoIncomeEntity ~= nil and mesoIncomeEntity.MesoIncome ~= nil then
+			mesoIncomeEntity.MesoIncome:IncreaseIncomeByPercent(percent)
 		end
 	end
 
