@@ -17,6 +17,11 @@ script CustomFootholdComponent extends Component
 	@Sync
 	property float FootholdWalkSpeedFactor = 1
 
+	---@description "Determines whether the Entity is blocked by vertical footholds in its TileMap. Only pertains to Entities with RigidbodyComponent."
+	---@sealed
+	@Sync
+	property boolean IsBlockVerticalLine = false
+
 	---@description "Can move the foothold or change the shape while playing if the value is true. Please be aware that changing the foothold's location or shape frequently may negatively affect your World's function."
 	---@sealed
 	property boolean IsDynamicFoothold = false

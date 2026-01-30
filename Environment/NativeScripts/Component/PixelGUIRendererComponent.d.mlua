@@ -45,6 +45,11 @@ script PixelGUIRendererComponent extends Component
 	@ExecSpace("ClientOnly")
 	method table<Color> GetPixels() end
 
+	---@description "Returns all pixel values as RGBA represented as integers. Prioritizes rows. (Row-major)"
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method table<integer> GetPixelsAsRGBAInt() end
+
 	---@description "Resets the sprite to be customized to the size you've entered and fills it with the color."
 	---@sealed
 	@ExecSpace("ClientOnly")
@@ -69,6 +74,11 @@ script PixelGUIRendererComponent extends Component
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method void SetPixels(table<Color> pixels) end
+
+	---@description "Sets all pixels values as RGBA represented as integers. The length of the table must be the same as the total pixel count (Width*Height) and prioritizes rows. (Row-major)"
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method void SetPixelsByRGBAInt(table<integer> pixels) end
 
 	emitter EmitOrderInLayerChangedEvent(OrderInLayerChangedEvent event) end
 

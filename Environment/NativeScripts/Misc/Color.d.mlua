@@ -58,6 +58,9 @@ script Color
 	---@description "Creates a Color entity using the hexadecimal number color value hex code. Uses a format such as #FFFFFF."
 	static method Color FromHexCode(string hexCode) end
 
+	---@description "Creates a Color entity using the RGBA represented as an integer."
+	static method Color FromRGBAInt(integer rgba) end
+
 	---@description "Finds the grayscale of the color."
 	static method float Grayscale(Color color) end
 
@@ -91,6 +94,20 @@ script Color
 	---@description "Converts the RGB value to HSV and returns it."
 	---@sealed
 	method float, float, float RGBToHSV() end
+
+	---@description "Converts RGBA to hex code."
+	static method string ToHexCode(Color color) end
+
+	---@description "Converts RGBA to hex code."
+	---@sealed
+	method string ToHexCode() end
+
+	---@description "Converts RGBA to an integer. Uses the '0xFFFFFFFF' format."
+	static method integer ToRGBAInt(Color color) end
+
+	---@description "Converts RGBA to an integer. Uses the '0xFFFFFFFF' format."
+	---@sealed
+	method integer ToRGBAInt() end
 
 	---@description "Checks if the two values are different. Returns false if all values are the same. Otherwise, returns true."
 	static operator boolean Inequality(Color left, Color right) end
