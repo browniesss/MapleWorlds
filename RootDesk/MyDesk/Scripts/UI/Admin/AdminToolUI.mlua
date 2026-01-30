@@ -2,24 +2,26 @@
 script AdminToolUI extends Component
 
 	property Entity InputTargetUserID = "Path/To/InputTargetUserID"
-
 	property Entity InputKey = "Path/To/InputKey"
-
 	property Entity InputValue = "Path/To/InputValue"
-
 	property Entity OutputLog = "Path/To/OutputLog"
-
+	
 	property Entity ButtonGet = "Path/To/ButtonGet"
-
 	property Entity ButtonSet = "Path/To/ButtonSet"
-
 	property Entity ButtonDelete = "Path/To/ButtonDelete"
 
 	method void OnBeginPlay()
-		-- 관리자 권한 체크 요청
-		_AdminService:CheckAdminPermission()
+		-- AdminProtocol 찾기
+		local protocol = self.Entity.AdminProtocol
+		if protocol == nil then
+			self:Log("Error: AdminProtocol not found on this entity.")
+			return
+		end
 		
-		-- 버튼 이벤트 연결 (실제로는 에디터에서 연결하거나 코드에서 동적으로 연결)
+		-- 관리자 권한 체크 요청
+		protocol:CheckAdminPermissionCall()
+		
+		-- 버튼 이벤트 연결
 		self.ButtonGet.ButtonClickEvent:Connect(function() self:OnClickGet() end)
 		self.ButtonSet.ButtonClickEvent:Connect(function() self:OnClickSet() end)
 		self.ButtonDelete.ButtonClickEvent:Connect(function() self:OnClickDelete() end)
@@ -35,7 +37,8 @@ script AdminToolUI extends Component
 		end
 		
 		self:Log("Requesting GET for " .. key .. "...")
-		_AdminService:ReqGetData(targetId, key)
+		-- Type is hardcoded to "User"
+		self.Entity.AdminProtocol:ReqGetDataCall(targetId, key, "User")
 	end
 
 	method void OnClickSet()
@@ -49,9 +52,9 @@ script AdminToolUI extends Component
 		end
 		
 		self:Log("Requesting SET for " .. key .. "...")
-		_AdminService:ReqSetData(targetId, key, value)
+		self.Entity.AdminProtocol:ReqSetDataCall(targetId, key, value, "User")
 	end
-
+	
 	method void OnClickDelete()
 		local targetId = self.InputTargetUserID.TextInputComponent.Text
 		local key = self.InputKey.TextInputComponent.Text
@@ -62,16 +65,21 @@ script AdminToolUI extends Component
 		end
 		
 		self:Log("Requesting DELETE for " .. key .. "...")
-		_AdminService:ReqDeleteData(targetId, key)
+		self.Entity.AdminProtocol:ReqDeleteDataCall(targetId, key, "User")
 	end
 
 	method void Log(string msg)
 		local currentText = self.OutputLog.TextComponent.Text
 		self.OutputLog.TextComponent.Text = "[" .. DateTime.Now:ToString() .. "] " .. msg .. "\n" .. currentText
 	end
-
+	
 	method void SetOutputValue(string value)
 		self.InputValue.TextInputComponent.Text = value
+	end
+	
+	method void SetVisible(boolean visible)
+		self.Entity.Visible = visible
+		self.Entity.Enable = visible
 	end
 
 end
