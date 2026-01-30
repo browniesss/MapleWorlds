@@ -1,0 +1,67 @@
+@Component
+script AdminProtocol extends CommonProtocol
+
+	@ExecSpace("Server")
+	method void ReqGetDataCall(string targetUserId, string key, string type)
+		self:CommonCall(senderUserId)
+		_AdminService:ServerReqGetData(senderUserId, targetUserId, key, type, self)
+	end
+
+	@ExecSpace("Client")
+	method void ResGetDataBack(string value)
+		-- UI에 결과 전달
+		local adminUI = self.Entity.AdminToolUI
+		if adminUI ~= nil then
+			adminUI:Log("Result: " .. value)
+			adminUI:SetOutputValue(value)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void ReqSetDataCall(string targetUserId, string key, string value, string type)
+		self:CommonCall(senderUserId)
+		_AdminService:ServerReqSetData(senderUserId, targetUserId, key, value, type, self)
+	end
+	
+	@ExecSpace("Client")
+	method void ResSetDataBack(string result)
+		local adminUI = self.Entity.AdminToolUI
+		if adminUI ~= nil then
+			adminUI:Log(result)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void ReqDeleteDataCall(string targetUserId, string key, string type)
+		self:CommonCall(senderUserId)
+		_AdminService:ServerReqDeleteData(senderUserId, targetUserId, key, type, self)
+	end
+
+	@ExecSpace("Client")
+	method void ResDeleteDataBack(string result)
+		local adminUI = self.Entity.AdminToolUI
+		if adminUI ~= nil then
+			adminUI:Log(result)
+		end
+	end
+	
+	@ExecSpace("Server")
+	method void CheckAdminPermissionCall()
+		local isAdmin = _AdminService:IsAdmin(senderUserId)
+		self:ResCheckAdminPermissionBack(isAdmin)
+	end
+
+	@ExecSpace("Client")
+	method void ResCheckAdminPermissionBack(boolean isAdmin)
+		local adminUI = self.Entity.AdminToolUI
+		if adminUI ~= nil then
+			adminUI:SetVisible(isAdmin)
+			if isAdmin then
+				adminUI:Log("Admin Access Granted.")
+			else
+				log("Admin Access Denied.")
+			end
+		end
+	end
+
+end

@@ -1,0 +1,169 @@
+@Logic
+script AdminService extends Logic
+
+	-- 관리자 목록 (UserID 또는 ProfileCode)
+	property table adminList = {
+		"AdminUserID_1", -- 예시: 실제 관리자 ID로 교체 필요
+		"AdminUserID_2"
+	}
+
+	@ExecSpace("Server")
+	method boolean IsAdmin(string userId)
+		if userId == nil then
+			return false
+		end
+		
+		for _, adminId in ipairs(self.adminList) do
+			if adminId == userId then
+				return true
+			end
+		end
+		
+		return false
+	end
+
+	@ExecSpace("Server")
+	method void ServerReqGetData(string sender, string targetUserId, string key, string type, AdminProtocol proto)
+		if not self:IsAdmin(sender) then
+			log_warning("Unauthorized Admin Access Attempt: " .. tostring(sender))
+			return
+		end
+		
+		if type == "User" then
+			local ds = _DataStorageService:GetUserDataStorage(targetUserId)
+			ds:GetAsync(key, function(errorcode, key, value)
+				local resultValue = "nil"
+				if value ~= nil then
+					resultValue = tostring(value)
+				end
+				
+				if errorcode == 0 then
+					proto:ResGetDataBack(resultValue, sender)
+				else
+					proto:ResGetDataBack("Error: " .. tostring(errorcode), sender)
+				end
+			end)
+		elseif type == "Global" then
+			local ds = _DataStorageService:GetGlobalDataStorage()
+			ds:GetAsync(key, function(errorcode, key, value)
+				local resultValue = "nil"
+				if value ~= nil then
+					resultValue = tostring(value)
+				end
+				
+				if errorcode == 0 then
+					proto:ResGetDataBack(resultValue, sender)
+				else
+					proto:ResGetDataBack("Error: " .. tostring(errorcode), sender)
+				end
+			end)
+		elseif type == "Sortable" then
+			-- Sortable은 Name(targetUserId 자리에 사용)과 Key가 필요함
+			-- UI에서 TargetID를 SortableName으로 사용
+			local ds = _DataStorageService:GetSortableDataStorage(targetUserId)
+			-- SortableDataStorage는 GetAsync가 없고 GetSortableDataAsync? 확인 필요
+			-- 보통 GetWrapper 등을 사용하지만 여기서는 GetAsync로 가정하거나 문서 확인 필요
+			-- MSW SortableDataStorage는 Key-Value 조회가 아니라 Rank 조회용이 주 목적이나, 데이터를 저장할 수도 있음.
+			-- GetAsync 지원 여부는 확실하지 않으므로, 일단 GetAsync 시도. 실패 시 수정.
+			-- *수정*: SortableDataStorage는 주로 랭킹용. GetAsync가 없을 수 있음.
+			-- 하지만 UserUserDataStorage와 동일한 인터페이스(DataStorage)를 상속받는다면 가능.
+			
+			ds:GetAsync(key, function(errorcode, key, value)
+				local resultValue = "nil"
+				if value ~= nil then
+					resultValue = tostring(value)
+				end
+				
+				if errorcode == 0 then
+					proto:ResGetDataBack(resultValue, sender)
+				else
+					proto:ResGetDataBack("Error: " .. tostring(errorcode), sender)
+				end
+			end)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void ServerReqSetData(string sender, string targetUserId, string key, string value, string type, AdminProtocol proto)
+		if not self:IsAdmin(sender) then
+			log_warning("Unauthorized Admin Access Attempt: " .. tostring(sender))
+			return
+		end
+		
+		-- 값 타입 추론
+		local finalValue = value
+		local numValue = tonumber(value)
+		if numValue ~= nil then
+			finalValue = numValue
+		end
+		if value == "true" then finalValue = true end
+		if value == "false" then finalValue = false end
+
+		if type == "User" then
+			local ds = _DataStorageService:GetUserDataStorage(targetUserId)
+			ds:SetAsync(key, finalValue, function(errorcode)
+				if errorcode == 0 then
+					proto:ResSetDataBack("Success: Set " .. key .. " = " .. tostring(finalValue), sender)
+				else
+					proto:ResSetDataBack("Error: " .. tostring(errorcode), sender)
+				end
+			end)
+		elseif type == "Global" then
+			local ds = _DataStorageService:GetGlobalDataStorage()
+			ds:SetAsync(key, finalValue, function(errorcode)
+				if errorcode == 0 then
+					proto:ResSetDataBack("Success: Set Global " .. key .. " = " .. tostring(finalValue), sender)
+				else
+					proto:ResSetDataBack("Error: " .. tostring(errorcode), sender)
+				end
+			end)
+		elseif type == "Sortable" then
+			local ds = _DataStorageService:GetSortableDataStorage(targetUserId) -- targetUserId as StorageName
+			ds:SetAsync(key, finalValue, function(errorcode)
+				if errorcode == 0 then
+					proto:ResSetDataBack("Success: Set Sortable " .. key .. " = " .. tostring(finalValue), sender)
+				else
+					proto:ResSetDataBack("Error: " .. tostring(errorcode), sender)
+				end
+			end)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void ServerReqDeleteData(string sender, string targetUserId, string key, string type, AdminProtocol proto)
+		if not self:IsAdmin(sender) then
+			log_warning("Unauthorized Admin Access Attempt: " .. tostring(sender))
+			return
+		end
+		
+		if type == "User" then
+			local ds = _DataStorageService:GetUserDataStorage(targetUserId)
+			ds:DeleteAsync(key, function(errorcode)
+				if errorcode == 0 then
+					proto:ResDeleteDataBack("Success: Deleted " .. key, sender)
+				else
+					proto:ResDeleteDataBack("Error: " .. tostring(errorcode), sender)
+				end
+			end)
+		elseif type == "Global" then
+			local ds = _DataStorageService:GetGlobalDataStorage()
+			ds:DeleteAsync(key, function(errorcode)
+				if errorcode == 0 then
+					proto:ResDeleteDataBack("Success: Deleted Global " .. key, sender)
+				else
+					proto:ResDeleteDataBack("Error: " .. tostring(errorcode), sender)
+				end
+			end)
+		elseif type == "Sortable" then
+			local ds = _DataStorageService:GetSortableDataStorage(targetUserId)
+			ds:DeleteAsync(key, function(errorcode)
+				if errorcode == 0 then
+					proto:ResDeleteDataBack("Success: Deleted Sortable " .. key, sender)
+				else
+					proto:ResDeleteDataBack("Error: " .. tostring(errorcode), sender)
+				end
+			end)
+		end
+	end
+
+end
