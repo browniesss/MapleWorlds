@@ -88,4 +88,44 @@ script AdminService extends Logic
 		end)
 	end
 
+	property table commonKeys = {}
+	property table unitKeys = {}
+	property table badgeKeys = {}
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		-- 1. Common Keys
+		self.commonKeys = {
+			"USER_ATTENDANCE",
+			"USER_PLAY_COIN",
+			"USER_TUTORIAL",
+			"USER_COIN",
+			"USER_STAGE",
+			"MESO_INITIAL_REWARD"
+		}
+		
+		-- 2. User Unit Keys: USER_{UnitID}
+		local unitDataSet = _DataService:GetTable("Unit")
+		if unitDataSet ~= nil then
+			for index = 1, unitDataSet:GetRowCount() do
+				local unitId = tostring(unitDataSet:GetCell(index, 'id'))
+				if unitId ~= nil and unitId ~= "" then
+					table.insert(self.unitKeys, "USER_" .. unitId)
+				end
+			end
+		end
+		
+		-- 3. Badge Keys: BADGE_REWARD & BADGE_ACQUIRED
+		local badgeDataSet = _DataService:GetTable("BadgeConditions")
+		if badgeDataSet ~= nil then
+			for index = 1, badgeDataSet:GetRowCount() do
+				local badgeId = tostring(badgeDataSet:GetCell(index, 'badge_id'))
+				if badgeId ~= nil and badgeId ~= "" then
+					table.insert(self.badgeKeys, "BADGE_REWARD_" .. badgeId)
+					table.insert(self.badgeKeys, "BADGE_ACQUIRED_" .. badgeId)
+				end
+			end
+		end
+	end
+
 end

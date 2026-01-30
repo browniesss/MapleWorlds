@@ -48,16 +48,28 @@ script AdminProtocol extends CommonProtocol
 	@ExecSpace("Server")
 	method void CheckAdminPermissionCall()
 		local isAdmin = _AdminService:IsAdmin(senderUserId)
-		self:ResCheckAdminPermissionBack(isAdmin)
+		
+		local common = {}
+		local unit = {}
+		local badge = {}
+		
+		if isAdmin then
+			common = _AdminService.commonKeys
+			unit = _AdminService.unitKeys
+			badge = _AdminService.badgeKeys
+		end
+		
+		self:ResCheckAdminPermissionBack(isAdmin, common, unit, badge)
 	end
 
 	@ExecSpace("Client")
-	method void ResCheckAdminPermissionBack(boolean isAdmin)
+	method void ResCheckAdminPermissionBack(boolean isAdmin, table common, table unit, table badge)
 		local adminUI = self.Entity.AdminToolUI
 		if adminUI ~= nil then
 			adminUI:SetVisible(isAdmin)
 			if isAdmin then
 				adminUI:Log("Admin Access Granted.")
+				-- adminUI:UpdateKeyLists(common, unit, badge) -- 추후 UI 구현 시 사용
 			else
 				log("Admin Access Denied.")
 			end
