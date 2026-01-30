@@ -2,13 +2,24 @@
 script AdminToolUI extends Component
 
 	property Entity InputTargetUserID = "Path/To/InputTargetUserID"
+
 	property Entity InputKey = "Path/To/InputKey"
+
 	property Entity InputValue = "Path/To/InputValue"
+
 	property Entity OutputLog = "Path/To/OutputLog"
-	
+
 	property Entity ButtonGet = "Path/To/ButtonGet"
+
 	property Entity ButtonSet = "Path/To/ButtonSet"
+
 	property Entity ButtonDelete = "Path/To/ButtonDelete"
+
+	property table common = {}
+
+	property table unit = {}
+
+	property table badge = {}
 
 	method void OnBeginPlay()
 		-- AdminProtocol 찾기
@@ -54,7 +65,7 @@ script AdminToolUI extends Component
 		self:Log("Requesting SET for " .. key .. "...")
 		self.Entity.AdminProtocol:ReqSetDataCall(targetId, key, value, "User")
 	end
-	
+
 	method void OnClickDelete()
 		local targetId = self.InputTargetUserID.TextInputComponent.Text
 		local key = self.InputKey.TextInputComponent.Text
@@ -72,14 +83,22 @@ script AdminToolUI extends Component
 		local currentText = self.OutputLog.TextComponent.Text
 		self.OutputLog.TextComponent.Text = "[" .. DateTime.Now:ToString() .. "] " .. msg .. "\n" .. currentText
 	end
-	
+
 	method void SetOutputValue(string value)
 		self.InputValue.TextInputComponent.Text = value
 	end
-	
+
 	method void SetVisible(boolean visible)
 		self.Entity.Visible = visible
 		self.Entity.Enable = visible
 	end
 
+	method void UpdateKeyLists(table common, table unit, table badge)
+		self.common = common
+		self.unit = unit
+		self.badge = badge
+		
+		self:Log("Received Key Lists: Common=" .. #common .. ", Unit=" .. #unit .. ", Badge=" .. #badge)
+	end
+	
 end

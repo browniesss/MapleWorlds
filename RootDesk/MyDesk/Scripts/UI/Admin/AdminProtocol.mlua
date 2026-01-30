@@ -69,7 +69,7 @@ script AdminProtocol extends CommonProtocol
 			adminUI:SetVisible(isAdmin)
 			if isAdmin then
 				adminUI:Log("Admin Access Granted.")
-				-- adminUI:UpdateKeyLists(common, unit, badge) -- 추후 UI 구현 시 사용
+				adminUI:UpdateKeyLists(common, unit, badge)
 			else
 				log("Admin Access Denied.")
 			end

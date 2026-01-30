@@ -109,8 +109,10 @@ script AdminService extends Logic
 		if unitDataSet ~= nil then
 			for index = 1, unitDataSet:GetRowCount() do
 				local unitId = tostring(unitDataSet:GetCell(index, 'id'))
+				local unitName = tostring(unitDataSet:GetCell(index, 'name'))
+				
 				if unitId ~= nil and unitId ~= "" then
-					table.insert(self.unitKeys, "USER_" .. unitId)
+					table.insert(self.unitKeys, { key = "USER_" .. unitId, name = unitName })
 				end
 			end
 		end
