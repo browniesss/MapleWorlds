@@ -22,7 +22,7 @@ script AdminProtocol extends CommonProtocol
 		self:CommonCall(senderUserId)
 		_AdminService:ServerReqSetData(senderUserId, targetUserId, key, value, type, self)
 	end
-	
+
 	@ExecSpace("Client")
 	method void ResSetDataBack(string result)
 		local adminUI = self.Entity.AdminToolUI
@@ -44,7 +44,7 @@ script AdminProtocol extends CommonProtocol
 			adminUI:Log(result)
 		end
 	end
-	
+
 	@ExecSpace("Server")
 	method void CheckAdminPermissionCall()
 		local isAdmin = _AdminService:IsAdmin(senderUserId)

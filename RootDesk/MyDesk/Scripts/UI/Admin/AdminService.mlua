@@ -1,11 +1,9 @@
 @Logic
 script AdminService extends Logic
 
-	-- 관리자 목록 (UserID 또는 ProfileCode)
-	property table adminList = {
-		"AdminUserID_1", -- 예시: 실제 관리자 ID로 교체 필요
-		"AdminUserID_2"
-	}
+	property table adminList = {"AdminUserID_1", "AdminUserID_2"}
+
+	property table NewValue1 = {}
 
 	@ExecSpace("Server")
 	method boolean IsAdmin(string userId)
@@ -98,7 +96,7 @@ script AdminService extends Logic
 		end
 		if value == "true" then finalValue = true end
 		if value == "false" then finalValue = false end
-
+		
 		if type == "User" then
 			local ds = _DataStorageService:GetUserDataStorage(targetUserId)
 			ds:SetAsync(key, finalValue, function(errorcode)
