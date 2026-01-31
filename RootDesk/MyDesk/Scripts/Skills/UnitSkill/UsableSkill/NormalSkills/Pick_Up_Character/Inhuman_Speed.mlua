@@ -16,8 +16,6 @@ script Inhuman_Speed extends SkillParent
 			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
 		end
 		
-		self:CallLoopAnimation("illusionLoop")
-		
 		local basePos = self.Entity.TransformComponent.WorldPosition
 		
 		local options = {

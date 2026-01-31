@@ -7,14 +7,13 @@ script Vortex_Sphere extends SkillParent
 	method void ActivateSkill()
 		__base:ActivateSkill()
 		
-		-- 3cac6c2bf6804d5999207c1b0719e8d7
 		-- ProjectileParent 가져오기
 		if self._T.projectileParent == nil then
 			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
 		end
 		
 		-- 스폰 위치 계산 (캐스터 앞)
-		local offset = Vector3(1.5, 0.5, 0)
+		local offset = Vector3(3.5, 0.5, 0)
 		if self.caster.Unit.isEnemy then
 			offset.x = -offset.x
 		end
@@ -30,7 +29,7 @@ script Vortex_Sphere extends SkillParent
 			)
 			
 			-- 끌어당기는 콜백 정의
-			local pullSpeed = 0.15
+			local pullSpeed = 0.3
 			local sphereEntity = self.sphereEntity
 			local pullCallback = function(target)
 				if not isvalid(sphereEntity) then
@@ -40,17 +39,14 @@ script Vortex_Sphere extends SkillParent
 				local spherePos = sphereEntity.TransformComponent.WorldPosition
 				local targetPos = target.TransformComponent.WorldPosition
 			
-				-- 구체 방향으로 이동
+				-- 구체 방향으로 X축만 이동 (Y축은 고정)
 				local dx = spherePos.x - targetPos.x
-				local dy = spherePos.y - targetPos.y
-				local distance = math.sqrt(dx * dx + dy * dy)
-			
-				if distance > 0.1 then
-					local moveX = (dx / distance) * pullSpeed
-					local moveY = (dy / distance) * pullSpeed
+		
+				if math.abs(dx) > 0.1 then
+					local moveX = (dx / math.abs(dx)) * pullSpeed
 					target.TransformComponent.WorldPosition = Vector3(
 						targetPos.x + moveX,
-						targetPos.y + moveY,
+						targetPos.y,
 						targetPos.z
 					)
 				end
