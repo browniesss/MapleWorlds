@@ -5,22 +5,37 @@
 **Platform**: MapleStory Worlds (MSW)
 **Language**: mLua (MSW Custom Lua)
 
-This project is a 2D Defense game where players summon units, manage resources (Meso), and defend against waves of enemies. It features normal/hard modes, event modes, and multiplayer synchronization.
+This project is a 2D Defense game where players summon units, manage resources (Meso), and defend against waves of enemies. It features normal/hard modes, event modes, multiplayer synchronization, and a PVP system.
 
 ## 2. Directory Structure
 
-The project follows the standard MSW structure with custom script organization.
+The project follows the standard MSW structure with an extensive custom script organization.
 
-- **`RootDesk/`**: The main workspace directory.
-    - **`MyDesk/`**: User content directory.
-        - **`Scripts/`**: Core game scripts.
-            - **`GameLogic/`**: Central game management logic.
-            - **`Units/`**: Unit-specific logic (Unit component, UnitShop).
-            - **`Skills/`**: Skill logic (though `SkillManager` is in `GameLogic`).
-            - **`UI/`**: UI control scripts, organized by scene/function (Lobby, Ingame, Popup).
-            - **`CommonProtocol.mlua`**: Network protocol base.
-            - **`ProtocolService.mlua`**: Network service.
-- **`Environment/`**: Native scripts and configuration.
+- **`Environment/`**: Native scripts (`NativeScripts/`) and configuration.
+- **`Global/`**: Global game logic, models (`DefaultPlayer`, `Foothold`), and world config.
+- **`map/`**: Map files for Chapters, Stages, Events, and Lobby.
+- **`RootDesk/MyDesk/`**: User content directory.
+    - **`DataSets/`**: Extensive game data (stages, skills, items, shop, synergy, etc.).
+    - **`Prefab/`**: Game object templates.
+        - **`ItemPrefab/`**: Drop items (Coins, HP/MP packs).
+        - **`SkillPrefab/`**: Visual representations of skills (Projectiles, Effects).
+        - **`UI/`**: UI Prefabs (Badges, StageSelect, Synergy, etc.).
+        - **`UnitPrefab/`**: Character and Enemy units organized by region/type.
+    - **`Scripts/`**: Core game logic.
+        - **`Analytics/`**: Analytics service and config.
+        - **`GameLogic/`**: Central game management (GameManager, Start/Spawn Managers, varied Services).
+        - **`Item/`**: Item behavior scripts.
+        - **`Lobby/`**: Looby-specific logic (Portals, StageRanking, UserDeckSetting).
+        - **`Map/`**: Minimap and map management.
+        - **`Meso/`**: Economy logic (Wallet, Income, UI).
+        - **`Npc/`**: NPC behaviors.
+        - **`Player/`**: Player logic (Deck, SkillDeck, Character).
+        - **`PVP/`**: PVP system (Client, Protocol, Server/Ranking).
+        - **`Shop/`**: In-game shop logic (Gold, Diamond, Packages).
+        - **`Skills/`**: Skill components and logic (Player, Unit, BaseComponents).
+        - **`UI/`**: UI Managers (Popup, etc. - Note: specific UI scripts often co-located or in `Scripts/UI` if present).
+        - **`CommonProtocol.mlua`**: Network protocol base.
+        - **`ProtocolService.mlua`**: Network service.
 
 ## 3. Architecture & Key Components
 
@@ -31,113 +46,88 @@ These are global services accessible via `_ServiceName`.
 
 - **`GameManager` (`_GameManager`)**:
     - **Role**: Central controller for the game loop.
-    - **Responsibilities**:
-        - Manages State: `isPlaying`, `isEventMode`, `isHardMode`, `playStartTs`.
-        - Controls flow: `GameStart`, `GameEnd`, `StageClear`, `Fail`.
-        - UI Orchestration: Toggles Lobby/Ingame UI visibility.
-        - Timer Management: Handles the limitation timer.
-
-- **`StageService` (`_StageService`)**:
-    - **Role**: Static Data Manager for Stages.
-    - **Responsibilities**:
-        - Loads **`data:stage`** DataSet on init.
-        - Provides stage info (`GetStageById`, `GetNextOpenStageId`).
-        - Handles Hard Mode level adjustments (`hard_level`).
+    - **Responsibilities**: State management (Playing, Event, HardMode), Flow control, UI Orchestration, Timer.
 
 - **`SpawnManager` (`_SpawnManager`)**:
     - **Role**: Unit Spawning Factory.
-    - **Responsibilities**:
-        - `Spawn(modelID, price, pos)`: Spawns player units.
-        - `SpawnEnemy(modelID, pos)`: Spawns enemies with level scaling.
-        - **Synergy System**: Checks `UserSynergyComponent` to apply buffs (HP/MP/Critical/SummonPoint) to spawned units based on Job/Class.
-        - Validates resource (Meso) sufficiency (`IsCanSpawn`).
+    - **Responsibilities**: Spawning player units/enemies, Synergy checks, Resource validation.
+
+- **`MonsterSpawnService` / `Repo`**:
+    - **Description**: More advanced spawning logic located in `Scripts/GameLogic/MonsterSpawn/`, using repositories for patterns and groups (Event vs Normal).
 
 - **`SkillManager` (`_SkillManager`)**:
     - **Role**: Skill Data & Execution Manager.
-    - **Responsibilities**:
-        - Loads **`data:IngameSkillData`** DataSet.
-        - `GetSkill(skillID)`: Handles skill acquisition and leveling up (1 -> Max).
-        - `UseSkill`: Spawns skill entities (projectiles/effects).
+    - **Responsibilities**: Skill acquisition, leveling, and execution.
+
+- **`PVP Services`**:
+    - **Role**: Manages Player vs Player content.
+    - **Components**: `PvpRankingService`, `PvpProtocol`.
+
+- **`ShopService` / `BillingService`**:
+    - **Role**: Economy management.
+    - **Responsibilities**: Handling Coin/Diamond/Package transactions and rewards.
 
 ### 3.2. Key Components (Game Objects)
 
-- **`Unit`**: The core component for Characters, Monsters, and Towers.
-    - **Stats**: `hp`, `mp`, `attack`, `moveSpeed`, `attackSpeed` (Synced).
-    - **State Machine**:
-        - `Stand`: Idle, searching for targets.
-        - `Move`: Moving towards `curTarget`.
-        - `Attack`: Melee or Ranged attack based on `attackRange`.
-        - `UseSkill`: Executes active skills.
-        - `Die`: Death processing.
-    - **AI**: Simple aggro logic (`FindTarget`) prioritizing closest enemies.
+- **`Unit`**: Core component for Characters/Monsters.
+    - **Stats**: Synced HP, MP, Attack, Speed.
+    - **State Machine**: Stand, Move, Attack, UseSkill, Die.
+    - **AI**: Chase and Wander components (Native/Custom).
+
+- **`PlayerCharacter`**:
+    - **Role**: Represents the user's avatar.
+    - **Features**: Deck management (`UserDeck`), Skill usage (`UserSkillDeck`).
 
 ## 4. Systems Breakdown
 
-### 4.1. UI System (`Scripts/UI/`)
-UI logic is separated into components attached to UI Entities.
-- **Lobby UI**:
-    - `LobbyUI`: Root manager.
-    - `StageSelectorUI`: Handles Chapter/Stage selection, Hard Mode toggles, and Ranking display.
-    - `StartUI`: Game start entry point.
-- **Ingame UI**:
-    - `IngameInfoUI`: Displays HP, MP, Wave info (inferred).
-    - `ClearRewardUI`: Shows rewards (Coins, Meso, Event Tokens) after clearing a stage.
-- **Popup UI**:
-    - `FailPopup`: Shows restart/quit options on failure.
-- **Admin UI**:
-    - `AdminToolUI`: Interface for Admin data management.
+### 4.1. UI System
+UI logic is distributed across directories but centralized in function:
+- **Lobby**: `StageSelectorUI`, `UserDeckSetting`, `StageRanking`.
+- **Ingame**: `IngameInfoUI`, `ClearRewardUI`.
+- **Shop**: `PurchasePopup`, `MushDiaPassUI`, `EventShopPopup`.
+- **PVP**: Specific UI for PVP ranking and matchmaking (inferred).
 
 ### 4.2. Data Management
-Data is largely driven by MSW **DataSets** accessed via `_DataService`.
-- **`stage`**: Stage config (Chapter, Stage, Name, Monster Level, Tower HP).
-- **`IngameSkillData`**: Skill properties (ID, Name, CoolTime, Amount).
-- **`EventData`**: Event-specific configurations.
+Data is driven by **DataSets** (`RootDesk/MyDesk/DataSets/`):
+- **`Stage`**: Configs for stages and events.
+- **`Synergy`**: Synergy definitions and bonuses.
+- **`SpawnPattern`**: Detailed wave definitions (`SpawnGroup`, `SpawnPattern`).
+- **`Shop`**: Prices and rewards for various currencies (`coin`, `dia`, `play_coin`).
 
 ### 4.3. Networking Flow
-1.  **Action**: User clicks "Spawn" or Unit attacks.
-2.  **Request**: Client calls Server method (e.g., `_SpawnManager:Spawn`).
-3.  **Validation**: Server checks resources (Meso) and state.
-4.  **Execution**: Server spawns Entity, deducts resources, updates Sync properties.
-5.  **Replication**: MSW automatically syncs `@Sync` properties (HP, Pos) to all clients.
-6.  **Feedback**: Server may call Client callback (e.g., `_GameManager:StageClearClientCallback`) for local UI effects (Victory anim).
+Standard MSW Server-Client architecture:
+1.  **Action**: User input (Spawn, Skill).
+2.  **Request**: `ProtocolService` or specific Managers call Server functions.
+3.  **Validation**: Server checks resources/state.
+4.  **Execution**: Server modifies `@Sync` properties or spawns entities.
+5.  **Replication**: MSW engine handles property sync.
 
-### 4.4. Admin System (`Scripts/UI/Admin/`)
-The Admin System allows authorized users to manage User Data directly.
-- **`AdminService`**:
-    - **Role**: Server-only logic for processing admin requests.
-    - **Features**:
-        - **Permission**: controlled via allowed User ID list.
-        - **Operation**: Supports `Get`, `Set`, `Delete` for **UserDataStorage** specific keys.
-        - **Execution**: Uses synchronous `Wait` functions for reliable data handling.
-- **`AdminProtocol`**:
-    - **Role**: Network bridge between Client UI and Server Logic.
-    - **Features**:
-        - Transmits execution results as standard Tables (`IsSuccess`, `Data`/`Message`).
-        - Handles sensitive parameter naming conventions (e.g., using `uid` instead of `targetUserId`).
-- **`AdminToolUI`**:
-    - **Role**: Client-side interface for Admin operations.
-    - **Features**: Dynamically populates Unit and Common key lists for easy access.
+### 4.4. PVP System (`Scripts/PVP/`)
+A structured system for competitive play.
+- **Architecture**: Separated into `Client`, `Server`, and `Protocol`.
+- **Ranking**: `PvpRankingService` handles ELO/Score.
+- **Protocol**: dedicated `pvpProtocol` for match state sync.
 
-## 5. Game Logic Flow (Example: Stage Clear)
-1.  **Trigger**: `Unit` logic or `GameManager` detects win condition (Enemy Tower Dead or Wave Clear).
-2.  **Client**: `StageClear()` calls `_GameManager:StageClearServer`.
-3.  **Server `StageClearServer`**:
-    - **Validation**: Checks play time and cheat detection.
-    - **Logic**:
-        - Updates `UserStage` (unlocks next stage/hard mode).
-        - Calculates Rank Score (`_RankingService`).
-        - Distributes Rewards (First Clear vs Re-clear).
-        - Handles Event Mode specifics.
-4.  **Client Callback**:
-    - `StageClearClientCallback` triggered.
-    - **UI**: Shows `ClearRewardUI` with calculated rewards.
-    - **FX**: Plays "Victory" emotion/animation.
-
-## 6. Coding Conventions
+## 5. Coding Conventions
 - **Execution Spaces**:
     - `@ExecSpace("Server")`: Server-authoritative logic.
     - `@ExecSpace("Client")`: Visuals, Input, UI.
-- **Sync**: Use `@Sync` for gameplay-critical data (HP, State).
-- **Services**: All Managers are singletons prefixed with `_` (e.g., `_GameManager`).
-- **Data Loading**: `OnBeginPlay` in Logic scripts is used to load DataSets into memory tables.
-- **Network Parameters**: When calling Server functions from Client space, do NOT include parameters named `senderUserId` or `targetUserId` in the function signature, as these may conflict with internal system parameters or best practices.
+- **Sync**: Use `@Sync` for gameplay-critical data.
+- **Services**: Singletons prefixed with `_`.
+- **Data Loading**: `OnBeginPlay` loads DataSets.
+- **Network Parameters**: Avoid `senderUserId` / `targetUserId` in client-to-server calls.
+
+## 7. Development Tools (MCP)
+The **msw-api** MCP server provides specialized tools to assist with MapleStory Worlds development.
+
+### 7.1. References & Guidelines
+- **`mluaEntry`**: **Start here** when editing mlua files. Provides guidance on tool usage order.
+- **`msw_helper`**: Categorized reference guide. Use to find specific component/service docs (e.g., `classes`, `Service`, `Component`, `Annotation`).
+- **`guideline`**: **Must read** for core MSW concepts. Covers execution spaces, sync, hierarchy, and resource management.
+- **`grammer`**: Mlua syntax guide. Use when unsure about specific language features (properties, events, sync).
+
+### 7.2. Search & Retrieval
+- **`API_Retriever`**: Search for specific API specifications (Classes, Functions, Components).
+    - *Example*: "Find functions for `UserService`" or "Properties of `TextComponent`".
+- **`Document_Retriever`**: Semantic search for implementation concepts and "how-to" guides.
+    - *Example*: "How to make a leaderboard" or "Implementing periodic damage".
