@@ -44,6 +44,15 @@ script AdminService extends Logic
 			resultValue = tostring(value)
 		end
 		
+		if type == "UNIT" then
+			local monsterId, _ = string.gsub(key, "USER_", "")
+			
+			local data = UserUnitModel()
+			data.id = monsterId
+			
+			resultValue = data:ENCODE()
+		end
+		
 		if errorcode == 0 then
 			result.IsSuccess = true
 			result.Data = resultValue
@@ -67,21 +76,21 @@ script AdminService extends Logic
 		end
 		
 		-- 값 타입 추론
-		local finalValue = value
-		local numValue = tonumber(value)
-		if numValue ~= nil then
-			finalValue = numValue
+		local finalValue = _HttpService:JSONDecode(value)
+		
+		if finalValue == nil then
+			result.IsSuccess = false
+			result.Message = "Invalide Value: " .. value
+			return result
 		end
-		if value == "true" then finalValue = true end
-		if value == "false" then finalValue = false end
 		
 		-- User Data 만 처리
 		local ds = _DataStorageService:GetUserDataStorage(uid)
-		local errorcode = ds:SetAndWait(key, finalValue)
+		local errorcode = ds:SetAndWait(key, value)
 		
 		if errorcode == 0 then
 			result.IsSuccess = true
-			result.Message = key .. " = " .. tostring(finalValue)
+			result.Message = key .. " = " .. tostring(value)
 		else
 			result.IsSuccess = false
 			result.Message = tostring(errorcode)
