@@ -76,7 +76,8 @@ script SkillSlot extends Component
 	@EventSender("Service", "InputService")
 	handler HandleKeyDownEvent(KeyDownEvent event)
 		-- Entity가 비활성화 상태면 무시 (Service 이벤트는 Enable과 무관하게 수신됨)
-		if not self.Entity.Enable then
+		-- EnabledInHierarchy를 사용해 부모가 비활성화된 경우도 체크 (매트릭스/일반 모드 스킬슬롯 충돌 방지)
+		if not self.Entity.EnabledInHierarchy then
 			return
 		end
 
