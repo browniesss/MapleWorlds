@@ -7,6 +7,11 @@ script BackgroundComponent extends Component
 	@Sync
 	property Color BottomColor = Color(0.000, 0.000, 1.000, 1.000)
 
+	---@description "When the Type is Sprite, the background image is scaled proportionally to fit the camera area without cropping."
+	---@sealed
+	@Sync
+	property boolean FitWithAspect = false
+
 	---@description "Specifies the Id of the material to be applied to the renderer."
 	---@sealed
 	@Sync
@@ -41,6 +46,11 @@ script BackgroundComponent extends Component
 	---@sealed
 	@Sync
 	property Color SolidColor = Color(1.000, 1.000, 1.000, 1.000)
+
+	---@description "This is the RUID when the Background Type is Sprite. Only SpriteRUID can be used."
+	---@sealed
+	@Sync
+	property string SpriteRUID = ""
 
 	---@description "RUID with Template Type. To change the background, use the ChangeBackgroundByTemplateRUID function."
 	---@sealed

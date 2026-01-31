@@ -1,7 +1,9 @@
 ---@sealed
+---@description "This event occurs when an animation begins playing while a skeleton animation is being transitioned."
 @Event
 script SkeletonAnimationStartEvent extends EventType
 
+	---@description "Animation information."
 	---@sealed
 	property SkeletonAnimationClip AnimationClip
 

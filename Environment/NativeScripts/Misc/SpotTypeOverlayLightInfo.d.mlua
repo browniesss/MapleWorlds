@@ -1,0 +1,54 @@
+---@sealed
+---@description "The information about a Spot-type light source that will spawn in the map."
+@Misc
+script SpotTypeOverlayLightInfo
+
+	---@description "An entity that belongs to the map where a light source will be added."
+	---@sealed
+	property Entity Instigator
+
+	---@description "The world space coordinates of the light source."
+	---@sealed
+	property Vector3 WorldPosition
+
+	---@description "The world's spatial z-axis-based rotation value where the light source will be applied."
+	---@sealed
+	property float WorldZRotation
+
+	---@sealed
+	property float FalloffIntensity = 0.5
+
+	---@sealed
+	property float InnerRadius = 0
+
+	---@sealed
+	property float OuterRadius = 1
+
+	---@sealed
+	property float SpotInnerAngle = 360
+
+	---@sealed
+	property float SpotOuterAngle = 360
+
+	---@sealed
+	property Color Color = RGBA(1.000, 1.000, 1.000, 1.000)
+
+	---@sealed
+	property float Intensity = 1
+
+	---@sealed
+	property float Lifetime = -1
+
+	---@sealed
+	property int32 LightOrder = 0
+
+	---@sealed
+	property OverlayLightOverlapOperation OverlapOperation = OverlayLightOverlapOperation.Additive
+
+	---@description "Initializes SpotTypeOverlayLightInfo to the specified value."
+	constructor SpotTypeOverlayLightInfo(Entity instigator) end
+
+	---@description "Initializes SpotTypeOverlayLightInfo to the specified value."
+	constructor SpotTypeOverlayLightInfo(Entity instigator, float lifetime, Vector3 worldPosition, float worldZRotation, Color color, float intensity, OverlayLightOverlapOperation overlapOperation, int32 lightOrder, float innerRadius, float outerRadius, float spotInnerAngle, float spotOuterAngle, float falloffIntensity) end
+
+end

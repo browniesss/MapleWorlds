@@ -7,6 +7,10 @@ script TweenLogic extends Logic
 	---@sealed
 	method float Ease(float startValue, float endValue, float duration, EaseType type, float tweenTime) end
 
+	---@description "Creates a Tweener entity that automatically calls a native component's method and performs the interpolation between the start value and end value. Only the native component can be set as targetComponent. A void method type that receives one float as a parameter from the target component must be set for methodName. It's more effective than using MakeTween()."
+	---@sealed
+	method Tweener MakeNativeTween(float startValue, float endValue, float duration, EaseType type, Component targetComponent, string methodName) end
+
 	---@description "Creates a Tweener Entity performing the interpolation between the start and end values."
 	---@sealed
 	method Tweener MakeTween(Vector2 startValue, Vector2 endValue, float duration, EaseType type, func<Vector2> tweenFunction) end

@@ -2,23 +2,23 @@
 @Component
 script FootholdComponent extends Component
 
-	---@description "Returns Foothold corresponding to footholdId."
+	---@description "Returns Foothold corresponding to a footholdId."
 	---@sealed
 	method Foothold GetFoothold(int32 footholdId) end
 
-	---@description "Returns all Footholds on the map."
+	---@description "Returns all footholds on the map."
 	---@sealed
 	method table<Foothold> GetFootholdAll() end
 
-	---@description "Finds and returns the closest Foothold within a certain distance from the specified point."
+	---@description "Finds and returns the closest foothold within a certain distance from the specified point."
 	---@sealed
 	method Foothold GetNearestFootholdByPoint(Vector2 point, float distance) end
 
-	---@description "Fires a moving ray over a distance in the direction from the point location and then finds and returns the first Foothold colliding with this ray."
+	---@description "Fires a moving ray over a distance in the direction from the point location and then finds and returns the first foothold colliding with this ray."
 	---@sealed
 	method Foothold Raycast(Vector2 point, Vector2 direction, float distance) end
 
-	---@description "Fires a moving ray over a distance in the direction from the point location and then finds and returns all the first Footholds colliding with this ray."
+	---@description "Fires a moving ray over a distance in the direction from the point location and then finds and returns all footholds colliding with this ray."
 	---@sealed
 	method table<Foothold> RaycastAll(Vector2 point, Vector2 direction, float distance) end
 

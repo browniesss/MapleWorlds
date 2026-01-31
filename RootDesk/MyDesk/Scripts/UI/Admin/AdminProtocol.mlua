@@ -1,0 +1,116 @@
+@Component
+script AdminProtocol extends Component
+
+	@ExecSpace("Server")
+	method void ReqGetDataCall(string uid, string targetKey, string type)
+		_ProtocolService:CommonCall(senderUserId)
+		local result = _AdminService:ServerReqGetData(senderUserId, uid, targetKey, type)
+		
+		local response = ""
+		if result.IsSuccess then
+			response = result.Data
+		else
+			response = "Error: " .. result.Message
+		end
+		
+		self:ResGetDataBack(response, senderUserId)
+	end
+
+	@ExecSpace("Client")
+	method void ResGetDataBack(string value)
+		-- UI에 결과 전달
+		local adminUI = self.Entity.AdminToolUI
+		if adminUI ~= nil then
+			adminUI:Log("Result: " .. value)
+			adminUI:SetOutputValue(value)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void ReqSetDataCall(string uid, string targetKey, string value, string type)
+		_ProtocolService:CommonCall(senderUserId)
+		local result = _AdminService:ServerReqSetData(senderUserId, uid, targetKey, value, type)
+		
+		local response = ""
+		if result.IsSuccess then
+			response = "Success: Set " .. result.Message
+		else
+			response = "Error: " .. result.Message
+		end
+		
+		self:ResSetDataBack(response, senderUserId)
+	end
+
+	@ExecSpace("Client")
+	method void ResSetDataBack(string result)
+		local adminUI = self.Entity.AdminToolUI
+		if adminUI ~= nil then
+			adminUI:Log(result)
+		end
+		
+		local userUnitProtocol = self.Entity.UserUnitProtocol
+		if userUnitProtocol ~= nil then
+			userUnitProtocol:GetUserUnitListCall()
+		end 
+	end
+
+	@ExecSpace("Server")
+	method void ReqDeleteDataCall(string uid, string targetKey, string type)
+		_ProtocolService:CommonCall(senderUserId)
+		local result = _AdminService:ServerReqDeleteData(senderUserId, uid, targetKey, type)
+		
+		local response = ""
+		if result.IsSuccess then
+			response = "Success: Deleted " .. result.Message
+		else
+			response = "Error: " .. result.Message
+		end
+		
+		self:ResDeleteDataBack(response, senderUserId)
+	end
+
+	@ExecSpace("Client")
+	method void ResDeleteDataBack(string result)
+		local adminUI = self.Entity.AdminToolUI
+		if adminUI ~= nil then
+			adminUI:Log(result)
+		end
+		
+		local userUnitProtocol = self.Entity.UserUnitProtocol
+		if userUnitProtocol ~= nil then
+			userUnitProtocol:GetUserUnitListCall()
+		end 
+	end
+
+	@ExecSpace("Server")
+	method void CheckAdminPermissionCall()
+		local isAdmin = _AdminService:IsAdmin(senderUserId)
+		
+		local common = {}
+		local unit = {}
+		local badge = {}
+		
+		if isAdmin then
+			common = _AdminService.commonKeys
+			unit = _AdminService.unitKeys
+			badge = _AdminService.badgeKeys
+		end
+		
+		self:ResCheckAdminPermissionBack(isAdmin, common, unit, badge, senderUserId)
+	end
+
+	@ExecSpace("Client")
+	method void ResCheckAdminPermissionBack(boolean isAdmin, table common, table unit, table badge)
+		local adminUI = self.Entity.AdminToolUI
+		if adminUI ~= nil then
+			adminUI:SetVisible(isAdmin)
+			if isAdmin then
+				adminUI:Log("Admin Access Granted.")
+				adminUI:UpdateKeyLists(common, unit, badge)
+			else
+				log("Admin Access Denied.")
+			end
+		end
+	end
+
+end
