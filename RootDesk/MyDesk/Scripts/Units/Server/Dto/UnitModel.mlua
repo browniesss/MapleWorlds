@@ -21,6 +21,8 @@ script UnitModel
 
 	property number attackRange = 0
 
+	property number isMelee = 0
+
 	property number attackSpeed = 0
 
 	property number projectileSpeed = 0
@@ -67,6 +69,7 @@ script UnitModel
 		self.hp = tonumber(item['hp'])
 		self.damage = tonumber(item['damage'])
 		self.attackRange = tonumber(item['attackRange'])
+		self.isMelee = tonumber(item['isMelee'])
 		self.attackSpeed = tonumber(item['attackSpeed'])
 		self.projectileSpeed= tonumber(item['projectileSpeed'])
 		self.attackTiming = tonumber(item['attackTiming'])

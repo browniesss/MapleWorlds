@@ -21,6 +21,7 @@ script UnitService extends Logic
 			item['hp'] = tonumber(dataSet:GetCell(index, 'hp'))
 			item['damage'] = tonumber(dataSet:GetCell(index, 'damage'))
 			item['attackRange'] = tonumber(dataSet:GetCell(index, 'attackRange'))
+			item['isMelee'] = tonumber(dataSet:GetCell(index, 'isMelee'))
 			item['attackSpeed'] = tonumber(dataSet:GetCell(index, 'attackSpeed'))
 			item['projectileSpeed'] = tonumber(dataSet:GetCell(index, 'projectileSpeed'))
 			item['attackTiming'] = tonumber(dataSet:GetCell(index, 'attackTiming'))
