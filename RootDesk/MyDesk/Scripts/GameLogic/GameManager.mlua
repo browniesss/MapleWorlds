@@ -123,9 +123,6 @@ script GameManager extends Logic
 
 		-- 모드 설정
 		self.currentGameMode = gameMode
-		local isEventMode = (gameMode == _eGameMode.Event)
-		self.isEventMode = isEventMode
-		self:SyncEventMode(isEventMode)
 		
 		local userIncome = _SpawnManager:GetUserIncome()
 		local baseIncomeData = userIncome.MesoIncome:GetMesoData()
