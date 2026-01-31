@@ -1,0 +1,64 @@
+@Struct
+script MAP
+
+	property table data = {}
+
+	method void Init()
+		self.data = {}
+	end
+
+	method void Add(any key, any value)
+		if key == nil then return end
+		self.data[key] = value
+	end
+
+	method boolean Remove(any key)
+		if self.data[key] ~= nil then
+			self.data[key] = nil
+			return true
+		end
+		return false
+	end
+
+	method any Get(any key)
+		return self.data[key]
+	end
+	
+	method void Set(any key, any value)
+		if key == nil then return end
+		self.data[key] = value
+	end
+
+	method boolean ContainsKey(any key)
+		return self.data[key] ~= nil
+	end
+
+	method integer Count()
+		local count = 0
+		for k, v in pairs(self.data) do
+			count = count + 1
+		end
+		return count
+	end
+
+	method void Clear()
+		self.data = {}
+	end
+
+	method table Keys()
+		local keys = {}
+		for k, v in pairs(self.data) do
+			table.insert(keys, k)
+		end
+		return keys
+	end
+
+	method table Values()
+		local values = {}
+		for k, v in pairs(self.data) do
+			table.insert(values, v)
+		end
+		return values
+	end
+
+end

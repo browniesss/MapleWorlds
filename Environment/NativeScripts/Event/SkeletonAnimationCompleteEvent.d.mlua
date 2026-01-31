@@ -1,7 +1,9 @@
 ---@sealed
+---@description "This event occurs when the skeleton animation is done playing. If it is set to play on a loop, the event will trigger each time it's completed."
 @Event
 script SkeletonAnimationCompleteEvent extends EventType
 
+	---@description "Animation information."
 	---@sealed
 	property SkeletonAnimationClip AnimationClip
 

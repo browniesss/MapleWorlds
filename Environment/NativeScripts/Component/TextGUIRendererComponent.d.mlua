@@ -26,6 +26,14 @@ script TextGUIRendererComponent extends Component
 	---@sealed
 	property float ConstraintY = 100
 
+	---@description "Sets the thickness of a text outline. Negative values make it thinner, while positive values make it thicker. When the value is 0, the text and outline will be the same."
+	---@sealed
+	property float FaceDilate = 0
+
+	---@description "Sets the softness of the corners of text and outlines. The higher the value, the softer and more blurred the corners."
+	---@sealed
+	property float FaceSoftness = 0
+
 	---@description "Sets the font."
 	---@sealed
 	property string Font = "Default"
@@ -129,6 +137,10 @@ script TextGUIRendererComponent extends Component
 	---@sealed
 	property Color UnderlayColor = Color(0.000, 0.000, 0.000, 1.000)
 
+	---@description "Sets the thickness of a shadow outline. Negative values make it thinner, while positive values make it thicker. When the value is 0, the original font and outline will be the same."
+	---@sealed
+	property float UnderlayDilate = 0
+
 	---@description "Sets the X axis location of the shadow."
 	---@sealed
 	property float UnderlayOffsetX = 0
@@ -136,6 +148,10 @@ script TextGUIRendererComponent extends Component
 	---@description "Sets the Y axis location of the shadow."
 	---@sealed
 	property float UnderlayOffsetY = 0
+
+	---@description "Sets the softness of the edges of shadows. The higher the value, the softer and more blurred the corners."
+	---@sealed
+	property float UnderlaySoftness = 0
 
 	---@description "Sets the width to be limited using the ConstraintX value."
 	---@sealed

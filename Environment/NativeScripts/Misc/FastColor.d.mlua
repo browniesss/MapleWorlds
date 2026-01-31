@@ -93,8 +93,25 @@ script FastColor
 	---@sealed
 	method void Div(number num) end
 
-	---@description "Creates a FastColor entity using the hexadecimal number color value. This hex code follows a format such as '#FFFFFF'."
-	static method FastColor FromHexColor(string hexCode) end
+	---@description "Converts RGBA to hex code."
+	---@sealed
+	method string ToHexCode() end
+
+	---@description "Converts RGBA to an integer. Uses the '0xFFFFFFFF' format."
+	---@sealed
+	method integer ToRGBAInt() end
+
+	---@description "Creates a FastColor entity using the hexadecimal number color value. This hex code follows a format such as '#FFFFFF' or '#FFFFFFFF'."
+	static method FastColor FromHexCode(string hexCode) end
+
+	---@description "Converts RGBA to hex code."
+	static method string ToHexCode(FastColor color) end
+
+	---@description "Creates a Color entity using the RGBA represented as an integer."
+	static method FastColor FromRGBAInt(integer rgba) end
+
+	---@description "Converts RGBA to an integer. Uses the '0xFFFFFFFF' format."
+	static method integer ToRGBAInt(FastColor color) end
 
 	---@description "Finds the grayscale of the color."
 	static method number Grayscale(FastColor color) end

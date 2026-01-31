@@ -1,0 +1,107 @@
+@Struct
+script PRIORITY_QUEUE
+
+	-- [ {Item=item, Priority=priority}, ... ]
+	property table data = {}
+
+	method void Init()
+		self.data = {}
+	end
+
+	method void Enqueue(any item, number priority)
+		local element = { Item = item, Priority = priority }
+		table.insert(self.data, element)
+		self:HeapifyUp(#self.data)
+	end
+
+	method any Dequeue()
+		if #self.data == 0 then
+			return nil
+		end
+
+		local root = self.data[1]
+		local last = table.remove(self.data)
+
+		if #self.data > 0 then
+			self.data[1] = last
+			self:HeapifyDown(1)
+		end
+
+		return root.Item
+	end
+
+	method any Peek()
+		if #self.data == 0 then
+			return nil
+		end
+		return self.data[1].Item
+	end
+	
+	method any PeekPriority()
+		if #self.data == 0 then
+			return nil
+		end
+		return self.data[1].Priority
+	end
+
+	method integer Count()
+		return #self.data
+	end
+
+	method void Clear()
+		self.data = {}
+	end
+
+	method boolean Contains(any item)
+		for i, v in ipairs(self.data) do
+			if v.Item == item then
+				return true
+			end
+		end
+		return false
+	end
+
+	-- Internal Helpers
+	method void HeapifyUp(integer index)
+		while index > 1 do
+			local parentIndex = math.floor(index / 2)
+			if self.data[index].Priority < self.data[parentIndex].Priority then
+				-- Swap
+				local temp = self.data[index]
+				self.data[index] = self.data[parentIndex]
+				self.data[parentIndex] = temp
+				index = parentIndex
+			else
+				break
+			end
+		end
+	end
+
+	method void HeapifyDown(integer index)
+		local count = #self.data
+		while true do
+			local leftChild = index * 2
+			local rightChild = index * 2 + 1
+			local smallest = index
+
+			if leftChild <= count and self.data[leftChild].Priority < self.data[smallest].Priority then
+				smallest = leftChild
+			end
+
+			if rightChild <= count and self.data[rightChild].Priority < self.data[smallest].Priority then
+				smallest = rightChild
+			end
+
+			if smallest ~= index then
+				-- Swap
+				local temp = self.data[index]
+				self.data[index] = self.data[smallest]
+				self.data[smallest] = temp
+				index = smallest
+			else
+				break
+			end
+		end
+	end
+
+end

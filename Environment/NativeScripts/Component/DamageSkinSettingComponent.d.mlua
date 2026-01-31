@@ -22,6 +22,11 @@ script DamageSkinSettingComponent extends Component
 	@Sync
 	property float DelayPerAttack = 0.05
 
+	---@description "Selects the rendering method that will determine whether materials or objects will be affected by light sources."
+	---@sealed
+	@Sync
+	property LitMode LitMode = LitMode.Default
+
 	---@description "Set the playback speed of the damage skin."
 	---@sealed
 	@Sync

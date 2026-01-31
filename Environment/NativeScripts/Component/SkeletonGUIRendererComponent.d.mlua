@@ -1,21 +1,24 @@
----@description "The parent component of all Components. Provides basic functions of Components."
+---@description "Provides a function that can draw and control skeleton resources created with Spine in the UI. Only resources made with Spine 4.1 can be used."
 @Component
 script SkeletonGUIRendererComponent extends Component
 
-	---@description "Sets the animation for track 1. Animations play in index order."
+	---@description "Sets the animation for track 1. Animations play in index order. Adding or removing values to property will make the animation play from the beginning again."
 	---@sealed
 	property SyncList<string> AnimationNames
 
-	---@description "Sets the skin."
+	---@description "Sets the color."
 	---@sealed
 	property Color Color = Color(1.000, 1.000, 1.000, 1.000)
 
+	---@description "Determines whether to invert based on the X axis."
 	---@sealed
 	property boolean FlipX = false
 
+	---@description "Determines whether to invert based on the Y axis."
 	---@sealed
 	property boolean FlipY = false
 
+	---@description "Set the play status to repeat the animation."
 	---@sealed
 	property boolean Loop = true
 
@@ -31,6 +34,7 @@ script SkeletonGUIRendererComponent extends Component
 	---@sealed
 	property boolean RaycastTarget = true
 
+	---@description "Set the skeleton resource RUID."
 	---@sealed
 	property string SkeletonRUID = ""
 
@@ -38,12 +42,12 @@ script SkeletonGUIRendererComponent extends Component
 	---@sealed
 	property SyncList<string> SkinNames
 
-	---@description "Adds an animation to the track. Sets the track number, animation name, and misc properties to animationClip. Track 1 can't be used."
+	---@description "Adds an animation to the track. Track 1 can't be used. Sets the track number, animation name, and misc properties to animationClip. Plays the animation from the start again."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method void AddAnimation(SkeletonAnimationClip animationClip) end
 
-	---@description "Adds an empty animation to the track. Sets the track number and misc properties to animationClip. Track 1 can't be used."
+	---@description "Adds an empty animation to the track. Track 1 can't be used. Sets the track number and misc properties to animationClip. Plays the animation from the start again."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method void AddEmptyAnimation(SkeletonAnimationClip animationClip) end
@@ -58,10 +62,20 @@ script SkeletonGUIRendererComponent extends Component
 	@ExecSpace("ClientOnly")
 	method SkeletonAnimationClip GetCurrentAnimation(int32 trackIndex) end
 
+	---@description "Empties a track and adds an animation to it. Sets the track number, animation name, and misc properties to animationClip. Track 1 can't be used."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method void SetAnimation(SkeletonAnimationClip animationClip) end
+
 	---@description "Adds an attachment to the slot. If attachmentName is nil, the attachment is removed."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method void SetAttachment(string slotName, string attachmentName) end
+
+	---@description "Empties a track and adds an empty animation to it. Sets the track number and misc properties to animationClip. Track 1 can't be used."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method void SetEmptyAnimation(SkeletonAnimationClip animationClip) end
 
 	emitter EmitSkeletonAnimationTimelineEvent(SkeletonAnimationTimelineEvent event) end
 

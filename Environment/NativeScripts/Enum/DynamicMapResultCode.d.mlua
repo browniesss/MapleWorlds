@@ -4,23 +4,23 @@
 script DynamicMapResultCode
 	---@description "Successfully created or destroyed the dynamic map."
 	member Success = 0
-	---@description "Invalid map name."
+	---@description "Invalid map name. A character that can't be used in the original map and dynamic name.  \, /,  :,  *, ?, \"\", <, >, |, #, &, = can't be used."
 	member InvalidMapName = 1
-	---@description "This map is a duplicate."
+	---@description "Duplicate map name. You must use a name that's not a duplicate of newMapName."
 	member DuplicateMapName = 2
-	---@description "The original map doesn't exist."
+	---@description "The original map doesn't exist. Please check if the original map that applies to sourceMapName exists."
 	member SourceMapNotFound = 3
-	---@description "The dynamic map doesn't exist."
+	---@description "The dynamic map with the map name that will be destroyed doesn't exist."
 	member DynamicMapNotFound = 4
 	---@description "This map cannot be used as the original map in the room. Only static maps can be used as the original map in static rooms. And only instance maps can be used as the original map in instance rooms."
 	member RoomAndSourceMapTypeMismatch = 5
-	---@description "The original map is not included in the instance room."
+	---@description "The original map is not included in the instance room. Please check if an instance map is in the instance room."
 	member SourceMapNotLoadable = 6
-	---@description "The user has entered the dynamic map."
+	---@description "A user has entered the dynamic map. You can view the User Entities in the map using the UserService's GetUsersByMapName() or GetUsersByMapComponent() functions."
 	member UserExistsInDynamicMap = 7
 	---@description "The dynamic map cannot be used as an original map."
 	member DynamicMapNotAllowedAsSourceMap = 8
-	---@description "An internal error has occurred."
+	---@description "Internal error occured."
 	member InternalError = -1
 
 	---@description "Converts numbers to the applicable type."

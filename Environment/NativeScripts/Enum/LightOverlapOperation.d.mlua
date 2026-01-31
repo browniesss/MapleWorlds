@@ -1,0 +1,15 @@
+---@sealed
+---@description "Determines how the color will be calculated when multiple light sources for LightComponent overlap."
+@Enum
+script LightOverlapOperation
+	---@description "Colors are added together."
+	member Additive = 0
+	---@description "Blends colors by using standard blending. (Alpha, 1-Alpha)"
+	member AlphaBlend = 1
+
+	---@description "Converts numbers to the applicable type."
+	static method LightOverlapOperation CastFrom(number value) end
+
+	---@description "Converts strings to the applicable type."
+	static method LightOverlapOperation CastFrom(string value) end
+end

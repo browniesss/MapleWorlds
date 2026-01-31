@@ -1,0 +1,10 @@
+---@sealed
+@Enum
+script OverlayLightOverlapOperation
+	member Additive = 0
+	member AlphaBlend = 1
+
+	static method OverlayLightOverlapOperation CastFrom(number value) end
+
+	static method OverlayLightOverlapOperation CastFrom(string value) end
+end
