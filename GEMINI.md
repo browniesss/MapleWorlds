@@ -1,173 +1,143 @@
-# Gemini: MapleWorld 2D 디펜스 게임 프로젝트
+# MapleWorlds Project Analysis
 
-## 1. 프로젝트 개요
+## 1. Project Overview
+**Project Name**: MapleWorlds 2D Defense Game (Team 옹기종기)
+**Platform**: MapleStory Worlds (MSW)
+**Language**: mLua (MSW Custom Lua)
 
-이 프로젝트는 **Nexon MapleStory Worlds** 플랫폼을 기반으로 개발된 2D 디펜스 게임입니다. 인기 게임인 '냥코 대전쟁'과 유사한 게임 플레이 방식을 가지고 있으며, '옹기종기' 팀에서 개발을 진행하고 있습니다.
+This project is a 2D Defense game where players summon units, manage resources (Meso), and defend against waves of enemies. It features normal/hard modes, event modes, and multiplayer synchronization.
 
-- **플랫폼**: Nexon MapleStory Worlds
-- **장르**: 2D 디펜스
-- **개발 언어**: mLua (MapleStory Worlds Script)
-- **핵심 특징**: 단일 스크립트 파일 내에 서버와 클라이언트 로직이 공존하는 독특한 아키텍처를 가집니다.
+## 2. Directory Structure
 
-## 2. 프로젝트 구조
+The project follows the standard MSW structure with custom script organization.
 
-주요 디렉토리 구조는 다음과 같습니다.
+- **`RootDesk/`**: The main workspace directory.
+    - **`MyDesk/`**: User content directory.
+        - **`Scripts/`**: Core game scripts.
+            - **`GameLogic/`**: Central game management logic.
+            - **`Units/`**: Unit-specific logic (Unit component, UnitShop).
+            - **`Skills/`**: Skill logic (though `SkillManager` is in `GameLogic`).
+            - **`UI/`**: UI control scripts, organized by scene/function (Lobby, Ingame, Popup).
+            - **`CommonProtocol.mlua`**: Network protocol base.
+            - **`ProtocolService.mlua`**: Network service.
+- **`Environment/`**: Native scripts and configuration.
 
-- `map/`: 게임의 다양한 스테이지와 로비 등 맵 파일(.map)이 위치합니다.
-- `RootDesk/MyDesk/`: 게임의 메인 개발 리소스가 위치하는 디렉토리입니다. 내부에는 다음과 같은 주요 폴더들이 있습니다.
-    - `Scripts/`: 기능 단위(Units, UI, GameLogic 등)로 분류된 핵심 스크립트(.mlua)들이 위치합니다.
-    - `Prefab/`: 게임에서 인스턴스화되어 사용되는 프리팹(.model) 파일들이 위치합니다.
-    - `DataSets/`: 게임 밸런스 및 설정을 담은 데이터 테이블이 위치합니다.
-- `ui/`: 게임에 사용되는 각종 UI 요소(.ui)들이 정의되어 있습니다.
-- `Environment/`: MapleStory Worlds에서 제공하는 기본 컴포넌트, 서비스, 이벤트 등의 스크립트 인터페이스(.d.mlua)가 정의되어 있습니다. 이 파일들은 코드 어시스트 및 타입 체킹에 사용됩니다.
-- `Global/`: 게임 전역에서 사용되는 설정(충돌 그룹, 기본 플레이어 모델 등) 파일이 위치합니다.
+## 3. Architecture & Key Components
 
-## 3. 핵심 아키텍처: 3-Tier 통신 구조 (Client-Protocol-Server)
+The code is divided into **Logics** (Singleton Managers) and **Components** (Entity behaviors).
 
-이 프로젝트는 명확한 역할 분리와 데이터 흐름 관리를 위해 **Client, Protocol, Server**의 3-Tier 아키텍처를 채택하고 있습니다. 이 구조는 `Scripts/Units`와 같은 기능 단위별 폴더에 구현되어 있습니다.
+### 3.1. Key Logics (Managers)
+These are global services accessible via `_ServiceName`.
 
--   **`Server` (서버)**: 실제 로직을 처리하는 두뇌 역할을 합니다.
-    -   `@ExecSpace("ServerOnly")`로 지정됩니다.
-    -   데이터베이스 조회, 유닛 레벨업, 재화 차감 등 핵심적이고 보안이 필요한 모든 연산을 수행합니다.
-    -   클라이언트로부터 직접 호출되지 않으며, 항상 `Protocol`을 통해 통신합니다.
-    -   예시: `UserMonsterService.mlua`
+- **`GameManager` (`_GameManager`)**:
+    - **Role**: Central controller for the game loop.
+    - **Responsibilities**:
+        - Manages State: `isPlaying`, `isEventMode`, `isHardMode`, `playStartTs`.
+        - Controls flow: `GameStart`, `GameEnd`, `StageClear`, `Fail`.
+        - UI Orchestration: Toggles Lobby/Ingame UI visibility.
+        - Timer Management: Handles the limitation timer.
 
--   **`Client` (클라이언트)**: 사용자 인터페이스(UI)와 상호작용하고 사용자 입력을 받습니다.
-    -   `@ExecSpace("ClientOnly")`로 지정됩니다.
-    -   사용자의 요청이 발생하면, `Protocol`을 통해 서버에 작업을 요청합니다.
-    -   서버로부터 `Protocol`을 통해 전달받은 데이터를 UI에 반영하는 역할을 합니다.
-    -   예시: `UserUnitStore.mlua`
+- **`StageService` (`_StageService`)**:
+    - **Role**: Static Data Manager for Stages.
+    - **Responsibilities**:
+        - Loads **`data:stage`** DataSet on init.
+        - Provides stage info (`GetStageById`, `GetNextOpenStageId`).
+        - Handles Hard Mode level adjustments (`hard_level`).
 
--   **`Protocol` (프로토콜)**: 서버와 클라이언트 간의 통신을 중개하는 다리 역할을 합니다.
-    -   RPC(Remote Procedure Call) 인터페이스를 정의합니다.
-    -   클라이언트의 요청을 받아 서버에 전달하는 `...Call` 메소드 (`@ExecSpace("Server")`)를 가집니다.
-    -   서버의 처리 결과를 다시 클라이언트에 전달하는 `...Back` 메소드 (`@ExecSpace("Client")`)를 가집니다.
-    -   이를 통해 서버와 클라이언트 코드가 직접적으로 서로를 호출하는 것을 방지하고, 통신 창구를 일원화하여 데이터 흐름을 명확하게 만듭니다.
-    -   예시: `UserUnitProtocol.mlua`
+- **`SpawnManager` (`_SpawnManager`)**:
+    - **Role**: Unit Spawning Factory.
+    - **Responsibilities**:
+        - `Spawn(modelID, price, pos)`: Spawns player units.
+        - `SpawnEnemy(modelID, pos)`: Spawns enemies with level scaling.
+        - **Synergy System**: Checks `UserSynergyComponent` to apply buffs (HP/MP/Critical/SummonPoint) to spawned units based on Job/Class.
+        - Validates resource (Meso) sufficiency (`IsCanSpawn`).
 
-### 통신 흐름 예시 (유저 유닛 리스트 요청)
+- **`SkillManager` (`_SkillManager`)**:
+    - **Role**: Skill Data & Execution Manager.
+    - **Responsibilities**:
+        - Loads **`data:IngameSkillData`** DataSet.
+        - `GetSkill(skillID)`: Handles skill acquisition and leveling up (1 -> Max).
+        - `UseSkill`: Spawns skill entities (projectiles/effects).
 
-1.  **Client (`UserUnitStore`)**: 게임이 시작되면 `OnBeginPlay`에서 `UserUnitProtocol:GetUserUnitListCall()`을 호출하여 서버에 데이터 요청.
-2.  **Protocol (`UserUnitProtocol`)**: `GetUserUnitListCall` 메소드가 서버 공간에서 실행됨. `UserMonsterService`를 호출하여 실제 데이터 조회를 지시.
-3.  **Server (`UserMonsterService`)**: 데이터베이스에서 유저의 몬스터 데이터를 조회하고 가공함.
-4.  **Protocol (`UserUnitProtocol`)**: `UserMonsterService`로부터 받은 결과를 `GetUserUnitListBack(결과)` 메소드를 통해 요청한 클라이언트에 전달.
-5.  **Client (`UserUnitStore`)**: `GetUserUnitListBack`으로부터 받은 결과를 `UserUnitMap`에 저장하고 UI를 갱신.
+### 3.2. Key Components (Game Objects)
 
----
+- **`Unit`**: The core component for Characters, Monsters, and Towers.
+    - **Stats**: `hp`, `mp`, `attack`, `moveSpeed`, `attackSpeed` (Synced).
+    - **State Machine**:
+        - `Stand`: Idle, searching for targets.
+        - `Move`: Moving towards `curTarget`.
+        - `Attack`: Melee or Ranged attack based on `attackRange`.
+        - `UseSkill`: Executes active skills.
+        - `Die`: Death processing.
+    - **AI**: Simple aggro logic (`FindTarget`) prioritizing closest enemies.
 
-## 4. 개발 가이드
+## 4. Systems Breakdown
 
-이 프로젝트에서 새로운 기능을 개발하거나 기존 코드를 수정할 때는 다음 아키텍처 원칙을 반드시 준수해야 합니다.
+### 4.1. UI System (`Scripts/UI/`)
+UI logic is separated into components attached to UI Entities.
+- **Lobby UI**:
+    - `LobbyUI`: Root manager.
+    - `StageSelectorUI`: Handles Chapter/Stage selection, Hard Mode toggles, and Ranking display.
+    - `StartUI`: Game start entry point.
+- **Ingame UI**:
+    - `IngameInfoUI`: Displays HP, MP, Wave info (inferred).
+    - `ClearRewardUI`: Shows rewards (Coins, Meso, Event Tokens) after clearing a stage.
+- **Popup UI**:
+    - `FailPopup`: Shows restart/quit options on failure.
+- **Admin UI**:
+    - `AdminToolUI`: Interface for Admin data management.
 
-1.  **3-Tier 구조 준수**: 모든 클라이언트-서버 간 통신은 `Client`, `Protocol`, `Server` 3-Tier 구조를 따라야 합니다. 기능을 추가할 때 각 역할에 맞는 스크립트를 생성하거나 수정하세요.
+### 4.2. Data Management
+Data is largely driven by MSW **DataSets** accessed via `_DataService`.
+- **`stage`**: Stage config (Chapter, Stage, Name, Monster Level, Tower HP).
+- **`IngameSkillData`**: Skill properties (ID, Name, CoolTime, Amount).
+- **`EventData`**: Event-specific configurations.
 
-2.  **실행 영역 명시**: 모든 메소드에 `@ExecSpace`를 사용하여 실행 환경(서버/클라이언트)을 명확히 지정해야 합니다. 특히 `Protocol` 스크립트의 `...Call`은 `@ExecSpace("Server")`, `...Back`은 `@ExecSpace("Client")`로 지정하는 규칙을 따릅니다.
+### 4.3. Networking Flow
+1.  **Action**: User clicks "Spawn" or Unit attacks.
+2.  **Request**: Client calls Server method (e.g., `_SpawnManager:Spawn`).
+3.  **Validation**: Server checks resources (Meso) and state.
+4.  **Execution**: Server spawns Entity, deducts resources, updates Sync properties.
+5.  **Replication**: MSW automatically syncs `@Sync` properties (HP, Pos) to all clients.
+6.  **Feedback**: Server may call Client callback (e.g., `_GameManager:StageClearClientCallback`) for local UI effects (Victory anim).
 
-3.  **신뢰 경계 구분**: 사용자 입력은 항상 `Client`에서 시작되지만, 모든 검증, 연산, 데이터 저장은 `Server`에서 이루어져야 합니다. `Client`에서 보낸 데이터를 절대 신뢰하지 마세요.
+### 4.4. Admin System (`Scripts/UI/Admin/`)
+The Admin System allows authorized users to manage User Data directly.
+- **`AdminService`**:
+    - **Role**: Server-only logic for processing admin requests.
+    - **Features**:
+        - **Permission**: controlled via allowed User ID list.
+        - **Operation**: Supports `Get`, `Set`, `Delete` for **UserDataStorage** specific keys.
+        - **Execution**: Uses synchronous `Wait` functions for reliable data handling.
+- **`AdminProtocol`**:
+    - **Role**: Network bridge between Client UI and Server Logic.
+    - **Features**:
+        - Transmits execution results as standard Tables (`IsSuccess`, `Data`/`Message`).
+        - Handles sensitive parameter naming conventions (e.g., using `uid` instead of `targetUserId`).
+- **`AdminToolUI`**:
+    - **Role**: Client-side interface for Admin operations.
+    - **Features**: Dynamically populates Unit and Common key lists for easy access.
 
-### **[중요] 데이터 동기화: `@Sync` 프로퍼티 사용 금지**
+## 5. Game Logic Flow (Example: Stage Clear)
+1.  **Trigger**: `Unit` logic or `GameManager` detects win condition (Enemy Tower Dead or Wave Clear).
+2.  **Client**: `StageClear()` calls `_GameManager:StageClearServer`.
+3.  **Server `StageClearServer`**:
+    - **Validation**: Checks play time and cheat detection.
+    - **Logic**:
+        - Updates `UserStage` (unlocks next stage/hard mode).
+        - Calculates Rank Score (`_RankingService`).
+        - Distributes Rewards (First Clear vs Re-clear).
+        - Handles Event Mode specifics.
+4.  **Client Callback**:
+    - `StageClearClientCallback` triggered.
+    - **UI**: Shows `ClearRewardUI` with calculated rewards.
+    - **FX**: Plays "Victory" emotion/animation.
 
-이 프로젝트에서는 데이터 흐름의 명확성을 확보하고 잠재적인 성능 문제를 방지하기 위해 **프로퍼티(property)에 `@Sync` 어노테이션을 사용하는 것을 **강력히 금지**합니다.**
-
--   **이유**: `@Sync`는 사용이 간편하지만, 데이터 변경이 잦을 경우 불필요한 네트워크 트래픽을 유발하여 성능 저하의 원인이 될 수 있습니다. 또한, 데이터가 언제 어떻게 동기화되는지 흐름을 추적하기 어렵게 만듭니다.
--   **대체 방안**: 모든 데이터 조회 및 변경은 상술한 **`Protocol`을 통한 명시적인 `Call/Back` RPC 패턴**을 사용해야 합니다. 클라이언트가 데이터가 필요할 때 `...Call`로 서버에 요청하고, 서버는 처리 후 `...Back`으로 결과를 돌려주는 방식은 데이터 흐름을 명확하고 예측 가능하게 만듭니다.
-
-이 가이드를 통해 프로젝트의 아키텍처 일관성을 유지하고, 안정적이며 효율적인 코드를 작성할 수 있습니다.
-
----
-
-## 6. 폴더 구조 및 역할별 스크립트 작성 가이드 (`Scripts/Units` 기준)
-
-`RootDesk/MyDesk/Scripts/Units` 디렉토리 내의 파일들은 역할에 따라 명확하게 구분됩니다. 각 분류별 작성 가이드는 다음과 같습니다.
-
-### 6.1. DTO (Data Transfer Object)
-데이터의 구조를 정의하고 서버와 클라이언트 간 데이터를 주고받을 때 사용되는 모델입니다.
-
--   **위치**: `Server/Dto` 폴더
--   **타입**: `@Struct` 어노테이션 사용
--   **상속**: 없음 (기본) 또는 다른 모델 상속 (예: `extends UnitModel`)
--   **작성 규칙**:
-    1.  **프로퍼티 정의**: 데이터 필드를 `property`로 정의합니다.
-    2.  **초기화 및 변환**: `Init(table data)`, `DECODE(string json)`, `ENCODE()` 메소드를 구현하여 JSON 직렬화/역직렬화를 지원해야 합니다.
-    3.  **로직 배제**: 복잡한 비즈니스 로직은 포함하지 않고, 데이터 홀더 역할에 집중합니다.
-
-    ```lua
-    @Struct
-    script UserUnitModel
-        property string id = ""
-        property integer level = 1
-
-        method string ENCODE()
-            -- JSON 인코딩 구현
-        end
-    end
-    ```
-
-### 6.2. Service & Repository (Server Logic)
-게임의 핵심 비즈니스 로직, 데이터베이스 접근, 데이터 캐싱을 담당합니다.
-
--   **위치**: `Server` 폴더 (Repository는 주로 데이터를 로드하고 제공하는 역할)
--   **타입**: `@Logic` 어노테이션 사용
--   **상속**: `extends Logic`
--   **작성 규칙**:
-    1.  **실행 공간**: 대부분의 메소드는 `@ExecSpace("ServerOnly")`로 지정하여 보안을 유지합니다.
-    2.  **데이터 접근**: `_DataStorageService` 등을 통해 DB에 접근하거나, `csv` 데이터를 로드하여 `table`에 캐싱합니다.
-    3.  **싱글톤 사용**: 다른 스크립트에서 `_서비스명`으로 접근합니다. (예: `_UserMonsterService`)
-
-    ```lua
-    @Logic
-    script UserMonsterService extends Logic
-        @ExecSpace("ServerOnly")
-        method void LEVEL_UP(string uid, table idList)
-            -- 레벨업 로직 및 DB 저장
-        end
-    end
-    ```
-
-### 6.3. Protocol
-클라이언트와 서버 간의 통신(RPC)을 담당하는 중계자입니다.
-
--   **위치**: `Protocol` 폴더
--   **타입**: `@Component` 어노테이션 사용
--   **상속**: `extends CommonProtocol` (프로젝트 공통 프로토콜 상속)
--   **작성 규칙**:
-    1.  **Call (Client -> Server)**: 함수명은 `...Call`로 끝나야 하며, `@ExecSpace("Server")`를 사용합니다. 내부에서 서비스를 호출합니다.
-    2.  **Back (Server -> Client)**: 함수명은 `...Back`으로 끝나야 하며, `@ExecSpace("Client")`를 사용합니다. 내부에서 Client 스크립트(Store)를 호출하여 UI를 갱신합니다.
-
-    ```lua
-    @Component
-    script UserUnitProtocol extends CommonProtocol
-        @ExecSpace("Server")
-        method void GetUserUnitListCall()
-            -- 서비스 호출 후 Back 호출
-        end
-
-        @ExecSpace("Client")
-        method void GetUserUnitListBack(table resp)
-            self.Entity.UserUnitStore:UpdateData(resp)
-        end
-    end
-    ```
-
-### 6.4. Client (Store & UI Controller)
-클라이언트의 상태 관리, UI 갱신, 사용자 입력을 처리합니다.
-
--   **위치**: `Client` 폴더
--   **타입**: `@Component` 어노테이션 사용
--   **상속**: `extends Component`
--   **작성 규칙**:
-    1.  **실행 공간**: `@ExecSpace("ClientOnly")`를 기본으로 사용합니다.
-    2.  **프로토콜 호출**: `OnBeginPlay`나 UI 이벤트 발생 시 `self.Entity.프로토콜명:MethodCall()`을 통해 서버에 요청합니다.
-    3.  **데이터 갱신**: 프로토콜로부터 데이터를 받아 로컬 프로퍼티(`property table DataMap`)를 갱신하고 UI를 업데이트합니다.
-
-    ```lua
-    @Component
-    script UserUnitStore extends Component
-        property table UserUnitMap = {}
-
-        @ExecSpace("ClientOnly")
-        method void OnBeginPlay()
-            self.Entity.UserUnitProtocol:GetUserUnitListCall()
-        end
-    end
-    ```
+## 6. Coding Conventions
+- **Execution Spaces**:
+    - `@ExecSpace("Server")`: Server-authoritative logic.
+    - `@ExecSpace("Client")`: Visuals, Input, UI.
+- **Sync**: Use `@Sync` for gameplay-critical data (HP, State).
+- **Services**: All Managers are singletons prefixed with `_` (e.g., `_GameManager`).
+- **Data Loading**: `OnBeginPlay` in Logic scripts is used to load DataSets into memory tables.
+- **Network Parameters**: When calling Server functions from Client space, do NOT include parameters named `senderUserId` or `targetUserId` in the function signature, as these may conflict with internal system parameters or best practices.

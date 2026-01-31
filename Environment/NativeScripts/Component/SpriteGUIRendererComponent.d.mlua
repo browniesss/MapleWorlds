@@ -146,6 +146,10 @@ script SpriteGUIRendererComponent extends Component
 	---@sealed
 	method void ChangeMaterial(string materialId) end
 
+	---@description "Sets the alpha value of the sprite."
+	---@sealed
+	method void SetAlpha(float alpha) end
+
 	---@description "Resizes the image to its original size."
 	---@sealed
 	method void SetNativeSize() end

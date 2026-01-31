@@ -37,6 +37,11 @@ script AreaParticleComponent extends Component
 	@Sync
 	readonly property boolean IsEmitting = false
 
+	---@description "Selects the rendering method that will determine whether materials or objects will be affected by light sources."
+	---@sealed
+	@Sync
+	property LitMode LitMode = LitMode.Default
+
 	---@description "Set whether to play particles repeatedly."
 	---@sealed
 	@Sync

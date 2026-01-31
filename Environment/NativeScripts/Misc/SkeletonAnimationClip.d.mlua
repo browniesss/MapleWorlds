@@ -1,28 +1,37 @@
 ---@sealed
+---@description "Displays the properties of animation that are played from SkeletonRendererComponent and SkeletonGUIRendererComponent."
 @Misc
 script SkeletonAnimationClip
 
+	---@description "Displays the ratio that this is mixed with other tracks. The default value is 1."
 	---@sealed
 	property float Alpha = 1
 
+	---@description "The animation name."
 	---@sealed
 	property string AnimationName
 
+	---@description "The standby time until the animation will start to play. Time is given in seconds."
 	---@sealed
 	property float Delay = 0
 
+	---@description "Indicates whether this will play on loop."
 	---@sealed
 	property boolean Loop = false
 
+	---@description "This is the amount of time that the animation will be mixed with the previous one when transitioning between animations. Time is given in seconds."
 	---@sealed
 	property float MixDuration = 0
 
+	---@description "The animation play speed. The default value is 1."
 	---@sealed
 	property float TimeScale = 1
 
+	---@description "The track number from which the animation will be played."
 	---@sealed
 	property int32 TrackIndex = 0
 
+	---@description "Resets SkeletonAnimationClip to the specified value."
 	constructor SkeletonAnimationClip() end
 
 end

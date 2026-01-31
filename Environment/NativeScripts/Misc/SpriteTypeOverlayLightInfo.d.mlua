@@ -1,0 +1,52 @@
+---@sealed
+---@description "The information about a Sprite-type light source that will spawn in the map."
+@Misc
+script SpriteTypeOverlayLightInfo
+
+	---@description "An entity that belongs to the map where a light source will be added."
+	---@sealed
+	property Entity Instigator
+
+	---@description "The world space coordinates of the light source."
+	---@sealed
+	property Vector3 WorldPosition
+
+	---@description "The world's spatial scale where the light source will be applied."
+	---@sealed
+	property Vector3 WorldScale
+
+	---@description "The world's spatial z-axis-based rotation value where the light source will be applied."
+	---@sealed
+	property float WorldZRotation
+
+	---@sealed
+	property boolean Loop = true
+
+	---@sealed
+	property float PlayRate = 1
+
+	---@sealed
+	property string SpriteRUID
+
+	---@sealed
+	property Color Color = RGBA(1.000, 1.000, 1.000, 1.000)
+
+	---@sealed
+	property float Intensity = 1
+
+	---@sealed
+	property float Lifetime = -1
+
+	---@sealed
+	property int32 LightOrder = 0
+
+	---@sealed
+	property OverlayLightOverlapOperation OverlapOperation = OverlayLightOverlapOperation.Additive
+
+	---@description "Initializes SpriteTypeOverlayLightInfo to the specified value."
+	constructor SpriteTypeOverlayLightInfo(Entity instigator) end
+
+	---@description "Initializes SpriteTypeOverlayLightInfo to the specified value."
+	constructor SpriteTypeOverlayLightInfo(Entity instigator, float lifetime, Vector3 worldPosition, float worldZRotation, Vector3 worldScale, Color color, float intensity, OverlayLightOverlapOperation overlapOperation, int32 lightOrder, string spriteRUID, float playRate, boolean loop) end
+
+end

@@ -3,15 +3,35 @@
 @Misc
 script Foothold
 
-	---@description "Indicates the end point of Foothold. Always located on the right side of StartPoint."
+	---@description "Indicates the end point of foothold. Always located on the right side of StartPoint."
 	---@sealed
 	readonly property Vector2 EndPoint
 
-	---@description "The Foothold ID. It is given when saving a foothold."
+	---@description "Applies a friction force to an Entity containing a RigidbodyComponent on the foothold. The larger the value, the faster it decelerates."
+	---@sealed
+	property float FootholdDrag
+
+	---@description "Applies a force to the Entity containing a RigidbodyComponent on the foothold. If positive, the force is applied to the right, and if negative, to the left."
+	---@sealed
+	property float FootholdForce
+
+	---@description "The coefficient is multiplied by the movement speed when the Entity with RigidbodyComponent is on the foothold. The greater the value, the faster the movement."
+	---@sealed
+	property float FootholdWalkSpeedFactor
+
+	---@description "The group Id that the foothold belongs to. Granted when saving a foothold."
+	---@sealed
+	readonly property int32 GroupId
+
+	---@description "A foothold Id. Given when saving a foothold."
 	---@sealed
 	readonly property int32 Id
 
-	---@description "Indicates whether the Foothold is a dynamic Foothold."
+	---@description "Determines whether the Entity is blocked by vertical footholds in its TileMap. Only pertains to Entities with RigidbodyComponent."
+	---@sealed
+	property boolean IsBlockVerticalLine
+
+	---@description "Indicates whether the Foothold is a dynamic foothold."
 	---@sealed
 	readonly property boolean IsDynamic
 
@@ -19,47 +39,51 @@ script Foothold
 	---@sealed
 	readonly property float Length = 0
 
-	---@description "The Id of the next Foothold. Always located on the right side of this Foothold."
+	---@description "The Id of the next foothold, located on the right side of this foothold."
 	---@sealed
 	readonly property int32 NextFootholdId = 0
 
-	---@description "The Id of the Entity that owns this Foothold. The Entity has either TileMapComponent or CustomFootholdComponent."
+	---@description "The Id of the Entity that owns this foothold. The Entity has either TileMapComponent or CustomFootholdComponent."
 	---@sealed
 	readonly property string OwnerId
 
-	---@description "The Id of the previous Foothold. Always located on the left side of this Foothold."
+	---@description "The Id of the previous foothold, located on the left side of this foothold."
 	---@sealed
 	readonly property int32 PreviousFootholdId = 0
 
-	---@description "Indicates the start point of Foothold. Always located on the left side of EndPoint."
+	---@description "When two or more entities overlap, the priority is determined according to the Sorting Layer."
+	---@sealed
+	readonly property string SortingLayer
+
+	---@description "Indicates the start point of foothold. Always located on the left side of EndPoint."
 	---@sealed
 	readonly property Vector2 StartPoint
 
-	---@description "Refers to the variance from the end to start points of Foothold. It can tell the slope."
+	---@description "Refers to the variance from the end to start points of a foothold. Indicates the slope."
 	---@sealed
 	readonly property Vector2 Variance
 
-	---@description "Returns the location of the Foothold center."
+	---@description "Returns the location of the center of the foothold."
 	---@sealed
 	method Vector2 GetCenter() end
 
-	---@description "Returns the height of Foothold."
+	---@description "Returns the height of a foothold."
 	---@sealed
 	method float GetHeight() end
 
-	---@description "Returns the width of Foothold."
+	---@description "Returns the width of a foothold."
 	---@sealed
 	method float GetWidth() end
 
-	---@description "Returns the Y-axis value when the Foothold's X-axis value is x."
+	---@description "Returns the Y-axis value when the foothold's X-axis value is x."
 	---@sealed
 	method float GetYByX(float x) end
 
-	---@description "Returns whether the Foothold is a horizontal Foothold."
+	---@description "Returns whether the foothold is a horizontal Foothold."
 	---@sealed
 	method boolean IsHorizontal() end
 
-	---@description "Returns whether the Foothold is a vertical Foothold."
+	---@description "Returns whether the foothold is a vertical Foothold."
 	---@sealed
 	method boolean IsVertical() end
 

@@ -12,6 +12,8 @@ script BackgroundType
 	member Web = 3
 	---@description "Gradient background."
 	member Gradient = 4
+	---@description "This is a single sprite image background."
+	member Sprite = 5
 
 	---@description "Converts numbers to the applicable type."
 	static method BackgroundType CastFrom(number value) end

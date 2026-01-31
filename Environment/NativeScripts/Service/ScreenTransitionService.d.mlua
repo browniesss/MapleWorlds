@@ -1,0 +1,34 @@
+---@sealed
+---@description "Provides a smooth screen transition effect."
+@Service
+script ScreenTransitionService extends Service
+
+	---@description "Executes the Dissolve effect. Time sets the effect's duration. It is measured in units of seconds, and only values from 0 to 3 can be used. The includeUI function determines whether a dissolve effect will be applied to the UI. If isHighPriorityThanFadeInOut is true, then the Fade In/Out effect during the dissolve effect will be blocked. If false, the dissolve effect and Fade In/Out will overlap on top of each other. When the Fade Out begins, Dissolve can't begin before Fade Out begins."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method void DissolveScreen(float time, boolean includeUI, boolean isHighPriorityThanFadeInOut) end
+
+	---@description "Sets whether the Fade In and Fade Out effect will be active when moving maps."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method void SetFadeInOutEnable(boolean isEnable) end
+
+	---@description "Sets the time it takes the screen to go from dark to bright when moving maps. It is measured in units of seconds, and the default value is 1. Only values from 0 to 3 can be used."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method void SetFadeInTime(float time) end
+
+	---@description "Sets the time it takes the screen to go from bright to dark when moving maps. It is measured in units of seconds, and the default value is 1. Only values from 0 to 3 can be used."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method void SetFadeOutTime(float time) end
+
+	emitter EmitFadeInStartEvent(FadeInStartEvent event) end
+
+	emitter EmitFadeInEndEvent(FadeInEndEvent event) end
+
+	emitter EmitFadeOutStartEvent(FadeOutStartEvent event) end
+
+	emitter EmitFadeOutEndEvent(FadeOutEndEvent event) end
+
+end

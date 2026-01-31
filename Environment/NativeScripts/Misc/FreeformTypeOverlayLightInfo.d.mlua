@@ -1,0 +1,52 @@
+---@sealed
+---@description "The information about a Freeform-type light source that will spawn in the map."
+@Misc
+script FreeformTypeOverlayLightInfo
+
+	---@description "An entity that belongs to the map where a light source will be added."
+	---@sealed
+	property Entity Instigator
+
+	---@description "The world space coordinates of the light source."
+	---@sealed
+	property Vector3 WorldPosition
+
+	---@description "The world's spatial scale where the light source will be applied."
+	---@sealed
+	property Vector3 WorldScale
+
+	---@description "The world's spatial z-axis-based rotation value where the light source will be applied."
+	---@sealed
+	property float WorldZRotation
+
+	---@sealed
+	property float FalloffDistance = 0.5
+
+	---@sealed
+	property float FalloffIntensity = 0.5
+
+	---@sealed
+	property List<Vector2> FreeformPoints
+
+	---@sealed
+	property Color Color = RGBA(1.000, 1.000, 1.000, 1.000)
+
+	---@sealed
+	property float Intensity = 1
+
+	---@sealed
+	property float Lifetime = -1
+
+	---@sealed
+	property int32 LightOrder = 0
+
+	---@sealed
+	property OverlayLightOverlapOperation OverlapOperation = OverlayLightOverlapOperation.Additive
+
+	---@description "Initializes FreeformTypeOverlayLightInfo to the specified value."
+	constructor FreeformTypeOverlayLightInfo(Entity instigator) end
+
+	---@description "Initializes FreeformTypeOverlayLightInfo to the specified value."
+	constructor FreeformTypeOverlayLightInfo(Entity instigator, float lifetime, Vector3 worldPosition, float worldZRotation, Vector3 worldScale, Color color, float intensity, OverlayLightOverlapOperation overlapOperation, int32 lightOrder, List<Vector2> freeformPoints, float falloffDistance, float falloffIntensity) end
+
+end

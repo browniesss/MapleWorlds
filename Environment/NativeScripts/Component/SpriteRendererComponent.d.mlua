@@ -86,13 +86,9 @@ script SpriteRendererComponent extends Component
 	---@sealed
 	method void ChangeMaterial(string materialId) end
 
-	emitter EmitEmbededSpriteAnimPlayerChangeFrameEvent(EmbededSpriteAnimPlayerChangeFrameEvent event) end
-
-	emitter EmitEmbededSpriteAnimPlayerChangeStateEvent(EmbededSpriteAnimPlayerChangeStateEvent event) end
-
-	emitter EmitEmbededSpriteAnimPlayerEndEvent(EmbededSpriteAnimPlayerEndEvent event) end
-
-	emitter EmitEmbededSpriteAnimPlayerStartEvent(EmbededSpriteAnimPlayerStartEvent event) end
+	---@description "Sets the alpha value of the sprite."
+	---@sealed
+	method void SetAlpha(float alpha) end
 
 	emitter EmitOrderInLayerChangedEvent(OrderInLayerChangedEvent event) end
 

@@ -1,0 +1,34 @@
+@Component
+script Eliza_Buff extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		local function buffFunction()
+			local enemiesListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
+			local enemies = enemiesListParent.Children
+		
+			for index in ipairs(enemies) do
+				local monster = enemies[index]
+			
+				if monster.Enable and monster.Unit ~= nil then
+					local spriteRenderer = monster.SpriteRendererComponent
+					local scaleTween = _TweenLogic:ScaleTo(monster, Vector2(monster.TransformComponent.Scale.x + 0.5, monster.TransformComponent.Scale.y + 0.5),
+			 		1, EaseType.BounceEaseInOut)
+					
+					_EffectService:PlayEffectAttached("288b2ca13ae34efc987c49ac0bb22f79", monster, Vector3(0, 0, 0) , 0, Vector3.one)
+					enemies[index].Unit:GetBuff(_eBuffType.AttackSpeedBuff, self.skillAmount, self.skillTime)
+					enemies[index].Unit:GetBuff(_eBuffType.MaxHealthMultiplyBuff, self.skillAmount, self.skillTime)
+				end
+			end
+			
+			self.caster.Unit.isUsingSkill = false
+			self.caster.Unit:SetState("move")
+		end
+		
+		-- 첫 번째 발사: 공격 모션 발생
+		_TimerService:SetTimerOnce(buffFunction, self.skillAttackTiming)
+	end
+
+end

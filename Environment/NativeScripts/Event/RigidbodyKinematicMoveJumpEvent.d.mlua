@@ -1,4 +1,5 @@
 ---@sealed
+---@description "This event occurs when jumping or landing while the KinematicMove property is true."
 @Event
 script RigidbodyKinematicMoveJumpEvent extends EventType
 
@@ -6,6 +7,7 @@ script RigidbodyKinematicMoveJumpEvent extends EventType
 	---@sealed
 	property Entity Entity
 
+	---@description "The current jump status."
 	---@sealed
 	property boolean IsJumping = false
 

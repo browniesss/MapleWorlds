@@ -15,4 +15,8 @@ script WorldInstanceInfo
 	---@sealed
 	readonly property int32 MaxUserCount
 
+	---@description "A short string that can be used as a world instance identifier or name. The uniqueness is guaranteed in the same world, but there can be duplicates between multiple worlds."
+	---@sealed
+	readonly property string ShortCode
+
 end

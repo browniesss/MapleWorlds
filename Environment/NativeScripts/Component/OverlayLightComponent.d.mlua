@@ -1,0 +1,75 @@
+---@description "Outputs the Overlap light source."
+@Component
+script OverlayLightComponent extends Component
+
+	---@description "The color of the light source."
+	---@sealed
+	@Sync
+	property Color Color = Color(1.000, 1.000, 1.000, 1.000)
+
+	---@description "Determines how much the light will stretch from FreeformPoints if the light source is a Freeform-type. The larger the value, the larger the size. "
+	---@sealed
+	@Sync
+	property float FalloffDistance = 0.5
+
+	---@description "Controls the softness of the curves when the light source starts to disappear. The larger the value, the more blurred and softer the edge looks. The smaller the value, the sharper and clearer the edge looks."
+	---@sealed
+	@Sync
+	property float FalloffIntensity = 0.5
+
+	---@description "Points that define the shape of a Freeform-type light source. The number of points can't exceed 2,000."
+	---@sealed
+	@Sync
+	property SyncList<Vector2> FreeformPoints
+
+	---@description "The radius of the internal light source area that has the max brightness if the light source is a Spot-type. It can't be larger than the OuterRadius value."
+	---@sealed
+	@Sync
+	property float InnerRadius = 0
+
+	---@description "The intensity of the light source."
+	---@sealed
+	@Sync
+	property float Intensity = 1
+
+	---@description "Determines the rendering order of a light source light texture. The light source with a smaller number will be rendered first, and then, the larger number light source will be rendered on top. Operates when OverlapOperation is set to AlphaBlend. Global-types don't use LightOrder."
+	---@sealed
+	@Sync
+	property int32 LightOrder = 0
+
+	---@description "The outer range that determines the radius Spot-type light source. The light will begin to get weaker from the end of the InnerRadius, and the light strength will be 0% when it reaches the radius."
+	---@sealed
+	@Sync
+	property float OuterRadius = 1
+
+	---@description "How to calculate a light source. Global-type don't use OverlapOperation."
+	---@sealed
+	@Sync
+	property OverlayLightOverlapOperation OverlapOperation = OverlayLightOverlapOperation.Additive
+
+	---@description "The play speed of an animation clip resource that is used for a Sprite-type light source. The larger the value, the faster the play speed."
+	---@sealed
+	@Sync
+	property float PlayRate = 1
+
+	---@description "The inner angle of a Spot-type light source. The wider the angle, the larger the interval. All of the pixels have 100% of the light intensity applied to them. It can't be larger than the SpotOuterAngle value."
+	---@sealed
+	@Sync
+	property float SpotInnerAngle = 360
+
+	---@description "The outer angle of a Spot-type light source. The larger the value, the wider the angle. The light will begin to get weaker from the end of the SpotInnerAngle, and the light strength will be 0% when it reaches the SpotOuterAngle."
+	---@sealed
+	@Sync
+	property float SpotOuterAngle = 360
+
+	---@description "The RUID of the sprite that will be drawn by a Sprite-type light source."
+	---@sealed
+	@Sync
+	property string SpriteRUID = ""
+
+	---@description "The type of light source. There are 4 types: Spot, Freeform, Global, and Sprite."
+	---@sealed
+	@Sync
+	property OverlayLightType Type = OverlayLightType.Spot
+
+end

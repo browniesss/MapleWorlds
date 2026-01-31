@@ -1,0 +1,52 @@
+---@sealed
+---@description "The Sprite-type light source information that will spawn as a child of an entity."
+@Misc
+script AttachedSpriteTypeOverlayLightInfo
+
+	---@description "The parent entity's spatial coordinates where the light source will be placed in."
+	---@sealed
+	property Vector3 LocalPosition
+
+	---@description "The parent entity's spatial scale where the light source will be applied to."
+	---@sealed
+	property Vector3 LocalScale
+
+	---@description "The parent entity's spatial z-axis-based rotation value where the light source will be applied to."
+	---@sealed
+	property float LocalZRotation
+
+	---@description "An entity that will have a created light source added to it."
+	---@sealed
+	property Entity ParentEntity
+
+	---@sealed
+	property boolean Loop = true
+
+	---@sealed
+	property float PlayRate = 1
+
+	---@sealed
+	property string SpriteRUID
+
+	---@sealed
+	property Color Color = RGBA(1.000, 1.000, 1.000, 1.000)
+
+	---@sealed
+	property float Intensity = 1
+
+	---@sealed
+	property float Lifetime = -1
+
+	---@sealed
+	property int32 LightOrder = 0
+
+	---@sealed
+	property OverlayLightOverlapOperation OverlapOperation = OverlayLightOverlapOperation.Additive
+
+	---@description "Initializes AttachedSpriteTypeOverlayLightInfo to the specified value."
+	constructor AttachedSpriteTypeOverlayLightInfo(Entity parentEntity) end
+
+	---@description "Initializes AttachedSpriteTypeOverlayLightInfo to the specified value."
+	constructor AttachedSpriteTypeOverlayLightInfo(Entity parentEntity, float lifetime, Vector3 localPosition, float localZRotation, Vector3 localScale, Color color, float intensity, OverlayLightOverlapOperation overlapOperation, int32 lightOrder, string spriteRUID, float playRate, boolean loop) end
+
+end

@@ -5,12 +5,20 @@ script Heal_0 extends SkillParent
 	method void ActivateSkill()
 		__base:ActivateSkill()
 		
-		_EffectService:PlayEffectAttached("92f5e05881614a50a58ea58b59fc7752", self.caster, Vector3(0, 0, 0) , 0, Vector3.one)
-		self.caster.Unit.hp += self.caster.Unit.damage * self.skillAmount
+		_EffectService:PlayEffectAttached("92f5e05881614a50a58ea58b59fc7752", self.caster, Vector3(0, 0, 0) , 0, Vector3.one * 2)
+		local nearByAllies = self:FindNearByAllies()
 		
-		-- 스킬 사용 종료 처리
-		self.caster.Unit.isUsingSkill = false
-		self.caster.Unit:SetState("move")
+		for _, target in ipairs(nearByAllies) do
+			if not isvalid(target) or target.Unit.curState == "die" then
+				continue
+			end
+			
+			log("Heal_0 to ", target.Unit.id, " by 광신도")
+				
+		    target.Unit:OnHeal(self.caster, self.caster.Unit.damage * self.skillAmount)
+		end
+		
+		self:SkillEnd()
 	end
 
 end

@@ -1,0 +1,23 @@
+@Component
+script AdminButton extends Component
+
+	property any callback = nil
+
+	method void init(any cb)
+		self.callback = cb
+	end
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: ButtonComponent
+		-- Space: Client
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local Entity = event.Entity
+		---------------------------------------------------------
+		self.callback()
+	end
+
+end

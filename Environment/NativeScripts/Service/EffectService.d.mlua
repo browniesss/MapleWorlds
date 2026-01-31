@@ -3,11 +3,11 @@
 @Service
 script EffectService extends Service
 
-	---@description "Plays the effect at a fixed location on the current map and returns a serial number to remove the effect. Returns 0 if it fails to create the effect. The available options are FlipX, FlipY, SortingLayer, OrderInLayer, Alpha, StartFrameIndex, EndFrameIndex, PlayRate, SyncFlip, Color, MaterialID, and IgnoreMapLayerCheck."
+	---@description "Plays the effect at a fixed location on the current map and returns a serial number to remove the effect. Returns 0 if it fails to create the effect. The available options are FlipX, FlipY, SortingLayer, OrderInLayer, Alpha, StartFrameIndex, EndFrameIndex, PlayRate, SyncFlip, Color, MaterialID, IgnoreMapLayerCheck, and LitMode."
 	---@sealed
 	method integer PlayEffect(string animationClipRUID, Entity instigator, Vector3 position, float zRotation, Vector3 scale, boolean isLoop = false, Dictionary<string, any> options = nil) end
 
-	---@description "Plays the effect attached to parentEntity and returns the serial number to remove the effect. Returns 0 if it fails to create the effect. The available options are FlipX, FlipY, SortingLayer, OrderInLayer, Alpha, StartFrameIndex, EndFrameIndex, PlayRate, SyncFlip, Color, MaterialID, and IgnoreMapLayerCheck."
+	---@description "Plays the effect attached to parentEntity and returns the serial number to remove the effect. Returns 0 if it fails to create the effect. The available options are FlipX, FlipY, SortingLayer, OrderInLayer, Alpha, StartFrameIndex, EndFrameIndex, PlayRate, SyncFlip, Color, MaterialID, IgnoreMapLayerCheck, and LitMode."
 	---@sealed
 	method integer PlayEffectAttached(string animationClipRUID, Entity parentEntity, Vector3 localPosition, float localZRotation, Vector3 localScale, boolean isLoop = false, Dictionary<string, any> options = nil) end
 

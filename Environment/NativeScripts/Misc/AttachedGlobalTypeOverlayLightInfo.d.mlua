@@ -1,0 +1,31 @@
+---@sealed
+---@description "The Global-type light source information that will spawn as a child of an entity."
+@Misc
+script AttachedGlobalTypeOverlayLightInfo
+
+	---@description "An entity that will have a created light source added to it."
+	---@sealed
+	property Entity ParentEntity
+
+	---@sealed
+	property Color Color = RGBA(1.000, 1.000, 1.000, 1.000)
+
+	---@sealed
+	property float Intensity = 1
+
+	---@sealed
+	property float Lifetime = -1
+
+	---@sealed
+	property int32 LightOrder = 0
+
+	---@sealed
+	property OverlayLightOverlapOperation OverlapOperation = OverlayLightOverlapOperation.Additive
+
+	---@description "Initializes AttachedFreeformTypeOverlayLightInfo to the specified value."
+	constructor AttachedGlobalTypeOverlayLightInfo(Entity parentEntity) end
+
+	---@description "Initializes AttachedFreeformTypeOverlayLightInfo to the specified value."
+	constructor AttachedGlobalTypeOverlayLightInfo(Entity parentEntity, float lifetime, Color color, float intensity) end
+
+end

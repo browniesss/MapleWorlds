@@ -1,0 +1,12 @@
+---@sealed
+@Enum
+script OverlayLightType
+	member Spot = 0
+	member Freeform = 1
+	member Global = 2
+	member Sprite = 3
+
+	static method OverlayLightType CastFrom(number value) end
+
+	static method OverlayLightType CastFrom(string value) end
+end

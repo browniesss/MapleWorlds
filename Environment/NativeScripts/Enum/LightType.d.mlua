@@ -1,0 +1,19 @@
+---@sealed
+---@description "The LightComponent lighting type."
+@Enum
+script LightType
+	---@description "A circular light source and can be composed as a pizza slice shape as well. Not affected by TransformComponent Scale."
+	member Spot = 0
+	---@description "This lighting is based on a user-customized, closed, multi-point shape."
+	member Freeform = 1
+	---@description "This lighting affects the entire screen with a defined shape. Individual SortingLayers can't be affected by multiple Global Light lighting effects at the same time."
+	member Global = 2
+	---@description "This lighting is based on a sprite."
+	member Sprite = 3
+
+	---@description "Converts numbers to the applicable type."
+	static method LightType CastFrom(number value) end
+
+	---@description "Converts strings to the applicable type."
+	static method LightType CastFrom(string value) end
+end

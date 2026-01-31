@@ -1,0 +1,30 @@
+@Component
+script Cold_Eye_Laser extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		local position
+		if self.caster.Unit.isEnemy == false then
+			position = Vector3(0, 0.35, 0)
+		else
+			position = Vector3(-2.2, 0.35, 0)
+		end
+		local laser = _SpawnService:SpawnByModelId("model://c0519d26-e94a-4f66-b92c-567e1a2d11e5", "ColdEye_Laser_Object", position, self.caster)
+		
+		laser.SpriteRendererComponent.FlipX = self.caster.Unit.isEnemy == false
+		laser.LoopAttackComponent:Init(self.skillAmount, self.skillTime, 0.5, self.caster, function(target)
+		        target.Unit:GetStatusDebuff(_eStatusDebuffType.AttackSpeedDecrease, 0.5, self.skillTime, self.caster)
+		    end, false)
+		
+		local deleteFunction = function()
+			-- 스킬 사용 종료 처리
+			self:SkillEnd()
+		end
+		
+		-- 스킬 사용 종료 처리
+		_TimerService:SetTimerOnce(deleteFunction, self.skillTime * 0.5)
+	end
+
+end

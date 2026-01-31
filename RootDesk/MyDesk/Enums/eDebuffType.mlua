@@ -1,6 +1,7 @@
 @Logic
 script eDebuffType extends Logic
 
+	-- 상태 변경형 디버프 (curState를 변경하는 디버프)
 	@Sync
 	property number Stun = 1
 
@@ -8,12 +9,6 @@ script eDebuffType extends Logic
 	property number Fear = 2
 
 	@Sync
-	property number Silence = 3
-
-	@Sync
-	property number AttackSpeedDecrease = 4
-
-	@Sync
-	property number HealDecrease = 5
+	property number Freeze = 3
 
 end

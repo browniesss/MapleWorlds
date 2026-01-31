@@ -1,0 +1,14 @@
+@Component
+script Star_Pixie_Freeze extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		_TimerService:SetTimerOnce(function()
+			self.target.Unit:GetDebuff(_eDebuffType.Freeze, self.skillAmount, self.skillTime)
+			self:SkillEnd()
+		end, self.skillAttackTiming)
+	end
+
+end

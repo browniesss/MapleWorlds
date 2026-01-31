@@ -1,0 +1,31 @@
+---@sealed
+---@description "The information about a Global-type light source that will spawn in the map."
+@Misc
+script GlobalTypeOverlayLightInfo
+
+	---@description "An entity that belongs to the map where a light source will be added."
+	---@sealed
+	property Entity Instigator
+
+	---@sealed
+	property Color Color = RGBA(1.000, 1.000, 1.000, 1.000)
+
+	---@sealed
+	property float Intensity = 1
+
+	---@sealed
+	property float Lifetime = -1
+
+	---@sealed
+	property int32 LightOrder = 0
+
+	---@sealed
+	property OverlayLightOverlapOperation OverlapOperation = OverlayLightOverlapOperation.Additive
+
+	---@description "Initializes GlobalTypeOverlayLightInfo to the specified value."
+	constructor GlobalTypeOverlayLightInfo(Entity instigator) end
+
+	---@description "Initializes GlobalTypeOverlayLightInfo to the specified value."
+	constructor GlobalTypeOverlayLightInfo(Entity instigator, float lifetime, Color color, float intensity) end
+
+end

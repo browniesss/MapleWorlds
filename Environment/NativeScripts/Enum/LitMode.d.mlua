@@ -1,0 +1,17 @@
+---@sealed
+---@description "Selects the rendering method that will determine whether materials or objects will be affected by light sources."
+@Enum
+script LitMode
+	---@description "Follows the rendering methods set to WorldConfig. It's useful for when you want to control the Lit/Unlit status of multiple objects without needing to set each one individually."
+	member Default = 0
+	---@description "Not affected by a light source. This mode always renders the material's original colors and texture to max brightness regardless of the light source's color, intensity, or position. It's well suited for certain background elements such as UI that need to be emphasized."
+	member Unlit = 1
+	---@description "Affected by light sources. This mode is directly affected by placed light sources. The color and brightness of objects will change dynamically."
+	member Lit = 2
+
+	---@description "Converts numbers to the applicable type."
+	static method LitMode CastFrom(number value) end
+
+	---@description "Converts strings to the applicable type."
+	static method LitMode CastFrom(string value) end
+end

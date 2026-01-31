@@ -1,0 +1,17 @@
+@Component
+script Skeleton_Soldier_Attack extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		local attackFunction = function()
+			self.target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 1)
+			self.target.Unit:GetStatusDebuff(_eStatusDebuffType.HealDecrease, 0, self.skillTime, self.caster)
+			self:SkillEnd()
+		end
+		
+		_TimerService:SetTimerOnce(attackFunction, self.skillAttackTiming)
+	end
+
+end

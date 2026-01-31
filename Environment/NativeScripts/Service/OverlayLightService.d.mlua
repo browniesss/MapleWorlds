@@ -1,0 +1,56 @@
+---@sealed
+---@description "Provides a create and destroy function for light sources."
+@Service
+script OverlayLightService extends Service
+
+	---@description "Removes a light source. Deliveres the identifier of the light source that will be removed to serial."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method void DestroyOverlayLight(integer serial) end
+
+	---@description "Determines the overlay light's activation status."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method void SetOverlayLightEnabled(boolean enable) end
+
+	---@description "Spawns a Freeform-type light source on the map. Delivers the FreeformTypeOverlayLightInfo, which is the Freeform light source information to overlayLightinfo. The return value is the identifier number of the created light source and returns 0 if creation fails."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method integer SpawnFreeformTypeOverlayLight(FreeformTypeOverlayLightInfo overlayLightInfo) end
+
+	---@description "Spawns a Freeform-type light source as a child entity. Delivers the AttachedFreeformTypeOverlayLightInfo, which is the Freeform light source information to overlayLightinfo. The return value is the identifier number of the created light source and returns 0 if creation fails."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method integer SpawnFreeformTypeOverlayLightAttached(AttachedFreeformTypeOverlayLightInfo overlayLightInfo) end
+
+	---@description "Spawns a Global-type light source on the map. Delivers the GlobalTypeOverlayLightInfo, which is the Global light source information to overlayLightinfo. The return value is the identifier number of the created light source and returns 0 if creation fails."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method integer SpawnGlobalTypeOverlayLight(GlobalTypeOverlayLightInfo overlayLightInfo) end
+
+	---@description "Spawns a Global-type light source as a child entity. Delivers the AttachedGlobalTypeOverlayLightInfo, which is the Global light source information to overlayLightinfo. The return value is the identifying number of the created light source and returns 0 if creation fails."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method integer SpawnGlobalTypeOverlayLightAttached(AttachedGlobalTypeOverlayLightInfo overlayLightInfo) end
+
+	---@description "Spawns a Spot-type light source on the map. Delivers the SpotTypeOverlayLightInfo, which is the Spot light source information to overlayLightinfo. The return value is the identifier number of the created light source and returns 0 if creation fails."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method integer SpawnSpotTypeOverlayLight(SpotTypeOverlayLightInfo overlayLightInfo) end
+
+	---@description "Spawns a Spot-type light source as a child entity. Delivers the AttachedSpotTypeOverlayLightInfo, which is the Spot light source information to overlayLightinfo. The return value is the identifier number of the created light source and returns 0 if creation fails."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method integer SpawnSpotTypeOverlayLightAttached(AttachedSpotTypeOverlayLightInfo overlayLightInfo) end
+
+	---@description "Spawns a Sprite-type light source on the map. Delivers the SpriteTypeOverlayLightInfo, which is the Sprite light source information to overlayLightinfo. The return value is the identifier number of the created light source and returns 0 if creation fails."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method integer SpawnSpriteTypeOverlayLight(SpriteTypeOverlayLightInfo overlayLightInfo) end
+
+	---@description "Spawns a Sprite-type light source as a child entity. Delivers the AttachedSpriteTypeOverlayLightInfo, which is the Sprite light source information to overlayLightinfo. The return value is the identifier number of the created light source and returns 0 if creation fails."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method integer SpawnSpriteTypeOverlayLightAttached(AttachedSpriteTypeOverlayLightInfo overlayLightInfo) end
+
+end

@@ -25,7 +25,11 @@ script AntiCheatService extends Service
 
 	---@sealed
 	@ExecSpace("ServerOnly")
-	method boolean WarpAdminToWorldInstanceAndWait(string userId, string destinationWorldInstanceId) end
+	method boolean WarpAdminToWorldInstanceAndWait(string userId, string destinationWorldInstanceId, string warpData) end
+
+	---@sealed
+	@ExecSpace("ServerOnly")
+	method void WritePrivateLog(string userId, string name, string value, table extras) end
 
 	emitter EmitStartBotDetectionEvent(StartBotDetectionEvent event) end
 

@@ -11,14 +11,27 @@ script UtilLogic extends Logic
 	---@sealed
 	property number ServerElapsedSeconds
 
+	---@description "After finding a concave polygon that wraps all of the points, it returns the points that make up the polygon. Returned points are sorted by link order. Concavity indicates how concave the polygon is and can take values between 0 and 1. The larger the samplingWeight value, the more points are selected to create the polygon. Values from 0 and higher can be used, and we recommend using a value between 1 and 1.2."
+	---@sealed
+	method table<Vector2> ConcaveHull(table<Vector2> points, float concavity, float samplingWeight) end
+
 	---@description "Checks if the targetString is included in the origin sentences."
 	---@sealed
 	method boolean Contains(string origin, string targetString) end
+
+	---@description "After finding a convex polygon that wraps all of the points, it returns the points that make up the polygon. Returned points are sorted by link order."
+	---@sealed
+	method table<Vector2> ConvexHull(table<Vector2> points) end
 
 	---@description "Creates LocalDateTime based on dateTime and returns it."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method DateTime GetLocalTimeFrom(DateTime dateTime) end
+
+	---@description "After finding the border of a sprite, it returns the points that make up the border. Returned points are sorted by link order. The border can be singular or multiple."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method table<table<Vector2>> GetSpriteEdgePoints(Sprite sprite) end
 
 	---@description "This is a deprecated function. Use the UtcNow property of DateTime."
 	---@deprecated
@@ -33,6 +46,7 @@ script UtilLogic extends Logic
 	---@sealed
 	method boolean IsNilorEmptyString(string origin) end
 
+	---@description "Creates a new GUID and returns it. The created GUID will be a 32-digit hexadecimal string with no hyphens."
 	---@sealed
 	method string NewGuid() end
 
@@ -55,6 +69,11 @@ script UtilLogic extends Logic
 	---@description "Replaces the targetString of the origin sentence with the newString."
 	---@sealed
 	method string Replace(string origin, string targetString, string newString) end
+
+	---@description "Controls the speed in which game time flows in the client. The default value is 1. Values between 0 and 100 can be set."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method void SetClientTimeScale(float timeScale) end
 
 	---@description "Divides the origin sentence by the separator."
 	---@sealed

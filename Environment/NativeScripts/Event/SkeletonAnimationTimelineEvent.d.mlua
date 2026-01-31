@@ -1,31 +1,41 @@
 ---@sealed
+---@description "This event occurs upon detecting an event that was registered to the animation timeline while the skeleton animation is playing."
 @Event
 script SkeletonAnimationTimelineEvent extends EventType
 
+	---@description "Animation information."
 	---@sealed
 	property SkeletonAnimationClip AnimationClip
 
+	---@description "The AudioPath data for the timeline event."
 	---@sealed
 	property string AudioPath
 
+	---@description "The Balance data for the timeline event."
 	---@sealed
 	property float Balance
 
+	---@description "The timeline event name."
 	---@sealed
 	property string EventName
 
+	---@description "The Float data for the timeline event."
 	---@sealed
 	property float Float
 
+	---@description "The Int data for the timeline event."
 	---@sealed
 	property int32 Int
 
+	---@description "The String data for the timeline event."
 	---@sealed
 	property string String
 
+	---@description "The playback time when a timeline event ocurred."
 	---@sealed
 	property float Time
 
+	---@description "The Volume data for the timeline event."
 	---@sealed
 	property float Volume
 
