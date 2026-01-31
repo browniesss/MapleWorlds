@@ -1,0 +1,80 @@
+@Component
+script Vortex_Sphere extends SkillParent
+
+	property Entity sphereEntity = nil
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		-- 3cac6c2bf6804d5999207c1b0719e8d7
+		-- ProjectileParent 가져오기
+		if self._T.projectileParent == nil then
+			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+		end
+		
+		-- 스폰 위치 계산 (캐스터 앞)
+		local offset = Vector3(1.5, 0.5, 0)
+		if self.caster.Unit.isEnemy then
+			offset.x = -offset.x
+		end
+		local spawnPosition = self.caster.TransformComponent.WorldPosition + offset
+		
+		local function spawnFunction()
+			-- 구체 스폰 (LoopAttackComponent 포함된 모델)
+			self.sphereEntity = _SpawnService:SpawnByModelId(
+				"model://a8e90e0e-045d-4cb6-a60a-45f0505fdcd3",
+				"Vortex_Sphere_Object",
+				spawnPosition,
+				self._T.projectileParent
+			)
+			
+			-- 끌어당기는 콜백 정의
+			local pullSpeed = 0.15
+			local sphereEntity = self.sphereEntity
+			local pullCallback = function(target)
+				if not isvalid(sphereEntity) then
+					return
+				end
+			
+				local spherePos = sphereEntity.TransformComponent.WorldPosition
+				local targetPos = target.TransformComponent.WorldPosition
+			
+				-- 구체 방향으로 이동
+				local dx = spherePos.x - targetPos.x
+				local dy = spherePos.y - targetPos.y
+				local distance = math.sqrt(dx * dx + dy * dy)
+			
+				if distance > 0.1 then
+					local moveX = (dx / distance) * pullSpeed
+					local moveY = (dy / distance) * pullSpeed
+					target.TransformComponent.WorldPosition = Vector3(
+						targetPos.x + moveX,
+						targetPos.y + moveY,
+						targetPos.z
+					)
+				end
+			end
+			
+			-- LoopAttackComponent 초기화
+			-- Init(attackDamage, loopCount, loopInterval, caster, activeFunc, isHeal)
+			local loopInterval = 0.1
+			local loopCount = math.floor(self.skillTime / loopInterval)
+			
+			self.sphereEntity.LoopAttackComponent:Init(
+				self.skillAmount,           -- 틱당 데미지
+				loopCount,                  -- 루프 횟수
+				loopInterval,               -- 루프 간격 (0.1초마다 당기기 + 데미지)
+				self.caster,
+				pullCallback,
+				false
+			)
+		end
+		
+		_TimerService:SetTimerOnce(spawnFunction, self.skillAttackTiming)
+		_TimerService:SetTimerOnce(function()
+			self:SkillEnd()
+		end, self.skillTime)
+	end
+
+end

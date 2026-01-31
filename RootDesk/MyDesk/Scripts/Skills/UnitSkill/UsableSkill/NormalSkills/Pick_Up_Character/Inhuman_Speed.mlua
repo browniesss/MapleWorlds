@@ -1,0 +1,50 @@
+@Component
+script Inhuman_Speed extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		-- 연속 투척 30d2fab7b7104354bd47f2e1cf940c2e
+		-- 삭제 b595d87323054df7951baca045124e64
+		-- 화살 d102da7303a94e89aa842696211d8285
+		
+		local spawnTimer
+		local loopEffect
+		
+		if self._T.projectileParent == nil then
+			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+		end
+		
+		self:CallLoopAnimation("illusionLoop")
+		
+		local basePos = self.Entity.TransformComponent.WorldPosition
+		
+		local options = {
+		    FlipX = true,  -- 좌우 반전
+		}
+		
+		loopEffect = _EffectService:PlayEffectAttached("30d2fab7b7104354bd47f2e1cf940c2e", self.caster, Vector3(0, 0, 0) , 0, Vector3.one, true, options)
+		
+		local function spawnMissile()
+			local projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			local arrow = _SpawnService:SpawnByModelId("model://d0cf599e-c8bd-4e38-aad6-f3d7aa7b4231", "inhuman_arrow", self.caster.TransformComponent.Position + Vector3(0.5, 0.3, 0), projectileParent)
+		
+			arrow.NonTargetProjectile:Init(self.caster, self.skillAmount, self.skillTime, self.caster.Unit.isEnemy, 1.5, true)
+		end
+		
+		local function clearFunction()
+			_EffectService:PlayEffectAttached("b595d87323054df7951baca045124e64", self.caster, Vector3(0, 0, 0) , 0, Vector3.one, false, options)
+		
+			self:CallAnimation("stand2")
+			_EffectService:RemoveEffect(loopEffect)
+			_TimerService:ClearTimer(spawnTimer)
+		end
+		
+		spawnTimer = _TimerService:SetTimerRepeat(spawnMissile, 0.2, 0.3)
+		
+		-- 반복 종료
+		_TimerService:SetTimerOnce(clearFunction, self.skillTime)
+	end
+
+end
