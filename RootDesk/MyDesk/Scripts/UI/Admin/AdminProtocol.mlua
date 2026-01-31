@@ -1,10 +1,19 @@
 @Component
-script AdminProtocol extends CommonProtocol
+script AdminProtocol extends Component
 
 	@ExecSpace("Server")
-	method void ReqGetDataCall(string targetUserId, string key, string type)
-		self:CommonCall(senderUserId)
-		_AdminService:ServerReqGetData(senderUserId, targetUserId, key, type, self)
+	method void ReqGetDataCall(string uid, string targetKey, string type)
+		_ProtocolService:CommonCall(senderUserId)
+		local result = _AdminService:ServerReqGetData(senderUserId, uid, targetKey, type)
+		
+		local response = ""
+		if result.IsSuccess then
+			response = result.Data
+		else
+			response = "Error: " .. result.Message
+		end
+		
+		self:ResGetDataBack(response, senderUserId)
 	end
 
 	@ExecSpace("Client")
@@ -18,9 +27,18 @@ script AdminProtocol extends CommonProtocol
 	end
 
 	@ExecSpace("Server")
-	method void ReqSetDataCall(string targetUserId, string key, string value, string type)
-		self:CommonCall(senderUserId)
-		_AdminService:ServerReqSetData(senderUserId, targetUserId, key, value, type, self)
+	method void ReqSetDataCall(string uid, string targetKey, string value, string type)
+		_ProtocolService:CommonCall(senderUserId)
+		local result = _AdminService:ServerReqSetData(senderUserId, uid, targetKey, value, type)
+		
+		local response = ""
+		if result.IsSuccess then
+			response = "Success: Set " .. result.Message
+		else
+			response = "Error: " .. result.Message
+		end
+		
+		self:ResSetDataBack(response, senderUserId)
 	end
 
 	@ExecSpace("Client")
@@ -29,12 +47,26 @@ script AdminProtocol extends CommonProtocol
 		if adminUI ~= nil then
 			adminUI:Log(result)
 		end
+		
+		local userUnitProtocol = self.Entity.UserUnitProtocol
+		if userUnitProtocol ~= nil then
+			userUnitProtocol:GetUserUnitListCall()
+		end 
 	end
 
 	@ExecSpace("Server")
-	method void ReqDeleteDataCall(string targetUserId, string key, string type)
-		self:CommonCall(senderUserId)
-		_AdminService:ServerReqDeleteData(senderUserId, targetUserId, key, type, self)
+	method void ReqDeleteDataCall(string uid, string targetKey, string type)
+		_ProtocolService:CommonCall(senderUserId)
+		local result = _AdminService:ServerReqDeleteData(senderUserId, uid, targetKey, type)
+		
+		local response = ""
+		if result.IsSuccess then
+			response = "Success: Deleted " .. result.Message
+		else
+			response = "Error: " .. result.Message
+		end
+		
+		self:ResDeleteDataBack(response, senderUserId)
 	end
 
 	@ExecSpace("Client")
@@ -43,6 +75,11 @@ script AdminProtocol extends CommonProtocol
 		if adminUI ~= nil then
 			adminUI:Log(result)
 		end
+		
+		local userUnitProtocol = self.Entity.UserUnitProtocol
+		if userUnitProtocol ~= nil then
+			userUnitProtocol:GetUserUnitListCall()
+		end 
 	end
 
 	@ExecSpace("Server")
@@ -59,7 +96,7 @@ script AdminProtocol extends CommonProtocol
 			badge = _AdminService.badgeKeys
 		end
 		
-		self:ResCheckAdminPermissionBack(isAdmin, common, unit, badge)
+		self:ResCheckAdminPermissionBack(isAdmin, common, unit, badge, senderUserId)
 	end
 
 	@ExecSpace("Client")

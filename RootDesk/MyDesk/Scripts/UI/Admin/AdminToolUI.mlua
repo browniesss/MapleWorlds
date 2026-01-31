@@ -1,19 +1,19 @@
 @Component
 script AdminToolUI extends Component
 
-	property Entity InputTargetUserID = "Path/To/InputTargetUserID"
+	property Entity InputTargetUserID = "7ebebe74-f3ed-4353-bc66-e585e9c18cac"
 
-	property Entity InputKey = "Path/To/InputKey"
+	property Entity InputKey = "6de38484-fa32-49f2-89ef-634270c49033"
 
-	property Entity InputValue = "Path/To/InputValue"
+	property Entity InputValue = "6df8d2cc-3ded-463f-8934-5e5c33d33209"
 
-	property Entity OutputLog = "Path/To/OutputLog"
+	property Entity OutputLog = "0dbb4b2d-42cb-43eb-b9d3-adca39bd3995"
 
-	property Entity ButtonGet = "Path/To/ButtonGet"
+	property Entity ButtonGet = "003bb6bc-4e44-4c92-8430-1e45333457ad"
 
-	property Entity ButtonSet = "Path/To/ButtonSet"
+	property Entity ButtonSet = "c551084e-f597-4b0e-bf86-5cfc67380ea7"
 
-	property Entity ButtonDelete = "Path/To/ButtonDelete"
+	property Entity ButtonDelete = "d009974c-45af-4637-b540-1c00578b4d77"
 
 	property table common = {}
 
@@ -21,6 +21,19 @@ script AdminToolUI extends Component
 
 	property table badge = {}
 
+	property Entity ButtonModal = "f651fb45-3fb4-4a8a-968d-4cdb44a479be"
+
+	property Entity Modal = "cb8fbe1a-e6c7-45fb-9805-19ae49523834"
+
+	property Entity AdminUI = "95d252e0-1edf-4d63-af35-1059ba4284e9"
+
+	property Entity UnitItem = "d01c828f-b023-4553-9158-f8890d8550b8"
+
+	property Entity UnitSelect = "0b9831e2-b55c-4d7e-9151-fe1ec5f83a16"
+
+	property Entity CommonSelect = "6e753ceb-3e30-40a3-9247-8988dbb8575d"
+
+	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		-- AdminProtocol 찾기
 		local protocol = self.Entity.AdminProtocol
@@ -33,25 +46,28 @@ script AdminToolUI extends Component
 		protocol:CheckAdminPermissionCall()
 		
 		-- 버튼 이벤트 연결
-		self.ButtonGet.ButtonClickEvent:Connect(function() self:OnClickGet() end)
-		self.ButtonSet.ButtonClickEvent:Connect(function() self:OnClickSet() end)
-		self.ButtonDelete.ButtonClickEvent:Connect(function() self:OnClickDelete() end)
+		self.ButtonGet.AdminButton:init(function() self:OnClickGet() end)
+		self.ButtonSet.AdminButton:init(function() self:OnClickSet() end)
+		self.ButtonDelete.AdminButton:init(function() self:OnClickDelete() end)
+		self.ButtonModal.AdminButton:init(function() self:OnClickModal() end)
 	end
 
+	@ExecSpace("Client")
 	method void OnClickGet()
-		local targetId = self.InputTargetUserID.TextInputComponent.Text
-		local key = self.InputKey.TextInputComponent.Text
+		local targetId, _ = string.gsub(self.InputTargetUserID.TextInputComponent.Text, "%s+", "")
+		local key, _ = string.gsub(self.InputKey.TextInputComponent.Text, "%s+", "")
 		
 		if targetId == "" or key == "" then
 			self:Log("Please enter TargetUserID and Key")
 			return
 		end
 		
-		self:Log("Requesting GET for " .. key .. "...")
+		self:Log("Requesting GET for " .. key .. " of " .. targetId)
 		-- Type is hardcoded to "User"
-		self.Entity.AdminProtocol:ReqGetDataCall(targetId, key, "User")
+		_UserService.LocalPlayer.AdminProtocol:ReqGetDataCall(targetId, key, "User")
 	end
 
+	@ExecSpace("ClientOnly")
 	method void OnClickSet()
 		local targetId = self.InputTargetUserID.TextInputComponent.Text
 		local key = self.InputKey.TextInputComponent.Text
@@ -66,6 +82,7 @@ script AdminToolUI extends Component
 		self.Entity.AdminProtocol:ReqSetDataCall(targetId, key, value, "User")
 	end
 
+	@ExecSpace("ClientOnly")
 	method void OnClickDelete()
 		local targetId = self.InputTargetUserID.TextInputComponent.Text
 		local key = self.InputKey.TextInputComponent.Text
@@ -79,26 +96,61 @@ script AdminToolUI extends Component
 		self.Entity.AdminProtocol:ReqDeleteDataCall(targetId, key, "User")
 	end
 
+	@ExecSpace("ClientOnly")
 	method void Log(string msg)
 		local currentText = self.OutputLog.TextComponent.Text
-		self.OutputLog.TextComponent.Text = "[" .. DateTime.Now:ToString() .. "] " .. msg .. "\n" .. currentText
+		self.OutputLog.TextComponent.Text = "[" .. self:GetCurrentUTC() .. "] " .. msg .. "\n" .. currentText
 	end
 
+	@ExecSpace("ClientOnly")
 	method void SetOutputValue(string value)
 		self.InputValue.TextInputComponent.Text = value
 	end
 
+	@ExecSpace("ClientOnly")
 	method void SetVisible(boolean visible)
-		self.Entity.Visible = visible
-		self.Entity.Enable = visible
+		self.AdminUI.Visible = visible
+		self.AdminUI.Enable = visible
 	end
 
+	@ExecSpace("ClientOnly")
 	method void UpdateKeyLists(table common, table unit, table badge)
 		self.common = common
 		self.unit = unit
 		self.badge = badge
 		
 		self:Log("Received Key Lists: Common=" .. #common .. ", Unit=" .. #unit .. ", Badge=" .. #badge)
+		
+		for i, data in ipairs(unit) do
+			local item = _SpawnService:SpawnByEntity(self.UnitItem, "item", Vector3.zero, self.UnitSelect)
+			item:SetEnable(true)
+			item:SetVisible(true)
+			
+			item.Children[1].TextComponent.Text = data.name
+			item.AdminButton:init(function() self.InputKey.TextInputComponent.Text = data.key end)
+		end
+		
+		for i, data in ipairs(common) do
+			local item = _SpawnService:SpawnByEntity(self.UnitItem, "item", Vector3.zero, self.CommonSelect)
+			item:SetEnable(true)
+			item:SetVisible(true)
+			
+			item.Children[1].TextComponent.Text = data
+			item.AdminButton:init(function() self.InputKey.TextInputComponent.Text = data end)
+		end
 	end
-	
+
+	@ExecSpace("ClientOnly")
+	method void OnClickModal()
+		self.Modal:SetEnable(self.Modal.Enable ~= true)
+		self.Modal:SetVisible(self.Modal.Visible ~= true)
+	end
+
+	@ExecSpace("ClientOnly")
+	method string GetCurrentUTC()
+		local now = DateTime.UtcNow
+		
+		return now.Year .. "-" .. now.Month .. "-" .. now.Day .. " " .. now.Hour .. ":" .. now.Minute .. ":" .. now.Second
+	end
+
 end

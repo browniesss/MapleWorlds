@@ -84,6 +84,8 @@ UI logic is separated into components attached to UI Entities.
     - `ClearRewardUI`: Shows rewards (Coins, Meso, Event Tokens) after clearing a stage.
 - **Popup UI**:
     - `FailPopup`: Shows restart/quit options on failure.
+- **Admin UI**:
+    - `AdminToolUI`: Interface for Admin data management.
 
 ### 4.2. Data Management
 Data is largely driven by MSW **DataSets** accessed via `_DataService`.
@@ -98,6 +100,23 @@ Data is largely driven by MSW **DataSets** accessed via `_DataService`.
 4.  **Execution**: Server spawns Entity, deducts resources, updates Sync properties.
 5.  **Replication**: MSW automatically syncs `@Sync` properties (HP, Pos) to all clients.
 6.  **Feedback**: Server may call Client callback (e.g., `_GameManager:StageClearClientCallback`) for local UI effects (Victory anim).
+
+### 4.4. Admin System (`Scripts/UI/Admin/`)
+The Admin System allows authorized users to manage User Data directly.
+- **`AdminService`**:
+    - **Role**: Server-only logic for processing admin requests.
+    - **Features**:
+        - **Permission**: controlled via allowed User ID list.
+        - **Operation**: Supports `Get`, `Set`, `Delete` for **UserDataStorage** specific keys.
+        - **Execution**: Uses synchronous `Wait` functions for reliable data handling.
+- **`AdminProtocol`**:
+    - **Role**: Network bridge between Client UI and Server Logic.
+    - **Features**:
+        - Transmits execution results as standard Tables (`IsSuccess`, `Data`/`Message`).
+        - Handles sensitive parameter naming conventions (e.g., using `uid` instead of `targetUserId`).
+- **`AdminToolUI`**:
+    - **Role**: Client-side interface for Admin operations.
+    - **Features**: Dynamically populates Unit and Common key lists for easy access.
 
 ## 5. Game Logic Flow (Example: Stage Clear)
 1.  **Trigger**: `Unit` logic or `GameManager` detects win condition (Enemy Tower Dead or Wave Clear).
@@ -121,3 +140,4 @@ Data is largely driven by MSW **DataSets** accessed via `_DataService`.
 - **Sync**: Use `@Sync` for gameplay-critical data (HP, State).
 - **Services**: All Managers are singletons prefixed with `_` (e.g., `_GameManager`).
 - **Data Loading**: `OnBeginPlay` in Logic scripts is used to load DataSets into memory tables.
+- **Network Parameters**: When calling Server functions from Client space, do NOT include parameters named `senderUserId` or `targetUserId` in the function signature, as these may conflict with internal system parameters or best practices.

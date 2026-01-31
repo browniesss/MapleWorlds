@@ -1,7 +1,13 @@
 @Logic
 script AdminService extends Logic
 
-	property table adminList = {"AdminUserID_1", "AdminUserID_2"}
+	property table adminList = {"20372100004704052"}
+
+	property table commonKeys = {}
+
+	property table unitKeys = {}
+
+	property table badgeKeys = {}
 
 	@ExecSpace("ServerOnly")
 	method boolean IsAdmin(string userId)
@@ -19,35 +25,45 @@ script AdminService extends Logic
 	end
 
 	@ExecSpace("ServerOnly")
-	method void ServerReqGetData(string sender, string targetUserId, string key, string type, AdminProtocol proto)
+	method table ServerReqGetData(string sender, string uid, string key, string type)
+		local result = {}
+		
 		if not self:IsAdmin(sender) then
-			log_warning("Unauthorized Admin Access Attempt: " .. tostring(sender))
-			return
+			log("Unauthorized Admin Access Attempt: " .. tostring(sender))
+			result.IsSuccess = false
+			result.Message = "Unauthorized"
+			return result
 		end
 		
-		-- User Data 조회만 수행 (type 확인 또는 무시하고 User로 처리)
-		-- 요청 사항: User 데이터 조회, 수정, 삭제만 남김
+		-- User Data 조회만 수행
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local errorcode, value = ds:GetAndWait(key)
 		
-		local ds = _DataStorageService:GetUserDataStorage(targetUserId)
-		ds:GetAsync(key, function(errorcode, key, value)
-			local resultValue = "nil"
-			if value ~= nil then
-				resultValue = tostring(value)
-			end
-			
-			if errorcode == 0 then
-				proto:ResGetDataBack(resultValue, sender)
-			else
-				proto:ResGetDataBack("Error: " .. tostring(errorcode), sender)
-			end
-		end)
+		local resultValue = "nil"
+		if value ~= nil then
+			resultValue = tostring(value)
+		end
+		
+		if errorcode == 0 then
+			result.IsSuccess = true
+			result.Data = resultValue
+		else
+			result.IsSuccess = false
+			result.Message = tostring(errorcode)
+		end
+		
+		return result
 	end
 
 	@ExecSpace("ServerOnly")
-	method void ServerReqSetData(string sender, string targetUserId, string key, string value, string type, AdminProtocol proto)
+	method table ServerReqSetData(string sender, string uid, string key, string value, string type)
+		local result = {}
+		
 		if not self:IsAdmin(sender) then
-			log_warning("Unauthorized Admin Access Attempt: " .. tostring(sender))
-			return
+			log("Unauthorized Admin Access Attempt: " .. tostring(sender))
+			result.IsSuccess = false
+			result.Message = "Unauthorized"
+			return result
 		end
 		
 		-- 값 타입 추론
@@ -60,37 +76,45 @@ script AdminService extends Logic
 		if value == "false" then finalValue = false end
 		
 		-- User Data 만 처리
-		local ds = _DataStorageService:GetUserDataStorage(targetUserId)
-		ds:SetAsync(key, finalValue, function(errorcode)
-			if errorcode == 0 then
-				proto:ResSetDataBack("Success: Set " .. key .. " = " .. tostring(finalValue), sender)
-			else
-				proto:ResSetDataBack("Error: " .. tostring(errorcode), sender)
-			end
-		end)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local errorcode = ds:SetAndWait(key, finalValue)
+		
+		if errorcode == 0 then
+			result.IsSuccess = true
+			result.Message = key .. " = " .. tostring(finalValue)
+		else
+			result.IsSuccess = false
+			result.Message = tostring(errorcode)
+		end
+		
+		return result
 	end
 
 	@ExecSpace("ServerOnly")
-	method void ServerReqDeleteData(string sender, string targetUserId, string key, string type, AdminProtocol proto)
+	method table ServerReqDeleteData(string sender, string uid, string key, string type)
+		local result = {}
+		
 		if not self:IsAdmin(sender) then
-			log_warning("Unauthorized Admin Access Attempt: " .. tostring(sender))
-			return
+			log("Unauthorized Admin Access Attempt: " .. tostring(sender))
+			result.IsSuccess = false
+			result.Message = "Unauthorized"
+			return result
 		end
 		
 		-- User Data 만 처리
-		local ds = _DataStorageService:GetUserDataStorage(targetUserId)
-		ds:DeleteAsync(key, function(errorcode)
-			if errorcode == 0 then
-				proto:ResDeleteDataBack("Success: Deleted " .. key, sender)
-			else
-				proto:ResDeleteDataBack("Error: " .. tostring(errorcode), sender)
-			end
-		end)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local errorcode = ds:DeleteAndWait(key)
+		
+		if errorcode == 0 then
+			result.IsSuccess = true
+			result.Message = key
+		else
+			result.IsSuccess = false
+			result.Message = tostring(errorcode)
+		end
+		
+		return result
 	end
-
-	property table commonKeys = {}
-	property table unitKeys = {}
-	property table badgeKeys = {}
 
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
