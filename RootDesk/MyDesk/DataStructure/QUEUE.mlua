@@ -1,0 +1,45 @@
+@Struct
+script QUEUE
+
+	property table data = {}
+
+	method void Init()
+		self.data = {}
+	end
+
+	method void Enqueue(any item)
+		table.insert(self.data, item)
+	end
+
+	method any Dequeue()
+		if #self.data == 0 then
+			return nil
+		end
+		return table.remove(self.data, 1)
+	end
+
+	method any Peek()
+		if #self.data == 0 then
+			return nil
+		end
+		return self.data[1]
+	end
+
+	method integer Count()
+		return #self.data
+	end
+
+	method void Clear()
+		self.data = {}
+	end
+
+	method boolean Contains(any item)
+		for i, v in ipairs(self.data) do
+			if v == item then
+				return true
+			end
+		end
+		return false
+	end
+
+end

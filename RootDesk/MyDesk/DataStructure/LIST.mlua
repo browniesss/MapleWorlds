@@ -1,0 +1,76 @@
+@Struct
+script LIST
+
+	property table data = {}
+
+	method void Init()
+		self.data = {}
+	end
+
+	method void Add(any item)
+		table.insert(self.data, item)
+	end
+	
+	method void AddRange(table items)
+		for _, item in ipairs(items) do
+			table.insert(self.data, item)
+		end
+	end
+
+	method boolean Remove(any item)
+		for i, v in ipairs(self.data) do
+			if v == item then
+				table.remove(self.data, i)
+				return true
+			end
+		end
+		return false
+	end
+
+	method void RemoveAt(integer index)
+		if index < 1 or index > #self.data then
+			return
+		end
+		table.remove(self.data, index)
+	end
+
+	method void Insert(integer index, any item)
+		table.insert(self.data, index, item)
+	end
+
+	method any Get(integer index)
+		return self.data[index]
+	end
+	
+	method void Set(integer index, any item)
+		if index >= 1 and index <= #self.data then
+			self.data[index] = item
+		end
+	end
+
+	method integer Count()
+		return #self.data
+	end
+
+	method void Clear()
+		self.data = {}
+	end
+
+	method boolean Contains(any item)
+		for i, v in ipairs(self.data) do
+			if v == item then
+				return true
+			end
+		end
+		return false
+	end
+	
+	method table ToTable()
+		local newTable = {}
+		for i, v in ipairs(self.data) do
+			table.insert(newTable, v)
+		end
+		return newTable
+	end
+
+end
