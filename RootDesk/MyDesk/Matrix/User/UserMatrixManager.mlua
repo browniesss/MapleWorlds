@@ -164,8 +164,8 @@ script UserMatrixManager extends Component
 
 	-- 페이즈 시작 시 호출 (시간 기록)
 	method void OnPhaseStart(integer phaseId)
-		if _MatrixTimerService ~= nil then
-			self.phaseStartTime[phaseId] = _MatrixTimerService.currentTime
+		if _MatrixGameManager ~= nil then
+			self.phaseStartTime[phaseId] = _MatrixGameManager.matrixTime
 		else
 			self.phaseStartTime[phaseId] = self.playTime
 		end
@@ -187,8 +187,8 @@ script UserMatrixManager extends Component
 		-- 페이즈 경과 시간 계산
 		local startTime = self.phaseStartTime[phaseId] or 0
 		local currentTime = 0
-		if _MatrixTimerService ~= nil then
-			currentTime = _MatrixTimerService.currentTime
+		if _MatrixGameManager ~= nil then
+			currentTime = _MatrixGameManager.matrixTime
 		else
 			currentTime = self.playTime
 		end
@@ -205,8 +205,8 @@ script UserMatrixManager extends Component
 	-- 무한모드 점수 계산 (초당 점수)
 	method integer CalculateInfiniteScore()
 		local currentTime = 0
-		if _MatrixTimerService ~= nil then
-			currentTime = _MatrixTimerService.currentTime
+		if _MatrixGameManager ~= nil then
+			currentTime = _MatrixGameManager.matrixTime
 		else
 			currentTime = self.playTime
 		end

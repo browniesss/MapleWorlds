@@ -423,11 +423,6 @@ script MatrixGameService extends Logic
 		if self.isInitialAugmentSelection then
 			self.isInitialAugmentSelection = false
 
-			-- 타이머 시작 (유닛 3번 + 증강 1번 선택 완료)
-			if _MatrixTimerService ~= nil then
-				_MatrixTimerService:StartTimer()
-			end
-
 			log("초기 증강 선택 완료, 라운드 1 시작")
 			self:StartRound(1)
 			return
@@ -478,11 +473,6 @@ script MatrixGameService extends Logic
 			end
 
 			log("[MatrixGameService] 최종 점수: " .. tostring(finalScore))
-		end
-
-		-- MatrixTimerService 정리
-		if _MatrixTimerService ~= nil then
-			_MatrixTimerService:Reset()
 		end
 
 		-- 서버에서 모든 유닛 제거

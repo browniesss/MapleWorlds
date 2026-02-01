@@ -207,13 +207,9 @@ script MatrixUnitSelectService extends Logic
 		
 		if self.remainingSelections > 0 then
 			-- 다음 선택 (0.5초 딜레이)
-			if _MatrixTimerService ~= nil then
-				_MatrixTimerService:SetTimerOnce(function()
-					self:ShowUnitSelectionUI()
-				end, 0.5)
-			else
+			_TimerService:SetTimerOnce(function()
 				self:ShowUnitSelectionUI()
-			end
+			end, 0.5)
 		else
 			-- 선택 완료 → 콜백 호출
 			if self.onSelectionCompleteCallback ~= nil then
