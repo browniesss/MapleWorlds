@@ -1,0 +1,60 @@
+@Logic
+script TimeScaleManager extends Logic
+
+	@Sync
+	property number timeScale = 1.0
+
+	@Sync
+	property boolean isSpeedUp = false
+
+	@Sync
+	property number accumulatedPlayTime = 0
+
+	@ExecSpace("ServerOnly")
+	method void OnUpdate(number delta)
+		if _GameManager ~= nil and _GameManager.isPlaying then
+			self.accumulatedPlayTime = self.accumulatedPlayTime + (delta * 1000 * self.timeScale)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void ToggleSpeed()
+		if self.isSpeedUp then
+			self.timeScale = 1.0
+			self.isSpeedUp = false
+		else
+			self.timeScale = 2.0
+			self.isSpeedUp = true
+		end
+		self:ApplyTimeScaleToClient(self.timeScale, senderUserId)
+	end
+
+	@ExecSpace("Server")
+	method void ResetTimeScale()
+		self.timeScale = 1.0
+		self.isSpeedUp = false
+		self.accumulatedPlayTime = 0
+		self:ApplyTimeScaleToAllClients(1.0)
+	end
+
+	@ExecSpace("Server")
+	method void ResetPlayTimeOnly()
+		self.accumulatedPlayTime = 0
+		self:ApplyTimeScaleToAllClients(self.timeScale)
+	end
+
+	@ExecSpace("Client")
+	method void ApplyTimeScaleToClient(number scale)
+		_UtilLogic:SetClientTimeScale(scale)
+	end
+
+	@ExecSpace("Client")
+	method void ApplyTimeScaleToAllClients(number scale)
+		_UtilLogic:SetClientTimeScale(scale)
+	end
+
+	method integer GetAccumulatedPlayTime()
+		return math.floor(self.accumulatedPlayTime)
+	end
+
+end

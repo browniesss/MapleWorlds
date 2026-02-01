@@ -45,11 +45,16 @@ script MesoIncome extends Component
 			self.UserWallet:SetMeso(0)
 			return
 		end
-		
-		self.currentTs = self.currentTs + delta
+
+		local effectiveDelta = delta
+		if _TimeScaleManager ~= nil then
+			effectiveDelta = delta * _TimeScaleManager.timeScale
+		end
+
+		self.currentTs = self.currentTs + effectiveDelta
 		if self.currentTs > self.nextUpdateTs then
 			self.nextUpdateTs = self.nextUpdateTs + self.incomeCooltime
-			
+
 			self:AddMeso()
 		end
 	end

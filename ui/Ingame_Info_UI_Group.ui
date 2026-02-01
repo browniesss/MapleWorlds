@@ -3682,6 +3682,150 @@
           ],
           "@version": 1
         }
+      },
+      {
+        "id": "e3ee11fa-07e0-4381-b8d3-21dbae64e35f",
+        "path": "/ui/Ingame_Info_UI_Group/PlaySpeedButton",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.SpeedToggleButton",
+        "jsonString": {
+          "name": "PlaySpeedButton",
+          "path": "/ui/Ingame_Info_UI_Group/PlaySpeedButton",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 12,
+          "pathConstraints": "///",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uibutton",
+            "sub_entity_id": null,
+            "root_entity_id": "e3ee11fa-07e0-4381-b8d3-21dbae64e35f",
+            "replaced_model_id": null
+          },
+          "modelId": "uibutton",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 2,
+              "AnchorsMax": {
+                "x": 1.0,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 1.0,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": -275.651184,
+                "y": 392.0
+              },
+              "OffsetMin": {
+                "x": -337.651184,
+                "y": 328.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 62.0,
+                "y": 64.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": -306.651184,
+                "y": 360.0
+              },
+              "Position": {
+                "x": 653.3488,
+                "y": 360.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "17102148cb514c2d8724ab5582d57a2a"
+              },
+              "LocalScale": {
+                "x": 1.5,
+                "y": 1.5
+              },
+              "OverrideSorting": false,
+              "Type": 0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ButtonComponent",
+              "Colors": {
+                "NormalColor": {
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                },
+                "HighlightedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "PressedColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 1.0
+                },
+                "SelectedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "DisabledColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 0.5019608
+                },
+                "ColorMultiplier": 1.0,
+                "FadeDuration": 0.1
+              },
+              "ImageRUIDs": {
+                "HighlightedSprite": null,
+                "PressedSprite": null,
+                "SelectedSprite": null,
+                "DisabledSprite": null
+              },
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "script.SpeedToggleButton",
+              "Enable": true,
+              "speedIcon": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "e3ee11fa-07e0-4381-b8d3-21dbae64e35f",
+                "Version2": false
+              },
+              "normalIconRUID": "17102148cb514c2d8724ab5582d57a2a",
+              "speedUpIconRUID": "4ba94d6f323c4974aecfb700111342e1"
+            }
+          ],
+          "@version": 1
+        }
       }
     ]
   }
