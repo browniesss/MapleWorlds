@@ -275,6 +275,17 @@ script MatrixMonsterSpawner extends Logic
 	end
 
 	-- ============================================
+	-- 맵 이탈 시 정리
+	-- ============================================
+
+	@ExecSpace("ServerOnly")
+	method void OnMapLeave(Entity leftMap)
+		if leftMap.Name == "MatrixStage" then
+			self:Reset()
+		end
+	end
+
+	-- ============================================
 	-- 리셋
 	-- ============================================
 

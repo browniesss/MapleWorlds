@@ -110,6 +110,11 @@ script MesoIncome extends Component
 			init=0,
 			income=0
 		}
+
+		-- 매트릭스 모드 관련 데이터 초기화
+		self.lastMatrixTime = 0
+		self.currentTs = 0
+		self.gameManager = nil
 	end
 
 	@ExecSpace("ServerOnly")

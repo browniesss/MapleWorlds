@@ -473,6 +473,11 @@ script MatrixGameManager extends Logic
 			_MatrixUnitSelectService:Reset()
 		end
 
+		-- MatrixMonsterSpawner 정리
+		if _MatrixMonsterSpawner ~= nil then
+			_MatrixMonsterSpawner:Reset()
+		end
+
 		-- 시너지 카운트 초기화 (서버)
 		local user = _UserService.LocalPlayer
 		if user ~= nil and user.UserSynergyComponent ~= nil then

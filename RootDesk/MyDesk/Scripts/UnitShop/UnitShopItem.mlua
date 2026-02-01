@@ -225,6 +225,14 @@ script UnitShopItem extends Component
 			return
 		end
 
+		-- shop의 Entity 또는 부모가 비활성화 상태면 무시 (모드 전환 시 상점 UI 비활성화 체크)
+		if not self.shop.Entity.Enable then
+			return
+		end
+		if self.shop.Entity.Parent ~= nil and not self.shop.Entity.Parent.Enable then
+			return
+		end
+
 		-- Empty 상태면 무시
 		if self.isEmpty then
 			return
@@ -234,11 +242,26 @@ script UnitShopItem extends Component
 
 		-- 일반 모드 또는 매트릭스 모드 체크
 		local isPlaying = _GameManager.isPlaying
+		local isMatrixMode = false
 		if _MatrixGameManager ~= nil and _MatrixGameManager.isPlaying then
 			isPlaying = true
+			isMatrixMode = true
 		end
 
 		if not isPlaying then
+			return
+		end
+
+		-- 현재 게임 모드에 맞는 상점인지 확인
+		local shopPath = self.shop.Entity.Path or ""
+		local isMatrixShop = string.find(shopPath, "MatrixUI") ~= nil
+
+		-- 매트릭스 모드인데 일반 상점이면 무시
+		if isMatrixMode and not isMatrixShop then
+			return
+		end
+		-- 일반 모드인데 매트릭스 상점이면 무시
+		if not isMatrixMode and isMatrixShop then
 			return
 		end
 
