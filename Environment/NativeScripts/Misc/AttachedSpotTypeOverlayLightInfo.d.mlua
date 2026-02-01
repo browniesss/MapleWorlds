@@ -1,0 +1,54 @@
+---@sealed
+---@description "The Spot-type light source information that will spawn as a child of an entity."
+@Misc
+script AttachedSpotTypeOverlayLightInfo
+
+	---@description "The parent entity's spatial coordinates where the light source will be placed in."
+	---@sealed
+	property Vector3 LocalPosition
+
+	---@description "The parent entity's spatial z-axis-based rotation value where the light source will be applied to."
+	---@sealed
+	property float LocalZRotation
+
+	---@description "An entity that will have a created light source added to it."
+	---@sealed
+	property Entity ParentEntity
+
+	---@sealed
+	property float FalloffIntensity = 0.5
+
+	---@sealed
+	property float InnerRadius = 0
+
+	---@sealed
+	property float OuterRadius = 1
+
+	---@sealed
+	property float SpotInnerAngle = 360
+
+	---@sealed
+	property float SpotOuterAngle = 360
+
+	---@sealed
+	property Color Color = RGBA(1.000, 1.000, 1.000, 1.000)
+
+	---@sealed
+	property float Intensity = 1
+
+	---@sealed
+	property float Lifetime = -1
+
+	---@sealed
+	property int32 LightOrder = 0
+
+	---@sealed
+	property OverlayLightOverlapOperation OverlapOperation = OverlayLightOverlapOperation.Additive
+
+	---@description "Initializes AttachedSpotTypeOverlayLightInfo to the specified value."
+	constructor AttachedSpotTypeOverlayLightInfo(Entity parentEntity) end
+
+	---@description "Initializes AttachedSpotTypeOverlayLightInfo to the specified value."
+	constructor AttachedSpotTypeOverlayLightInfo(Entity parentEntity, float lifetime, Vector3 localPosition, float localZRotation, Color color, float intensity, OverlayLightOverlapOperation overlapOperation, int32 lightOrder, float innerRadius, float outerRadius, float spotInnerAngle, float spotOuterAngle, float falloffDistance) end
+
+end

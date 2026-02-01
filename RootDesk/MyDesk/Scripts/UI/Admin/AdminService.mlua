@@ -1,0 +1,166 @@
+@Logic
+script AdminService extends Logic
+
+	property table adminList = {"20372100004704052", "20372100008069853", "20372001292201301"}
+
+	property table commonKeys = {}
+
+	property table unitKeys = {}
+
+	property table badgeKeys = {}
+
+	@ExecSpace("ServerOnly")
+	method boolean IsAdmin(string userId)
+		if userId == nil then
+			return false
+		end
+		
+		for _, adminId in ipairs(self.adminList) do
+			if adminId == userId then
+				return true
+			end
+		end
+		
+		return false
+	end
+
+	@ExecSpace("ServerOnly")
+	method table ServerReqGetData(string sender, string uid, string key, string type)
+		local result = {}
+		
+		if not self:IsAdmin(sender) then
+			log("Unauthorized Admin Access Attempt: " .. tostring(sender))
+			result.IsSuccess = false
+			result.Message = "Unauthorized"
+			return result
+		end
+		
+		-- User Data 조회만 수행
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local errorcode, value = ds:GetAndWait(key)
+		
+		local resultValue = "nil"
+		if value ~= nil then
+			resultValue = tostring(value)
+		end
+		
+		if type == "UNIT" then
+			local monsterId, _ = string.gsub(key, "USER_", "")
+			
+			local data = UserUnitModel()
+			data.id = monsterId
+			
+			resultValue = data:ENCODE()
+		end
+		
+		if errorcode == 0 then
+			result.IsSuccess = true
+			result.Data = resultValue
+		else
+			result.IsSuccess = false
+			result.Message = tostring(errorcode)
+		end
+		
+		return result
+	end
+
+	@ExecSpace("ServerOnly")
+	method table ServerReqSetData(string sender, string uid, string key, string value, string type)
+		local result = {}
+		
+		if not self:IsAdmin(sender) then
+			log("Unauthorized Admin Access Attempt: " .. tostring(sender))
+			result.IsSuccess = false
+			result.Message = "Unauthorized"
+			return result
+		end
+		
+		-- 값 타입 추론
+		local finalValue = _HttpService:JSONDecode(value)
+		
+		if finalValue == nil then
+			result.IsSuccess = false
+			result.Message = "Invalide Value: " .. value
+			return result
+		end
+		
+		-- User Data 만 처리
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local errorcode = ds:SetAndWait(key, value)
+		
+		if errorcode == 0 then
+			result.IsSuccess = true
+			result.Message = key .. " = " .. tostring(value)
+		else
+			result.IsSuccess = false
+			result.Message = tostring(errorcode)
+		end
+		
+		return result
+	end
+
+	@ExecSpace("ServerOnly")
+	method table ServerReqDeleteData(string sender, string uid, string key, string type)
+		local result = {}
+		
+		if not self:IsAdmin(sender) then
+			log("Unauthorized Admin Access Attempt: " .. tostring(sender))
+			result.IsSuccess = false
+			result.Message = "Unauthorized"
+			return result
+		end
+		
+		-- User Data 만 처리
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local errorcode = ds:DeleteAndWait(key)
+		
+		if errorcode == 0 then
+			result.IsSuccess = true
+			result.Message = key
+		else
+			result.IsSuccess = false
+			result.Message = tostring(errorcode)
+		end
+		
+		return result
+	end
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		-- 1. Common Keys
+		self.commonKeys = {
+			"USER_ATTENDANCE",
+			"USER_PLAY_COIN",
+			"USER_TUTORIAL",
+			"USER_COIN",
+			"USER_STAGE",
+			"MESO_INITIAL_REWARD"
+		}
+		
+		-- 2. User Unit Keys: USER_{UnitID}
+		local unitDataSet = _DataService:GetTable("Unit")
+		if unitDataSet ~= nil then
+			for index = 1, unitDataSet:GetRowCount() do
+				local unitId = tostring(unitDataSet:GetCell(index, 'id'))
+				local unitName = tostring(unitDataSet:GetCell(index, 'name'))
+				
+				if unitId ~= nil and unitId ~= "" then
+					table.insert(self.unitKeys, { key = "USER_" .. unitId, name = unitName })
+				end
+			end
+		end
+		
+		-- 3. Badge Keys: BADGE_REWARD & BADGE_ACQUIRED
+		local badgeDataSet = _DataService:GetTable("BadgeConditions")
+		if badgeDataSet ~= nil then
+			for index = 1, badgeDataSet:GetRowCount() do
+				local badgeId = tostring(badgeDataSet:GetCell(index, 'badge_id'))
+				if badgeId ~= nil and badgeId ~= "" then
+					table.insert(self.badgeKeys, "BADGE_REWARD_" .. badgeId)
+					table.insert(self.badgeKeys, "BADGE_ACQUIRED_" .. badgeId)
+				end
+			end
+		end
+	end
+
+end

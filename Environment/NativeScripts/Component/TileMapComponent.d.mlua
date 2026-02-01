@@ -7,15 +7,15 @@ script TileMapComponent extends Component
 	@Sync
 	property Color Color = Color(1.000, 1.000, 1.000, 1.000)
 
-	---@description "Changes the player's friction on the tile map. The larger the value, the faster it decelerates."
+	---@description "Applies a friction force to an Entity containing a RigidbodyComponent on the foothold. The larger the value, the faster it decelerates."
 	---@sealed
 	property float FootholdDrag = 1
 
-	---@description "The force applied to the player above the tile map. If positive, the force is applied to the right, and if negative, to the left."
+	---@description "Applies a force to the Entity containing a RigidbodyComponent on the foothold. If positive, the force is applied to the right, and if negative, to the left."
 	---@sealed
 	property float FootholdForce = 0
 
-	---@description "Changes the player's speed on the tile map. The higher the value is, the faster the speed."
+	---@description "The coefficient is multiplied by the movement speed when the Entity with RigidbodyComponent is on the foothold. The greater the value, the faster the movement."
 	---@sealed
 	property float FootholdWalkSpeedFactor = 1
 

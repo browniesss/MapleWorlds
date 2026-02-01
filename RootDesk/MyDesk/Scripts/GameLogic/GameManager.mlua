@@ -123,7 +123,11 @@ script GameManager extends Logic
 
 		-- 모드 설정
 		self.currentGameMode = gameMode
-		
+
+		if _TimeScaleManager ~= nil then
+			_TimeScaleManager:ResetPlayTimeOnly()
+		end
+
 		local userIncome = _SpawnManager:GetUserIncome()
 		local baseIncomeData = userIncome.MesoIncome:GetMesoData()
 		local meso = baseIncomeData.init
@@ -214,7 +218,7 @@ script GameManager extends Logic
 	method void GameEnd()
 		-- 몬스터 도감 킬 데이터 서버로 동기화
 		_MonsterCodexService:SyncKillDataToServer()
-		
+
 		-- 인게임 UI 비활성화
 		self.shopUI.Enable = false
 		self.shopUI.Visible = false
@@ -446,7 +450,10 @@ script GameManager extends Logic
 	method void SetTimer()
 		self.timer = _TimerService:SetTimerRepeat(function()
 			local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
-			
+			if _TimeScaleManager ~= nil then
+				playTime = _TimeScaleManager:GetAccumulatedPlayTime()
+			end
+
 			self:SetTimeText(playTime)
 		end, 1.0, 0)
 	end
@@ -541,7 +548,10 @@ script GameManager extends Logic
 		local userStage = user.UserStage
 		local userName = user.PlayerComponent.Nickname
 		local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
-		
+		if _TimeScaleManager ~= nil then
+			playTime = _TimeScaleManager:GetAccumulatedPlayTime()
+		end
+
 		-- 하드모드 여부에 따라 랭킹 키 분기
 		local isHardMode = (self.currentGameMode == _eGameMode.Hard)
 		local key = nil

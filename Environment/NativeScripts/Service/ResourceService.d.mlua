@@ -19,9 +19,11 @@ script ResourceService extends Service
 	---@sealed
 	method Sprite LoadSpriteAndWait(string RUID) end
 
+	---@description "Pre-loads an RUID selected from the ruidList. Loaded resources are cached and not deleted from the memory for reuse as necessary. This is executed asynchronously. When the operation is complete, the function delivered to completeCallback will be called, and the load result will be returned in the same order of the resource RUID set to ruidList."
 	---@sealed
 	method void PreloadAsync(List<string> ruidList, func<table<PreloadResultStatus>> completeCallback) end
 
+	---@description "Pre-loads all Sprite resources in the tile set. The tileSetId is the Id of the TileDataSet entries. This is executed asynchronously. When the operation is complete, the function delivered to completeCallback will be called, and the load result will be returned."
 	---@sealed
 	method void PreloadTileSetAsync(string tileSetId, func<PreloadResultStatus> completeCallback) end
 

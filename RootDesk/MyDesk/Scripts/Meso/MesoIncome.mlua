@@ -63,29 +63,16 @@ script MesoIncome extends Component
 			return
 		end
 
-		-- 매트릭스 모드: matrixTime 기반으로 메소 추가
-		if self.gameManager == _MatrixGameManager then
-			local matrixTime = _MatrixGameManager.matrixTime
-			local matrixDelta = matrixTime - self.lastMatrixTime
-			self.lastMatrixTime = matrixTime
+		local effectiveDelta = delta
+		if _TimeScaleManager ~= nil then
+			effectiveDelta = delta * _TimeScaleManager.timeScale
+		end
 
-			-- 일시정지 중이면 delta가 0이므로 메소 추가 안됨
-			if matrixDelta <= 0 then
-				return
-			end
+		self.currentTs = self.currentTs + effectiveDelta
+		if self.currentTs > self.nextUpdateTs then
+			self.nextUpdateTs = self.nextUpdateTs + self.incomeCooltime
 
-			self.currentTs = self.currentTs + matrixDelta
-			if self.currentTs >= self.incomeCooltime then
-				self.currentTs = 0
-				self:AddMeso()
-			end
-		else
-			-- 일반 모드: 실제 시간(delta) 기반
-			self.currentTs = self.currentTs + delta
-			if self.currentTs >= self.incomeCooltime then
-				self.currentTs = 0
-				self:AddMeso()
-			end
+			self:AddMeso()
 		end
 	end
 

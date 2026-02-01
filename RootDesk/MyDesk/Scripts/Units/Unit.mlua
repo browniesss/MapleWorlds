@@ -38,6 +38,9 @@ script Unit extends Component
 	property number attackRange = 1
 
 	@Sync
+	property boolean isMelee = true
+
+	@Sync
 	property number attackSpeed = 1.5
 
 	@Sync
@@ -212,6 +215,7 @@ script Unit extends Component
 		self.damage = unitData.damage
 		self.originDamage = unitData.damage
 		self.attackRange = unitData.attackRange
+		self.isMelee = unitData.isMelee == 1
 		self.attackSpeed = unitData.attackSpeed
 		self.originAttackSpeed = unitData.attackSpeed
 		self.projectileSpeed = unitData.projectileSpeed
@@ -462,8 +466,8 @@ script Unit extends Component
 		local myPos = self.Entity.TransformComponent.WorldPosition
 		local targetPos = Vector3.zero
 		
-		if (self.curTarget.StateAnimationComponent == nil or self.curTarget.StateAnimationComponent.ActionSheet:ContainsKey("attack") == false) 
-			and self.curTarget.Unit.attackRange == 1 and self.curTarget.Unit.originPos ~= Vector3.zero then
+		if (self.curTarget.StateAnimationComponent == nil or self.curTarget.StateAnimationComponent.ActionSheet:ContainsKey("attack") == false)
+			and self.curTarget.Unit.isMelee and self.curTarget.Unit.originPos ~= Vector3.zero then
 			targetPos = self.curTarget.Unit.originPos
 		else
 			targetPos = self.curTarget.TransformComponent.WorldPosition
@@ -510,10 +514,10 @@ script Unit extends Component
 		
 		self.attackTimer += delta;
 		
-		if self.attackTimer >= self.attackSpeed and self.attackRange == 1 then
+		if self.attackTimer >= self.attackSpeed and self.isMelee then
 			self:Melee_Attack()
 			self.attackTimer = 0
-		elseif self.attackTimer >= self.attackSpeed and self.attackRange > 1 then
+		elseif self.attackTimer >= self.attackSpeed and not self.isMelee then
 			self:Range_Attack()
 			self.attackTimer = 0
 		end
@@ -1252,6 +1256,7 @@ script Unit extends Component
 		self.originMaxHP = unitData.hp
 		self.damage = unitData.damage
 		self.attackRange = unitData.attackRange
+		self.isMelee = unitData.isMelee == 1
 		self.attackSpeed = unitData.attackSpeed
 		self.originAttackSpeed = unitData.attackSpeed
 		self.projectileSpeed = unitData.projectileSpeed

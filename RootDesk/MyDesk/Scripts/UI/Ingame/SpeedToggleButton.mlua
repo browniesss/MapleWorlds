@@ -1,0 +1,53 @@
+@Component
+script SpeedToggleButton extends Component
+
+	property Entity speedIcon = nil
+
+	property string normalIconRUID = ""
+
+	property string speedUpIconRUID = ""
+
+	property boolean localIsSpeedUp = false
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		if _TimeScaleManager ~= nil then
+			self.localIsSpeedUp = _TimeScaleManager.isSpeedUp
+		else
+			self.localIsSpeedUp = false
+		end
+		self:UpdateIcon()
+	end
+
+	method void UpdateIcon()
+		if self.speedIcon == nil then
+			return
+		end
+		
+		local renderer = self.speedIcon.SpriteGUIRendererComponent
+		if renderer == nil then
+			return
+		end
+		
+		if self.localIsSpeedUp then
+			renderer.ImageRUID = self.speedUpIconRUID
+		else
+			renderer.ImageRUID = self.normalIconRUID
+		end
+	end
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		if _TutorialService ~= nil and _TutorialService.isIngameTutorial and _TutorialService.isActive then
+			return
+		end
+		
+		self.localIsSpeedUp = not self.localIsSpeedUp
+		self:UpdateIcon()
+		
+		if _TimeScaleManager ~= nil then
+			_TimeScaleManager:ToggleSpeed()
+		end
+	end
+
+end
