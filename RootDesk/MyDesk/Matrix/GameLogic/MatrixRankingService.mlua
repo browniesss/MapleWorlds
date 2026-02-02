@@ -39,7 +39,8 @@ script MatrixRankingService extends Logic
 		
 		-- 기존 점수보다 높은 경우에만 업데이트
 		if lastScore >= score then
-			self:UpdateUserScore(score)
+			-- 최고점(lastScore)을 유지하도록 업데이트
+			self:UpdateUserScore(lastScore)
 			return
 		end
 		

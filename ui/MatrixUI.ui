@@ -8508,6 +8508,161 @@
         }
       },
       {
+        "id": "b97cbc0c-d54c-40ba-87aa-b76a9bc85c45",
+        "path": "/ui/MatrixUI/IngameUI/IngameInfoUI/PlaySpeedButton",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.SpeedToggleButton",
+        "jsonString": {
+          "name": "PlaySpeedButton",
+          "path": "/ui/MatrixUI/IngameUI/IngameInfoUI/PlaySpeedButton",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 8,
+          "pathConstraints": "/////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uibutton",
+            "sub_entity_id": null,
+            "root_entity_id": "e3ee11fa-07e0-4381-b8d3-21dbae64e35f",
+            "replaced_model_id": null
+          },
+          "modelId": "uibutton",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 2,
+              "AnchorsMax": {
+                "x": 1.0,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 1.0,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": -266.7351,
+                "y": 400.0
+              },
+              "OffsetMin": {
+                "x": -328.7351,
+                "y": 336.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 62.0,
+                "y": 64.0
+              },
+              "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": -297.7351,
+                "y": 368.0
+              },
+              "Position": {
+                "x": 662.2649,
+                "y": 368.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "17102148cb514c2d8724ab5582d57a2a"
+              },
+              "LocalScale": {
+                "x": 1.5,
+                "y": 1.5
+              },
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Type": 0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ButtonComponent",
+              "Colors": {
+                "NormalColor": {
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                },
+                "HighlightedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "PressedColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 1.0
+                },
+                "SelectedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "DisabledColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 0.5019608
+                },
+                "ColorMultiplier": 1.0,
+                "FadeDuration": 0.1
+              },
+              "ImageRUIDs": {
+                "HighlightedSprite": null,
+                "PressedSprite": null,
+                "SelectedSprite": null,
+                "DisabledSprite": null
+              },
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "script.SpeedToggleButton",
+              "Enable": true,
+              "speedIcon": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "b97cbc0c-d54c-40ba-87aa-b76a9bc85c45",
+                "Version2": false
+              },
+              "normalIconRUID": "17102148cb514c2d8724ab5582d57a2a",
+              "speedUpIconRUID": "4ba94d6f323c4974aecfb700111342e1"
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
         "id": "3ff206fa-bc3b-42b2-ade2-8975e9ad6357",
         "path": "/ui/MatrixUI/IngameUI/IngameInfoUI/BreakLimitSkill",
         "componentNames": "MOD.Core.UITransformComponent",
@@ -8518,7 +8673,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 8,
+          "displayOrder": 9,
           "pathConstraints": "/////",
           "revision": 1,
           "origin": {
@@ -9150,7 +9305,7 @@
           "enable": false,
           "visible": true,
           "localize": true,
-          "displayOrder": 9,
+          "displayOrder": 10,
           "pathConstraints": "/////",
           "revision": 1,
           "origin": {
@@ -11105,7 +11260,7 @@
           "name": "MatrixSelectUI",
           "path": "/ui/MatrixUI/MatrixSelectUI",
           "nameEditable": true,
-          "enable": false,
+          "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 1,
@@ -11264,7 +11419,7 @@
           "name": "MatrixSelectUI",
           "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI",
           "nameEditable": true,
-          "enable": false,
+          "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 1,
@@ -11599,7 +11754,7 @@
               "AnimClipPlayType": 0,
               "EndFrameIndex": 2147483647,
               "ImageRUID": {
-                "DataId": "8738db49d13cefd47b786c6005dbb4c7"
+                "DataId": "66536a70183b4ae4bba797eb51f13204"
               },
               "LocalPosition": {
                 "x": 0.0,
@@ -11652,7 +11807,13 @@
             {
               "@type": "script.MatrixButton",
               "Enable": true,
-              "matrixIndex": 1
+              "matrixIndex": 1,
+              "resetButton": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "061a85a0-e99f-43e7-accb-0d346e3130d1",
+                "Version2": false
+              }
             },
             {
               "@type": "MOD.Core.ButtonComponent",
@@ -11704,91 +11865,6 @@
         }
       },
       {
-        "id": "8ed076a8-949f-40b5-865b-2721efd17aee",
-        "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_1/MatrixCardBackground",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
-        "jsonString": {
-          "name": "MatrixCardBackground",
-          "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_1/MatrixCardBackground",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 0,
-          "pathConstraints": "///////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uisprite",
-            "sub_entity_id": null,
-            "root_entity_id": null,
-            "replaced_model_id": null
-          },
-          "modelId": "uisprite",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 15,
-              "AnchorsMax": {
-                "x": 1.0,
-                "y": 1.0
-              },
-              "AnchorsMin": {
-                "x": 0.0,
-                "y": 0.0
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": -19.9999924,
-                "y": -20.0
-              },
-              "OffsetMin": {
-                "x": 20.0000076,
-                "y": 20.0
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 340.0,
-                "y": 560.0
-              },
-              "UIMode": 1,
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": 7.62939453E-06,
-                "y": 0.0
-              },
-              "Position": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "OverrideSorting": false,
-              "Color": {
-                "r": 0.0,
-                "g": 0.565104,
-                "b": 0.84765625,
-                "a": 1.0
-              },
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
         "id": "15c95562-6271-424c-a98f-7aad220f2f30",
         "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_1/MatrixIcon",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
@@ -11799,7 +11875,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 1,
+          "displayOrder": 0,
           "pathConstraints": "///////",
           "revision": 1,
           "origin": {
@@ -11824,30 +11900,30 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 159.9995,
-                "y": 272.5
+                "x": 100.0,
+                "y": 235.0
               },
               "OffsetMin": {
-                "x": -160.0005,
-                "y": 37.5
+                "x": -100.0,
+                "y": 35.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 320.0,
-                "y": 235.0
+                "x": 200.0,
+                "y": 200.0
               },
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -0.0005,
-                "y": 155.0
+                "x": 0.0,
+                "y": 135.0
               },
               "Position": {
-                "x": -0.0005,
-                "y": 155.0,
+                "x": 0.0,
+                "y": 135.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -11881,7 +11957,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 2,
+          "displayOrder": 1,
           "pathConstraints": "///////",
           "revision": 1,
           "origin": {
@@ -11906,30 +11982,30 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 160.0,
-                "y": 27.5
+                "x": 163.75,
+                "y": -3.75
               },
               "OffsetMin": {
-                "x": -160.0,
-                "y": -47.5
+                "x": -163.75,
+                "y": -76.25
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 320.0,
-                "y": 75.0
+                "x": 327.5,
+                "y": 72.5
               },
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": 0.0,
-                "y": -10.0
+                "y": -40.0
               },
               "Position": {
                 "x": 0.0,
-                "y": -10.0,
+                "y": -40.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -11955,19 +12031,27 @@
                 "b": 1.0,
                 "a": 1.0
               },
-              "FontSize": 60,
-              "MaxSize": 60,
+              "FontSize": 40,
+              "MaxSize": 40,
               "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
+              "OutlineWidth": 2.0,
               "Overflow": 1,
               "OverrideSorting": false,
               "SizeFit": false,
               "Text": "슈퍼 점프",
               "UseConstraintX": false,
               "UseConstraintY": false,
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -11985,7 +12069,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 3,
+          "displayOrder": 2,
           "pathConstraints": "///////",
           "revision": 1,
           "origin": {
@@ -12010,30 +12094,30 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 158.3695,
-                "y": -58.4806
+                "x": 162.5,
+                "y": -90.0
               },
               "OffsetMin": {
-                "x": -161.6305,
-                "y": -266.958618
+                "x": -162.5,
+                "y": -270.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 320.0,
-                "y": 208.478012
+                "x": 325.0,
+                "y": 180.0
               },
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -1.6305,
-                "y": -162.7196
+                "x": 0.0,
+                "y": -180.0
               },
               "Position": {
-                "x": -1.6305,
-                "y": -162.7196,
+                "x": 0.0,
+                "y": -180.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -12053,6 +12137,7 @@
               "@type": "MOD.Core.TextComponent",
               "Alignment": 1,
               "BestFit": true,
+              "Font": 3,
               "FontColor": {
                 "r": 1.0,
                 "g": 1.0,
@@ -12078,7 +12163,7 @@
       {
         "id": "575e40ef-3601-4984-8fea-7813611b5dbf",
         "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_1/ResetMatrixButton",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.CallBackButton",
         "jsonString": {
           "name": "ResetMatrixButton",
           "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_1/ResetMatrixButton",
@@ -12086,7 +12171,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 4,
+          "displayOrder": 3,
           "pathConstraints": "///////",
           "revision": 1,
           "origin": {
@@ -12111,20 +12196,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 50.0,
-                "y": -300.0
+                "x": 62.5,
+                "y": -320.0
               },
               "OffsetMin": {
-                "x": -50.0,
-                "y": -400.0
+                "x": -62.5,
+                "y": -380.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 100.0,
-                "y": 100.0
+                "x": 125.0,
+                "y": 60.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -12147,6 +12232,9 @@
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "52862b3dd1e242b5b11ca9dd2fe40dd1"
+              },
               "OverrideSorting": false,
               "Enable": true
             },
@@ -12193,6 +12281,10 @@
                 "DisabledSprite": null
               },
               "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "script.CallBackButton",
               "Enable": true
             }
           ],
@@ -12235,20 +12327,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 37.5,
-                "y": 37.5
+                "x": 47.5,
+                "y": 22.5
               },
               "OffsetMin": {
-                "x": -37.5,
-                "y": -37.5
+                "x": -47.5,
+                "y": -22.5
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 75.0,
-                "y": 75.0
+                "x": 95.0,
+                "y": 45.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -12286,12 +12378,20 @@
                 "b": 1.0,
                 "a": 1.0
               },
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
+              "OutlineWidth": 1.5,
               "OverrideSorting": false,
               "Text": "Reset",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -12299,7 +12399,7 @@
         }
       },
       {
-        "id": "ab7ddbed-6491-437a-96dc-78443cb4128c",
+        "id": "7e40b422-d41c-48aa-b4a7-d00e19a10d86",
         "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_2",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,script.MatrixButton,MOD.Core.ButtonComponent",
         "jsonString": {
@@ -12383,7 +12483,7 @@
               "AnimClipPlayType": 0,
               "EndFrameIndex": 2147483647,
               "ImageRUID": {
-                "DataId": "8738db49d13cefd47b786c6005dbb4c7"
+                "DataId": "66536a70183b4ae4bba797eb51f13204"
               },
               "LocalPosition": {
                 "x": 0.0,
@@ -12437,7 +12537,13 @@
             {
               "@type": "script.MatrixButton",
               "Enable": true,
-              "matrixIndex": 2
+              "matrixIndex": 2,
+              "resetButton": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "7e40b422-d41c-48aa-b4a7-d00e19a10d86",
+                "Version2": false
+              }
             },
             {
               "@type": "MOD.Core.ButtonComponent",
@@ -12489,93 +12595,7 @@
         }
       },
       {
-        "id": "071691d6-ad58-4e89-81a6-7327dd1768e2",
-        "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_2/MatrixCardBackground",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
-        "jsonString": {
-          "name": "MatrixCardBackground",
-          "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_2/MatrixCardBackground",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 0,
-          "pathConstraints": "///////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uisprite",
-            "sub_entity_id": null,
-            "root_entity_id": null,
-            "replaced_model_id": null
-          },
-          "modelId": "uisprite",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 15,
-              "AnchorsMax": {
-                "x": 1.0,
-                "y": 1.0
-              },
-              "AnchorsMin": {
-                "x": 0.0,
-                "y": 0.0
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": -19.9999924,
-                "y": -20.0
-              },
-              "OffsetMin": {
-                "x": 20.0000076,
-                "y": 20.0
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 340.0,
-                "y": 560.0
-              },
-              "UIMode": 1,
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": 7.62939453E-06,
-                "y": 0.0
-              },
-              "Position": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "OverrideSorting": false,
-              "SortingLayer": "MapLayer0",
-              "Color": {
-                "r": 0.0,
-                "g": 0.565104,
-                "b": 0.84765625,
-                "a": 1.0
-              },
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "b614cdc4-0767-43d3-a36c-e1b59c5a17a4",
+        "id": "732e16b1-f7f4-4d3d-84e4-0b4fba70be58",
         "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_2/MatrixIcon",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
@@ -12585,7 +12605,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 1,
+          "displayOrder": 0,
           "pathConstraints": "///////",
           "revision": 1,
           "origin": {
@@ -12610,30 +12630,30 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 159.9995,
-                "y": 272.5
+                "x": 100.0,
+                "y": 235.0
               },
               "OffsetMin": {
-                "x": -160.0005,
-                "y": 37.5
+                "x": -100.0,
+                "y": 35.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 320.0,
-                "y": 235.0
+                "x": 200.0,
+                "y": 200.0
               },
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -0.0005,
-                "y": 155.0
+                "x": 0.0,
+                "y": 135.0
               },
               "Position": {
-                "x": -0.0005,
-                "y": 155.0,
+                "x": 0.0,
+                "y": 135.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -12658,12 +12678,125 @@
         }
       },
       {
-        "id": "f2b9bec9-e804-4d50-8bf7-2383850a87dc",
+        "id": "ae523608-da01-4c9c-bda1-593a1bdf3fa0",
         "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_2/MatirxName",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
           "name": "MatirxName",
           "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_2/MatirxName",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 1,
+          "pathConstraints": "///////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null,
+            "root_entity_id": null,
+            "replaced_model_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 163.75,
+                "y": -3.75
+              },
+              "OffsetMin": {
+                "x": -163.75,
+                "y": -76.25
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 327.5,
+                "y": 72.5
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": -40.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": -40.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "BestFit": true,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 40,
+              "MaxSize": 40,
+              "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "OutlineWidth": 2.0,
+              "Overflow": 1,
+              "OverrideSorting": false,
+              "SizeFit": false,
+              "Text": "슈퍼 점프",
+              "UseConstraintX": false,
+              "UseConstraintY": false,
+              "UseOutLine": true,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "6dbb22ac-f28d-49d5-ac94-a138832dd265",
+        "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_2/MatrixInfo",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "MatrixInfo",
+          "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_2/MatrixInfo",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -12693,135 +12826,30 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 160.0,
-                "y": 27.5
+                "x": 162.5,
+                "y": -90.0
               },
               "OffsetMin": {
-                "x": -160.0,
-                "y": -47.5
+                "x": -162.5,
+                "y": -270.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 320.0,
-                "y": 75.0
+                "x": 325.0,
+                "y": 180.0
               },
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": 0.0,
-                "y": -10.0
+                "y": -180.0
               },
               "Position": {
                 "x": 0.0,
-                "y": -10.0,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "OverrideSorting": false,
-              "SortingLayer": "MapLayer0",
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.TextComponent",
-              "BestFit": true,
-              "Font": 3,
-              "FontColor": {
-                "r": 1.0,
-                "g": 1.0,
-                "b": 1.0,
-                "a": 1.0
-              },
-              "FontSize": 60,
-              "MaxSize": 60,
-              "MinSize": 10,
-              "OutlineDistance": {
-                "x": 1.0,
-                "y": -1.0
-              },
-              "Overflow": 1,
-              "OverrideSorting": false,
-              "SizeFit": false,
-              "Text": "슈퍼 점프",
-              "UseConstraintX": false,
-              "UseConstraintY": false,
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "af42674b-35dd-4d95-9dfa-26d33b0fe16c",
-        "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_2/MatrixInfo",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
-        "jsonString": {
-          "name": "MatrixInfo",
-          "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_2/MatrixInfo",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 3,
-          "pathConstraints": "///////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uitext",
-            "sub_entity_id": null,
-            "root_entity_id": null,
-            "replaced_model_id": null
-          },
-          "modelId": "uitext",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 0,
-              "AnchorsMax": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "AnchorsMin": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": 158.3695,
-                "y": -58.4806
-              },
-              "OffsetMin": {
-                "x": -161.6305,
-                "y": -266.958618
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 320.0,
-                "y": 208.478012
-              },
-              "UIMode": 1,
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": -1.6305,
-                "y": -162.7196
-              },
-              "Position": {
-                "x": -1.6305,
-                "y": -162.7196,
+                "y": -180.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -12842,6 +12870,7 @@
               "@type": "MOD.Core.TextComponent",
               "Alignment": 1,
               "BestFit": true,
+              "Font": 3,
               "FontColor": {
                 "r": 1.0,
                 "g": 1.0,
@@ -12865,9 +12894,9 @@
         }
       },
       {
-        "id": "a8ba0317-1322-41b9-8bf2-d6099dff0c4d",
+        "id": "6a10af5e-82e7-4b8e-9498-51bcb6e3d4a3",
         "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_2/ResetMatrixButton",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.CallBackButton",
         "jsonString": {
           "name": "ResetMatrixButton",
           "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_2/ResetMatrixButton",
@@ -12875,7 +12904,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 4,
+          "displayOrder": 3,
           "pathConstraints": "///////",
           "revision": 1,
           "origin": {
@@ -12900,20 +12929,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 50.0,
-                "y": -300.0
+                "x": 62.5,
+                "y": -320.0
               },
               "OffsetMin": {
-                "x": -50.0,
-                "y": -400.0
+                "x": -62.5,
+                "y": -380.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 100.0,
-                "y": 100.0
+                "x": 125.0,
+                "y": 60.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -12936,6 +12965,9 @@
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "52862b3dd1e242b5b11ca9dd2fe40dd1"
+              },
               "OverrideSorting": false,
               "SortingLayer": "MapLayer0",
               "Enable": true
@@ -12984,13 +13016,17 @@
               },
               "OverrideSorting": false,
               "Enable": true
+            },
+            {
+              "@type": "script.CallBackButton",
+              "Enable": true
             }
           ],
           "@version": 1
         }
       },
       {
-        "id": "b2bd9137-56f8-4698-b7c8-f832799d3b32",
+        "id": "228b794f-01f3-4ddf-b25b-4725fe91889a",
         "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_2/ResetMatrixButton/ResetIcon",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
@@ -13025,20 +13061,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 37.5,
-                "y": 37.5
+                "x": 47.5,
+                "y": 22.5
               },
               "OffsetMin": {
-                "x": -37.5,
-                "y": -37.5
+                "x": -47.5,
+                "y": -22.5
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 75.0,
-                "y": 75.0
+                "x": 95.0,
+                "y": 45.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -13077,12 +13113,20 @@
                 "b": 1.0,
                 "a": 1.0
               },
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
+              "OutlineWidth": 1.5,
               "OverrideSorting": false,
               "Text": "Reset",
+              "UseOutLine": true,
               "Enable": true
             }
           ],
@@ -13090,7 +13134,7 @@
         }
       },
       {
-        "id": "906ee939-658f-4f55-94d6-c6cedbd524d7",
+        "id": "36af0930-afc5-4a4a-845c-4f4b492b8ed5",
         "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_3",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,script.MatrixButton,MOD.Core.ButtonComponent",
         "jsonString": {
@@ -13174,7 +13218,7 @@
               "AnimClipPlayType": 0,
               "EndFrameIndex": 2147483647,
               "ImageRUID": {
-                "DataId": "8738db49d13cefd47b786c6005dbb4c7"
+                "DataId": "66536a70183b4ae4bba797eb51f13204"
               },
               "LocalPosition": {
                 "x": 0.0,
@@ -13228,7 +13272,13 @@
             {
               "@type": "script.MatrixButton",
               "Enable": true,
-              "matrixIndex": 3
+              "matrixIndex": 3,
+              "resetButton": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "36af0930-afc5-4a4a-845c-4f4b492b8ed5",
+                "Version2": false
+              }
             },
             {
               "@type": "MOD.Core.ButtonComponent",
@@ -13280,93 +13330,7 @@
         }
       },
       {
-        "id": "317a90e4-3b23-4941-85b9-1c32207e7ec9",
-        "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_3/MatrixCardBackground",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
-        "jsonString": {
-          "name": "MatrixCardBackground",
-          "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_3/MatrixCardBackground",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 0,
-          "pathConstraints": "///////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uisprite",
-            "sub_entity_id": null,
-            "root_entity_id": null,
-            "replaced_model_id": null
-          },
-          "modelId": "uisprite",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 15,
-              "AnchorsMax": {
-                "x": 1.0,
-                "y": 1.0
-              },
-              "AnchorsMin": {
-                "x": 0.0,
-                "y": 0.0
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": -19.9999924,
-                "y": -20.0
-              },
-              "OffsetMin": {
-                "x": 20.0000076,
-                "y": 20.0
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 340.0,
-                "y": 560.0
-              },
-              "UIMode": 1,
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": 7.62939453E-06,
-                "y": 0.0
-              },
-              "Position": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "OverrideSorting": false,
-              "SortingLayer": "MapLayer0",
-              "Color": {
-                "r": 0.0,
-                "g": 0.565104,
-                "b": 0.84765625,
-                "a": 1.0
-              },
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "3cbb34f5-6d1b-4f6f-9d7b-e80f1f22ee9a",
+        "id": "719953fc-8077-45a7-a59f-cc1f0dbf4d0d",
         "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_3/MatrixIcon",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
@@ -13376,7 +13340,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 1,
+          "displayOrder": 0,
           "pathConstraints": "///////",
           "revision": 1,
           "origin": {
@@ -13401,30 +13365,30 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 159.9995,
-                "y": 272.5
+                "x": 100.0,
+                "y": 235.0
               },
               "OffsetMin": {
-                "x": -160.0005,
-                "y": 37.5
+                "x": -100.0,
+                "y": 35.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 320.0,
-                "y": 235.0
+                "x": 200.0,
+                "y": 200.0
               },
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -0.0005,
-                "y": 155.0
+                "x": 0.0,
+                "y": 135.0
               },
               "Position": {
-                "x": -0.0005,
-                "y": 155.0,
+                "x": 0.0,
+                "y": 135.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -13449,12 +13413,125 @@
         }
       },
       {
-        "id": "2343aa5b-0704-4cfe-8210-76699a3015f6",
+        "id": "38f3a7b1-acd4-47a5-90eb-ce22b7c4180e",
         "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_3/MatirxName",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
           "name": "MatirxName",
           "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_3/MatirxName",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 1,
+          "pathConstraints": "///////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uitext",
+            "sub_entity_id": null,
+            "root_entity_id": null,
+            "replaced_model_id": null
+          },
+          "modelId": "uitext",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 0,
+              "AnchorsMax": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "AnchorsMin": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": 163.75,
+                "y": -3.75
+              },
+              "OffsetMin": {
+                "x": -163.75,
+                "y": -76.25
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 327.5,
+                "y": 72.5
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": -40.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": -40.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "OverrideSorting": false,
+              "SortingLayer": "MapLayer0",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "BestFit": true,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontSize": 40,
+              "MaxSize": 40,
+              "MinSize": 10,
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
+              },
+              "OutlineWidth": 2.0,
+              "Overflow": 1,
+              "OverrideSorting": false,
+              "SizeFit": false,
+              "Text": "슈퍼 점프",
+              "UseConstraintX": false,
+              "UseConstraintY": false,
+              "UseOutLine": true,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "930ef85e-c7d8-4f29-8b62-2e8e7f7d9aed",
+        "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_3/MatrixInfo",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "MatrixInfo",
+          "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_3/MatrixInfo",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -13484,135 +13561,30 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 160.0,
-                "y": 27.5
+                "x": 162.5,
+                "y": -90.0
               },
               "OffsetMin": {
-                "x": -160.0,
-                "y": -47.5
+                "x": -162.5,
+                "y": -270.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 320.0,
-                "y": 75.0
+                "x": 325.0,
+                "y": 180.0
               },
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": 0.0,
-                "y": -10.0
+                "y": -180.0
               },
               "Position": {
                 "x": 0.0,
-                "y": -10.0,
-                "z": 0.0
-              },
-              "QuaternionRotation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-                "w": 1.0
-              },
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "OverrideSorting": false,
-              "SortingLayer": "MapLayer0",
-              "Enable": true
-            },
-            {
-              "@type": "MOD.Core.TextComponent",
-              "BestFit": true,
-              "Font": 3,
-              "FontColor": {
-                "r": 1.0,
-                "g": 1.0,
-                "b": 1.0,
-                "a": 1.0
-              },
-              "FontSize": 60,
-              "MaxSize": 60,
-              "MinSize": 10,
-              "OutlineDistance": {
-                "x": 1.0,
-                "y": -1.0
-              },
-              "Overflow": 1,
-              "OverrideSorting": false,
-              "SizeFit": false,
-              "Text": "슈퍼 점프",
-              "UseConstraintX": false,
-              "UseConstraintY": false,
-              "Enable": true
-            }
-          ],
-          "@version": 1
-        }
-      },
-      {
-        "id": "4af843f5-627d-4fda-9c62-bfdf88af57c0",
-        "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_3/MatrixInfo",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
-        "jsonString": {
-          "name": "MatrixInfo",
-          "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_3/MatrixInfo",
-          "nameEditable": true,
-          "enable": true,
-          "visible": true,
-          "localize": true,
-          "displayOrder": 3,
-          "pathConstraints": "///////",
-          "revision": 1,
-          "origin": {
-            "type": "Model",
-            "entry_id": "uitext",
-            "sub_entity_id": null,
-            "root_entity_id": null,
-            "replaced_model_id": null
-          },
-          "modelId": "uitext",
-          "@components": [
-            {
-              "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 0,
-              "AnchorsMax": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "AnchorsMin": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "MobileOnly": false,
-              "OffsetMax": {
-                "x": 158.3695,
-                "y": -58.4806
-              },
-              "OffsetMin": {
-                "x": -161.6305,
-                "y": -266.958618
-              },
-              "Pivot": {
-                "x": 0.5,
-                "y": 0.5
-              },
-              "RectSize": {
-                "x": 320.0,
-                "y": 208.478012
-              },
-              "UIMode": 1,
-              "UIVersion": 2,
-              "anchoredPosition": {
-                "x": -1.6305,
-                "y": -162.7196
-              },
-              "Position": {
-                "x": -1.6305,
-                "y": -162.7196,
+                "y": -180.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -13633,6 +13605,7 @@
               "@type": "MOD.Core.TextComponent",
               "Alignment": 1,
               "BestFit": true,
+              "Font": 3,
               "FontColor": {
                 "r": 1.0,
                 "g": 1.0,
@@ -13656,9 +13629,9 @@
         }
       },
       {
-        "id": "335ff47d-2f50-42b4-b2fe-81fe68889104",
+        "id": "0baeb295-51f1-4257-a60e-200696d5b26c",
         "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_3/ResetMatrixButton",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.CallBackButton",
         "jsonString": {
           "name": "ResetMatrixButton",
           "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_3/ResetMatrixButton",
@@ -13666,7 +13639,7 @@
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 4,
+          "displayOrder": 3,
           "pathConstraints": "///////",
           "revision": 1,
           "origin": {
@@ -13691,20 +13664,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 50.0,
-                "y": -300.0
+                "x": 62.5,
+                "y": -320.0
               },
               "OffsetMin": {
-                "x": -50.0,
-                "y": -400.0
+                "x": -62.5,
+                "y": -380.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 100.0,
-                "y": 100.0
+                "x": 125.0,
+                "y": 60.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -13727,6 +13700,9 @@
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "52862b3dd1e242b5b11ca9dd2fe40dd1"
+              },
               "OverrideSorting": false,
               "SortingLayer": "MapLayer0",
               "Enable": true
@@ -13775,13 +13751,17 @@
               },
               "OverrideSorting": false,
               "Enable": true
+            },
+            {
+              "@type": "script.CallBackButton",
+              "Enable": true
             }
           ],
           "@version": 1
         }
       },
       {
-        "id": "5a024b99-c2ba-4a96-9e7c-1ae10cee2fb5",
+        "id": "70d785fa-3878-4808-8f21-137eee78400b",
         "path": "/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI/MatrixGrid/UIItemMatrixCard_3/ResetMatrixButton/ResetIcon",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
@@ -13816,20 +13796,20 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 37.5,
-                "y": 37.5
+                "x": 47.5,
+                "y": 22.5
               },
               "OffsetMin": {
-                "x": -37.5,
-                "y": -37.5
+                "x": -47.5,
+                "y": -22.5
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 75.0,
-                "y": 75.0
+                "x": 95.0,
+                "y": 45.0
               },
               "UIMode": 1,
               "UIVersion": 2,
@@ -13868,12 +13848,20 @@
                 "b": 1.0,
                 "a": 1.0
               },
+              "OutlineColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 1.0
+              },
               "OutlineDistance": {
                 "x": 1.0,
                 "y": -1.0
               },
+              "OutlineWidth": 1.5,
               "OverrideSorting": false,
               "Text": "Reset",
+              "UseOutLine": true,
               "Enable": true
             }
           ],

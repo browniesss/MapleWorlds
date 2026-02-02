@@ -19,6 +19,12 @@ script MatrixAugmentService extends Logic
 	-- 메소 수입 배율 (증강 효과로 변동)
 	property number mesoIncomeMultiplier = 1.0
 
+	-- 리셋 버튼 사용 상태 (인덱스별: 1, 2, 3)
+	property table resetUsed = {}
+
+	-- 리셋 버튼 엔티티 참조
+	property table resetButtons = {}
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		self.matrixSelectUI = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI")
@@ -32,10 +38,19 @@ script MatrixAugmentService extends Logic
 					local btn = matrixGrid.Children[i]
 					if btn ~= nil then
 						table.insert(self.matrixButtons, btn)
+
+						-- 리셋 버튼 참조 저장
+						local resetBtn = btn:GetChildByName("ResetMatrixButton")
+						if resetBtn ~= nil then
+							self.resetButtons[i] = resetBtn
+						end
 					end
 				end
 			end
 		end
+
+		-- 리셋 상태 초기화
+		self.resetUsed = {false, false, false}
 	end
 
 	-- 서버측 일시정지 상태 설정 (MesoIncome에서 참조)
@@ -57,6 +72,9 @@ script MatrixAugmentService extends Logic
 
 		-- 서버측 일시정지 (MesoIncome 연동)
 		self:SetGamePausedOnServer(true)
+
+		-- 리셋 상태 초기화 (새 증강 선택 시 모두 사용 가능)
+		self.resetUsed = {false, false, false}
 
 		-- 3개의 증강 선택지 생성
 		local choices = _MatrixAugmentRepo:GenerateMatrixChoices()
@@ -118,37 +136,35 @@ script MatrixAugmentService extends Logic
 				btn.Enable = true
 				btn.Visible = true
 
-				-- 등급 배경 설정 (Children[1])
-				local bgEntity = btn.Children[1]
-				if bgEntity ~= nil and bgEntity.SpriteGUIRendererComponent ~= nil then
-					local modeData = _MatrixAugmentRepo:GetModeDataByGrade(matrix.grade)
-					if modeData ~= nil and modeData.bgRUID ~= nil and modeData.bgRUID ~= "" then
-						bgEntity.SpriteGUIRendererComponent.ImageRUID = modeData.bgRUID
+				local modeData = _MatrixAugmentRepo:GetModeDataByGrade(matrix.grade)
+
+				-- 등급별 색상 이미지 설정 (btn 자체)
+				if btn.SpriteGUIRendererComponent ~= nil then
+					if modeData ~= nil and modeData.colorRUID ~= nil and modeData.colorRUID ~= "" then
+						btn.SpriteGUIRendererComponent.ImageRUID = modeData.colorRUID
 					end
 				end
 
-				-- 아이콘 설정 (Children[2])
-				local iconEntity = btn.Children[2]
+				-- UIItemMatrixCard 구조 (백그라운드 제거됨):
+				-- Children[1]: MatrixIcon (아이콘)
+				-- Children[2]: MatirxName (이름)
+				-- Children[3]: MatrixInfo (설명)
+
+				-- 아이콘 설정 (Children[1])
+				local iconEntity = btn.Children[1]
 				if iconEntity ~= nil and iconEntity.SpriteGUIRendererComponent ~= nil then
 					iconEntity.SpriteGUIRendererComponent.ImageRUID = matrix.icon or ""
 				end
 
-				-- 이름 설정 (Children[3]) - "[등급] 이름" 형태로 표시
-				local nameEntity = btn.Children[3]
+				-- 이름 설정 (Children[2])
+				local nameEntity = btn.Children[2]
 				if nameEntity ~= nil and nameEntity.TextComponent ~= nil then
 					local displayName = "[" .. (matrix.grade or "RARE") .. "] " .. (matrix.name or "")
 					nameEntity.TextComponent.Text = displayName
-
-					-- 등급별 색상 적용
-					local modeData = _MatrixAugmentRepo:GetModeDataByGrade(matrix.grade)
-					if modeData ~= nil and modeData.color ~= nil then
-						local color = self:HexToColor(modeData.color)
-						nameEntity.TextComponent.FontColor = color
-					end
 				end
 
-				-- 설명 설정 (Children[4])
-				local descEntity = btn.Children[4]
+				-- 설명 설정 (Children[3])
+				local descEntity = btn.Children[3]
 				if descEntity ~= nil and descEntity.TextComponent ~= nil then
 					descEntity.TextComponent.Text = matrix.desc or ""
 				end
@@ -157,10 +173,107 @@ script MatrixAugmentService extends Logic
 				if btn.MatrixButton ~= nil then
 					btn.MatrixButton.matrixIndex = i
 				end
+
+				-- 리셋 버튼 상태 업데이트
+				self:UpdateResetButtonState(i)
 			else
 				btn.Enable = false
 				btn.Visible = false
 			end
+		end
+	end
+
+	-- 리셋 버튼 UI 상태 업데이트
+	@ExecSpace("Client")
+	method void UpdateResetButtonState(integer index)
+		local resetBtn = self.resetButtons[index]
+		if resetBtn == nil then
+			return
+		end
+
+		local isUsed = self.resetUsed[index] or false
+
+		if isUsed then
+			-- 이미 사용됨 - 비활성화
+			resetBtn.Enable = true
+			if resetBtn.ButtonComponent ~= nil then
+				resetBtn.ButtonComponent.Enable = false
+			end
+		else
+			-- 사용 가능
+			resetBtn.Enable = true
+			if resetBtn.ButtonComponent ~= nil then
+				resetBtn.ButtonComponent.Enable = true
+			end
+		end
+	end
+
+	-- 리셋 버튼 클릭 시 호출 (해당 인덱스의 증강을 새로 뽑음)
+	@ExecSpace("Client")
+	method void ResetMatrixByIndex(integer index)
+		-- 이미 사용한 리셋인지 확인
+		if self.resetUsed[index] == true then
+			log("[MatrixAugmentService] 리셋 버튼 이미 사용됨: " .. tostring(index))
+			return
+		end
+
+		-- 리셋 사용 처리
+		self.resetUsed[index] = true
+
+		-- 새 증강 생성 (해당 인덱스만)
+		local newMatrix = _MatrixAugmentRepo:GenerateSingleMatrixChoice(self.currentChoices)
+
+		if newMatrix == nil then
+			log("[MatrixAugmentService] 새 증강 생성 실패")
+			return
+		end
+
+		-- 현재 선택지 교체
+		self.currentChoices[index] = newMatrix
+
+		-- UI 업데이트 (해당 카드만)
+		self:UpdateSingleMatrixCard(index, newMatrix)
+
+		-- 리셋 버튼 상태 업데이트
+		self:UpdateResetButtonState(index)
+
+		log("[MatrixAugmentService] 증강 리셋 완료: 인덱스=" .. tostring(index) .. ", 새 증강=" .. tostring(newMatrix.name))
+	end
+
+	-- 단일 증강 카드 UI 업데이트
+	@ExecSpace("Client")
+	method void UpdateSingleMatrixCard(integer index, table matrix)
+		local btn = self.matrixButtons[index]
+		if btn == nil or matrix == nil then
+			return
+		end
+
+		local modeData = _MatrixAugmentRepo:GetModeDataByGrade(matrix.grade)
+
+		-- 등급별 색상 이미지 설정 (btn 자체)
+		if btn.SpriteGUIRendererComponent ~= nil then
+			if modeData ~= nil and modeData.colorRUID ~= nil and modeData.colorRUID ~= "" then
+				btn.SpriteGUIRendererComponent.ImageRUID = modeData.colorRUID
+			end
+		end
+
+		-- 아이콘 설정 (Children[1])
+		local iconEntity = btn.Children[1]
+		if iconEntity ~= nil and iconEntity.SpriteGUIRendererComponent ~= nil then
+			iconEntity.SpriteGUIRendererComponent.ImageRUID = matrix.icon or ""
+		end
+
+		-- 이름 설정 (Children[2])
+		local nameEntity = btn.Children[2]
+		if nameEntity ~= nil and nameEntity.TextComponent ~= nil then
+			local displayName = "[" .. (matrix.grade or "RARE") .. "] " .. (matrix.name or "")
+			nameEntity.TextComponent.Text = displayName
+		end
+
+		-- 설명 설정 (Children[3])
+		local descEntity = btn.Children[3]
+		if descEntity ~= nil and descEntity.TextComponent ~= nil then
+			descEntity.TextComponent.Text = matrix.desc or ""
 		end
 	end
 
@@ -186,6 +299,12 @@ script MatrixAugmentService extends Logic
 		local matrix = self.currentChoices[index]
 		if matrix == nil then
 			return
+		end
+
+		-- 클라이언트 UserMatrixManager에도 증강 저장 (UI 표시용)
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.UserMatrixManager ~= nil then
+			user.UserMatrixManager:AddMatrix(matrix)
 		end
 
 		self:SelectMatrixServer(matrix.id)
@@ -216,6 +335,12 @@ script MatrixAugmentService extends Logic
 	@ExecSpace("Client")
 	method void CloseMatrixSelectUIClient()
 		self:CloseMatrixSelectUI()
+
+		-- 시너지 UI 갱신 (시너지 증강 효과 반영)
+		local synergyUI = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/MatrixSynergyUI")
+		if synergyUI ~= nil and synergyUI.MatrixSynergyUIManager ~= nil then
+			synergyUI.MatrixSynergyUIManager:RefreshSynergyUI()
+		end
 
 		-- 증강 선택 완료 후 다음 라운드/페이즈 진행
 		if _MatrixGameService ~= nil then
@@ -304,42 +429,9 @@ script MatrixAugmentService extends Logic
 
 	@ExecSpace("Server")
 	method void ApplySynergyEffect(table matrixData)
-		local effectType = matrixData.effectType
-
-		if senderUserId == nil then
-			return
-		end
-
-		local user = _UserService:GetUserEntityByUserId(senderUserId)
-		if user == nil or user.UserSynergyComponent == nil then
-			return
-		end
-
-		local synergyComponent = user.UserSynergyComponent
-
-		if effectType == "SynergyBonus_All" then
-			-- 모든 시너지 카운트 증가
-			for key, value in pairs(synergyComponent.countMap) do
-				-- 원래 값 저장 (처음 적용시에만)
-				if self.synergyBonusMap[key] == nil then
-					self.synergyBonusMap[key] = 0
-				end
-				self.synergyBonusMap[key] = self.synergyBonusMap[key] + matrixData.value
-
-				synergyComponent.countMap[key] = value + matrixData.value
-			end
-		elseif effectType == "SynergyBonus_JobId" then
-			-- 특정 직업 시너지만 증가
-			local jobId = matrixData.value
-			local currentCount = synergyComponent.countMap[jobId] or 0
-
-			if self.synergyBonusMap[jobId] == nil then
-				self.synergyBonusMap[jobId] = 0
-			end
-			self.synergyBonusMap[jobId] = self.synergyBonusMap[jobId] + 1
-
-			synergyComponent.countMap[jobId] = currentCount + 1
-		end
+		-- 시너지 보너스는 UserMatrixManager.matrixEffects에 저장되어 있고,
+		-- GET_SYNERGY_COUNT에서 자동으로 보너스를 계산하므로 별도 처리 불필요
+		log("[MatrixAugmentService] 시너지 증강 적용: " .. tostring(matrixData.effectType) .. ", value=" .. tostring(matrixData.value))
 	end
 
 	-- 트리거 효과 저장 (Phase 3에서 확장)
@@ -516,20 +608,8 @@ script MatrixAugmentService extends Logic
 
 	@ExecSpace("Server")
 	method void ClearAllEffects()
-		-- 시너지 보너스 복원 (제거)
-		if senderUserId ~= nil then
-			local user = _UserService:GetUserEntityByUserId(senderUserId)
-			if user ~= nil and user.UserSynergyComponent ~= nil then
-				local synergyComponent = user.UserSynergyComponent
-				for key, bonusValue in pairs(self.synergyBonusMap) do
-					local currentCount = synergyComponent.countMap[key] or 0
-					synergyComponent.countMap[key] = currentCount - bonusValue
-					if synergyComponent.countMap[key] < 0 then
-						synergyComponent.countMap[key] = 0
-					end
-				end
-			end
-		end
+		-- 시너지 보너스는 UserMatrixManager.matrixEffects 초기화 시 자동으로 제거됨
+		-- (GET_SYNERGY_COUNT에서 matrixEffects 기반으로 보너스 계산)
 
 		-- 상태 초기화
 		self.selectCount = 0
@@ -537,6 +617,7 @@ script MatrixAugmentService extends Logic
 		self.currentChoices = {}
 		self.isGamePaused = false
 		self.mesoIncomeMultiplier = 1.0
+		self.resetUsed = {false, false, false}
 	end
 
 	method table GetActiveEffects()

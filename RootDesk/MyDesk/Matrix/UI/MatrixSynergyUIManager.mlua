@@ -23,17 +23,19 @@ script MatrixSynergyUIManager extends Component
 		if self.SynergyScrollView == nil then
 			return
 		end
-		
+
 		for k, v in pairs(self.SynergyItemTable) do
 			_EntityService:Destroy(self.SynergyItemTable[k])
 		end
 		self.SynergyItemTable = {}
-		
+
 		local activeSynergy = _UserService.LocalPlayer.UserSynergyComponent.countMap
-		
+
 		local keys = {}
 		for k, v in pairs(activeSynergy) do
-			table.insert(keys, {id = k, count = v})
+			-- 매트릭스 보너스 포함한 카운트 계산
+			local bonus = self:GetMatrixSynergyBonusClient(k)
+			table.insert(keys, {id = k, count = v + bonus})
 		end
 		
 		table.sort(keys, function(a, b)
@@ -68,6 +70,47 @@ script MatrixSynergyUIManager extends Component
 			_EntityService:Destroy(self.SynergyItemTable[k])
 		end
 		self.SynergyItemTable = {}
+	end
+
+	-- 클라이언트용 매트릭스 시너지 보너스 계산
+	method integer GetMatrixSynergyBonusClient(number target)
+		-- 매트릭스 모드가 아니면 0
+		if _GameManager == nil or _GameManager.currentGameMode ~= _eGameMode.Matrix then
+			return 0
+		end
+
+		local user = _UserService.LocalPlayer
+		if user == nil or user.UserMatrixManager == nil then
+			return 0
+		end
+
+		local matrixEffects = user.UserMatrixManager:GetMatrixEffects()
+		if matrixEffects == nil or #matrixEffects == 0 then
+			return 0
+		end
+
+		local bonus = 0
+		for _, matrix in ipairs(matrixEffects) do
+			if matrix.type == "SYNERGY" then
+				if matrix.effectType == "SynergyBonus_All" then
+					-- 모든 시너지에 보너스
+					bonus = bonus + matrix.value
+				elseif matrix.effectType == "SynergyBonus_JobId" then
+					-- 특정 직업에만 보너스
+					if tonumber(matrix.value) == target then
+						bonus = bonus + 1
+					end
+				end
+			end
+		end
+
+		return bonus
+	end
+
+	-- 외부에서 UI 갱신 트리거 (시너지 증강 선택 후 호출)
+	@ExecSpace("ClientOnly")
+	method void RefreshSynergyUI()
+		self:SetSynergyItem()
 	end
 
 end

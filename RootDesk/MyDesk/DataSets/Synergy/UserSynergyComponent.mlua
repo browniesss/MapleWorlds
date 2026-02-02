@@ -8,11 +8,51 @@ script UserSynergyComponent extends Component
 
 	@ExecSpace("ServerOnly")
 	method integer GET_SYNERGY_COUNT(number target)
+		local baseCount = 0
 		if self.countMap[target] ~= nil then
-			return self.countMap[target]
+			baseCount = self.countMap[target]
 		end
-		
-		return 0
+
+		-- 매트릭스 시너지 보너스 추가
+		local bonus = self:GetMatrixSynergyBonus(target)
+
+		return baseCount + bonus
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer GetMatrixSynergyBonus(number target)
+		-- 매트릭스 모드가 아니면 0
+		if _GameManager == nil or _GameManager.currentGameMode ~= _eGameMode.Matrix then
+			return 0
+		end
+
+		-- UserMatrixManager에서 증강 효과 가져오기
+		local userMatrixManager = self.Entity.UserMatrixManager
+		if userMatrixManager == nil then
+			return 0
+		end
+
+		local matrixEffects = userMatrixManager:GetMatrixEffects()
+		if matrixEffects == nil or #matrixEffects == 0 then
+			return 0
+		end
+
+		local bonus = 0
+		for _, matrix in ipairs(matrixEffects) do
+			if matrix.type == "SYNERGY" then
+				if matrix.effectType == "SynergyBonus_All" then
+					-- 모든 시너지에 보너스
+					bonus = bonus + matrix.value
+				elseif matrix.effectType == "SynergyBonus_JobId" then
+					-- 특정 직업에만 보너스
+					if tonumber(matrix.value) == target then
+						bonus = bonus + 1
+					end
+				end
+			end
+		end
+
+		return bonus
 	end
 
 	@ExecSpace("ServerOnly")

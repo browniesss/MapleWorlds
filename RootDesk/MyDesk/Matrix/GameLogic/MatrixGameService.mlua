@@ -36,6 +36,9 @@ script MatrixGameService extends Logic
 	-- 초기 증강 선택 여부 (게임 시작 시 유닛 선택 후 증강 선택)
 	property boolean isInitialAugmentSelection = false
 
+	-- 현재 적 타워 HP (라운드 클리어 시 증가)
+	property number currentEnemyTowerHP = 0
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		-- 데이터 로드
@@ -65,6 +68,9 @@ script MatrixGameService extends Logic
 			phase.killPoint = tonumber(dataSet:GetCell(i, "killPoint")) or 1
 			phase.baseScore = tonumber(dataSet:GetCell(i, "baseScore")) or 0
 			phase.timeBonus = tonumber(dataSet:GetCell(i, "timeBonus")) or 0
+			-- 타워 HP 데이터
+			phase.towerHP = tonumber(dataSet:GetCell(i, "towerHP")) or 2000
+			phase.towerHPIncrement = tonumber(dataSet:GetCell(i, "towerHPIncrement")) or 0
 
 			self.phaseData[phase.phaseId] = phase
 		end
@@ -138,6 +144,16 @@ script MatrixGameService extends Logic
 		self.currentWaveIndex = 0
 		self.loopCount = 0
 		self.isRoundCleared = false
+		self.currentEnemyTowerHP = 0
+
+		-- 플레이어 타워 HP 초기화 (1000 고정, 라운드 간 유지)
+		if self.playerTower ~= nil and self.playerTower.Unit ~= nil then
+			local playerTowerHP = 1000
+			self.playerTower.Unit.originMaxHP = playerTowerHP
+			self.playerTower.Unit.maxHP = playerTowerHP
+			self.playerTower.Unit.hp = playerTowerHP
+			self.playerTower.Unit.curState = "stand"
+		end
 
 		-- 메소 초기화 (meso.csv 기본값으로)
 		self:ResetMesoOnServer()
@@ -220,19 +236,31 @@ script MatrixGameService extends Logic
 		self.currentWaveIndex = 0
 		self.isRoundCleared = false
 
-		-- 적 타워 HP 및 상태 설정
-		local finalTowerHP = roundData.towerHP
+		-- 페이즈 데이터에서 타워 HP 가져오기
+		local phase = self:GetCurrentPhaseData()
+		local baseTowerHP = phase.towerHP or 2000
+
+		-- 페이즈 내 라운드 진행에 따른 HP 증가 계산
+		local roundsInPhase = roundId - phase.baseRoundStart
+		local hpIncrement = (phase.towerHPIncrement or 0) * roundsInPhase
+
+		-- 최종 타워 HP 계산
+		local finalTowerHP = baseTowerHP + hpIncrement
 		if self.loopCount > 0 then
 			-- 무한 모드: 난이도 증가 적용
-			local phase = self:GetCurrentPhaseData()
 			finalTowerHP = finalTowerHP * (phase.levelMultiplier ^ self.loopCount)
 		end
 
+		-- 현재 타워 HP 저장 (라운드 클리어 시 증가용)
+		self.currentEnemyTowerHP = finalTowerHP
+
+		-- 적 타워 HP 및 상태 설정 (originMaxHP 포함)
+		self.enemyTower.Unit.originMaxHP = finalTowerHP
 		self.enemyTower.Unit.maxHP = finalTowerHP
 		self.enemyTower.Unit.hp = finalTowerHP
 		self.enemyTower.Unit.curState = "stand"  -- 상태 리셋 (die → stand)
 
-		log("라운드 " .. tostring(roundId) .. " 시작 (타워 HP: " .. tostring(finalTowerHP) .. ")")
+		log("라운드 " .. tostring(roundId) .. " 시작 (타워 HP: " .. tostring(finalTowerHP) .. ", 페이즈: " .. tostring(self.currentPhaseId) .. ")")
 
 		-- 첫 웨이브 시작
 		self:StartNextWave()

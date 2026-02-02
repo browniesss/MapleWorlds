@@ -44,7 +44,7 @@ script MatrixAugmentRepo extends Logic
 				id = tonumber(dataSet:GetCell(index, 'id')),
 				grade = tostring(dataSet:GetCell(index, 'grade')),
 				probability = tonumber(dataSet:GetCell(index, 'probability')),
-				color = tostring(dataSet:GetCell(index, 'color')),
+				colorRUID = tostring(dataSet:GetCell(index, 'colorRUID')),
 				bgRUID = tostring(dataSet:GetCell(index, 'bgRUID')),
 			}
 			self.modeData[item.grade] = item
@@ -109,6 +109,40 @@ script MatrixAugmentRepo extends Logic
 		return choices
 	end
 
+	-- 기존 선택지와 중복되지 않는 단일 증강 생성 (리셋용)
+	method table GenerateSingleMatrixChoice(table currentChoices)
+		local usedIds = {}
+
+		-- 기존 선택지의 id를 수집
+		if currentChoices ~= nil then
+			for _, matrix in ipairs(currentChoices) do
+				if matrix ~= nil then
+					usedIds[matrix.id] = true
+				end
+			end
+		end
+
+		local grade = self:GetRandomGrade()
+		local matrix = self:GetRandomMatrixByGrade(grade)
+
+		if matrix == nil then
+			return nil
+		end
+
+		-- 중복 체크 (최대 20번 시도)
+		local attempts = 0
+		while usedIds[matrix.id] ~= nil and attempts < 20 do
+			grade = self:GetRandomGrade()
+			matrix = self:GetRandomMatrixByGrade(grade)
+			attempts = attempts + 1
+			if matrix == nil then
+				break
+			end
+		end
+
+		return matrix
+	end
+
 	method table GetMatrixById(number id)
 		for _, grade in ipairs(self.gradeList) do
 			local gradeList = self.matrixData[grade]
@@ -153,6 +187,34 @@ script MatrixAugmentRepo extends Logic
 			end
 		end
 		return result
+	end
+
+	-- 특정 타입의 증강 선택지 생성 (테스트용)
+	method table GenerateMatrixChoicesByType(string matrixType)
+		local choices = {}
+		local usedIds = {}
+		local typeList = self:GetMatrixByType(matrixType)
+
+		if typeList == nil or #typeList == 0 then
+			return choices
+		end
+
+		for i = 1, math.min(3, #typeList) do
+			local matrix = typeList[math.random(1, #typeList)]
+
+			-- 중복 체크
+			local attempts = 0
+			while usedIds[matrix.id] ~= nil and attempts < 10 do
+				matrix = typeList[math.random(1, #typeList)]
+				attempts = attempts + 1
+			end
+
+			if matrix ~= nil and usedIds[matrix.id] == nil then
+				usedIds[matrix.id] = true
+				table.insert(choices, matrix)
+			end
+		end
+		return choices
 	end
 
 end

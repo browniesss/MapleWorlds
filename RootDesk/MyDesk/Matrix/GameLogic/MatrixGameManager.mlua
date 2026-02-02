@@ -50,49 +50,11 @@ script MatrixGameManager extends Logic
 
 	property string mapPath = "/maps/MatrixStage"
 
-	-- playTime 업데이트 추적용
-	property integer lastPlayTimeSecond = -1
-
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		-- UUID 기반 참조는 property에서 이미 설정됨
 		-- 하위 요소들은 동적으로 가져옴
 		self:RefreshUIReferences()
-	end
-
-	@ExecSpace("ClientOnly")
-	method void OnUpdate(number delta)
-		-- 매트릭스 게임 중이 아니거나 일시정지 상태면 시간 업데이트 안함
-		if not self.isPlaying or self.isPaused then
-			return
-		end
-
-		-- matrixTime 업데이트
-		self.matrixTime = self.matrixTime + delta
-
-		-- 서버로 시간 동기화
-		self:SyncMatrixTimeToServer(self.matrixTime)
-
-		-- 매초 UserMatrixManager.playTime 업데이트
-		local currentSecond = math.floor(self.matrixTime)
-		if currentSecond ~= self.lastPlayTimeSecond then
-			self.lastPlayTimeSecond = currentSecond
-			self:UpdateUserPlayTime()
-		end
-	end
-
-	-- 유저 플레이 시간 업데이트
-	method void UpdateUserPlayTime()
-		local user = _UserService.LocalPlayer
-		if user ~= nil and user.UserMatrixManager ~= nil then
-			user.UserMatrixManager.playTime = self.matrixTime
-		end
-	end
-
-	-- 매트릭스 시간 서버 동기화
-	@ExecSpace("Server")
-	method void SyncMatrixTimeToServer(number time)
-		self.matrixTime = time
 	end
 
 	@ExecSpace("Client")
@@ -127,12 +89,10 @@ script MatrixGameManager extends Logic
 			user.UserSynergyComponent:ResetCountMapFromClient()
 		end
 
-		-- 매트릭스 시간 초기화
-		self.matrixTime = 0
-		self.lastPlayTimeSecond = -1
-
-		-- TimeScale 정상화 (이전 게임에서 일시정지 상태였을 수 있음)
-		_UtilLogic:SetClientTimeScale(1)
+		-- MatrixTimerService 초기화
+		if _MatrixTimerService ~= nil then
+			_MatrixTimerService:Reset()
+		end
 
 		-- UI 참조 다시 가져오기 (텔레포트 후 참조가 변경될 수 있음)
 		self:RefreshUIReferences()
@@ -410,16 +370,18 @@ script MatrixGameManager extends Logic
 	method void PauseGame()
 		self.isPaused = true
 
-		-- TimeScale을 0으로 설정하여 게임 시간 정지
-		_UtilLogic:SetClientTimeScale(0)
+		if _MatrixTimerService ~= nil then
+			_MatrixTimerService:Pause()
+		end
 	end
 
 	@ExecSpace("Client")
 	method void ResumeGame()
 		self.isPaused = false
 
-		-- TimeScale을 1로 설정하여 게임 시간 재개
-		_UtilLogic:SetClientTimeScale(1)
+		if _MatrixTimerService ~= nil then
+			_MatrixTimerService:Resume()
+		end
 	end
 
 	@ExecSpace("Client")
@@ -497,25 +459,18 @@ script MatrixGameManager extends Logic
 		
 		-- 오브젝트 정리
 		self:ClearObjects()
-		
+
 		-- 타이머 정리
 		self:ClearTimer()
 
-		-- TimeScale 정상화
-		_UtilLogic:SetClientTimeScale(1)
-
-		-- 매트릭스 시간 초기화
-		self.matrixTime = 0
-		self.lastPlayTimeSecond = -1
+		-- MatrixTimerService 정리
+		if _MatrixTimerService ~= nil then
+			_MatrixTimerService:Reset()
+		end
 
 		-- MatrixUnitSelectService 정리
 		if _MatrixUnitSelectService ~= nil then
 			_MatrixUnitSelectService:Reset()
-		end
-
-		-- MatrixMonsterSpawner 정리
-		if _MatrixMonsterSpawner ~= nil then
-			_MatrixMonsterSpawner:Reset()
 		end
 
 		-- 시너지 카운트 초기화 (서버)
@@ -543,7 +498,8 @@ script MatrixGameManager extends Logic
 
 		-- 플레이어 타워 초기화
 		if playerTower ~= nil and playerTower.Unit ~= nil then
-			local defaultHP = 10000  -- 기본 HP 값
+			local defaultHP = 1000  -- 기본 HP 값
+			playerTower.Unit.originMaxHP = defaultHP
 			playerTower.Unit.maxHP = defaultHP
 			playerTower.Unit.hp = defaultHP
 			playerTower.Unit.curState = "stand"
@@ -551,7 +507,8 @@ script MatrixGameManager extends Logic
 
 		-- 적 타워 초기화
 		if enemyTower ~= nil and enemyTower.Unit ~= nil then
-			local defaultHP = 10000  -- 기본 HP 값
+			local defaultHP = 2000  -- 기본 HP 값 (페이즈1 기준)
+			enemyTower.Unit.originMaxHP = defaultHP
 			enemyTower.Unit.maxHP = defaultHP
 			enemyTower.Unit.hp = defaultHP
 			enemyTower.Unit.curState = "stand"

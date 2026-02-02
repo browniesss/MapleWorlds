@@ -9,12 +9,20 @@ script ExtendToggleTopMenu extends ToggleAction
 
 	method void ExecuteOnLogic(Toggle sender)
 		__base:ExecuteOnLogic(sender)
-		
+
 		if self.targetTopMenu then
 			self.targetTopMenu.Enable = true
-		
+
 			self:SetEventBackground(true)
-		
+
+			-- 매트릭스 모드 탭 활성화 시 랭킹 갱신
+			if self.panelIndex == 2 then
+				local rankingListUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/ModeSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
+				if rankingListUI ~= nil and rankingListUI.MatrixRankingPanel ~= nil then
+					rankingListUI.MatrixRankingPanel:RefreshRankList()
+				end
+			end
+
 			-- 이벤트 스테이지 탭 활성화 시 초기화
 			if self.panelIndex == 3 then
 				-- targetTopMenu에서 직접 컴포넌트 찾기 (비활성화된 엔티티도 접근 가능)
