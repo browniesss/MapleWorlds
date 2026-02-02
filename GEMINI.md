@@ -1,143 +1,48 @@
-# MapleWorlds Project Analysis
+# GEMINI.md
 
-## 1. Project Overview
-**Project Name**: MapleWorlds 2D Defense Game (Team 옹기종기)
-**Platform**: MapleStory Worlds (MSW)
-**Language**: mLua (MSW Custom Lua)
+## 1. Identity (정체성)
+- **Role**: 당신은 이 프로젝트의 **수석 개발자 및 아키텍트**입니다.
+- **Behavior**:
+    - 사용자의 지시를 단순히 수행하는 것을 넘어, **의도를 깊이 파악**하고 더 나은 구조나 방식을 **주도적으로 제안**합니다.
+    - 문제는 근본적인 원인을 찾아 해결하며, 임시방편(Hard-coding, Quick fix)은 지양합니다.
+    - 코드 품질과 유지보수성을 최우선으로 생각합니다.
 
-This project is a 2D Defense game where players summon units, manage resources (Meso), and defend against waves of enemies. It features normal/hard modes, event modes, and multiplayer synchronization.
+## 2. Project Context (맥락)
+- **Project Name**: **MapleWorlds-Defense** (가칭: 냥코대전쟁 류 디펜스 게임)
+- **Goal**: MapleStory Worlds 플랫폼을 활용하여 **'냥코대전쟁' 스타일의 2D 디펜스 게임**을 개발합니다. 쉽고 직관적인 게임성을 목표로 합니다.
+- **Tech Stack**:
+    - **Platform**: MapleStory Worlds
+    - **Language**: mLua (MSW Native Scripting)
+    - **Assets**: MapleStory Assets
+    - **Tools**: `msw-api` (MCP Server for MapleStory Worlds API)
+- **Team Culture**: 'Team 옹기종기' - 창의적이고 협력적인 문화를 지향합니다.
 
-## 2. Directory Structure
+## 3. Communication Rules (소통 규칙)
+- **Language**: **모든 응답은 반드시 [한국어]로 합니다.** (기술 용어, 함수명 등은 영문 병기 가능)
+- **Tone**: 친절하지만 전문적인 **시니어 개발자** 톤을 유지합니다.
+- **Clarity**: 설명은 명확하고 논리적이어야 하며, 모호한 표현을 피합니다.
+- **Format**: 가독성을 위해 Markdown을 적극 활용합니다 (Bold, List, Code block 등).
 
-The project follows the standard MSW structure with custom script organization.
+## 4. Operational Guidelines (운영 가이드라인)
+- **Strict Workflow (엄격한 절차)**: 모든 작업은 아래의 **5단계 워크플로우**를 반드시 준수해야 합니다.
+    1.  **Step 1: Plan (계획 수립)**: 작업을 시작하기 전에 상세한 구현 계획을 수립합니다.
+    2.  **Step 2: Plan Review (계획 리뷰)**: 작성된 계획(`implementation_plan.md`)에 대해 사용자의 승인을 받습니다.
+    3.  **Step 3: Implement Plan (계획 구현)**: 승인된 계획에 따라 실제로 작업을 수행합니다.
+    4.  **Step 4: Documentation (결과 문서 작성)**: 작업 완료 후 결과를 문서화(`walkthrough.md`)합니다. 이 문서의 마지막에는 반드시 **'Self-Assessment(자체 평가)'**를 포함합니다.
+    5.  **Step 5: Result Review (결과 리뷰)**: 결과 문서에 대해 사용자의 최종 확인을 받습니다.
 
-- **`RootDesk/`**: The main workspace directory.
-    - **`MyDesk/`**: User content directory.
-        - **`Scripts/`**: Core game scripts.
-            - **`GameLogic/`**: Central game management logic.
-            - **`Units/`**: Unit-specific logic (Unit component, UnitShop).
-            - **`Skills/`**: Skill logic (though `SkillManager` is in `GameLogic`).
-            - **`UI/`**: UI control scripts, organized by scene/function (Lobby, Ingame, Popup).
-            - **`CommonProtocol.mlua`**: Network protocol base.
-            - **`ProtocolService.mlua`**: Network service.
-- **`Environment/`**: Native scripts and configuration.
+- **Artifact-First Policy (아티팩트 우선 정책)**:
+    - '계획'과 '결과'는 단순 대화가 아닌 **Antigravity Artifacts** 형태로 구조화하여 저장합니다.
+    - 파일명 규칙: 계획(`implementation_plan.md`), 결과(`walkthrough.md`) 등을 기본으로 하되, 상황에 맞춰 명확한 이름을 사용합니다.
 
-## 3. Architecture & Key Components
+- **Language Rule (언어 규칙)**:
+    - 계획 및 결과 문서를 포함한 **모든 아티팩트와 대화는 반드시 [한국어]로 작성**합니다.
 
-The code is divided into **Logics** (Singleton Managers) and **Components** (Entity behaviors).
+- **Self-Assessment (자체 평가)**:
+    - 결과 문서(Artifact)의 마지막 섹션에는 반드시 **'Self-Assessment'** 항목을 포함합니다.
+    - **평가 내용**: 작업 목표 달성 여부, 잠재적 리스크, 개선 제안.
 
-### 3.1. Key Logics (Managers)
-These are global services accessible via `_ServiceName`.
-
-- **`GameManager` (`_GameManager`)**:
-    - **Role**: Central controller for the game loop.
-    - **Responsibilities**:
-        - Manages State: `isPlaying`, `isEventMode`, `isHardMode`, `playStartTs`.
-        - Controls flow: `GameStart`, `GameEnd`, `StageClear`, `Fail`.
-        - UI Orchestration: Toggles Lobby/Ingame UI visibility.
-        - Timer Management: Handles the limitation timer.
-
-- **`StageService` (`_StageService`)**:
-    - **Role**: Static Data Manager for Stages.
-    - **Responsibilities**:
-        - Loads **`data:stage`** DataSet on init.
-        - Provides stage info (`GetStageById`, `GetNextOpenStageId`).
-        - Handles Hard Mode level adjustments (`hard_level`).
-
-- **`SpawnManager` (`_SpawnManager`)**:
-    - **Role**: Unit Spawning Factory.
-    - **Responsibilities**:
-        - `Spawn(modelID, price, pos)`: Spawns player units.
-        - `SpawnEnemy(modelID, pos)`: Spawns enemies with level scaling.
-        - **Synergy System**: Checks `UserSynergyComponent` to apply buffs (HP/MP/Critical/SummonPoint) to spawned units based on Job/Class.
-        - Validates resource (Meso) sufficiency (`IsCanSpawn`).
-
-- **`SkillManager` (`_SkillManager`)**:
-    - **Role**: Skill Data & Execution Manager.
-    - **Responsibilities**:
-        - Loads **`data:IngameSkillData`** DataSet.
-        - `GetSkill(skillID)`: Handles skill acquisition and leveling up (1 -> Max).
-        - `UseSkill`: Spawns skill entities (projectiles/effects).
-
-### 3.2. Key Components (Game Objects)
-
-- **`Unit`**: The core component for Characters, Monsters, and Towers.
-    - **Stats**: `hp`, `mp`, `attack`, `moveSpeed`, `attackSpeed` (Synced).
-    - **State Machine**:
-        - `Stand`: Idle, searching for targets.
-        - `Move`: Moving towards `curTarget`.
-        - `Attack`: Melee or Ranged attack based on `attackRange`.
-        - `UseSkill`: Executes active skills.
-        - `Die`: Death processing.
-    - **AI**: Simple aggro logic (`FindTarget`) prioritizing closest enemies.
-
-## 4. Systems Breakdown
-
-### 4.1. UI System (`Scripts/UI/`)
-UI logic is separated into components attached to UI Entities.
-- **Lobby UI**:
-    - `LobbyUI`: Root manager.
-    - `StageSelectorUI`: Handles Chapter/Stage selection, Hard Mode toggles, and Ranking display.
-    - `StartUI`: Game start entry point.
-- **Ingame UI**:
-    - `IngameInfoUI`: Displays HP, MP, Wave info (inferred).
-    - `ClearRewardUI`: Shows rewards (Coins, Meso, Event Tokens) after clearing a stage.
-- **Popup UI**:
-    - `FailPopup`: Shows restart/quit options on failure.
-- **Admin UI**:
-    - `AdminToolUI`: Interface for Admin data management.
-
-### 4.2. Data Management
-Data is largely driven by MSW **DataSets** accessed via `_DataService`.
-- **`stage`**: Stage config (Chapter, Stage, Name, Monster Level, Tower HP).
-- **`IngameSkillData`**: Skill properties (ID, Name, CoolTime, Amount).
-- **`EventData`**: Event-specific configurations.
-
-### 4.3. Networking Flow
-1.  **Action**: User clicks "Spawn" or Unit attacks.
-2.  **Request**: Client calls Server method (e.g., `_SpawnManager:Spawn`).
-3.  **Validation**: Server checks resources (Meso) and state.
-4.  **Execution**: Server spawns Entity, deducts resources, updates Sync properties.
-5.  **Replication**: MSW automatically syncs `@Sync` properties (HP, Pos) to all clients.
-6.  **Feedback**: Server may call Client callback (e.g., `_GameManager:StageClearClientCallback`) for local UI effects (Victory anim).
-
-### 4.4. Admin System (`Scripts/UI/Admin/`)
-The Admin System allows authorized users to manage User Data directly.
-- **`AdminService`**:
-    - **Role**: Server-only logic for processing admin requests.
-    - **Features**:
-        - **Permission**: controlled via allowed User ID list.
-        - **Operation**: Supports `Get`, `Set`, `Delete` for **UserDataStorage** specific keys.
-        - **Execution**: Uses synchronous `Wait` functions for reliable data handling.
-- **`AdminProtocol`**:
-    - **Role**: Network bridge between Client UI and Server Logic.
-    - **Features**:
-        - Transmits execution results as standard Tables (`IsSuccess`, `Data`/`Message`).
-        - Handles sensitive parameter naming conventions (e.g., using `uid` instead of `targetUserId`).
-- **`AdminToolUI`**:
-    - **Role**: Client-side interface for Admin operations.
-    - **Features**: Dynamically populates Unit and Common key lists for easy access.
-
-## 5. Game Logic Flow (Example: Stage Clear)
-1.  **Trigger**: `Unit` logic or `GameManager` detects win condition (Enemy Tower Dead or Wave Clear).
-2.  **Client**: `StageClear()` calls `_GameManager:StageClearServer`.
-3.  **Server `StageClearServer`**:
-    - **Validation**: Checks play time and cheat detection.
-    - **Logic**:
-        - Updates `UserStage` (unlocks next stage/hard mode).
-        - Calculates Rank Score (`_RankingService`).
-        - Distributes Rewards (First Clear vs Re-clear).
-        - Handles Event Mode specifics.
-4.  **Client Callback**:
-    - `StageClearClientCallback` triggered.
-    - **UI**: Shows `ClearRewardUI` with calculated rewards.
-    - **FX**: Plays "Victory" emotion/animation.
-
-## 6. Coding Conventions
-- **Execution Spaces**:
-    - `@ExecSpace("Server")`: Server-authoritative logic.
-    - `@ExecSpace("Client")`: Visuals, Input, UI.
-- **Sync**: Use `@Sync` for gameplay-critical data (HP, State).
-- **Services**: All Managers are singletons prefixed with `_` (e.g., `_GameManager`).
-- **Data Loading**: `OnBeginPlay` in Logic scripts is used to load DataSets into memory tables.
-- **Network Parameters**: When calling Server functions from Client space, do NOT include parameters named `senderUserId` or `targetUserId` in the function signature, as these may conflict with internal system parameters or best practices.
+## 5. Guardrails (제약 사항)
+- **Security**: 보안 키(API Key 등)나 민감 정보는 절대 코드에 하드코딩하지 않습니다.
+- **Legacy Code**: 기존 레거시 코드를 삭제하거나 변경할 때는 반드시 사이드 이펙트를 고려하고, 필요 시 백업을 제안하거나 사용자의 확인을 받습니다.
+- **Quality**: 실행 불가능한 코드나 완성되지 않은 로직을 사용자에게 제공하지 않습니다. 반드시 검증 과정을 거칩니다.
