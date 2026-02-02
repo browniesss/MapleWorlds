@@ -397,20 +397,65 @@ script MatrixGameService extends Logic
 		-- 서버에서 모든 유닛 제거
 		self:ClearAllUnitsOnServer()
 
+		-- 해적 시너지(5) 적용: 라운드 클리어 시 메소 추가
+		self:ApplyPirateSynergyOnRoundClear()
+
 		-- 다음 라운드 준비
 		local nextRoundId = self.currentRoundId + 1
 		local nextRoundData = self:GetRoundData(nextRoundId)
-		
+
 		-- 페이즈 변경 체크
 		local currentPhaseId = self:GetRoundData(self.currentRoundId).phaseId
-		local nextPhaseId = nextRoundData ~= nil and nextRoundData.phaseId or currentPhaseId
-		
+
+		-- 다음 라운드 데이터가 없으면 무한 모드 진입 체크
+		if nextRoundData == nil then
+			-- 현재 페이즈가 무한 모드인지 확인 (self.currentPhaseId 사용 - 무한 모드에서는 라운드의 phaseId와 다를 수 있음)
+			local currentPhase = self.phaseData[self.currentPhaseId]
+			if currentPhase ~= nil and currentPhase.phaseType == self.PHASE_TYPE_INFINITE then
+				-- 이미 무한 모드면 루프 시작 (증강 선택)
+				log("무한 모드 루프 완료, 다음 루프 준비")
+				self:OnPhaseComplete()
+			else
+				-- 무한 모드 페이즈로 전환 (페이즈 5)
+				log("무한 모드 페이즈로 전환")
+				self:OnPhaseComplete()
+			end
+			return
+		end
+
+		local nextPhaseId = nextRoundData.phaseId
+
 		if nextPhaseId ~= currentPhaseId then
 			-- 페이즈 종료 → 증강 선택
 			self:OnPhaseComplete()
 		else
 			-- 같은 페이즈 → 캐릭터 선택
 			self:OnRoundComplete()
+		end
+	end
+
+	-- 해적 시너지(5): 라운드 클리어 시 초기 메소 추가
+	@ExecSpace("Server")
+	method void ApplyPirateSynergyOnRoundClear()
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		if user == nil then
+			return
+		end
+
+		local pirateSynergyId = 5
+		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(pirateSynergyId)
+		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(tostring(pirateSynergyId), count)
+
+		if synergy:length() > 0 then
+			local item = synergy:Get(1)
+			local bonusMeso = item:CalcValue(0)
+
+			local mapPath = "/maps/MatrixStage"
+			local mesoWallet = _EntityService:GetEntityByPath(mapPath .. "/userWallet")
+			if mesoWallet ~= nil and mesoWallet.MesoWallet ~= nil then
+				mesoWallet.MesoWallet:AddMeso(bonusMeso)
+				log("[MatrixGameService] 해적 시너지 적용: +" .. tostring(bonusMeso) .. " 메소")
+			end
 		end
 	end
 
@@ -430,8 +475,16 @@ script MatrixGameService extends Logic
 
 	@ExecSpace("Client")
 	method void OnPhaseComplete()
-		self.currentPhaseId = self.currentPhaseId + 1
-		log("페이즈 " .. tostring(self.currentPhaseId) .. " 진입")
+		-- 현재 페이즈가 무한 모드인지 확인
+		local currentPhase = self.phaseData[self.currentPhaseId]
+		if currentPhase ~= nil and currentPhase.phaseType == self.PHASE_TYPE_INFINITE then
+			-- 무한 모드: 페이즈 유지 (루프 반복)
+			log("무한 모드 " .. tostring(self.currentPhaseId) .. " 페이즈 루프")
+		else
+			-- 일반 모드: 다음 페이즈로 진행
+			self.currentPhaseId = self.currentPhaseId + 1
+			log("페이즈 " .. tostring(self.currentPhaseId) .. " 진입")
+		end
 
 		-- 증강 선택 UI 표시 (MatrixGameManager 통해)
 		if _MatrixGameManager ~= nil then

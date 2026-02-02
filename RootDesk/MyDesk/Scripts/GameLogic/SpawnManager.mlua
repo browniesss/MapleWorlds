@@ -177,6 +177,14 @@ script SpawnManager extends Logic
 
 	method void ApplyAugmentComponent(Entity spawnEntity, table matrix)
 		local effectType = matrix.effectType
+		local matrixType = matrix.type
+
+		-- INFINITE 타입은 직접 스탯 적용
+		if matrixType == "INFINITE" then
+			self:ApplyInfiniteAugmentToUnit(spawnEntity, effectType, matrix.value)
+			return
+		end
+
 		local componentName = self:GetAugmentComponentName(effectType)
 
 		if componentName == nil or componentName == "" then
@@ -205,6 +213,44 @@ script SpawnManager extends Logic
 		end
 
 		log("[SpawnManager] 증강 컴포넌트 적용: " .. componentName .. " (value=" .. tostring(matrix.value) .. ")")
+	end
+
+	-- INFINITE 타입 증강을 유닛에 직접 적용
+	method void ApplyInfiniteAugmentToUnit(Entity spawnEntity, string effectType, number value)
+		local unit = spawnEntity.Unit
+		if unit == nil then
+			return
+		end
+
+		if effectType == "AttackDamageBuff" then
+			-- 공격력 고정 증가
+			unit.damage = unit.damage + value
+			unit.originDamage = unit.originDamage + value
+		elseif effectType == "MaxHealthBuff" then
+			-- 최대 체력 고정 증가
+			unit.maxHP = unit.maxHP + value
+			unit.originMaxHP = unit.originMaxHP + value
+			unit.hp = unit.hp + value
+		elseif effectType == "AttackSpeedBuff" then
+			-- 공격속도 증가 (간격 감소)
+			unit.attackSpeed = unit.attackSpeed - value
+			unit.originAttackSpeed = unit.originAttackSpeed - value
+			if unit.attackSpeed < 0.5 then
+				unit.attackSpeed = 0.5
+			end
+			if unit.originAttackSpeed < 0.5 then
+				unit.originAttackSpeed = 0.5
+			end
+		elseif effectType == "MoveSpeedBuff" then
+			-- 이동속도 고정 증가
+			unit.moveSpeed = unit.moveSpeed + value
+			unit.originMoveSpeed = unit.originMoveSpeed + value
+		elseif effectType == "AttackRangeBuff" then
+			-- 사거리 고정 증가
+			unit.attackRange = unit.attackRange + value
+		end
+
+		log("[SpawnManager] INFINITE 증강 적용: " .. effectType .. " +" .. tostring(value))
 	end
 
 	method string GetAugmentComponentName(string effectType)

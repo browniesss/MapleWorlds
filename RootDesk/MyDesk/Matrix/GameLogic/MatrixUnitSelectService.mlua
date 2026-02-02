@@ -197,6 +197,9 @@ script MatrixUnitSelectService extends Logic
 			user.UserSynergyComponent:AddCountFromClient(unitId)
 		end
 
+		-- 메소 UI 업데이트 (시너지 변경 반영)
+		self:RefreshMesoIncomeUI()
+
 		log("[MatrixUnitSelectService] 유닛 선택: " .. unitId .. " (남은 선택: " .. tostring(self.remainingSelections - 1) .. ")")
 		
 		-- UI 닫기
@@ -247,6 +250,16 @@ script MatrixUnitSelectService extends Logic
 		self.currentChoiceIds = {}
 		self.isSelectingUnit = false
 		self.onSelectionCompleteCallback = nil
+	end
+
+	-- 메소 income UI 업데이트 (시너지 변경 반영)
+	@ExecSpace("Server")
+	method void RefreshMesoIncomeUI()
+		local mapPath = "/maps/MatrixStage"
+		local mesoIncomeEntity = _EntityService:GetEntityByPath(mapPath .. "/ingameIncome")
+		if mesoIncomeEntity ~= nil and mesoIncomeEntity.MesoIncome ~= nil then
+			mesoIncomeEntity.MesoIncome:RefreshIncomeUI()
+		end
 	end
 
 end

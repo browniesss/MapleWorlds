@@ -23,6 +23,9 @@ script MesoIncome extends Component
 	-- 매트릭스 모드용: 마지막 매트릭스 시간
 	property number lastMatrixTime = 0
 
+	-- 소수점 누적 (배율 적용 시 소수점 처리용)
+	property number incomeAccumulator = 0
+
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
 		-- 맵에 따라 gameManager 설정
@@ -94,12 +97,114 @@ script MesoIncome extends Component
 		local baseIncome = self.incomeData[1]["income"]
 		local finalIncome = baseIncome
 
-		-- MatrixAugmentService 배율 적용
-		if _MatrixAugmentService ~= nil and _MatrixAugmentService.mesoIncomeMultiplier ~= 1.0 then
-			finalIncome = math.floor(baseIncome * _MatrixAugmentService.mesoIncomeMultiplier)
+		-- 매트릭스 모드에서만 시너지/증강 적용
+		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
+			-- 모험가 시너지(101) 배율 적용
+			local synergyMultiplier = self:GetAdventurerSynergyMultiplier()
+			if synergyMultiplier > 1.0 then
+				finalIncome = finalIncome * synergyMultiplier
+			end
+
+			-- MatrixAugmentService 배율 적용
+			if _MatrixAugmentService ~= nil and _MatrixAugmentService.mesoIncomeMultiplier ~= 1.0 then
+				finalIncome = finalIncome * _MatrixAugmentService.mesoIncomeMultiplier
+			end
+		else
+			-- 일반 모드: 증강 배율만 적용 (시너지는 InitData에서 이미 적용됨)
+			if _MatrixAugmentService ~= nil and _MatrixAugmentService.mesoIncomeMultiplier ~= 1.0 then
+				finalIncome = finalIncome * _MatrixAugmentService.mesoIncomeMultiplier
+			end
 		end
 
-		self.UserWallet:AddMeso(finalIncome)
+		-- 소수점 누적 처리: 소수점을 누적하여 정수가 되면 추가
+		self.incomeAccumulator = self.incomeAccumulator + finalIncome
+		local integerPart = math.floor(self.incomeAccumulator)
+
+		if integerPart > 0 then
+			self.incomeAccumulator = self.incomeAccumulator - integerPart
+			self.UserWallet:AddMeso(integerPart)
+		end
+	end
+
+	-- 시너지 + 증강 배율이 적용된 최종 income 계산
+	@ExecSpace("Server")
+	method number GetFinalIncome()
+		local baseIncome = self.incomeData[1]["income"]
+		local finalIncome = baseIncome
+
+		-- 매트릭스 모드에서만 시너지/증강 적용
+		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
+			-- 모험가 시너지(101) 배율 적용
+			local synergyMultiplier = self:GetAdventurerSynergyMultiplier()
+			if synergyMultiplier > 1.0 then
+				finalIncome = finalIncome * synergyMultiplier
+			end
+
+			-- MatrixAugmentService 배율 적용
+			if _MatrixAugmentService ~= nil and _MatrixAugmentService.mesoIncomeMultiplier ~= 1.0 then
+				finalIncome = finalIncome * _MatrixAugmentService.mesoIncomeMultiplier
+			end
+		else
+			-- 일반 모드: 증강 배율만 적용 (시너지는 InitData에서 이미 적용됨)
+			if _MatrixAugmentService ~= nil and _MatrixAugmentService.mesoIncomeMultiplier ~= 1.0 then
+				finalIncome = finalIncome * _MatrixAugmentService.mesoIncomeMultiplier
+			end
+		end
+
+		return math.floor(finalIncome)
+	end
+
+	-- 모험가 시너지(101) 배율 계산
+	@ExecSpace("Server")
+	method number GetAdventurerSynergyMultiplier()
+		-- Player 태그로 유저 엔티티 가져오기
+		local user = _EntityService:GetEntityByTag("Player")
+		if user == nil or user.UserSynergyComponent == nil then
+			return 1.0
+		end
+
+		local adventurerSynergyId = 101
+		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(adventurerSynergyId)
+		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(tostring(adventurerSynergyId), count)
+
+		if synergy:length() > 0 then
+			local item = synergy:Get(1)
+			-- value는 10000 = 10%, 20000 = 20% 형식
+			local bonusRatio = item.value / 100000
+			return 1.0 + bonusRatio
+		end
+
+		return 1.0
+	end
+
+	-- UI에 표시될 최종 income 값 갱신
+	@ExecSpace("Server")
+	method void RefreshIncomeUI()
+		local displayIncome = self:GetDisplayIncome()
+		self.UIController:UpdateMesoIncome(displayIncome)
+	end
+
+	-- UI에 표시할 income 값 (소수점 포함)
+	@ExecSpace("Server")
+	method number GetDisplayIncome()
+		local baseIncome = self.incomeData[1]["income"]
+		local displayIncome = baseIncome
+
+		-- 매트릭스 모드에서만 시너지/증강 적용
+		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
+			-- 모험가 시너지(101) 배율 적용
+			local synergyMultiplier = self:GetAdventurerSynergyMultiplier()
+			if synergyMultiplier > 1.0 then
+				displayIncome = displayIncome * synergyMultiplier
+			end
+
+			-- MatrixAugmentService 배율 적용
+			if _MatrixAugmentService ~= nil and _MatrixAugmentService.mesoIncomeMultiplier ~= 1.0 then
+				displayIncome = displayIncome * _MatrixAugmentService.mesoIncomeMultiplier
+			end
+		end
+
+		return displayIncome
 	end
 
 	@ExecSpace("ServerOnly")
@@ -114,6 +219,7 @@ script MesoIncome extends Component
 		-- 매트릭스 모드 관련 데이터 초기화
 		self.lastMatrixTime = 0
 		self.currentTs = 0
+		self.incomeAccumulator = 0
 		self.gameManager = nil
 	end
 
@@ -130,6 +236,7 @@ script MesoIncome extends Component
 		self.UIController:UpdateMesoIncome(income)
 
 		self.currentTs = 0
+		self.incomeAccumulator = 0
 		-- 매트릭스 모드용 시간 동기화
 		if _MatrixGameManager ~= nil then
 			self.lastMatrixTime = _MatrixGameManager.matrixTime
@@ -177,6 +284,7 @@ script MesoIncome extends Component
 		self.UserWallet:SetMeso(self.incomeData[1]["init"])
 		self.UIController:UpdateMesoIncome(self.incomeData[1]["income"])
 		self.currentTs = 0
+		self.incomeAccumulator = 0
 
 		if _MatrixGameManager ~= nil then
 			self.lastMatrixTime = _MatrixGameManager.matrixTime

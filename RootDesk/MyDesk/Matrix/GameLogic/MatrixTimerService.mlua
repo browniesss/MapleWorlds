@@ -26,9 +26,15 @@ script MatrixTimerService extends Logic
 		if self.isPaused then
 			return
 		end
-		
+
+		-- 배속 보정: delta를 현재 timeScale로 나눠서 실제 시간 기준으로 계산
+		local adjustedDelta = delta
+		if _TimeScaleManager ~= nil and _TimeScaleManager.timeScale > 0 then
+			adjustedDelta = delta / _TimeScaleManager.timeScale
+		end
+
 		-- 현재 시간 업데이트
-		self.currentTime = self.currentTime + delta
+		self.currentTime = self.currentTime + adjustedDelta
 		
 		-- MatrixGameManager에 시간 동기화 (서버로 전송)
 		if _MatrixGameManager ~= nil then

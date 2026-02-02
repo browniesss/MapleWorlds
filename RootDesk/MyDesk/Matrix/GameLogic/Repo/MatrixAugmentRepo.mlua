@@ -84,23 +84,29 @@ script MatrixAugmentRepo extends Logic
 		local choices = {}
 		local usedIds = {}
 
+		-- 이미 선택한 증강 ID 수집 (중복 방지)
+		local selectedIds = self:GetSelectedMatrixIds()
+		for id, _ in pairs(selectedIds) do
+			usedIds[id] = true
+		end
+
 		for i = 1, 3 do
 			local grade = self:GetRandomGrade()
-			local matrix = self:GetRandomMatrixByGrade(grade)
+			local matrix = self:GetRandomMatrixByGradeExcludeInfinite(grade)
 
 			if matrix ~= nil then
 				-- 중복 체크
 				local attempts = 0
-				while usedIds[matrix.id] ~= nil and attempts < 10 do
+				while (usedIds[matrix.id] ~= nil or matrix.type == "INFINITE") and attempts < 10 do
 					grade = self:GetRandomGrade()
-					matrix = self:GetRandomMatrixByGrade(grade)
+					matrix = self:GetRandomMatrixByGradeExcludeInfinite(grade)
 					attempts = attempts + 1
 					if matrix == nil then
 						break
 					end
 				end
 
-				if matrix ~= nil and usedIds[matrix.id] == nil then
+				if matrix ~= nil and usedIds[matrix.id] == nil and matrix.type ~= "INFINITE" then
 					usedIds[matrix.id] = true
 					table.insert(choices, matrix)
 				end
@@ -109,9 +115,55 @@ script MatrixAugmentRepo extends Logic
 		return choices
 	end
 
-	-- 기존 선택지와 중복되지 않는 단일 증강 생성 (리셋용)
+	-- INFINITE 타입을 제외한 랜덤 증강 반환
+	method table GetRandomMatrixByGradeExcludeInfinite(string grade)
+		local gradeList = self.matrixData[grade]
+		if gradeList == nil or #gradeList == 0 then
+			return nil
+		end
+
+		-- INFINITE 타입 제외
+		local filtered = {}
+		for _, matrix in ipairs(gradeList) do
+			if matrix.type ~= "INFINITE" then
+				table.insert(filtered, matrix)
+			end
+		end
+
+		if #filtered == 0 then
+			return nil
+		end
+
+		local index = math.random(1, #filtered)
+		return filtered[index]
+	end
+
+	-- 이미 선택한 증강 ID 목록 가져오기
+	method table GetSelectedMatrixIds()
+		local selectedIds = {}
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.UserMatrixManager ~= nil then
+			local matrixEffects = user.UserMatrixManager:GetMatrixEffects()
+			if matrixEffects ~= nil then
+				for _, matrix in ipairs(matrixEffects) do
+					if matrix ~= nil and matrix.id ~= nil then
+						selectedIds[matrix.id] = true
+					end
+				end
+			end
+		end
+		return selectedIds
+	end
+
+	-- 기존 선택지와 중복되지 않는 단일 증강 생성 (리셋용, INFINITE 제외)
 	method table GenerateSingleMatrixChoice(table currentChoices)
 		local usedIds = {}
+
+		-- 이미 선택한 증강 ID 수집 (중복 방지)
+		local selectedIds = self:GetSelectedMatrixIds()
+		for id, _ in pairs(selectedIds) do
+			usedIds[id] = true
+		end
 
 		-- 기존 선택지의 id를 수집
 		if currentChoices ~= nil then
@@ -123,17 +175,17 @@ script MatrixAugmentRepo extends Logic
 		end
 
 		local grade = self:GetRandomGrade()
-		local matrix = self:GetRandomMatrixByGrade(grade)
+		local matrix = self:GetRandomMatrixByGradeExcludeInfinite(grade)
 
 		if matrix == nil then
 			return nil
 		end
 
-		-- 중복 체크 (최대 20번 시도)
+		-- 중복 체크 (최대 20번 시도, INFINITE 제외)
 		local attempts = 0
-		while usedIds[matrix.id] ~= nil and attempts < 20 do
+		while (usedIds[matrix.id] ~= nil or matrix.type == "INFINITE") and attempts < 20 do
 			grade = self:GetRandomGrade()
-			matrix = self:GetRandomMatrixByGrade(grade)
+			matrix = self:GetRandomMatrixByGradeExcludeInfinite(grade)
 			attempts = attempts + 1
 			if matrix == nil then
 				break
@@ -215,6 +267,105 @@ script MatrixAugmentRepo extends Logic
 			end
 		end
 		return choices
+	end
+
+	-- 무한 모드 전용 증강 선택지 생성 (INFINITE 타입만, 중복 선택 가능)
+	method table GenerateInfiniteMatrixChoices()
+		local choices = {}
+		local usedIdsInChoice = {}  -- 현재 선택지 내에서만 중복 방지
+
+		-- INFINITE 타입 증강만 필터링
+		local infiniteList = self:GetMatrixByType("INFINITE")
+
+		if infiniteList == nil or #infiniteList == 0 then
+			log("[MatrixAugmentRepo] INFINITE 타입 증강이 없습니다")
+			return choices
+		end
+
+		for i = 1, 3 do
+			local grade = self:GetRandomGrade()
+			local matrix = self:GetRandomInfiniteMatrixByGrade(grade, infiniteList)
+
+			if matrix ~= nil then
+				-- 현재 선택지 내에서만 중복 체크 (이미 선택한 증강과는 중복 허용)
+				local attempts = 0
+				while usedIdsInChoice[matrix.id] ~= nil and attempts < 10 do
+					grade = self:GetRandomGrade()
+					matrix = self:GetRandomInfiniteMatrixByGrade(grade, infiniteList)
+					attempts = attempts + 1
+					if matrix == nil then
+						break
+					end
+				end
+
+				if matrix ~= nil then
+					usedIdsInChoice[matrix.id] = true
+					table.insert(choices, matrix)
+				end
+			end
+		end
+
+		log("[MatrixAugmentRepo] 무한 모드 증강 선택지 생성: " .. tostring(#choices) .. "개")
+		return choices
+	end
+
+	-- 무한 모드 증강 중 특정 등급의 랜덤 증강 반환
+	method table GetRandomInfiniteMatrixByGrade(string grade, table infiniteList)
+		local gradeFiltered = {}
+		for _, matrix in ipairs(infiniteList) do
+			if matrix.grade == grade then
+				table.insert(gradeFiltered, matrix)
+			end
+		end
+
+		if #gradeFiltered == 0 then
+			-- 해당 등급에 증강이 없으면 전체에서 랜덤 선택
+			if #infiniteList > 0 then
+				return infiniteList[math.random(1, #infiniteList)]
+			end
+			return nil
+		end
+
+		return gradeFiltered[math.random(1, #gradeFiltered)]
+	end
+
+	-- 무한 모드 리셋용 단일 증강 생성 (중복 선택 가능, 현재 선택지와만 중복 방지)
+	method table GenerateSingleInfiniteMatrixChoice(table currentChoices)
+		local usedIdsInChoice = {}
+
+		-- 현재 선택지의 id만 수집 (이미 선택한 증강과는 중복 허용)
+		if currentChoices ~= nil then
+			for _, matrix in ipairs(currentChoices) do
+				if matrix ~= nil then
+					usedIdsInChoice[matrix.id] = true
+				end
+			end
+		end
+
+		local infiniteList = self:GetMatrixByType("INFINITE")
+		if infiniteList == nil or #infiniteList == 0 then
+			return nil
+		end
+
+		local grade = self:GetRandomGrade()
+		local matrix = self:GetRandomInfiniteMatrixByGrade(grade, infiniteList)
+
+		if matrix == nil then
+			return nil
+		end
+
+		-- 현재 선택지 내에서만 중복 체크
+		local attempts = 0
+		while usedIdsInChoice[matrix.id] ~= nil and attempts < 20 do
+			grade = self:GetRandomGrade()
+			matrix = self:GetRandomInfiniteMatrixByGrade(grade, infiniteList)
+			attempts = attempts + 1
+			if matrix == nil then
+				break
+			end
+		end
+
+		return matrix
 	end
 
 end

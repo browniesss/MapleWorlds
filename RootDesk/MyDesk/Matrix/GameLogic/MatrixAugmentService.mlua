@@ -59,6 +59,18 @@ script MatrixAugmentService extends Logic
 		self.isGamePaused = paused
 	end
 
+	-- 현재 무한 모드인지 확인
+	method boolean IsInfiniteMode()
+		if _MatrixGameService == nil then
+			return false
+		end
+		local phase = _MatrixGameService:GetCurrentPhaseData()
+		if phase ~= nil and phase.phaseType == _MatrixGameService.PHASE_TYPE_INFINITE then
+			return true
+		end
+		return false
+	end
+
 	@ExecSpace("Client")
 	method void OnMatrixEvent()
 		if self.selectCount >= self.maxSelectCount then
@@ -76,8 +88,16 @@ script MatrixAugmentService extends Logic
 		-- 리셋 상태 초기화 (새 증강 선택 시 모두 사용 가능)
 		self.resetUsed = {false, false, false}
 
-		-- 3개의 증강 선택지 생성
-		local choices = _MatrixAugmentRepo:GenerateMatrixChoices()
+		-- 3개의 증강 선택지 생성 (무한 모드 여부에 따라 분기)
+		local choices = nil
+		if self:IsInfiniteMode() then
+			-- 무한 모드: INFINITE 타입 증강만 선택 (중복 허용)
+			choices = _MatrixAugmentRepo:GenerateInfiniteMatrixChoices()
+			log("[MatrixAugmentService] 무한 모드 증강 선택지 생성")
+		else
+			-- 일반 모드: 기존 증강 선택
+			choices = _MatrixAugmentRepo:GenerateMatrixChoices()
+		end
 
 		if choices == nil or #choices == 0 then
 			-- 선택지가 없으면 다시 재개
@@ -220,8 +240,15 @@ script MatrixAugmentService extends Logic
 		-- 리셋 사용 처리
 		self.resetUsed[index] = true
 
-		-- 새 증강 생성 (해당 인덱스만)
-		local newMatrix = _MatrixAugmentRepo:GenerateSingleMatrixChoice(self.currentChoices)
+		-- 새 증강 생성 (무한 모드 여부에 따라 분기)
+		local newMatrix = nil
+		if self:IsInfiniteMode() then
+			-- 무한 모드: INFINITE 타입 증강만 (중복 허용)
+			newMatrix = _MatrixAugmentRepo:GenerateSingleInfiniteMatrixChoice(self.currentChoices)
+		else
+			-- 일반 모드: 기존 증강 선택
+			newMatrix = _MatrixAugmentRepo:GenerateSingleMatrixChoice(self.currentChoices)
+		end
 
 		if newMatrix == nil then
 			log("[MatrixAugmentService] 새 증강 생성 실패")
@@ -328,6 +355,9 @@ script MatrixAugmentService extends Logic
 			user.UserMatrixManager:AddMatrix(matrix)
 		end
 
+		-- 메소 UI 업데이트 (MESO/SYNERGY 타입 증강 효과 반영)
+		self:RefreshMesoIncomeUI()
+
 		-- UI 닫기 (클라이언트)
 		self:CloseMatrixSelectUIClient()
 	end
@@ -362,6 +392,8 @@ script MatrixAugmentService extends Logic
 			self:ApplySpecialEffect(matrixData)
 		elseif effectType == "MESO" then
 			self:ApplyMesoEffect(matrixData)
+		elseif effectType == "INFINITE" then
+			self:ApplyInfiniteEffect(matrixData)
 		end
 	end
 
@@ -466,6 +498,61 @@ script MatrixAugmentService extends Logic
 				self.mesoIncomeMultiplier = self.mesoIncomeMultiplier + matrixData.value
 			end
 			log("[MatrixAugmentService] 메소 수입 배율 변경: " .. tostring(self.mesoIncomeMultiplier))
+		end
+	end
+
+	-- 무한 모드 전용 증강 효과 적용 (전체 유닛 스탯 고정값 증가)
+	@ExecSpace("Server")
+	method void ApplyInfiniteEffect(table matrixData)
+		local gameMapPath = _GameManager:GetGameMapName()
+		local myMonsterList = _EntityService:GetEntityByPath(gameMapPath.."/MyMonsterList")
+
+		if myMonsterList == nil then
+			return
+		end
+
+		local effectType = matrixData.effectType
+		local value = matrixData.value
+
+		for _, child in ipairs(myMonsterList.Children) do
+			if child.Unit ~= nil then
+				self:ApplyInfiniteBuffToUnit(child.Unit, effectType, value)
+			end
+		end
+
+		log("[MatrixAugmentService] 무한 모드 증강 적용: " .. tostring(effectType) .. " +" .. tostring(value))
+	end
+
+	-- 무한 모드 증강을 단일 유닛에 적용
+	method void ApplyInfiniteBuffToUnit(any unit, string effectType, number value)
+		if effectType == "AttackDamageBuff" then
+			-- 공격력 고정 증가
+			unit.damage = unit.damage + value
+			unit.originDamage = unit.originDamage + value
+		elseif effectType == "MaxHealthBuff" then
+			-- 최대 체력 고정 증가
+			local hpRatio = unit.hp / unit.maxHP
+			unit.maxHP = unit.maxHP + value
+			unit.originMaxHP = unit.originMaxHP + value
+			unit.hp = unit.maxHP * hpRatio  -- HP 비율 유지
+		elseif effectType == "AttackSpeedBuff" then
+			-- 공격속도 증가 (간격 감소)
+			unit.attackSpeed = unit.attackSpeed - value
+			unit.originAttackSpeed = unit.originAttackSpeed - value
+			-- 최소값 제한
+			if unit.attackSpeed < 0.5 then
+				unit.attackSpeed = 0.5
+			end
+			if unit.originAttackSpeed < 0.5 then
+				unit.originAttackSpeed = 0.5
+			end
+		elseif effectType == "MoveSpeedBuff" then
+			-- 이동속도 고정 증가
+			unit.moveSpeed = unit.moveSpeed + value
+			unit.originMoveSpeed = unit.originMoveSpeed + value
+		elseif effectType == "AttackRangeBuff" then
+			-- 사거리 고정 증가
+			unit.attackRange = unit.attackRange + value
 		end
 	end
 
@@ -650,6 +737,16 @@ script MatrixAugmentService extends Logic
 		local b = tonumber(string.sub(hex, 5, 6), 16) / 255
 
 		return Color(r, g, b, 1)
+	end
+
+	-- 메소 income UI 업데이트 (증강 효과 반영)
+	@ExecSpace("Server")
+	method void RefreshMesoIncomeUI()
+		local mapPath = "/maps/MatrixStage"
+		local mesoIncomeEntity = _EntityService:GetEntityByPath(mapPath .. "/ingameIncome")
+		if mesoIncomeEntity ~= nil and mesoIncomeEntity.MesoIncome ~= nil then
+			mesoIncomeEntity.MesoIncome:RefreshIncomeUI()
+		end
 	end
 
 end
