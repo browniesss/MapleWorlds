@@ -7,7 +7,6 @@ script eventGroupRepo extends Logic
 	method void OnBeginPlay()
 		local dataSet = _DataService:GetTable("EventSpawnGroup")
 		if dataSet == nil then
-			log("EventSpawnGroup DataSet not found")
 			return
 		end
 		

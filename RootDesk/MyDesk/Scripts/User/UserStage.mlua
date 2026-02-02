@@ -83,20 +83,20 @@ script UserStage extends Component
 			clearedEventList[#clearedEventList + 1] = key
 		end
 		data["clearedEvent"] = table.concat(clearedEventList, ",")
-
+		
 		-- clearedHardStages를 문자열로 변환
 		local clearedHardList = {}
 		for key, _ in pairs(self.clearedHardStages) do
 			clearedHardList[#clearedHardList + 1] = key
 		end
 		data["clearedHard"] = table.concat(clearedHardList, ",")
-
+		
 		-- 하드모드 진행 데이터
 		data["hardOpenStage"] = self.hardOpenStage
 		data["hardOpenChapter"] = self.hardOpenChapter
 		data["hardSelectStage"] = self.hardSelectStage
 		data["hardSelectChapter"] = self.hardSelectChapter
-
+		
 		local jsonData = _HttpService:JSONEncode(data)
 		
 		local userStorage = _DataStorageService:GetUserDataStorage(self.Entity.PlayerComponent.UserId)
@@ -152,7 +152,7 @@ script UserStage extends Component
 				self.clearedEventStages[stageId] = true
 			end
 		end
-
+		
 		-- clearedHard 문자열을 테이블로 변환
 		self.clearedHardStages = {}
 		local clearedHardStr = data["clearedHard"]
@@ -161,26 +161,26 @@ script UserStage extends Component
 				self.clearedHardStages[stageId] = true
 			end
 		end
-
+		
 		-- 클라이언트 동기화 문자열 초기화
 		local clearedEventList = {}
 		for key, _ in pairs(self.clearedEventStages) do
 			clearedEventList[#clearedEventList + 1] = key
 		end
 		self.clearedEventStagesSync = table.concat(clearedEventList, ",")
-
+		
 		local clearedHardList = {}
 		for key, _ in pairs(self.clearedHardStages) do
 			clearedHardList[#clearedHardList + 1] = key
 		end
 		self.clearedHardStagesSync = table.concat(clearedHardList, ",")
-
+		
 		-- 하드모드 진행 데이터 로드 (기본값 1)
 		self.hardOpenStage = tonumber(data["hardOpenStage"]) or 1
 		self.hardOpenChapter = tonumber(data["hardOpenChapter"]) or 1
 		self.hardSelectStage = tonumber(data["hardSelectStage"]) or 1
 		self.hardSelectChapter = tonumber(data["hardSelectChapter"]) or 1
-
+		
 		return 0
 	end
 
@@ -254,20 +254,16 @@ script UserStage extends Component
 		local userId = self.Entity.PlayerComponent.UserId
 		local userStorage = _DataStorageService:GetUserDataStorage(userId)
 		
-		log("[MesoReward] CheckMesoInitialReward started for user:", userId)
 		
 		-- 이미 보상을 받았는지 확인
 		local errCode, rewardFlag = userStorage:GetAndWait("MESO_INITIAL_REWARD")
-		log("[MesoReward] GetAndWait result - errCode:", errCode, "rewardFlag:", rewardFlag)
 		
 		if errCode ~= 0 then
-			log_error("[MesoReward] Failed to check reward flag for user:", userId, "error:", errCode)
 			return
 		end
 		
 		-- 이미 보상을 받은 경우 종료
 		if rewardFlag == "1" then
-			log("[MesoReward] User already received reward, skipping:", userId)
 			return
 		end
 		
@@ -275,33 +271,23 @@ script UserStage extends Component
 		local clearedCount = 0
 		for key, _ in pairs(self.clearedStages) do
 			clearedCount = clearedCount + 1
-			log("[MesoReward] Cleared stage found:", key)
 		end
-		log("[MesoReward] Total cleared stages:", clearedCount)
 		
 		-- 보상 지급
 		local rewardAmount = clearedCount * 4000
-		log("[MesoReward] Calculated reward amount:", rewardAmount)
 		
 		if rewardAmount > 0 then
 			local addResult = _BillingService:AddThirdFreeCoin(userId, rewardAmount)
-			log("[MesoReward] AddThirdFreeCoin result:", addResult)
 			if addResult ~= 0 then
 				log_error("[MesoReward] Failed to add meso for user:", userId, "error:", addResult)
 				return
 			end
-			log("[MesoReward] Granted", rewardAmount, "meso to user:", userId, "(", clearedCount, "stages cleared)")
-		else
-			log("[MesoReward] No reward to grant (0 stages cleared)")
 		end
 		
 		-- 보상 지급 플래그 저장
 		local saveResult = userStorage:SetAndWait("MESO_INITIAL_REWARD", "1")
-		log("[MesoReward] SetAndWait (flag save) result:", saveResult)
 		if saveResult ~= 0 then
 			log_error("[MesoReward] Failed to save reward flag for user:", userId, "error:", saveResult)
-		else
-			log("[MesoReward] Reward flag saved successfully for user:", userId)
 		end
 		
 		if rewardAmount == 0 then
@@ -430,7 +416,7 @@ script UserStage extends Component
 		if self.clearedStages[stageId] == nil then
 			return false
 		end
-
+		
 		return self.clearedStages[stageId]
 	end
 
@@ -438,14 +424,14 @@ script UserStage extends Component
 	method void AddClearedHardStage(integer chapter, integer stage)
 		local stageId = tostring(chapter * 100 + stage)
 		self.clearedHardStages[stageId] = true
-
+		
 		-- 클라이언트 동기화를 위한 문자열 업데이트
 		local clearedList = {}
 		for key, _ in pairs(self.clearedHardStages) do
 			clearedList[#clearedList + 1] = key
 		end
 		self.clearedHardStagesSync = table.concat(clearedList, ",")
-
+		
 		self:SAVE()
 	end
 
@@ -458,17 +444,17 @@ script UserStage extends Component
 	@ExecSpace("Client")
 	method boolean IsHardStageClearedClient(integer chapter, integer stage)
 		local stageId = tostring(chapter * 100 + stage)
-
+		
 		if self.clearedHardStagesSync == "" then
 			return false
 		end
-
+		
 		for id in string.gmatch(self.clearedHardStagesSync, "[^,]+") do
 			if id == stageId then
 				return true
 			end
 		end
-
+		
 		return false
 	end
 

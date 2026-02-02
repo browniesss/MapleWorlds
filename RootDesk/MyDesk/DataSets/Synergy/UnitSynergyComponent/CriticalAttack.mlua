@@ -6,7 +6,6 @@ script CriticalAttack extends BaseSynergyComponent
 		local random = math.random(100000)
 		
 		local baseCritial = self:CalValue(1) * 100000
-		log("is critical ", baseCritial, " >= ", random)
 		if baseCritial >=  random then
 			isCritical = true
 			damage *= 1.5

@@ -15,18 +15,14 @@ script StageSelectItemUI extends Component
 	property Entity StageNameText = nil
 
 	method void SetImage(string newImageRUID)
-		log("[StageSelectItemUI] SetImage called with RUID: " .. tostring(newImageRUID))
 		if self.EnabledButton == nil then
-			log("[StageSelectItemUI] ERROR: EnabledButton is nil in SetImage!")
 			return
 		end
 		if self.DisabledButton == nil then
-			log("[StageSelectItemUI] ERROR: DisabledButton is nil in SetImage!")
 			return
 		end
 		self.EnabledButton.SpriteGUIRendererComponent.ImageRUID = newImageRUID
 		self.DisabledButton.SpriteGUIRendererComponent.ImageRUID = newImageRUID
-		log("[StageSelectItemUI] SetImage complete")
 	end
 
 	method void SetSelected()
@@ -64,7 +60,6 @@ script StageSelectItemUI extends Component
 
 	method void Init()
 		local selfPath = self.Entity.Path
-		log("[StageSelectItemUI] Init - Path: " .. selfPath)
 
 		self.LockImage = _EntityService:GetEntityByPath(selfPath .. "/LockImage")
 		self.SelectImage = _EntityService:GetEntityByPath(selfPath .. "/SelectImage")
@@ -72,8 +67,6 @@ script StageSelectItemUI extends Component
 		self.DisabledButton = _EntityService:GetEntityByPath(selfPath .. "/SelectButtonDisable")
 		self.StageNameText = _EntityService:GetEntityByPath(selfPath .. "/StageName")
 		self.StageIdText = _EntityService:GetEntityByPath(selfPath .. "/StageId")
-
-		log("[StageSelectItemUI] Init complete - EnabledButton: " .. tostring(self.EnabledButton ~= nil) .. ", DisabledButton: " .. tostring(self.DisabledButton ~= nil))
 	end
 
 	method void SetName(string name)

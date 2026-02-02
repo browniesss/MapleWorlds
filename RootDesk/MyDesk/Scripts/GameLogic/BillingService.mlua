@@ -355,7 +355,6 @@ script BillingService extends Logic
 		end
 		
 		self.ThirdFreeCoin += addCoin
-		log("[Meso] AddThirdFreeCoin - userId:", userId, "added:", addCoin, "free:", self.ThirdFreeCoin, "paid:", self.ThirdPaidCoin, "total:", self.ThirdFreeCoin + self.ThirdPaidCoin)
 		
 		return self:SAVE(userId)
 	end
@@ -372,7 +371,6 @@ script BillingService extends Logic
 		end
 		
 		self.ThirdPaidCoin += addCoin
-		log("[Meso] AddThirdPaidCoin - userId:", userId, "added:", addCoin, "free:", self.ThirdFreeCoin, "paid:", self.ThirdPaidCoin, "total:", self.ThirdFreeCoin + self.ThirdPaidCoin)
 		
 		return self:SAVE(userId)
 	end
@@ -425,7 +423,6 @@ script BillingService extends Logic
 		
 		self.EventCoin = resTable["EventCoin"]
 		
-		log("_BillingService.EventCoin ", self.EventCoin)
 		
 		return 0
 	end
@@ -478,7 +475,6 @@ script BillingService extends Logic
 		end
 		
 		self.EventCoin += addCoin
-		log("[EventCoin] AddEventCoin - userId:", userId, "added:", addCoin, "total:", self.EventCoin)
 		
 		return self:EVENT_SAVE(userId)
 	end

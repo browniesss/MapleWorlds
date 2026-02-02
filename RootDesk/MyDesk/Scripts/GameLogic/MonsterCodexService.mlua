@@ -23,12 +23,10 @@ script MonsterCodexService extends Logic
 	method void LoadCodexData()
 		local dataSet = _DataService:GetTable("monster_codex")
 		if dataSet == nil then
-			log("[MonsterCodex] Warning: monster_codex dataset not found")
 			return
 		end
 
 		local count = dataSet:GetRowCount()
-		log("[MonsterCodex] Loading codex data:", count)
 
 		for i = 1, count do
 			local id = tonumber(dataSet:GetCell(i, "id"))
@@ -40,8 +38,6 @@ script MonsterCodexService extends Logic
 			local json = string.format('{"id":%d,"monster_id":"%s","required_kills":%d,"reward_amount":%d}',
 				id, monsterId, requiredKills, rewardAmount)
 			self.codexData[monsterId] = json
-
-			log("[MonsterCodex] Loaded:", monsterId, "required:", requiredKills)
 		end
 	end
 
@@ -70,7 +66,6 @@ script MonsterCodexService extends Logic
 		
 		local decoded = _HttpService:JSONDecode(data)
 		self.userKillData[userId] = decoded
-		log("[MonsterCodex] Loaded user data for:", userId)
 	end
 
 	@ExecSpace("ServerOnly")
@@ -82,7 +77,6 @@ script MonsterCodexService extends Logic
 		local ds = _DataStorageService:GetUserDataStorage(userId)
 		local json = self:EncodeUserData(userId)
 		ds:SetAndWait(self.STORAGE_KEY, json)
-		log("[MonsterCodex] Saved user data for:", userId)
 	end
 
 	@ExecSpace("ServerOnly")
@@ -228,7 +222,6 @@ script MonsterCodexService extends Logic
 
 		-- DB 저장
 		self:SaveUserData(userId)
-		log("[MonsterCodex] Codex achieved and saved:", monsterId)
 	end
 
 	-- 클라이언트에서 게임 종료 시 킬 데이터 동기화
@@ -259,18 +252,13 @@ script MonsterCodexService extends Logic
 
 		-- DB 저장
 		self:SaveUserData(userId)
-		log("[MonsterCodex] Kill data synced for:", userId)
 	end
 
 	@ExecSpace("Client")
 	method void NotifyCodexCompleted(string odataUserId, string monsterId, string monsterName)
-		log("[MonsterCodex] NotifyCodexCompleted called - monsterId:", monsterId, "monsterName:", monsterName)
-
 		-- 배너 표시
 		local banner = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/MonsterCodexBanner")
-		log("[MonsterCodex] banner entity:", banner)
 		if banner ~= nil and banner.MonsterCodexBanner ~= nil then
-			log("[MonsterCodex] Calling banner Show")
 			banner.MonsterCodexBanner:Show(monsterName, monsterId)
 		else
 			log_error("[MonsterCodex] Banner not found or component is nil")
@@ -286,7 +274,6 @@ script MonsterCodexService extends Logic
 	@ExecSpace("Server")
 	method void ClaimReward(string monsterId)
 		local userId = senderUserId
-		log("[MonsterCodex] ClaimReward - userId:", userId, "monsterId:", monsterId)
 
 		-- 도감 정보 확인
 		local codexInfo = self:GetCodexInfo(monsterId)
@@ -303,14 +290,12 @@ script MonsterCodexService extends Logic
 
 		-- 달성 여부 확인
 		if not self:IsCompleted(userId, monsterId) then
-			log("[MonsterCodex] Not completed:", monsterId)
 			self:OnClaimRewardResult(userId, monsterId, false, "NOT_COMPLETED")
 			return
 		end
 
 		-- 이미 수령했는지 확인
 		if self:IsRewardClaimed(userId, monsterId) then
-			log("[MonsterCodex] Already claimed:", monsterId)
 			self:OnClaimRewardResult(userId, monsterId, false, "ALREADY_CLAIMED")
 			return
 		end
@@ -331,14 +316,11 @@ script MonsterCodexService extends Logic
 		self.userKillData[userId]["claimed"][monsterId] = true
 		self:SaveUserData(userId)
 
-		log("[MonsterCodex] Reward claimed:", monsterId, "amount:", rewardAmount)
 		self:OnClaimRewardResult(userId, monsterId, true, "")
 	end
 
 	@ExecSpace("Client")
 	method void OnClaimRewardResult(string odataUserId, string monsterId, boolean success, string errorCode)
-		log("[MonsterCodex] OnClaimRewardResult:", monsterId, success, errorCode)
-		
 		-- 팝업 표시
 		local codexUI = _EntityService:GetEntityByPath("/ui/MonsterCodexUI")
 		if codexUI ~= nil and codexUI.MonsterCodexUI ~= nil then
@@ -362,8 +344,6 @@ script MonsterCodexService extends Logic
 
 	@ExecSpace("Client")
 	method void OnUserDataReceived(string odataUserId, string json)
-		log("[MonsterCodex] OnUserDataReceived")
-
 		local data = _HttpService:JSONDecode(json)
 
 		-- 초기 유저 데이터 저장 (클라이언트 로컬 킬 카운트 계산용)

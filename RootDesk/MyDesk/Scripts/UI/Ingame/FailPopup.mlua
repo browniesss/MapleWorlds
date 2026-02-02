@@ -10,8 +10,6 @@ script FailPopup extends Component
 			local chapterIndex = _GameManager.chapterIndex
 			local mapIndex = _GameManager.mapIndex
 			wasTutorialMode = (chapterIndex == 0 and mapIndex == 0)
-			log("[FailPopup] chapterIndex: ", chapterIndex, ", mapIndex: ", mapIndex)
-			log("[FailPopup] wasTutorialMode (calculated): ", wasTutorialMode)
 		end
 		
 		_GameManager:GameEnd()
@@ -49,14 +47,9 @@ script FailPopup extends Component
 		
 		-- 튜토리얼 모드였다면 로비 진입 후 로비 튜토리얼 시작
 		if wasTutorialMode then
-			log("[FailPopup] Tutorial mode detected, starting lobby tutorial after delay...")
 			_TimerService:SetTimerOnce(function()
-				log("[FailPopup] Timer fired! Checking TutorialService...")
 				if _TutorialService ~= nil then
-					log("[FailPopup] Calling StartLobbyTutorial(2)...")
 					_TutorialService:StartLobbyTutorial(2)
-				else
-					log("[FailPopup] ERROR: _TutorialService is nil!")
 				end
 			end, 1.5)
 		end

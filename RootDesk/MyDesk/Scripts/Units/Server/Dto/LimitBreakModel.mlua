@@ -58,7 +58,6 @@ script LimitBreakModel
 		end
 		
 		if not (self.skillID == "0") then
-			log("LimitBreakSkill desc ",self.skillID)
 			local skillData = _SkillService:GetSkillByIDFromClient(self.skillID)
 			desc = desc .. string.format("\n오리진 스킬 추가: %s", skillData.skillName)
 		end

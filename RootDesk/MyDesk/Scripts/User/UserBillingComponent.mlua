@@ -5,9 +5,7 @@ script UserBillingComponent extends Component
 	method void OnBeginPlay()
 		local uid = self.Entity.PlayerComponent.UserId
 		local res = _BillingService:LOAD_OR_INIT(uid)
-		log(uid, " result of _BillingService:LOAD_OR_INIT ", res)
 		res = _BillingService:EVENT_LOAD_OR_INIT(uid)
-		log(uid, " result of _BillingService:EVENT_LOAD_OR_INIT ", res)
 	end
 
 	@ExecSpace("ClientOnly")

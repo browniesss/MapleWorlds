@@ -82,7 +82,6 @@ script UnitLevelUpRepo extends Logic
 
 	@ExecSpace("ClientOnly")
 	method LevelUpModel FindBuffInClient(integer jobId, integer grade, integer level)
-		log(jobId, "-", grade, "-", level)
 		local jobMap = self.dataMap[tostring(jobId)]
 		if jobMap == nil then
 			return LevelUpModel()

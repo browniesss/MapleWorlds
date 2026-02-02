@@ -58,7 +58,6 @@ script UserBreakLimitSkillClient extends Component
 	@ExecSpace("ClientOnly")
 	method void UseSkill(string id)
 		-- 나중에 서버 공간으로 옮길것
-		log("skill use ", id)
 		local skillData = _SkillService:GetSkillByIDFromClient(id)
 		if skillData ~= nil then
 			local spawnSkillEntity = _SpawnService:SpawnByModelId(skillData["id"], skillData['skillDesc'], Vector3.zero, self.Entity)

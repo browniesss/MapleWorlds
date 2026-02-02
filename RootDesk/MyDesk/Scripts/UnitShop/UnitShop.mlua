@@ -49,7 +49,6 @@ script UnitShop extends Component
 				end
 				maxCount = item.count
 				
-		        log("unit price ", price , " => ", item:CalcValue(0))
 				price = math.tointeger(unitData.summonCost + item:CalcValue(0))
 		    end
 		
@@ -90,7 +89,6 @@ script UnitShop extends Component
 			maxCount = item.count
 			
 			price = math.tointeger(previewUD.summonCost + item:CalcValue(0))
-		    log("unit price ", price , " => ", item:CalcValue(0))
 		end
 		self.shopItems[5].UnitShopItem:Initialize(previewUD, PREVIEW_SLOT, self, previewSD, price)
 	end
@@ -139,7 +137,6 @@ script UnitShop extends Component
 		
 		-- 서브 덱
 		for i, modelId in ipairs(playerDeck.userSubDeck) do
-			log("init shop with Cygnus ", modelId)
 			if modelId and modelId ~= "" then
 				table.insert(self.summonPools, modelId)
 			end
@@ -184,7 +181,6 @@ script UnitShop extends Component
 		
 		-- 서브 덱
 		for i, modelId in ipairs(playerDeck.userSubDeck) do
-			log("init shop with Cygnus ", modelId)
 			if modelId and modelId ~= 0 then
 				table.insert(self.summonPools, modelId)
 			end

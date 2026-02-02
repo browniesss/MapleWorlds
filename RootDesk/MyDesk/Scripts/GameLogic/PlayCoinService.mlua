@@ -85,7 +85,6 @@ script PlayCoinService extends Logic
 			local userData = _HttpService:JSONDecode(res)
 			self.playCoin = tonumber(userData["playCoin"])
 			self.lastReceiveTs = tonumber(userData["lastReceiveTs"])
-			log(res)
 		end
 		
 		if self.playCoin >= self.maxPlayCoin then

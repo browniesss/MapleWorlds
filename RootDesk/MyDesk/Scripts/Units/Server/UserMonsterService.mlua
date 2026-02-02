@@ -168,8 +168,6 @@ script UserMonsterService extends Logic
 				data.count += 1
 			end
 			
-			log(monsterId .. " count : " .. (data.count -1) .. " -> " .. data.count)
-				
 			self.userMonsterDict[monsterId] = data:ENCODE()
 			
 			keyMap[monsterId]=true
@@ -220,9 +218,7 @@ script UserMonsterService extends Logic
 			local data = UserUnitModel()
 			data:DECODE(json)
 			data.level += 1
-			
-			log(monsterId .. " level : " .. (data.level -1) .. " -> " .. data.level)
-				
+
 			self.userMonsterDict[monsterId] = data:ENCODE()
 			
 			keyMap[monsterId]=true
@@ -250,9 +246,7 @@ script UserMonsterService extends Logic
 			end
 			
 			data.limitBreak += 1
-			
-			log(monsterId .. " limitBreak : " .. (data.limitBreak - 1 ) .. " -> " .. data.limitBreak)
-				
+
 			self.userMonsterDict[monsterId] = data:ENCODE()
 			
 			keyMap[monsterId]=true

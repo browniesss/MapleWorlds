@@ -17,7 +17,6 @@ script UserDeckService extends Logic
 		
 		local save =  _HttpService:JSONEncode(data)
 		
-		log(save)
 		return ds:SetAndWait("USER_DECK",save)
 		
 	end
@@ -34,7 +33,6 @@ script UserDeckService extends Logic
 		end
 		
 		if res == nil then
-			log(res)
 			local deckList = {}
 			local data = {}
 			
@@ -50,7 +48,6 @@ script UserDeckService extends Logic
 				deckList[i] = allUnit[i]
 			end
 			
-			log(deckList)
 			
 			playerDeck:SetUserDeck(deckList)
 			
@@ -64,7 +61,6 @@ script UserDeckService extends Logic
 		
 		playerDeck:SetUserDeck(resTable["UserDeck"])
 		
-		log(resTable)
 		
 		return 0
 	end

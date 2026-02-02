@@ -130,20 +130,16 @@ script MonsterCodexUI extends Component
 	end
 
 	method void OnClaimResult(string monsterId, boolean success, string errorCode)
-		log("[MonsterCodexUI] OnClaimResult:", monsterId, success, errorCode)
 		if success then
 			-- 팝업 표시
-			log("[MonsterCodexUI] popup:", self.popup)
 			if self.popup == nil then
 				self.popup = self.Entity:GetChildByName("MonsterCodexPopup")
-				log("[MonsterCodexUI] popup after GetChildByName:", self.popup)
 			end
 			if self.popup ~= nil and self.popup.MonsterCodexPopup ~= nil then
 				local codexInfo = _MonsterCodexService:GetCodexInfoClient(monsterId)
 				local unitInfo = _UnitService:GetUnitByIDFromClient(monsterId)
 				local monsterName = unitInfo and unitInfo["name"] or ""
 				local rewardAmount = codexInfo and codexInfo["reward_amount"] or 0
-				log("[MonsterCodexUI] Showing popup:", monsterName, rewardAmount)
 				self.popup.MonsterCodexPopup:Show(monsterName, rewardAmount)
 			else
 				log_error("[MonsterCodexUI] popup or MonsterCodexPopup component is nil")
@@ -162,7 +158,6 @@ script MonsterCodexUI extends Component
 			end
 		else
 			-- 에러 처리 (필요시)
-			log("[MonsterCodexUI] Claim failed:", errorCode)
 		end
 	end
 

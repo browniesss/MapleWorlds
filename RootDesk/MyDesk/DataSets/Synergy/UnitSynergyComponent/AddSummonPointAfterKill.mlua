@@ -12,10 +12,8 @@ script AddSummonPointAfterKill extends BaseSynergyComponent
 	@ExecSpace("Server")
 	method void AddMoney()
 		local desposit = self:CalValue(0)
-		
+
 		self.userWallet.MesoWallet:AddMeso(desposit)
-		
-		log("steal money ", desposit)
 	end
 
 end

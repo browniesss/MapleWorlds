@@ -9,7 +9,6 @@ script SpawnManager extends Logic
 		_ProtocolService:CommonCall(senderUserId)
 		
 		if modelID == "model://6194a4e3-0eb4-417a-92b5-891af548b672" then
-			log("Cygnus spawn")
 			self:SpawnCygnus(pos, senderUserId)
 			return
 		end
@@ -124,14 +123,11 @@ script SpawnManager extends Logic
 			stageLevel = 1
 		end
 
-		log("SpawnEnemy at ", stageId, " stageLevel ", stageLevel, " isHardMode ", _GameManager.isHardMode)
 		local buffedUnit = BuffedUnitModel()
 		buffedUnit:Init(unitData)
-		log("SpawnEnemy before buff ", buffedUnit.hp)
 		
 		buffedUnit = _BuffedUnitService:SetUnitBuff(buffedUnit, stageLevel, 1)
 		
-		log("SpawnEnemy after buff ", buffedUnit.hp)
 			
 		spawnEntity.Unit:SpawnEnemy(buffedUnit, skillData)
 	end
