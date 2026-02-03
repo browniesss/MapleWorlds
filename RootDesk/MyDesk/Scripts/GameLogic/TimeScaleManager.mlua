@@ -10,6 +10,10 @@ script TimeScaleManager extends Logic
 	@Sync
 	property number accumulatedPlayTime = 0
 
+	property number lastTimeScale = 1.0
+
+	property boolean lastIsSpeedUp = false
+
 	@ExecSpace("ServerOnly")
 	method void OnUpdate(number delta)
 		if _GameManager ~= nil and _GameManager.isPlaying then
@@ -38,7 +42,19 @@ script TimeScaleManager extends Logic
 	end
 
 	@ExecSpace("Server")
-	method void ResetPlayTimeOnly()
+	method void SaveAndReset()
+		self.lastTimeScale = self.timeScale
+		self.lastIsSpeedUp = self.isSpeedUp
+		self.timeScale = 1.0
+		self.isSpeedUp = false
+		self.accumulatedPlayTime = 0
+		self:ApplyTimeScaleToAllClients(1.0)
+	end
+
+	@ExecSpace("Server")
+	method void RestoreTimeScale()
+		self.timeScale = self.lastTimeScale
+		self.isSpeedUp = self.lastIsSpeedUp
 		self.accumulatedPlayTime = 0
 		self:ApplyTimeScaleToAllClients(self.timeScale)
 	end
