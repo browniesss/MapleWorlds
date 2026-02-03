@@ -150,16 +150,23 @@ script MatrixUnitSelectService extends Logic
 		local matrixManager = user.UserMatrixManager
 		local pool = matrixManager.unitPool
 		local unitList = matrixManager.unitList
+		local subUnitList = matrixManager.subUnitList or {}
+
+		-- subUnitList를 빠른 조회용 테이블로 변환
+		local subUnitSet = {}
+		for _, unitId in ipairs(subUnitList) do
+			subUnitSet[unitId] = true
+		end
 
 		-- 풀 크기 로깅
 		local poolCount = 0
 		for _ in pairs(pool) do poolCount = poolCount + 1 end
 		log("[MatrixUnitSelectService] GenerateUnitChoices - pool size: " .. tostring(poolCount))
 
-		-- 선택 가능 목록 구성 (이미 선택한 유닛 제외)
+		-- 선택 가능 목록 구성 (이미 선택한 유닛 및 서브 유닛 제외)
 		local available = {}
 		for unitId, unitData in pairs(pool) do
-			if unitList[unitId] == nil then
+			if unitList[unitId] == nil and subUnitSet[unitId] == nil then
 				table.insert(available, unitId)
 			end
 		end

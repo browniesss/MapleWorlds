@@ -9,6 +9,9 @@ script UserMatrixManager extends Component
 	property integer unitListCount = 0
 	property integer maxUnitListCount = 8
 
+	-- 서브 유닛 리스트 (시너지 보너스로 추가되는 유닛: 시그너스 등)
+	property table subUnitList = {}
+
 	-- 증강 효과 목록
 	property table matrixEffects = {}
 
@@ -134,6 +137,7 @@ script UserMatrixManager extends Component
 		self.unitPool = {}
 		self.unitList = {}
 		self.unitListCount = 0
+		self.subUnitList = {}
 		self.matrixEffects = {}
 		self.playTime = 0
 		self:ResetScoreData()
@@ -235,6 +239,97 @@ script UserMatrixManager extends Component
 		self.phaseStartTime = {}
 		self.currentPhaseScore = 0
 		log("[UserMatrixManager] 점수 데이터 초기화 완료")
+	end
+
+	-- ============================================
+	-- 서브 유닛 (시너지 보너스 유닛)
+	-- ============================================
+
+	-- 시너지 보너스 유닛 체크 및 추가 (시그너스 등)
+	@ExecSpace("Server")
+	method void CheckAndAddSynergyUnits()
+		local userSynergy = self.Entity.UserSynergyComponent
+		if userSynergy == nil then
+			return
+		end
+
+		-- 시그너스 시너지(102) 체크
+		local cygnusCount = userSynergy:GET_SYNERGY_COUNT(102)
+		local cygnusModelId = "model://6194a4e3-0eb4-417a-92b5-891af548b672"
+
+		-- 이미 subUnitList에 시그너스가 있는지 확인
+		local hasCygnus = false
+		for _, unitId in ipairs(self.subUnitList) do
+			if unitId == cygnusModelId then
+				hasCygnus = true
+				break
+			end
+		end
+
+		if cygnusCount > 0 and not hasCygnus then
+			-- 시그너스 추가
+			table.insert(self.subUnitList, cygnusModelId)
+			log("[UserMatrixManager] 시그너스 시너지 활성화 - subUnitList에 추가 (카운트: " .. tostring(cygnusCount) .. ")")
+
+			-- 시그너스 유닛 데이터를 unitPool에 추가
+			self:AddCygnusToUnitPool()
+
+			-- 클라이언트에 알림
+			self:OnSynergyUnitAdded(cygnusModelId)
+		end
+	end
+
+	-- 시그너스 유닛 데이터를 unitPool에 추가
+	method void AddCygnusToUnitPool()
+		local cygnusModelId = "model://6194a4e3-0eb4-417a-92b5-891af548b672"
+
+		-- 이미 있으면 스킵
+		if self.unitPool[cygnusModelId] ~= nil then
+			return
+		end
+
+		-- 시그너스 유닛 정보 로드
+		local unitInfo = _UnitService:GetUnitByIDFromServer(cygnusModelId)
+		if unitInfo == nil then
+			log("[UserMatrixManager] 시그너스 유닛 정보를 찾을 수 없습니다")
+			return
+		end
+
+		local buffedUnit = BuffedUnitModel()
+		buffedUnit:Init(unitInfo)
+
+		-- 시그너스 레벨은 시너지에 따라 결정되므로 기본값으로 설정
+		self.unitPool[cygnusModelId] = buffedUnit
+		log("[UserMatrixManager] 시그너스를 unitPool에 추가")
+	end
+
+	-- 시너지 유닛 추가 시 클라이언트에 알림
+	@ExecSpace("Client")
+	method void OnSynergyUnitAdded(string unitId)
+		-- 시그너스 유닛 데이터를 클라이언트 unitPool에도 추가
+		local cygnusModelId = "model://6194a4e3-0eb4-417a-92b5-891af548b672"
+		if unitId == cygnusModelId then
+			local unitInfo = _UnitService:GetUnitByIDFromClient(cygnusModelId)
+			if unitInfo ~= nil then
+				local buffedUnit = BuffedUnitModel()
+				buffedUnit:Init(unitInfo)
+				self.unitPool[cygnusModelId] = buffedUnit
+			end
+		end
+
+		-- MatrixExtendUnitShop에 유닛 추가
+		if _MatrixGameManager ~= nil and _MatrixGameManager.unitShop ~= nil then
+			local shop = _MatrixGameManager.unitShop.MatrixExtendUnitShop
+			if shop ~= nil then
+				shop:AddUnit(unitId)
+				log("[UserMatrixManager] MatrixExtendUnitShop에 시너지 유닛 추가: " .. unitId)
+			end
+		end
+	end
+
+	-- subUnitList 조회
+	method table GetSubUnitList()
+		return self.subUnitList
 	end
 
 end

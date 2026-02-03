@@ -89,16 +89,33 @@ script MatrixSynergyUIManager extends Component
 			return 0
 		end
 
+		-- target 시너지의 타입 조회
+		local synergyData = _SynergyRepo:GetSynergyData(target)
+		local synergyType = nil
+		if synergyData ~= nil then
+			synergyType = synergyData.type
+		end
+
 		local bonus = 0
 		for _, matrix in ipairs(matrixEffects) do
 			if matrix.type == "SYNERGY" then
 				if matrix.effectType == "SynergyBonus_All" then
 					-- 모든 시너지에 보너스
 					bonus = bonus + matrix.value
-				elseif matrix.effectType == "SynergyBonus_JobId" then
-					-- 특정 직업에만 보너스
-					if tonumber(matrix.value) == target then
-						bonus = bonus + 1
+				elseif matrix.effectType == "SynergyBonus_Job" then
+					-- Job 타입 시너지에만 보너스
+					if synergyType == "Job" then
+						bonus = bonus + matrix.value
+					end
+				elseif matrix.effectType == "SynergyBonus_Country" then
+					-- Country 타입 시너지에만 보너스
+					if synergyType == "Country" then
+						bonus = bonus + matrix.value
+					end
+				elseif matrix.effectType == "SynergyBonus_Region" then
+					-- Region 타입 시너지에만 보너스
+					if synergyType == "Region" then
+						bonus = bonus + matrix.value
 					end
 				end
 			end

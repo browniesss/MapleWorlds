@@ -140,6 +140,14 @@ script UserSynergyComponent extends Component
 
 			self:AddCount(buffedUnit[col])
 		end
+
+		-- 매트릭스 모드에서 시너지 보너스 유닛 체크 (시그너스 등)
+		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
+			local userMatrixManager = self.Entity.UserMatrixManager
+			if userMatrixManager ~= nil then
+				userMatrixManager:CheckAndAddSynergyUnits()
+			end
+		end
 	end
 
 	@ExecSpace("Server")

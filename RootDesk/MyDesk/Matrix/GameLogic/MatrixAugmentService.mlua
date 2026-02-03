@@ -464,6 +464,14 @@ script MatrixAugmentService extends Logic
 		-- 시너지 보너스는 UserMatrixManager.matrixEffects에 저장되어 있고,
 		-- GET_SYNERGY_COUNT에서 자동으로 보너스를 계산하므로 별도 처리 불필요
 		log("[MatrixAugmentService] 시너지 증강 적용: " .. tostring(matrixData.effectType) .. ", value=" .. tostring(matrixData.value))
+
+		-- 시너지 보너스 유닛 체크 (시그너스 등)
+		-- SynergyBonus_All, SynergyBonus_Region 등 시너지 증강 선택 시
+		-- 시그너스 시너지 조건을 충족할 수 있으므로 체크
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		if user ~= nil and user.UserMatrixManager ~= nil then
+			user.UserMatrixManager:CheckAndAddSynergyUnits()
+		end
 	end
 
 	-- 트리거 효과 저장 (Phase 3에서 확장)

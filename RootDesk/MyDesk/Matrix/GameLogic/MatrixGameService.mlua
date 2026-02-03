@@ -269,14 +269,23 @@ script MatrixGameService extends Logic
 	@ExecSpace("Client")
 	method void StartNextWave()
 		self.currentWaveIndex = self.currentWaveIndex + 1
-		
+
 		local roundData = self:GetRoundData(self.currentRoundId)
 		if roundData == nil then
 			return
 		end
-		
+
 		-- 모든 웨이브 완료 확인
 		if self.currentWaveIndex > roundData.waveCount then
+			-- 무한 모드 체크
+			local phase = self:GetCurrentPhaseData()
+			if phase ~= nil and phase.phaseType == self.PHASE_TYPE_INFINITE then
+				-- 무한 모드: 5초 후 다음 라운드 자동 진행
+				log("무한 모드: 모든 웨이브 완료, 5초 후 다음 라운드")
+				self:StartNextRoundAfterDelay(5.0)
+				return
+			end
+
 			log("모든 웨이브 완료. 적 타워 파괴 대기 중...")
 			return
 		end
@@ -373,11 +382,14 @@ script MatrixGameService extends Logic
 		if self.isRoundCleared then
 			return
 		end
-		
-		-- 적 타워 HP 체크
+
+		-- 적 타워 HP 체크 (무한 모드가 아닐 때만)
+		local phase = self:GetCurrentPhaseData()
 		if self.enemyTower ~= nil and self.enemyTower.Unit ~= nil then
-			if self.enemyTower.Unit.hp <= 0 then
-				self:OnRoundClear()
+			if phase == nil or phase.phaseType ~= self.PHASE_TYPE_INFINITE then
+				if self.enemyTower.Unit.hp <= 0 then
+					self:OnRoundClear()
+				end
 			end
 		end
 		
@@ -654,6 +666,42 @@ script MatrixGameService extends Logic
 			table.insert(result, tonumber(value))
 		end
 		return result
+	end
+
+	-- ============================================
+	-- 무한 모드: 5초 후 다음 라운드 자동 진행
+	-- ============================================
+
+	@ExecSpace("Client")
+	method void StartNextRoundAfterDelay(number delay)
+		_TimerService:SetTimerOnce(function()
+			self:StartInfiniteNextRound()
+		end, delay)
+	end
+
+	@ExecSpace("Client")
+	method void StartInfiniteNextRound()
+		local nextRoundId = self.currentRoundId + 1
+		local nextRoundData = self:GetRoundData(nextRoundId)
+
+		if nextRoundData == nil then
+			-- 다음 라운드 데이터가 없으면 루프 (baseRoundStart부터)
+			local phase = self:GetCurrentPhaseData()
+			self.loopCount = self.loopCount + 1
+			log("무한 모드 " .. tostring(self.loopCount) .. "회차 루프")
+
+			-- 증강 선택 UI 표시
+			if _MatrixGameManager ~= nil then
+				_MatrixGameManager:ShowMatrixSelectUI()
+			end
+			if _MatrixAugmentService ~= nil then
+				_MatrixAugmentService:OnMatrixEvent()
+			end
+			return
+		end
+
+		-- 다음 라운드 시작
+		self:StartRound(nextRoundId)
 	end
 
 end
