@@ -9,8 +9,13 @@ script MatrixCharterViewButton extends Component
 		if self.charterIndex <= 0 then
 			return
 		end
-		
-		_MatrixUnitSelectService:SelectUnitByIndex(self.charterIndex)
+
+		-- 강화 모드인 경우 강화 선택 처리
+		if _MatrixUnitSelectService.isUpgradeMode then
+			_MatrixUnitSelectService:SelectUpgradeByIndex(self.charterIndex)
+		else
+			_MatrixUnitSelectService:SelectUnitByIndex(self.charterIndex)
+		end
 	end
 
 end

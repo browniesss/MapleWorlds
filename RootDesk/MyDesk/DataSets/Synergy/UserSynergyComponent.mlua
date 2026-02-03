@@ -48,6 +48,21 @@ script UserSynergyComponent extends Component
 					if tonumber(matrix.value) == target then
 						bonus = bonus + 1
 					end
+				elseif matrix.effectType == "SynergyBonus_Job" then
+					-- 모든 직업 시너지에 보너스 (id 1-5)
+					if target >= 1 and target <= 5 then
+						bonus = bonus + matrix.value
+					end
+				elseif matrix.effectType == "SynergyBonus_Country" then
+					-- 모든 지역 시너지에 보너스 (id 11-19)
+					if target >= 11 and target <= 19 then
+						bonus = bonus + matrix.value
+					end
+				elseif matrix.effectType == "SynergyBonus_Region" then
+					-- 모든 소속 시너지에 보너스 (id 101-102)
+					if target >= 101 and target <= 102 then
+						bonus = bonus + matrix.value
+					end
 				end
 			end
 		end

@@ -17,6 +17,11 @@ script MatrixUnitSelectService extends Logic
 
 	property any onSelectionCompleteCallback = nil
 
+	-- 유닛 강화 모드 관련 프로퍼티
+	property boolean isUpgradeMode = false
+	-- currentUpgradeChoices 구조: { {unitId, buffType, buffValue}, ... }
+	property table currentUpgradeChoices = {}
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		self.matrixSelectUI = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI")
@@ -34,8 +39,21 @@ script MatrixUnitSelectService extends Logic
 
 	@ExecSpace("Client")
 	method void ShowUnitSelectionUI()
+		local user = _UserService.LocalPlayer
+		if user == nil or user.UserMatrixManager == nil then
+			log("[MatrixUnitSelectService] user or UserMatrixManager is nil")
+			return
+		end
+
+		-- 8개 유닛 보유 시 강화 모드로 전환
+		if user.UserMatrixManager:IsUnitListFull() then
+			self:ShowUnitUpgradeUI()
+			return
+		end
+
 		self.isSelectingUnit = true
-		
+		self.isUpgradeMode = false
+
 		-- unitPool에서 랜덤 4유닛 생성
 		local choices = self:GenerateUnitChoices()
 		if choices == nil or #choices == 0 then
@@ -47,25 +65,25 @@ script MatrixUnitSelectService extends Logic
 			end
 			return
 		end
-		
+
 		self.currentChoiceIds = choices
-		
+
 		-- 게임 일시정지
 		if _MatrixGameManager ~= nil then
 			_MatrixGameManager:PauseGame()
 		end
-		
+
 		-- 서버측 일시정지 (MesoIncome 연동)
 		if _MatrixAugmentService ~= nil then
 			_MatrixAugmentService:SetGamePausedOnServer(true)
 		end
-		
+
 		-- MatrixSelectUI 컨테이너 활성화
 		if self.matrixSelectUI ~= nil then
 			self.matrixSelectUI.Enable = true
 			self.matrixSelectUI.Visible = true
 		end
-		
+
 		-- UnitSelectUI 활성화, 증강 패널 비활성화
 		if self.unitSelectUI ~= nil then
 			self.unitSelectUI.Enable = true
@@ -74,7 +92,7 @@ script MatrixUnitSelectService extends Logic
 		if self.augmentPanel ~= nil then
 			self.augmentPanel.Enable = false
 		end
-		
+
 		-- CharterView에 유닛 데이터 표시
 		self:PopulateCharterViews(choices)
 	end
@@ -249,7 +267,239 @@ script MatrixUnitSelectService extends Logic
 		self.remainingSelections = 0
 		self.currentChoiceIds = {}
 		self.isSelectingUnit = false
+		self.isUpgradeMode = false
+		self.currentUpgradeChoices = {}
 		self.onSelectionCompleteCallback = nil
+	end
+
+	-- ============================================
+	-- 유닛 강화 모드 (8개 유닛 보유 시)
+	-- ============================================
+
+	@ExecSpace("Client")
+	method void ShowUnitUpgradeUI()
+		self.isSelectingUnit = true
+		self.isUpgradeMode = true
+
+		-- 보유 유닛 중 랜덤 4개 + 버프 타입 생성
+		local upgradeChoices = self:GenerateUpgradeChoices()
+		if upgradeChoices == nil or #upgradeChoices == 0 then
+			log("[MatrixUnitSelectService] 강화 선택지 생성 실패")
+			self.isSelectingUnit = false
+			self.isUpgradeMode = false
+			if self.onSelectionCompleteCallback ~= nil then
+				self.onSelectionCompleteCallback()
+				self.onSelectionCompleteCallback = nil
+			end
+			return
+		end
+
+		self.currentUpgradeChoices = upgradeChoices
+
+		-- 게임 일시정지
+		if _MatrixGameManager ~= nil then
+			_MatrixGameManager:PauseGame()
+		end
+
+		-- 서버측 일시정지
+		if _MatrixAugmentService ~= nil then
+			_MatrixAugmentService:SetGamePausedOnServer(true)
+		end
+
+		-- MatrixSelectUI 컨테이너 활성화
+		if self.matrixSelectUI ~= nil then
+			self.matrixSelectUI.Enable = true
+			self.matrixSelectUI.Visible = true
+		end
+
+		-- UnitSelectUI 활성화, 증강 패널 비활성화
+		if self.unitSelectUI ~= nil then
+			self.unitSelectUI.Enable = true
+			self.unitSelectUI.Visible = true
+		end
+		if self.augmentPanel ~= nil then
+			self.augmentPanel.Enable = false
+		end
+
+		-- CharterView에 강화 선택지 표시
+		self:PopulateUpgradeViews(upgradeChoices)
+
+		log("[MatrixUnitSelectService] 유닛 강화 모드 UI 표시 - " .. tostring(#upgradeChoices) .. "개 선택지")
+	end
+
+	-- 보유 유닛 중 랜덤 4개 선택 + 50% 확률로 공격력/체력 버프 할당
+	method table GenerateUpgradeChoices()
+		local user = _UserService.LocalPlayer
+		if user == nil or user.UserMatrixManager == nil then
+			return {}
+		end
+
+		local unitList = user.UserMatrixManager.unitList
+
+		-- 보유 유닛 ID 목록
+		local ownedUnitIds = {}
+		for unitId, _ in pairs(unitList) do
+			table.insert(ownedUnitIds, unitId)
+		end
+
+		if #ownedUnitIds == 0 then
+			return {}
+		end
+
+		-- Fisher-Yates 셔플
+		for i = #ownedUnitIds, 2, -1 do
+			local j = math.random(1, i)
+			ownedUnitIds[i], ownedUnitIds[j] = ownedUnitIds[j], ownedUnitIds[i]
+		end
+
+		-- 최대 4개 선택 + 버프 타입 할당
+		local choices = {}
+		for i = 1, math.min(4, #ownedUnitIds) do
+			local unitId = ownedUnitIds[i]
+			local buffType = "DAMAGE"
+			local buffValue = 1
+
+			-- 50% 확률로 공격력 또는 체력
+			if math.random() < 0.5 then
+				buffType = "DAMAGE"
+				buffValue = 1
+			else
+				buffType = "HP"
+				buffValue = 10
+			end
+
+			table.insert(choices, {
+				unitId = unitId,
+				buffType = buffType,
+				buffValue = buffValue
+			})
+
+			log("[MatrixUnitSelectService] 강화 선택지 " .. tostring(i) .. ": " .. unitId .. " - " .. buffType .. " +" .. tostring(buffValue))
+		end
+
+		return choices
+	end
+
+	-- 강화 선택지를 CharterView에 표시
+	method void PopulateUpgradeViews(table upgradeChoices)
+		if self.charterViewList == nil then
+			log("[MatrixUnitSelectService] charterViewList is nil")
+			return
+		end
+
+		local user = _UserService.LocalPlayer
+		if user == nil or user.UserMatrixManager == nil then
+			return
+		end
+
+		local unitPool = user.UserMatrixManager.unitPool
+		local children = self.charterViewList.Children
+		local index = 1
+
+		for _, child in pairs(children) do
+			if child.CharterView ~= nil then
+				if index > #upgradeChoices then
+					child.CharterView.Entity.Enable = false
+				else
+					local choice = upgradeChoices[index]
+					local unitData = unitPool[choice.unitId]
+
+					if unitData ~= nil then
+						child.CharterView:InitUpgrade(unitData, choice.buffType, choice.buffValue)
+					else
+						child.CharterView.Entity.Enable = false
+					end
+				end
+				index = index + 1
+			end
+		end
+	end
+
+	-- 강화 선택 처리
+	@ExecSpace("Client")
+	method void SelectUpgradeByIndex(integer index)
+		if not self.isSelectingUnit or not self.isUpgradeMode then
+			return
+		end
+
+		local choice = self.currentUpgradeChoices[index]
+		if choice == nil then
+			return
+		end
+
+		self.isSelectingUnit = false
+		self.isUpgradeMode = false
+
+		-- 버프 적용
+		self:ApplyUpgradeToUnit(choice.unitId, choice.buffType, choice.buffValue)
+
+		log("[MatrixUnitSelectService] 강화 선택: " .. choice.unitId .. " - " .. choice.buffType .. " +" .. tostring(choice.buffValue))
+
+		-- UI 닫기
+		self:CloseUnitSelectionUI()
+
+		-- 남은 선택 처리
+		self.remainingSelections = self.remainingSelections - 1
+
+		if self.remainingSelections > 0 then
+			-- 다음 선택 (0.5초 딜레이)
+			_TimerService:SetTimerOnce(function()
+				self:ShowUnitSelectionUI()
+			end, 0.5)
+		else
+			-- 선택 완료 → 콜백 호출
+			if self.onSelectionCompleteCallback ~= nil then
+				local callback = self.onSelectionCompleteCallback
+				self.onSelectionCompleteCallback = nil
+				callback()
+			end
+		end
+	end
+
+	-- 유닛에 버프 적용 (unitPool의 BuffedUnitModel에 직접 적용)
+	method void ApplyUpgradeToUnit(string unitId, string buffType, number buffValue)
+		local user = _UserService.LocalPlayer
+		if user == nil or user.UserMatrixManager == nil then
+			return
+		end
+
+		local unitData = user.UserMatrixManager.unitPool[unitId]
+		if unitData == nil then
+			log("[MatrixUnitSelectService] 버프 적용 실패 - 유닛 없음: " .. unitId)
+			return
+		end
+
+		if buffType == "DAMAGE" then
+			unitData.damage = unitData.damage + buffValue
+			log("[MatrixUnitSelectService] " .. unitId .. " 공격력 +" .. tostring(buffValue) .. " → " .. tostring(unitData.damage))
+		elseif buffType == "HP" then
+			unitData.hp = unitData.hp + buffValue
+			log("[MatrixUnitSelectService] " .. unitId .. " 체력 +" .. tostring(buffValue) .. " → " .. tostring(unitData.hp))
+		end
+
+		-- 서버에 버프 적용 동기화
+		self:ApplyUpgradeToUnitServer(unitId, buffType, buffValue)
+	end
+
+	@ExecSpace("Server")
+	method void ApplyUpgradeToUnitServer(string unitId, string buffType, number buffValue)
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		if user == nil or user.UserMatrixManager == nil then
+			return
+		end
+
+		local unitData = user.UserMatrixManager.unitPool[unitId]
+		if unitData == nil then
+			return
+		end
+
+		if buffType == "DAMAGE" then
+			unitData.damage = unitData.damage + buffValue
+		elseif buffType == "HP" then
+			unitData.hp = unitData.hp + buffValue
+		end
+
+		log("[MatrixUnitSelectService] 서버 버프 적용: " .. unitId .. " - " .. buffType .. " +" .. tostring(buffValue))
 	end
 
 	-- 메소 income UI 업데이트 (시너지 변경 반영)

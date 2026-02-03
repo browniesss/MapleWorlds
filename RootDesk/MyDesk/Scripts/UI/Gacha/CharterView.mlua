@@ -11,7 +11,12 @@ script CharterView extends Component
 
 	property Entity SynergyIcon = nil
 
+	-- 유닛 강화 모드용 UI
+	property Entity UnitUpgradeBackground = nil
+
 	method void InitGacha(table unitData)
+		-- 강화 UI 숨기기
+		self:HideUpgradeUI()
 		self.EffectEntity.Visible = false
 
 		-- 해당 슬롯에 장착한 유닛이 없을 경우
@@ -56,7 +61,7 @@ script CharterView extends Component
 		local entity = _SpawnService:SpawnByModelId(unitData['id'], "Avatar", Vector3.zero, self.Entity)
 		entity.Visible = false
 		entity.Enable = false
-		
+
 		self.Charter.CostumeManagerComponent.CustomBodyEquip = entity.CostumeManagerComponent.CustomBodyEquip
 		self.Charter.CostumeManagerComponent.CustomCapEquip = entity.CostumeManagerComponent.CustomCapEquip
 		self.Charter.CostumeManagerComponent.CustomCapeEquip = entity.CostumeManagerComponent.CustomCapeEquip
@@ -74,6 +79,67 @@ script CharterView extends Component
 		self.Charter.CostumeManagerComponent.CustomShoesEquip = entity.CostumeManagerComponent.CustomShoesEquip
 		self.Charter.CostumeManagerComponent.CustomSubWeaponEquip = entity.CostumeManagerComponent.CustomSubWeaponEquip
 		self.Charter.CostumeManagerComponent.CustomTwoHandedWeaponEquip = entity.CostumeManagerComponent.CustomTwoHandedWeaponEquip
+	end
+
+	-- 유닛 강화 모드 초기화 (8개 유닛 보유 시 사용)
+	-- buffType: "DAMAGE" 또는 "HP"
+	-- buffValue: 버프 수치 (공격력 +1, 체력 +10)
+	method void InitUpgrade(table unitData, string buffType, number buffValue)
+		if unitData == nil then
+			self.Entity.Enable = false
+			return
+		end
+
+		self.Entity.Enable = true
+
+		-- 기존 유닛 표시 (InitGacha와 유사)
+		self.EffectEntity.Visible = false
+		self.Monster.Visible = true
+		self.Name.Visible = true
+		self.Charter.Visible = true
+		self.Name.TextComponent.Text = unitData['name']
+
+		-- SynergyIcon 설정
+		if self.SynergyIcon ~= nil and self.SynergyIcon.SynergyComponentItem ~= nil then
+			self.SynergyIcon.Enable = true
+			self.SynergyIcon.SynergyComponentItem:SetSynergyData(unitData)
+		end
+
+		if unitData['isUsableCharacter'] == 0 then
+			self.Charter.Visible = false
+			self.Monster.SpriteGUIRendererComponent.ImageRUID = unitData['ImageRUID']
+		else
+			self.Monster.Visible = false
+			self:SetCostume(unitData)
+
+			if unitData['spawnSkill'] == "" then
+				self.EffectEntity.Visible = false
+			else
+				self.EffectEntity.Visible = true
+			end
+		end
+
+		-- 강화 UI 표시
+		if self.UnitUpgradeBackground ~= nil then
+			self.UnitUpgradeBackground.Enable = true
+
+			-- 강화 텍스트 설정
+			local upgradeText = self.UnitUpgradeBackground:GetChildByName("UnitUpgradeText")
+			if upgradeText ~= nil and upgradeText.TextComponent ~= nil then
+				if buffType == "DAMAGE" then
+					upgradeText.TextComponent.Text = "공격력 +" .. tostring(math.floor(buffValue))
+				elseif buffType == "HP" then
+					upgradeText.TextComponent.Text = "체력 +" .. tostring(math.floor(buffValue))
+				end
+			end
+		end
+	end
+
+	-- 강화 UI 숨기기
+	method void HideUpgradeUI()
+		if self.UnitUpgradeBackground ~= nil then
+			self.UnitUpgradeBackground.Enable = false
+		end
 	end
 
 end
