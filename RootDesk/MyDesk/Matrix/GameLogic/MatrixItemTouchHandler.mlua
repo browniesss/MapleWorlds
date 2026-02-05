@@ -1,0 +1,27 @@
+@Component
+script MatrixItemTouchHandler extends Component
+
+	property Entity matrixInfoBox = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		if self.matrixInfoBox ~= nil then
+			self.matrixInfoBox.Enable = false
+		end
+	end
+
+	@EventSender("Self")
+	handler HandleUITouchDownEvent(UITouchDownEvent event)
+		if self.matrixInfoBox ~= nil then
+			self.matrixInfoBox.Enable = true
+		end
+	end
+
+	@EventSender("Self")
+	handler HandleUITouchUpEvent(UITouchUpEvent event)
+		if self.matrixInfoBox ~= nil then
+			self.matrixInfoBox.Enable = false
+		end
+	end
+
+end

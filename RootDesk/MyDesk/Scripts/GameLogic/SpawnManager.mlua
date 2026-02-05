@@ -436,21 +436,29 @@ script SpawnManager extends Logic
 	@ExecSpace("Server")
 	method void CygnusSkillSpawn(string modelID, Vector3 pos)
 		_ProtocolService:CommonCall(senderUserId)
-		
-		local unitModel = _BuffedUnitService:GetBuffedUnitModel(senderUserId, modelID)
+
 		local user = _UserService:GetUserEntityByUserId(senderUserId)
-		
-		local summoner = _BuffedUnitService:GetBuffedUnitModel(senderUserId, "model://6194a4e3-0eb4-417a-92b5-891af548b672")
-		
+
 		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(102)
 		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE("102", count)
-		
+
 		if synergy:length() <= 0 then
 			return
 		end
-		
+
 		local item = synergy:Get(1)
-		
+
+		local unitModel = nil
+		if _GameManager.currentGameMode == _eGameMode.Matrix then
+			-- 매트릭스 모드: Unit DataSet에서 기사단 데이터 참조
+			local unitData = _UnitService:GetUnitByIDFromServer(modelID)
+			unitModel = BuffedUnitModel()
+			unitModel:Init(unitData)
+		else
+			-- 일반 모드: 유저 보유 유닛 데이터 참조
+			unitModel = _BuffedUnitService:GetBuffedUnitModel(senderUserId, modelID)
+		end
+
 		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, math.floor(item.value), 1)
 		
 		local spawnParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/MyMonsterList')
@@ -470,18 +478,23 @@ script SpawnManager extends Logic
 		spawnEntity.Unit.isNotTargetUnit = true
 		spawnEntity.Unit.effectId = effectId
 		
+		-- 매트릭스 증강 컴포넌트 적용
+		if _GameManager.currentGameMode == _eGameMode.Matrix then
+			self:ApplyMatrixAugments(spawnEntity, user)
+		end
+
 		_TimerService:SetTimerOnce(
 			function()
 				if spawnEntity.Unit.curState == "useSkill" then
 					return
 				end
-				
+
 				spawnEntity.Unit:OnRemove()
 			end,
 			5
 		)
-		
-		
+
+
 	end
 
 end

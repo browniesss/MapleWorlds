@@ -128,17 +128,33 @@ script MatrixCoinService extends Logic
 		-- 오늘 자정(00:00) 타임스탬프 계산
 		local todayStartTs = nowTs - (now.Hour * hourMs) - (now.Minute * 60000) - (now.Second * 1000) - now.Millisecond
 		
-		-- 현재 요일 (DayOfWeek: Sunday=0, Monday=1, ...)
+		-- 현재 요일을 숫자로 변환 (Sunday=0, Monday=1, ..., Saturday=6)
 		local currentDayOfWeek = now.DayOfWeek
-		
+		local dayNum = 0
+		if currentDayOfWeek == DayOfWeekType.Sunday then
+			dayNum = 0
+		elseif currentDayOfWeek == DayOfWeekType.Monday then
+			dayNum = 1
+		elseif currentDayOfWeek == DayOfWeekType.Tuesday then
+			dayNum = 2
+		elseif currentDayOfWeek == DayOfWeekType.Wednesday then
+			dayNum = 3
+		elseif currentDayOfWeek == DayOfWeekType.Thursday then
+			dayNum = 4
+		elseif currentDayOfWeek == DayOfWeekType.Friday then
+			dayNum = 5
+		elseif currentDayOfWeek == DayOfWeekType.Saturday then
+			dayNum = 6
+		end
+
 		-- 이번 주 월요일까지의 일수 계산
 		local daysFromMonday = 0
-		if currentDayOfWeek == DayOfWeekType.Sunday then
+		if dayNum == 0 then
 			-- 일요일은 지난 월요일 기준 (-6일)
 			daysFromMonday = 6
 		else
-			-- 월~토는 현재 요일 - 월요일
-			daysFromMonday = currentDayOfWeek - DayOfWeekType.Monday
+			-- 월~토는 현재 요일 - 월요일(1)
+			daysFromMonday = dayNum - 1
 		end
 		
 		-- 이번 주 월요일 자정 타임스탬프
@@ -195,7 +211,12 @@ script MatrixCoinService extends Logic
 			log_error("[MatrixCoinService] 저장 실패: " .. tostring(saveErr))
 			return {success = false, reason = "저장 실패", earned = 0}
 		end
-		
+
+		-- @Sync 프로퍼티 업데이트 (서버→클라이언트 동기화 및 퇴장 시 저장용)
+		self.weeklyEarned = data.weeklyEarned
+		self.totalEarned = data.totalEarned
+		self.lastResetTs = data.lastResetTs
+
 		-- 클라이언트 동기화
 		self:UpdateCoinDataToClient(data.weeklyEarned, data.totalEarned, actualCoin)
 		

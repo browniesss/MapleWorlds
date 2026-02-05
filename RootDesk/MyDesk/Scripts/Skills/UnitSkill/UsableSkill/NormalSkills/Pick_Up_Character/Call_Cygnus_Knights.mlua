@@ -4,27 +4,35 @@ script Call_Cygnus_Knights extends SkillParent
 	@ExecSpace("Client")
 	method void ActivateSkill()
 		__base:ActivateSkill()
-		
+
 		local kightsMap = {}
 		kightsMap["model://9835b280-7553-451d-bab0-b480c97aeb18"] = true
 		kightsMap["model://2f0ffaca-fa8d-4d5e-a049-c43e4f5436a5"] = true
 		kightsMap["model://c1c16e15-b494-4311-a149-1dac36dfdf65"] = true
 		kightsMap["model://d695ed33-e193-4a95-adc3-40b02652be5a"] = true
-		
-		-- 모델 변경 필요
+
 		local targetIdList = {}
-		local userDeck = _UserService.LocalPlayer.UserDeck.userDeck
-		for _, id in ipairs(userDeck) do
-			if kightsMap[id] == true then
+
+		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
+			-- 매트릭스 모드: Unit DataSet에서 기사단 전체를 대상으로 랜덤 선택
+			for id, _ in pairs(kightsMap) do
 				targetIdList[#targetIdList + 1] = id
 			end
+		else
+			-- 일반 모드: 덱에 편성된 기사단만 대상
+			local userDeck = _UserService.LocalPlayer.UserDeck.userDeck
+			for _, id in ipairs(userDeck) do
+				if kightsMap[id] == true then
+					targetIdList[#targetIdList + 1] = id
+				end
+			end
 		end
-		
+
 		if #targetIdList == 0 then
 			log_error("fail to pick unit")
 			return
 		end
-		
+
 		math.randomseed(os.time())
 		local model = targetIdList[math.random(1, #targetIdList)]
 		
