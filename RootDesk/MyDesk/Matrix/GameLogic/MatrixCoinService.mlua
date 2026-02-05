@@ -1,0 +1,282 @@
+@Logic
+script MatrixCoinService extends Logic
+
+	property string STORAGE_KEY = "USER_MATRIX_COIN"
+
+	property integer DATA_VERSION = 1
+
+	property integer WEEKLY_LIMIT = 10000
+
+	property integer RESET_HOUR = 6
+
+	property integer RESET_DAY_OF_WEEK = 1
+
+	property integer SCORE_TO_COIN_RATIO = 1
+
+	@Sync
+	property integer weeklyEarned = 0
+
+	@Sync
+	property integer totalEarned = 0
+
+	property integer lastResetTs = 0
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self:LoadConfig()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void LoadConfig()
+		local dataSet = _DataService:GetTable("MatrixCoinConfig")
+		if dataSet == nil then
+			log("[MatrixCoinService] MatrixCoinConfig 데이터셋을 찾을 수 없습니다. 기본값 사용")
+			return
+		end
+		
+		if dataSet:GetRowCount() < 1 then
+			return
+		end
+		
+		self.WEEKLY_LIMIT = tonumber(dataSet:GetCell(1, "weeklyLimit")) or 10000
+		self.RESET_HOUR = tonumber(dataSet:GetCell(1, "resetHour")) or 6
+		self.RESET_DAY_OF_WEEK = tonumber(dataSet:GetCell(1, "resetDayOfWeek")) or 1
+		self.SCORE_TO_COIN_RATIO = tonumber(dataSet:GetCell(1, "scoreToCoinRatio")) or 1
+		
+		log("[MatrixCoinService] 설정 로드 완료 - 주간제한: " .. tostring(self.WEEKLY_LIMIT) .. ", 초기화: 요일" .. tostring(self.RESET_DAY_OF_WEEK) .. " " .. tostring(self.RESET_HOUR) .. "시")
+	end
+
+	@ExecSpace("Server")
+	method void InitCoinData(string uid)
+		local data = self:LoadCoinData(uid)
+		if data == nil then
+			return
+		end
+		
+		-- 주간 초기화 체크
+		if self:ShouldResetWeekly(data.lastResetTs) then
+			data.weeklyEarned = 0
+			data.lastResetTs = self:GetCurrentResetTs()
+			self:SaveCoinData(uid, data)
+			log("[MatrixCoinService] 주간 초기화 실행 - uid: " .. uid)
+		end
+		
+		-- 동기화 프로퍼티 업데이트
+		self.weeklyEarned = data.weeklyEarned
+		self.totalEarned = data.totalEarned
+		self.lastResetTs = data.lastResetTs
+		
+		-- 클라이언트 UI 업데이트
+		self:UpdateCoinDataToClient(data.weeklyEarned, data.totalEarned, 0)
+	end
+
+	@ExecSpace("ServerOnly")
+	method table LoadCoinData(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		
+		local errCode, res = ds:GetAndWait(self.STORAGE_KEY)
+		if errCode ~= 0 then
+			log_error("[MatrixCoinService] 로드 에러: " .. tostring(errCode))
+			return nil
+		end
+		
+		if res == nil then
+			-- 신규 유저 - 초기 데이터 생성
+			return {
+				vsn = self.DATA_VERSION,
+				weeklyEarned = 0,
+				totalEarned = 0,
+				lastResetTs = 0
+			}
+		end
+		
+		local data = _HttpService:JSONDecode(res)
+		
+		-- 버전 마이그레이션 (필요 시)
+		if data.vsn == nil or data.vsn < self.DATA_VERSION then
+			data.vsn = self.DATA_VERSION
+			-- 향후 마이그레이션 로직 추가 가능
+		end
+		
+		return data
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer SaveCoinData(string uid, table data)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local json = _HttpService:JSONEncode(data)
+		return ds:SetAndWait(self.STORAGE_KEY, json)
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean ShouldResetWeekly(integer lastResetTs)
+		local currentResetTs = self:GetCurrentResetTs()
+		
+		-- 마지막 초기화 시점이 현재 주의 초기화 시점보다 이전이면 초기화 필요
+		return lastResetTs < currentResetTs
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer GetCurrentResetTs()
+		local now = DateTime.UtcNow
+		local nowTs = now.Elapsed
+		
+		-- 밀리초 단위 상수
+		local hourMs = 3600000
+		local dayMs = 86400000
+		
+		-- 오늘 자정(00:00) 타임스탬프 계산
+		local todayStartTs = nowTs - (now.Hour * hourMs) - (now.Minute * 60000) - (now.Second * 1000) - now.Millisecond
+		
+		-- 현재 요일 (DayOfWeek: Sunday=0, Monday=1, ...)
+		local currentDayOfWeek = now.DayOfWeek
+		
+		-- 이번 주 월요일까지의 일수 계산
+		local daysFromMonday = 0
+		if currentDayOfWeek == DayOfWeekType.Sunday then
+			-- 일요일은 지난 월요일 기준 (-6일)
+			daysFromMonday = 6
+		else
+			-- 월~토는 현재 요일 - 월요일
+			daysFromMonday = currentDayOfWeek - DayOfWeekType.Monday
+		end
+		
+		-- 이번 주 월요일 자정 타임스탬프
+		local mondayStartTs = todayStartTs - (daysFromMonday * dayMs)
+		
+		-- 월요일 오전 6시 타임스탬프
+		local resetTs = mondayStartTs + (self.RESET_HOUR * hourMs)
+		
+		-- 현재 시간이 리셋 시간 이전이면 지난주 월요일 기준
+		if nowTs < resetTs then
+			resetTs = resetTs - (7 * dayMs)
+		end
+		
+		return resetTs
+	end
+
+	@ExecSpace("Server")
+	method table AddMatrixCoin(integer score)
+		local uid = senderUserId
+		local data = self:LoadCoinData(uid)
+		
+		if data == nil then
+			return {success = false, reason = "데이터 로드 실패", earned = 0}
+		end
+		
+		-- 주간 초기화 체크
+		if self:ShouldResetWeekly(data.lastResetTs) then
+			data.weeklyEarned = 0
+			data.lastResetTs = self:GetCurrentResetTs()
+			log("[MatrixCoinService] 주간 초기화 실행 - uid: " .. uid)
+		end
+		
+		-- 점수 → 코인 변환
+		local coinAmount = math.floor(score / self.SCORE_TO_COIN_RATIO)
+		
+		-- 획득 가능량 계산
+		local remaining = self.WEEKLY_LIMIT - data.weeklyEarned
+		local actualCoin = math.min(coinAmount, remaining)
+		
+		if actualCoin <= 0 then
+			-- 주간 한도 초과
+			self:UpdateCoinDataToClient(data.weeklyEarned, data.totalEarned, 0)
+			log("[MatrixCoinService] 주간 한도 초과 - uid: " .. uid .. ", 주간획득: " .. tostring(data.weeklyEarned) .. "/" .. tostring(self.WEEKLY_LIMIT))
+			return {success = false, reason = "주간 획득 한도 초과", earned = 0, weeklyEarned = data.weeklyEarned, weeklyLimit = self.WEEKLY_LIMIT}
+		end
+		
+		-- 코인 지급
+		data.weeklyEarned = data.weeklyEarned + actualCoin
+		data.totalEarned = data.totalEarned + actualCoin
+		
+		-- 저장
+		local saveErr = self:SaveCoinData(uid, data)
+		if saveErr ~= 0 then
+			log_error("[MatrixCoinService] 저장 실패: " .. tostring(saveErr))
+			return {success = false, reason = "저장 실패", earned = 0}
+		end
+		
+		-- 클라이언트 동기화
+		self:UpdateCoinDataToClient(data.weeklyEarned, data.totalEarned, actualCoin)
+		
+		log("[MatrixCoinService] 코인 지급 - uid: " .. uid .. ", 점수: " .. tostring(score) .. ", 지급: " .. tostring(actualCoin) .. ", 주간: " .. tostring(data.weeklyEarned) .. "/" .. tostring(self.WEEKLY_LIMIT))
+		
+		return {
+			success = true,
+			earned = actualCoin,
+			weeklyEarned = data.weeklyEarned,
+			weeklyLimit = self.WEEKLY_LIMIT,
+			remaining = self.WEEKLY_LIMIT - data.weeklyEarned
+		}
+	end
+
+	@ExecSpace("Client")
+	method void UpdateCoinDataToClient(integer weeklyEarned, integer totalEarned, integer earnedNow)
+		self.weeklyEarned = weeklyEarned
+		self.totalEarned = totalEarned
+		
+		-- UI 업데이트
+		self:UpdateWeeklyPointUI()
+		
+		if earnedNow > 0 then
+			log("[MatrixCoinService] 코인 획득: +" .. tostring(earnedNow) .. " (주간: " .. tostring(weeklyEarned) .. "/" .. tostring(self.WEEKLY_LIMIT) .. ")")
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void UpdateWeeklyPointUI()
+		local matrixPointText = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/ModeSelectUI/StageInfoPanel/userPanel/top/WeekMatrixPointRoot/MatrixPoint")
+		if matrixPointText == nil then
+			return
+		end
+		
+		if matrixPointText.TextComponent == nil then
+			return
+		end
+		
+		-- "현재/최대" 형식으로 표시
+		matrixPointText.TextComponent.Text = tostring(self.weeklyEarned) .. " / " .. tostring(self.WEEKLY_LIMIT)
+	end
+
+	@ExecSpace("ClientOnly")
+	method integer GetRemainingWeeklyLimit()
+		return self.WEEKLY_LIMIT - self.weeklyEarned
+	end
+
+	@ExecSpace("ServerOnly")
+	@EventSender("Service", "UserService")
+	handler HandleUserEnterEvent(UserEnterEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: UserService
+		-- Space: Server
+		---------------------------------------------------------
+		
+		-- Parameters
+		local UserId = event.UserId
+		
+		self:InitCoinData(UserId)
+	end
+
+	@ExecSpace("ServerOnly")
+	@EventSender("Service", "UserService")
+	handler HandleUserLeaveEvent(UserLeaveEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: UserService
+		-- Space: Server
+		---------------------------------------------------------
+		
+		-- Parameters
+		local UserId = event.UserId
+		
+		-- 퇴장 시 현재 상태 저장
+		local data = {
+			vsn = self.DATA_VERSION,
+			weeklyEarned = self.weeklyEarned,
+			totalEarned = self.totalEarned,
+			lastResetTs = self.lastResetTs
+		}
+		
+		self:SaveCoinData(UserId, data)
+	end
+
+end

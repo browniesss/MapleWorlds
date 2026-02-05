@@ -73,7 +73,8 @@ script MatrixAugmentService extends Logic
 
 	@ExecSpace("Client")
 	method void OnMatrixEvent()
-		if self.selectCount >= self.maxSelectCount then
+		-- 무한 모드가 아닌 경우에만 선택 횟수 제한 적용
+		if not self:IsInfiniteMode() and self.selectCount >= self.maxSelectCount then
 			return
 		end
 

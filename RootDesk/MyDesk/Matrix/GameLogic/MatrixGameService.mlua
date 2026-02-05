@@ -280,9 +280,9 @@ script MatrixGameService extends Logic
 			-- 무한 모드 체크
 			local phase = self:GetCurrentPhaseData()
 			if phase ~= nil and phase.phaseType == self.PHASE_TYPE_INFINITE then
-				-- 무한 모드: 5초 후 다음 라운드 자동 진행
-				log("무한 모드: 모든 웨이브 완료, 5초 후 다음 라운드")
-				self:StartNextRoundAfterDelay(5.0)
+				-- 무한 모드: 유닛 선택 후 다음 라운드 진행
+				log("무한 모드: 모든 웨이브 완료, 유닛 선택 시작")
+				self:OnInfiniteWaveComplete()
 				return
 			end
 
@@ -524,10 +524,10 @@ script MatrixGameService extends Logic
 		-- 무한 모드 체크
 		local phase = self:GetCurrentPhaseData()
 		if phase ~= nil and phase.phaseType == self.PHASE_TYPE_INFINITE then
-			self.loopCount = self.loopCount + 1
-			log("무한 모드 " .. tostring(self.loopCount) .. "회차 시작")
+			-- 무한 모드: loopCount는 OnInfinitePhaseComplete에서 이미 증가됨
+			log("무한 모드 " .. tostring(self.loopCount) .. "회차 시작, baseRoundStart로 이동")
 
-			-- 무한 모드에서는 baseRoundStart부터 다시 시작
+			-- 무한 모드에서는 baseRoundStart부터 다시 시작 (5-1)
 			self:StartRound(phase.baseRoundStart)
 		else
 			-- 일반 페이즈: 다음 라운드
@@ -563,6 +563,11 @@ script MatrixGameService extends Logic
 
 			if _MatrixRankingService ~= nil then
 				_MatrixRankingService:AddScore(userName, finalScore)
+			end
+
+			-- 매트릭스 코인 지급
+			if _MatrixCoinService ~= nil then
+				_MatrixCoinService:AddMatrixCoin(finalScore)
 			end
 
 			log("[MatrixGameService] 최종 점수: " .. tostring(finalScore))
@@ -669,39 +674,44 @@ script MatrixGameService extends Logic
 	end
 
 	-- ============================================
-	-- 무한 모드: 5초 후 다음 라운드 자동 진행
+	-- 무한 모드: 웨이브 완료 시 유닛 선택 후 다음 라운드
 	-- ============================================
 
 	@ExecSpace("Client")
-	method void StartNextRoundAfterDelay(number delay)
-		_TimerService:SetTimerOnce(function()
-			self:StartInfiniteNextRound()
-		end, delay)
-	end
-
-	@ExecSpace("Client")
-	method void StartInfiniteNextRound()
+	method void OnInfiniteWaveComplete()
 		local nextRoundId = self.currentRoundId + 1
 		local nextRoundData = self:GetRoundData(nextRoundId)
 
 		if nextRoundData == nil then
-			-- 다음 라운드 데이터가 없으면 루프 (baseRoundStart부터)
-			local phase = self:GetCurrentPhaseData()
-			self.loopCount = self.loopCount + 1
-			log("무한 모드 " .. tostring(self.loopCount) .. "회차 루프")
-
-			-- 증강 선택 UI 표시
-			if _MatrixGameManager ~= nil then
-				_MatrixGameManager:ShowMatrixSelectUI()
+			-- 마지막 라운드 클리어: 증강 선택 후 5-1로 돌아감
+			log("무한 모드: 마지막 라운드 클리어, 증강 선택 시작")
+			self:OnInfinitePhaseComplete()
+		else
+			-- 다음 라운드 있음: 유닛 선택 후 다음 라운드 진행
+			log("무한 모드: 유닛 선택 후 다음 라운드 진행")
+			if _MatrixUnitSelectService ~= nil then
+				_MatrixUnitSelectService:StartUnitSelection(1, function()
+					self:StartRound(nextRoundId)
+				end)
+			else
+				self:StartRound(nextRoundId)
 			end
-			if _MatrixAugmentService ~= nil then
-				_MatrixAugmentService:OnMatrixEvent()
-			end
-			return
 		end
+	end
 
-		-- 다음 라운드 시작
-		self:StartRound(nextRoundId)
+	-- 무한 모드 마지막 라운드 클리어 시 증강 선택
+	@ExecSpace("Client")
+	method void OnInfinitePhaseComplete()
+		self.loopCount = self.loopCount + 1
+		log("무한 모드 " .. tostring(self.loopCount) .. "회차 완료, 증강 선택")
+
+		-- 증강 선택 UI 표시
+		if _MatrixGameManager ~= nil then
+			_MatrixGameManager:ShowMatrixSelectUI()
+		end
+		if _MatrixAugmentService ~= nil then
+			_MatrixAugmentService:OnMatrixEvent()
+		end
 	end
 
 end

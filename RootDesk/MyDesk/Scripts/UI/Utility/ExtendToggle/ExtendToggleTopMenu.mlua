@@ -15,11 +15,16 @@ script ExtendToggleTopMenu extends ToggleAction
 
 			self:SetEventBackground(true)
 
-			-- 매트릭스 모드 탭 활성화 시 랭킹 갱신
+			-- 매트릭스 모드 탭 활성화 시 랭킹 및 코인 UI 갱신
 			if self.panelIndex == 2 then
 				local rankingListUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/ModeSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
 				if rankingListUI ~= nil and rankingListUI.MatrixRankingPanel ~= nil then
 					rankingListUI.MatrixRankingPanel:RefreshRankList()
+				end
+
+				-- 주간 매트릭스 코인 UI 갱신
+				if _MatrixCoinService ~= nil then
+					_MatrixCoinService:UpdateWeeklyPointUI()
 				end
 			end
 

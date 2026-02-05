@@ -630,6 +630,11 @@ script MatrixGameManager extends Logic
 			lobbyInfoUI.Enable = true
 		end
 
+		-- 주간 매트릭스 코인 UI 갱신
+		if _MatrixCoinService ~= nil then
+			_MatrixCoinService:UpdateWeeklyPointUI()
+		end
+
 		-- 뱃지 버튼 활성화
 		local lobbyBadgeButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton")
 		if lobbyBadgeButton ~= nil then
