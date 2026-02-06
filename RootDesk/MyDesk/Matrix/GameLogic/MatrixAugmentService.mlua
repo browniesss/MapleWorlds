@@ -25,6 +25,18 @@ script MatrixAugmentService extends Logic
 	-- 리셋 버튼 엔티티 참조
 	property table resetButtons = {}
 
+	-- 증강 Scroll_Layout 참조
+	property Entity augmentScrollLayout = nil
+
+	-- 동적 생성된 MatrixItem 추적
+	property table augmentItemTable = {}
+
+	-- InfiniteMatrixItem 참조
+	property Entity infiniteMatrixItem = nil
+
+	-- INFINITE 누적 스탯
+	property table infiniteStats = {}
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		self.matrixSelectUI = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI")
@@ -51,6 +63,21 @@ script MatrixAugmentService extends Logic
 
 		-- 리셋 상태 초기화
 		self.resetUsed = {false, false, false}
+
+		-- 증강 Scroll_Layout 참조
+		self.augmentScrollLayout = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/UserDeckUI/MatrixAugmentUI/Scroll_Layout")
+
+		-- InfiniteMatrixItem 참조
+		self.infiniteMatrixItem = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/UserDeckUI/MatrixAugmentUI/Scroll_Layout/InfiniteMatrixItem")
+
+		-- INFINITE 스탯 초기화
+		self.infiniteStats = {
+			AttackDamageBuff = 0,
+			MaxHealthBuff = 0,
+			MoveSpeedBuff = 0,
+			AttackSpeedBuff = 0,
+			AttackRangeBuff = 0
+		}
 	end
 
 	-- 서버측 일시정지 상태 설정 (MesoIncome에서 참조)
@@ -333,6 +360,13 @@ script MatrixAugmentService extends Logic
 		local user = _UserService.LocalPlayer
 		if user ~= nil and user.UserMatrixManager ~= nil then
 			user.UserMatrixManager:AddMatrix(matrix)
+		end
+
+		-- 증강 UI 업데이트 (타입별 분기)
+		if matrix.type == "INFINITE" then
+			self:UpdateInfiniteMatrixUI(matrix)
+		else
+			self:AddAugmentToScrollUI(matrix)
 		end
 
 		self:SelectMatrixServer(matrix.id)
@@ -687,19 +721,120 @@ script MatrixAugmentService extends Logic
 		return finalMpGain
 	end
 
-	-- 사망 시 효과 (OnDie)
+	-- 사망 시 효과 (OnDie) - 아군 유닛 사망 시 주변 적에게 효과 적용
 	method void OnDieEffect(Entity deadUnit, Entity killer)
 		if _GameManager == nil or not (_GameManager.currentGameMode == _eGameMode.Matrix) then
 			return
 		end
 
 		local triggerEffects = self:GetTriggerEffects("OnDie")
+		if #triggerEffects == 0 then
+			return
+		end
+
+		-- 사망한 유닛 위치
+		local deadPos = deadUnit.TransformComponent.WorldPosition
+
+		-- 적 리스트에서 범위 내 적 탐색
+		local enemyList = _EntityService:GetEntityByPath(_GameManager:GetGameMapName() .. "/EnemyList")
+		if enemyList == nil then
+			return
+		end
 
 		for _, effect in ipairs(triggerEffects) do
-			if effect.effectType == "ExplosionOnDie" then
-				-- 사망 시 폭발 데미지 (추후 구현)
+			if effect.effectType == "FreezeOnDie" then
+				self:ApplyFreezeOnDie(deadPos, enemyList, effect)
+			elseif effect.effectType == "KnockbackOnDie" then
+				self:ApplyKnockbackOnDie(deadPos, enemyList, effect)
 			end
 		end
+	end
+
+	-- 등급별 범위 반환
+	method number GetOnDieRange(string grade)
+		if grade == "LEGENDARY" then
+			return 5
+		elseif grade == "UNIQUE" then
+			return 4
+		else
+			return 3
+		end
+	end
+
+	-- 범위 내 적 목록 반환
+	method table FindEnemiesInRange(Vector3 pos, Entity enemyList, number range)
+		local targets = {}
+		for _, entity in ipairs(enemyList.Children) do
+			if entity.Unit ~= nil and entity.Unit.curState ~= "die" then
+				local targetPos = entity.TransformComponent.WorldPosition
+				local distance = math.abs(targetPos.x - pos.x)
+				if distance <= range then
+					table.insert(targets, entity)
+				end
+			end
+		end
+		return targets
+	end
+
+	-- 빙결 효과 적용 (아군 사망 시)
+	method void ApplyFreezeOnDie(Vector3 deadPos, Entity enemyList, table effect)
+		local range = self:GetOnDieRange(effect.grade)
+		local freezeTime = effect.value
+		local targets = self:FindEnemiesInRange(deadPos, enemyList, range)
+
+		for _, enemy in ipairs(targets) do
+			if enemy.Unit ~= nil and enemy.Unit.curState ~= "die" then
+				enemy.Unit:GetDebuff(_eDebuffType.Freeze, 0, freezeTime)
+			end
+		end
+
+		log("[MatrixAugmentService] 빙결의 유언 발동: 범위=" .. tostring(range) .. ", 지속=" .. tostring(freezeTime) .. "초, 대상=" .. tostring(#targets) .. "명")
+	end
+
+	-- 밀치기 효과 적용 (아군 사망 시)
+	method void ApplyKnockbackOnDie(Vector3 deadPos, Entity enemyList, table effect)
+		local range = self:GetOnDieRange(effect.grade)
+		local pushDistance = effect.value
+		local targets = self:FindEnemiesInRange(deadPos, enemyList, range)
+
+		-- 등급별 스턴 시간
+		local stunTime = 0.5
+		if effect.grade == "UNIQUE" then
+			stunTime = 0.8
+		elseif effect.grade == "LEGENDARY" then
+			stunTime = 1.2
+		end
+
+		local pushSteps = 10
+		local pushInterval = 0.02
+
+		for _, enemy in ipairs(targets) do
+			if enemy.Unit ~= nil and enemy.Unit.curState ~= "die" then
+				-- 스턴 적용
+				enemy.Unit:GetDebuff(_eDebuffType.Stun, 0, stunTime)
+
+				-- 밀치기 방향: 사망 위치 기준으로 바깥쪽으로
+				local enemyPos = enemy.TransformComponent.WorldPosition
+				local direction = 1
+				if enemyPos.x < deadPos.x then
+					direction = -1
+				end
+
+				-- 점진적 밀치기 (이징 효과)
+				local stepDistance = pushDistance / pushSteps
+				for i = 1, pushSteps do
+					_TimerService:SetTimerOnce(function()
+						if isvalid(enemy) and enemy.Unit.curState ~= "die" then
+							local pos = enemy.TransformComponent.WorldPosition
+							local ratio = 1 - (i / pushSteps)
+							enemy.TransformComponent.WorldPosition = Vector3(pos.x + (stepDistance * ratio * 2 * direction), pos.y, pos.z)
+						end
+					end, pushInterval * i)
+				end
+			end
+		end
+
+		log("[MatrixAugmentService] 밀치기 유언 발동: 범위=" .. tostring(range) .. ", 거리=" .. tostring(pushDistance) .. ", 대상=" .. tostring(#targets) .. "명")
 	end
 
 	@ExecSpace("Server")
@@ -714,6 +849,9 @@ script MatrixAugmentService extends Logic
 		self.isGamePaused = false
 		self.mesoIncomeMultiplier = 1.0
 		self.resetUsed = {false, false, false}
+
+		-- 증강 Scroll UI 초기화
+		self:ClearAugmentScrollUI()
 	end
 
 	method table GetActiveEffects()
@@ -729,6 +867,96 @@ script MatrixAugmentService extends Logic
 			end
 		end
 		return buffEffects
+	end
+
+	-- ============================================
+	-- 증강 Scroll UI 관리
+	-- ============================================
+
+	-- 일반 증강 선택 시 MatrixItem 동적 생성
+	@ExecSpace("Client")
+	method void AddAugmentToScrollUI(table matrix)
+		if self.augmentScrollLayout == nil then
+			return
+		end
+
+		local item = _SpawnService:SpawnByModelId("model://9f03b085-86cb-4c62-ad2d-10c011110e29", "MatrixItem", Vector3.zero, self.augmentScrollLayout)
+
+		-- 아이콘 이미지 설정 (MatrixItem 루트)
+		if item.SpriteGUIRendererComponent ~= nil then
+			item.SpriteGUIRendererComponent.ImageRUID = matrix.icon or ""
+		end
+
+		-- MatrixInfoBox 하위 자식 접근
+		local infoBox = item:GetChildByName("MatrixInfoBox")
+		if infoBox ~= nil then
+			local nameEntity = infoBox:GetChildByName("MatrixName")
+			if nameEntity ~= nil and nameEntity.TextComponent ~= nil then
+				nameEntity.TextComponent.Text = matrix.name or ""
+			end
+
+			local infoEntity = infoBox:GetChildByName("MatrixInfo")
+			if infoEntity ~= nil and infoEntity.TextComponent ~= nil then
+				infoEntity.TextComponent.Text = "[" .. (matrix.grade or "RARE") .. "] " .. (matrix.desc or "")
+			end
+		end
+
+		table.insert(self.augmentItemTable, item)
+	end
+
+	-- INFINITE 증강 선택 시 InfiniteMatrixItem 스탯 누적
+	@ExecSpace("Client")
+	method void UpdateInfiniteMatrixUI(table matrix)
+		if self.infiniteMatrixItem == nil then
+			return
+		end
+
+		-- 스탯 누적
+		local effectType = matrix.effectType
+		if self.infiniteStats[effectType] ~= nil then
+			self.infiniteStats[effectType] = self.infiniteStats[effectType] + matrix.value
+		end
+
+		-- MatrixInfo 텍스트 갱신
+		local infoBox = self.infiniteMatrixItem:GetChildByName("MatrixInfoBox")
+		if infoBox ~= nil then
+			local infoEntity = infoBox:GetChildByName("MatrixInfo")
+			if infoEntity ~= nil and infoEntity.TextComponent ~= nil then
+				infoEntity.TextComponent.Text = "공격력 : " .. tostring(self.infiniteStats.AttackDamageBuff) .. "\n" .. "체력 : " .. tostring(self.infiniteStats.MaxHealthBuff) .. "\n" .. "이동속도 : " .. tostring(self.infiniteStats.MoveSpeedBuff) .. "\n" .. "공격속도 : " .. tostring(self.infiniteStats.AttackSpeedBuff) .. "\n" .. "사거리 : " .. tostring(self.infiniteStats.AttackRangeBuff)
+			end
+		end
+	end
+
+	-- 증강 Scroll UI 초기화
+	@ExecSpace("Client")
+	method void ClearAugmentScrollUI()
+		-- 동적 생성 아이템 제거
+		for _, item in ipairs(self.augmentItemTable) do
+			if isvalid(item) then
+				_EntityService:Destroy(item)
+			end
+		end
+		self.augmentItemTable = {}
+
+		-- INFINITE 스탯 초기화
+		self.infiniteStats = {
+			AttackDamageBuff = 0,
+			MaxHealthBuff = 0,
+			MoveSpeedBuff = 0,
+			AttackSpeedBuff = 0,
+			AttackRangeBuff = 0
+		}
+
+		-- InfiniteMatrixItem 텍스트 초기화
+		if self.infiniteMatrixItem ~= nil then
+			local infoBox = self.infiniteMatrixItem:GetChildByName("MatrixInfoBox")
+			if infoBox ~= nil then
+				local infoEntity = infoBox:GetChildByName("MatrixInfo")
+				if infoEntity ~= nil and infoEntity.TextComponent ~= nil then
+					infoEntity.TextComponent.Text = "공격력 : 0\n체력 : 0\n이동속도 : 0\n공격속도 : 0\n사거리 : 0"
+				end
+			end
+		end
 	end
 
 	method any HexToColor(string hex)

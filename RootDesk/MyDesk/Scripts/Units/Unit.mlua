@@ -1063,6 +1063,11 @@ script Unit extends Component
 			if _GameManager.currentGameMode == _eGameMode.Matrix and _MatrixMonsterSpawner ~= nil then
 				_MatrixMonsterSpawner:OnEnemyDefeated(self.Entity)
 			end
+		else
+			-- 아군 유닛 사망 시 매트릭스 증강 OnDie 트리거
+			if _GameManager.currentGameMode == _eGameMode.Matrix and _MatrixAugmentService ~= nil then
+				_MatrixAugmentService:OnDieEffect(self.Entity, attacker)
+			end
 		end
 		
 		-- 죽는 애니메이션이 없는 경우 직접 처리

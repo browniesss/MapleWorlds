@@ -103,7 +103,7 @@ script UserMatrixManager extends Component
 		end
 	end
 
-	-- 유저가 보유한 전체 유닛을 unitPool에 로드
+	-- 유저가 보유한 전체 유닛을 unitPool에 로드 (시그너스는 시너지 보너스 유닛이므로 제외)
 	method void LoadUnitPoolFromUser()
 		self.unitPool = {}
 
@@ -113,10 +113,13 @@ script UserMatrixManager extends Component
 			return
 		end
 
+		local cygnusModelId = "model://6194a4e3-0eb4-417a-92b5-891af548b672"
 		local count = 0
 		for unitId, unitData in pairs(userUnitStore.UserUnitMap) do
-			self.unitPool[unitId] = unitData
-			count = count + 1
+			if unitId ~= cygnusModelId then
+				self.unitPool[unitId] = unitData
+				count = count + 1
+			end
 		end
 
 		log("[UserMatrixManager] UnitPool 로드 완료: " .. tostring(count) .. "개 유닛")
@@ -314,6 +317,18 @@ script UserMatrixManager extends Component
 				local buffedUnit = BuffedUnitModel()
 				buffedUnit:Init(unitInfo)
 				self.unitPool[cygnusModelId] = buffedUnit
+			end
+
+			-- 클라이언트 subUnitList에도 추가 (GenerateUnitChoices 필터링용)
+			local hasCygnus = false
+			for _, id in ipairs(self.subUnitList) do
+				if id == cygnusModelId then
+					hasCygnus = true
+					break
+				end
+			end
+			if not hasCygnus then
+				table.insert(self.subUnitList, cygnusModelId)
 			end
 		end
 
