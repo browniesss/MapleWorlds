@@ -1,0 +1,25 @@
+@Component
+script CouponOpenButton extends Component
+
+	property any buttonHandler = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.buttonHandler = self.Entity:ConnectEvent(ButtonClickEvent, self.OnClickButton)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnClickButton(Entity entity)
+		local couponPopup = _EntityService:GetEntityByPath("/ui/CouponPopup")
+		if couponPopup ~= nil and couponPopup.CouponPopupUI ~= nil then
+			couponPopup.CouponPopupUI:Open()
+		end
+	end
+
+	method void OnDestroy()
+		if self.buttonHandler ~= nil then
+			self.Entity:DisconnectEvent(ButtonClickEvent, self.buttonHandler)
+		end
+	end
+
+end
