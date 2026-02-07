@@ -1003,8 +1003,8 @@ script MatrixAugmentService extends Logic
 		local formatValue = value
 
 		if calcType == "PERCENT" then
-			-- DamageReduction: (1 - value) * 100 (예: 0.9 -> 10%, 0.75 -> 25%)
-			if effectType == "DamageReduction" then
+			-- DamageReduction, AttackSpeedBuff: (1 - value) * 100 (예: 0.9 -> 10%, 0.75 -> 25%)
+			if effectType == "DamageReduction" or effectType == "AttackSpeedBuff" then
 				formatValue = math.floor((1 - value) * 100 + 0.5)
 			-- HealOnKill: value * 100 (예: 0.1 -> 10%)
 			elseif effectType == "HealOnKill" then
