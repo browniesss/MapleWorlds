@@ -415,6 +415,12 @@ script MatrixGameService extends Logic
 		-- 서버에서 모든 유닛 제거
 		self:ClearAllUnitsOnServer()
 
+		-- 진행 중인 스폰 타이머 즉시 취소 (서버 _TimerService 타이머 정리)
+		if _MatrixMonsterSpawner ~= nil then
+			_MatrixMonsterSpawner:ResetOnClient()
+			_MatrixMonsterSpawner:ResetOnServer()
+		end
+
 		-- 해적 시너지(5) 적용: 라운드 클리어 시 메소 추가
 		self:ApplyPirateSynergyOnRoundClear()
 
