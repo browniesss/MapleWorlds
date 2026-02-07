@@ -397,7 +397,7 @@ script Unit extends Component
 		local myPos = self.Entity.TransformComponent.WorldPosition
 		local nearestEnemy = nil
 		local nearestDistance = math.huge
-		if self.curState == "attack" or self.curState == "die" then
+		if self.curState == "attack" or self.curState == "die" or self.curState == "freeze" or self.curState == "stun" then
 			return
 		end
 		

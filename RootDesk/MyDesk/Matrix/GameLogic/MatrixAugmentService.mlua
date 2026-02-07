@@ -214,7 +214,7 @@ script MatrixAugmentService extends Logic
 				-- 설명 설정 (Children[3])
 				local descEntity = btn.Children[3]
 				if descEntity ~= nil and descEntity.TextComponent ~= nil then
-					descEntity.TextComponent.Text = matrix.desc or ""
+					descEntity.TextComponent.Text = self:FormatDesc(matrix)
 				end
 
 				-- 버튼 컴포넌트에 matrix 인덱스 저장
@@ -328,7 +328,7 @@ script MatrixAugmentService extends Logic
 		-- 설명 설정 (Children[3])
 		local descEntity = btn.Children[3]
 		if descEntity ~= nil and descEntity.TextComponent ~= nil then
-			descEntity.TextComponent.Text = matrix.desc or ""
+			descEntity.TextComponent.Text = self:FormatDesc(matrix)
 		end
 	end
 
@@ -690,7 +690,13 @@ script MatrixAugmentService extends Logic
 				end
 				killer.Unit:OnHeal(killer, healAmount)
 			elseif effect.effectType == "GoldOnKill" then
-				-- 처치 시 골드 추가 (추후 구현)
+				-- 처치 시 소환 포인트 추가
+				local goldAmount = effect.value or 0
+				local mapPath = _MatrixGameManager:GetMapPath()
+				local mesoWallet = _EntityService:GetEntityByPath(mapPath .. "/userWallet")
+				if mesoWallet ~= nil and mesoWallet.MesoWallet ~= nil then
+					mesoWallet.MesoWallet:AddMeso(goldAmount)
+				end
 			end
 		end
 	end
@@ -729,17 +735,27 @@ script MatrixAugmentService extends Logic
 
 		local triggerEffects = self:GetTriggerEffects("OnDie")
 		if #triggerEffects == 0 then
+			log("[MatrixAugmentService] OnDieEffect: OnDie 트리거 효과 없음")
 			return
 		end
 
 		-- 사망한 유닛 위치
 		local deadPos = deadUnit.TransformComponent.WorldPosition
 
+		-- 매트릭스 모드에서는 MatrixGameManager 경로 사용
+		local mapPath = "/maps/MatrixStage"
+		if _MatrixGameManager ~= nil then
+			mapPath = _MatrixGameManager:GetMapPath()
+		end
+
 		-- 적 리스트에서 범위 내 적 탐색
-		local enemyList = _EntityService:GetEntityByPath(_GameManager:GetGameMapName() .. "/EnemyList")
+		local enemyList = _EntityService:GetEntityByPath(mapPath .. "/EnemyList")
 		if enemyList == nil then
+			log("[MatrixAugmentService] OnDieEffect: EnemyList를 찾을 수 없음 - " .. mapPath)
 			return
 		end
+
+		log("[MatrixAugmentService] OnDieEffect: " .. tostring(#triggerEffects) .. "개 효과 적용 시도")
 
 		for _, effect in ipairs(triggerEffects) do
 			if effect.effectType == "FreezeOnDie" then
@@ -776,52 +792,57 @@ script MatrixAugmentService extends Logic
 		return targets
 	end
 
-	-- 빙결 효과 적용 (아군 사망 시)
+	-- 빙결 효과 적용 (아군 사망 시) - 클라이언트에서 호출, 서버로 전달
 	method void ApplyFreezeOnDie(Vector3 deadPos, Entity enemyList, table effect)
 		local range = self:GetOnDieRange(effect.grade)
 		local freezeTime = effect.value
 		local targets = self:FindEnemiesInRange(deadPos, enemyList, range)
 
+		-- 서버에서 빙결 적용 (curState가 @Sync 프로퍼티이므로)
 		for _, enemy in ipairs(targets) do
 			if enemy.Unit ~= nil and enemy.Unit.curState ~= "die" then
-				enemy.Unit:GetDebuff(_eDebuffType.Freeze, 0, freezeTime)
+				self:ApplyFreezeOnServer(enemy, freezeTime)
 			end
 		end
 
 		log("[MatrixAugmentService] 빙결의 유언 발동: 범위=" .. tostring(range) .. ", 지속=" .. tostring(freezeTime) .. "초, 대상=" .. tostring(#targets) .. "명")
 	end
 
-	-- 밀치기 효과 적용 (아군 사망 시)
+	-- 서버에서 빙결 디버프 적용
+	@ExecSpace("Server")
+	method void ApplyFreezeOnServer(Entity enemy, number freezeTime)
+		if enemy == nil or enemy.Unit == nil then
+			return
+		end
+		enemy.Unit:GetDebuff(_eDebuffType.Freeze, 0, freezeTime)
+	end
+
+	-- 밀치기 효과 적용 (아군 사망 시) - 스턴은 서버, 이동은 클라이언트
 	method void ApplyKnockbackOnDie(Vector3 deadPos, Entity enemyList, table effect)
 		local range = self:GetOnDieRange(effect.grade)
 		local pushDistance = effect.value
 		local targets = self:FindEnemiesInRange(deadPos, enemyList, range)
 
-		-- 등급별 스턴 시간
-		local stunTime = 0.5
-		if effect.grade == "UNIQUE" then
-			stunTime = 0.8
-		elseif effect.grade == "LEGENDARY" then
-			stunTime = 1.2
-		end
-
-		local pushSteps = 10
-		local pushInterval = 0.02
+		-- 밀치기 거리에 비례한 스턴 시간 (거리 1당 0.1초 + 밀치기 시간 0.2초)
+		local pushDuration = 0.2
+		local stunTime = (pushDistance * 0.1) + pushDuration
 
 		for _, enemy in ipairs(targets) do
 			if enemy.Unit ~= nil and enemy.Unit.curState ~= "die" then
-				-- 스턴 적용
-				enemy.Unit:GetDebuff(_eDebuffType.Stun, 0, stunTime)
-
-				-- 밀치기 방향: 사망 위치 기준으로 바깥쪽으로
 				local enemyPos = enemy.TransformComponent.WorldPosition
 				local direction = 1
 				if enemyPos.x < deadPos.x then
 					direction = -1
 				end
 
-				-- 점진적 밀치기 (이징 효과)
+				-- 서버에서 스턴 적용 (적 유닛이므로 서버에서 처리 필요)
+				self:ApplyStunOnServer(enemy, stunTime)
+
+				-- 클라이언트에서 밀치기 이동 처리
+				local pushSteps = 10
+				local pushInterval = 0.02
 				local stepDistance = pushDistance / pushSteps
+
 				for i = 1, pushSteps do
 					_TimerService:SetTimerOnce(function()
 						if isvalid(enemy) and enemy.Unit.curState ~= "die" then
@@ -834,7 +855,16 @@ script MatrixAugmentService extends Logic
 			end
 		end
 
-		log("[MatrixAugmentService] 밀치기 유언 발동: 범위=" .. tostring(range) .. ", 거리=" .. tostring(pushDistance) .. ", 대상=" .. tostring(#targets) .. "명")
+		log("[MatrixAugmentService] 밀치기 유언 발동: 범위=" .. tostring(range) .. ", 거리=" .. tostring(pushDistance) .. ", 스턴=" .. tostring(stunTime) .. "초, 대상=" .. tostring(#targets) .. "명")
+	end
+
+	-- 서버에서 스턴 적용
+	@ExecSpace("Server")
+	method void ApplyStunOnServer(Entity enemy, number stunTime)
+		if enemy == nil or enemy.Unit == nil then
+			return
+		end
+		enemy.Unit:GetDebuff(_eDebuffType.Stun, 0, stunTime)
 	end
 
 	@ExecSpace("Server")
@@ -897,7 +927,7 @@ script MatrixAugmentService extends Logic
 
 			local infoEntity = infoBox:GetChildByName("MatrixInfo")
 			if infoEntity ~= nil and infoEntity.TextComponent ~= nil then
-				infoEntity.TextComponent.Text = "[" .. (matrix.grade or "RARE") .. "] " .. (matrix.desc or "")
+				infoEntity.TextComponent.Text = "[" .. (matrix.grade or "RARE") .. "] " .. self:FormatDesc(matrix)
 			end
 		end
 
@@ -956,6 +986,44 @@ script MatrixAugmentService extends Logic
 					infoEntity.TextComponent.Text = "공격력 : 0\n체력 : 0\n이동속도 : 0\n공격속도 : 0\n사거리 : 0"
 				end
 			end
+		end
+	end
+
+	-- desc를 value로 포맷팅하여 반환
+	method string FormatDesc(table matrix)
+		if matrix == nil or matrix.desc == nil or matrix.desc == "" then
+			return ""
+		end
+
+		local value = matrix.value or 0
+		local calcType = matrix.calcType or "FLAT"
+		local effectType = matrix.effectType or ""
+
+		-- 포맷 값 계산
+		local formatValue = value
+
+		if calcType == "PERCENT" then
+			-- DamageReduction: (1 - value) * 100 (예: 0.9 -> 10%, 0.75 -> 25%)
+			if effectType == "DamageReduction" then
+				formatValue = math.floor((1 - value) * 100 + 0.5)
+			-- HealOnKill: value * 100 (예: 0.1 -> 10%)
+			elseif effectType == "HealOnKill" then
+				formatValue = math.floor(value * 100 + 0.5)
+			-- 그 외 PERCENT: (value - 1) * 100 (예: 1.1 -> 10%, 1.35 -> 35%)
+			else
+				formatValue = math.floor((value - 1) * 100 + 0.5)
+			end
+		end
+
+		-- string.format으로 desc 포맷팅
+		local success, result = pcall(function()
+			return string.format(matrix.desc, formatValue)
+		end)
+
+		if success then
+			return result
+		else
+			return matrix.desc
 		end
 	end
 

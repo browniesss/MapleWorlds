@@ -6621,7 +6621,7 @@
       {
         "id": "ed4549e1-33c3-4908-832f-51a6d257e956",
         "path": "/ui/MatrixUI/IngameUI/UserDeckUI/MatrixAugmentUI/Scroll_Layout/InfiniteMatrixItem",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.UITouchReceiveComponent,script.MatrixItemTouchHandler",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,script.MatrixItemTouchHandler,MOD.Core.UITouchReceiveComponent",
         "jsonString": {
           "name": "InfiniteMatrixItem",
           "path": "/ui/MatrixUI/IngameUI/UserDeckUI/MatrixAugmentUI/Scroll_Layout/InfiniteMatrixItem",
@@ -6655,11 +6655,11 @@
               "MobileOnly": false,
               "OffsetMax": {
                 "x": 70.0,
-                "y": -299.0
+                "y": -319.0
               },
               "OffsetMin": {
                 "x": 10.0,
-                "y": -359.0
+                "y": -379.0
               },
               "Pivot": {
                 "x": 0.5,
@@ -6678,7 +6678,7 @@
               "UIVersion": 2,
               "anchoredPosition": {
                 "x": 40.0,
-                "y": -329.0
+                "y": -349.0
               },
               "Rotation": {
                 "x": 0.0,
@@ -6687,7 +6687,7 @@
               },
               "Position": {
                 "x": 40.0,
-                "y": -329.0,
+                "y": -349.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -6710,11 +6710,11 @@
               "Enable": true
             },
             {
-              "@type": "MOD.Core.UITouchReceiveComponent",
+              "@type": "script.MatrixItemTouchHandler",
               "Enable": true
             },
             {
-              "@type": "script.MatrixItemTouchHandler",
+              "@type": "MOD.Core.UITouchReceiveComponent",
               "Enable": true
             }
           ],

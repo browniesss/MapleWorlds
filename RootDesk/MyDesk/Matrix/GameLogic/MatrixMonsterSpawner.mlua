@@ -14,6 +14,9 @@ script MatrixMonsterSpawner extends Logic
 	-- 몬스터 ID 매핑 테이블 (CSV 로드)
 	property table monsterIdMap = {}
 
+	-- 스폰 타이머 ID 목록 (취소용)
+	property table spawnTimerIds = {}
+
 	method void OnBeginPlay()
 		self:LoadMonsterIdMap()
 	end
@@ -115,9 +118,10 @@ script MatrixMonsterSpawner extends Logic
 	method void SpawnMonsterSequence(integer monsterId, integer count, number interval, number levelMultiplier, integer loopCount, table monsterIds, table spawnDelays, table spawnCounts, integer groupIndex, number groupDelay)
 		if count <= 0 then
 			-- 현재 그룹 스폰 완료, 다음 그룹으로
-			_TimerService:SetTimerOnce(function()
+			local timerId = _TimerService:SetTimerOnce(function()
 				self:SpawnMonsterGroup(monsterIds, spawnDelays, spawnCounts, groupIndex + 1, levelMultiplier, loopCount)
 			end, groupDelay)
+			table.insert(self.spawnTimerIds, timerId)
 			return
 		end
 
@@ -126,14 +130,16 @@ script MatrixMonsterSpawner extends Logic
 
 		-- 나머지 몬스터 순차 스폰
 		if count > 1 then
-			_TimerService:SetTimerOnce(function()
+			local timerId = _TimerService:SetTimerOnce(function()
 				self:SpawnMonsterSequence(monsterId, count - 1, interval, levelMultiplier, loopCount, monsterIds, spawnDelays, spawnCounts, groupIndex, groupDelay)
 			end, interval)
+			table.insert(self.spawnTimerIds, timerId)
 		else
 			-- 현재 그룹의 마지막 몬스터, 다음 그룹으로
-			_TimerService:SetTimerOnce(function()
+			local timerId = _TimerService:SetTimerOnce(function()
 				self:SpawnMonsterGroup(monsterIds, spawnDelays, spawnCounts, groupIndex + 1, levelMultiplier, loopCount)
 			end, groupDelay)
+			table.insert(self.spawnTimerIds, timerId)
 		end
 	end
 
@@ -282,7 +288,18 @@ script MatrixMonsterSpawner extends Logic
 	method void OnMapLeave(Entity leftMap)
 		if leftMap.Name == "MatrixStage" then
 			self:Reset()
+			self:ResetOnClient()
 		end
+	end
+
+	@ExecSpace("Client")
+	method void ResetOnClient()
+		self:Reset()
+	end
+
+	@ExecSpace("Server")
+	method void ResetOnServer()
+		self:Reset()
 	end
 
 	-- ============================================
@@ -290,6 +307,14 @@ script MatrixMonsterSpawner extends Logic
 	-- ============================================
 
 	method void Reset()
+		-- 스폰 타이머 모두 취소
+		for _, timerId in ipairs(self.spawnTimerIds) do
+			if timerId ~= 0 then
+				_TimerService:ClearTimer(timerId)
+			end
+		end
+		self.spawnTimerIds = {}
+
 		self.currentWaveMonsters = {}
 		self.isSpawning = false
 		self.totalSpawnedCount = 0

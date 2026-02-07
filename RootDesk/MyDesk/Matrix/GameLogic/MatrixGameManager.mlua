@@ -468,6 +468,12 @@ script MatrixGameManager extends Logic
 		-- 타이머 정리
 		self:ClearTimer()
 
+		-- MatrixMonsterSpawner 정리 (스폰 타이머 즉시 취소)
+		if _MatrixMonsterSpawner ~= nil then
+			_MatrixMonsterSpawner:ResetOnClient()
+			_MatrixMonsterSpawner:ResetOnServer()
+		end
+
 		-- MatrixTimerService 정리
 		if _MatrixTimerService ~= nil then
 			_MatrixTimerService:Reset()
@@ -481,6 +487,11 @@ script MatrixGameManager extends Logic
 		-- MatrixUnitSelectService 정리
 		if _MatrixUnitSelectService ~= nil then
 			_MatrixUnitSelectService:Reset()
+		end
+
+		-- MatrixAugmentService 정리
+		if _MatrixAugmentService ~= nil then
+			_MatrixAugmentService:ClearAugmentScrollUI()
 		end
 
 		-- 시너지 카운트 초기화 (서버)

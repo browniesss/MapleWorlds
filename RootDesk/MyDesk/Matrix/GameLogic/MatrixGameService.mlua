@@ -146,6 +146,12 @@ script MatrixGameService extends Logic
 		self.isRoundCleared = false
 		self.currentEnemyTowerHP = 0
 
+		-- MatrixMonsterSpawner 리셋 (이전 게임의 타이머/상태 정리)
+		if _MatrixMonsterSpawner ~= nil then
+			_MatrixMonsterSpawner:ResetOnClient()
+			_MatrixMonsterSpawner:ResetOnServer()
+		end
+
 		-- 플레이어 타워 HP 초기화 (1000 고정, 라운드 간 유지)
 		if self.playerTower ~= nil and self.playerTower.Unit ~= nil then
 			local playerTowerHP = 1000
@@ -424,9 +430,9 @@ script MatrixGameService extends Logic
 			-- 현재 페이즈가 무한 모드인지 확인 (self.currentPhaseId 사용 - 무한 모드에서는 라운드의 phaseId와 다를 수 있음)
 			local currentPhase = self.phaseData[self.currentPhaseId]
 			if currentPhase ~= nil and currentPhase.phaseType == self.PHASE_TYPE_INFINITE then
-				-- 이미 무한 모드면 루프 시작 (증강 선택)
+				-- 이미 무한 모드면 루프 완료 (loopCount 증가 후 증강 선택)
 				log("무한 모드 루프 완료, 다음 루프 준비")
-				self:OnPhaseComplete()
+				self:OnInfinitePhaseComplete()
 			else
 				-- 무한 모드 페이즈로 전환 (페이즈 5)
 				log("무한 모드 페이즈로 전환")
