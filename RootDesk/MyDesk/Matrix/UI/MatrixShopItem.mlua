@@ -58,14 +58,12 @@ script MatrixShopItem extends Component
 
 	method void InitializeItem()
 		if self.itemID == "" then
-			log_error("[MatrixShopItem] itemID is empty")
 			return
 		end
 		
 		-- 서비스에서 상품 데이터 가져오기
 		self.itemData = _MatrixShopService:GetItemDataClient(self.itemID)
 		if self.itemData == nil then
-			log_error("[MatrixShopItem] Item data not found:", self.itemID)
 			return
 		end
 		
@@ -155,7 +153,6 @@ script MatrixShopItem extends Component
 		
 		-- 이미 품절인지 확인
 		if self.maxCount ~= -1 and self.purchaseCount >= self.maxCount then
-			log("[MatrixShopItem] Already sold out:", self.itemID)
 			return
 		end
 		

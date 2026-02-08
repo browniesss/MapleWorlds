@@ -278,7 +278,6 @@ script MatrixAugmentRepo extends Logic
 		local infiniteList = self:GetMatrixByType("INFINITE")
 
 		if infiniteList == nil or #infiniteList == 0 then
-			log("[MatrixAugmentRepo] INFINITE 타입 증강이 없습니다")
 			return choices
 		end
 
@@ -305,7 +304,6 @@ script MatrixAugmentRepo extends Logic
 			end
 		end
 
-		log("[MatrixAugmentRepo] 무한 모드 증강 선택지 생성: " .. tostring(#choices) .. "개")
 		return choices
 	end
 

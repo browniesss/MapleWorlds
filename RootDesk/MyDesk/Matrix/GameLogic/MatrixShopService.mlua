@@ -15,12 +15,10 @@ script MatrixShopService extends Logic
 	method void LoadMatrixShopItems()
 		local dataSet = _DataService:GetTable("matrix_shop_items")
 		if dataSet == nil then
-			log("[MatrixShop] Warning: matrix_shop_items dataset not found")
 			return
 		end
 		
 		local count = dataSet:GetRowCount()
-		log("[MatrixShop] Loading matrix shop items:", count)
 		
 		for i = 1, count do
 			local item = {}
@@ -36,7 +34,6 @@ script MatrixShopService extends Logic
 			local json = _HttpService:JSONEncode(item)
 			self.matrixShopItems[item["id"]] = json
 		
-			log("[MatrixShop] Loaded item:", item["id"], "name:", item["name"])
 		end
 	end
 
@@ -149,7 +146,6 @@ script MatrixShopService extends Logic
 		
 		-- 주간 리셋 체크
 		if self:ShouldResetWeekly(lastResetTs) then
-			log("[MatrixShop] Weekly reset for user:", userId)
 			result["items"] = {}
 			result["lastResetTs"] = self:GetCurrentWeekResetTs()
 		end
@@ -214,7 +210,6 @@ script MatrixShopService extends Logic
 		local rewardType = itemData["reward_type"]
 		local rewardValue = itemData["reward_value"]
 		
-		log("[MatrixShop] GiveReward - type:", rewardType, "value:", rewardValue)
 		
 		if rewardType == "unit" then
 			_UserMonsterService:AddCount(userId, {rewardValue})
@@ -240,26 +235,22 @@ script MatrixShopService extends Logic
 			return result == 0
 		end
 		
-		log_error("[MatrixShop] Unknown reward type:", rewardType)
 		return false
 	end
 
 	@ExecSpace("Server")
 	method void PurchaseItem(string itemId)
 		local userId = senderUserId
-		log("[MatrixShop] PurchaseItem - userId:", userId, "itemId:", itemId)
 		
 		-- 상품 데이터 확인
 		local itemData = self:GetItemData(itemId)
 		if itemData == nil then
-			log_error("[MatrixShop] Item not found:", itemId)
 			self:OnPurchaseComplete(itemId, false, "", "ITEM_NOT_FOUND")
 			return
 		end
 		
 		-- 구매 가능 여부 확인 (횟수 제한)
 		if not self:CanPurchase(userId, itemId) then
-			log("[MatrixShop] Purchase limit reached:", itemId)
 			self:OnPurchaseComplete(itemId, false, itemData["name"], "LIMIT_REACHED")
 			return
 		end
@@ -267,14 +258,12 @@ script MatrixShopService extends Logic
 		-- 재화 차감
 		local price = itemData["price"]
 		if not self:DeductCurrency(userId, price) then
-			log("[MatrixShop] Insufficient currency for:", itemId)
 			self:OnPurchaseComplete(itemId, false, itemData["name"], "INSUFFICIENT_CURRENCY")
 			return
 		end
 		
 		-- 보상 지급
 		if not self:GiveReward(userId, itemData) then
-			log_error("[MatrixShop] Failed to give reward:", itemId)
 			-- 재화 환불 (실패 시)
 			self:RefundCurrency(userId, price)
 			self:OnPurchaseComplete(itemId, false, itemData["name"], "REWARD_FAILED")
@@ -288,13 +277,11 @@ script MatrixShopService extends Logic
 		purchaseData["lastResetTs"] = self:GetCurrentWeekResetTs()
 		self:SavePurchaseData(userId, purchaseData)
 		
-		log("[MatrixShop] Purchase success:", itemId, "count:", currentCount + 1)
 		self:OnPurchaseComplete(itemId, true, itemData["name"], "")
 	end
 
 	@ExecSpace("Client")
 	method void OnPurchaseComplete(string itemId, boolean success, string itemName, string errorCode)
-		log("[MatrixShop] OnPurchaseComplete - itemId:", itemId, "success:", success, "itemName:", itemName)
 		
 		-- 결과 팝업 표시
 		local matrixShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/MatrixShopParent")
@@ -334,7 +321,6 @@ script MatrixShopService extends Logic
 	@ExecSpace("Server")
 	method void DebugForceWeeklyReset()
 		local userId = senderUserId
-		log("[MatrixShop] DEBUG: Force weekly reset for user:", userId)
 		
 		local purchaseData = self:LoadPurchaseData(userId)
 		purchaseData["items"] = {}
@@ -346,7 +332,6 @@ script MatrixShopService extends Logic
 
 	@ExecSpace("Client")
 	method void OnDebugResetComplete()
-		log("[MatrixShop] DEBUG: Weekly reset complete. Refreshing UI...")
 		
 		local matrixShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/MatrixShopParent")
 		if matrixShopParent == nil then

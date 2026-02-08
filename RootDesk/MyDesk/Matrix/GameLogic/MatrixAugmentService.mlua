@@ -121,7 +121,6 @@ script MatrixAugmentService extends Logic
 		if self:IsInfiniteMode() then
 			-- 무한 모드: INFINITE 타입 증강만 선택 (중복 허용)
 			choices = _MatrixAugmentRepo:GenerateInfiniteMatrixChoices()
-			log("[MatrixAugmentService] 무한 모드 증강 선택지 생성")
 		else
 			-- 일반 모드: 기존 증강 선택
 			choices = _MatrixAugmentRepo:GenerateMatrixChoices()
@@ -261,7 +260,6 @@ script MatrixAugmentService extends Logic
 	method void ResetMatrixByIndex(integer index)
 		-- 이미 사용한 리셋인지 확인
 		if self.resetUsed[index] == true then
-			log("[MatrixAugmentService] 리셋 버튼 이미 사용됨: " .. tostring(index))
 			return
 		end
 
@@ -279,7 +277,6 @@ script MatrixAugmentService extends Logic
 		end
 
 		if newMatrix == nil then
-			log("[MatrixAugmentService] 새 증강 생성 실패")
 			return
 		end
 
@@ -292,7 +289,6 @@ script MatrixAugmentService extends Logic
 		-- 리셋 버튼 상태 업데이트
 		self:UpdateResetButtonState(index)
 
-		log("[MatrixAugmentService] 증강 리셋 완료: 인덱스=" .. tostring(index) .. ", 새 증강=" .. tostring(newMatrix.name))
 	end
 
 	-- 단일 증강 카드 UI 업데이트
@@ -498,7 +494,6 @@ script MatrixAugmentService extends Logic
 	method void ApplySynergyEffect(table matrixData)
 		-- 시너지 보너스는 UserMatrixManager.matrixEffects에 저장되어 있고,
 		-- GET_SYNERGY_COUNT에서 자동으로 보너스를 계산하므로 별도 처리 불필요
-		log("[MatrixAugmentService] 시너지 증강 적용: " .. tostring(matrixData.effectType) .. ", value=" .. tostring(matrixData.value))
 
 		-- 시너지 보너스 유닛 체크 (시그너스 등)
 		-- SynergyBonus_All, SynergyBonus_Region 등 시너지 증강 선택 시
@@ -540,7 +535,6 @@ script MatrixAugmentService extends Logic
 			elseif matrixData.calcType == "FLAT" then
 				self.mesoIncomeMultiplier = self.mesoIncomeMultiplier + matrixData.value
 			end
-			log("[MatrixAugmentService] 메소 수입 배율 변경: " .. tostring(self.mesoIncomeMultiplier))
 		end
 	end
 
@@ -563,7 +557,6 @@ script MatrixAugmentService extends Logic
 			end
 		end
 
-		log("[MatrixAugmentService] 무한 모드 증강 적용: " .. tostring(effectType) .. " +" .. tostring(value))
 	end
 
 	-- 무한 모드 증강을 단일 유닛에 적용
@@ -735,7 +728,6 @@ script MatrixAugmentService extends Logic
 
 		local triggerEffects = self:GetTriggerEffects("OnDie")
 		if #triggerEffects == 0 then
-			log("[MatrixAugmentService] OnDieEffect: OnDie 트리거 효과 없음")
 			return
 		end
 
@@ -751,11 +743,9 @@ script MatrixAugmentService extends Logic
 		-- 적 리스트에서 범위 내 적 탐색
 		local enemyList = _EntityService:GetEntityByPath(mapPath .. "/EnemyList")
 		if enemyList == nil then
-			log("[MatrixAugmentService] OnDieEffect: EnemyList를 찾을 수 없음 - " .. mapPath)
 			return
 		end
 
-		log("[MatrixAugmentService] OnDieEffect: " .. tostring(#triggerEffects) .. "개 효과 적용 시도")
 
 		for _, effect in ipairs(triggerEffects) do
 			if effect.effectType == "FreezeOnDie" then
@@ -805,7 +795,6 @@ script MatrixAugmentService extends Logic
 			end
 		end
 
-		log("[MatrixAugmentService] 빙결의 유언 발동: 범위=" .. tostring(range) .. ", 지속=" .. tostring(freezeTime) .. "초, 대상=" .. tostring(#targets) .. "명")
 	end
 
 	-- 서버에서 빙결 디버프 적용
@@ -855,7 +844,6 @@ script MatrixAugmentService extends Logic
 			end
 		end
 
-		log("[MatrixAugmentService] 밀치기 유언 발동: 범위=" .. tostring(range) .. ", 거리=" .. tostring(pushDistance) .. ", 스턴=" .. tostring(stunTime) .. "초, 대상=" .. tostring(#targets) .. "명")
 	end
 
 	-- 서버에서 스턴 적용

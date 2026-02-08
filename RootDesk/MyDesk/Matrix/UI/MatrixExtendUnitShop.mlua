@@ -33,14 +33,12 @@ script MatrixExtendUnitShop extends UnitShop
 		-- 미리보기 슬롯도 Empty
 		self.shopItems[5].UnitShopItem:InitializeEmpty(5, self)
 
-		log("[MatrixUnitShop] 빈 상점으로 초기화 완료")
 	end
 
 	-- 특정 슬롯에 유닛 추가 (증강 선택 시 호출)
 	@ExecSpace("Client")
 	method void AddUnitToSlot(integer slot, string unitId)
 		if slot < 1 or slot > 4 then
-			log("[MatrixUnitShop] 잘못된 슬롯 번호: " .. tostring(slot))
 			return
 		end
 
@@ -49,7 +47,6 @@ script MatrixExtendUnitShop extends UnitShop
 			targetSlot = self:FindEmptySlot()
 			if targetSlot == -1 then
 				table.insert(self.queueUnits, unitId)
-				log("[MatrixUnitShop] 빈 슬롯 없음, 대기열에 추가: " .. unitId)
 				self:UpdatePreviewSlot()
 				return
 			end
@@ -59,7 +56,6 @@ script MatrixExtendUnitShop extends UnitShop
 		self.slotEmpty[targetSlot] = false
 		self:SetSlot(targetSlot)
 
-		log("[MatrixUnitShop] 슬롯 " .. tostring(targetSlot) .. "에 유닛 추가: " .. unitId)
 	end
 
 	-- 자동으로 빈 슬롯에 유닛 추가
@@ -70,7 +66,6 @@ script MatrixExtendUnitShop extends UnitShop
 			self:AddUnitToSlot(emptySlot, unitId)
 		else
 			table.insert(self.queueUnits, unitId)
-			log("[MatrixUnitShop] 빈 슬롯 없음, 대기열에 추가: " .. unitId)
 			self:UpdatePreviewSlot()
 		end
 	end

@@ -33,7 +33,6 @@ script MatrixCoinService extends Logic
 	method void LoadConfig()
 		local dataSet = _DataService:GetTable("MatrixCoinConfig")
 		if dataSet == nil then
-			log("[MatrixCoinService] MatrixCoinConfig 데이터셋을 찾을 수 없습니다. 기본값 사용")
 			return
 		end
 		
@@ -46,7 +45,6 @@ script MatrixCoinService extends Logic
 		self.RESET_DAY_OF_WEEK = tonumber(dataSet:GetCell(1, "resetDayOfWeek")) or 1
 		self.SCORE_TO_COIN_RATIO = tonumber(dataSet:GetCell(1, "scoreToCoinRatio")) or 1
 		
-		log("[MatrixCoinService] 설정 로드 완료 - 주간제한: " .. tostring(self.WEEKLY_LIMIT) .. ", 초기화: 요일" .. tostring(self.RESET_DAY_OF_WEEK) .. " " .. tostring(self.RESET_HOUR) .. "시")
 	end
 
 	@ExecSpace("Server")
@@ -61,7 +59,6 @@ script MatrixCoinService extends Logic
 			data.weeklyEarned = 0
 			data.lastResetTs = self:GetCurrentResetTs()
 			self:SaveCoinData(uid, data)
-			log("[MatrixCoinService] 주간 초기화 실행 - uid: " .. uid)
 		end
 		
 		-- 동기화 프로퍼티 업데이트
@@ -80,7 +77,6 @@ script MatrixCoinService extends Logic
 		
 		local errCode, res = ds:GetAndWait(self.STORAGE_KEY)
 		if errCode ~= 0 then
-			log_error("[MatrixCoinService] 로드 에러: " .. tostring(errCode))
 			return nil
 		end
 		
@@ -193,7 +189,6 @@ script MatrixCoinService extends Logic
 		if self:ShouldResetWeekly(data.lastResetTs) then
 			data.weeklyEarned = 0
 			data.lastResetTs = self:GetCurrentResetTs()
-			log("[MatrixCoinService] 주간 초기화 실행 - uid: " .. uid)
 		end
 		
 		-- 점수 → 코인 변환
@@ -206,7 +201,6 @@ script MatrixCoinService extends Logic
 		if actualCoin <= 0 then
 			-- 주간 한도 초과
 			self:UpdateCoinDataToClient(data.weeklyEarned, data.totalEarned, data.totalSpent or 0, 0)
-			log("[MatrixCoinService] 주간 한도 초과 - uid: " .. uid .. ", 주간획득: " .. tostring(data.weeklyEarned) .. "/" .. tostring(self.WEEKLY_LIMIT))
 			return {success = false, reason = "주간 획득 한도 초과", earned = 0, weeklyEarned = data.weeklyEarned, weeklyLimit = self.WEEKLY_LIMIT}
 		end
 		
@@ -217,7 +211,6 @@ script MatrixCoinService extends Logic
 		-- 저장
 		local saveErr = self:SaveCoinData(uid, data)
 		if saveErr ~= 0 then
-			log_error("[MatrixCoinService] 저장 실패: " .. tostring(saveErr))
 			return {success = false, reason = "저장 실패", earned = 0}
 		end
 
@@ -229,7 +222,6 @@ script MatrixCoinService extends Logic
 		-- 클라이언트 동기화
 		self:UpdateCoinDataToClient(data.weeklyEarned, data.totalEarned, data.totalSpent or 0, actualCoin)
 		
-		log("[MatrixCoinService] 코인 지급 - uid: " .. uid .. ", 점수: " .. tostring(score) .. ", 지급: " .. tostring(actualCoin) .. ", 주간: " .. tostring(data.weeklyEarned) .. "/" .. tostring(self.WEEKLY_LIMIT))
 		
 		return {
 			success = true,
@@ -250,7 +242,6 @@ script MatrixCoinService extends Logic
 		self:UpdateWeeklyPointUI()
 
 		if earnedNow > 0 then
-			log("[MatrixCoinService] 코인 획득: +" .. tostring(earnedNow) .. " (주간: " .. tostring(weeklyEarned) .. "/" .. tostring(self.WEEKLY_LIMIT) .. ")")
 		end
 	end
 
@@ -285,12 +276,10 @@ script MatrixCoinService extends Logic
 
 		local saveErr = self:SaveCoinData(userId, data)
 		if saveErr ~= 0 then
-			log_error("[MatrixCoinService] UseMatrixCoin 저장 실패: " .. tostring(saveErr))
 			return false
 		end
 
 		self.totalSpent = data.totalSpent
-		log("[MatrixCoinService] 코인 사용 - uid: " .. userId .. ", amount: " .. tostring(amount) .. ", 잔액: " .. tostring(data.totalEarned - data.totalSpent))
 		return true
 	end
 
@@ -304,7 +293,6 @@ script MatrixCoinService extends Logic
 		data.totalSpent = math.max(0, (data.totalSpent or 0) - amount)
 		self:SaveCoinData(userId, data)
 		self.totalSpent = data.totalSpent
-		log("[MatrixCoinService] 코인 환불 - uid: " .. userId .. ", amount: " .. tostring(amount))
 	end
 
 	@ExecSpace("ClientOnly")

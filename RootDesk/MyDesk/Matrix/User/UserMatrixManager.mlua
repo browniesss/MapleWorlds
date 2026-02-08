@@ -32,7 +32,6 @@ script UserMatrixManager extends Component
 
 	method void AddUnitToPool(string unitId, table unitData)
 		self.unitPool[unitId] = unitData
-		log("[UserMatrixManager] UnitPool에 추가: " .. unitId)
 	end
 
 	method table GetUnitFromPool(string unitId)
@@ -45,25 +44,21 @@ script UserMatrixManager extends Component
 
 	method boolean AddUnitToList(string unitId, table unitData)
 		if self:IsUnitListFull() then
-			log("[UserMatrixManager] UnitList가 꽉 참. Swap 필요")
 			return false
 		end
 
 		self.unitList[unitId] = unitData
 		self.unitListCount = self.unitListCount + 1
-		log("[UserMatrixManager] UnitList에 추가: " .. unitId .. " (" .. tostring(self.unitListCount) .. "/" .. tostring(self.maxUnitListCount) .. ")")
 		return true
 	end
 
 	method void SwapUnitInList(string oldUnitId, string newUnitId, table newUnitData)
 		if self.unitList[oldUnitId] == nil then
-			log("[UserMatrixManager] Swap 실패 - 기존 유닛 없음: " .. oldUnitId)
 			return
 		end
 
 		self.unitList[oldUnitId] = nil
 		self.unitList[newUnitId] = newUnitData
-		log("[UserMatrixManager] UnitList Swap: " .. oldUnitId .. " → " .. newUnitId)
 	end
 
 	method table GetUnitFromList(string unitId)
@@ -80,7 +75,6 @@ script UserMatrixManager extends Component
 
 	method void AddMatrix(table matrixData)
 		table.insert(self.matrixEffects, matrixData)
-		log("[UserMatrixManager] 증강 추가: " .. tostring(matrixData.name or matrixData.id))
 	end
 
 	method table GetMatrixEffects()
@@ -109,7 +103,6 @@ script UserMatrixManager extends Component
 
 		local userUnitStore = self.Entity.UserUnitStore
 		if userUnitStore == nil then
-			log("[UserMatrixManager] UserUnitStore를 찾을 수 없습니다")
 			return
 		end
 
@@ -122,7 +115,6 @@ script UserMatrixManager extends Component
 			end
 		end
 
-		log("[UserMatrixManager] UnitPool 로드 완료: " .. tostring(count) .. "개 유닛")
 	end
 
 	method void OnMapLeave(Entity leftMap)
@@ -144,7 +136,6 @@ script UserMatrixManager extends Component
 		self.matrixEffects = {}
 		self.playTime = 0
 		self:ResetScoreData()
-		log("[UserMatrixManager] 매트릭스 유저 데이터 초기화 완료")
 	end
 
 	-- ============================================
@@ -163,9 +154,7 @@ script UserMatrixManager extends Component
 		if phaseData ~= nil then
 			local killPoint = phaseData.killPoint or 1
 			self.totalScore = self.totalScore + killPoint
-			log("[UserMatrixManager] 킬 등록: 페이즈=" .. tostring(phaseId) .. ", 킬포인트=" .. tostring(killPoint) .. ", 총점수=" .. tostring(self.totalScore))
 		else
-			log("[UserMatrixManager] 킬 등록 실패: phaseData가 nil (phaseId=" .. tostring(phaseId) .. ")")
 		end
 	end
 
@@ -176,7 +165,6 @@ script UserMatrixManager extends Component
 		else
 			self.phaseStartTime[phaseId] = self.playTime
 		end
-		log("[UserMatrixManager] 페이즈 " .. tostring(phaseId) .. " 시작 시간 기록: " .. tostring(self.phaseStartTime[phaseId]))
 	end
 
 	-- 페이즈 종료 시 점수 계산 (1~3페이즈용)
@@ -205,7 +193,6 @@ script UserMatrixManager extends Component
 		local timeScore = math.max(0, baseScore - math.floor(elapsedTime))
 		self.totalScore = self.totalScore + timeScore
 
-		log("[UserMatrixManager] 페이즈 " .. tostring(phaseId) .. " 시간 점수: " .. tostring(timeScore) .. " (경과: " .. tostring(math.floor(elapsedTime)) .. "초)")
 		return timeScore
 	end
 
@@ -226,7 +213,6 @@ script UserMatrixManager extends Component
 		local timeScore = math.floor(infiniteTime)
 		self.totalScore = self.totalScore + timeScore
 
-		log("[UserMatrixManager] 무한모드 시간 점수: " .. tostring(timeScore) .. " (경과: " .. tostring(math.floor(infiniteTime)) .. "초)")
 		return timeScore
 	end
 
@@ -241,7 +227,6 @@ script UserMatrixManager extends Component
 		self.phaseKillCount = {}
 		self.phaseStartTime = {}
 		self.currentPhaseScore = 0
-		log("[UserMatrixManager] 점수 데이터 초기화 완료")
 	end
 
 	-- ============================================
@@ -272,7 +257,6 @@ script UserMatrixManager extends Component
 		if cygnusCount > 0 and not hasCygnus then
 			-- 시그너스 추가
 			table.insert(self.subUnitList, cygnusModelId)
-			log("[UserMatrixManager] 시그너스 시너지 활성화 - subUnitList에 추가 (카운트: " .. tostring(cygnusCount) .. ")")
 
 			-- 시그너스 유닛 데이터를 unitPool에 추가
 			self:AddCygnusToUnitPool()
@@ -294,7 +278,6 @@ script UserMatrixManager extends Component
 		-- 시그너스 유닛 정보 로드
 		local unitInfo = _UnitService:GetUnitByIDFromServer(cygnusModelId)
 		if unitInfo == nil then
-			log("[UserMatrixManager] 시그너스 유닛 정보를 찾을 수 없습니다")
 			return
 		end
 
@@ -303,7 +286,6 @@ script UserMatrixManager extends Component
 
 		-- 시그너스 레벨은 시너지에 따라 결정되므로 기본값으로 설정
 		self.unitPool[cygnusModelId] = buffedUnit
-		log("[UserMatrixManager] 시그너스를 unitPool에 추가")
 	end
 
 	-- 시너지 유닛 추가 시 클라이언트에 알림
@@ -337,7 +319,6 @@ script UserMatrixManager extends Component
 			local shop = _MatrixGameManager.unitShop.MatrixExtendUnitShop
 			if shop ~= nil then
 				shop:AddUnit(unitId)
-				log("[UserMatrixManager] MatrixExtendUnitShop에 시너지 유닛 추가: " .. unitId)
 			end
 		end
 	end

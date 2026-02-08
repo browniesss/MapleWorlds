@@ -73,7 +73,6 @@ script MatrixRankingPanel extends Component
 	@ExecSpace("Client")
 	method void RefreshRankList()
 		if _MatrixRankingService == nil then
-			log("[MatrixRankingPanel] MatrixRankingService를 찾을 수 없습니다")
 			return
 		end
 		

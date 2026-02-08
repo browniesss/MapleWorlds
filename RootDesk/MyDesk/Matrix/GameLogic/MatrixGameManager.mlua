@@ -137,7 +137,6 @@ script MatrixGameManager extends Logic
 		-- MatrixUI 최상위
 		self.matrixUI = _EntityService:GetEntityByPath("/ui/MatrixUI")
 		if self.matrixUI == nil then
-			log("[MatrixGameManager] MatrixUI를 찾을 수 없습니다")
 			return
 		end
 		
@@ -166,7 +165,6 @@ script MatrixGameManager extends Logic
 		-- CompletePopup
 		self.completePopup = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/CompletePopup")
 
-		log("[MatrixGameManager] UI 참조 갱신 완료")
 	end
 
 	@ExecSpace("Client")
@@ -525,7 +523,6 @@ script MatrixGameManager extends Logic
 			enemyTower.Unit.curState = "stand"
 		end
 
-		log("[MatrixGameManager] 타워 HP 초기화 완료")
 	end
 
 	@ExecSpace("Server")
