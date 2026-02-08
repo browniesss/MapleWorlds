@@ -4,18 +4,17 @@ script UserUnitProtocol extends CommonProtocol
 	@ExecSpace("Server")
 	method void GetUserUnitListCall()
 		self:CommonCall(senderUserId)
-		
+
 		_UserMonsterService:INIT(senderUserId)
 		local userMonsterData = _UserMonsterService.userMonsterDict
 		local unitData = _UnitService:GetUnitAll()
-		
+
 		local resp = {}
-		
+
 		for id, json in pairs(userMonsterData) do
 			local userUnitModel = UserUnitModel()
 			userUnitModel:DECODE(json)
-			
-			log(id, "-", json)
+
 			local buffedUnit = BuffedUnitModel()
 			buffedUnit:Init(unitData[id])
 			
@@ -148,14 +147,13 @@ script UserUnitProtocol extends CommonProtocol
 	method void UpdateUserUnitList(string uid)
 		local userMonsterData = _UserMonsterService.userMonsterDict
 		local unitData = _UnitService:GetUnitAll()
-		
+
 		local resp = {}
-		
+
 		for id, json in pairs(userMonsterData) do
 			local userUnitModel = UserUnitModel()
 			userUnitModel:DECODE(json)
-			
-			log(id, "-", json)
+
 			local buffedUnit = BuffedUnitModel()
 			buffedUnit:Init(unitData[id])
 			

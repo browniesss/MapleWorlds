@@ -1,0 +1,122 @@
+@Component
+script CouponPopupUI extends Component
+
+	property Entity InputField = nil
+
+	property Entity ConfirmButton = nil
+
+	property Entity CloseButton = nil
+
+	property Entity MessageLabel = nil
+
+	property any confirmHandler = nil
+
+	property any closeHandler = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.InputField = self.Entity:GetChildByName("CouponInput", false)
+		self.ConfirmButton = self.Entity:GetChildByName("ConfirmButton", false)
+		self.CloseButton = self.Entity:GetChildByName("CloseButton", false)
+		self.MessageLabel = self.Entity:GetChildByName("MessageLabel", false)
+		
+		if self.ConfirmButton ~= nil then
+			self.confirmHandler = self.ConfirmButton:ConnectEvent(ButtonClickEvent, self.OnConfirmClick)
+		end
+		
+		if self.CloseButton ~= nil then
+			self.closeHandler = self.CloseButton:ConnectEvent(ButtonClickEvent, self.OnCloseClick)
+		end
+		
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnConfirmClick(Entity entity)
+		if self.InputField == nil then
+			return
+		end
+		
+		local couponCode = self.InputField.TextInputComponent.Text
+		
+		couponCode, _ = string.gsub(couponCode, "%s+", "")
+		
+		if couponCode == "" then
+			self:ShowMessage("쿠폰 번호를 입력해주세요")
+			return
+		end
+		
+		_CouponService:RequestUseCoupon(couponCode)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnCloseClick(Entity entity)
+		self:Close()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void Open()
+		self.Entity.Enable = true
+		self.Entity.Visible = true
+		
+		if self.InputField ~= nil and self.InputField.TextInputComponent ~= nil then
+			self.InputField.TextInputComponent.Text = ""
+		end
+		
+		if self.MessageLabel ~= nil and self.MessageLabel.TextComponent ~= nil then
+			self.MessageLabel.TextComponent.Text = ""
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void Close()
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+	end
+
+	@ExecSpace("ClientOnly")
+	method void ShowResult(boolean success, string message, string rewardType, integer rewardAmount)
+		if success then
+			local rewardName = self:GetRewardName(rewardType)
+			self:ShowMessage(rewardName .. " " .. tostring(rewardAmount) .. "개가 지급되었습니다")
+		else
+			if message == "INVALID" then
+				self:ShowMessage("쿠폰 번호가 잘못되었습니다")
+			elseif message == "ALREADY_USED" then
+				self:ShowMessage("이미 사용된 쿠폰입니다")
+			else
+				self:ShowMessage("쿠폰 사용에 실패했습니다")
+			end
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method string GetRewardName(string rewardType)
+		if rewardType == "FirstCoin" then
+			return "다이아"
+		elseif rewardType == "SecondCoin" then
+			return "코인"
+		elseif rewardType == "ThirdCoin" then
+			return "메소"
+		end
+		return "보상"
+	end
+
+	@ExecSpace("ClientOnly")
+	method void ShowMessage(string msg)
+		if self.MessageLabel ~= nil and self.MessageLabel.TextComponent ~= nil then
+			self.MessageLabel.TextComponent.Text = msg
+		end
+	end
+
+	method void OnDestroy()
+		if self.confirmHandler ~= nil and self.ConfirmButton ~= nil then
+			self.ConfirmButton:DisconnectEvent(ButtonClickEvent, self.confirmHandler)
+		end
+		if self.closeHandler ~= nil and self.CloseButton ~= nil then
+			self.CloseButton:DisconnectEvent(ButtonClickEvent, self.closeHandler)
+		end
+	end
+
+end

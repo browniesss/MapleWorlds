@@ -71,9 +71,7 @@ script ToggleGroup extends Component
 		        child.Toggle:SetGroupController(self.Entity)
 		    end
 		end
-		        
-		log("ToggleGroup found " .. #self.ToggleButtons .. " child Toggle buttons.")
-		
+
 		-- 라디오 모드 초기화 로직 (구성된 내부 리스트를 사용)
 		if self.UseRadioMode and #self.ToggleButtons > 0 then
 		    self:InitializeRadioMode()

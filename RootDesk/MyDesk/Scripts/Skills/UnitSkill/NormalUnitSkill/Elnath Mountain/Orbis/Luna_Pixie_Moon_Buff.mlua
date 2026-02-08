@@ -1,0 +1,18 @@
+@Component
+script Luna_Pixie_Moon_Buff extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		local effectId = _EffectService:PlayEffectAttached("d3334b903488482eaacf09034221a8a3", self.caster, Vector3(0, 1.5, 0) , 0, Vector3(0.15, 0.15, 0.15), true)
+		self.caster.Unit:GetBuff(_eBuffType.AttackDamageBuff, self.skillAmount * self.caster.Unit.damage, self.skillTime)
+		self.caster.Unit:GetBuff(_eBuffType.AttackSpeedBuff, self.skillAmount, self.skillTime)
+		self:SkillEnd()
+		
+		_TimerService:SetTimerOnce(function()
+			_EffectService:RemoveEffect(effectId)
+		end, self.skillTime)
+	end
+
+end

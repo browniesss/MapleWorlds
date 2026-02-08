@@ -1,0 +1,48 @@
+@Logic
+script NoticeService extends Logic
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		
+	end
+
+	@ExecSpace("ServerOnly")
+	method string GetTodayDateString()
+		local time = os.time()
+		local date = os.date("*t", time)
+		return string.format("%04d-%02d-%02d", date.year, date.month, date.day)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void CheckAndShowNotice(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local errorCode, lastShown = ds:GetAndWait("NOTICE_LAST_SHOWN")
+		
+		local today = self:GetTodayDateString()
+		
+		if errorCode == 0 and lastShown == today then
+			return
+		end
+		
+		ds:SetAndWait("NOTICE_LAST_SHOWN", today)
+		
+		self:ShowNoticePopup(uid)
+	end
+
+	@ExecSpace("Client")
+	method void ShowNoticePopup(string uid)
+		local popup = _EntityService:GetEntityByPath("/ui/NoticePopup")
+		if popup ~= nil and popup.NoticePopupUI ~= nil then
+			popup.NoticePopupUI:Open()
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void ShowNoticePopupDirect()
+		local popup = _EntityService:GetEntityByPath("/ui/NoticePopup")
+		if popup ~= nil and popup.NoticePopupUI ~= nil then
+			popup.NoticePopupUI:Open()
+		end
+	end
+
+end

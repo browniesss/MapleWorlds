@@ -15,8 +15,7 @@ script UI_UpgradePopup extends Component
 		---------------------------------------------------------
 		self.popup.Enable = false
 		self.popup.Visible = false
-		log("close upgrade popup")
-		
+
 	end
 
 	@EventSender("Entity", "cb420390-263e-45f2-a6e8-4bafacbc4efc")
@@ -31,7 +30,6 @@ script UI_UpgradePopup extends Component
 		---------------------------------------------------------
 		self.popup.Enable = true
 		self.popup.Visible = true
-		log("open upgrade popup")
 	end
 
 end

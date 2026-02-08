@@ -1,0 +1,32 @@
+@Component
+script Luster_Pixie_Sun_Attack extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		local basePos = self.Entity.TransformComponent.WorldPosition
+		local pos
+		
+		if self.caster.Unit.isEnemy then
+			pos = Vector3(-3, 3, 0)
+		else
+			pos = Vector3(3, 3, 0)
+		end
+		
+		if self._T.projectileParent == nil then
+			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+		end
+		
+		local spawnFunction = function()	
+			local fountain = _SpawnService:SpawnByModelId("model://5798b45f-a5d5-47de-80e2-8d31e6758835", "sum_Object", basePos + pos, self._T.projectileParent)
+		
+			fountain.SpriteRendererComponent.FlipX = self.caster.Unit.isEnemy == false
+			fountain.LoopAttackComponent:Init(self.skillAmount, self.skillTime, self.skillAttackTiming, self.caster, nil, false)
+			self:SkillEnd()
+		end
+		
+		_TimerService:SetTimerOnce(spawnFunction, 0.1)
+	end
+
+end

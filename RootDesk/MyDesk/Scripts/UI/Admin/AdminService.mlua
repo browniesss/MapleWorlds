@@ -29,12 +29,11 @@ script AdminService extends Logic
 		local result = {}
 		
 		if not self:IsAdmin(sender) then
-			log("Unauthorized Admin Access Attempt: " .. tostring(sender))
 			result.IsSuccess = false
 			result.Message = "Unauthorized"
 			return result
 		end
-		
+
 		-- User Data 조회만 수행
 		local ds = _DataStorageService:GetUserDataStorage(uid)
 		local errorcode, value = ds:GetAndWait(key)
@@ -69,12 +68,11 @@ script AdminService extends Logic
 		local result = {}
 		
 		if not self:IsAdmin(sender) then
-			log("Unauthorized Admin Access Attempt: " .. tostring(sender))
 			result.IsSuccess = false
 			result.Message = "Unauthorized"
 			return result
 		end
-		
+
 		-- 값 타입 추론
 		local finalValue = _HttpService:JSONDecode(value)
 		
@@ -104,12 +102,11 @@ script AdminService extends Logic
 		local result = {}
 		
 		if not self:IsAdmin(sender) then
-			log("Unauthorized Admin Access Attempt: " .. tostring(sender))
 			result.IsSuccess = false
 			result.Message = "Unauthorized"
 			return result
 		end
-		
+
 		-- User Data 만 처리
 		local ds = _DataStorageService:GetUserDataStorage(uid)
 		local errorcode = ds:DeleteAndWait(key)

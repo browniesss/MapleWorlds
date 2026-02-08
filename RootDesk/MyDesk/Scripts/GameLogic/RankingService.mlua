@@ -15,7 +15,6 @@ script RankingService extends Logic
 		
 		local getCode, lastScore = ds:GetAndWait(userName)
 		if getCode ~= 0 then
-			log("AddPoint get err: " .. getCode)
 			return
 		end
 		
@@ -29,9 +28,6 @@ script RankingService extends Logic
 		end
 		
 		local setCode = ds:SetAndWait(userName, userScore)
-		if setCode ~= 0 then
-			log("AddPoint set err: " .. setCode)
-		end
 		
 		self:UpdaetUserPointMap(storageKey, userScore)
 	end
@@ -55,7 +51,6 @@ script RankingService extends Logic
 		-- 데이터들을 정렬된 순서로 가져옵니다.
 		local errorCode, itemPages = ds:GetSortedAndWait(SortDirection.Ascending, 0, 9999999)
 		if errorCode ~= 0 then
-			log("fetch rank code:" .. errorCode)
 			return
 		end
 		local rank = 1
@@ -211,7 +206,6 @@ script RankingService extends Logic
 		
 		local getCode, lastScore = ds:GetAndWait(userName)
 		if getCode ~= 0 then
-			log("AddPoint get err: " .. getCode)
 			return
 		end
 		

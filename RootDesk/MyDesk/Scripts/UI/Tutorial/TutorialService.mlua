@@ -1090,7 +1090,6 @@ script TutorialService extends Logic
 	@ExecSpace("Client")
 	method void ShowFullScreenTutorial(table stepData)
 		-- 전체 화면 딤드 + 중앙 텍스트만 표시
-		log("  Full screen tutorial mode")
 		
 		-- 텍스트 업데이트
 		if self.tutorialText ~= nil and self.tutorialText.TextComponent ~= nil then
@@ -1338,8 +1337,6 @@ script TutorialService extends Logic
 			return
 		end
 		
-		log("  Connecting touch events to all dimmed panels")
-		
 		-- DimmedTop
 		if self.dimmedTop ~= nil then
 			self.dimmedTop:ConnectEvent("ButtonClickEvent", function(event)
@@ -1383,19 +1380,12 @@ script TutorialService extends Logic
 		end
 		
 		self.dimmedTouchConnected = true
-		log("  All dimmed touch events connected")
 	end
 
 	@ExecSpace("Client")
 	method void OnDimmedClicked(string panelName)
-		log("[Tutorial] OnDimmedClicked: ", panelName)
-		log("  isActive=", self.isActive, ", actionType=", self.currentActionType)
-		log("  isIngameTutorial=", self.isIngameTutorial)
-		log("  isStepCooldown=", self.isStepCooldown)
-
 		-- 쿨다운 중이면 무시
 		if self.isStepCooldown then
-			log("  -> Step cooldown active, ignoring touch")
 			return
 		end
 
@@ -1411,13 +1401,8 @@ script TutorialService extends Logic
 			end
 
 			if self.isIngameTutorial then
-				log("  -> Calling NextIngameStep()")
 				self:NextIngameStep()
-			else
-				log("  -> No tutorial type matched!")
 			end
-		else
-			log("  -> Conditions not met for advancing")
 		end
 	end
 
@@ -1484,7 +1469,6 @@ script TutorialService extends Logic
 	method void NextIngameStep()
 		-- 4스텝에서 5스텝으로 넘어갈 때는 몬스터 스폰 후 진행
 		if self.currentStep == 4 then
-			log("[Tutorial] Step 4 completed, waiting for monster spawn...")
 			self:HideTutorialUI()
 			self:SpawnTutorialMonster()
 			return
@@ -1512,8 +1496,6 @@ script TutorialService extends Logic
 	@ExecSpace("Client")
 	method void SpawnTutorialMonster()
 		-- 튜토리얼용 몬스터 스폰 요청 (서버로)
-		log("[Tutorial] Requesting tutorial monster spawn...")
-
 		-- 스텝 4에서 5로 전환되는 동안 쿨다운 (터치 방지)
 		self.isStepCooldown = true
 
@@ -1528,23 +1510,17 @@ script TutorialService extends Logic
 	@ExecSpace("Server")
 	method void SpawnTutorialMonsterServer()
 		-- 서버에서 튜토리얼용 몬스터 스폰
-		log("[Tutorial] Spawning tutorial monster on server...")
-		
 		-- SpawnManager를 통해 적 스폰
 		if _SpawnManager ~= nil then
 			-- 기본 몬스터 모델 ID 사용 (SpawnGroup의 첫 번째 유닛)
 			local monsterModelId = "model://5aac7c14-9173-4d47-96f1-5fc5429e36c4"
 			_SpawnManager:SpawnEnemy(monsterModelId, Vector3.zero)
-			log("[Tutorial] Monster spawned!")
-		else
-			log("[Tutorial] ERROR: _SpawnManager is nil!")
 		end
 	end
 
 	@ExecSpace("Client")
 	method void OnTutorialMonsterSpawned()
 		-- 몬스터 스폰 완료 후 5스텝 시작
-		log("[Tutorial] Monster spawn complete, starting step 5...")
 
 		-- 튜토리얼 UI 다시 표시
 		if self.tutorialUI ~= nil then
@@ -1757,7 +1733,6 @@ script TutorialService extends Logic
 	method void ResetTutorialData()
 		local userId = _UserService.LocalPlayer.PlayerComponent.UserId
 		self:RESET(userId)
-		log("[TutorialService] Tutorial data reset. Please re-enter the game.")
 	end
 
 end

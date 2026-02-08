@@ -145,7 +145,6 @@ script EventShopItem extends Component
 		
 		-- 이미 품절인지 확인
 		if self.maxCount ~= -1 and self.purchaseCount >= self.maxCount then
-			log("[EventShopItem] Already sold out:", self.itemID)
 			return
 		end
 		

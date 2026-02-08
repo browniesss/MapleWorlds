@@ -11,7 +11,6 @@ script True_Sniping extends SkillParent
 		self:CallAnimation("6thSniping")
 		
 		local targetList = self:GetFarthestEnemies(3)
-		log(targetList)
 		local effectFunction = function()
 			for _, target in ipairs(targetList) do
 			    if isvalid(target) and target.Unit and target.Unit.curState ~= "die" then

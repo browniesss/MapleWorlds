@@ -6,7 +6,6 @@ script Mix_Golem_See extends SkillParent
 		__base:ActivateSkill()
 		
 		local targetList = self:GetFarthestEnemies(1)
-		log(targetList)
 		local damageFunction = function()
 			for _, target in ipairs(targetList) do
 			    if isvalid(target) and target.Unit and target.Unit.curState ~= "die" then

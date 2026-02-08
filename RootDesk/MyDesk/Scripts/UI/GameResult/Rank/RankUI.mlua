@@ -32,10 +32,7 @@ script RankUI extends Component
 		for i = 1, 4 do
 			local textComp = _EntityService:GetEntityByPath(path .. "/Rank_" .. tostring(i) .. "/UIText").TextComponent
 			local user = rankTable[i]
-			if user == nil then
-				log("rank to set rank of" .. i)
-			end
-			
+
 			textComp.Text = self:GetRankText(i, user.name, user.score)
 		end
 		

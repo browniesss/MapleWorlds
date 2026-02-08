@@ -56,7 +56,6 @@ script EventService extends Logic
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
 		self:LoadEventData(self.currentEventId)
-		log("EVENT SERVICE INIT DONE")
 	end
 
 	@ExecSpace("ServerOnly")

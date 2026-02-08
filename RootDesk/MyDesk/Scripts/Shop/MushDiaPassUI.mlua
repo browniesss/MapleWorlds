@@ -94,7 +94,6 @@ script MushDiaPassUI extends Component
 		end
 		
 		self.isInitialized = true
-		log("[MushDiaPassUI] Created 14 PassItems")
 	end
 
 	@ExecSpace("ClientOnly")
@@ -172,7 +171,6 @@ script MushDiaPassUI extends Component
 	handler HandleKeyDownEvent(KeyDownEvent event)
 		if event.key == KeyboardKey.P and Environment:IsMakerPlay() then
 			if self.hasPass then
-				log("[MushDiaPassUI] TEST: Advancing pass day by 1")
 				_ShopService:AdvancePassDay()
 			end
 		end

@@ -72,9 +72,7 @@ script UnitLimitBreakRepo extends Logic
 		if grade < 5 then
 			id = "COMMON"
 		end
-		
-		log(id, "-", grade, "-", limitBreak)
-		
+
 		local gradeMap = self.dataMap[tostring(grade)]
 		if gradeMap == nil then
 			return LimitBreakModel()

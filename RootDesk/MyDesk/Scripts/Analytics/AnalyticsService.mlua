@@ -6,12 +6,10 @@ script AnalyticsService extends Logic
 	@ExecSpace("ServerOnly")
 	method void SendAnalyticsLog(string userId, table logData, string endpoint)
 		if userId == nil then
-			log("invalid analytics request: userId is nil")
 			return
 		end
-		
+
 		if logData["name"] == nil then
-			log("invalid analytics request: userId is nil")
 			return
 		end
 		
@@ -20,10 +18,8 @@ script AnalyticsService extends Logic
 			if key == "name" then
 				continue
 			end
-			
+
 			content[key] = value
-			
-			log(key," : ", value)
 		end
 		
 		local header = {}
@@ -32,7 +28,6 @@ script AnalyticsService extends Logic
 		
 		
 		local res = _HttpService:PostAndWait(self:GetUrl(endpoint), _HttpService:JSONEncode(content), HttpContentType.ApplicationJson, header)
-		log(res)
 	end
 
 	@ExecSpace("ServerOnly")

@@ -12,9 +12,7 @@ script Heal_0 extends SkillParent
 			if not isvalid(target) or target.Unit.curState == "die" then
 				continue
 			end
-			
-			log("Heal_0 to ", target.Unit.id, " by 광신도")
-				
+
 		    target.Unit:OnHeal(self.caster, self.caster.Unit.damage * self.skillAmount)
 		end
 		

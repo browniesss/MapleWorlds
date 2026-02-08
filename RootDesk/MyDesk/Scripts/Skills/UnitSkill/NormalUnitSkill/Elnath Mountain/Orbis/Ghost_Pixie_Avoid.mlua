@@ -1,0 +1,14 @@
+@Component
+script Ghost_Pixie_Avoid extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		_EffectService:PlayEffectAttached("06ffb834a55c4cc2972b1a90bb34a384", self.caster, Vector3(0, 1, 0) , 0, Vector3.one)
+		
+		self.caster.Unit.damageAvoidAmount += self.skillAmount
+		self:SkillEnd()
+	end
+
+end

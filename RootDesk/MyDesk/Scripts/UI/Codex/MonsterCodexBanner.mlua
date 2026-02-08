@@ -41,8 +41,6 @@ script MonsterCodexBanner extends Component
 
 	method void CancelAllTimers()
 		-- 모든 진행 중인 타이머 취소
-		log("[MonsterCodexBanner] CancelAllTimers - slideIn:", self.slideInTimer, "slideOut:", self.slideOutTimer, "wait:", self.waitTimer)
-
 		if self.slideInTimer ~= 0 then
 			_TimerService:ClearTimer(self.slideInTimer)
 			self.slideInTimer = 0
@@ -55,13 +53,9 @@ script MonsterCodexBanner extends Component
 			_TimerService:ClearTimer(self.waitTimer)
 			self.waitTimer = 0
 		end
-
-		log("[MonsterCodexBanner] CancelAllTimers done")
 	end
 
 	method void Show(string monsterName, string monsterId)
-		log("[MonsterCodexBanner] Show START - name:", monsterName)
-
 		-- 새로운 애니메이션 ID 생성 (기존 애니메이션 무효화)
 		self.animationId = self.animationId + 1
 		local currentAnimId = self.animationId
@@ -81,8 +75,6 @@ script MonsterCodexBanner extends Component
 			end
 		end
 
-		log("[MonsterCodexBanner] Show - before position set")
-
 		-- 시작 위치 (화면 밖)
 		local pos = self.Entity.UITransformComponent.Position
 		self.Entity.UITransformComponent.Position = Vector3(pos.x, self.hiddenY, pos.z)
@@ -90,12 +82,8 @@ script MonsterCodexBanner extends Component
 		self.Entity.Enable = true
 		self.Entity.Visible = true
 
-		log("[MonsterCodexBanner] Show - calling SlideIn, animId:", currentAnimId)
-
 		-- 슬라이드 인
 		self:SlideIn(currentAnimId)
-
-		log("[MonsterCodexBanner] Show END")
 	end
 
 	method void SlideIn(integer animId)
@@ -105,8 +93,6 @@ script MonsterCodexBanner extends Component
 
 		local elapsed = 0
 		local tick = 1/60
-
-		log("[MonsterCodexBanner] SlideIn - from:", startY, "to:", endY, "animId:", animId)
 
 		self.slideInTimer = _TimerService:SetTimerRepeat(function(dt)
 			-- 애니메이션 ID가 바뀌었으면 종료

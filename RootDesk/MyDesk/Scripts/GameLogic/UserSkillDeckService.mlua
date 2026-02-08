@@ -17,7 +17,6 @@ script UserSkillDeckService extends Logic
 		
 		local save =  _HttpService:JSONEncode(data)
 		
-		log(save)
 		return ds:SetAndWait("USER_SKILLDECK",save)
 	end
 
@@ -32,7 +31,6 @@ script UserSkillDeckService extends Logic
 		end
 		
 		if res == nil then
-			log(res)
 			local deckList = {}
 			local data = {}
 			
@@ -48,7 +46,6 @@ script UserSkillDeckService extends Logic
 				deckList[i] = allUnit[i]
 			end
 			
-			log(deckList)
 			
 			playerSkillDeck:SetUserSkillDeck(deckList)
 			
@@ -62,7 +59,6 @@ script UserSkillDeckService extends Logic
 		
 		playerSkillDeck:SetUserSkillDeck(resTable["UserSkillDeck"])
 		
-		log(resTable)
 		
 		return 0
 	end
