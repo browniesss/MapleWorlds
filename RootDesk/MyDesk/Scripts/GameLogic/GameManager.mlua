@@ -873,6 +873,11 @@ script GameManager extends Logic
 		if event.key == KeyboardKey.T and Environment:IsMakerPlay() then
 			_TutorialService:ResetTutorialData()
 		end
+
+		-- F3키: 매트릭스 상점 주간 초기화 (개발용)
+		if event.key == KeyboardKey.F3 and Environment:IsMakerPlay() then
+			_MatrixShopService:DebugForceWeeklyReset()
+		end
 	end
 
 end

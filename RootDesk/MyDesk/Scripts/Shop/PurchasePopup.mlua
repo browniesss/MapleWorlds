@@ -6,6 +6,10 @@ script PurchasePopup extends Component
 	@Sync
 	property string productID = ""
 
+	property string purchaseMode = ""
+
+	property string matrixItemId = ""
+
 	@Sync
 	property Entity itemIcon = nil
 
@@ -24,26 +28,69 @@ script PurchasePopup extends Component
 		self.itemAmountLabel = self.Entity:GetChildByName("CoinAmountLabel")
 		self.purchaseButton = self.Entity:GetChildByName("PurchaseButton")
 		self.closeButton = self.Entity:GetChildByName("CloseButton")
-		
-		self.purchaseButton:ConnectEvent("ButtonClickEvent", function(event) 
-		        _BillingService:Function1(self.productID)
+
+		self.purchaseButton:ConnectEvent("ButtonClickEvent", function(event)
+		        self:OnPurchaseClick()
 		   	end)
-		
-		self.closeButton:ConnectEvent("ButtonClickEvent", function(event) 
+
+		self.closeButton:ConnectEvent("ButtonClickEvent", function(event)
 		        self.Entity.Enable = false
 				self.Entity.Visible = false
 		   	end)
 	end
 
+	method void OnPurchaseClick()
+		if self.purchaseMode == "matrix" then
+			_MatrixShopService:PurchaseItem(self.matrixItemId)
+			self.Entity.Enable = false
+			self.Entity.Visible = false
+		else
+			_BillingService:Function1(self.productID)
+		end
+	end
+
 	method void Init(table data, string productID)
 		self.productData = data
 		self.productID = productID
-		
+		self.purchaseMode = ""
+		self.matrixItemId = ""
+
 		self.Entity.Enable = true
 		self.Entity.Visible = true
-		
+
 		self:SetSprite()
 		self:SetLabel()
+	end
+
+	method void InitMatrix(string itemId, table itemData)
+		self.purchaseMode = "matrix"
+		self.matrixItemId = itemId
+		self.productData = itemData
+
+		self.Entity.Enable = true
+		self.Entity.Visible = true
+
+		self:SetMatrixSprite(itemData)
+		self:SetMatrixLabel(itemData)
+	end
+
+	method void SetMatrixSprite(table itemData)
+		if self.itemIcon ~= nil and self.itemIcon.SpriteGUIRendererComponent ~= nil then
+			local rewardType = itemData["reward_type"] or ""
+			if rewardType == "dia_free" then
+				self.itemIcon.SpriteGUIRendererComponent.ImageRUID = "3d291a0daa274583a7856b0470793de5"
+			elseif rewardType == "coin_free" then
+				self.itemIcon.SpriteGUIRendererComponent.ImageRUID = "78fb3b54f37c41cc920aa5b34667efc8"
+			elseif rewardType == "meso_free" then
+				self.itemIcon.SpriteGUIRendererComponent.ImageRUID = "4cc5ffc272224edc809a792b8efa16e3"
+			end
+		end
+	end
+
+	method void SetMatrixLabel(table itemData)
+		if self.itemAmountLabel ~= nil then
+			self.itemAmountLabel.TextComponent.Text = itemData["amount_label"] or ""
+		end
 	end
 
 	method void SetSprite()

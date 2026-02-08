@@ -1,0 +1,175 @@
+@Component
+script MatrixShopItem extends Component
+
+	property string itemID = ""
+
+	property Entity iconImage = nil
+
+	property Entity nameLabel = nil
+
+	property Entity priceLabel = nil
+
+	property Entity amountLabel = nil
+
+	property Entity purchaseButton = nil
+
+	property Entity remainCountLabel = nil
+
+	property table itemData = {}
+
+	property integer purchaseCount = 0
+
+	property integer maxCount = 0
+
+	property boolean isInitialized = false
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		-- 자식 엔티티 자동 탐색
+		if self.iconImage == nil then
+			self.iconImage = self.Entity:GetChildByName("IconImage")
+		end
+		if self.nameLabel == nil then
+			self.nameLabel = self.Entity:GetChildByName("NameLabel")
+		end
+		if self.purchaseButton == nil then
+			self.purchaseButton = self.Entity:GetChildByName("PurchaseButton")
+		end
+		if self.priceLabel == nil and self.purchaseButton ~= nil then
+			self.priceLabel = self.purchaseButton:GetChildByName("PriceLabel")
+		end
+		if self.amountLabel == nil then
+			self.amountLabel = self.Entity:GetChildByName("AmountLabel")
+		end
+		if self.remainCountLabel == nil then
+			self.remainCountLabel = self.Entity:GetChildByName("RemainCountLabel")
+		end
+		
+		-- 구매 버튼 이벤트 연결
+		if self.purchaseButton ~= nil then
+			self.purchaseButton:ConnectEvent(ButtonClickEvent, function()
+				self:OnPurchaseButtonClick()
+			end)
+		end
+		
+		-- 상품 데이터 로드 및 UI 초기화
+		self:InitializeItem()
+	end
+
+	method void InitializeItem()
+		if self.itemID == "" then
+			log_error("[MatrixShopItem] itemID is empty")
+			return
+		end
+		
+		-- 서비스에서 상품 데이터 가져오기
+		self.itemData = _MatrixShopService:GetItemDataClient(self.itemID)
+		if self.itemData == nil then
+			log_error("[MatrixShopItem] Item data not found:", self.itemID)
+			return
+		end
+		
+		self.maxCount = self.itemData["max_count"] or -1
+		
+		-- UI 설정
+		self:SetupUI()
+		
+		-- 서버에 구매 횟수 요청
+		_MatrixShopService:RequestItemStatus(self.itemID)
+		
+		self.isInitialized = true
+	end
+
+	method void SetupUI()
+		-- 상품명
+		if self.nameLabel ~= nil then
+			self.nameLabel.TextComponent.Text = self.itemData["name"] or ""
+		end
+		
+		-- 가격
+		if self.priceLabel ~= nil then
+			self.priceLabel.TextComponent.Text = tostring(self.itemData["price"] or 0)
+		end
+		
+		-- 받는 수량 라벨
+		if self.amountLabel ~= nil then
+			self.amountLabel.TextComponent.Text = self.itemData["amount_label"] or ""
+		end
+
+		-- 아이콘 이미지
+		if self.iconImage ~= nil and self.iconImage.SpriteGUIRendererComponent ~= nil then
+			local rewardType = self.itemData["reward_type"] or ""
+			if rewardType == "dia_free" then
+				self.iconImage.SpriteGUIRendererComponent.ImageRUID = "3d291a0daa274583a7856b0470793de5"
+			elseif rewardType == "coin_free" then
+				self.iconImage.SpriteGUIRendererComponent.ImageRUID = "78fb3b54f37c41cc920aa5b34667efc8"
+			elseif rewardType == "meso_free" then
+				self.iconImage.SpriteGUIRendererComponent.ImageRUID = "4cc5ffc272224edc809a792b8efa16e3"
+			end
+		end
+
+		-- 남은 횟수 라벨 초기화
+		self:UpdateRemainCountLabel()
+	end
+
+	method void UpdatePurchaseCount(integer count)
+		self.purchaseCount = count
+		self:UpdateRemainCountLabel()
+		self:CheckSoldOut()
+	end
+
+	method void UpdateRemainCountLabel()
+		if self.remainCountLabel == nil then
+			return
+		end
+		
+		if self.maxCount == -1 then
+			-- 무제한
+			self.remainCountLabel.TextComponent.Text = ""
+			self.remainCountLabel.Enable = false
+		else
+			local remaining = self.maxCount - self.purchaseCount
+			self.remainCountLabel.TextComponent.Text = string.format("%d/%d", remaining, self.maxCount)
+			self.remainCountLabel.Enable = true
+		end
+	end
+
+	method void CheckSoldOut()
+		if self.maxCount == -1 then
+			return
+		end
+		
+		if self.purchaseCount >= self.maxCount then
+			self:SetSoldOut()
+		end
+	end
+
+	method void SetSoldOut()
+		self.Entity.Enable = false
+	end
+
+	method void OnPurchaseButtonClick()
+		if self.itemID == "" then
+			return
+		end
+		
+		-- 이미 품절인지 확인
+		if self.maxCount ~= -1 and self.purchaseCount >= self.maxCount then
+			log("[MatrixShopItem] Already sold out:", self.itemID)
+			return
+		end
+		
+		-- PurchasePopup으로 구매 확인
+		local purchasePopup = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/PurchasePopup")
+		if purchasePopup ~= nil and purchasePopup.PurchasePopup ~= nil then
+			purchasePopup.PurchasePopup:InitMatrix(self.itemID, self.itemData)
+		end
+	end
+
+	method void OnPurchaseSuccess()
+		self.purchaseCount = self.purchaseCount + 1
+		self:UpdateRemainCountLabel()
+		self:CheckSoldOut()
+	end
+
+end
