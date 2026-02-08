@@ -94,11 +94,6 @@ script MatrixGameManager extends Logic
 			_MatrixTimerService:Reset()
 		end
 
-		-- TimeScaleManager 초기화 (배속 플레이 시간 리셋)
-		if _TimeScaleManager ~= nil then
-			_TimeScaleManager:ResetPlayTimeOnly()
-		end
-
 		-- UI 참조 다시 가져오기 (텔레포트 후 참조가 변경될 수 있음)
 		self:RefreshUIReferences()
 
@@ -477,11 +472,6 @@ script MatrixGameManager extends Logic
 		-- MatrixTimerService 정리
 		if _MatrixTimerService ~= nil then
 			_MatrixTimerService:Reset()
-		end
-
-		-- TimeScaleManager 초기화 (배속 플레이 시간 리셋)
-		if _TimeScaleManager ~= nil then
-			_TimeScaleManager:ResetPlayTimeOnly()
 		end
 
 		-- MatrixUnitSelectService 정리
