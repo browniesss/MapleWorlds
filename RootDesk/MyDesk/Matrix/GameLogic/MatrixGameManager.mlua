@@ -194,6 +194,10 @@ script MatrixGameManager extends Logic
 		if lobbyBadgeButton ~= nil then
 			lobbyBadgeButton.Enable = false
 		end
+		local lobbyCouponButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/CouponButton")
+		if lobbyCouponButton ~= nil then
+			lobbyCouponButton.Enable = false
+		end
 
 		-- 모바일 환경 조이스틱/점프버튼 비활성화
 		if Environment:IsMobilePlatform() then
@@ -650,6 +654,10 @@ script MatrixGameManager extends Logic
 		local lobbyBadgeButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton")
 		if lobbyBadgeButton ~= nil then
 			lobbyBadgeButton.Enable = true
+		end
+		local lobbyCouponButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/CouponButton")
+		if lobbyCouponButton ~= nil then
+			lobbyCouponButton.Enable = true
 		end
 
 		-- 모바일 환경 조이스틱/점프버튼 활성화
