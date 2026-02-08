@@ -387,12 +387,12 @@ script ShopService extends Logic
 
 	@ExecSpace("Client")
 	method void HidePackageItem(string packageId)
-		local packageParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/PackageParent")
-		if packageParent == nil then
+		local packageGrid = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/PackageParent/Grid")
+		if packageGrid == nil then
 			return
 		end
 
-		local children = packageParent.Children
+		local children = packageGrid.Children
 		for _, child in ipairs(children) do
 			local packageItem = child.PackageItem
 			if packageItem ~= nil and packageItem.itemID == packageId then
@@ -407,14 +407,14 @@ script ShopService extends Logic
 
 	@ExecSpace("Client")
 	method void CheckPackageTabVisibility()
-		local packageParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/PackageParent")
-		if packageParent == nil then
+		local packageGrid = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/PackageParent/Grid")
+		if packageGrid == nil then
 			return
 		end
 
 		-- 활성화된 패키지 아이템이 있는지 확인
 		local hasActivePackage = false
-		local children = packageParent.Children
+		local children = packageGrid.Children
 		for _, child in ipairs(children) do
 			if child.Enable == true and child.PackageItem ~= nil then
 				hasActivePackage = true
