@@ -1,0 +1,20 @@
+@Component
+script ExtendToggleNoticeMenu extends ToggleAction
+
+	property Entity ContentPanel = nil
+
+	method void ExecuteOnLogic(Toggle sender)
+		__base:ToggleGroupActivate()
+		
+		if self.ContentPanel then
+			self.ContentPanel.Enable = true
+		end
+	end
+
+	method void ExecuteOffLogic(Toggle sender)
+		if self.ContentPanel then
+			self.ContentPanel.Enable = false
+		end
+	end
+
+end
