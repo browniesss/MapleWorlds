@@ -10,6 +10,8 @@ script TermAgreeButton extends Component
 		ui.Visible = false
 		
 		_TermService:SAVE(player.PlayerComponent.UserId)
+
+		_NoticeService:ShowNoticePopupDirect()
 	end
 
 end

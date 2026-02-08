@@ -90,6 +90,8 @@ script PlayerCharacter extends Component
 			if enteredMap.Name == "MainLobbyMap" then
 				if isTermAgree == 0 then
 					_TermService:AgreePopupOn()
+				else
+					_NoticeService:CheckAndShowNotice(self.Entity.PlayerComponent.UserId)
 				end
 			end
 		end

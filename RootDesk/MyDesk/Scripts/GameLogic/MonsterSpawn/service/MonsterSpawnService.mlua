@@ -21,7 +21,11 @@ script MonsterSpawnService extends Component
 			return
 		end
 		local value = group[1]
-		_SpawnManager:SpawnEnemy(value.unit, Vector3.zero)
+		local spawnPos = Vector3.zero
+		if value.x ~= nil and value.y ~= nil and value.z ~= nil then
+			spawnPos = Vector3(value.x, value.y, value.z)
+		end
+		_SpawnManager:SpawnEnemy(value.unit, spawnPos)
 		
 		table.remove(group, 1)
 		
@@ -62,6 +66,9 @@ script MonsterSpawnService extends Component
 				local value = {}
 				value['unit'] = groupItem.unit
 				value['delayTs'] = groupItem.delayTs
+				value['x'] = groupItem.x
+				value['y'] = groupItem.y
+				value['z'] = groupItem.z
 
 				table.insert(groupTable, value)
 			end
@@ -86,6 +93,9 @@ script MonsterSpawnService extends Component
 			local value = {}
 			value['unit'] = g.unit
 			value['delayTs'] = g.delayTs
+			value['x'] = g.x
+			value['y'] = g.y
+			value['z'] = g.z
 
 			table.insert(groupTable, value)
 		end
@@ -219,9 +229,37 @@ script MonsterSpawnService extends Component
 						table.insert(self.eventGroup[setting.type][id].group, g)
 					end
 				end
+
+				if pattern.type == 'INSTANT' then
+					local group_data
+					if _GameManager.isEventMode then
+						group_data = _eventGroupRepo:GetGroupById(pattern.group)
+					else
+						group_data = _groupRepo:GetGroupById(pattern.group)
+					end
+
+					if group_data ~= nil then
+						local groupTable = {}
+						for j, g in ipairs(group_data) do
+							local value = {}
+							value['unit'] = g.unit
+							value['delayTs'] = g.delayTs
+							value['x'] = g.x
+							value['y'] = g.y
+							value['z'] = g.z
+
+							table.insert(groupTable, value)
+						end
+
+						self.timerIdList[#self.timerIdList + 1] = _TimerService:SetTimerOnce(
+							function() self:GroupSummon(groupTable) end,
+							0
+						)
+					end
+				end
 			end
 		end
-		
+
 		_TimerService:SetTimerOnce(settingFunction, 1)
 	end
 

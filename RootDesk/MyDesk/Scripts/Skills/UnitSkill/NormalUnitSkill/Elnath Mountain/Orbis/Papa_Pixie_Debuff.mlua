@@ -1,0 +1,31 @@
+@Component
+script Papa_Pixie_Debuff extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		local monsterList = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+		local myMonsters = monsterList.Children
+		
+		local debuffFunction = function()
+			for index in ipairs(myMonsters) do
+				local monster = myMonsters[index]
+			
+				if monster.Name == "MySpawnPoint" then
+					continue
+				end
+				
+				if monster.Enable then
+					self.caster.Unit.curTarget.Unit:GetStatusDebuff(_eStatusDebuffType.Silence, self.skillAmount, self.skillTime, self.caster)
+				end
+			end
+		
+			self:SkillEnd()
+		end
+		
+		-- 첫 번째 발사: 공격 모션 발생
+		_TimerService:SetTimerOnce(debuffFunction, self.skillAttackTiming)
+	end
+
+end

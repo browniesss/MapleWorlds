@@ -1,0 +1,116 @@
+@Logic
+script CouponService extends Logic
+
+	property table couponData = {}
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		self:LoadCouponData()
+	end
+
+	@ExecSpace("ServerOnly")
+	method void LoadCouponData()
+		local dataSet = _DataService:GetTable("CouponData")
+		
+		if dataSet == nil then
+			return
+		end
+		
+		local count = dataSet:GetRowCount()
+		
+		for i = 1, count do
+			local code = tostring(dataSet:GetCell(i, "code"))
+			local coupon = {}
+			coupon["code"] = code
+			coupon["reward_type"] = tostring(dataSet:GetCell(i, "reward_type"))
+			coupon["reward_amount"] = tonumber(dataSet:GetCell(i, "reward_amount"))
+			coupon["description"] = tostring(dataSet:GetCell(i, "description"))
+		
+			self.couponData[code] = coupon
+		end
+	end
+
+	@ExecSpace("Server")
+	method void RequestUseCoupon(string couponCode)
+		local userId = senderUserId
+		
+		-- 1. 쿠폰 존재 여부 확인
+		local coupon = self.couponData[couponCode]
+		if coupon == nil then
+			self:SendCouponResult(userId, false, "INVALID", "", 0)
+			return
+		end
+		
+		-- 2. 이미 사용한 쿠폰인지 확인
+		local used = self:IsCouponUsed(userId, couponCode)
+		if used then
+			self:SendCouponResult(userId, false, "ALREADY_USED", "", 0)
+			return
+		end
+		
+		-- 3. 보상 지급
+		self:GiveReward(userId, coupon.reward_type, coupon.reward_amount)
+		
+		-- 4. 사용 기록 저장
+		self:MarkCouponUsed(userId, couponCode)
+		
+		-- 5. 결과 전송
+		self:SendCouponResult(userId, true, "SUCCESS", coupon.reward_type, coupon.reward_amount)
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean IsCouponUsed(string userId, string couponCode)
+		local ds = _DataStorageService:GetUserDataStorage(userId)
+		local errorCode, usedCouponsJson = ds:GetAndWait("USED_COUPONS")
+		
+		if errorCode ~= 0 or usedCouponsJson == nil or usedCouponsJson == "" then
+			return false
+		end
+		
+		local usedCoupons = _HttpService:JSONDecode(usedCouponsJson)
+		if usedCoupons == nil then
+			return false
+		end
+		
+		return usedCoupons[couponCode] == true
+	end
+
+	@ExecSpace("ServerOnly")
+	method void MarkCouponUsed(string userId, string couponCode)
+		local ds = _DataStorageService:GetUserDataStorage(userId)
+		local errorCode, usedCouponsJson = ds:GetAndWait("USED_COUPONS")
+		
+		local usedCoupons = {}
+		if errorCode == 0 and usedCouponsJson ~= nil and usedCouponsJson ~= "" then
+			usedCoupons = _HttpService:JSONDecode(usedCouponsJson)
+			if usedCoupons == nil then
+				usedCoupons = {}
+			end
+		end
+		
+		usedCoupons[couponCode] = true
+		
+		local newJson = _HttpService:JSONEncode(usedCoupons)
+		ds:SetAndWait("USED_COUPONS", newJson)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void GiveReward(string userId, string rewardType, integer amount)
+		if rewardType == "FirstCoin" then
+			_BillingService:AddFirstFreeCoin(userId, amount)
+		elseif rewardType == "SecondCoin" then
+			_BillingService:AddSecondFreeCoin(userId, amount)
+		elseif rewardType == "ThirdCoin" then
+			_BillingService:AddThirdFreeCoin(userId, amount)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void SendCouponResult(string userId, boolean success, string message, string rewardType, integer rewardAmount)
+		local popup = _EntityService:GetEntityByPath("/ui/CouponPopup")
+		if popup ~= nil and popup.CouponPopupUI ~= nil then
+			popup.CouponPopupUI:ShowResult(success, message, rewardType, rewardAmount)
+		end
+	end
+
+end

@@ -17,7 +17,15 @@ script eventGroupRepo extends Logic
 			item['group'] = tonumber(dataSet:GetCell(index, 'group'))
 			item['unit'] = tostring(dataSet:GetCell(index, 'unit'))
 			item['delayTs'] = tonumber(dataSet:GetCell(index, 'delay'))
-		
+
+			local xVal = dataSet:GetCell(index, 'x')
+			local yVal = dataSet:GetCell(index, 'y')
+			local zVal = dataSet:GetCell(index, 'z')
+
+			item['x'] = (xVal ~= nil and xVal ~= "") and tonumber(xVal) or nil
+			item['y'] = (yVal ~= nil and yVal ~= "") and tonumber(yVal) or nil
+			item['z'] = (zVal ~= nil and zVal ~= "") and tonumber(zVal) or nil
+
 			if self.groupTable[item.group] == nil then
 				self.groupTable[item.group] = {}
 			end

@@ -1,0 +1,67 @@
+@Component
+script NoticePopupUI extends Component
+
+	property Entity CloseButton = nil
+
+	property Entity DiscordButton = nil
+
+	property any closeHandler = nil
+
+	property any discordHandler = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.CloseButton = self.Entity:GetChildByName("CloseButton", false)
+		self.DiscordButton = self.Entity:GetChildByName("DiscordButton", false)
+		
+		if self.CloseButton ~= nil then
+			self.closeHandler = self.CloseButton:ConnectEvent(ButtonClickEvent, self.OnCloseClick)
+		end
+		
+		if self.DiscordButton ~= nil then
+			self.discordHandler = self.DiscordButton:ConnectEvent(ButtonClickEvent, self.OnDiscordClick)
+		end
+		
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnCloseClick(Entity entity)
+		self:Close()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnDiscordClick(Entity entity)
+		_EditorService:OpenUrl("디스코드", "https://discord.com/invite/Dyhn9fFC6e")
+	end
+
+	@ExecSpace("ClientOnly")
+	method void Open()
+		self.Entity.Enable = true
+		self.Entity.Visible = true
+	end
+
+	@ExecSpace("ClientOnly")
+	method void Close()
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+	end
+
+	method void OnDestroy()
+		if self.closeHandler ~= nil and self.CloseButton ~= nil then
+			self.CloseButton:DisconnectEvent(ButtonClickEvent, self.closeHandler)
+		end
+		if self.discordHandler ~= nil and self.DiscordButton ~= nil then
+			self.DiscordButton:DisconnectEvent(ButtonClickEvent, self.discordHandler)
+		end
+	end
+
+	@EventSender("Service", "InputService")
+	handler HandleKeyDownEvent(KeyDownEvent event)
+		if event.key == KeyboardKey.F2 and Environment:IsMakerPlay() then
+			self:Open()
+		end
+	end
+
+end
