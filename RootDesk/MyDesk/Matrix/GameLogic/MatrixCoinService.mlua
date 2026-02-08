@@ -13,6 +13,8 @@ script MatrixCoinService extends Logic
 
 	property integer SCORE_TO_COIN_RATIO = 1
 
+	property integer MAX_SUMMON_POINT = 200
+
 	@Sync
 	property integer weeklyEarned = 0
 
@@ -44,7 +46,8 @@ script MatrixCoinService extends Logic
 		self.RESET_HOUR = tonumber(dataSet:GetCell(1, "resetHour")) or 6
 		self.RESET_DAY_OF_WEEK = tonumber(dataSet:GetCell(1, "resetDayOfWeek")) or 1
 		self.SCORE_TO_COIN_RATIO = tonumber(dataSet:GetCell(1, "scoreToCoinRatio")) or 1
-		
+		self.MAX_SUMMON_POINT = tonumber(dataSet:GetCell(1, "maxSummonPoint")) or 200
+
 	end
 
 	@ExecSpace("Server")

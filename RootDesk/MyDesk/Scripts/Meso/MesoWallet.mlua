@@ -16,9 +16,19 @@ script MesoWallet extends Component
 		if deposit <= 0 then
 			return
 		end
-		
+
 		self.CurrentMeso = self.CurrentMeso + deposit
-		
+
+		-- 매트릭스 모드: 소환 포인트 상한선 적용
+		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
+			if _MatrixCoinService ~= nil then
+				local maxPoint = _MatrixCoinService.MAX_SUMMON_POINT
+				if self.CurrentMeso > maxPoint then
+					self.CurrentMeso = maxPoint
+				end
+			end
+		end
+
 		self.UIController:UpdateCurrentMeso(self.CurrentMeso)
 	end
 
@@ -37,9 +47,19 @@ script MesoWallet extends Component
 		if newMeso < 0 then
 			return -1
 		end
-		
+
+		-- 매트릭스 모드: 소환 포인트 상한선 적용
+		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
+			if _MatrixCoinService ~= nil then
+				local maxPoint = _MatrixCoinService.MAX_SUMMON_POINT
+				if newMeso > maxPoint then
+					newMeso = maxPoint
+				end
+			end
+		end
+
 		self.CurrentMeso = newMeso
-		
+
 		return self.CurrentMeso
 	end
 
