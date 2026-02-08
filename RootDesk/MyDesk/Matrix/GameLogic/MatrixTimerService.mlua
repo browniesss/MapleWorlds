@@ -78,20 +78,17 @@ script MatrixTimerService extends Logic
 			delay = delay
 		}
 		
-		log("[MatrixTimerService] 타이머 등록: ID=" .. tostring(timerId) .. ", delay=" .. tostring(delay))
 		return timerId
 	end
 
 	method void ClearTimer(integer timerId)
 		if self.pendingTimers[timerId] ~= nil then
 			self.pendingTimers[timerId] = nil
-			log("[MatrixTimerService] 타이머 취소: ID=" .. tostring(timerId))
 		end
 	end
 
 	method void ClearAllTimers()
 		self.pendingTimers = {}
-		log("[MatrixTimerService] 모든 타이머 취소")
 	end
 
 	method void Pause()
@@ -100,7 +97,6 @@ script MatrixTimerService extends Logic
 		end
 		
 		self.isPaused = true
-		log("[MatrixTimerService] 일시정지: " .. tostring(self:GetPendingTimerCount()) .. "개 타이머 대기 중")
 	end
 
 	method void Resume()
@@ -120,7 +116,6 @@ script MatrixTimerService extends Logic
 			timerInfo.executeTime = self.currentTime + remainingTime
 		end
 		
-		log("[MatrixTimerService] 재개: " .. tostring(self:GetPendingTimerCount()) .. "개 타이머 재개")
 	end
 
 	method boolean IsPaused()
@@ -155,12 +150,10 @@ script MatrixTimerService extends Logic
 		self.nextTimerId = 1
 		self.currentTime = 0.0
 		self.lastPlayTimeSecond = -1
-		log("[MatrixTimerService] 타이머 시스템 리셋 (일시정지 상태)")
 	end
 
 	method void StartTimer()
 		self.isPaused = false
-		log("[MatrixTimerService] 타이머 시작")
 	end
 
 end

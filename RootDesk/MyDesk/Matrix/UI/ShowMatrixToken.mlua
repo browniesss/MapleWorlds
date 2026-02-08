@@ -7,13 +7,10 @@ script ShowMatrixToken extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
-		log("[ShowMatrixToken] OnBeginPlay - Entity:", self.Entity.Name)
 		
 		local labelEntity = self.Entity:GetChildByName("TokenLabel")
-		log("[ShowMatrixToken] TokenLabel entity:", tostring(labelEntity))
 		if labelEntity ~= nil then
 			self.TokenLabel = labelEntity.TextComponent
-			log("[ShowMatrixToken] TokenLabel TextComponent:", tostring(self.TokenLabel))
 		end
 		
 		local iconEntity = self.Entity:GetChildByName("TokenIcon")
@@ -24,18 +21,6 @@ script ShowMatrixToken extends Component
 		if self.TokenIcon ~= nil then
 			self.TokenIcon.ImageRUID = "6d8995d1e6ca4b098ca2af8b3fe25f24"
 		end
-		
-		-- 자식 엔티티 이름 목록 출력
-		local children = self.Entity.Children
-		if children ~= nil then
-			for i, child in ipairs(children) do
-				log("[ShowMatrixToken] Child[" .. tostring(i) .. "]:", child.Name)
-			end
-		else
-			log("[ShowMatrixToken] No children found")
-		end
-		
-		log("[ShowMatrixToken] CoinService totalEarned:", tostring(_MatrixCoinService.totalEarned), "totalSpent:", tostring(_MatrixCoinService.totalSpent))
 		
 		_MatrixCoinService:RequestBalance()
 		self:RefreshUI()
@@ -52,15 +37,12 @@ script ShowMatrixToken extends Component
 		
 		if self.TokenLabel ~= nil then
 			self.TokenLabel.Text = tostring(coin)
-		else
-			log("[ShowMatrixToken] RefreshUI - TokenLabel is nil! coin:", tostring(coin))
 		end
 	end
 
 	@EventSender("Self")
 	handler HandleComponentEnabledInHierarchyChangedEvent(ComponentEnabledInHierarchyChangedEvent event)
 		if event.EnabledInHierarchy then
-			log("[ShowMatrixToken] EnabledInHierarchy changed - requesting balance")
 			_MatrixCoinService:RequestBalance()
 			self:RefreshUI()
 		end

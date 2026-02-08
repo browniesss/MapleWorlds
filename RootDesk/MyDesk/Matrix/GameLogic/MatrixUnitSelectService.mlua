@@ -41,7 +41,6 @@ script MatrixUnitSelectService extends Logic
 	method void ShowUnitSelectionUI()
 		local user = _UserService.LocalPlayer
 		if user == nil or user.UserMatrixManager == nil then
-			log("[MatrixUnitSelectService] user or UserMatrixManager is nil")
 			return
 		end
 
@@ -57,7 +56,6 @@ script MatrixUnitSelectService extends Logic
 		-- unitPool에서 랜덤 4유닛 생성
 		local choices = self:GenerateUnitChoices()
 		if choices == nil or #choices == 0 then
-			log("[MatrixUnitSelectService] 선택 가능한 유닛이 없습니다")
 			self.isSelectingUnit = false
 			if self.onSelectionCompleteCallback ~= nil then
 				self.onSelectionCompleteCallback()
@@ -99,15 +97,12 @@ script MatrixUnitSelectService extends Logic
 
 	method void PopulateCharterViews(table choiceIds)
 		if self.charterViewList == nil then
-			log("[MatrixUnitSelectService] charterViewList is nil")
 			return
 		end
 
-		log("[MatrixUnitSelectService] PopulateCharterViews - choiceIds count: " .. tostring(#choiceIds))
 
 		local user = _UserService.LocalPlayer
 		if user == nil or user.UserMatrixManager == nil then
-			log("[MatrixUnitSelectService] user or UserMatrixManager is nil in PopulateCharterViews")
 			return
 		end
 
@@ -125,25 +120,17 @@ script MatrixUnitSelectService extends Logic
 					-- unitPool에서 BuffedUnitModel 가져오기
 					local unitData = unitPool[unitId]
 
-					if unitData == nil then
-						log("[MatrixUnitSelectService] unitData is nil for unitId: " .. tostring(unitId))
-					else
-						log("[MatrixUnitSelectService] Setting CharterView " .. tostring(index) .. " with unit: " .. tostring(unitData.name))
-					end
-
 					child.CharterView:InitGacha(unitData)
 				end
 				index = index + 1
 			end
 		end
 
-		log("[MatrixUnitSelectService] PopulateCharterViews complete, processed " .. tostring(index - 1) .. " CharterViews")
 	end
 
 	method table GenerateUnitChoices()
 		local user = _UserService.LocalPlayer
 		if user == nil or user.UserMatrixManager == nil then
-			log("[MatrixUnitSelectService] GenerateUnitChoices - user or UserMatrixManager is nil")
 			return {}
 		end
 
@@ -158,11 +145,6 @@ script MatrixUnitSelectService extends Logic
 			subUnitSet[unitId] = true
 		end
 
-		-- 풀 크기 로깅
-		local poolCount = 0
-		for _ in pairs(pool) do poolCount = poolCount + 1 end
-		log("[MatrixUnitSelectService] GenerateUnitChoices - pool size: " .. tostring(poolCount))
-
 		-- 선택 가능 목록 구성 (이미 선택한 유닛 및 서브 유닛 제외)
 		local available = {}
 		for unitId, unitData in pairs(pool) do
@@ -171,7 +153,6 @@ script MatrixUnitSelectService extends Logic
 			end
 		end
 
-		log("[MatrixUnitSelectService] GenerateUnitChoices - available count: " .. tostring(#available))
 
 		-- Fisher-Yates 셔플
 		for i = #available, 2, -1 do
@@ -183,7 +164,6 @@ script MatrixUnitSelectService extends Logic
 		local choices = {}
 		for i = 1, math.min(4, #available) do
 			table.insert(choices, available[i])
-			log("[MatrixUnitSelectService] Choice " .. tostring(i) .. ": " .. tostring(available[i]))
 		end
 
 		return choices
@@ -225,7 +205,6 @@ script MatrixUnitSelectService extends Logic
 		-- 메소 UI 업데이트 (시너지 변경 반영)
 		self:RefreshMesoIncomeUI()
 
-		log("[MatrixUnitSelectService] 유닛 선택: " .. unitId .. " (남은 선택: " .. tostring(self.remainingSelections - 1) .. ")")
 		
 		-- UI 닫기
 		self:CloseUnitSelectionUI()
@@ -291,7 +270,6 @@ script MatrixUnitSelectService extends Logic
 		-- 보유 유닛 중 랜덤 4개 + 버프 타입 생성
 		local upgradeChoices = self:GenerateUpgradeChoices()
 		if upgradeChoices == nil or #upgradeChoices == 0 then
-			log("[MatrixUnitSelectService] 강화 선택지 생성 실패")
 			self.isSelectingUnit = false
 			self.isUpgradeMode = false
 			if self.onSelectionCompleteCallback ~= nil then
@@ -331,7 +309,6 @@ script MatrixUnitSelectService extends Logic
 		-- CharterView에 강화 선택지 표시
 		self:PopulateUpgradeViews(upgradeChoices)
 
-		log("[MatrixUnitSelectService] 유닛 강화 모드 UI 표시 - " .. tostring(#upgradeChoices) .. "개 선택지")
 	end
 
 	-- 보유 유닛 중 랜덤 4개 선택 + 50% 확률로 공격력/체력 버프 할당
@@ -381,7 +358,6 @@ script MatrixUnitSelectService extends Logic
 				buffValue = buffValue
 			})
 
-			log("[MatrixUnitSelectService] 강화 선택지 " .. tostring(i) .. ": " .. unitId .. " - " .. buffType .. " +" .. tostring(buffValue))
 		end
 
 		return choices
@@ -390,7 +366,6 @@ script MatrixUnitSelectService extends Logic
 	-- 강화 선택지를 CharterView에 표시
 	method void PopulateUpgradeViews(table upgradeChoices)
 		if self.charterViewList == nil then
-			log("[MatrixUnitSelectService] charterViewList is nil")
 			return
 		end
 
@@ -440,7 +415,6 @@ script MatrixUnitSelectService extends Logic
 		-- 버프 적용
 		self:ApplyUpgradeToUnit(choice.unitId, choice.buffType, choice.buffValue)
 
-		log("[MatrixUnitSelectService] 강화 선택: " .. choice.unitId .. " - " .. choice.buffType .. " +" .. tostring(choice.buffValue))
 
 		-- UI 닫기
 		self:CloseUnitSelectionUI()
@@ -472,16 +446,13 @@ script MatrixUnitSelectService extends Logic
 
 		local unitData = user.UserMatrixManager.unitPool[unitId]
 		if unitData == nil then
-			log("[MatrixUnitSelectService] 버프 적용 실패 - 유닛 없음: " .. unitId)
 			return
 		end
 
 		if buffType == "DAMAGE" then
 			unitData.damage = unitData.damage + buffValue
-			log("[MatrixUnitSelectService] " .. unitId .. " 공격력 +" .. tostring(buffValue) .. " → " .. tostring(unitData.damage))
 		elseif buffType == "HP" then
 			unitData.hp = unitData.hp + buffValue
-			log("[MatrixUnitSelectService] " .. unitId .. " 체력 +" .. tostring(buffValue) .. " → " .. tostring(unitData.hp))
 		end
 
 		-- 서버에 버프 적용 동기화
@@ -506,7 +477,6 @@ script MatrixUnitSelectService extends Logic
 			unitData.hp = unitData.hp + buffValue
 		end
 
-		log("[MatrixUnitSelectService] 서버 버프 적용: " .. unitId .. " - " .. buffType .. " +" .. tostring(buffValue))
 	end
 
 	-- 메소 income UI 업데이트 (시너지 변경 반영)

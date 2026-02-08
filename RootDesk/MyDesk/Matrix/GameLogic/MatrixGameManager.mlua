@@ -94,11 +94,6 @@ script MatrixGameManager extends Logic
 			_MatrixTimerService:Reset()
 		end
 
-		-- TimeScaleManager 초기화 (배속 플레이 시간 리셋)
-		if _TimeScaleManager ~= nil then
-			_TimeScaleManager:ResetPlayTimeOnly()
-		end
-
 		-- UI 참조 다시 가져오기 (텔레포트 후 참조가 변경될 수 있음)
 		self:RefreshUIReferences()
 
@@ -142,7 +137,6 @@ script MatrixGameManager extends Logic
 		-- MatrixUI 최상위
 		self.matrixUI = _EntityService:GetEntityByPath("/ui/MatrixUI")
 		if self.matrixUI == nil then
-			log("[MatrixGameManager] MatrixUI를 찾을 수 없습니다")
 			return
 		end
 		
@@ -171,7 +165,6 @@ script MatrixGameManager extends Logic
 		-- CompletePopup
 		self.completePopup = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/CompletePopup")
 
-		log("[MatrixGameManager] UI 참조 갱신 완료")
 	end
 
 	@ExecSpace("Client")
@@ -483,11 +476,6 @@ script MatrixGameManager extends Logic
 			_MatrixTimerService:Reset()
 		end
 
-		-- TimeScaleManager 초기화 (배속 플레이 시간 리셋)
-		if _TimeScaleManager ~= nil then
-			_TimeScaleManager:ResetPlayTimeOnly()
-		end
-
 		-- MatrixUnitSelectService 정리
 		if _MatrixUnitSelectService ~= nil then
 			_MatrixUnitSelectService:Reset()
@@ -539,7 +527,6 @@ script MatrixGameManager extends Logic
 			enemyTower.Unit.curState = "stand"
 		end
 
-		log("[MatrixGameManager] 타워 HP 초기화 완료")
 	end
 
 	@ExecSpace("Server")

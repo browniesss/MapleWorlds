@@ -13,7 +13,6 @@ script MatrixGiveUpButton extends Component
 			return
 		end
 		
-		log("[MatrixGiveUpButton] 포기! 현재 페이즈: " .. tostring(_MatrixGameService.currentPhaseId) .. ", 라운드: " .. tostring(_MatrixGameService.currentRoundId))
 		
 		-- 게임 플레이 중지
 		_MatrixGameManager.isPlaying = false
@@ -43,7 +42,6 @@ script MatrixGiveUpButton extends Component
 				_MatrixCoinService:AddMatrixCoin(finalScore)
 			end
 
-			log("[MatrixGiveUpButton] 포기 - 최종 점수: " .. tostring(finalScore))
 		end
 		
 		-- 서버에서 모든 유닛 제거

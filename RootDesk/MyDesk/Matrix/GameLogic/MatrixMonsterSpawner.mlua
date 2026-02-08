@@ -25,7 +25,6 @@ script MatrixMonsterSpawner extends Logic
 	method void LoadMonsterIdMap()
 		local dataSet = _DataService:GetTable("MatrixMonster")
 		if dataSet == nil then
-			log("[MatrixMonsterSpawner] MatrixMonster 데이터셋을 찾을 수 없습니다")
 			return
 		end
 
@@ -40,9 +39,6 @@ script MatrixMonsterSpawner extends Logic
 			}
 		end
 
-		local count = 0
-		for _ in pairs(self.monsterIdMap) do count = count + 1 end
-		log("[MatrixMonsterSpawner] 몬스터 ID 매핑 로드 완료: " .. tostring(count) .. "개")
 	end
 
 	-- ============================================
@@ -52,7 +48,6 @@ script MatrixMonsterSpawner extends Logic
 	@ExecSpace("Client")
 	method void SpawnWave(table monsterIds, table spawnDelays, table spawnCounts, number levelMultiplier, integer loopCount)
 		if self.isSpawning then
-			log("[MatrixMonsterSpawner] 이미 스폰 중입니다")
 			return
 		end
 
@@ -61,7 +56,6 @@ script MatrixMonsterSpawner extends Logic
 		self.totalAliveCount = 0
 		self.currentWaveMonsters = {}
 
-		log("[MatrixMonsterSpawner] 웨이브 스폰 시작: " .. tostring(#monsterIds) .. "종류")
 
 		-- 서버에 스폰 요청
 		self:SpawnWaveOnServer(monsterIds, spawnDelays, spawnCounts, levelMultiplier, loopCount)
@@ -93,7 +87,6 @@ script MatrixMonsterSpawner extends Logic
 		if groupIndex > #monsterIds then
 			-- 모든 그룹 스폰 완료
 			self.isSpawning = false
-			log("[MatrixMonsterSpawner] 모든 몬스터 스폰 완료: " .. tostring(self.totalSpawnedCount) .. "마리")
 
 			-- 클라이언트에 스폰 완료 알림
 			self:OnWaveSpawnCompleteClient()
@@ -104,7 +97,6 @@ script MatrixMonsterSpawner extends Logic
 		local count = spawnCounts[groupIndex]
 		local delay = spawnDelays[groupIndex]
 
-		log("[MatrixMonsterSpawner] 그룹 " .. tostring(groupIndex) .. " 스폰: 몬스터ID=" .. tostring(monsterId) .. ", 개수=" .. tostring(count))
 
 		-- 현재 그룹의 몬스터들을 순차적으로 스폰
 		self:SpawnMonsterSequence(monsterId, count, 0.3, levelMultiplier, loopCount, monsterIds, spawnDelays, spawnCounts, groupIndex, delay)
@@ -153,24 +145,20 @@ script MatrixMonsterSpawner extends Logic
 		local spawnPos = _EntityService:GetEntityByPath("/maps/MatrixStage/EnemyList/EnemySpawnPoint")
 
 		if spawnParent == nil or spawnPos == nil then
-			log("[MatrixMonsterSpawner] 스폰 위치를 찾을 수 없습니다")
 			return
 		end
 
 		-- 몬스터 ID 매핑 테이블에서 모델 ID 가져오기
 		local monsterInfo = self.monsterIdMap[monsterId]
 		if monsterInfo == nil then
-			log("[MatrixMonsterSpawner] 몬스터 ID 매핑을 찾을 수 없습니다: " .. tostring(monsterId))
 			return
 		end
 
 		local modelID = monsterInfo.modelID
-		log("[MatrixMonsterSpawner] 스폰: " .. monsterInfo.name .. " (" .. modelID .. ")")
 
 		-- 몬스터 데이터 가져오기 (서버에서)
 		local unitData = _UnitService:GetUnitByIDFromServer(modelID)
 		if unitData == nil then
-			log("[MatrixMonsterSpawner] 몬스터 데이터를 찾을 수 없습니다: " .. modelID)
 			return
 		end
 
@@ -180,7 +168,6 @@ script MatrixMonsterSpawner extends Logic
 		local spawnEntity = _SpawnService:SpawnByModelId(modelID, "Enemy", spawnPos.TransformComponent.Position, spawnParent)
 
 		if spawnEntity == nil then
-			log("[MatrixMonsterSpawner] 몬스터 스폰 실패: " .. modelID)
 			return
 		end
 
@@ -192,7 +179,6 @@ script MatrixMonsterSpawner extends Logic
 		if loopCount > 0 then
 			local scaledLevel = 1 * (levelMultiplier ^ loopCount)
 			buffedUnit = _BuffedUnitService:SetUnitBuff(buffedUnit, scaledLevel, 1)
-			log("[MatrixMonsterSpawner] 무한 모드 " .. tostring(loopCount) .. "회차: 레벨=" .. tostring(scaledLevel))
 		else
 			buffedUnit = _BuffedUnitService:SetUnitBuff(buffedUnit, 1, 1)
 		end
@@ -204,7 +190,6 @@ script MatrixMonsterSpawner extends Logic
 		self.totalAliveCount = self.totalAliveCount + 1
 		table.insert(self.currentWaveMonsters, spawnEntity)
 
-		log("[MatrixMonsterSpawner] 몬스터 스폰 완료: " .. modelID .. " (총 " .. tostring(self.totalSpawnedCount) .. "마리)")
 	end
 
 	-- ============================================
@@ -214,7 +199,6 @@ script MatrixMonsterSpawner extends Logic
 	@ExecSpace("Client")
 	method void OnWaveSpawnCompleteClient()
 		self.isSpawning = false
-		log("[MatrixMonsterSpawner] 클라이언트: 웨이브 스폰 완료")
 
 		if self.onWaveSpawnCompleteCallback ~= nil then
 			self.onWaveSpawnCompleteCallback()
@@ -250,7 +234,6 @@ script MatrixMonsterSpawner extends Logic
 
 	@ExecSpace("Client")
 	method void OnAllEnemiesDefeatedClient()
-		log("[MatrixMonsterSpawner] 모든 적 처치 완료!")
 		if self.onAllEnemiesDefeatedCallback ~= nil then
 			self.onAllEnemiesDefeatedCallback()
 		end
