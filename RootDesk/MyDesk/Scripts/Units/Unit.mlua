@@ -202,6 +202,24 @@ script Unit extends Component
 	@Sync
 	property number freezeTimeCounter = 0
 
+	-- 매트릭스 증강 전용 보너스 (시간제 버프 만료 시에도 보존)
+	@Sync
+	property number matrixDamageBonus = 0
+	@Sync
+	property number matrixMaxHPBonus = 0
+	@Sync
+	property number matrixAttackSpeedBonus = 0
+	@Sync
+	property number matrixMoveSpeedBonus = 0
+	@Sync
+	property number matrixDamageDecreaseBonus = 0
+
+	-- 유닛 중복 선택 강화 보너스
+	@Sync
+	property number overlapDamageBonus = 0
+	@Sync
+	property number overlapMaxHPBonus = 0
+
 	@ExecSpace("Server")
 	method void Spawn(BuffedUnitModel unitData, table skillData)
 		self.baseData = unitData
@@ -651,20 +669,21 @@ script Unit extends Component
 					self.Entity.TransformComponent.WorldPosition + Vector3(0.5, 0.3, 0),
 					self._T.projectileParent)
 				projectile.Projectile:SetCaster(self.Entity)
-		
+
 				if self.passiveSkill ~= nil and self.passiveSkill.PassiveSkillParent.passiveType == _ePassiveType.OnAttack then
 					self.passiveSkill.PassiveSkillParent:OnAttack()
 				end
 
 				-- 매트릭스 모드 OnAttack 트리거 적용
-				local finalDamage = self.damage
+				local baseDamage = self.damage
+				local finalDamage = baseDamage
 				if _MatrixAugmentService ~= nil then
 					finalDamage = _MatrixAugmentService:CalcAttackDamage(self.Entity, finalDamage)
 				end
 
 				projectile.Projectile:SetShoot(self.projectileSpriteRUID, 1, self.projectileSpeed, self.curTarget, true, finalDamage)
 			end
-			
+
 			local timerTiming = self.attackTiming / animationPlaySpeed
 			if timerTiming < 0 then
 				timerTiming = 0.5
@@ -706,7 +725,8 @@ script Unit extends Component
 				projectile.Projectile:SetCaster(self.Entity)
 
 				-- 매트릭스 모드 OnAttack 트리거 적용
-				local finalDamage = self.damage
+				local baseDamage = self.damage
+				local finalDamage = baseDamage
 				if _MatrixAugmentService ~= nil then
 					finalDamage = _MatrixAugmentService:CalcAttackDamage(self.Entity, finalDamage)
 				end
@@ -763,7 +783,8 @@ script Unit extends Component
 			return
 		end
 
-		local finalDamage = self.damage
+		local baseDamage = self.damage
+		local finalDamage = baseDamage
 
 		-- 매트릭스 모드 OnAttack 트리거 적용
 		if _MatrixAugmentService ~= nil then
@@ -828,7 +849,10 @@ script Unit extends Component
 			if buffTime ~= 0 then
 				deleteFunction = function()
 					self.attackSpeedTimerID = 0
-					self.attackSpeed = self.originAttackSpeed
+					self.attackSpeed = self.originAttackSpeed - self.matrixAttackSpeedBonus
+					if self.attackSpeed < 0.5 then
+						self.attackSpeed = 0.5
+					end
 				end
 		
 				self.attackSpeedTimerID = _TimerService:SetTimerOnce(deleteFunction, buffTime) 
@@ -846,9 +870,9 @@ script Unit extends Component
 			if buffTime ~= 0 then
 				deleteFunction = function()
 					self.maxHPTimerID = 0
-					self.maxHP = self.originMaxHP
-		
-					
+					self.maxHP = self.originMaxHP + self.matrixMaxHPBonus
+
+
 					if self.hp >= self.maxHP then
 						self.hp = self.maxHP
 					end
@@ -866,7 +890,7 @@ script Unit extends Component
 			if buffTime ~= 0 then
 				deleteFunction = function()
 					self.damageTimerID = 0
-					self.damage = self.originDamage
+					self.damage = self.originDamage + self.matrixDamageBonus
 				end
 		
 				self.damageTimerID = _TimerService:SetTimerOnce(deleteFunction, buffTime) 
@@ -881,7 +905,7 @@ script Unit extends Component
 			if buffTime ~= 0 then
 				deleteFunction = function()
 					self.moveSpeedTimerID = 0
-					self.moveSpeed = self.originMoveSpeed
+					self.moveSpeed = self.originMoveSpeed + self.matrixMoveSpeedBonus
 				end
 				
 				self.moveSpeedTimerID = _TimerService:SetTimerOnce(deleteFunction, buffTime)
@@ -896,7 +920,7 @@ script Unit extends Component
 			if buffTime ~= 0 then
 				deleteFunction = function()
 					self.damageDecreaseTimerID = 0
-					self.damageDecreaseAmount = 0
+					self.damageDecreaseAmount = self.matrixDamageDecreaseBonus
 		
 				end
 				
@@ -905,18 +929,61 @@ script Unit extends Component
 		end
 	end
 
+	-- 매트릭스 증강 전용: 서버에서 @Sync 프로퍼티 직접 변경 + 보너스 추적
+	@ExecSpace("Server")
+	method void GetMatrix(number buffType, number buffAmount)
+		if buffType == _eBuffType.AttackDamageBuff then
+			self.damage = self.damage + buffAmount
+			self.matrixDamageBonus = self.matrixDamageBonus + buffAmount
+		elseif buffType == _eBuffType.AttackSpeedBuff then
+			self.attackSpeed = self.attackSpeed - buffAmount
+			if self.attackSpeed < 0.5 then
+				self.attackSpeed = 0.5
+			end
+			self.matrixAttackSpeedBonus = self.matrixAttackSpeedBonus + buffAmount
+		elseif buffType == _eBuffType.MaxHealthMultiplyBuff then
+			local addHP = self.maxHP * buffAmount - self.maxHP
+			self.maxHP = self.maxHP * buffAmount
+			self.hp = self.hp + addHP
+			self.matrixMaxHPBonus = self.matrixMaxHPBonus + addHP
+		elseif buffType == _eBuffType.MoveSpeedBuff then
+			self.moveSpeed = self.moveSpeed + buffAmount
+			self.matrixMoveSpeedBonus = self.matrixMoveSpeedBonus + buffAmount
+		elseif buffType == _eBuffType.DamageDecreaseBuff then
+			self.damageDecreaseAmount = self.damageDecreaseAmount + buffAmount
+			self.matrixDamageDecreaseBonus = self.matrixDamageDecreaseBonus + buffAmount
+		end
+	end
+
+	-- 유닛 중복 선택 강화 전용: 서버에서 @Sync 프로퍼티 직접 변경
+	@ExecSpace("Server")
+	method void GetUnitOverlap(string buffType, number buffValue)
+		if buffType == "DAMAGE" then
+			self.damage = self.damage + buffValue
+			self.originDamage = self.originDamage + buffValue
+			self.overlapDamageBonus = self.overlapDamageBonus + buffValue
+		elseif buffType == "HP" then
+			self.maxHP = self.maxHP + buffValue
+			self.originMaxHP = self.originMaxHP + buffValue
+			self.hp = self.hp + buffValue
+			self.overlapMaxHPBonus = self.overlapMaxHPBonus + buffValue
+		end
+	end
+
 	method void OnHit(Entity attacker, number damage, boolean isCritical, number attackCount)
 		if self.hp <= 0 then
 			return
 		end
-		
+
 		if self.isNotTargetUnit == true then
 			return
 		end
-		
+
 		if _UserService.LocalPlayer.PlayerCharacter.isLimitBreakSkill and self.Entity.TagComponent.Tags[2] == "Tower" and not self.isEnemy then
 			return
 		end
+
+		local incomingDamage = damage
 		
 		if self.damageAvoidAmount > 0 then
 			local damageSkin

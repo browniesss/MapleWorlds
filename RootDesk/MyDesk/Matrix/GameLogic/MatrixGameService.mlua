@@ -394,6 +394,12 @@ script MatrixGameService extends Logic
 	method void OnRoundClear()
 		self.isRoundCleared = true
 
+		-- 미니맵 아이콘 제거
+		local map = _EntityService:GetEntityByPath("/maps/MatrixStage")
+		if map ~= nil and map.MinimapManager ~= nil then
+			map.MinimapManager:ClearAllEntityList()
+		end
+
 		-- 서버에서 모든 유닛 제거
 		self:ClearAllUnitsOnServer()
 
@@ -555,6 +561,12 @@ script MatrixGameService extends Logic
 				_MatrixCoinService:AddMatrixCoin(finalScore)
 			end
 
+		end
+
+		-- 미니맵 아이콘 제거
+		local map = _EntityService:GetEntityByPath("/maps/MatrixStage")
+		if map ~= nil and map.MinimapManager ~= nil then
+			map.MinimapManager:ClearAllEntityList()
 		end
 
 		-- 서버에서 모든 유닛 제거

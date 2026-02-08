@@ -22,6 +22,9 @@ script MatrixUnitSelectService extends Logic
 	-- currentUpgradeChoices 구조: { {unitId, buffType, buffValue}, ... }
 	property table currentUpgradeChoices = {}
 
+	-- 서버용: 유닛별 중복 강화 누적 데이터 {unitId -> {damage=N, hp=N}}
+	property table unitUpgrades = {}
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		self.matrixSelectUI = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI")
@@ -256,6 +259,7 @@ script MatrixUnitSelectService extends Logic
 		self.isUpgradeMode = false
 		self.currentUpgradeChoices = {}
 		self.onSelectionCompleteCallback = nil
+		self.unitUpgrades = {}
 	end
 
 	-- ============================================
@@ -412,9 +416,21 @@ script MatrixUnitSelectService extends Logic
 		self.isSelectingUnit = false
 		self.isUpgradeMode = false
 
-		-- 버프 적용
-		self:ApplyUpgradeToUnit(choice.unitId, choice.buffType, choice.buffValue)
+		-- 클라이언트 unitPool 데이터 업데이트
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.UserMatrixManager ~= nil then
+			local unitData = user.UserMatrixManager.unitPool[choice.unitId]
+			if unitData ~= nil then
+				if choice.buffType == "DAMAGE" then
+					unitData.damage = unitData.damage + choice.buffValue
+				elseif choice.buffType == "HP" then
+					unitData.hp = unitData.hp + choice.buffValue
+				end
+			end
+		end
 
+		-- 서버에 필드 유닛 버프 적용 (직접 호출)
+		self:ApplyUpgradeToUnitServer(choice.unitId, choice.buffType, choice.buffValue)
 
 		-- UI 닫기
 		self:CloseUnitSelectionUI()
@@ -437,46 +453,49 @@ script MatrixUnitSelectService extends Logic
 		end
 	end
 
-	-- 유닛에 버프 적용 (unitPool의 BuffedUnitModel에 직접 적용)
-	method void ApplyUpgradeToUnit(string unitId, string buffType, number buffValue)
-		local user = _UserService.LocalPlayer
-		if user == nil or user.UserMatrixManager == nil then
-			return
-		end
-
-		local unitData = user.UserMatrixManager.unitPool[unitId]
-		if unitData == nil then
-			return
-		end
-
-		if buffType == "DAMAGE" then
-			unitData.damage = unitData.damage + buffValue
-		elseif buffType == "HP" then
-			unitData.hp = unitData.hp + buffValue
-		end
-
-		-- 서버에 버프 적용 동기화
-		self:ApplyUpgradeToUnitServer(unitId, buffType, buffValue)
-	end
-
 	@ExecSpace("Server")
 	method void ApplyUpgradeToUnitServer(string unitId, string buffType, number buffValue)
-		local user = _UserService:GetUserEntityByUserId(senderUserId)
-		if user == nil or user.UserMatrixManager == nil then
-			return
+		-- 강화 데이터 누적 저장 (스폰 시 적용 위해)
+		if self.unitUpgrades[unitId] == nil then
+			self.unitUpgrades[unitId] = {damage = 0, hp = 0}
 		end
-
-		local unitData = user.UserMatrixManager.unitPool[unitId]
-		if unitData == nil then
-			return
-		end
-
 		if buffType == "DAMAGE" then
-			unitData.damage = unitData.damage + buffValue
+			self.unitUpgrades[unitId].damage = self.unitUpgrades[unitId].damage + buffValue
 		elseif buffType == "HP" then
-			unitData.hp = unitData.hp + buffValue
+			self.unitUpgrades[unitId].hp = self.unitUpgrades[unitId].hp + buffValue
 		end
 
+		-- 필드 위 해당 유닛에도 즉시 적용
+		local gameMapPath = _GameManager:GetGameMapName()
+		local myMonsterList = _EntityService:GetEntityByPath(gameMapPath .. "/MyMonsterList")
+
+		if myMonsterList ~= nil then
+			for _, child in pairs(myMonsterList.Children) do
+				if child.Unit ~= nil and child.Unit.id == unitId and child.Unit.curState ~= "die" then
+					child.Unit:GetUnitOverlap(buffType, buffValue)
+				end
+			end
+		end
+	end
+
+	-- 스폰 시 저장된 중복 강화를 유닛에 적용
+	method void ApplyStoredUpgrades(Entity spawnEntity)
+		if spawnEntity == nil or spawnEntity.Unit == nil then
+			return
+		end
+
+		local unitId = spawnEntity.Unit.id
+		local upgrade = self.unitUpgrades[unitId]
+		if upgrade == nil then
+			return
+		end
+
+		if upgrade.damage > 0 then
+			spawnEntity.Unit:GetUnitOverlap("DAMAGE", upgrade.damage)
+		end
+		if upgrade.hp > 0 then
+			spawnEntity.Unit:GetUnitOverlap("HP", upgrade.hp)
+		end
 	end
 
 	-- 메소 income UI 업데이트 (시너지 변경 반영)

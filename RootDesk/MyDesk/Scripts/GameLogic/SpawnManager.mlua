@@ -80,6 +80,11 @@ script SpawnManager extends Logic
 		-- 매트릭스 증강 컴포넌트 적용
 		self:ApplyMatrixAugments(spawnEntity, user)
 
+		-- 유닛 중복 강화 적용
+		if _MatrixUnitSelectService ~= nil then
+			_MatrixUnitSelectService:ApplyStoredUpgrades(spawnEntity)
+		end
+
 		self:GetUserWallet().MesoWallet:UseMeso(price)
 	end
 
@@ -208,7 +213,6 @@ script SpawnManager extends Logic
 			component:OnSpawn()
 		end
 
-		log("[SpawnManager] 증강 컴포넌트 적용: " .. componentName .. " (value=" .. tostring(matrix.value) .. ")")
 	end
 
 	-- INFINITE 타입 증강을 유닛에 직접 적용
@@ -246,7 +250,6 @@ script SpawnManager extends Logic
 			unit.attackRange = unit.attackRange + value
 		end
 
-		log("[SpawnManager] INFINITE 증강 적용: " .. effectType .. " +" .. tostring(value))
 	end
 
 	method string GetAugmentComponentName(string effectType)
@@ -343,6 +346,11 @@ script SpawnManager extends Logic
 			self:ApplyMatrixAugments(spawnEntity, user)
 		end
 		spawnEntity.Unit:Spawn(unitModel, skillData)
+
+		-- 유닛 중복 강화 적용
+		if _MatrixUnitSelectService ~= nil then
+			_MatrixUnitSelectService:ApplyStoredUpgrades(spawnEntity)
+		end
 	end
 
 	@ExecSpace("ServerOnly")

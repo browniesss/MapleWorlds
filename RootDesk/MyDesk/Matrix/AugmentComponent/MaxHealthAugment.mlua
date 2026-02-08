@@ -6,9 +6,9 @@ script MaxHealthAugment extends BaseMatrixAugmentComponent
 		if unit == nil then
 			return
 		end
-		
+
 		-- MaxHealthMultiplyBuff는 배율 그대로 전달
-		unit:GetBuff(_eBuffType.MaxHealthMultiplyBuff, self.value, 0)
+		unit:GetMatrix(_eBuffType.MaxHealthMultiplyBuff, self.value)
 	end
 
 end

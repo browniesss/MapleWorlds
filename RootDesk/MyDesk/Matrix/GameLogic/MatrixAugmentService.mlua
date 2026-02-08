@@ -458,8 +458,8 @@ script MatrixAugmentService extends Logic
 			buffAmount = self:CalcRatioValue(unit, matrixData.effectType, matrixData.value)
 		end
 
-		-- 버프 적용 (시간 0 = 무제한)
-		unit:GetBuff(buffType, buffAmount, 0)
+		-- 매트릭스 전용 버프 적용 (서버에서 @Sync 프로퍼티 직접 변경 + 보너스 추적)
+		unit:GetMatrix(buffType, buffAmount)
 	end
 
 	method number GetBuffTypeByName(string effectType)
@@ -489,6 +489,7 @@ script MatrixAugmentService extends Logic
 		end
 		return 0
 	end
+
 
 	@ExecSpace("Server")
 	method void ApplySynergyEffect(table matrixData)

@@ -91,6 +91,17 @@ script MinimapManager extends Component
 	end
 
 	@ExecSpace("Client")
+	method void ClearAllEntityList()
+		for uidStr, icon in pairs(self.entityIconMap) do
+			if isvalid(icon) then
+				_EntityService:Destroy(icon)
+			end
+		end
+		self.entityIconMap = {}
+		self.entityList = {}
+	end
+
+	@ExecSpace("Client")
 	method void RemoveEntityList(Entity entity)
 		local minimapSpriteEntity = _EntityService:GetEntityByPath(self:GetMinimapPath())
 		if not isvalid(minimapSpriteEntity) or not isvalid(entity) then

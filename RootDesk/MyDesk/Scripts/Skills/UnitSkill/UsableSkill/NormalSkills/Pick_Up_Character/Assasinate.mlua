@@ -4,40 +4,46 @@ script Assasinate extends SkillParent
 	@ExecSpace("Client")
 	method void ActivateSkill()
 		__base:ActivateSkill()
-		
+
 		-- 15332c6f8dc94dc5a16206cc2bc4fd1e 1타
 		-- ceba149628214e589b67b563a776544f 2타
 		-- 960a72295d044748922e4c88b745b361 다크 사이트
-		
+
 		self:CallAnimation("6thAssassination")
 		local options = {
 		    FlipX = true,  -- 좌우 반전
 		}
-		
+
 		_EffectService:PlayEffectAttached("960a72295d044748922e4c88b745b361", self.caster, Vector3.zero , 0, Vector3.one, false, options)
 		_EffectService:PlayEffectAttached("15332c6f8dc94dc5a16206cc2bc4fd1e", self.caster, Vector3.zero , 0, Vector3.one, false, options)
-		
+
 		self.caster.Unit.damageAvoidAmount += 5
 		self.caster.AvatarRendererComponent:SetAlpha(0.5)
 		self.target.Unit:OnHit(self.caster, (self.caster.Unit.damage * self.skillAmount), false, 1)
-		
+
 		local function HitFunction()
-			self.target.Unit:OnHit(self.caster, (self.caster.Unit.damage * self.skillAmount), false, 1)
+			if self.target ~= nil and self.target.Unit ~= nil then
+				self.target.Unit:OnHit(self.caster, (self.caster.Unit.damage * self.skillAmount), false, 1)
+			end
 		end
-		
+
 		local function SecondAnimFunction()
-			self.target.Unit:OnHit(self.caster, (self.caster.Unit.damage * self.skillAmount), false, 1)
+			if self.target ~= nil and self.target.Unit ~= nil then
+				self.target.Unit:OnHit(self.caster, (self.caster.Unit.damage * self.skillAmount), false, 1)
+			end
 		end
-		
+
 		local function SecondHitFunction()
 			self:CallAnimation("6thAssassination2")
 			_EffectService:PlayEffectAttached("ceba149628214e589b67b563a776544f", self.caster, Vector3.zero , 0, Vector3.one, false, options)
-		
-			self.target.Unit:OnHit(self.caster, (self.caster.Unit.damage * self.skillAmount), false, 1)
+
+			if self.target ~= nil and self.target.Unit ~= nil then
+				self.target.Unit:OnHit(self.caster, (self.caster.Unit.damage * self.skillAmount), false, 1)
+			end
 			self.caster.AvatarRendererComponent:SetAlpha(1)
 			self:SkillEnd()
 		end
-		
+
 		-- 첫 번째 발사: 공격 모션 발생
 		_TimerService:SetTimerOnce(HitFunction, self.skillAttackTiming)
 		_TimerService:SetTimerOnce(SecondAnimFunction, self.skillAttackTiming * 1.5)

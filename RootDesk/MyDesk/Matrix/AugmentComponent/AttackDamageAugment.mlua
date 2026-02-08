@@ -6,10 +6,10 @@ script AttackDamageAugment extends BaseMatrixAugmentComponent
 		if unit == nil then
 			return
 		end
-		
+
 		-- value가 1.1이면 10% 증가 → (1.1 - 1) * originDamage = 버프량
 		local buffAmount = unit.originDamage * (self.value - 1)
-		unit:GetBuff(_eBuffType.AttackDamageBuff, buffAmount, 0)
+		unit:GetMatrix(_eBuffType.AttackDamageBuff, buffAmount)
 	end
 
 end

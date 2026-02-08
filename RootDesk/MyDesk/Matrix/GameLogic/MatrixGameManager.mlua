@@ -343,14 +343,8 @@ script MatrixGameManager extends Logic
 
 	@ExecSpace("Server")
 	method void SetTimer()
-		self.timer = _TimerService:SetTimerRepeat(function()
-			if self.isPaused then
-				return
-			end
-
-			-- 매트릭스 타이머 시간 사용 (일시정지 시 자동 정지)
-			self:SetTimeText(self.matrixTime)
-		end, 1.0, 0)
+		-- UI 시간 업데이트는 MatrixTimerService.OnUpdate에서 클라이언트 직접 처리
+		-- (배속 시 게임 시간 기준으로 갱신되도록 변경)
 	end
 
 	@ExecSpace("Client")
@@ -565,11 +559,17 @@ script MatrixGameManager extends Logic
 	end
 
 	method void ClearObjects()
+		-- 미니맵 아이콘 제거
+		local map = _EntityService:GetEntityByPath(self.mapPath)
+		if map ~= nil and map.MinimapManager ~= nil then
+			map.MinimapManager:ClearAllEntityList()
+		end
+
 		local myMonsterList = _EntityService:GetEntityByPath(self.mapPath .. "/MyMonsterList")
 		local enemyList = _EntityService:GetEntityByPath(self.mapPath .. "/EnemyList")
 		local skillParent = _EntityService:GetEntityByPath(self.mapPath .. "/SkillParent")
 		local projectileParent = _EntityService:GetEntityByPath(self.mapPath .. "/ProjectileParent")
-		
+
 		-- 첫 번째 자식(스폰 포인트)은 유지
 		self:DestroyChildren(myMonsterList, true)
 		self:DestroyChildren(enemyList, true)

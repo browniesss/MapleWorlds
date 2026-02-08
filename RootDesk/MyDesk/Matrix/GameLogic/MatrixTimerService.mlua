@@ -27,25 +27,24 @@ script MatrixTimerService extends Logic
 			return
 		end
 
-		-- 배속 보정: delta를 현재 timeScale로 나눠서 실제 시간 기준으로 계산
-		local adjustedDelta = delta
-		if _TimeScaleManager ~= nil and _TimeScaleManager.timeScale > 0 then
-			adjustedDelta = delta / _TimeScaleManager.timeScale
-		end
+		-- delta를 그대로 사용 (게임 시간 기준, 배속 반영)
+		self.currentTime = self.currentTime + delta
 
-		-- 현재 시간 업데이트
-		self.currentTime = self.currentTime + adjustedDelta
-		
 		-- MatrixGameManager에 시간 동기화 (서버로 전송)
 		if _MatrixGameManager ~= nil then
 			self:SyncMatrixTimeToServer(self.currentTime)
 		end
-		
-		-- 매초 UserMatrixManager.playTime 업데이트
+
+		-- 매 게임 초마다 업데이트 (배속 시 리얼 시간 대비 빠르게 갱신)
 		local currentSecond = math.floor(self.currentTime)
 		if currentSecond ~= self.lastPlayTimeSecond then
 			self.lastPlayTimeSecond = currentSecond
 			self:UpdateUserPlayTime()
+
+			-- UI 시간 텍스트 직접 업데이트 (클라이언트에서 즉시 반영)
+			if _MatrixGameManager ~= nil then
+				_MatrixGameManager:SetTimeText(self.currentTime)
+			end
 		end
 		
 		-- 대기 중인 타이머 확인
