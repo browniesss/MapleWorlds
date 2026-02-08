@@ -1,0 +1,21 @@
+@Component
+script MatrixCharterViewButton extends Component
+
+	@Sync
+	property integer charterIndex = 0
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		if self.charterIndex <= 0 then
+			return
+		end
+
+		-- 강화 모드인 경우 강화 선택 처리
+		if _MatrixUnitSelectService.isUpgradeMode then
+			_MatrixUnitSelectService:SelectUpgradeByIndex(self.charterIndex)
+		else
+			_MatrixUnitSelectService:SelectUnitByIndex(self.charterIndex)
+		end
+	end
+
+end

@@ -1,0 +1,13 @@
+@Component
+script BonusDamageAugment extends BaseMatrixAugmentComponent
+
+	method number OnAttack(Entity target, number baseDamage)
+		if self.calcType == "PERCENT" then
+			return baseDamage * self.value
+		elseif self.calcType == "FLAT" then
+			return baseDamage + self.value
+		end
+		return baseDamage
+	end
+
+end

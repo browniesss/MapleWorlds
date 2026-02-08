@@ -137,14 +137,16 @@ script PlayCoinService extends Logic
 	method boolean IsUseCoin()
 		local userStage = _UserService.LocalPlayer.UserStage
 
-		-- 하드모드 상태 가져오기
-		local isHardMode = false
+		-- 게임 모드 가져오기 (StageSelectorUI에서 isHardMode 확인)
+		local gameMode = _eGameMode.Normal
 		local stageSelector = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/StageSelectUI")
 		if stageSelector ~= nil and stageSelector.StageSelectorUI ~= nil then
-			isHardMode = stageSelector.StageSelectorUI.isHardMode or false
+			if stageSelector.StageSelectorUI.isHardMode then
+				gameMode = _eGameMode.Hard
+			end
 		end
 
-		if isHardMode then
+		if gameMode == _eGameMode.Hard then
 			-- 하드모드: 해당 스테이지의 노말모드가 클리어되어 있어야 함
 			local isNormalCleared = (userStage.selectChapter < userStage.openChapter) or
 				(userStage.selectChapter == userStage.openChapter and userStage.selectStage < userStage.openStage)

@@ -1,0 +1,227 @@
+@Component
+script MatrixExtendUnitShop extends UnitShop
+
+	-- 매트릭스 전용 프로퍼티
+	@Sync
+	property SyncTable<string> deckUnits
+
+	@Sync
+	property SyncTable<string> queueUnits
+
+	@Sync
+	property SyncTable<boolean> slotEmpty
+
+	-- 빈 상태로 상점 초기화
+	method void InitShopEmpty()
+		table.clear(self.shopItems)
+		table.clear(self.deckUnits)
+		table.clear(self.queueUnits)
+		table.clear(self.slotEmpty)
+
+		-- UI 슬롯 연결 (4 + 1 preview)
+		for i = 1, 5 do
+			self.shopItems[i] = self.Entity.Children[i]
+			self.slotEmpty[i] = true
+			self.deckUnits[i] = ""
+		end
+
+		-- 모든 슬롯을 Empty 상태로 초기화
+		for slot = 1, 4 do
+			self.shopItems[slot].UnitShopItem:InitializeEmpty(slot, self)
+		end
+
+		-- 미리보기 슬롯도 Empty
+		self.shopItems[5].UnitShopItem:InitializeEmpty(5, self)
+
+		log("[MatrixUnitShop] 빈 상점으로 초기화 완료")
+	end
+
+	-- 특정 슬롯에 유닛 추가 (증강 선택 시 호출)
+	@ExecSpace("Client")
+	method void AddUnitToSlot(integer slot, string unitId)
+		if slot < 1 or slot > 4 then
+			log("[MatrixUnitShop] 잘못된 슬롯 번호: " .. tostring(slot))
+			return
+		end
+
+		local targetSlot = slot
+		if not self.slotEmpty[slot] then
+			targetSlot = self:FindEmptySlot()
+			if targetSlot == -1 then
+				table.insert(self.queueUnits, unitId)
+				log("[MatrixUnitShop] 빈 슬롯 없음, 대기열에 추가: " .. unitId)
+				self:UpdatePreviewSlot()
+				return
+			end
+		end
+
+		self.deckUnits[targetSlot] = unitId
+		self.slotEmpty[targetSlot] = false
+		self:SetSlot(targetSlot)
+
+		log("[MatrixUnitShop] 슬롯 " .. tostring(targetSlot) .. "에 유닛 추가: " .. unitId)
+	end
+
+	-- 자동으로 빈 슬롯에 유닛 추가
+	@ExecSpace("Client")
+	method void AddUnit(string unitId)
+		local emptySlot = self:FindEmptySlot()
+		if emptySlot ~= -1 then
+			self:AddUnitToSlot(emptySlot, unitId)
+		else
+			table.insert(self.queueUnits, unitId)
+			log("[MatrixUnitShop] 빈 슬롯 없음, 대기열에 추가: " .. unitId)
+			self:UpdatePreviewSlot()
+		end
+	end
+
+	method integer FindEmptySlot()
+		for i = 1, 4 do
+			if self.slotEmpty[i] then
+				return i
+			end
+		end
+		return -1
+	end
+
+	-- 개별 슬롯 UI 업데이트
+	@ExecSpace("Client")
+	method void SetSlot(integer slot)
+		if slot < 1 or slot > 4 then
+			return
+		end
+
+		local unitId = self.deckUnits[slot]
+		if unitId == nil or unitId == "" then
+			self.shopItems[slot].UnitShopItem:InitializeEmpty(slot, self)
+			return
+		end
+
+		-- UserMatrixManager.unitPool에서 BuffedUnitModel 가져오기 (countryId 포함)
+		local user = _UserService.LocalPlayer
+		local unitData = nil
+		if user ~= nil and user.UserMatrixManager ~= nil then
+			unitData = user.UserMatrixManager.unitPool[unitId]
+		end
+
+		if unitData == nil then
+			self.shopItems[slot].UnitShopItem:InitializeEmpty(slot, self)
+			return
+		end
+
+		local skillData = (unitData and unitData.skillID) and _SkillService:GetSkillByIDFromClient(unitData.skillID) or nil
+		local price = self:CalculatePrice(unitData)
+
+		self.shopItems[slot].UnitShopItem:Initialize(unitData, slot, self, skillData, price)
+	end
+
+	-- 미리보기 슬롯 업데이트
+	@ExecSpace("Client")
+	method void UpdatePreviewSlot()
+		if #self.queueUnits == 0 then
+			self.shopItems[5].UnitShopItem:InitializeEmpty(5, self)
+			return
+		end
+
+		local previewUnitId = self.queueUnits[1]
+		-- UserMatrixManager.unitPool에서 BuffedUnitModel 가져오기 (countryId 포함)
+		local user = _UserService.LocalPlayer
+		local unitData = nil
+		if user ~= nil and user.UserMatrixManager ~= nil then
+			unitData = user.UserMatrixManager.unitPool[previewUnitId]
+		end
+
+		if unitData == nil then
+			self.shopItems[5].UnitShopItem:InitializeEmpty(5, self)
+			return
+		end
+
+		local skillData = (unitData and unitData.skillID) and _SkillService:GetSkillByIDFromClient(unitData.skillID) or nil
+		local price = self:CalculatePrice(unitData)
+
+		self.shopItems[5].UnitShopItem:Initialize(unitData, -1, self, skillData, price)
+	end
+
+	-- 가격 계산 (시너지 적용)
+	method integer CalculatePrice(table unitData)
+		local price = unitData.summonCost
+		local user = _UserService.LocalPlayer
+		-- BuffedUnitModel의 countryId는 이미 integer (UnitModel에서 상속)
+		local count = user.UserSynergyComponent.countMap[unitData.countryId]
+
+		if count == nil then
+			count = 0
+		end
+
+		local synergy = _SynergyRepo:GetSynergyList(tonumber(unitData.countryId))
+		local maxCount = 0
+
+		for i = 1, synergy:length() do
+			local item = synergy:Get(i)
+
+			if item.count > count then
+				continue
+			end
+
+			if item.count <= maxCount then
+				continue
+			end
+
+			maxCount = item.count
+			price = math.tointeger(unitData.summonCost + item:CalcValue(0))
+		end
+
+		return price
+	end
+
+	-- 유닛 소환 시 호출 (UnitShop.OnSpawn 오버라이드)
+	method void OnSpawn(integer slotId, integer price)
+		if slotId < 1 or slotId > 4 then
+			return
+		end
+
+		local mesoWallet = _EntityService:GetEntityByPath(_MatrixGameManager:GetMapPath() .. "/userWallet")
+		if mesoWallet.MesoWallet:GetMeso() < price then
+			return
+		end
+
+		local usedUnitId = self.deckUnits[slotId]
+
+		if #self.queueUnits > 0 then
+			local nextUnitId = table.remove(self.queueUnits, 1)
+			self.deckUnits[slotId] = nextUnitId
+			table.insert(self.queueUnits, usedUnitId)
+		end
+
+		self:SetSlot(slotId)
+		self:UpdatePreviewSlot()
+	end
+
+	-- 전체 상점 새로고침 (UnitShop.RefreshShop 오버라이드)
+	method void RefreshShop()
+		for slot = 1, 4 do
+			self:SetSlot(slot)
+		end
+		self:UpdatePreviewSlot()
+	end
+
+	method integer GetUnitCount()
+		local count = 0
+		for i = 1, 4 do
+			if not self.slotEmpty[i] then
+				count = count + 1
+			end
+		end
+		return count
+	end
+
+	method boolean IsDeckEmpty()
+		for i = 1, 4 do
+			if not self.slotEmpty[i] then
+				return false
+			end
+		end
+		return true
+	end
+
+end

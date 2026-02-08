@@ -1,0 +1,1057 @@
+@Logic
+script MatrixAugmentService extends Logic
+
+	property integer selectCount = 0
+
+	property integer maxSelectCount = 5
+
+	property Entity matrixSelectUI = nil
+
+	property table matrixButtons = {}
+
+	property table currentChoices = {}
+
+	property table synergyBonusMap = {}
+
+	-- 매트릭스 게임 일시정지 상태 (MesoIncome 서버측 참조용)
+	property boolean isGamePaused = false
+
+	-- 메소 수입 배율 (증강 효과로 변동)
+	property number mesoIncomeMultiplier = 1.0
+
+	-- 리셋 버튼 사용 상태 (인덱스별: 1, 2, 3)
+	property table resetUsed = {}
+
+	-- 리셋 버튼 엔티티 참조
+	property table resetButtons = {}
+
+	-- 증강 Scroll_Layout 참조
+	property Entity augmentScrollLayout = nil
+
+	-- 동적 생성된 MatrixItem 추적
+	property table augmentItemTable = {}
+
+	-- InfiniteMatrixItem 참조
+	property Entity infiniteMatrixItem = nil
+
+	-- INFINITE 누적 스탯
+	property table infiniteStats = {}
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.matrixSelectUI = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI")
+
+		-- 증강 버튼은 내부 MatrixSelectUI/MatrixGrid에 있음
+		local augmentPanel = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI")
+		if augmentPanel ~= nil then
+			local matrixGrid = augmentPanel.Children[1]
+			if matrixGrid ~= nil then
+				for i = 1, 3 do
+					local btn = matrixGrid.Children[i]
+					if btn ~= nil then
+						table.insert(self.matrixButtons, btn)
+
+						-- 리셋 버튼 참조 저장
+						local resetBtn = btn:GetChildByName("ResetMatrixButton")
+						if resetBtn ~= nil then
+							self.resetButtons[i] = resetBtn
+						end
+					end
+				end
+			end
+		end
+
+		-- 리셋 상태 초기화
+		self.resetUsed = {false, false, false}
+
+		-- 증강 Scroll_Layout 참조
+		self.augmentScrollLayout = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/UserDeckUI/MatrixAugmentUI/Scroll_Layout")
+
+		-- InfiniteMatrixItem 참조
+		self.infiniteMatrixItem = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/UserDeckUI/MatrixAugmentUI/Scroll_Layout/InfiniteMatrixItem")
+
+		-- INFINITE 스탯 초기화
+		self.infiniteStats = {
+			AttackDamageBuff = 0,
+			MaxHealthBuff = 0,
+			MoveSpeedBuff = 0,
+			AttackSpeedBuff = 0,
+			AttackRangeBuff = 0
+		}
+	end
+
+	-- 서버측 일시정지 상태 설정 (MesoIncome에서 참조)
+	@ExecSpace("Server")
+	method void SetGamePausedOnServer(boolean paused)
+		self.isGamePaused = paused
+	end
+
+	-- 현재 무한 모드인지 확인
+	method boolean IsInfiniteMode()
+		if _MatrixGameService == nil then
+			return false
+		end
+		local phase = _MatrixGameService:GetCurrentPhaseData()
+		if phase ~= nil and phase.phaseType == _MatrixGameService.PHASE_TYPE_INFINITE then
+			return true
+		end
+		return false
+	end
+
+	@ExecSpace("Client")
+	method void OnMatrixEvent()
+		-- 무한 모드가 아닌 경우에만 선택 횟수 제한 적용
+		if not self:IsInfiniteMode() and self.selectCount >= self.maxSelectCount then
+			return
+		end
+
+		-- 게임 일시정지
+		if _MatrixGameManager ~= nil then
+			_MatrixGameManager:PauseGame()
+		end
+
+		-- 서버측 일시정지 (MesoIncome 연동)
+		self:SetGamePausedOnServer(true)
+
+		-- 리셋 상태 초기화 (새 증강 선택 시 모두 사용 가능)
+		self.resetUsed = {false, false, false}
+
+		-- 3개의 증강 선택지 생성 (무한 모드 여부에 따라 분기)
+		local choices = nil
+		if self:IsInfiniteMode() then
+			-- 무한 모드: INFINITE 타입 증강만 선택 (중복 허용)
+			choices = _MatrixAugmentRepo:GenerateInfiniteMatrixChoices()
+			log("[MatrixAugmentService] 무한 모드 증강 선택지 생성")
+		else
+			-- 일반 모드: 기존 증강 선택
+			choices = _MatrixAugmentRepo:GenerateMatrixChoices()
+		end
+
+		if choices == nil or #choices == 0 then
+			-- 선택지가 없으면 다시 재개
+			if _MatrixGameManager ~= nil then
+				_MatrixGameManager:ResumeGame()
+			end
+			self:SetGamePausedOnServer(false)
+			return
+		end
+
+		self.currentChoices = choices
+
+		-- UI 열기
+		self:OpenMatrixSelectUI(choices)
+	end
+
+	@ExecSpace("Client")
+	method void OpenMatrixSelectUI(table choices)
+		if self.matrixSelectUI == nil then
+			return
+		end
+
+		self.matrixSelectUI.Enable = true
+		self.matrixSelectUI.Visible = true
+
+		-- UnitSelectUI 숨기기, 증강 패널 보이기
+		local unitSelectUI = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI/UnitSelectUI")
+		if unitSelectUI ~= nil then
+			unitSelectUI.Enable = false
+		end
+
+		local augmentPanel = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI")
+		if augmentPanel ~= nil then
+			augmentPanel.Enable = true
+			augmentPanel.Visible = true
+		end
+
+		-- 슬라이드 애니메이션
+		_TweenLogic:MoveTo(self.matrixSelectUI, Vector2(0, 0), 0.3, EaseType.CircEaseIn)
+
+		-- 3개 버튼에 데이터 할당
+		-- UIItemMatrixCard 구조:
+		-- Children[1]: MatrixCardBackground (등급 배경)
+		-- Children[2]: MatrixIcon (아이콘)
+		-- Children[3]: MatirxName (이름) - 오타 주의
+		-- Children[4]: MatrixInfo (설명)
+		for i = 1, 3 do
+			local btn = self.matrixButtons[i]
+			if btn == nil then
+				continue
+			end
+
+			local matrix = choices[i]
+
+			if matrix ~= nil then
+				btn.Enable = true
+				btn.Visible = true
+
+				local modeData = _MatrixAugmentRepo:GetModeDataByGrade(matrix.grade)
+
+				-- 등급별 색상 이미지 설정 (btn 자체)
+				if btn.SpriteGUIRendererComponent ~= nil then
+					if modeData ~= nil and modeData.colorRUID ~= nil and modeData.colorRUID ~= "" then
+						btn.SpriteGUIRendererComponent.ImageRUID = modeData.colorRUID
+					end
+				end
+
+				-- UIItemMatrixCard 구조 (백그라운드 제거됨):
+				-- Children[1]: MatrixIcon (아이콘)
+				-- Children[2]: MatirxName (이름)
+				-- Children[3]: MatrixInfo (설명)
+
+				-- 아이콘 설정 (Children[1])
+				local iconEntity = btn.Children[1]
+				if iconEntity ~= nil and iconEntity.SpriteGUIRendererComponent ~= nil then
+					iconEntity.SpriteGUIRendererComponent.ImageRUID = matrix.icon or ""
+				end
+
+				-- 이름 설정 (Children[2])
+				local nameEntity = btn.Children[2]
+				if nameEntity ~= nil and nameEntity.TextComponent ~= nil then
+					local displayName = "[" .. (matrix.grade or "RARE") .. "] " .. (matrix.name or "")
+					nameEntity.TextComponent.Text = displayName
+				end
+
+				-- 설명 설정 (Children[3])
+				local descEntity = btn.Children[3]
+				if descEntity ~= nil and descEntity.TextComponent ~= nil then
+					descEntity.TextComponent.Text = self:FormatDesc(matrix)
+				end
+
+				-- 버튼 컴포넌트에 matrix 인덱스 저장
+				if btn.MatrixButton ~= nil then
+					btn.MatrixButton.matrixIndex = i
+				end
+
+				-- 리셋 버튼 상태 업데이트
+				self:UpdateResetButtonState(i)
+			else
+				btn.Enable = false
+				btn.Visible = false
+			end
+		end
+	end
+
+	-- 리셋 버튼 UI 상태 업데이트
+	@ExecSpace("Client")
+	method void UpdateResetButtonState(integer index)
+		local resetBtn = self.resetButtons[index]
+		if resetBtn == nil then
+			return
+		end
+
+		local isUsed = self.resetUsed[index] or false
+
+		if isUsed then
+			-- 이미 사용됨 - 비활성화
+			resetBtn.Enable = true
+			if resetBtn.ButtonComponent ~= nil then
+				resetBtn.ButtonComponent.Enable = false
+			end
+		else
+			-- 사용 가능
+			resetBtn.Enable = true
+			if resetBtn.ButtonComponent ~= nil then
+				resetBtn.ButtonComponent.Enable = true
+			end
+		end
+	end
+
+	-- 리셋 버튼 클릭 시 호출 (해당 인덱스의 증강을 새로 뽑음)
+	@ExecSpace("Client")
+	method void ResetMatrixByIndex(integer index)
+		-- 이미 사용한 리셋인지 확인
+		if self.resetUsed[index] == true then
+			log("[MatrixAugmentService] 리셋 버튼 이미 사용됨: " .. tostring(index))
+			return
+		end
+
+		-- 리셋 사용 처리
+		self.resetUsed[index] = true
+
+		-- 새 증강 생성 (무한 모드 여부에 따라 분기)
+		local newMatrix = nil
+		if self:IsInfiniteMode() then
+			-- 무한 모드: INFINITE 타입 증강만 (중복 허용)
+			newMatrix = _MatrixAugmentRepo:GenerateSingleInfiniteMatrixChoice(self.currentChoices)
+		else
+			-- 일반 모드: 기존 증강 선택
+			newMatrix = _MatrixAugmentRepo:GenerateSingleMatrixChoice(self.currentChoices)
+		end
+
+		if newMatrix == nil then
+			log("[MatrixAugmentService] 새 증강 생성 실패")
+			return
+		end
+
+		-- 현재 선택지 교체
+		self.currentChoices[index] = newMatrix
+
+		-- UI 업데이트 (해당 카드만)
+		self:UpdateSingleMatrixCard(index, newMatrix)
+
+		-- 리셋 버튼 상태 업데이트
+		self:UpdateResetButtonState(index)
+
+		log("[MatrixAugmentService] 증강 리셋 완료: 인덱스=" .. tostring(index) .. ", 새 증강=" .. tostring(newMatrix.name))
+	end
+
+	-- 단일 증강 카드 UI 업데이트
+	@ExecSpace("Client")
+	method void UpdateSingleMatrixCard(integer index, table matrix)
+		local btn = self.matrixButtons[index]
+		if btn == nil or matrix == nil then
+			return
+		end
+
+		local modeData = _MatrixAugmentRepo:GetModeDataByGrade(matrix.grade)
+
+		-- 등급별 색상 이미지 설정 (btn 자체)
+		if btn.SpriteGUIRendererComponent ~= nil then
+			if modeData ~= nil and modeData.colorRUID ~= nil and modeData.colorRUID ~= "" then
+				btn.SpriteGUIRendererComponent.ImageRUID = modeData.colorRUID
+			end
+		end
+
+		-- 아이콘 설정 (Children[1])
+		local iconEntity = btn.Children[1]
+		if iconEntity ~= nil and iconEntity.SpriteGUIRendererComponent ~= nil then
+			iconEntity.SpriteGUIRendererComponent.ImageRUID = matrix.icon or ""
+		end
+
+		-- 이름 설정 (Children[2])
+		local nameEntity = btn.Children[2]
+		if nameEntity ~= nil and nameEntity.TextComponent ~= nil then
+			local displayName = "[" .. (matrix.grade or "RARE") .. "] " .. (matrix.name or "")
+			nameEntity.TextComponent.Text = displayName
+		end
+
+		-- 설명 설정 (Children[3])
+		local descEntity = btn.Children[3]
+		if descEntity ~= nil and descEntity.TextComponent ~= nil then
+			descEntity.TextComponent.Text = self:FormatDesc(matrix)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void CloseMatrixSelectUI()
+		-- UI 비활성화
+		if self.matrixSelectUI ~= nil then
+			self.matrixSelectUI.Enable = false
+			self.matrixSelectUI.Visible = false
+		end
+
+		-- 게임 재개
+		if _MatrixGameManager ~= nil then
+			_MatrixGameManager:ResumeGame()
+		end
+
+		-- 서버측 일시정지 해제 (MesoIncome 연동)
+		self:SetGamePausedOnServer(false)
+	end
+
+	@ExecSpace("Client")
+	method void SelectMatrixByIndex(integer index)
+		local matrix = self.currentChoices[index]
+		if matrix == nil then
+			return
+		end
+
+		-- 클라이언트 UserMatrixManager에도 증강 저장 (UI 표시용)
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.UserMatrixManager ~= nil then
+			user.UserMatrixManager:AddMatrix(matrix)
+		end
+
+		-- 증강 UI 업데이트 (타입별 분기)
+		if matrix.type == "INFINITE" then
+			self:UpdateInfiniteMatrixUI(matrix)
+		else
+			self:AddAugmentToScrollUI(matrix)
+		end
+
+		self:SelectMatrixServer(matrix.id)
+	end
+
+	@ExecSpace("Server")
+	method void SelectMatrixServer(integer matrixId)
+		local matrix = _MatrixAugmentRepo:GetMatrixById(matrixId)
+		if matrix == nil then
+			return
+		end
+
+		self.selectCount = self.selectCount + 1
+
+		-- 효과 적용
+		self:ApplyMatrixEffect(matrix)
+
+		-- UserMatrixManager에 증강 추가
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		if user ~= nil and user.UserMatrixManager ~= nil then
+			user.UserMatrixManager:AddMatrix(matrix)
+		end
+
+		-- 메소 UI 업데이트 (MESO/SYNERGY 타입 증강 효과 반영)
+		self:RefreshMesoIncomeUI()
+
+		-- UI 닫기 (클라이언트)
+		self:CloseMatrixSelectUIClient()
+	end
+
+	@ExecSpace("Client")
+	method void CloseMatrixSelectUIClient()
+		self:CloseMatrixSelectUI()
+
+		-- 시너지 UI 갱신 (시너지 증강 효과 반영)
+		local synergyUI = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/MatrixSynergyUI")
+		if synergyUI ~= nil and synergyUI.MatrixSynergyUIManager ~= nil then
+			synergyUI.MatrixSynergyUIManager:RefreshSynergyUI()
+		end
+
+		-- 증강 선택 완료 후 다음 라운드/페이즈 진행
+		if _MatrixGameService ~= nil then
+			_MatrixGameService:OnAugmentSelected()
+		end
+	end
+
+	@ExecSpace("Server")
+	method void ApplyMatrixEffect(table matrixData)
+		local effectType = matrixData.type
+
+		if effectType == "STAT" or effectType == "BUFF" then
+			self:ApplyBuffEffect(matrixData)
+		elseif effectType == "SYNERGY" then
+			self:ApplySynergyEffect(matrixData)
+		elseif effectType == "TRIGGER" then
+			self:ApplyTriggerEffect(matrixData)
+		elseif effectType == "SPECIAL" then
+			self:ApplySpecialEffect(matrixData)
+		elseif effectType == "MESO" then
+			self:ApplyMesoEffect(matrixData)
+		elseif effectType == "INFINITE" then
+			self:ApplyInfiniteEffect(matrixData)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void ApplyBuffEffect(table matrixData)
+		-- 현재 맵의 모든 아군 유닛에게 버프 적용
+		local gameMapPath = _GameManager:GetGameMapName()
+		local myMonsterList = _EntityService:GetEntityByPath(gameMapPath.."/MyMonsterList")
+
+		if myMonsterList == nil then
+			return
+		end
+
+		for _, child in ipairs(myMonsterList.Children) do
+			if child.Unit ~= nil then
+				self:ApplyBuffToUnit(child.Unit, matrixData)
+			end
+		end
+	end
+
+	method void ApplyBuffToUnit(any unit, table matrixData)
+		local buffType = self:GetBuffTypeByName(matrixData.effectType)
+		if buffType == 0 then
+			return
+		end
+
+		local buffAmount = matrixData.value
+
+		-- 비율 계산인 경우
+		if matrixData.calcType == "PERCENT" then
+			buffAmount = self:CalcRatioValue(unit, matrixData.effectType, matrixData.value)
+		end
+
+		-- 버프 적용 (시간 0 = 무제한)
+		unit:GetBuff(buffType, buffAmount, 0)
+	end
+
+	method number GetBuffTypeByName(string effectType)
+		if effectType == "AttackSpeedBuff" then
+			return _eBuffType.AttackSpeedBuff
+		elseif effectType == "MaxHealthMultiplyBuff" then
+			return _eBuffType.MaxHealthMultiplyBuff
+		elseif effectType == "AttackDamageBuff" then
+			return _eBuffType.AttackDamageBuff
+		elseif effectType == "MoveSpeedBuff" then
+			return _eBuffType.MoveSpeedBuff
+		elseif effectType == "DamageDecreaseBuff" then
+			return _eBuffType.DamageDecreaseBuff
+		end
+		return 0
+	end
+
+	method number CalcRatioValue(any unit, string effectType, number ratio)
+		if effectType == "AttackDamageBuff" then
+			return unit.originDamage * (ratio - 1)
+		elseif effectType == "MaxHealthMultiplyBuff" then
+			return ratio
+		elseif effectType == "AttackSpeedBuff" then
+			return unit.originAttackSpeed * (1 - ratio)
+		elseif effectType == "MoveSpeedBuff" then
+			return unit.originMoveSpeed * (ratio - 1)
+		end
+		return 0
+	end
+
+	@ExecSpace("Server")
+	method void ApplySynergyEffect(table matrixData)
+		-- 시너지 보너스는 UserMatrixManager.matrixEffects에 저장되어 있고,
+		-- GET_SYNERGY_COUNT에서 자동으로 보너스를 계산하므로 별도 처리 불필요
+		log("[MatrixAugmentService] 시너지 증강 적용: " .. tostring(matrixData.effectType) .. ", value=" .. tostring(matrixData.value))
+
+		-- 시너지 보너스 유닛 체크 (시그너스 등)
+		-- SynergyBonus_All, SynergyBonus_Region 등 시너지 증강 선택 시
+		-- 시그너스 시너지 조건을 충족할 수 있으므로 체크
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		if user ~= nil and user.UserMatrixManager ~= nil then
+			user.UserMatrixManager:CheckAndAddSynergyUnits()
+		end
+	end
+
+	-- 트리거 효과 저장 (Phase 3에서 확장)
+	@ExecSpace("Server")
+	method void ApplyTriggerEffect(table matrixData)
+		-- triggerType: OnAttack, OnHit, OnKill, OnDie, OnStart
+		-- 트리거 효과는 activeMatrixEffects에 저장되어 있으므로
+		-- 실제 트리거 발동 시 GetTriggerEffects()로 조회하여 처리
+	end
+
+	@ExecSpace("Server")
+	method void ApplySpecialEffect(table matrixData)
+		local effectType = matrixData.effectType
+
+		-- 커스텀 특수 효과 처리 (확장 가능)
+		if effectType == "SkillCooldownReduction" then
+			-- 스킬 쿨타임 감소 (추후 구현)
+		end
+
+		-- 추가 특수 효과는 여기에 분기 추가
+	end
+
+	@ExecSpace("Server")
+	method void ApplyMesoEffect(table matrixData)
+		local effectType = matrixData.effectType
+
+		if effectType == "MesoIncomeMultiplier" then
+			-- 배율 누적 적용 (예: 기존 1.0 + 0.2 = 1.2)
+			if matrixData.calcType == "PERCENT" then
+				self.mesoIncomeMultiplier = self.mesoIncomeMultiplier * matrixData.value
+			elseif matrixData.calcType == "FLAT" then
+				self.mesoIncomeMultiplier = self.mesoIncomeMultiplier + matrixData.value
+			end
+			log("[MatrixAugmentService] 메소 수입 배율 변경: " .. tostring(self.mesoIncomeMultiplier))
+		end
+	end
+
+	-- 무한 모드 전용 증강 효과 적용 (전체 유닛 스탯 고정값 증가)
+	@ExecSpace("Server")
+	method void ApplyInfiniteEffect(table matrixData)
+		local gameMapPath = _GameManager:GetGameMapName()
+		local myMonsterList = _EntityService:GetEntityByPath(gameMapPath.."/MyMonsterList")
+
+		if myMonsterList == nil then
+			return
+		end
+
+		local effectType = matrixData.effectType
+		local value = matrixData.value
+
+		for _, child in ipairs(myMonsterList.Children) do
+			if child.Unit ~= nil then
+				self:ApplyInfiniteBuffToUnit(child.Unit, effectType, value)
+			end
+		end
+
+		log("[MatrixAugmentService] 무한 모드 증강 적용: " .. tostring(effectType) .. " +" .. tostring(value))
+	end
+
+	-- 무한 모드 증강을 단일 유닛에 적용
+	method void ApplyInfiniteBuffToUnit(any unit, string effectType, number value)
+		if effectType == "AttackDamageBuff" then
+			-- 공격력 고정 증가
+			unit.damage = unit.damage + value
+			unit.originDamage = unit.originDamage + value
+		elseif effectType == "MaxHealthBuff" then
+			-- 최대 체력 고정 증가
+			local hpRatio = unit.hp / unit.maxHP
+			unit.maxHP = unit.maxHP + value
+			unit.originMaxHP = unit.originMaxHP + value
+			unit.hp = unit.maxHP * hpRatio  -- HP 비율 유지
+		elseif effectType == "AttackSpeedBuff" then
+			-- 공격속도 증가 (간격 감소)
+			unit.attackSpeed = unit.attackSpeed - value
+			unit.originAttackSpeed = unit.originAttackSpeed - value
+			-- 최소값 제한
+			if unit.attackSpeed < 0.5 then
+				unit.attackSpeed = 0.5
+			end
+			if unit.originAttackSpeed < 0.5 then
+				unit.originAttackSpeed = 0.5
+			end
+		elseif effectType == "MoveSpeedBuff" then
+			-- 이동속도 고정 증가
+			unit.moveSpeed = unit.moveSpeed + value
+			unit.originMoveSpeed = unit.originMoveSpeed + value
+		elseif effectType == "AttackRangeBuff" then
+			-- 사거리 고정 증가
+			unit.attackRange = unit.attackRange + value
+		end
+	end
+
+	-- UserMatrixManager에서 증강 효과 목록 가져오기
+	method table GetMatrixEffects()
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.UserMatrixManager ~= nil then
+			return user.UserMatrixManager:GetMatrixEffects()
+		end
+		return {}
+	end
+
+	-- 특정 트리거 타입의 효과 목록 반환
+	method table GetTriggerEffects(string triggerType)
+		local effects = {}
+		local matrixEffects = self:GetMatrixEffects()
+		for _, matrix in ipairs(matrixEffects) do
+			if matrix.type == "TRIGGER" and matrix.triggerType == triggerType then
+				table.insert(effects, matrix)
+			end
+		end
+		return effects
+	end
+
+	-- ============================================
+	-- 트리거 계산 메서드들 (Unit.mlua에서 호출)
+	-- ============================================
+
+	-- 공격 시 데미지 계산 (OnAttack)
+	method number CalcAttackDamage(Entity attacker, number baseDamage)
+		if _GameManager == nil or not (_GameManager.currentGameMode == _eGameMode.Matrix) then
+			return baseDamage
+		end
+
+		local finalDamage = baseDamage
+		local triggerEffects = self:GetTriggerEffects("OnAttack")
+
+		for _, effect in ipairs(triggerEffects) do
+			if effect.effectType == "BonusDamage" then
+				if effect.calcType == "PERCENT" then
+					finalDamage = finalDamage * effect.value
+				elseif effect.calcType == "FLAT" then
+					finalDamage = finalDamage + effect.value
+				end
+			end
+		end
+
+		return finalDamage
+	end
+
+	-- 피격 시 데미지 계산 (OnHit)
+	method number CalcOnHitDamage(Entity defender, number incomingDamage)
+		if _GameManager == nil or not (_GameManager.currentGameMode == _eGameMode.Matrix) then
+			return incomingDamage
+		end
+
+		local finalDamage = incomingDamage
+		local triggerEffects = self:GetTriggerEffects("OnHit")
+
+		for _, effect in ipairs(triggerEffects) do
+			if effect.effectType == "DamageReduction" then
+				if effect.calcType == "PERCENT" then
+					finalDamage = finalDamage * effect.value
+				elseif effect.calcType == "FLAT" then
+					finalDamage = finalDamage - effect.value
+					if finalDamage < 1 then
+						finalDamage = 1
+					end
+				end
+			end
+		end
+
+		return finalDamage
+	end
+
+	-- 처치 시 효과 (OnKill)
+	method void OnKillEffect(Entity killer, Entity victim)
+		if _GameManager == nil or not (_GameManager.currentGameMode == _eGameMode.Matrix) then
+			return
+		end
+
+		local triggerEffects = self:GetTriggerEffects("OnKill")
+
+		for _, effect in ipairs(triggerEffects) do
+			if effect.effectType == "HealOnKill" then
+				-- 처치 시 HP 회복
+				local healAmount = 0
+				if effect.calcType == "PERCENT" then
+					healAmount = killer.Unit.maxHP * effect.value
+				elseif effect.calcType == "FLAT" then
+					healAmount = effect.value
+				end
+				killer.Unit:OnHeal(killer, healAmount)
+			elseif effect.effectType == "GoldOnKill" then
+				-- 처치 시 소환 포인트 추가
+				local goldAmount = effect.value or 0
+				local mapPath = _MatrixGameManager:GetMapPath()
+				local mesoWallet = _EntityService:GetEntityByPath(mapPath .. "/userWallet")
+				if mesoWallet ~= nil and mesoWallet.MesoWallet ~= nil then
+					mesoWallet.MesoWallet:AddMeso(goldAmount)
+				end
+			end
+		end
+	end
+
+	-- 마나 회복 계산 (공격 시 MP 증가량 보너스)
+	method number CalcMpRecovery(Entity attacker, number baseMpGain)
+		if _GameManager == nil or not (_GameManager.currentGameMode == _eGameMode.Matrix) then
+			return baseMpGain
+		end
+
+		local finalMpGain = baseMpGain
+
+		-- matrixEffects를 순회하여 마나 회복 증강 찾기
+		local matrixEffects = self:GetMatrixEffects()
+		for _, matrix in ipairs(matrixEffects) do
+			-- TRIGGER 타입이면서 Always 트리거이거나, STAT 타입인 경우
+			if (matrix.type == "TRIGGER" and matrix.triggerType == "Always") or matrix.type == "STAT" then
+				if matrix.effectType == "MpRecoveryBonus" then
+					if matrix.calcType == "PERCENT" then
+						finalMpGain = finalMpGain * matrix.value
+					elseif matrix.calcType == "FLAT" then
+						finalMpGain = finalMpGain + matrix.value
+					end
+				end
+			end
+		end
+
+		return finalMpGain
+	end
+
+	-- 사망 시 효과 (OnDie) - 아군 유닛 사망 시 주변 적에게 효과 적용
+	method void OnDieEffect(Entity deadUnit, Entity killer)
+		if _GameManager == nil or not (_GameManager.currentGameMode == _eGameMode.Matrix) then
+			return
+		end
+
+		local triggerEffects = self:GetTriggerEffects("OnDie")
+		if #triggerEffects == 0 then
+			log("[MatrixAugmentService] OnDieEffect: OnDie 트리거 효과 없음")
+			return
+		end
+
+		-- 사망한 유닛 위치
+		local deadPos = deadUnit.TransformComponent.WorldPosition
+
+		-- 매트릭스 모드에서는 MatrixGameManager 경로 사용
+		local mapPath = "/maps/MatrixStage"
+		if _MatrixGameManager ~= nil then
+			mapPath = _MatrixGameManager:GetMapPath()
+		end
+
+		-- 적 리스트에서 범위 내 적 탐색
+		local enemyList = _EntityService:GetEntityByPath(mapPath .. "/EnemyList")
+		if enemyList == nil then
+			log("[MatrixAugmentService] OnDieEffect: EnemyList를 찾을 수 없음 - " .. mapPath)
+			return
+		end
+
+		log("[MatrixAugmentService] OnDieEffect: " .. tostring(#triggerEffects) .. "개 효과 적용 시도")
+
+		for _, effect in ipairs(triggerEffects) do
+			if effect.effectType == "FreezeOnDie" then
+				self:ApplyFreezeOnDie(deadPos, enemyList, effect)
+			elseif effect.effectType == "KnockbackOnDie" then
+				self:ApplyKnockbackOnDie(deadPos, enemyList, effect)
+			end
+		end
+	end
+
+	-- 등급별 범위 반환
+	method number GetOnDieRange(string grade)
+		if grade == "LEGENDARY" then
+			return 5
+		elseif grade == "UNIQUE" then
+			return 4
+		else
+			return 3
+		end
+	end
+
+	-- 범위 내 적 목록 반환
+	method table FindEnemiesInRange(Vector3 pos, Entity enemyList, number range)
+		local targets = {}
+		for _, entity in ipairs(enemyList.Children) do
+			if entity.Unit ~= nil and entity.Unit.curState ~= "die" then
+				local targetPos = entity.TransformComponent.WorldPosition
+				local distance = math.abs(targetPos.x - pos.x)
+				if distance <= range then
+					table.insert(targets, entity)
+				end
+			end
+		end
+		return targets
+	end
+
+	-- 빙결 효과 적용 (아군 사망 시) - 클라이언트에서 호출, 서버로 전달
+	method void ApplyFreezeOnDie(Vector3 deadPos, Entity enemyList, table effect)
+		local range = self:GetOnDieRange(effect.grade)
+		local freezeTime = effect.value
+		local targets = self:FindEnemiesInRange(deadPos, enemyList, range)
+
+		-- 서버에서 빙결 적용 (curState가 @Sync 프로퍼티이므로)
+		for _, enemy in ipairs(targets) do
+			if enemy.Unit ~= nil and enemy.Unit.curState ~= "die" then
+				self:ApplyFreezeOnServer(enemy, freezeTime)
+			end
+		end
+
+		log("[MatrixAugmentService] 빙결의 유언 발동: 범위=" .. tostring(range) .. ", 지속=" .. tostring(freezeTime) .. "초, 대상=" .. tostring(#targets) .. "명")
+	end
+
+	-- 서버에서 빙결 디버프 적용
+	@ExecSpace("Server")
+	method void ApplyFreezeOnServer(Entity enemy, number freezeTime)
+		if enemy == nil or enemy.Unit == nil then
+			return
+		end
+		enemy.Unit:GetDebuff(_eDebuffType.Freeze, 0, freezeTime)
+	end
+
+	-- 밀치기 효과 적용 (아군 사망 시) - 스턴은 서버, 이동은 클라이언트
+	method void ApplyKnockbackOnDie(Vector3 deadPos, Entity enemyList, table effect)
+		local range = self:GetOnDieRange(effect.grade)
+		local pushDistance = effect.value
+		local targets = self:FindEnemiesInRange(deadPos, enemyList, range)
+
+		-- 밀치기 거리에 비례한 스턴 시간 (거리 1당 0.1초 + 밀치기 시간 0.2초)
+		local pushDuration = 0.2
+		local stunTime = (pushDistance * 0.1) + pushDuration
+
+		for _, enemy in ipairs(targets) do
+			if enemy.Unit ~= nil and enemy.Unit.curState ~= "die" then
+				local enemyPos = enemy.TransformComponent.WorldPosition
+				local direction = 1
+				if enemyPos.x < deadPos.x then
+					direction = -1
+				end
+
+				-- 서버에서 스턴 적용 (적 유닛이므로 서버에서 처리 필요)
+				self:ApplyStunOnServer(enemy, stunTime)
+
+				-- 클라이언트에서 밀치기 이동 처리
+				local pushSteps = 10
+				local pushInterval = 0.02
+				local stepDistance = pushDistance / pushSteps
+
+				for i = 1, pushSteps do
+					_TimerService:SetTimerOnce(function()
+						if isvalid(enemy) and enemy.Unit.curState ~= "die" then
+							local pos = enemy.TransformComponent.WorldPosition
+							local ratio = 1 - (i / pushSteps)
+							enemy.TransformComponent.WorldPosition = Vector3(pos.x + (stepDistance * ratio * 2 * direction), pos.y, pos.z)
+						end
+					end, pushInterval * i)
+				end
+			end
+		end
+
+		log("[MatrixAugmentService] 밀치기 유언 발동: 범위=" .. tostring(range) .. ", 거리=" .. tostring(pushDistance) .. ", 스턴=" .. tostring(stunTime) .. "초, 대상=" .. tostring(#targets) .. "명")
+	end
+
+	-- 서버에서 스턴 적용
+	@ExecSpace("Server")
+	method void ApplyStunOnServer(Entity enemy, number stunTime)
+		if enemy == nil or enemy.Unit == nil then
+			return
+		end
+		enemy.Unit:GetDebuff(_eDebuffType.Stun, 0, stunTime)
+	end
+
+	@ExecSpace("Server")
+	method void ClearAllEffects()
+		-- 시너지 보너스는 UserMatrixManager.matrixEffects 초기화 시 자동으로 제거됨
+		-- (GET_SYNERGY_COUNT에서 matrixEffects 기반으로 보너스 계산)
+
+		-- 상태 초기화
+		self.selectCount = 0
+		self.synergyBonusMap = {}
+		self.currentChoices = {}
+		self.isGamePaused = false
+		self.mesoIncomeMultiplier = 1.0
+		self.resetUsed = {false, false, false}
+
+		-- 증강 Scroll UI 초기화
+		self:ClearAugmentScrollUI()
+	end
+
+	method table GetActiveEffects()
+		return self:GetMatrixEffects()
+	end
+
+	method table GetActiveBuffEffects()
+		local buffEffects = {}
+		local matrixEffects = self:GetMatrixEffects()
+		for _, matrix in ipairs(matrixEffects) do
+			if matrix.type == "STAT" or matrix.type == "BUFF" then
+				table.insert(buffEffects, matrix)
+			end
+		end
+		return buffEffects
+	end
+
+	-- ============================================
+	-- 증강 Scroll UI 관리
+	-- ============================================
+
+	-- 일반 증강 선택 시 MatrixItem 동적 생성
+	@ExecSpace("Client")
+	method void AddAugmentToScrollUI(table matrix)
+		if self.augmentScrollLayout == nil then
+			return
+		end
+
+		local item = _SpawnService:SpawnByModelId("model://9f03b085-86cb-4c62-ad2d-10c011110e29", "MatrixItem", Vector3.zero, self.augmentScrollLayout)
+
+		-- 아이콘 이미지 설정 (MatrixItem 루트)
+		if item.SpriteGUIRendererComponent ~= nil then
+			item.SpriteGUIRendererComponent.ImageRUID = matrix.icon or ""
+		end
+
+		-- MatrixInfoBox 하위 자식 접근
+		local infoBox = item:GetChildByName("MatrixInfoBox")
+		if infoBox ~= nil then
+			local nameEntity = infoBox:GetChildByName("MatrixName")
+			if nameEntity ~= nil and nameEntity.TextComponent ~= nil then
+				nameEntity.TextComponent.Text = matrix.name or ""
+			end
+
+			local infoEntity = infoBox:GetChildByName("MatrixInfo")
+			if infoEntity ~= nil and infoEntity.TextComponent ~= nil then
+				infoEntity.TextComponent.Text = "[" .. (matrix.grade or "RARE") .. "] " .. self:FormatDesc(matrix)
+			end
+		end
+
+		table.insert(self.augmentItemTable, item)
+	end
+
+	-- INFINITE 증강 선택 시 InfiniteMatrixItem 스탯 누적
+	@ExecSpace("Client")
+	method void UpdateInfiniteMatrixUI(table matrix)
+		if self.infiniteMatrixItem == nil then
+			return
+		end
+
+		-- 스탯 누적
+		local effectType = matrix.effectType
+		if self.infiniteStats[effectType] ~= nil then
+			self.infiniteStats[effectType] = self.infiniteStats[effectType] + matrix.value
+		end
+
+		-- MatrixInfo 텍스트 갱신
+		local infoBox = self.infiniteMatrixItem:GetChildByName("MatrixInfoBox")
+		if infoBox ~= nil then
+			local infoEntity = infoBox:GetChildByName("MatrixInfo")
+			if infoEntity ~= nil and infoEntity.TextComponent ~= nil then
+				infoEntity.TextComponent.Text = "공격력 : " .. tostring(self.infiniteStats.AttackDamageBuff) .. "\n" .. "체력 : " .. tostring(self.infiniteStats.MaxHealthBuff) .. "\n" .. "이동속도 : " .. tostring(self.infiniteStats.MoveSpeedBuff) .. "\n" .. "공격속도 : " .. tostring(self.infiniteStats.AttackSpeedBuff) .. "\n" .. "사거리 : " .. tostring(self.infiniteStats.AttackRangeBuff)
+			end
+		end
+	end
+
+	-- 증강 Scroll UI 초기화
+	@ExecSpace("Client")
+	method void ClearAugmentScrollUI()
+		-- 동적 생성 아이템 제거
+		for _, item in ipairs(self.augmentItemTable) do
+			if isvalid(item) then
+				_EntityService:Destroy(item)
+			end
+		end
+		self.augmentItemTable = {}
+
+		-- INFINITE 스탯 초기화
+		self.infiniteStats = {
+			AttackDamageBuff = 0,
+			MaxHealthBuff = 0,
+			MoveSpeedBuff = 0,
+			AttackSpeedBuff = 0,
+			AttackRangeBuff = 0
+		}
+
+		-- InfiniteMatrixItem 텍스트 초기화
+		if self.infiniteMatrixItem ~= nil then
+			local infoBox = self.infiniteMatrixItem:GetChildByName("MatrixInfoBox")
+			if infoBox ~= nil then
+				local infoEntity = infoBox:GetChildByName("MatrixInfo")
+				if infoEntity ~= nil and infoEntity.TextComponent ~= nil then
+					infoEntity.TextComponent.Text = "공격력 : 0\n체력 : 0\n이동속도 : 0\n공격속도 : 0\n사거리 : 0"
+				end
+			end
+		end
+	end
+
+	-- desc를 value로 포맷팅하여 반환
+	method string FormatDesc(table matrix)
+		if matrix == nil or matrix.desc == nil or matrix.desc == "" then
+			return ""
+		end
+
+		local value = matrix.value or 0
+		local calcType = matrix.calcType or "FLAT"
+		local effectType = matrix.effectType or ""
+
+		-- 포맷 값 계산
+		local formatValue = value
+
+		if calcType == "PERCENT" then
+			-- DamageReduction, AttackSpeedBuff: (1 - value) * 100 (예: 0.9 -> 10%, 0.75 -> 25%)
+			if effectType == "DamageReduction" or effectType == "AttackSpeedBuff" then
+				formatValue = math.floor((1 - value) * 100 + 0.5)
+			-- HealOnKill: value * 100 (예: 0.1 -> 10%)
+			elseif effectType == "HealOnKill" then
+				formatValue = math.floor(value * 100 + 0.5)
+			-- 그 외 PERCENT: (value - 1) * 100 (예: 1.1 -> 10%, 1.35 -> 35%)
+			else
+				formatValue = math.floor((value - 1) * 100 + 0.5)
+			end
+		end
+
+		-- string.format으로 desc 포맷팅
+		local success, result = pcall(function()
+			return string.format(matrix.desc, formatValue)
+		end)
+
+		if success then
+			return result
+		else
+			return matrix.desc
+		end
+	end
+
+	method any HexToColor(string hex)
+		if hex == nil or hex == "" then
+			return Color(1, 1, 1, 1)
+		end
+
+		-- # 제거
+		if string.sub(hex, 1, 1) == "#" then
+			hex = string.sub(hex, 2)
+		end
+
+		local r = tonumber(string.sub(hex, 1, 2), 16) / 255
+		local g = tonumber(string.sub(hex, 3, 4), 16) / 255
+		local b = tonumber(string.sub(hex, 5, 6), 16) / 255
+
+		return Color(r, g, b, 1)
+	end
+
+	-- 메소 income UI 업데이트 (증강 효과 반영)
+	@ExecSpace("Server")
+	method void RefreshMesoIncomeUI()
+		local mapPath = "/maps/MatrixStage"
+		local mesoIncomeEntity = _EntityService:GetEntityByPath(mapPath .. "/ingameIncome")
+		if mesoIncomeEntity ~= nil and mesoIncomeEntity.MesoIncome ~= nil then
+			mesoIncomeEntity.MesoIncome:RefreshIncomeUI()
+		end
+	end
+
+end

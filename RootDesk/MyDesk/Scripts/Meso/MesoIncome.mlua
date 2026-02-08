@@ -13,55 +13,204 @@ script MesoIncome extends Component
 	property MesoWallet UserWallet = "cc1d0323-9041-4ead-8cde-646ca0b26e89"
 
 	@Sync
-	property number incomeCooltime = 0.5
+	property number incomeCooltime = 1.0
 
 	@Sync
 	property number currentTs = 0
 
+	property any gameManager = nil
+
+	-- 매트릭스 모드용: 마지막 매트릭스 시간
+	property number lastMatrixTime = 0
+
+	-- 소수점 누적 (배율 적용 시 소수점 처리용)
+	property number incomeAccumulator = 0
+
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
+		-- 맵에 따라 gameManager 설정
+		local currentMap = self.Entity.CurrentMap
+		if currentMap ~= nil then
+			local mapPath = currentMap.Path
+			if string.find(mapPath, "MatrixStage") then
+				self.gameManager = _MatrixGameManager
+			else
+				self.gameManager = _GameManager
+			end
+		else
+			self.gameManager = _GameManager
+		end
+
 		local dataSet = _DataService:GetTable("meso")
 		for i = 1, dataSet:GetRowCount() do
 			local item = {}
-			
+
 			item["id"] = tonumber(dataSet:GetCell(i,"id"))
 			item["init"] = tonumber(dataSet:GetCell(i,"init"))
 			item["income"] = tonumber(dataSet:GetCell(i,"income"))
-			
+
 			self.incomeData[item["id"]] = item
-		end        
-		
+		end
+
 		self.UIController:UpdateMesoIncome(self.incomeData[1]["income"])
-		
+
 		self.UserWallet:SetMeso(self.incomeData[1]["init"])
-		
-		self.nextUpdateTs = self.incomeCooltime
+
 		self.currentTs = 0
 	end
 
 	@ExecSpace("ServerOnly")
 	method void OnUpdate(number delta)
-		if not _GameManager.isPlaying then
-			self.UserWallet:SetMeso(0)
+		-- 게임이 시작되지 않았으면 메소 수입 중단 (단, 기존 메소는 유지)
+		if self.gameManager == nil or not self.gameManager.isPlaying then
 			return
 		end
 
-		local effectiveDelta = delta
-		if _TimeScaleManager ~= nil then
-			effectiveDelta = delta * _TimeScaleManager.timeScale
-		end
+		-- 매트릭스 모드: matrixTime 기반으로 메소 추가
+		if self.gameManager == _MatrixGameManager then
+			local matrixTime = _MatrixGameManager.matrixTime
+			local matrixDelta = matrixTime - self.lastMatrixTime
+			self.lastMatrixTime = matrixTime
 
-		self.currentTs = self.currentTs + effectiveDelta
-		if self.currentTs > self.nextUpdateTs then
-			self.nextUpdateTs = self.nextUpdateTs + self.incomeCooltime
+			-- 일시정지 중이면 delta가 0이므로 메소 추가 안됨
+			if matrixDelta <= 0 then
+				return
+			end
 
-			self:AddMeso()
+			-- 타임 스케일에 따른 쿨타임 조정 (2배속 시 0.5초마다 지급)
+			local adjustedCooltime = self.incomeCooltime
+			if _TimeScaleManager ~= nil and _TimeScaleManager.timeScale > 0 then
+				adjustedCooltime = self.incomeCooltime / _TimeScaleManager.timeScale
+			end
+
+			self.currentTs = self.currentTs + matrixDelta
+			if self.currentTs >= adjustedCooltime then
+				self.currentTs = 0
+				self:AddMeso()
+			end
+		else
+			-- 일반 모드: 실제 시간(delta) 기반
+			self.currentTs = self.currentTs + delta
+			if self.currentTs >= self.incomeCooltime then
+				self.currentTs = 0
+				self:AddMeso()
+			end
 		end
 	end
 
 	@ExecSpace("Server")
 	method void AddMeso()
-		self.UserWallet:AddMeso(self.incomeData[1]["income"])
+		local baseIncome = self.incomeData[1]["income"]
+		local finalIncome = baseIncome
+
+		-- 매트릭스 모드에서만 시너지/증강 적용
+		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
+			-- 모험가 시너지(101) 배율 적용
+			local synergyMultiplier = self:GetAdventurerSynergyMultiplier()
+			if synergyMultiplier > 1.0 then
+				finalIncome = finalIncome * synergyMultiplier
+			end
+
+			-- MatrixAugmentService 배율 적용
+			if _MatrixAugmentService ~= nil and _MatrixAugmentService.mesoIncomeMultiplier ~= 1.0 then
+				finalIncome = finalIncome * _MatrixAugmentService.mesoIncomeMultiplier
+			end
+		else
+			-- 일반 모드: 증강 배율만 적용 (시너지는 InitData에서 이미 적용됨)
+			if _MatrixAugmentService ~= nil and _MatrixAugmentService.mesoIncomeMultiplier ~= 1.0 then
+				finalIncome = finalIncome * _MatrixAugmentService.mesoIncomeMultiplier
+			end
+		end
+
+		-- 소수점 누적 처리: 소수점을 누적하여 정수가 되면 추가
+		self.incomeAccumulator = self.incomeAccumulator + finalIncome
+		local integerPart = math.floor(self.incomeAccumulator)
+
+		if integerPart > 0 then
+			self.incomeAccumulator = self.incomeAccumulator - integerPart
+			self.UserWallet:AddMeso(integerPart)
+		end
+	end
+
+	-- 시너지 + 증강 배율이 적용된 최종 income 계산
+	@ExecSpace("Server")
+	method number GetFinalIncome()
+		local baseIncome = self.incomeData[1]["income"]
+		local finalIncome = baseIncome
+
+		-- 매트릭스 모드에서만 시너지/증강 적용
+		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
+			-- 모험가 시너지(101) 배율 적용
+			local synergyMultiplier = self:GetAdventurerSynergyMultiplier()
+			if synergyMultiplier > 1.0 then
+				finalIncome = finalIncome * synergyMultiplier
+			end
+
+			-- MatrixAugmentService 배율 적용
+			if _MatrixAugmentService ~= nil and _MatrixAugmentService.mesoIncomeMultiplier ~= 1.0 then
+				finalIncome = finalIncome * _MatrixAugmentService.mesoIncomeMultiplier
+			end
+		else
+			-- 일반 모드: 증강 배율만 적용 (시너지는 InitData에서 이미 적용됨)
+			if _MatrixAugmentService ~= nil and _MatrixAugmentService.mesoIncomeMultiplier ~= 1.0 then
+				finalIncome = finalIncome * _MatrixAugmentService.mesoIncomeMultiplier
+			end
+		end
+
+		return math.floor(finalIncome)
+	end
+
+	-- 모험가 시너지(101) 배율 계산
+	@ExecSpace("Server")
+	method number GetAdventurerSynergyMultiplier()
+		-- Player 태그로 유저 엔티티 가져오기
+		local user = _EntityService:GetEntityByTag("Player")
+		if user == nil or user.UserSynergyComponent == nil then
+			return 1.0
+		end
+
+		local adventurerSynergyId = 101
+		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(adventurerSynergyId)
+		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(tostring(adventurerSynergyId), count)
+
+		if synergy:length() > 0 then
+			local item = synergy:Get(1)
+			-- value는 10000 = 10%, 20000 = 20% 형식
+			local bonusRatio = item.value / 100000
+			return 1.0 + bonusRatio
+		end
+
+		return 1.0
+	end
+
+	-- UI에 표시될 최종 income 값 갱신
+	@ExecSpace("Server")
+	method void RefreshIncomeUI()
+		local displayIncome = self:GetDisplayIncome()
+		self.UIController:UpdateMesoIncome(displayIncome)
+	end
+
+	-- UI에 표시할 income 값 (소수점 포함)
+	@ExecSpace("Server")
+	method number GetDisplayIncome()
+		local baseIncome = self.incomeData[1]["income"]
+		local displayIncome = baseIncome
+
+		-- 매트릭스 모드에서만 시너지/증강 적용
+		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
+			-- 모험가 시너지(101) 배율 적용
+			local synergyMultiplier = self:GetAdventurerSynergyMultiplier()
+			if synergyMultiplier > 1.0 then
+				displayIncome = displayIncome * synergyMultiplier
+			end
+
+			-- MatrixAugmentService 배율 적용
+			if _MatrixAugmentService ~= nil and _MatrixAugmentService.mesoIncomeMultiplier ~= 1.0 then
+				displayIncome = displayIncome * _MatrixAugmentService.mesoIncomeMultiplier
+			end
+		end
+
+		return displayIncome
 	end
 
 	@ExecSpace("ServerOnly")
@@ -72,6 +221,12 @@ script MesoIncome extends Component
 			init=0,
 			income=0
 		}
+
+		-- 매트릭스 모드 관련 데이터 초기화
+		self.lastMatrixTime = 0
+		self.currentTs = 0
+		self.incomeAccumulator = 0
+		self.gameManager = nil
 	end
 
 	@ExecSpace("ServerOnly")
@@ -82,13 +237,16 @@ script MesoIncome extends Component
 			init=meso,
 			income=income
 		}
-		
+
 		self.UserWallet:SetMeso(meso)
 		self.UIController:UpdateMesoIncome(income)
-		
-		
-		self.nextUpdateTs = self.incomeCooltime
+
 		self.currentTs = 0
+		self.incomeAccumulator = 0
+		-- 매트릭스 모드용 시간 동기화
+		if _MatrixGameManager ~= nil then
+			self.lastMatrixTime = _MatrixGameManager.matrixTime
+		end
 	end
 
 	@ExecSpace("ServerOnly")
@@ -110,6 +268,33 @@ script MesoIncome extends Component
 	@ExecSpace("ServerOnly")
 	method void ReturnMeso(integer meso)
 		self.UserWallet:AddMeso(meso)
+	end
+
+	-- meso.csv에서 기본값 다시 로드
+	@ExecSpace("Server")
+	method void ResetToDefault()
+		local dataSet = _DataService:GetTable("meso")
+		if dataSet == nil then
+			return
+		end
+
+		self.incomeData = {}
+		for i = 1, dataSet:GetRowCount() do
+			local item = {}
+			item["id"] = tonumber(dataSet:GetCell(i, "id"))
+			item["init"] = tonumber(dataSet:GetCell(i, "init"))
+			item["income"] = tonumber(dataSet:GetCell(i, "income"))
+			self.incomeData[item["id"]] = item
+		end
+
+		self.UserWallet:SetMeso(self.incomeData[1]["init"])
+		self.UIController:UpdateMesoIncome(self.incomeData[1]["income"])
+		self.currentTs = 0
+		self.incomeAccumulator = 0
+
+		if _MatrixGameManager ~= nil then
+			self.lastMatrixTime = _MatrixGameManager.matrixTime
+		end
 	end
 
 end

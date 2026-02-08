@@ -8,11 +8,66 @@ script UserSynergyComponent extends Component
 
 	@ExecSpace("ServerOnly")
 	method integer GET_SYNERGY_COUNT(number target)
+		local baseCount = 0
 		if self.countMap[target] ~= nil then
-			return self.countMap[target]
+			baseCount = self.countMap[target]
 		end
-		
-		return 0
+
+		-- 매트릭스 시너지 보너스 추가
+		local bonus = self:GetMatrixSynergyBonus(target)
+
+		return baseCount + bonus
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer GetMatrixSynergyBonus(number target)
+		-- 매트릭스 모드가 아니면 0
+		if _GameManager == nil or _GameManager.currentGameMode ~= _eGameMode.Matrix then
+			return 0
+		end
+
+		-- UserMatrixManager에서 증강 효과 가져오기
+		local userMatrixManager = self.Entity.UserMatrixManager
+		if userMatrixManager == nil then
+			return 0
+		end
+
+		local matrixEffects = userMatrixManager:GetMatrixEffects()
+		if matrixEffects == nil or #matrixEffects == 0 then
+			return 0
+		end
+
+		local bonus = 0
+		for _, matrix in ipairs(matrixEffects) do
+			if matrix.type == "SYNERGY" then
+				if matrix.effectType == "SynergyBonus_All" then
+					-- 모든 시너지에 보너스
+					bonus = bonus + matrix.value
+				elseif matrix.effectType == "SynergyBonus_JobId" then
+					-- 특정 직업에만 보너스
+					if tonumber(matrix.value) == target then
+						bonus = bonus + 1
+					end
+				elseif matrix.effectType == "SynergyBonus_Job" then
+					-- 모든 직업 시너지에 보너스 (id 1-5)
+					if target >= 1 and target <= 5 then
+						bonus = bonus + matrix.value
+					end
+				elseif matrix.effectType == "SynergyBonus_Country" then
+					-- 모든 지역 시너지에 보너스 (id 11-19)
+					if target >= 11 and target <= 19 then
+						bonus = bonus + matrix.value
+					end
+				elseif matrix.effectType == "SynergyBonus_Region" then
+					-- 모든 소속 시너지에 보너스 (id 101-102)
+					if target >= 101 and target <= 102 then
+						bonus = bonus + matrix.value
+					end
+				end
+			end
+		end
+
+		return bonus
 	end
 
 	@ExecSpace("ServerOnly")
@@ -55,21 +110,81 @@ script UserSynergyComponent extends Component
 		if self.countMap[key] == nil then
 			self.countMap[key] = 0
 		end
-		
+
 		self.countMap[key] += 1
+
+		if key == 102 then
+			log("Cygnus synergy ", self.countMap[102])
+		end
+	end
+
+	@ExecSpace("Server")
+	method void AddCountFromClient(string unitId)
+		local unit = _UnitService:GetUnitByIDFromServer(unitId)
+		if unit == nil then
+			return
+		end
+
+		local syncCols = {"jobId", "countryId", "regionId", "LimitBreakCountryId", "LimitBreakJobId"}
+		local buffedUnit = BuffedUnitModel()
+		buffedUnit:Init(unit)
+
+		for i, col in ipairs(syncCols) do
+			if buffedUnit[col] == nil then
+				continue
+			end
+
+			if buffedUnit[col] == 0 then
+				continue
+			end
+
+			self:AddCount(buffedUnit[col])
+		end
+
+		-- 매트릭스 모드에서 시너지 보너스 유닛 체크 (시그너스 등)
+		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
+			local userMatrixManager = self.Entity.UserMatrixManager
+			if userMatrixManager ~= nil then
+				userMatrixManager:CheckAndAddSynergyUnits()
+			end
+		end
+	end
+
+	@ExecSpace("Server")
+	method void ResetCountMapFromClient()
+		for k, v in pairs(self.countMap) do
+			self.countMap[k] = 0
+		end
+	end
+
+	@ExecSpace("Server")
+	method void RestoreSynergyFromDeck()
+		local userDeck = self.Entity.UserDeck
+		if userDeck ~= nil and userDeck.userDeck ~= nil then
+			self:SET_SYNERGY(userDeck.userDeck)
+		end
 	end
 
 	@ExecSpace("ClientOnly")
 	method void OnSyncProperty(string name, any value)
-		local callback = self.synergyTable[name]
-		
-		if callback ~= nil then
-			callback()
+		local callbacks = self.synergyTable[name]
+
+		if callbacks ~= nil then
+			for key, callback in pairs(callbacks) do
+				if callback ~= nil then
+					callback()
+				end
+			end
 		end
 	end
 
 	method void AddSynercyCallback(string name, any callback)
-		self.synergyTable[name] = callback
+		if self.synergyTable[name] == nil then
+			self.synergyTable[name] = {}
+		end
+
+		local callbackKey = tostring(callback)
+		self.synergyTable[name][callbackKey] = callback
 	end
 
 end

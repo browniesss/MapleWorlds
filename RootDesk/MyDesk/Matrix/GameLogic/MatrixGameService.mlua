@@ -1,0 +1,729 @@
+@Logic
+script MatrixGameService extends Logic
+
+	property integer PHASE_TYPE_NORMAL = 0
+
+	property integer PHASE_TYPE_INFINITE = 1
+
+	property integer currentPhaseId = 1
+
+	property integer currentRoundId = 1
+
+	property integer currentWaveIndex = 0
+
+	property integer loopCount = 0
+
+	property table phaseData = {}
+
+	property table roundDataList = {}
+
+	property table spawnPatternData = {}
+
+	property Entity enemyTower = nil
+
+	property Entity playerTower = nil
+
+	property Entity enemySpawnPoint = nil
+
+	property Entity mySpawnPoint = nil
+
+	property Entity mesoIncome = nil
+
+	property boolean isRoundCleared = false
+
+	property boolean isWaveSpawning = false
+
+	-- 초기 증강 선택 여부 (게임 시작 시 유닛 선택 후 증강 선택)
+	property boolean isInitialAugmentSelection = false
+
+	-- 현재 적 타워 HP (라운드 클리어 시 증가)
+	property number currentEnemyTowerHP = 0
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		-- 데이터 로드
+		self:LoadPhaseData()
+		self:LoadRoundData()
+		self:LoadSpawnPatternData()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void LoadPhaseData()
+		local dataSet = _DataService:GetTable("MatrixPhase")
+		if dataSet == nil then
+			log("MatrixPhase 데이터셋을 찾을 수 없습니다")
+			return
+		end
+
+		for i = 1, dataSet:GetRowCount() do
+			local phase = {}
+			phase.phaseId = tonumber(dataSet:GetCell(i, "phaseId"))
+			phase.phaseType = tonumber(dataSet:GetCell(i, "phaseType"))
+			phase.baseRoundStart = tonumber(dataSet:GetCell(i, "baseRoundStart"))
+			phase.roundCount = tonumber(dataSet:GetCell(i, "roundCount"))
+			phase.levelMultiplier = tonumber(dataSet:GetCell(i, "levelMultiplier"))
+			phase.spawnDelayMultiplier = tonumber(dataSet:GetCell(i, "spawnDelayMultiplier"))
+			phase.phaseName = dataSet:GetCell(i, "phaseName")
+			-- 랭킹용 점수 데이터
+			phase.killPoint = tonumber(dataSet:GetCell(i, "killPoint")) or 1
+			phase.baseScore = tonumber(dataSet:GetCell(i, "baseScore")) or 0
+			phase.timeBonus = tonumber(dataSet:GetCell(i, "timeBonus")) or 0
+			-- 타워 HP 데이터
+			phase.towerHP = tonumber(dataSet:GetCell(i, "towerHP")) or 2000
+			phase.towerHPIncrement = tonumber(dataSet:GetCell(i, "towerHPIncrement")) or 0
+
+			self.phaseData[phase.phaseId] = phase
+		end
+
+		log("MatrixPhase 데이터 로드 완료: " .. tostring(#self.phaseData) .. "개")
+	end
+
+	@ExecSpace("ClientOnly")
+	method void LoadRoundData()
+		local dataSet = _DataService:GetTable("MatrixRound")
+		if dataSet == nil then
+			log("MatrixRound 데이터셋을 찾을 수 없습니다")
+			return
+		end
+		
+		for i = 1, dataSet:GetRowCount() do
+			local round = {}
+			round.roundId = tonumber(dataSet:GetCell(i, "roundId"))
+			round.phaseId = tonumber(dataSet:GetCell(i, "phaseId"))
+			round.waveCount = tonumber(dataSet:GetCell(i, "waveCount"))
+			round.towerHP = tonumber(dataSet:GetCell(i, "towerHP"))
+			round.spawnPatternId = tonumber(dataSet:GetCell(i, "spawnPatternId"))
+
+			table.insert(self.roundDataList, round)
+		end
+		
+		log("MatrixRound 데이터 로드 완료: " .. tostring(#self.roundDataList) .. "개")
+	end
+
+	@ExecSpace("ClientOnly")
+	method void LoadSpawnPatternData()
+		local dataSet = _DataService:GetTable("MatrixSpawnPattern")
+		if dataSet == nil then
+			log("MatrixSpawnPattern 데이터셋을 찾을 수 없습니다")
+			return
+		end
+		
+		for i = 1, dataSet:GetRowCount() do
+			local pattern = {}
+			pattern.id = tonumber(dataSet:GetCell(i, "id"))
+			pattern.roundId = tonumber(dataSet:GetCell(i, "roundId"))
+			pattern.waveIndex = tonumber(dataSet:GetCell(i, "waveIndex"))
+			pattern.monsterIds = dataSet:GetCell(i, "monsterIds")
+			pattern.spawnDelays = dataSet:GetCell(i, "spawnDelays")
+			pattern.spawnCounts = dataSet:GetCell(i, "spawnCounts")
+		
+			-- 패턴 ID별로 그룹화
+			if self.spawnPatternData[pattern.id] == nil then
+				self.spawnPatternData[pattern.id] = {}
+			end
+			table.insert(self.spawnPatternData[pattern.id], pattern)
+		end
+		
+		log("MatrixSpawnPattern 데이터 로드 완료")
+	end
+
+	-- MatrixGameManager에서 호출되는 초기화 메서드
+	@ExecSpace("Client")
+	method void InitializeGameFromManager()
+		-- 엔티티 참조 가져오기
+		local mapPath = _MatrixGameManager:GetMapPath()
+		self.enemyTower = _EntityService:GetEntityByPath(mapPath .. "/EnemyTower")
+		self.playerTower = _EntityService:GetEntityByPath(mapPath .. "/PlayerTower")
+		self.enemySpawnPoint = _EntityService:GetEntityByPath(mapPath .. "/EnemyList/EnemySpawnPoint")
+		self.mySpawnPoint = _EntityService:GetEntityByPath(mapPath .. "/MyMonsterList/MySpawnPoint")
+		self.mesoIncome = _EntityService:GetEntityByPath(mapPath .. "/ingameIncome")
+
+		-- 초기 상태 설정
+		self.currentPhaseId = 1
+		self.currentRoundId = 1
+		self.currentWaveIndex = 0
+		self.loopCount = 0
+		self.isRoundCleared = false
+		self.currentEnemyTowerHP = 0
+
+		-- MatrixMonsterSpawner 리셋 (이전 게임의 타이머/상태 정리)
+		if _MatrixMonsterSpawner ~= nil then
+			_MatrixMonsterSpawner:ResetOnClient()
+			_MatrixMonsterSpawner:ResetOnServer()
+		end
+
+		-- 플레이어 타워 HP 초기화 (1000 고정, 라운드 간 유지)
+		if self.playerTower ~= nil and self.playerTower.Unit ~= nil then
+			local playerTowerHP = 1000
+			self.playerTower.Unit.originMaxHP = playerTowerHP
+			self.playerTower.Unit.maxHP = playerTowerHP
+			self.playerTower.Unit.hp = playerTowerHP
+			self.playerTower.Unit.curState = "stand"
+		end
+
+		-- 메소 초기화 (meso.csv 기본값으로)
+		self:ResetMesoOnServer()
+
+		-- unitPool은 UserMatrixManager.OnMapEnter에서 이미 로드됨
+
+		-- 초기 유닛 선택 (3회) 후 증강 선택 (1회) 후 첫 라운드 시작
+		if _MatrixUnitSelectService ~= nil then
+			_MatrixUnitSelectService:StartUnitSelection(3, function()
+				-- 유닛 선택 완료 후 증강 선택
+				self:StartInitialAugmentSelection()
+			end)
+		else
+			self:StartInitialAugmentSelection()
+		end
+	end
+
+	@ExecSpace("Server")
+	method void ResetMesoOnServer()
+		local mapPath = "/maps/MatrixStage"
+		local mesoIncomeEntity = _EntityService:GetEntityByPath(mapPath .. "/ingameIncome")
+		if mesoIncomeEntity ~= nil and mesoIncomeEntity.MesoIncome ~= nil then
+			mesoIncomeEntity.MesoIncome:ResetToDefault()
+		end
+	end
+
+	-- 초기 증강 선택 (유닛 3회 선택 후)
+	@ExecSpace("Client")
+	method void StartInitialAugmentSelection()
+		self.isInitialAugmentSelection = true
+
+		-- 증강 선택 UI 표시
+		if _MatrixGameManager ~= nil then
+			_MatrixGameManager:ShowMatrixSelectUI()
+		end
+
+		if _MatrixAugmentService ~= nil then
+			_MatrixAugmentService:OnMatrixEvent()
+		else
+			-- 증강 서비스가 없으면 바로 라운드 시작
+			self.isInitialAugmentSelection = false
+			self:StartRound(1)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void StartRound(integer roundId)
+		local roundData = self:GetRoundData(roundId)
+		if roundData == nil then
+			log("라운드 데이터를 찾을 수 없습니다: " .. tostring(roundId))
+			return
+		end
+
+		-- 페이즈 변경 체크 및 점수 처리
+		local previousPhaseId = self.currentPhaseId
+		local newPhaseId = roundData.phaseId
+
+		-- 이전 페이즈 시간 점수 계산 (페이즈가 변경된 경우)
+		if previousPhaseId ~= newPhaseId and previousPhaseId > 0 then
+			local user = _UserService.LocalPlayer
+			if user ~= nil and user.UserMatrixManager ~= nil then
+				local prevPhaseData = self.phaseData[previousPhaseId]
+				if prevPhaseData ~= nil and prevPhaseData.timeBonus == 0 then
+					-- 일반 페이즈: 기준 점수에서 시간 감소
+					user.UserMatrixManager:CalculatePhaseScore(previousPhaseId)
+				end
+			end
+		end
+
+		-- 새로운 페이즈 시작 시 시간 기록
+		if previousPhaseId ~= newPhaseId or roundId == 1 then
+			self.currentPhaseId = newPhaseId
+			local user = _UserService.LocalPlayer
+			if user ~= nil and user.UserMatrixManager ~= nil then
+				user.UserMatrixManager:OnPhaseStart(newPhaseId)
+			end
+		end
+
+		self.currentRoundId = roundId
+		self.currentWaveIndex = 0
+		self.isRoundCleared = false
+
+		-- 페이즈 데이터에서 타워 HP 가져오기
+		local phase = self:GetCurrentPhaseData()
+		local baseTowerHP = phase.towerHP or 2000
+
+		-- 페이즈 내 라운드 진행에 따른 HP 증가 계산
+		local roundsInPhase = roundId - phase.baseRoundStart
+		local hpIncrement = (phase.towerHPIncrement or 0) * roundsInPhase
+
+		-- 최종 타워 HP 계산
+		local finalTowerHP = baseTowerHP + hpIncrement
+		if self.loopCount > 0 then
+			-- 무한 모드: 난이도 증가 적용
+			finalTowerHP = finalTowerHP * (phase.levelMultiplier ^ self.loopCount)
+		end
+
+		-- 현재 타워 HP 저장 (라운드 클리어 시 증가용)
+		self.currentEnemyTowerHP = finalTowerHP
+
+		-- 적 타워 HP 및 상태 설정 (originMaxHP 포함)
+		self.enemyTower.Unit.originMaxHP = finalTowerHP
+		self.enemyTower.Unit.maxHP = finalTowerHP
+		self.enemyTower.Unit.hp = finalTowerHP
+		self.enemyTower.Unit.curState = "stand"  -- 상태 리셋 (die → stand)
+
+		log("라운드 " .. tostring(roundId) .. " 시작 (타워 HP: " .. tostring(finalTowerHP) .. ", 페이즈: " .. tostring(self.currentPhaseId) .. ")")
+
+		-- 첫 웨이브 시작
+		self:StartNextWave()
+	end
+
+	@ExecSpace("Client")
+	method void StartNextWave()
+		self.currentWaveIndex = self.currentWaveIndex + 1
+
+		local roundData = self:GetRoundData(self.currentRoundId)
+		if roundData == nil then
+			return
+		end
+
+		-- 모든 웨이브 완료 확인
+		if self.currentWaveIndex > roundData.waveCount then
+			-- 무한 모드 체크
+			local phase = self:GetCurrentPhaseData()
+			if phase ~= nil and phase.phaseType == self.PHASE_TYPE_INFINITE then
+				-- 무한 모드: 유닛 선택 후 다음 라운드 진행
+				log("무한 모드: 모든 웨이브 완료, 유닛 선택 시작")
+				self:OnInfiniteWaveComplete()
+				return
+			end
+
+			log("모든 웨이브 완료. 적 타워 파괴 대기 중...")
+			return
+		end
+		
+		-- 스폰 패턴 가져오기
+		local patterns = self.spawnPatternData[roundData.spawnPatternId]
+		if patterns == nil then
+			log("스폰 패턴을 찾을 수 없습니다: " .. tostring(roundData.spawnPatternId))
+			return
+		end
+		
+		-- 현재 웨이브 패턴 찾기
+		local wavePattern = nil
+		for _, pattern in ipairs(patterns) do
+			if pattern.waveIndex == self.currentWaveIndex then
+				wavePattern = pattern
+				break
+			end
+		end
+		
+		if wavePattern == nil then
+			log("웨이브 패턴을 찾을 수 없습니다: " .. tostring(self.currentWaveIndex))
+			return
+		end
+		
+		log("웨이브 " .. tostring(self.currentWaveIndex) .. " / " .. tostring(roundData.waveCount) .. " 시작")
+		
+		-- 몬스터 스폰
+		self:SpawnWave(wavePattern)
+	end
+
+	@ExecSpace("Client")
+	method void SpawnWave(table wavePattern)
+		self.isWaveSpawning = true
+		
+		-- 문자열 파싱: "1,2,3" -> {1, 2, 3}
+		local monsterIds = self:ParseCSVString(wavePattern.monsterIds)
+		local spawnDelays = self:ParseCSVString(wavePattern.spawnDelays)
+		local spawnCounts = self:ParseCSVString(wavePattern.spawnCounts)
+		
+		-- 무한 모드 난이도 적용
+		local phase = self:GetCurrentPhaseData()
+		local levelMultiplier = phase.levelMultiplier or 1.0
+		
+		if phase.phaseType == self.PHASE_TYPE_INFINITE and self.loopCount > 0 then
+			-- 스폰 간격 감소
+			for i = 1, #spawnDelays do
+				spawnDelays[i] = spawnDelays[i] * (phase.spawnDelayMultiplier ^ self.loopCount)
+				if spawnDelays[i] < 0.5 then
+					spawnDelays[i] = 0.5  -- 최소 간격
+				end
+			end
+		end
+		
+		log("[MatrixGameService] 웨이브 스폰 시작: " .. tostring(#monsterIds) .. "종류, 무한모드=" .. tostring(self.loopCount) .. "회차")
+		
+		-- MatrixMonsterSpawner를 통한 스폰
+		if _MatrixMonsterSpawner ~= nil then
+			-- 스폰 완료 콜백 설정
+			_MatrixMonsterSpawner:SetOnWaveSpawnCompleteCallback(function()
+				self.isWaveSpawning = false
+				log("[MatrixGameService] 웨이브 스폰 완료, 적 처치 대기 중...")
+			end)
+		
+			-- 모든 적 처치 콜백 설정
+			_MatrixMonsterSpawner:SetOnAllEnemiesDefeatedCallback(function()
+				log("[MatrixGameService] 모든 적 처치 완료, 다음 웨이브 시작")
+				self:StartNextWave()
+			end)
+		
+			-- 웨이브 스폰 시작
+			_MatrixMonsterSpawner:SpawnWave(monsterIds, spawnDelays, spawnCounts, levelMultiplier, self.loopCount)
+		else
+			log("[MatrixGameService] ERROR: MatrixMonsterSpawner를 찾을 수 없습니다")
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnUpdate(number delta)
+		-- MatrixGameManager 기반으로 체크
+		if _MatrixGameManager == nil or not _MatrixGameManager.isPlaying then
+			return
+		end
+
+		if _GameManager.currentGameMode ~= _eGameMode.Matrix then
+			return
+		end
+
+		-- 일시정지 중이면 업데이트 스킵
+		if _MatrixGameManager.isPaused then
+			return
+		end
+		
+		if self.isRoundCleared then
+			return
+		end
+
+		-- 적 타워 HP 체크 (무한 모드가 아닐 때만)
+		local phase = self:GetCurrentPhaseData()
+		if self.enemyTower ~= nil and self.enemyTower.Unit ~= nil then
+			if phase == nil or phase.phaseType ~= self.PHASE_TYPE_INFINITE then
+				if self.enemyTower.Unit.hp <= 0 then
+					self:OnRoundClear()
+				end
+			end
+		end
+		
+		-- 아군 타워 HP 체크 (게임 오버)
+		if self.playerTower ~= nil and self.playerTower.Unit ~= nil then
+			if self.playerTower.Unit.hp <= 0 then
+				self:OnGameOver()
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnRoundClear()
+		self.isRoundCleared = true
+		log("라운드 " .. tostring(self.currentRoundId) .. " 클리어!")
+
+		-- 서버에서 모든 유닛 제거
+		self:ClearAllUnitsOnServer()
+
+		-- 진행 중인 스폰 타이머 즉시 취소 (서버 _TimerService 타이머 정리)
+		if _MatrixMonsterSpawner ~= nil then
+			_MatrixMonsterSpawner:ResetOnClient()
+			_MatrixMonsterSpawner:ResetOnServer()
+		end
+
+		-- 해적 시너지(5) 적용: 라운드 클리어 시 메소 추가
+		self:ApplyPirateSynergyOnRoundClear()
+
+		-- 다음 라운드 준비
+		local nextRoundId = self.currentRoundId + 1
+		local nextRoundData = self:GetRoundData(nextRoundId)
+
+		-- 페이즈 변경 체크
+		local currentPhaseId = self:GetRoundData(self.currentRoundId).phaseId
+
+		-- 다음 라운드 데이터가 없으면 무한 모드 진입 체크
+		if nextRoundData == nil then
+			-- 현재 페이즈가 무한 모드인지 확인 (self.currentPhaseId 사용 - 무한 모드에서는 라운드의 phaseId와 다를 수 있음)
+			local currentPhase = self.phaseData[self.currentPhaseId]
+			if currentPhase ~= nil and currentPhase.phaseType == self.PHASE_TYPE_INFINITE then
+				-- 이미 무한 모드면 루프 완료 (loopCount 증가 후 증강 선택)
+				log("무한 모드 루프 완료, 다음 루프 준비")
+				self:OnInfinitePhaseComplete()
+			else
+				-- 무한 모드 페이즈로 전환 (페이즈 5)
+				log("무한 모드 페이즈로 전환")
+				self:OnPhaseComplete()
+			end
+			return
+		end
+
+		local nextPhaseId = nextRoundData.phaseId
+
+		if nextPhaseId ~= currentPhaseId then
+			-- 페이즈 종료 → 증강 선택
+			self:OnPhaseComplete()
+		else
+			-- 같은 페이즈 → 캐릭터 선택
+			self:OnRoundComplete()
+		end
+	end
+
+	-- 해적 시너지(5): 라운드 클리어 시 초기 메소 추가
+	@ExecSpace("Server")
+	method void ApplyPirateSynergyOnRoundClear()
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		if user == nil then
+			return
+		end
+
+		local pirateSynergyId = 5
+		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(pirateSynergyId)
+		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(tostring(pirateSynergyId), count)
+
+		if synergy:length() > 0 then
+			local item = synergy:Get(1)
+			local bonusMeso = item:CalcValue(0)
+
+			local mapPath = "/maps/MatrixStage"
+			local mesoWallet = _EntityService:GetEntityByPath(mapPath .. "/userWallet")
+			if mesoWallet ~= nil and mesoWallet.MesoWallet ~= nil then
+				mesoWallet.MesoWallet:AddMeso(bonusMeso)
+				log("[MatrixGameService] 해적 시너지 적용: +" .. tostring(bonusMeso) .. " 메소")
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnRoundComplete()
+		log("라운드 사이 유닛 선택 시작")
+
+		-- 유닛 선택 (1회) 후 다음 라운드 시작
+		if _MatrixUnitSelectService ~= nil then
+			_MatrixUnitSelectService:StartUnitSelection(1, function()
+				self:StartRound(self.currentRoundId + 1)
+			end)
+		else
+			self:StartRound(self.currentRoundId + 1)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnPhaseComplete()
+		-- 현재 페이즈가 무한 모드인지 확인
+		local currentPhase = self.phaseData[self.currentPhaseId]
+		if currentPhase ~= nil and currentPhase.phaseType == self.PHASE_TYPE_INFINITE then
+			-- 무한 모드: 페이즈 유지 (루프 반복)
+			log("무한 모드 " .. tostring(self.currentPhaseId) .. " 페이즈 루프")
+		else
+			-- 일반 모드: 다음 페이즈로 진행
+			self.currentPhaseId = self.currentPhaseId + 1
+			log("페이즈 " .. tostring(self.currentPhaseId) .. " 진입")
+		end
+
+		-- 증강 선택 UI 표시 (MatrixGameManager 통해)
+		if _MatrixGameManager ~= nil then
+			_MatrixGameManager:ShowMatrixSelectUI()
+		end
+
+		-- 증강 선택 UI 표시
+		if _MatrixAugmentService ~= nil then
+			_MatrixAugmentService:OnMatrixEvent()
+		end
+	end
+
+	-- 증강 선택 완료 후 호출
+	@ExecSpace("Client")
+	method void OnAugmentSelected()
+		-- 초기 증강 선택인 경우 (게임 시작 시)
+		if self.isInitialAugmentSelection then
+			self.isInitialAugmentSelection = false
+
+			log("초기 증강 선택 완료, 라운드 1 시작")
+			self:StartRound(1)
+			return
+		end
+
+		-- 무한 모드 체크
+		local phase = self:GetCurrentPhaseData()
+		if phase ~= nil and phase.phaseType == self.PHASE_TYPE_INFINITE then
+			-- 무한 모드: loopCount는 OnInfinitePhaseComplete에서 이미 증가됨
+			log("무한 모드 " .. tostring(self.loopCount) .. "회차 시작, baseRoundStart로 이동")
+
+			-- 무한 모드에서는 baseRoundStart부터 다시 시작 (5-1)
+			self:StartRound(phase.baseRoundStart)
+		else
+			-- 일반 페이즈: 다음 라운드
+			self:StartRound(self.currentRoundId + 1)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnGameOver()
+		log("게임 오버!")
+
+		-- MatrixGameManager를 통해 게임 종료 처리
+		if _MatrixGameManager ~= nil then
+			_MatrixGameManager.isPlaying = false
+		end
+
+		-- 최종 점수 계산 및 랭킹 제출
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.UserMatrixManager ~= nil then
+			-- 4페이즈 이상(무한모드)에서만 시간 점수 계산
+			-- 1~3페이즈에서 죽으면 해당 페이즈 시간 점수는 제외 (킬 점수만)
+			local phaseData = self:GetCurrentPhaseData()
+			if phaseData ~= nil and phaseData.timeBonus > 0 then
+				-- 무한모드: 초당 점수
+				user.UserMatrixManager:CalculateInfiniteScore()
+			end
+			-- 1~3페이즈에서 죽으면 시간 점수 계산 안 함
+			-- (클리어한 페이즈의 시간 점수는 StartRound에서 이미 계산됨)
+
+			-- 최종 점수 및 랭킹 저장
+			local finalScore = user.UserMatrixManager:GetTotalScore()
+			local userName = user.PlayerComponent.Nickname
+
+			if _MatrixRankingService ~= nil then
+				_MatrixRankingService:AddScore(userName, finalScore)
+			end
+
+			-- 매트릭스 코인 지급
+			if _MatrixCoinService ~= nil then
+				_MatrixCoinService:AddMatrixCoin(finalScore)
+			end
+
+			log("[MatrixGameService] 최종 점수: " .. tostring(finalScore))
+		end
+
+		-- 서버에서 모든 유닛 제거
+		self:ClearAllUnitsOnServer()
+
+		-- CompletePopup 표시 (MatrixGameManager 사용)
+		if _MatrixGameManager ~= nil then
+			_MatrixGameManager:ShowCompletePopup()
+		end
+	end
+
+	method table GetRoundData(integer roundId)
+		for _, round in ipairs(self.roundDataList) do
+			if round.roundId == roundId then
+				return round
+			end
+		end
+		return nil
+	end
+
+	method table GetCurrentPhaseData()
+		return self.phaseData[self.currentPhaseId]
+	end
+
+	-- 서버에서 모든 유닛 제거 (적 + 내 유닛)
+	@ExecSpace("Server")
+	method void ClearAllUnitsOnServer()
+		local mapPath = "/maps/MatrixStage"
+
+		-- 적 유닛 제거
+		local enemyList = _EntityService:GetEntityByPath(mapPath .. "/EnemyList")
+		if enemyList ~= nil then
+			local enemySpawnPoint = _EntityService:GetEntityByPath(mapPath .. "/EnemyList/EnemySpawnPoint")
+			for _, child in ipairs(enemyList.Children) do
+				if child ~= enemySpawnPoint and child.Unit ~= nil then
+					child:Destroy()
+				end
+			end
+			log("[MatrixGameService] 모든 적 유닛 제거 완료")
+		end
+
+		-- 내 유닛 제거
+		local myMonsterList = _EntityService:GetEntityByPath(mapPath .. "/MyMonsterList")
+		if myMonsterList ~= nil then
+			local mySpawnPoint = _EntityService:GetEntityByPath(mapPath .. "/MyMonsterList/MySpawnPoint")
+			for _, child in ipairs(myMonsterList.Children) do
+				if child ~= mySpawnPoint and child.Unit ~= nil then
+					child:Destroy()
+				end
+			end
+			log("[MatrixGameService] 모든 내 유닛 제거 완료")
+		end
+	end
+
+	method void ClearAllEnemies()
+		local mapPath = "/maps/MatrixStage"
+		if _MatrixGameManager ~= nil then
+			mapPath = _MatrixGameManager:GetMapPath()
+		end
+
+		local enemyList = _EntityService:GetEntityByPath(mapPath .. "/EnemyList")
+		if enemyList == nil then
+			return
+		end
+
+		for _, child in ipairs(enemyList.Children) do
+			if child ~= self.enemySpawnPoint and child.Unit ~= nil then
+				child:Destroy()
+			end
+		end
+	end
+
+	method void ClearAllMyUnits()
+		local mapPath = "/maps/MatrixStage"
+		if _MatrixGameManager ~= nil then
+			mapPath = _MatrixGameManager:GetMapPath()
+		end
+
+		local myMonsterList = _EntityService:GetEntityByPath(mapPath .. "/MyMonsterList")
+		if myMonsterList == nil then
+			return
+		end
+
+		local mySpawnPoint = _EntityService:GetEntityByPath(mapPath .. "/MyMonsterList/MySpawnPoint")
+
+		for _, child in ipairs(myMonsterList.Children) do
+			if child ~= mySpawnPoint and child.Unit ~= nil then
+				child:Destroy()
+			end
+		end
+
+		log("[MatrixGameService] 모든 내 유닛 제거 완료")
+	end
+
+	method table ParseCSVString(string csvStr)
+		local result = {}
+		for value in string.gmatch(csvStr, "([^,]+)") do
+			table.insert(result, tonumber(value))
+		end
+		return result
+	end
+
+	-- ============================================
+	-- 무한 모드: 웨이브 완료 시 유닛 선택 후 다음 라운드
+	-- ============================================
+
+	@ExecSpace("Client")
+	method void OnInfiniteWaveComplete()
+		local nextRoundId = self.currentRoundId + 1
+		local nextRoundData = self:GetRoundData(nextRoundId)
+
+		if nextRoundData == nil then
+			-- 마지막 라운드 클리어: 증강 선택 후 5-1로 돌아감
+			log("무한 모드: 마지막 라운드 클리어, 증강 선택 시작")
+			self:OnInfinitePhaseComplete()
+		else
+			-- 다음 라운드 있음: 유닛 선택 후 다음 라운드 진행
+			log("무한 모드: 유닛 선택 후 다음 라운드 진행")
+			if _MatrixUnitSelectService ~= nil then
+				_MatrixUnitSelectService:StartUnitSelection(1, function()
+					self:StartRound(nextRoundId)
+				end)
+			else
+				self:StartRound(nextRoundId)
+			end
+		end
+	end
+
+	-- 무한 모드 마지막 라운드 클리어 시 증강 선택
+	@ExecSpace("Client")
+	method void OnInfinitePhaseComplete()
+		self.loopCount = self.loopCount + 1
+		log("무한 모드 " .. tostring(self.loopCount) .. "회차 완료, 증강 선택")
+
+		-- 증강 선택 UI 표시
+		if _MatrixGameManager ~= nil then
+			_MatrixGameManager:ShowMatrixSelectUI()
+		end
+		if _MatrixAugmentService ~= nil then
+			_MatrixAugmentService:OnMatrixEvent()
+		end
+	end
+
+end

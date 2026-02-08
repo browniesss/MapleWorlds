@@ -1,0 +1,14 @@
+@Component
+script DamageDecreaseAugment extends BaseMatrixAugmentComponent
+
+	method void OnSpawn()
+		local unit = self.Entity.Unit
+		if unit == nil then
+			return
+		end
+		
+		-- FLAT 타입: 받는 피해 value만큼 감소
+		unit:GetBuff(_eBuffType.DamageDecreaseBuff, self.value, 0)
+	end
+
+end

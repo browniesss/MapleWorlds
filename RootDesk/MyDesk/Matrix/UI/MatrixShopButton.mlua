@@ -1,0 +1,20 @@
+@Component
+script MatrixShopButton extends Component
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		local shopUI = _EntityService:GetEntityByPath("/ui/ShopUI")
+		
+		if shopUI then
+			shopUI.Enable = true
+			shopUI.Visible = true
+
+			local shopMenuGrid = _EntityService:GetEntityByPath("/ui/ShopUI/ShopMenu/ShopMenuGrid")
+
+			if shopMenuGrid and shopMenuGrid.ToggleGroup then
+				shopMenuGrid.ToggleGroup:ActivateButtonByIndex(4)
+			end
+		end
+	end
+
+end

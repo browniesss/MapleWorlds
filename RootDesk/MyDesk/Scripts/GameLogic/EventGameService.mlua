@@ -1,0 +1,133 @@
+@Logic
+script EventGameService extends Logic
+
+	-- 이벤트 모드 게임 시작
+	@ExecSpace("Client")
+	method void StartGame()
+		local userStage = _UserService.LocalPlayer.UserStage
+		if userStage.eventOpenChapter < userStage.eventSelectChapter then
+			return
+		end
+
+		if userStage.eventOpenChapter == userStage.eventSelectChapter and userStage.eventOpenStage < userStage.eventSelectStage then
+			return
+		end
+
+		_EntityService:GetEntityByPath("/ui/LobbyInfoUI").Enable = false
+		local lobbyBadgeButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton")
+		lobbyBadgeButton.Enable = false
+
+		if Environment:IsMobilePlatform() then
+			local lobbyJoyStick = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIJoystick")
+			local lobbyJumpButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/JumpButton")
+
+			lobbyJoyStick.Enable = false
+			lobbyJumpButton.Enable = false
+		end
+
+		_LoadingManager:Show()
+
+		_UserService.LocalPlayer.UserBreakLimitSkillProtocol:InitCallWithCallback(function(limitBreakRuids)
+			local ruids = _GameManager:GetPreLoadAssetRuid()
+
+			for _, ruid in ipairs(limitBreakRuids) do
+				table.insert(ruids, ruid)
+			end
+
+			_ResourceService:PreloadAsync(ruids, function()
+				local mapName = "Event" .. string.format("%02d", userStage.eventSelectChapter) .. string.format("%02d", userStage.eventSelectStage)
+				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, mapName)
+				self:EventGameStart(userStage.eventSelectChapter, userStage.eventSelectStage)
+			end)
+		end)
+	end
+
+	@ExecSpace("Server")
+	method void EventGameStart(integer chapterIndex, integer mapIndex)
+		_GameManager:GameStart(chapterIndex, mapIndex, true)
+	end
+
+	-- 이벤트 모드 클리어 처리
+	@ExecSpace("Client")
+	method void OnStageClear()
+		local userStage = _UserService.LocalPlayer.UserStage
+
+		self:LogStageClear()
+
+		local clearedChapter = userStage.eventSelectChapter
+		local clearedStage = userStage.eventSelectStage
+
+		self:ProcessStageClearServer(clearedChapter, clearedStage)
+	end
+
+	-- 서버 클리어 처리 (이벤트 토큰)
+	@ExecSpace("Server")
+	method void ProcessStageClearServer(integer clearedChapter, integer clearedStage)
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		local userStage = user.UserStage
+		local playTime = DateTime.UtcNow.Elapsed - _GameManager.playStartTs
+
+		local isFirstClear = false
+		local isNewStage = (clearedChapter > userStage.eventOpenChapter) or
+			(clearedChapter == userStage.eventOpenChapter and clearedStage >= userStage.eventOpenStage)
+		local isNotCleared = not userStage:IsEventStageCleared(clearedChapter, clearedStage)
+
+		if isNewStage and isNotCleared then
+			isFirstClear = true
+		end
+
+		-- 이벤트 스테이지 데이터에서 토큰 정보 가져오기
+		local eventIdValue = tostring(_EventService.currentEventVersion)
+		local eventStageData = _EventService:GetEventStageByIdFromServer(eventIdValue, clearedChapter, clearedStage)
+		local eventToken = 0
+
+		if isFirstClear then
+			-- 최초 클리어 보상
+			_BillingService:AddSecondFreeCoin(senderUserId, 300)
+
+			-- 이벤트 토큰 지급 (최초 클리어)
+			if eventStageData ~= nil and eventStageData.get_first_event_token ~= nil then
+				eventToken = eventStageData.get_first_event_token
+				_BillingService:AddEventToken(senderUserId, eventToken)
+			end
+		else
+			-- 재클리어 보상: 이벤트 토큰 지급
+			if eventStageData ~= nil and eventStageData.get_event_token ~= nil then
+				eventToken = eventStageData.get_event_token
+				_BillingService:AddEventToken(senderUserId, eventToken)
+			end
+		end
+
+		-- 클라이언트 UI 업데이트 콜백 (이벤트 토큰 전달)
+		_GameManager:StageClearClientCallback(isFirstClear, eventToken, senderUserId)
+
+		userStage:AddClearedEventStage(clearedChapter, clearedStage)
+
+		local nextStage = _EventService:GetNextOpenEventStageIdFromServer(userStage.eventOpenChapter, userStage.eventOpenStage)
+		if nextStage.chapter ~= userStage.eventOpenChapter or nextStage.stage ~= userStage.eventOpenStage then
+			userStage:SetClearEventStage(nextStage.chapter, nextStage.stage)
+		end
+	end
+
+	-- 로그 기록
+	@ExecSpace("Server")
+	method void LogStageClear()
+		local playTime = DateTime.UtcNow.Elapsed - _GameManager.playStartTs
+		local userEntity = _UserService:GetUserEntityByUserId(senderUserId)
+		local selectStageId = _GameManager.mapIndex
+		local userDeck = userEntity.UserDeck.userDeck
+		local userSkill = userEntity.UserSkillDeck.userSkillDeck
+		_AnalyticsService:GameEnd(senderUserId, playTime, selectStageId, userDeck, userSkill, true)
+	end
+
+	@ExecSpace("Server")
+	method void LogStageFail()
+		local playTime = DateTime.UtcNow.Elapsed - _GameManager.playStartTs
+		local userEntity = _UserService:GetUserEntityByUserId(senderUserId)
+		local selectStageId = _GameManager.mapIndex
+		local userDeck = userEntity.UserDeck.userDeck
+		local userSkill = userEntity.UserSkillDeck.userSkillDeck
+		_AnalyticsService:GameEnd(senderUserId, playTime, selectStageId, userDeck, userSkill, false)
+	end
+
+end

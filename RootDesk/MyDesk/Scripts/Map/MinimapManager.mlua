@@ -10,13 +10,20 @@ script MinimapManager extends Component
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		local currentMap = self.Entity.MapComponent
-		
+
 		self.mapInfo["Left"] = currentMap.LeftBottom.x
 		self.mapInfo["Bottom"] = currentMap.LeftBottom.y
 		self.mapInfo["Right"] = currentMap.RightTop.x
 		self.mapInfo["Top"] = currentMap.RightTop.x
 		self.mapInfo["Width"] = 300
 		self.mapInfo["Height"] = 192
+	end
+
+	method string GetMinimapPath()
+		if _GameManager.currentGameMode == _eGameMode.Matrix then
+			return "/ui/MatrixUI/IngameUI/IngameInfoUI/Minimap Group/Minimap Background"
+		end
+		return "/ui/Ingame_Info_UI_Group/Minimap Group/Minimap Background"
 	end
 
 	@ExecSpace("ClientOnly")
@@ -26,7 +33,7 @@ script MinimapManager extends Component
 
 	@ExecSpace("Client")
 	method void UpdateMinimap()
-		local minimapSpriteEntity = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/Minimap Group/Minimap Background")
+		local minimapSpriteEntity = _EntityService:GetEntityByPath(self:GetMinimapPath())
 		if minimapSpriteEntity == nil then
 		        return
 		end
@@ -66,7 +73,7 @@ script MinimapManager extends Component
 
 	@ExecSpace("Client")
 	method void AddEntityList(Entity entity, boolean isEnemy)
-		local minimapSpriteEntity = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/Minimap Group/Minimap Background")
+		local minimapSpriteEntity = _EntityService:GetEntityByPath(self:GetMinimapPath())
 		if minimapSpriteEntity == nil then
 			return
 		end
@@ -85,9 +92,9 @@ script MinimapManager extends Component
 
 	@ExecSpace("Client")
 	method void RemoveEntityList(Entity entity)
-		local minimapSpriteEntity = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/Minimap Group/Minimap Background")
+		local minimapSpriteEntity = _EntityService:GetEntityByPath(self:GetMinimapPath())
 		if not isvalid(minimapSpriteEntity) or not isvalid(entity) then
-			
+			return
 		end
 		
 		-- UID를 문자열로 변환하여 map에서 검색

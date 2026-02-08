@@ -1590,7 +1590,7 @@ script TutorialService extends Logic
 		-- GameManager 상태 복원
 		if _GameManager ~= nil then
 			_GameManager.isTutorialPaused = false
-			_GameManager.isTutorialMode = false
+			_GameManager.currentGameMode = _eGameMode.Normal
 		end
 		
 		-- 튜토리얼 완료 저장

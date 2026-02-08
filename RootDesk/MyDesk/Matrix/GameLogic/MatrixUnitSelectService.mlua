@@ -1,0 +1,522 @@
+@Logic
+script MatrixUnitSelectService extends Logic
+
+	property Entity matrixSelectUI = nil
+
+	property Entity unitSelectUI = nil
+
+	property Entity charterViewList = nil
+
+	property Entity augmentPanel = nil
+
+	property integer remainingSelections = 0
+
+	property table currentChoiceIds = {}
+
+	property boolean isSelectingUnit = false
+
+	property any onSelectionCompleteCallback = nil
+
+	-- 유닛 강화 모드 관련 프로퍼티
+	property boolean isUpgradeMode = false
+	-- currentUpgradeChoices 구조: { {unitId, buffType, buffValue}, ... }
+	property table currentUpgradeChoices = {}
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.matrixSelectUI = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI")
+		self.unitSelectUI = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI/UnitSelectUI")
+		self.charterViewList = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI/UnitSelectUI/CharterViewList_1")
+		self.augmentPanel = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI")
+	end
+
+	@ExecSpace("Client")
+	method void StartUnitSelection(integer count, any callback)
+		self.remainingSelections = count
+		self.onSelectionCompleteCallback = callback
+		self:ShowUnitSelectionUI()
+	end
+
+	@ExecSpace("Client")
+	method void ShowUnitSelectionUI()
+		local user = _UserService.LocalPlayer
+		if user == nil or user.UserMatrixManager == nil then
+			log("[MatrixUnitSelectService] user or UserMatrixManager is nil")
+			return
+		end
+
+		-- 8개 유닛 보유 시 강화 모드로 전환
+		if user.UserMatrixManager:IsUnitListFull() then
+			self:ShowUnitUpgradeUI()
+			return
+		end
+
+		self.isSelectingUnit = true
+		self.isUpgradeMode = false
+
+		-- unitPool에서 랜덤 4유닛 생성
+		local choices = self:GenerateUnitChoices()
+		if choices == nil or #choices == 0 then
+			log("[MatrixUnitSelectService] 선택 가능한 유닛이 없습니다")
+			self.isSelectingUnit = false
+			if self.onSelectionCompleteCallback ~= nil then
+				self.onSelectionCompleteCallback()
+				self.onSelectionCompleteCallback = nil
+			end
+			return
+		end
+
+		self.currentChoiceIds = choices
+
+		-- 게임 일시정지
+		if _MatrixGameManager ~= nil then
+			_MatrixGameManager:PauseGame()
+		end
+
+		-- 서버측 일시정지 (MesoIncome 연동)
+		if _MatrixAugmentService ~= nil then
+			_MatrixAugmentService:SetGamePausedOnServer(true)
+		end
+
+		-- MatrixSelectUI 컨테이너 활성화
+		if self.matrixSelectUI ~= nil then
+			self.matrixSelectUI.Enable = true
+			self.matrixSelectUI.Visible = true
+		end
+
+		-- UnitSelectUI 활성화, 증강 패널 비활성화
+		if self.unitSelectUI ~= nil then
+			self.unitSelectUI.Enable = true
+			self.unitSelectUI.Visible = true
+		end
+		if self.augmentPanel ~= nil then
+			self.augmentPanel.Enable = false
+		end
+
+		-- CharterView에 유닛 데이터 표시
+		self:PopulateCharterViews(choices)
+	end
+
+	method void PopulateCharterViews(table choiceIds)
+		if self.charterViewList == nil then
+			log("[MatrixUnitSelectService] charterViewList is nil")
+			return
+		end
+
+		log("[MatrixUnitSelectService] PopulateCharterViews - choiceIds count: " .. tostring(#choiceIds))
+
+		local user = _UserService.LocalPlayer
+		if user == nil or user.UserMatrixManager == nil then
+			log("[MatrixUnitSelectService] user or UserMatrixManager is nil in PopulateCharterViews")
+			return
+		end
+
+		local unitPool = user.UserMatrixManager.unitPool
+		local children = self.charterViewList.Children
+		local index = 1
+
+		for _, child in pairs(children) do
+			if child.CharterView ~= nil then
+				if index > #choiceIds then
+					child.CharterView.Entity.Enable = false
+				else
+					child.CharterView.Entity.Enable = true
+					local unitId = choiceIds[index]
+					-- unitPool에서 BuffedUnitModel 가져오기
+					local unitData = unitPool[unitId]
+
+					if unitData == nil then
+						log("[MatrixUnitSelectService] unitData is nil for unitId: " .. tostring(unitId))
+					else
+						log("[MatrixUnitSelectService] Setting CharterView " .. tostring(index) .. " with unit: " .. tostring(unitData.name))
+					end
+
+					child.CharterView:InitGacha(unitData)
+				end
+				index = index + 1
+			end
+		end
+
+		log("[MatrixUnitSelectService] PopulateCharterViews complete, processed " .. tostring(index - 1) .. " CharterViews")
+	end
+
+	method table GenerateUnitChoices()
+		local user = _UserService.LocalPlayer
+		if user == nil or user.UserMatrixManager == nil then
+			log("[MatrixUnitSelectService] GenerateUnitChoices - user or UserMatrixManager is nil")
+			return {}
+		end
+
+		local matrixManager = user.UserMatrixManager
+		local pool = matrixManager.unitPool
+		local unitList = matrixManager.unitList
+		local subUnitList = matrixManager.subUnitList or {}
+
+		-- subUnitList를 빠른 조회용 테이블로 변환
+		local subUnitSet = {}
+		for _, unitId in ipairs(subUnitList) do
+			subUnitSet[unitId] = true
+		end
+
+		-- 풀 크기 로깅
+		local poolCount = 0
+		for _ in pairs(pool) do poolCount = poolCount + 1 end
+		log("[MatrixUnitSelectService] GenerateUnitChoices - pool size: " .. tostring(poolCount))
+
+		-- 선택 가능 목록 구성 (이미 선택한 유닛 및 서브 유닛 제외)
+		local available = {}
+		for unitId, unitData in pairs(pool) do
+			if unitList[unitId] == nil and subUnitSet[unitId] == nil then
+				table.insert(available, unitId)
+			end
+		end
+
+		log("[MatrixUnitSelectService] GenerateUnitChoices - available count: " .. tostring(#available))
+
+		-- Fisher-Yates 셔플
+		for i = #available, 2, -1 do
+			local j = math.random(1, i)
+			available[i], available[j] = available[j], available[i]
+		end
+
+		-- 최대 4개 선택
+		local choices = {}
+		for i = 1, math.min(4, #available) do
+			table.insert(choices, available[i])
+			log("[MatrixUnitSelectService] Choice " .. tostring(i) .. ": " .. tostring(available[i]))
+		end
+
+		return choices
+	end
+
+	@ExecSpace("Client")
+	method void SelectUnitByIndex(integer index)
+		if not self.isSelectingUnit then
+			return
+		end
+
+		local unitId = self.currentChoiceIds[index]
+		if unitId == nil then
+			return
+		end
+
+		self.isSelectingUnit = false
+
+		-- UserMatrixManager.unitList에 추가 (unitPool에서 BuffedUnitModel 가져옴)
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.UserMatrixManager ~= nil then
+			local unitData = user.UserMatrixManager.unitPool[unitId]
+			user.UserMatrixManager:AddUnitToList(unitId, unitData)
+		end
+
+		-- MatrixExtendUnitShop에 유닛 추가
+		if _MatrixGameManager ~= nil and _MatrixGameManager.unitShop ~= nil then
+			local shop = _MatrixGameManager.unitShop.MatrixExtendUnitShop
+			if shop ~= nil then
+				shop:AddUnit(unitId)
+			end
+		end
+
+		-- 시너지 카운트 업데이트 (서버로 전송)
+		if user ~= nil and user.UserSynergyComponent ~= nil then
+			user.UserSynergyComponent:AddCountFromClient(unitId)
+		end
+
+		-- 메소 UI 업데이트 (시너지 변경 반영)
+		self:RefreshMesoIncomeUI()
+
+		log("[MatrixUnitSelectService] 유닛 선택: " .. unitId .. " (남은 선택: " .. tostring(self.remainingSelections - 1) .. ")")
+		
+		-- UI 닫기
+		self:CloseUnitSelectionUI()
+		
+		-- 남은 선택 처리
+		self.remainingSelections = self.remainingSelections - 1
+		
+		if self.remainingSelections > 0 then
+			-- 다음 선택 (0.5초 딜레이)
+			_TimerService:SetTimerOnce(function()
+				self:ShowUnitSelectionUI()
+			end, 0.5)
+		else
+			-- 선택 완료 → 콜백 호출
+			if self.onSelectionCompleteCallback ~= nil then
+				local callback = self.onSelectionCompleteCallback
+				self.onSelectionCompleteCallback = nil
+				callback()
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void CloseUnitSelectionUI()
+		if self.unitSelectUI ~= nil then
+			self.unitSelectUI.Enable = false
+		end
+		
+		if self.matrixSelectUI ~= nil then
+			self.matrixSelectUI.Enable = false
+			self.matrixSelectUI.Visible = false
+		end
+		
+		-- 게임 재개
+		if _MatrixGameManager ~= nil then
+			_MatrixGameManager:ResumeGame()
+		end
+		
+		-- 서버측 일시정지 해제 (MesoIncome 연동)
+		if _MatrixAugmentService ~= nil then
+			_MatrixAugmentService:SetGamePausedOnServer(false)
+		end
+	end
+
+	method void Reset()
+		self.remainingSelections = 0
+		self.currentChoiceIds = {}
+		self.isSelectingUnit = false
+		self.isUpgradeMode = false
+		self.currentUpgradeChoices = {}
+		self.onSelectionCompleteCallback = nil
+	end
+
+	-- ============================================
+	-- 유닛 강화 모드 (8개 유닛 보유 시)
+	-- ============================================
+
+	@ExecSpace("Client")
+	method void ShowUnitUpgradeUI()
+		self.isSelectingUnit = true
+		self.isUpgradeMode = true
+
+		-- 보유 유닛 중 랜덤 4개 + 버프 타입 생성
+		local upgradeChoices = self:GenerateUpgradeChoices()
+		if upgradeChoices == nil or #upgradeChoices == 0 then
+			log("[MatrixUnitSelectService] 강화 선택지 생성 실패")
+			self.isSelectingUnit = false
+			self.isUpgradeMode = false
+			if self.onSelectionCompleteCallback ~= nil then
+				self.onSelectionCompleteCallback()
+				self.onSelectionCompleteCallback = nil
+			end
+			return
+		end
+
+		self.currentUpgradeChoices = upgradeChoices
+
+		-- 게임 일시정지
+		if _MatrixGameManager ~= nil then
+			_MatrixGameManager:PauseGame()
+		end
+
+		-- 서버측 일시정지
+		if _MatrixAugmentService ~= nil then
+			_MatrixAugmentService:SetGamePausedOnServer(true)
+		end
+
+		-- MatrixSelectUI 컨테이너 활성화
+		if self.matrixSelectUI ~= nil then
+			self.matrixSelectUI.Enable = true
+			self.matrixSelectUI.Visible = true
+		end
+
+		-- UnitSelectUI 활성화, 증강 패널 비활성화
+		if self.unitSelectUI ~= nil then
+			self.unitSelectUI.Enable = true
+			self.unitSelectUI.Visible = true
+		end
+		if self.augmentPanel ~= nil then
+			self.augmentPanel.Enable = false
+		end
+
+		-- CharterView에 강화 선택지 표시
+		self:PopulateUpgradeViews(upgradeChoices)
+
+		log("[MatrixUnitSelectService] 유닛 강화 모드 UI 표시 - " .. tostring(#upgradeChoices) .. "개 선택지")
+	end
+
+	-- 보유 유닛 중 랜덤 4개 선택 + 50% 확률로 공격력/체력 버프 할당
+	method table GenerateUpgradeChoices()
+		local user = _UserService.LocalPlayer
+		if user == nil or user.UserMatrixManager == nil then
+			return {}
+		end
+
+		local unitList = user.UserMatrixManager.unitList
+
+		-- 보유 유닛 ID 목록
+		local ownedUnitIds = {}
+		for unitId, _ in pairs(unitList) do
+			table.insert(ownedUnitIds, unitId)
+		end
+
+		if #ownedUnitIds == 0 then
+			return {}
+		end
+
+		-- Fisher-Yates 셔플
+		for i = #ownedUnitIds, 2, -1 do
+			local j = math.random(1, i)
+			ownedUnitIds[i], ownedUnitIds[j] = ownedUnitIds[j], ownedUnitIds[i]
+		end
+
+		-- 최대 4개 선택 + 버프 타입 할당
+		local choices = {}
+		for i = 1, math.min(4, #ownedUnitIds) do
+			local unitId = ownedUnitIds[i]
+			local buffType = "DAMAGE"
+			local buffValue = 1
+
+			-- 50% 확률로 공격력 또는 체력
+			if math.random() < 0.5 then
+				buffType = "DAMAGE"
+				buffValue = 1
+			else
+				buffType = "HP"
+				buffValue = 10
+			end
+
+			table.insert(choices, {
+				unitId = unitId,
+				buffType = buffType,
+				buffValue = buffValue
+			})
+
+			log("[MatrixUnitSelectService] 강화 선택지 " .. tostring(i) .. ": " .. unitId .. " - " .. buffType .. " +" .. tostring(buffValue))
+		end
+
+		return choices
+	end
+
+	-- 강화 선택지를 CharterView에 표시
+	method void PopulateUpgradeViews(table upgradeChoices)
+		if self.charterViewList == nil then
+			log("[MatrixUnitSelectService] charterViewList is nil")
+			return
+		end
+
+		local user = _UserService.LocalPlayer
+		if user == nil or user.UserMatrixManager == nil then
+			return
+		end
+
+		local unitPool = user.UserMatrixManager.unitPool
+		local children = self.charterViewList.Children
+		local index = 1
+
+		for _, child in pairs(children) do
+			if child.CharterView ~= nil then
+				if index > #upgradeChoices then
+					child.CharterView.Entity.Enable = false
+				else
+					local choice = upgradeChoices[index]
+					local unitData = unitPool[choice.unitId]
+
+					if unitData ~= nil then
+						child.CharterView:InitUpgrade(unitData, choice.buffType, choice.buffValue)
+					else
+						child.CharterView.Entity.Enable = false
+					end
+				end
+				index = index + 1
+			end
+		end
+	end
+
+	-- 강화 선택 처리
+	@ExecSpace("Client")
+	method void SelectUpgradeByIndex(integer index)
+		if not self.isSelectingUnit or not self.isUpgradeMode then
+			return
+		end
+
+		local choice = self.currentUpgradeChoices[index]
+		if choice == nil then
+			return
+		end
+
+		self.isSelectingUnit = false
+		self.isUpgradeMode = false
+
+		-- 버프 적용
+		self:ApplyUpgradeToUnit(choice.unitId, choice.buffType, choice.buffValue)
+
+		log("[MatrixUnitSelectService] 강화 선택: " .. choice.unitId .. " - " .. choice.buffType .. " +" .. tostring(choice.buffValue))
+
+		-- UI 닫기
+		self:CloseUnitSelectionUI()
+
+		-- 남은 선택 처리
+		self.remainingSelections = self.remainingSelections - 1
+
+		if self.remainingSelections > 0 then
+			-- 다음 선택 (0.5초 딜레이)
+			_TimerService:SetTimerOnce(function()
+				self:ShowUnitSelectionUI()
+			end, 0.5)
+		else
+			-- 선택 완료 → 콜백 호출
+			if self.onSelectionCompleteCallback ~= nil then
+				local callback = self.onSelectionCompleteCallback
+				self.onSelectionCompleteCallback = nil
+				callback()
+			end
+		end
+	end
+
+	-- 유닛에 버프 적용 (unitPool의 BuffedUnitModel에 직접 적용)
+	method void ApplyUpgradeToUnit(string unitId, string buffType, number buffValue)
+		local user = _UserService.LocalPlayer
+		if user == nil or user.UserMatrixManager == nil then
+			return
+		end
+
+		local unitData = user.UserMatrixManager.unitPool[unitId]
+		if unitData == nil then
+			log("[MatrixUnitSelectService] 버프 적용 실패 - 유닛 없음: " .. unitId)
+			return
+		end
+
+		if buffType == "DAMAGE" then
+			unitData.damage = unitData.damage + buffValue
+			log("[MatrixUnitSelectService] " .. unitId .. " 공격력 +" .. tostring(buffValue) .. " → " .. tostring(unitData.damage))
+		elseif buffType == "HP" then
+			unitData.hp = unitData.hp + buffValue
+			log("[MatrixUnitSelectService] " .. unitId .. " 체력 +" .. tostring(buffValue) .. " → " .. tostring(unitData.hp))
+		end
+
+		-- 서버에 버프 적용 동기화
+		self:ApplyUpgradeToUnitServer(unitId, buffType, buffValue)
+	end
+
+	@ExecSpace("Server")
+	method void ApplyUpgradeToUnitServer(string unitId, string buffType, number buffValue)
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		if user == nil or user.UserMatrixManager == nil then
+			return
+		end
+
+		local unitData = user.UserMatrixManager.unitPool[unitId]
+		if unitData == nil then
+			return
+		end
+
+		if buffType == "DAMAGE" then
+			unitData.damage = unitData.damage + buffValue
+		elseif buffType == "HP" then
+			unitData.hp = unitData.hp + buffValue
+		end
+
+		log("[MatrixUnitSelectService] 서버 버프 적용: " .. unitId .. " - " .. buffType .. " +" .. tostring(buffValue))
+	end
+
+	-- 메소 income UI 업데이트 (시너지 변경 반영)
+	@ExecSpace("Server")
+	method void RefreshMesoIncomeUI()
+		local mapPath = "/maps/MatrixStage"
+		local mesoIncomeEntity = _EntityService:GetEntityByPath(mapPath .. "/ingameIncome")
+		if mesoIncomeEntity ~= nil and mesoIncomeEntity.MesoIncome ~= nil then
+			mesoIncomeEntity.MesoIncome:RefreshIncomeUI()
+		end
+	end
+
+end

@@ -1,0 +1,350 @@
+@Component
+script UserMatrixManager extends Component
+
+	-- 유닛 전체 풀 (선택 페이즈에서 뽑힐 수 있는 전체 유닛)
+	property table unitPool = {}
+
+	-- 유저 보유 유닛 리스트 (최대 8개)
+	property table unitList = {}
+	property integer unitListCount = 0
+	property integer maxUnitListCount = 8
+
+	-- 서브 유닛 리스트 (시너지 보너스로 추가되는 유닛: 시그너스 등)
+	property table subUnitList = {}
+
+	-- 증강 효과 목록
+	property table matrixEffects = {}
+
+	-- 매트릭스 플레이 시간 (초 단위, 맵 진입 시 초기화)
+	property number playTime = 0
+
+	-- ============================================
+	-- 랭킹용 점수 데이터
+	-- ============================================
+	property integer totalScore = 0
+	property table phaseKillCount = {}
+	property table phaseStartTime = {}
+	property integer currentPhaseScore = 0
+
+	-- ============================================
+	-- 유닛 풀 (UnitPool)
+	-- ============================================
+
+	method void AddUnitToPool(string unitId, table unitData)
+		self.unitPool[unitId] = unitData
+		log("[UserMatrixManager] UnitPool에 추가: " .. unitId)
+	end
+
+	method table GetUnitFromPool(string unitId)
+		return self.unitPool[unitId]
+	end
+
+	-- ============================================
+	-- 유닛 리스트 (UnitList, 최대 8개)
+	-- ============================================
+
+	method boolean AddUnitToList(string unitId, table unitData)
+		if self:IsUnitListFull() then
+			log("[UserMatrixManager] UnitList가 꽉 참. Swap 필요")
+			return false
+		end
+
+		self.unitList[unitId] = unitData
+		self.unitListCount = self.unitListCount + 1
+		log("[UserMatrixManager] UnitList에 추가: " .. unitId .. " (" .. tostring(self.unitListCount) .. "/" .. tostring(self.maxUnitListCount) .. ")")
+		return true
+	end
+
+	method void SwapUnitInList(string oldUnitId, string newUnitId, table newUnitData)
+		if self.unitList[oldUnitId] == nil then
+			log("[UserMatrixManager] Swap 실패 - 기존 유닛 없음: " .. oldUnitId)
+			return
+		end
+
+		self.unitList[oldUnitId] = nil
+		self.unitList[newUnitId] = newUnitData
+		log("[UserMatrixManager] UnitList Swap: " .. oldUnitId .. " → " .. newUnitId)
+	end
+
+	method table GetUnitFromList(string unitId)
+		return self.unitList[unitId]
+	end
+
+	method boolean IsUnitListFull()
+		return self.unitListCount >= self.maxUnitListCount
+	end
+
+	-- ============================================
+	-- 증강 (Matrix Effects)
+	-- ============================================
+
+	method void AddMatrix(table matrixData)
+		table.insert(self.matrixEffects, matrixData)
+		log("[UserMatrixManager] 증강 추가: " .. tostring(matrixData.name or matrixData.id))
+	end
+
+	method table GetMatrixEffects()
+		return self.matrixEffects
+	end
+
+	-- ============================================
+	-- 라이프사이클
+	-- ============================================
+
+	method void OnMapEnter(Entity enteredMap)
+		if enteredMap.Name == "MatrixStage" then
+			self.playTime = 0
+			self:LoadUnitPoolFromUser()
+
+			-- 맵 진입 시 게임 초기화 (맵이 로드된 후 호출되므로 엔티티 참조가 안전함)
+			if _MatrixGameManager ~= nil then
+				_MatrixGameManager:InitializeGame()
+			end
+		end
+	end
+
+	-- 유저가 보유한 전체 유닛을 unitPool에 로드 (시그너스는 시너지 보너스 유닛이므로 제외)
+	method void LoadUnitPoolFromUser()
+		self.unitPool = {}
+
+		local userUnitStore = self.Entity.UserUnitStore
+		if userUnitStore == nil then
+			log("[UserMatrixManager] UserUnitStore를 찾을 수 없습니다")
+			return
+		end
+
+		local cygnusModelId = "model://6194a4e3-0eb4-417a-92b5-891af548b672"
+		local count = 0
+		for unitId, unitData in pairs(userUnitStore.UserUnitMap) do
+			if unitId ~= cygnusModelId then
+				self.unitPool[unitId] = unitData
+				count = count + 1
+			end
+		end
+
+		log("[UserMatrixManager] UnitPool 로드 완료: " .. tostring(count) .. "개 유닛")
+	end
+
+	method void OnMapLeave(Entity leftMap)
+		if leftMap.Name == "MatrixStage" then
+			self:InitMatrixUserData()
+
+			-- 기존 덱 기반으로 시너지 복원 (서버에서만 실행)
+			if _Server ~= nil and self.Entity.UserSynergyComponent ~= nil then
+				self.Entity.UserSynergyComponent:RestoreSynergyFromDeck()
+			end
+		end
+	end
+
+	method void InitMatrixUserData()
+		self.unitPool = {}
+		self.unitList = {}
+		self.unitListCount = 0
+		self.subUnitList = {}
+		self.matrixEffects = {}
+		self.playTime = 0
+		self:ResetScoreData()
+		log("[UserMatrixManager] 매트릭스 유저 데이터 초기화 완료")
+	end
+
+	-- ============================================
+	-- 점수 추적 (Scoring)
+	-- ============================================
+
+	-- 킬 등록 (페이즈별 킬포인트 적용)
+	method void OnMonsterKilled(integer phaseId)
+		if self.phaseKillCount[phaseId] == nil then
+			self.phaseKillCount[phaseId] = 0
+		end
+		self.phaseKillCount[phaseId] = self.phaseKillCount[phaseId] + 1
+
+		-- 킬 점수 즉시 반영
+		local phaseData = _MatrixGameService.phaseData[phaseId]
+		if phaseData ~= nil then
+			local killPoint = phaseData.killPoint or 1
+			self.totalScore = self.totalScore + killPoint
+			log("[UserMatrixManager] 킬 등록: 페이즈=" .. tostring(phaseId) .. ", 킬포인트=" .. tostring(killPoint) .. ", 총점수=" .. tostring(self.totalScore))
+		else
+			log("[UserMatrixManager] 킬 등록 실패: phaseData가 nil (phaseId=" .. tostring(phaseId) .. ")")
+		end
+	end
+
+	-- 페이즈 시작 시 호출 (시간 기록)
+	method void OnPhaseStart(integer phaseId)
+		if _MatrixGameManager ~= nil then
+			self.phaseStartTime[phaseId] = _MatrixGameManager.matrixTime
+		else
+			self.phaseStartTime[phaseId] = self.playTime
+		end
+		log("[UserMatrixManager] 페이즈 " .. tostring(phaseId) .. " 시작 시간 기록: " .. tostring(self.phaseStartTime[phaseId]))
+	end
+
+	-- 페이즈 종료 시 점수 계산 (1~3페이즈용)
+	method integer CalculatePhaseScore(integer phaseId)
+		local phaseData = _MatrixGameService.phaseData[phaseId]
+		if phaseData == nil then
+			return 0
+		end
+
+		local baseScore = phaseData.baseScore or 0
+		if baseScore == 0 then
+			return 0
+		end
+
+		-- 페이즈 경과 시간 계산
+		local startTime = self.phaseStartTime[phaseId] or 0
+		local currentTime = 0
+		if _MatrixGameManager ~= nil then
+			currentTime = _MatrixGameManager.matrixTime
+		else
+			currentTime = self.playTime
+		end
+		local elapsedTime = currentTime - startTime
+
+		-- 기준 점수에서 초당 1점 감소 (최소 0점)
+		local timeScore = math.max(0, baseScore - math.floor(elapsedTime))
+		self.totalScore = self.totalScore + timeScore
+
+		log("[UserMatrixManager] 페이즈 " .. tostring(phaseId) .. " 시간 점수: " .. tostring(timeScore) .. " (경과: " .. tostring(math.floor(elapsedTime)) .. "초)")
+		return timeScore
+	end
+
+	-- 무한모드 점수 계산 (초당 점수)
+	method integer CalculateInfiniteScore()
+		local currentTime = 0
+		if _MatrixGameManager ~= nil then
+			currentTime = _MatrixGameManager.matrixTime
+		else
+			currentTime = self.playTime
+		end
+
+		-- 4페이즈 시작 시간부터 계산
+		local phase4StartTime = self.phaseStartTime[4] or 0
+		local infiniteTime = currentTime - phase4StartTime
+
+		-- 초당 1점
+		local timeScore = math.floor(infiniteTime)
+		self.totalScore = self.totalScore + timeScore
+
+		log("[UserMatrixManager] 무한모드 시간 점수: " .. tostring(timeScore) .. " (경과: " .. tostring(math.floor(infiniteTime)) .. "초)")
+		return timeScore
+	end
+
+	-- 총 점수 반환
+	method integer GetTotalScore()
+		return self.totalScore
+	end
+
+	-- 점수 데이터 초기화
+	method void ResetScoreData()
+		self.totalScore = 0
+		self.phaseKillCount = {}
+		self.phaseStartTime = {}
+		self.currentPhaseScore = 0
+		log("[UserMatrixManager] 점수 데이터 초기화 완료")
+	end
+
+	-- ============================================
+	-- 서브 유닛 (시너지 보너스 유닛)
+	-- ============================================
+
+	-- 시너지 보너스 유닛 체크 및 추가 (시그너스 등)
+	@ExecSpace("Server")
+	method void CheckAndAddSynergyUnits()
+		local userSynergy = self.Entity.UserSynergyComponent
+		if userSynergy == nil then
+			return
+		end
+
+		-- 시그너스 시너지(102) 체크
+		local cygnusCount = userSynergy:GET_SYNERGY_COUNT(102)
+		local cygnusModelId = "model://6194a4e3-0eb4-417a-92b5-891af548b672"
+
+		-- 이미 subUnitList에 시그너스가 있는지 확인
+		local hasCygnus = false
+		for _, unitId in ipairs(self.subUnitList) do
+			if unitId == cygnusModelId then
+				hasCygnus = true
+				break
+			end
+		end
+
+		if cygnusCount > 0 and not hasCygnus then
+			-- 시그너스 추가
+			table.insert(self.subUnitList, cygnusModelId)
+			log("[UserMatrixManager] 시그너스 시너지 활성화 - subUnitList에 추가 (카운트: " .. tostring(cygnusCount) .. ")")
+
+			-- 시그너스 유닛 데이터를 unitPool에 추가
+			self:AddCygnusToUnitPool()
+
+			-- 클라이언트에 알림
+			self:OnSynergyUnitAdded(cygnusModelId)
+		end
+	end
+
+	-- 시그너스 유닛 데이터를 unitPool에 추가
+	method void AddCygnusToUnitPool()
+		local cygnusModelId = "model://6194a4e3-0eb4-417a-92b5-891af548b672"
+
+		-- 이미 있으면 스킵
+		if self.unitPool[cygnusModelId] ~= nil then
+			return
+		end
+
+		-- 시그너스 유닛 정보 로드
+		local unitInfo = _UnitService:GetUnitByIDFromServer(cygnusModelId)
+		if unitInfo == nil then
+			log("[UserMatrixManager] 시그너스 유닛 정보를 찾을 수 없습니다")
+			return
+		end
+
+		local buffedUnit = BuffedUnitModel()
+		buffedUnit:Init(unitInfo)
+
+		-- 시그너스 레벨은 시너지에 따라 결정되므로 기본값으로 설정
+		self.unitPool[cygnusModelId] = buffedUnit
+		log("[UserMatrixManager] 시그너스를 unitPool에 추가")
+	end
+
+	-- 시너지 유닛 추가 시 클라이언트에 알림
+	@ExecSpace("Client")
+	method void OnSynergyUnitAdded(string unitId)
+		-- 시그너스 유닛 데이터를 클라이언트 unitPool에도 추가
+		local cygnusModelId = "model://6194a4e3-0eb4-417a-92b5-891af548b672"
+		if unitId == cygnusModelId then
+			local unitInfo = _UnitService:GetUnitByIDFromClient(cygnusModelId)
+			if unitInfo ~= nil then
+				local buffedUnit = BuffedUnitModel()
+				buffedUnit:Init(unitInfo)
+				self.unitPool[cygnusModelId] = buffedUnit
+			end
+
+			-- 클라이언트 subUnitList에도 추가 (GenerateUnitChoices 필터링용)
+			local hasCygnus = false
+			for _, id in ipairs(self.subUnitList) do
+				if id == cygnusModelId then
+					hasCygnus = true
+					break
+				end
+			end
+			if not hasCygnus then
+				table.insert(self.subUnitList, cygnusModelId)
+			end
+		end
+
+		-- MatrixExtendUnitShop에 유닛 추가
+		if _MatrixGameManager ~= nil and _MatrixGameManager.unitShop ~= nil then
+			local shop = _MatrixGameManager.unitShop.MatrixExtendUnitShop
+			if shop ~= nil then
+				shop:AddUnit(unitId)
+				log("[UserMatrixManager] MatrixExtendUnitShop에 시너지 유닛 추가: " .. unitId)
+			end
+		end
+	end
+
+	-- subUnitList 조회
+	method table GetSubUnitList()
+		return self.subUnitList
+	end
+
+end

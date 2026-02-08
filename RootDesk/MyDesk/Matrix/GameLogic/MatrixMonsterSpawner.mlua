@@ -1,0 +1,326 @@
+@Logic
+script MatrixMonsterSpawner extends Logic
+
+	-- 현재 스폰 중인 웨이브 정보
+	property table currentWaveMonsters = {}
+	property boolean isSpawning = false
+	property integer totalSpawnedCount = 0
+	property integer totalAliveCount = 0
+
+	-- 스폰 완료 콜백
+	property any onWaveSpawnCompleteCallback = nil
+	property any onAllEnemiesDefeatedCallback = nil
+
+	-- 몬스터 ID 매핑 테이블 (CSV 로드)
+	property table monsterIdMap = {}
+
+	-- 스폰 타이머 ID 목록 (취소용)
+	property table spawnTimerIds = {}
+
+	method void OnBeginPlay()
+		self:LoadMonsterIdMap()
+	end
+
+	-- 몬스터 ID 매핑 로드 (클라이언트/서버 모두)
+	method void LoadMonsterIdMap()
+		local dataSet = _DataService:GetTable("MatrixMonster")
+		if dataSet == nil then
+			log("[MatrixMonsterSpawner] MatrixMonster 데이터셋을 찾을 수 없습니다")
+			return
+		end
+
+		for i = 1, dataSet:GetRowCount() do
+			local id = tonumber(dataSet:GetCell(i, "id"))
+			local modelID = dataSet:GetCell(i, "modelID")
+			local name = dataSet:GetCell(i, "name")
+
+			self.monsterIdMap[id] = {
+				modelID = modelID,
+				name = name
+			}
+		end
+
+		local count = 0
+		for _ in pairs(self.monsterIdMap) do count = count + 1 end
+		log("[MatrixMonsterSpawner] 몬스터 ID 매핑 로드 완료: " .. tostring(count) .. "개")
+	end
+
+	-- ============================================
+	-- 웨이브 스폰 시작 (클라이언트에서 호출)
+	-- ============================================
+
+	@ExecSpace("Client")
+	method void SpawnWave(table monsterIds, table spawnDelays, table spawnCounts, number levelMultiplier, integer loopCount)
+		if self.isSpawning then
+			log("[MatrixMonsterSpawner] 이미 스폰 중입니다")
+			return
+		end
+
+		self.isSpawning = true
+		self.totalSpawnedCount = 0
+		self.totalAliveCount = 0
+		self.currentWaveMonsters = {}
+
+		log("[MatrixMonsterSpawner] 웨이브 스폰 시작: " .. tostring(#monsterIds) .. "종류")
+
+		-- 서버에 스폰 요청
+		self:SpawnWaveOnServer(monsterIds, spawnDelays, spawnCounts, levelMultiplier, loopCount)
+	end
+
+	-- ============================================
+	-- 서버에서 웨이브 스폰 처리
+	-- ============================================
+
+	@ExecSpace("Server")
+	method void SpawnWaveOnServer(table monsterIds, table spawnDelays, table spawnCounts, number levelMultiplier, integer loopCount)
+		-- 몬스터 ID 매핑이 비어있으면 다시 로드
+		local count = 0
+		for _ in pairs(self.monsterIdMap) do count = count + 1 end
+		if count == 0 then
+			self:LoadMonsterIdMap()
+		end
+
+		-- 순차적으로 각 몬스터 그룹 스폰
+		self:SpawnMonsterGroup(monsterIds, spawnDelays, spawnCounts, 1, levelMultiplier, loopCount)
+	end
+
+	-- ============================================
+	-- 몬스터 그룹 순차 스폰 (재귀, 서버)
+	-- ============================================
+
+	@ExecSpace("Server")
+	method void SpawnMonsterGroup(table monsterIds, table spawnDelays, table spawnCounts, integer groupIndex, number levelMultiplier, integer loopCount)
+		if groupIndex > #monsterIds then
+			-- 모든 그룹 스폰 완료
+			self.isSpawning = false
+			log("[MatrixMonsterSpawner] 모든 몬스터 스폰 완료: " .. tostring(self.totalSpawnedCount) .. "마리")
+
+			-- 클라이언트에 스폰 완료 알림
+			self:OnWaveSpawnCompleteClient()
+			return
+		end
+
+		local monsterId = monsterIds[groupIndex]
+		local count = spawnCounts[groupIndex]
+		local delay = spawnDelays[groupIndex]
+
+		log("[MatrixMonsterSpawner] 그룹 " .. tostring(groupIndex) .. " 스폰: 몬스터ID=" .. tostring(monsterId) .. ", 개수=" .. tostring(count))
+
+		-- 현재 그룹의 몬스터들을 순차적으로 스폰
+		self:SpawnMonsterSequence(monsterId, count, 0.3, levelMultiplier, loopCount, monsterIds, spawnDelays, spawnCounts, groupIndex, delay)
+	end
+
+	-- ============================================
+	-- 단일 몬스터 종류를 여러 마리 순차 스폰 (서버)
+	-- ============================================
+
+	@ExecSpace("Server")
+	method void SpawnMonsterSequence(integer monsterId, integer count, number interval, number levelMultiplier, integer loopCount, table monsterIds, table spawnDelays, table spawnCounts, integer groupIndex, number groupDelay)
+		if count <= 0 then
+			-- 현재 그룹 스폰 완료, 다음 그룹으로
+			local timerId = _TimerService:SetTimerOnce(function()
+				self:SpawnMonsterGroup(monsterIds, spawnDelays, spawnCounts, groupIndex + 1, levelMultiplier, loopCount)
+			end, groupDelay)
+			table.insert(self.spawnTimerIds, timerId)
+			return
+		end
+
+		-- 몬스터 스폰
+		self:SpawnSingleMonster(monsterId, levelMultiplier, loopCount)
+
+		-- 나머지 몬스터 순차 스폰
+		if count > 1 then
+			local timerId = _TimerService:SetTimerOnce(function()
+				self:SpawnMonsterSequence(monsterId, count - 1, interval, levelMultiplier, loopCount, monsterIds, spawnDelays, spawnCounts, groupIndex, groupDelay)
+			end, interval)
+			table.insert(self.spawnTimerIds, timerId)
+		else
+			-- 현재 그룹의 마지막 몬스터, 다음 그룹으로
+			local timerId = _TimerService:SetTimerOnce(function()
+				self:SpawnMonsterGroup(monsterIds, spawnDelays, spawnCounts, groupIndex + 1, levelMultiplier, loopCount)
+			end, groupDelay)
+			table.insert(self.spawnTimerIds, timerId)
+		end
+	end
+
+	-- ============================================
+	-- 단일 몬스터 스폰 (실제 스폰 로직, 서버)
+	-- ============================================
+
+	@ExecSpace("Server")
+	method void SpawnSingleMonster(integer monsterId, number levelMultiplier, integer loopCount)
+		local spawnParent = _EntityService:GetEntityByPath("/maps/MatrixStage/EnemyList")
+		local spawnPos = _EntityService:GetEntityByPath("/maps/MatrixStage/EnemyList/EnemySpawnPoint")
+
+		if spawnParent == nil or spawnPos == nil then
+			log("[MatrixMonsterSpawner] 스폰 위치를 찾을 수 없습니다")
+			return
+		end
+
+		-- 몬스터 ID 매핑 테이블에서 모델 ID 가져오기
+		local monsterInfo = self.monsterIdMap[monsterId]
+		if monsterInfo == nil then
+			log("[MatrixMonsterSpawner] 몬스터 ID 매핑을 찾을 수 없습니다: " .. tostring(monsterId))
+			return
+		end
+
+		local modelID = monsterInfo.modelID
+		log("[MatrixMonsterSpawner] 스폰: " .. monsterInfo.name .. " (" .. modelID .. ")")
+
+		-- 몬스터 데이터 가져오기 (서버에서)
+		local unitData = _UnitService:GetUnitByIDFromServer(modelID)
+		if unitData == nil then
+			log("[MatrixMonsterSpawner] 몬스터 데이터를 찾을 수 없습니다: " .. modelID)
+			return
+		end
+
+		local skillData = _SkillService:GetSkillByIDFromServer(unitData["skillID"])
+
+		-- 몬스터 스폰
+		local spawnEntity = _SpawnService:SpawnByModelId(modelID, "Enemy", spawnPos.TransformComponent.Position, spawnParent)
+
+		if spawnEntity == nil then
+			log("[MatrixMonsterSpawner] 몬스터 스폰 실패: " .. modelID)
+			return
+		end
+
+		-- 난이도 배율 적용
+		local buffedUnit = BuffedUnitModel()
+		buffedUnit:Init(unitData)
+
+		-- 무한 모드 난이도 스케일링
+		if loopCount > 0 then
+			local scaledLevel = 1 * (levelMultiplier ^ loopCount)
+			buffedUnit = _BuffedUnitService:SetUnitBuff(buffedUnit, scaledLevel, 1)
+			log("[MatrixMonsterSpawner] 무한 모드 " .. tostring(loopCount) .. "회차: 레벨=" .. tostring(scaledLevel))
+		else
+			buffedUnit = _BuffedUnitService:SetUnitBuff(buffedUnit, 1, 1)
+		end
+
+		spawnEntity.Unit:SpawnEnemy(buffedUnit, skillData)
+
+		-- 스폰된 몬스터 추적
+		self.totalSpawnedCount = self.totalSpawnedCount + 1
+		self.totalAliveCount = self.totalAliveCount + 1
+		table.insert(self.currentWaveMonsters, spawnEntity)
+
+		log("[MatrixMonsterSpawner] 몬스터 스폰 완료: " .. modelID .. " (총 " .. tostring(self.totalSpawnedCount) .. "마리)")
+	end
+
+	-- ============================================
+	-- 클라이언트에 스폰 완료 알림
+	-- ============================================
+
+	@ExecSpace("Client")
+	method void OnWaveSpawnCompleteClient()
+		self.isSpawning = false
+		log("[MatrixMonsterSpawner] 클라이언트: 웨이브 스폰 완료")
+
+		if self.onWaveSpawnCompleteCallback ~= nil then
+			self.onWaveSpawnCompleteCallback()
+		end
+	end
+
+	-- ============================================
+	-- 몬스터 사망 시 호출 (Unit.mlua에서 호출 필요)
+	-- ============================================
+
+	@ExecSpace("Client")
+	method void OnEnemyDefeated(Entity enemy)
+		-- 킬 포인트 추가 (현재 페이즈 기준) - 먼저 실행
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.UserMatrixManager ~= nil and _MatrixGameService ~= nil then
+			local phaseId = _MatrixGameService.currentPhaseId
+			user.UserMatrixManager:OnMonsterKilled(phaseId)
+		end
+
+		-- 서버에 킬 카운트 동기화
+		self:OnEnemyDefeatedServer()
+	end
+
+	@ExecSpace("Server")
+	method void OnEnemyDefeatedServer()
+		self.totalAliveCount = self.totalAliveCount - 1
+
+		-- 모든 적 처치 확인
+		if self.totalAliveCount <= 0 and not self.isSpawning then
+			self:OnAllEnemiesDefeatedClient()
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnAllEnemiesDefeatedClient()
+		log("[MatrixMonsterSpawner] 모든 적 처치 완료!")
+		if self.onAllEnemiesDefeatedCallback ~= nil then
+			self.onAllEnemiesDefeatedCallback()
+		end
+	end
+
+	-- ============================================
+	-- 콜백 설정
+	-- ============================================
+
+	method void SetOnWaveSpawnCompleteCallback(any callback)
+		self.onWaveSpawnCompleteCallback = callback
+	end
+
+	method void SetOnAllEnemiesDefeatedCallback(any callback)
+		self.onAllEnemiesDefeatedCallback = callback
+	end
+
+	-- ============================================
+	-- 웨이브 상태 확인
+	-- ============================================
+
+	method boolean IsWaveActive()
+		return self.totalAliveCount > 0 or self.isSpawning
+	end
+
+	method integer GetAliveCount()
+		return self.totalAliveCount
+	end
+
+	-- ============================================
+	-- 맵 이탈 시 정리
+	-- ============================================
+
+	@ExecSpace("ServerOnly")
+	method void OnMapLeave(Entity leftMap)
+		if leftMap.Name == "MatrixStage" then
+			self:Reset()
+			self:ResetOnClient()
+		end
+	end
+
+	@ExecSpace("Client")
+	method void ResetOnClient()
+		self:Reset()
+	end
+
+	@ExecSpace("Server")
+	method void ResetOnServer()
+		self:Reset()
+	end
+
+	-- ============================================
+	-- 리셋
+	-- ============================================
+
+	method void Reset()
+		-- 스폰 타이머 모두 취소
+		for _, timerId in ipairs(self.spawnTimerIds) do
+			if timerId ~= 0 then
+				_TimerService:ClearTimer(timerId)
+			end
+		end
+		self.spawnTimerIds = {}
+
+		self.currentWaveMonsters = {}
+		self.isSpawning = false
+		self.totalSpawnedCount = 0
+		self.totalAliveCount = 0
+		self.onWaveSpawnCompleteCallback = nil
+		self.onAllEnemiesDefeatedCallback = nil
+	end
+
+end

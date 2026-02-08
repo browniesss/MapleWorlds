@@ -3,7 +3,7 @@ script AdventureButton extends Component
 
 	@ExecSpace("Server")
 	method void Function1()
-		_GameManager.isTest = true
+		_GameManager.currentGameMode = _eGameMode.Test
 	end
 
 	@EventSender("Entity", "847fe505-dd41-4eef-89ab-c33aaceec548")

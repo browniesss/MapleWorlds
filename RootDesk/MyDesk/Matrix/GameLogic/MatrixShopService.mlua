@@ -1,0 +1,395 @@
+@Logic
+script MatrixShopService extends Logic
+
+	property string STORAGE_KEY = "MATRIX_SHOP_DATA"
+
+	@Sync
+	property SyncTable<string, string> matrixShopItems
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		self:LoadMatrixShopItems()
+	end
+
+	@ExecSpace("ServerOnly")
+	method void LoadMatrixShopItems()
+		local dataSet = _DataService:GetTable("matrix_shop_items")
+		if dataSet == nil then
+			log("[MatrixShop] Warning: matrix_shop_items dataset not found")
+			return
+		end
+		
+		local count = dataSet:GetRowCount()
+		log("[MatrixShop] Loading matrix shop items:", count)
+		
+		for i = 1, count do
+			local item = {}
+			item["id"] = tostring(dataSet:GetCell(i, "id"))
+			item["name"] = tostring(dataSet:GetCell(i, "name"))
+			item["type"] = tostring(dataSet:GetCell(i, "type"))
+			item["reward_type"] = tostring(dataSet:GetCell(i, "reward_type"))
+			item["reward_value"] = tostring(dataSet:GetCell(i, "reward_value"))
+			item["price"] = tonumber(dataSet:GetCell(i, "price"))
+			item["max_count"] = tonumber(dataSet:GetCell(i, "max_count"))
+			item["amount_label"] = tostring(dataSet:GetCell(i, "amount_label") or "")
+		
+			local json = _HttpService:JSONEncode(item)
+			self.matrixShopItems[item["id"]] = json
+		
+			log("[MatrixShop] Loaded item:", item["id"], "name:", item["name"])
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method table GetItemData(string itemId)
+		local json = self.matrixShopItems[itemId]
+		if json == nil then
+			return nil
+		end
+		return _HttpService:JSONDecode(json)
+	end
+
+	@ExecSpace("ClientOnly")
+	method table GetItemDataClient(string itemId)
+		local json = self.matrixShopItems[itemId]
+		if json == nil then
+			return nil
+		end
+		return _HttpService:JSONDecode(json)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer GetCurrentWeekResetTs()
+		local now = DateTime.UtcNow
+		local nowTs = now.Elapsed
+		
+		-- 밀리초 단위 상수
+		local hourMs = 3600000
+		local dayMs = 86400000
+		
+		-- 오늘 자정(00:00 UTC) 타임스탬프 계산
+		local todayStartTs = nowTs - (now.Hour * hourMs) - (now.Minute * 60000) - (now.Second * 1000) - now.Millisecond
+		
+		-- 현재 요일을 숫자로 변환 (Sunday=0, Monday=1, ..., Saturday=6)
+		local currentDayOfWeek = now.DayOfWeek
+		local dayNum = 0
+		if currentDayOfWeek == DayOfWeekType.Sunday then
+			dayNum = 0
+		elseif currentDayOfWeek == DayOfWeekType.Monday then
+			dayNum = 1
+		elseif currentDayOfWeek == DayOfWeekType.Tuesday then
+			dayNum = 2
+		elseif currentDayOfWeek == DayOfWeekType.Wednesday then
+			dayNum = 3
+		elseif currentDayOfWeek == DayOfWeekType.Thursday then
+			dayNum = 4
+		elseif currentDayOfWeek == DayOfWeekType.Friday then
+			dayNum = 5
+		elseif currentDayOfWeek == DayOfWeekType.Saturday then
+			dayNum = 6
+		end
+		
+		-- 이번 주 일요일까지의 일수 계산
+		-- 일요일 15:00 UTC = 월요일 00:00 KST
+		local daysFromSunday = dayNum
+		
+		-- 이번 주 일요일 자정(UTC) 타임스탬프
+		local sundayStartTs = todayStartTs - (daysFromSunday * dayMs)
+		
+		-- 일요일 15:00 UTC = 월요일 00:00 KST
+		local resetTs = sundayStartTs + (15 * hourMs)
+		
+		-- 현재 시간이 리셋 시간 이전이면 지난주 기준
+		if nowTs < resetTs then
+			resetTs = resetTs - (7 * dayMs)
+		end
+		
+		return resetTs
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean ShouldResetWeekly(integer lastResetTs)
+		local currentResetTs = self:GetCurrentWeekResetTs()
+		return lastResetTs < currentResetTs
+	end
+
+	@ExecSpace("ServerOnly")
+	method table LoadPurchaseData(string userId)
+		local userStorage = _DataStorageService:GetUserDataStorage(userId)
+		local errCode, data = userStorage:GetAndWait(self.STORAGE_KEY)
+		
+		if errCode ~= 0 or data == nil or data == "" then
+			local newData = {}
+			newData["lastResetTs"] = 0
+			newData["items"] = {}
+			return newData
+		end
+		
+		local parsed = _HttpService:JSONDecode(data)
+		if parsed == nil then
+			local newData = {}
+			newData["lastResetTs"] = 0
+			newData["items"] = {}
+			return newData
+		end
+		
+		-- flat 구조에서 items 복원 (item_ 접두사)
+		local lastResetTs = tonumber(parsed["lastResetTs"]) or 0
+		local items = {}
+		for k, v in pairs(parsed) do
+			if string.sub(k, 1, 5) == "item_" then
+				local itemId = string.sub(k, 6)
+				items[itemId] = tonumber(v) or 0
+			end
+		end
+		
+		local result = {}
+		result["lastResetTs"] = lastResetTs
+		result["items"] = items
+		
+		-- 주간 리셋 체크
+		if self:ShouldResetWeekly(lastResetTs) then
+			log("[MatrixShop] Weekly reset for user:", userId)
+			result["items"] = {}
+			result["lastResetTs"] = self:GetCurrentWeekResetTs()
+		end
+		
+		return result
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer SavePurchaseData(string userId, table data)
+		local userStorage = _DataStorageService:GetUserDataStorage(userId)
+		-- flat 구조로 저장 (중첩 테이블 없이 모든 값 string)
+		local saveData = {}
+		saveData["lastResetTs"] = tostring(data["lastResetTs"] or 0)
+		if data["items"] ~= nil then
+			for k, v in pairs(data["items"]) do
+				saveData["item_" .. k] = tostring(v)
+			end
+		end
+		local json = _HttpService:JSONEncode(saveData)
+		return userStorage:SetAndWait(self.STORAGE_KEY, json)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer GetPurchaseCount(string userId, string itemId)
+		local data = self:LoadPurchaseData(userId)
+		local items = data["items"]
+		if items == nil then
+			return 0
+		end
+		return tonumber(items[itemId]) or 0
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean CanPurchase(string userId, string itemId)
+		local itemData = self:GetItemData(itemId)
+		if itemData == nil then
+			return false
+		end
+		
+		local maxCount = itemData["max_count"]
+		-- -1은 무제한
+		if maxCount == -1 then
+			return true
+		end
+		
+		local currentCount = self:GetPurchaseCount(userId, itemId)
+		return currentCount < maxCount
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean DeductCurrency(string userId, integer price)
+		return _MatrixCoinService:UseMatrixCoin(userId, price)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void RefundCurrency(string userId, integer price)
+		_MatrixCoinService:RefundMatrixCoin(userId, price)
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean GiveReward(string userId, table itemData)
+		local rewardType = itemData["reward_type"]
+		local rewardValue = itemData["reward_value"]
+		
+		log("[MatrixShop] GiveReward - type:", rewardType, "value:", rewardValue)
+		
+		if rewardType == "unit" then
+			_UserMonsterService:AddCount(userId, {rewardValue})
+			_BadgeConditionService:CheckPickupBadges(userId, rewardValue)
+			return true
+		elseif rewardType == "dia_free" then
+			local result = _BillingService:AddFirstFreeCoin(userId, tonumber(rewardValue))
+			return result == 0
+		elseif rewardType == "dia_paid" then
+			local result = _BillingService:AddFirstPaidCoin(userId, tonumber(rewardValue))
+			return result == 0
+		elseif rewardType == "coin_free" then
+			local result = _BillingService:AddSecondFreeCoin(userId, tonumber(rewardValue))
+			return result == 0
+		elseif rewardType == "coin_paid" then
+			local result = _BillingService:AddSecondPaidCoin(userId, tonumber(rewardValue))
+			return result == 0
+		elseif rewardType == "meso_free" then
+			local result = _BillingService:AddThirdFreeCoin(userId, tonumber(rewardValue))
+			return result == 0
+		elseif rewardType == "meso_paid" then
+			local result = _BillingService:AddThirdPaidCoin(userId, tonumber(rewardValue))
+			return result == 0
+		end
+		
+		log_error("[MatrixShop] Unknown reward type:", rewardType)
+		return false
+	end
+
+	@ExecSpace("Server")
+	method void PurchaseItem(string itemId)
+		local userId = senderUserId
+		log("[MatrixShop] PurchaseItem - userId:", userId, "itemId:", itemId)
+		
+		-- 상품 데이터 확인
+		local itemData = self:GetItemData(itemId)
+		if itemData == nil then
+			log_error("[MatrixShop] Item not found:", itemId)
+			self:OnPurchaseComplete(itemId, false, "", "ITEM_NOT_FOUND")
+			return
+		end
+		
+		-- 구매 가능 여부 확인 (횟수 제한)
+		if not self:CanPurchase(userId, itemId) then
+			log("[MatrixShop] Purchase limit reached:", itemId)
+			self:OnPurchaseComplete(itemId, false, itemData["name"], "LIMIT_REACHED")
+			return
+		end
+		
+		-- 재화 차감
+		local price = itemData["price"]
+		if not self:DeductCurrency(userId, price) then
+			log("[MatrixShop] Insufficient currency for:", itemId)
+			self:OnPurchaseComplete(itemId, false, itemData["name"], "INSUFFICIENT_CURRENCY")
+			return
+		end
+		
+		-- 보상 지급
+		if not self:GiveReward(userId, itemData) then
+			log_error("[MatrixShop] Failed to give reward:", itemId)
+			-- 재화 환불 (실패 시)
+			self:RefundCurrency(userId, price)
+			self:OnPurchaseComplete(itemId, false, itemData["name"], "REWARD_FAILED")
+			return
+		end
+		
+		-- 구매 횟수 증가
+		local purchaseData = self:LoadPurchaseData(userId)
+		local currentCount = tonumber(purchaseData["items"][itemId]) or 0
+		purchaseData["items"][itemId] = currentCount + 1
+		purchaseData["lastResetTs"] = self:GetCurrentWeekResetTs()
+		self:SavePurchaseData(userId, purchaseData)
+		
+		log("[MatrixShop] Purchase success:", itemId, "count:", currentCount + 1)
+		self:OnPurchaseComplete(itemId, true, itemData["name"], "")
+	end
+
+	@ExecSpace("Client")
+	method void OnPurchaseComplete(string itemId, boolean success, string itemName, string errorCode)
+		log("[MatrixShop] OnPurchaseComplete - itemId:", itemId, "success:", success, "itemName:", itemName)
+		
+		-- 결과 팝업 표시
+		local matrixShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/MatrixShopParent")
+		if matrixShopParent ~= nil then
+			local popup = matrixShopParent:GetChildByName("MatrixShopPopup")
+			if popup ~= nil and popup.MatrixShopPopup ~= nil then
+				popup.MatrixShopPopup:Show(itemName, success, errorCode)
+			end
+		end
+		
+		-- 아이템 UI 갱신
+		if success then
+			self:RefreshItemUI(itemId)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void RefreshItemUI(string itemId)
+		local matrixShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/MatrixShopParent")
+		if matrixShopParent == nil then
+			return
+		end
+		
+		local itemContainer = matrixShopParent:GetChildByName("ItemContainer")
+		if itemContainer == nil then
+			return
+		end
+		
+		for _, child in ipairs(itemContainer.Children) do
+			if child.MatrixShopItem ~= nil and child.MatrixShopItem.itemID == itemId then
+				child.MatrixShopItem:OnPurchaseSuccess()
+				break
+			end
+		end
+	end
+
+	@ExecSpace("Server")
+	method void DebugForceWeeklyReset()
+		local userId = senderUserId
+		log("[MatrixShop] DEBUG: Force weekly reset for user:", userId)
+		
+		local purchaseData = self:LoadPurchaseData(userId)
+		purchaseData["items"] = {}
+		purchaseData["lastResetTs"] = self:GetCurrentWeekResetTs()
+		self:SavePurchaseData(userId, purchaseData)
+		
+		self:OnDebugResetComplete()
+	end
+
+	@ExecSpace("Client")
+	method void OnDebugResetComplete()
+		log("[MatrixShop] DEBUG: Weekly reset complete. Refreshing UI...")
+		
+		local matrixShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/MatrixShopParent")
+		if matrixShopParent == nil then
+			return
+		end
+		
+		local itemContainer = matrixShopParent:GetChildByName("ItemContainer")
+		if itemContainer == nil then
+			return
+		end
+		
+		for _, child in ipairs(itemContainer.Children) do
+			if child.MatrixShopItem ~= nil then
+				child.MatrixShopItem:UpdatePurchaseCount(0)
+			end
+		end
+	end
+
+	@ExecSpace("Server")
+	method void RequestItemStatus(string itemId)
+		local userId = senderUserId
+		local purchaseCount = self:GetPurchaseCount(userId, itemId)
+		self:OnItemStatusReceived(itemId, purchaseCount)
+	end
+
+	@ExecSpace("Client")
+	method void OnItemStatusReceived(string itemId, integer purchaseCount)
+		local matrixShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/MatrixShopParent")
+		if matrixShopParent == nil then
+			return
+		end
+		
+		local itemContainer = matrixShopParent:GetChildByName("ItemContainer")
+		if itemContainer == nil then
+			return
+		end
+		
+		for _, child in ipairs(itemContainer.Children) do
+			if child.MatrixShopItem ~= nil and child.MatrixShopItem.itemID == itemId then
+				child.MatrixShopItem:UpdatePurchaseCount(purchaseCount)
+				break
+			end
+		end
+	end
+
+end

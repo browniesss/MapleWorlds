@@ -1,0 +1,50 @@
+@Component
+script MatrixButton extends Component
+
+	@Sync
+	property integer matrixIndex = 0
+
+	property Entity resetButton = nil
+
+	property any resetButtonHandler = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		-- 리셋 버튼 찾기
+		self.resetButton = self.Entity:GetChildByName("ResetMatrixButton")
+		
+		-- 리셋 버튼에 CallBackButton이 있으면 callback 설정
+		if self.resetButton ~= nil and self.resetButton.CallBackButton ~= nil then
+			self.resetButton.CallBackButton.callback = function()
+				self:OnResetButtonClick()
+			end
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnEndPlay()
+		-- 이벤트 핸들러 해제
+		if self.resetButtonHandler ~= nil then
+			self.resetButtonHandler:Disconnect()
+			self.resetButtonHandler = nil
+		end
+	end
+
+	method void OnResetButtonClick()
+		if self.matrixIndex <= 0 then
+			return
+		end
+		
+		_MatrixAugmentService:ResetMatrixByIndex(self.matrixIndex)
+	end
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		if self.matrixIndex <= 0 then
+			return
+		end
+		
+		_MatrixAugmentService:SelectMatrixByIndex(self.matrixIndex)
+	end
+
+end

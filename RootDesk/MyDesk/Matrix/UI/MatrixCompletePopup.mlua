@@ -1,0 +1,70 @@
+@Component
+script MatrixCompletePopup extends Component
+
+	property Entity rankUI = nil
+
+	property Entity scoreText = nil
+
+	property Entity rankText = nil
+
+	property Entity returnButton = nil
+
+	property any returnButtonHandler = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		-- UI 요소 참조 가져오기
+		self.rankUI = self.Entity:GetChildByName("RankUI")
+		if self.rankUI ~= nil then
+			self.scoreText = self.rankUI:GetChildByName("ScoreText")
+			self.rankText = self.rankUI:GetChildByName("RankText")
+		end
+		
+		self.returnButton = self.Entity:GetChildByName("ReturnButton")
+		
+		-- 리턴 버튼 이벤트 연결
+		if self.returnButton ~= nil then
+			self.returnButtonHandler = self.returnButton.ButtonComponent.OnClick:Connect(function()
+				self:OnReturnButtonClicked()
+			end)
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnEndPlay()
+		if self.returnButtonHandler ~= nil then
+			self.returnButtonHandler:Disconnect()
+			self.returnButtonHandler = nil
+		end
+	end
+
+	method void ShowResult()
+		local user = _UserService.LocalPlayer
+		if user == nil or user.UserMatrixManager == nil then
+			return
+		end
+		
+		local finalScore = user.UserMatrixManager:GetTotalScore()
+		local userName = user.PlayerComponent.Nickname
+		
+		-- 점수 표시
+		if self.scoreText ~= nil then
+			self.scoreText.TextComponent.Text = tostring(finalScore)
+		end
+		
+		-- 순위 표시
+		if self.rankText ~= nil and _MatrixRankingService ~= nil then
+			local rank = _MatrixRankingService:GetUserRank(userName, finalScore)
+			self.rankText.TextComponent.Text = tostring(rank)
+		end
+		
+		log("[MatrixCompletePopup] 결과 표시 - 점수: " .. tostring(finalScore))
+	end
+
+	method void OnReturnButtonClicked()
+		if _MatrixGameManager ~= nil then
+			_MatrixGameManager:ReturnToLobby()
+		end
+	end
+
+end

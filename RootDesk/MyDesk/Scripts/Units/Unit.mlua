@@ -357,7 +357,13 @@ script Unit extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnUpdate(number delta)
-		if self.isSpawnEnd == false or not _GameManager.isPlaying then
+		-- 게임 플레이 상태 확인 (Matrix 모드 지원)
+		local isPlaying = _GameManager.isPlaying
+		if _MatrixGameManager ~= nil and _MatrixGameManager.isPlaying then
+			isPlaying = true
+		end
+
+		if self.isSpawnEnd == false or not isPlaying then
 			return
 		end
 		
@@ -391,7 +397,7 @@ script Unit extends Component
 		local myPos = self.Entity.TransformComponent.WorldPosition
 		local nearestEnemy = nil
 		local nearestDistance = math.huge
-		if self.curState == "attack" or self.curState == "die" then
+		if self.curState == "attack" or self.curState == "die" or self.curState == "freeze" or self.curState == "stun" then
 			return
 		end
 		
@@ -491,12 +497,12 @@ script Unit extends Component
 
 	@ExecSpace("Client")
 	method void Attack(number delta)
-		if self.curTarget == nil or self:GetDistance() > self.attackRange then
+		if self.curTarget == nil or not isvalid(self.curTarget) or self:GetDistance() > self.attackRange then
 			self:SetState("stand")
 			self.curTarget = nil
 			return
 		end
-		
+
 		if self.mp >= self.maxMP and self.curTarget.TagComponent.Tags[2] ~= "Tower" and not self.Entity.UnitDebuffComponent:HasDebuff(_eStatusDebuffType.Silence) then
 			self:SetState("useSkill")
 			return
@@ -544,11 +550,11 @@ script Unit extends Component
 					if self.curState == "die" then
 						return
 					end
-					
+
 					self:SetAnimationState("stand")
 					self.Entity.AvatarRendererComponent.PlayRate = 1
-		
-					-- 마나 충전
+
+					-- 마나 충전 (curTarget 유효성 체크는 IncreaseMp 내부에서 처리)
 					self:IncreaseMp()
 				end)
 				
@@ -556,11 +562,17 @@ script Unit extends Component
 					if self.curState == "die" then
 						return
 					end
-		
-					
+
+					-- curTarget 유효성 체크
+					if self.curTarget == nil or not isvalid(self.curTarget) then
+						self.curTarget = nil
+						self:SetState("stand")
+						return
+					end
+
 					_CustomSoundService:PlaySoundAtPos("2ac47382f3ad45f09a0f429cb5aa71a0", self.Entity.TransformComponent.WorldPosition, self.Entity)
 					self:Attack_Damage()
-				
+
 					if self.passiveSkill ~= nil and self.passiveSkill.PassiveSkillParent.passiveType == _ePassiveType.OnAttack then
 						self.passiveSkill.PassiveSkillParent:OnAttack()
 					end
@@ -643,8 +655,14 @@ script Unit extends Component
 				if self.passiveSkill ~= nil and self.passiveSkill.PassiveSkillParent.passiveType == _ePassiveType.OnAttack then
 					self.passiveSkill.PassiveSkillParent:OnAttack()
 				end
-		
-				projectile.Projectile:SetShoot(self.projectileSpriteRUID, 1, self.projectileSpeed, self.curTarget, true,self.damage)
+
+				-- 매트릭스 모드 OnAttack 트리거 적용
+				local finalDamage = self.damage
+				if _MatrixAugmentService ~= nil then
+					finalDamage = _MatrixAugmentService:CalcAttackDamage(self.Entity, finalDamage)
+				end
+
+				projectile.Projectile:SetShoot(self.projectileSpriteRUID, 1, self.projectileSpeed, self.curTarget, true, finalDamage)
 			end
 			
 			local timerTiming = self.attackTiming / animationPlaySpeed
@@ -674,18 +692,32 @@ script Unit extends Component
 			_CustomSoundService:PlaySoundAtPos("4346b64f2d0a4cf683980bb0d318b14a", self.Entity.TransformComponent.WorldPosition, self.Entity)
 			
 			local attackFunction = function()
+				-- 타이머 실행 시점에 curTarget이 유효한지 체크
+				if self.curTarget == nil or not isvalid(self.curTarget) then
+					self.curTarget = nil
+					self:SetState("stand")
+					return
+				end
+
 				local projectile = _SpawnService:SpawnByModelId("model://cd38ad89-1c52-45f2-8d86-d6be27475ba9",
 					"Projectile",
 					self.Entity.TransformComponent.WorldPosition + (Vector3.up * 0.3),
 					self._T.projectileParent)
 				projectile.Projectile:SetCaster(self.Entity)
-				projectile.Projectile:SetShoot(self.projectileSpriteRUID, 1, self.projectileSpeed, self.curTarget, true,self.damage)
-				
+
+				-- 매트릭스 모드 OnAttack 트리거 적용
+				local finalDamage = self.damage
+				if _MatrixAugmentService ~= nil then
+					finalDamage = _MatrixAugmentService:CalcAttackDamage(self.Entity, finalDamage)
+				end
+
+				projectile.Projectile:SetShoot(self.projectileSpriteRUID, 1, self.projectileSpeed, self.curTarget, true, finalDamage)
+
 				-- 마나 충전
 				self:IncreaseMp()
 			end
-			
-			_TimerService:SetTimerOnce(attackFunction, timerTiming)		
+
+			_TimerService:SetTimerOnce(attackFunction, timerTiming)
 		end
 	end
 
@@ -724,7 +756,21 @@ script Unit extends Component
 
 	@ExecSpace("Client")
 	method void Attack_Damage()
-		self.curTarget.Unit:OnHit(self.Entity, self.damage, false, 1)
+		-- curTarget nil 체크
+		if self.curTarget == nil or not isvalid(self.curTarget) then
+			self.curTarget = nil
+			self:SetState("stand")
+			return
+		end
+
+		local finalDamage = self.damage
+
+		-- 매트릭스 모드 OnAttack 트리거 적용
+		if _MatrixAugmentService ~= nil then
+			finalDamage = _MatrixAugmentService:CalcAttackDamage(self.Entity, finalDamage)
+		end
+
+		self.curTarget.Unit:OnHit(self.Entity, finalDamage, false, 1)
 	end
 
 	@ExecSpace("Client")
@@ -917,7 +963,12 @@ script Unit extends Component
 			self:SetMaterial("")
 			_EffectService:PlayEffectAttached("7b5e34498e934366b8ae61a2de66d42e", self.Entity, Vector3.zero, 0, Vector3.one)
 		end
-		
+
+		-- 매트릭스 모드 OnHit 트리거 적용 (아군이 피격당할 때)
+		if not self.isEnemy and _MatrixAugmentService ~= nil then
+			damage = _MatrixAugmentService:CalcOnHitDamage(self.Entity, damage)
+		end
+
 		self.Entity.HitComponent:OnHit(attacker, damage, isCritical, "", attackCount)
 		self.hp -= damage
 		
@@ -928,10 +979,15 @@ script Unit extends Component
 				self.Entity.MonsterSpawnService:OnDamage(currentHpPercent)
 			end
 		end
-		
+
 		if self.hp <= 0 then
 			self:OnDie(attacker)
-		
+
+			-- 매트릭스 모드 OnKill 트리거 적용 (아군이 적을 처치할 때)
+			if self.isEnemy and _MatrixAugmentService ~= nil then
+				_MatrixAugmentService:OnKillEffect(attacker, self.Entity)
+			end
+
 			if attacker.AddSummonPointAfterKill ~= nil then
 				attacker.AddSummonPointAfterKill:OnHit(attacker, damage, isCritical, attackCount)
 			end
@@ -961,9 +1017,14 @@ script Unit extends Component
 		
 		-- 적 타워 무너진 경우
 		if self.Entity.TagComponent.Tags[2] == "Tower" and self.isEnemy then
-			
+
 			return
 		elseif self.Entity.TagComponent.Tags[2] == "Tower" and not self.isEnemy then -- 아군 타워 무너진 경우
+			-- Matrix 모드에서는 MatrixGameService.OnUpdate에서 처리
+			if _GameManager.currentGameMode == _eGameMode.Matrix then
+				return
+			end
+
 			local shopUI = _GameManager.shopUI
 			local failPopupUI = _GameManager.failPopupUI
 			local infoUI = _GameManager.infoUI
@@ -997,6 +1058,16 @@ script Unit extends Component
 		
 			-- 몬스터 도감 처치 카운트 (클라이언트 로컬 처리)
 			_MonsterCodexService:OnLocalMonsterKilled(self.id)
+
+			-- 매트릭스 모드: 스폰 시스템에 알림
+			if _GameManager.currentGameMode == _eGameMode.Matrix and _MatrixMonsterSpawner ~= nil then
+				_MatrixMonsterSpawner:OnEnemyDefeated(self.Entity)
+			end
+		else
+			-- 아군 유닛 사망 시 매트릭스 증강 OnDie 트리거
+			if _GameManager.currentGameMode == _eGameMode.Matrix and _MatrixAugmentService ~= nil then
+				_MatrixAugmentService:OnDieEffect(self.Entity, attacker)
+			end
 		end
 		
 		-- 죽는 애니메이션이 없는 경우 직접 처리
@@ -1132,16 +1203,28 @@ script Unit extends Component
 	end
 
 	method void IncreaseMp()
+		-- curTarget nil 체크 추가
+		if self.curTarget == nil or not isvalid(self.curTarget) then
+			return
+		end
+
 		if self.curState == "useSkill" or self.curTarget.TagComponent.Tags[2] == "Tower" or self.Entity.UnitDebuffComponent:HasDebuff(_eStatusDebuffType.Silence) then
 			return
 		end
-		
-		self.mp += 5
-		
+
+		local baseMpGain = 5
+
+		-- 매트릭스 모드 MP 회복 보너스 적용
+		if _MatrixAugmentService ~= nil then
+			baseMpGain = _MatrixAugmentService:CalcMpRecovery(self.Entity, baseMpGain)
+		end
+
+		self.mp += baseMpGain
+
 		if self.mp < self.maxMP then
 			return
 		end
-		
+
 		self:SetState("useSkill")
 	end
 

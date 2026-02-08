@@ -76,7 +76,10 @@ script SpawnManager extends Logic
 		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, userUnitModel.level, userUnitModel.limitBreak)
 		user.UserBreakLimitSkillClient:ActivateSkill(unitModel.LimitBreakActiveSkill)
 		spawnEntity.Unit:Spawn(unitModel, skillData)
-				
+
+		-- 매트릭스 증강 컴포넌트 적용
+		self:ApplyMatrixAugments(spawnEntity, user)
+
 		self:GetUserWallet().MesoWallet:UseMeso(price)
 	end
 
@@ -97,7 +100,7 @@ script SpawnManager extends Logic
 		local curStage
 		local stageId
 
-		if _GameManager.isEventMode then
+		if (_GameManager.currentGameMode == _eGameMode.Event) then
 			stageId = _GameManager.mapIndex
 			local eventIdValue = tostring(_EventService.currentEventVersion)
 			curStage = _EventService:GetEventStageByIdFromServer(eventIdValue, _GameManager.chapterIndex, _GameManager.mapIndex)
@@ -111,7 +114,8 @@ script SpawnManager extends Logic
 		end
 
 		-- 하드모드면 hard_level 값만큼 레벨 추가
-		if _GameManager.isHardMode then
+		local isHardMode = (_GameManager.currentGameMode == _eGameMode.Hard)
+		if isHardMode then
 			local hardLevelBonus = 0
 			if curStage ~= nil and curStage["hard_level"] ~= nil then
 				hardLevelBonus = tonumber(curStage["hard_level"]) or 0
@@ -142,6 +146,130 @@ script SpawnManager extends Logic
 
 	method Entity GetUserIncome()
 		return _EntityService:GetEntityByPath(_GameManager:GetGameMapName() .. "/ingameIncome")
+	end
+
+	-- ============================================
+	-- 매트릭스 증강 컴포넌트 적용
+	-- ============================================
+	method void ApplyMatrixAugments(Entity spawnEntity, Entity user)
+		-- 매트릭스 모드가 아니면 스킵
+		if _GameManager.currentGameMode ~= _eGameMode.Matrix then
+			return
+		end
+
+		if user == nil or user.UserMatrixManager == nil then
+			return
+		end
+
+		local matrixEffects = user.UserMatrixManager:GetMatrixEffects()
+		if matrixEffects == nil or #matrixEffects == 0 then
+			return
+		end
+
+		for _, matrix in ipairs(matrixEffects) do
+			self:ApplyAugmentComponent(spawnEntity, matrix)
+		end
+	end
+
+	method void ApplyAugmentComponent(Entity spawnEntity, table matrix)
+		local effectType = matrix.effectType
+		local matrixType = matrix.type
+
+		-- INFINITE 타입은 직접 스탯 적용
+		if matrixType == "INFINITE" then
+			self:ApplyInfiniteAugmentToUnit(spawnEntity, effectType, matrix.value)
+			return
+		end
+
+		local componentName = self:GetAugmentComponentName(effectType)
+
+		if componentName == nil or componentName == "" then
+			return
+		end
+
+		-- 컴포넌트 추가
+		spawnEntity:RemoveComponent(componentName)
+		spawnEntity:AddComponent(componentName)
+
+		local component = spawnEntity[componentName]
+		if component == nil then
+			return
+		end
+
+		-- 컴포넌트 설정
+		component.Enable = true
+		component.calcType = matrix.calcType or "PERCENT"
+		component.value = matrix.value or 0
+		component.effectType = effectType
+		component.grade = matrix.grade or "RARE"
+
+		-- OnSpawn 호출 (STAT 버프 적용)
+		if component.OnSpawn ~= nil then
+			component:OnSpawn()
+		end
+
+		log("[SpawnManager] 증강 컴포넌트 적용: " .. componentName .. " (value=" .. tostring(matrix.value) .. ")")
+	end
+
+	-- INFINITE 타입 증강을 유닛에 직접 적용
+	method void ApplyInfiniteAugmentToUnit(Entity spawnEntity, string effectType, number value)
+		local unit = spawnEntity.Unit
+		if unit == nil then
+			return
+		end
+
+		if effectType == "AttackDamageBuff" then
+			-- 공격력 고정 증가
+			unit.damage = unit.damage + value
+			unit.originDamage = unit.originDamage + value
+		elseif effectType == "MaxHealthBuff" then
+			-- 최대 체력 고정 증가
+			unit.maxHP = unit.maxHP + value
+			unit.originMaxHP = unit.originMaxHP + value
+			unit.hp = unit.hp + value
+		elseif effectType == "AttackSpeedBuff" then
+			-- 공격속도 증가 (간격 감소)
+			unit.attackSpeed = unit.attackSpeed - value
+			unit.originAttackSpeed = unit.originAttackSpeed - value
+			if unit.attackSpeed < 0.5 then
+				unit.attackSpeed = 0.5
+			end
+			if unit.originAttackSpeed < 0.5 then
+				unit.originAttackSpeed = 0.5
+			end
+		elseif effectType == "MoveSpeedBuff" then
+			-- 이동속도 고정 증가
+			unit.moveSpeed = unit.moveSpeed + value
+			unit.originMoveSpeed = unit.originMoveSpeed + value
+		elseif effectType == "AttackRangeBuff" then
+			-- 사거리 고정 증가
+			unit.attackRange = unit.attackRange + value
+		end
+
+		log("[SpawnManager] INFINITE 증강 적용: " .. effectType .. " +" .. tostring(value))
+	end
+
+	method string GetAugmentComponentName(string effectType)
+		if effectType == "AttackDamageBuff" then
+			return "AttackDamageAugment"
+		elseif effectType == "MaxHealthMultiplyBuff" then
+			return "MaxHealthAugment"
+		elseif effectType == "AttackSpeedBuff" then
+			return "AttackSpeedAugment"
+		elseif effectType == "MoveSpeedBuff" then
+			return "MoveSpeedAugment"
+		elseif effectType == "DamageDecreaseBuff" then
+			return "DamageDecreaseAugment"
+		elseif effectType == "BonusDamage" then
+			return "BonusDamageAugment"
+		elseif effectType == "DamageReduction" then
+			return "DamageReductionAugment"
+		elseif effectType == "HealOnKill" then
+			return "HealOnKillAugment"
+		elseif effectType == "MpRecoveryBonus" then
+			return "MpRecoveryAugment"
+		end
+		return nil
 	end
 
 	@ExecSpace("Server")
@@ -210,6 +338,9 @@ script SpawnManager extends Logic
 					spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet()
 				end
 			end
+
+			-- 매트릭스 증강 컴포넌트 적용
+			self:ApplyMatrixAugments(spawnEntity, user)
 		end
 		spawnEntity.Unit:Spawn(unitModel, skillData)
 	end
@@ -290,7 +421,10 @@ script SpawnManager extends Logic
 				end
 			end
 		end
-		
+
+		-- 매트릭스 증강 컴포넌트 적용
+		self:ApplyMatrixAugments(spawnEntity, user)
+
 		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
 		spawnEntity.Unit:Spawn(unitModel, skillData)
 	end
@@ -298,21 +432,29 @@ script SpawnManager extends Logic
 	@ExecSpace("Server")
 	method void CygnusSkillSpawn(string modelID, Vector3 pos)
 		_ProtocolService:CommonCall(senderUserId)
-		
-		local unitModel = _BuffedUnitService:GetBuffedUnitModel(senderUserId, modelID)
+
 		local user = _UserService:GetUserEntityByUserId(senderUserId)
-		
-		local summoner = _BuffedUnitService:GetBuffedUnitModel(senderUserId, "model://6194a4e3-0eb4-417a-92b5-891af548b672")
-		
+
 		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(102)
 		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE("102", count)
-		
+
 		if synergy:length() <= 0 then
 			return
 		end
-		
+
 		local item = synergy:Get(1)
-		
+
+		local unitModel = nil
+		if _GameManager.currentGameMode == _eGameMode.Matrix then
+			-- 매트릭스 모드: Unit DataSet에서 기사단 데이터 참조
+			local unitData = _UnitService:GetUnitByIDFromServer(modelID)
+			unitModel = BuffedUnitModel()
+			unitModel:Init(unitData)
+		else
+			-- 일반 모드: 유저 보유 유닛 데이터 참조
+			unitModel = _BuffedUnitService:GetBuffedUnitModel(senderUserId, modelID)
+		end
+
 		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, math.floor(item.value), 1)
 		
 		local spawnParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/MyMonsterList')
@@ -332,18 +474,23 @@ script SpawnManager extends Logic
 		spawnEntity.Unit.isNotTargetUnit = true
 		spawnEntity.Unit.effectId = effectId
 		
+		-- 매트릭스 증강 컴포넌트 적용
+		if _GameManager.currentGameMode == _eGameMode.Matrix then
+			self:ApplyMatrixAugments(spawnEntity, user)
+		end
+
 		_TimerService:SetTimerOnce(
 			function()
 				if spawnEntity.Unit.curState == "useSkill" then
 					return
 				end
-				
+
 				spawnEntity.Unit:OnRemove()
 			end,
 			5
 		)
-		
-		
+
+
 	end
 
 end
