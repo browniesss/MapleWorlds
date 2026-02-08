@@ -48,7 +48,10 @@ script MatrixRankingService extends Logic
 		if setCode ~= 0 then
 			log("[MatrixRankingService] AddScore set err: " .. tostring(setCode))
 		end
-		
+
+		-- 캐시 무효화 (다음 FETCH에서 최신 데이터 조회)
+		self.cacheExpireTs = 0
+
 		self:UpdateUserScore(score)
 		log("[MatrixRankingService] 점수 저장: " .. userName .. " = " .. tostring(score))
 	end

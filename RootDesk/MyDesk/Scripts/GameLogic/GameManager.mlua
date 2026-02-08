@@ -399,7 +399,11 @@ script GameManager extends Logic
 		local enemyList = _EntityService:GetEntityByPath(self:GetGameMapName().."/EnemyList")
 		local skillParent = _EntityService:GetEntityByPath(self:GetGameMapName().."/SkillParent")
 		local ProjectileParent = _EntityService:GetEntityByPath(self:GetGameMapName().."/ProjectileParent")
-		local minimap = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/Minimap Group/Minimap Background")
+		local minimapPath = "/ui/Ingame_Info_UI_Group/Minimap Group/Minimap Background"
+		if self.currentGameMode == _eGameMode.Matrix then
+			minimapPath = "/ui/MatrixUI/IngameUI/IngameInfoUI/Minimap Group/Minimap Background"
+		end
+		local minimap = _EntityService:GetEntityByPath(minimapPath)
 		local timeText = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/CenterUI/TimeText")
 		
 		-- 첫 번째 자식은 유지

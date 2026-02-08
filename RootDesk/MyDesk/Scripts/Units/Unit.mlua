@@ -503,7 +503,7 @@ script Unit extends Component
 			return
 		end
 
-		if self.mp >= self.maxMP and self.curTarget.TagComponent.Tags[2] ~= "Tower" and self.debuffState ~= _eDebuffType.Silence then
+		if self.mp >= self.maxMP and self.curTarget.TagComponent.Tags[2] ~= "Tower" and not self.Entity.UnitDebuffComponent:HasDebuff(_eStatusDebuffType.Silence) then
 			self:SetState("useSkill")
 			return
 		end
@@ -1208,7 +1208,7 @@ script Unit extends Component
 			return
 		end
 
-		if self.curState == "useSkill" or self.curTarget.TagComponent.Tags[2] == "Tower" or self.debuffState == _eDebuffType.Silence then
+		if self.curState == "useSkill" or self.curTarget.TagComponent.Tags[2] == "Tower" or self.Entity.UnitDebuffComponent:HasDebuff(_eStatusDebuffType.Silence) then
 			return
 		end
 

@@ -37,7 +37,12 @@ script MatrixGiveUpButton extends Component
 			if _MatrixRankingService ~= nil then
 				_MatrixRankingService:AddScore(userName, finalScore)
 			end
-		
+
+			-- 매트릭스 코인 지급
+			if _MatrixCoinService ~= nil then
+				_MatrixCoinService:AddMatrixCoin(finalScore)
+			end
+
 			log("[MatrixGiveUpButton] 포기 - 최종 점수: " .. tostring(finalScore))
 		end
 		

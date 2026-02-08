@@ -95,7 +95,7 @@ script MatrixShopItem extends Component
 		if self.amountLabel ~= nil then
 			self.amountLabel.TextComponent.Text = self.itemData["amount_label"] or ""
 		end
-
+		
 		-- 아이콘 이미지
 		if self.iconImage ~= nil and self.iconImage.SpriteGUIRendererComponent ~= nil then
 			local rewardType = self.itemData["reward_type"] or ""
@@ -107,7 +107,7 @@ script MatrixShopItem extends Component
 				self.iconImage.SpriteGUIRendererComponent.ImageRUID = "4cc5ffc272224edc809a792b8efa16e3"
 			end
 		end
-
+		
 		-- 남은 횟수 라벨 초기화
 		self:UpdateRemainCountLabel()
 	end

@@ -117,14 +117,14 @@ script MatrixShopService extends Logic
 	method table LoadPurchaseData(string userId)
 		local userStorage = _DataStorageService:GetUserDataStorage(userId)
 		local errCode, data = userStorage:GetAndWait(self.STORAGE_KEY)
-
+		
 		if errCode ~= 0 or data == nil or data == "" then
 			local newData = {}
 			newData["lastResetTs"] = 0
 			newData["items"] = {}
 			return newData
 		end
-
+		
 		local parsed = _HttpService:JSONDecode(data)
 		if parsed == nil then
 			local newData = {}
@@ -132,7 +132,7 @@ script MatrixShopService extends Logic
 			newData["items"] = {}
 			return newData
 		end
-
+		
 		-- flat 구조에서 items 복원 (item_ 접두사)
 		local lastResetTs = tonumber(parsed["lastResetTs"]) or 0
 		local items = {}
@@ -142,18 +142,18 @@ script MatrixShopService extends Logic
 				items[itemId] = tonumber(v) or 0
 			end
 		end
-
+		
 		local result = {}
 		result["lastResetTs"] = lastResetTs
 		result["items"] = items
-
+		
 		-- 주간 리셋 체크
 		if self:ShouldResetWeekly(lastResetTs) then
 			log("[MatrixShop] Weekly reset for user:", userId)
 			result["items"] = {}
 			result["lastResetTs"] = self:GetCurrentWeekResetTs()
 		end
-
+		
 		return result
 	end
 
@@ -331,34 +331,33 @@ script MatrixShopService extends Logic
 		end
 	end
 
-	-- 디버그: 주간 초기화 강제 실행
 	@ExecSpace("Server")
 	method void DebugForceWeeklyReset()
 		local userId = senderUserId
 		log("[MatrixShop] DEBUG: Force weekly reset for user:", userId)
-
+		
 		local purchaseData = self:LoadPurchaseData(userId)
 		purchaseData["items"] = {}
 		purchaseData["lastResetTs"] = self:GetCurrentWeekResetTs()
 		self:SavePurchaseData(userId, purchaseData)
-
+		
 		self:OnDebugResetComplete()
 	end
 
 	@ExecSpace("Client")
 	method void OnDebugResetComplete()
 		log("[MatrixShop] DEBUG: Weekly reset complete. Refreshing UI...")
-
+		
 		local matrixShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/MatrixShopParent")
 		if matrixShopParent == nil then
 			return
 		end
-
+		
 		local itemContainer = matrixShopParent:GetChildByName("ItemContainer")
 		if itemContainer == nil then
 			return
 		end
-
+		
 		for _, child in ipairs(itemContainer.Children) do
 			if child.MatrixShopItem ~= nil then
 				child.MatrixShopItem:UpdatePurchaseCount(0)
