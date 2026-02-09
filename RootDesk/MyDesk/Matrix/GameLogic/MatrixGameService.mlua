@@ -160,11 +160,16 @@ script MatrixGameService extends Logic
 
 		-- unitPool은 UserMatrixManager.OnMapEnter에서 이미 로드됨
 
-		-- 초기 유닛 선택 (3회) 후 증강 선택 (1회) 후 첫 라운드 시작
+		-- 초기 유닛 선택: 덱 기반 1회 → 전체 풀 2회 → 증강 선택
 		if _MatrixUnitSelectService ~= nil then
-			_MatrixUnitSelectService:StartUnitSelection(3, function()
-				-- 유닛 선택 완료 후 증강 선택
-				self:StartInitialAugmentSelection()
+			-- 1단계: 유저 덱(8개) 중 랜덤 4개 표시 → 1개 선택
+			_MatrixUnitSelectService.isInitialDeckSelection = true
+			_MatrixUnitSelectService:StartUnitSelection(1, function()
+				-- 2단계: 전체 풀에서 2회 선택 (isInitialDeckSelection은 자동 해제됨)
+				_MatrixUnitSelectService:StartUnitSelection(2, function()
+					-- 유닛 선택 완료 후 증강 선택
+					self:StartInitialAugmentSelection()
+				end)
 			end)
 		else
 			self:StartInitialAugmentSelection()

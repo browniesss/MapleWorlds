@@ -25,6 +25,9 @@ script MatrixUnitSelectService extends Logic
 	-- 서버용: 유닛별 중복 강화 누적 데이터 {unitId -> {damage=N, hp=N}}
 	property table unitUpgrades = {}
 
+	-- 초기 덱 기반 선택 모드 (유저 덱 8개에서 선택)
+	property boolean isInitialDeckSelection = false
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		self.matrixSelectUI = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI")
@@ -56,8 +59,13 @@ script MatrixUnitSelectService extends Logic
 		self.isSelectingUnit = true
 		self.isUpgradeMode = false
 
-		-- unitPool에서 랜덤 4유닛 생성
-		local choices = self:GenerateUnitChoices()
+		-- 초기 덱 선택 모드이면 유저 덱에서, 아니면 전체 풀에서 랜덤 생성
+		local choices
+		if self.isInitialDeckSelection then
+			choices = self:GenerateDeckUnitChoices()
+		else
+			choices = self:GenerateUnitChoices()
+		end
 		if choices == nil or #choices == 0 then
 			self.isSelectingUnit = false
 			if self.onSelectionCompleteCallback ~= nil then
@@ -172,6 +180,49 @@ script MatrixUnitSelectService extends Logic
 		return choices
 	end
 
+	-- 유저 덱(8개)에서 아직 선택하지 않은 유닛 중 랜덤 4개 반환
+	method table GenerateDeckUnitChoices()
+		local user = _UserService.LocalPlayer
+		if user == nil then
+			return {}
+		end
+
+		local userDeck = user.UserDeck
+		if userDeck == nil then
+			return {}
+		end
+
+		local matrixManager = user.UserMatrixManager
+		if matrixManager == nil then
+			return {}
+		end
+
+		local unitList = matrixManager.unitList
+
+		-- 덱에서 아직 선택하지 않은 유닛만 추출
+		local available = {}
+		for i = 1, 8 do
+			local unitId = userDeck.userDeck[i]
+			if unitId ~= nil and unitList[unitId] == nil then
+				table.insert(available, unitId)
+			end
+		end
+
+		-- Fisher-Yates 셔플
+		for i = #available, 2, -1 do
+			local j = math.random(1, i)
+			available[i], available[j] = available[j], available[i]
+		end
+
+		-- 최대 4개 반환
+		local choices = {}
+		for i = 1, math.min(4, #available) do
+			table.insert(choices, available[i])
+		end
+
+		return choices
+	end
+
 	@ExecSpace("Client")
 	method void SelectUnitByIndex(integer index)
 		if not self.isSelectingUnit then
@@ -229,6 +280,9 @@ script MatrixUnitSelectService extends Logic
 				self:ShowUnitSelectionUI()
 			end, 0.5)
 		else
+			-- 초기 덱 선택 모드 해제
+			self.isInitialDeckSelection = false
+
 			-- 선택 완료 → 콜백 호출
 			if self.onSelectionCompleteCallback ~= nil then
 				local callback = self.onSelectionCompleteCallback
@@ -265,6 +319,7 @@ script MatrixUnitSelectService extends Logic
 		self.currentChoiceIds = {}
 		self.isSelectingUnit = false
 		self.isUpgradeMode = false
+		self.isInitialDeckSelection = false
 		self.currentUpgradeChoices = {}
 		self.onSelectionCompleteCallback = nil
 		self.unitUpgrades = {}
