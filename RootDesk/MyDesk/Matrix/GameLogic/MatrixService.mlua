@@ -1,0 +1,550 @@
+@Logic
+script MatrixService extends Logic
+
+	property integer selectCount = 0
+
+	property integer maxSelectCount = 5
+
+	property Entity matrixSelectUI = nil
+
+	property table matrixButtons = {}
+
+	property table currentChoices = {}
+
+	property boolean isGamePaused = false
+
+	property table resetUsed = {}
+
+	property table resetButtons = {}
+
+	property Entity augmentScrollLayout = nil
+
+	property table augmentItemTable = {}
+
+	property Entity infiniteMatrixItem = nil
+
+	property table infiniteStats = {}
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.matrixSelectUI = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI")
+		
+		-- 증강 버튼은 내부 MatrixSelectUI/MatrixGrid에 있음
+		local augmentPanel = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI")
+		if augmentPanel ~= nil then
+			local matrixGrid = augmentPanel.Children[1]
+			if matrixGrid ~= nil then
+				for i = 1, 3 do
+					local btn = matrixGrid.Children[i]
+					if btn ~= nil then
+						table.insert(self.matrixButtons, btn)
+		
+						-- 리셋 버튼 참조 저장
+						local resetBtn = btn:GetChildByName("ResetMatrixButton")
+						if resetBtn ~= nil then
+							self.resetButtons[i] = resetBtn
+						end
+					end
+				end
+			end
+		end
+		
+		-- 리셋 상태 초기화
+		self.resetUsed = {false, false, false}
+		
+		-- 증강 Scroll_Layout 참조
+		self.augmentScrollLayout = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/UserDeckUI/MatrixAugmentUI/Scroll_Layout")
+		
+		-- InfiniteMatrixItem 참조
+		self.infiniteMatrixItem = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/UserDeckUI/MatrixAugmentUI/Scroll_Layout/InfiniteMatrixItem")
+		
+		-- INFINITE 스탯 초기화
+		self.infiniteStats = {
+			AttackDamageBuff = 0,
+			MaxHealthBuff = 0,
+			MoveSpeedBuff = 0,
+			AttackSpeedBuff = 0,
+			AttackRangeBuff = 0
+		}
+	end
+
+	@ExecSpace("Server")
+	method void SetGamePausedOnServer(boolean paused)
+		self.isGamePaused = paused
+	end
+
+	method boolean IsInfiniteMode()
+		if _MatrixGameService == nil then
+			return false
+		end
+		local phase = _MatrixGameService:GetCurrentPhaseData()
+		if phase ~= nil and phase.phaseType == _MatrixGameService.PHASE_TYPE_INFINITE then
+			return true
+		end
+		return false
+	end
+
+	@ExecSpace("Client")
+	method void OnMatrixEvent()
+		-- 무한 모드가 아닌 경우에만 선택 횟수 제한 적용
+		if not self:IsInfiniteMode() and self.selectCount >= self.maxSelectCount then
+			return
+		end
+		
+		-- 게임 일시정지
+		if _MatrixGameManager ~= nil then
+			_MatrixGameManager:PauseGame()
+		end
+		
+		-- 서버측 일시정지 (MesoIncome 연동)
+		self:SetGamePausedOnServer(true)
+		
+		-- 리셋 상태 초기화 (새 증강 선택 시 모두 사용 가능)
+		self.resetUsed = {false, false, false}
+		
+		-- 3개의 증강 선택지 생성 (무한 모드 여부에 따라 분기)
+		local choices = nil
+		if self:IsInfiniteMode() then
+			-- 무한 모드: INFINITE 타입 증강만 선택 (중복 허용)
+			choices = _MatrixAugmentRepo:GenerateInfiniteMatrixChoices()
+		else
+			-- 일반 모드: 기존 증강 선택
+			choices = _MatrixAugmentRepo:GenerateMatrixChoices()
+		end
+		
+		if choices == nil or #choices == 0 then
+			-- 선택지가 없으면 다시 재개
+			if _MatrixGameManager ~= nil then
+				_MatrixGameManager:ResumeGame()
+			end
+			self:SetGamePausedOnServer(false)
+			return
+		end
+		
+		self.currentChoices = choices
+		
+		-- UI 열기
+		self:OpenMatrixSelectUI(choices)
+	end
+
+	@ExecSpace("Client")
+	method void OpenMatrixSelectUI(table choices)
+		if self.matrixSelectUI == nil then
+			return
+		end
+		
+		self.matrixSelectUI.Enable = true
+		self.matrixSelectUI.Visible = true
+		
+		-- UnitSelectUI 숨기기, 증강 패널 보이기
+		local unitSelectUI = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI/UnitSelectUI")
+		if unitSelectUI ~= nil then
+			unitSelectUI.Enable = false
+		end
+		
+		local augmentPanel = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI")
+		if augmentPanel ~= nil then
+			augmentPanel.Enable = true
+			augmentPanel.Visible = true
+		end
+		
+		-- 슬라이드 애니메이션
+		_TweenLogic:MoveTo(self.matrixSelectUI, Vector2(0, 0), 0.3, EaseType.CircEaseIn)
+		
+		-- 3개 버튼에 데이터 할당
+		-- UIItemMatrixCard 구조:
+		-- Children[1]: MatrixIcon (아이콘)
+		-- Children[2]: MatirxName (이름) - 오타 주의
+		-- Children[3]: MatrixInfo (설명)
+		for i = 1, 3 do
+			local btn = self.matrixButtons[i]
+			if btn == nil then
+				continue
+			end
+		
+			local matrix = choices[i]
+		
+			if matrix ~= nil then
+				btn.Enable = true
+				btn.Visible = true
+		
+				local modeData = _MatrixAugmentRepo:GetModeDataByGrade(matrix.grade)
+		
+				-- 등급별 색상 이미지 설정 (btn 자체)
+				if btn.SpriteGUIRendererComponent ~= nil then
+					if modeData ~= nil and modeData.colorRUID ~= nil and modeData.colorRUID ~= "" then
+						btn.SpriteGUIRendererComponent.ImageRUID = modeData.colorRUID
+					end
+				end
+		
+				-- UIItemMatrixCard 구조 (백그라운드 제거됨):
+				-- Children[1]: MatrixIcon (아이콘)
+				-- Children[2]: MatirxName (이름)
+				-- Children[3]: MatrixInfo (설명)
+		
+				-- 아이콘 설정 (Children[1])
+				local iconEntity = btn.Children[1]
+				if iconEntity ~= nil and iconEntity.SpriteGUIRendererComponent ~= nil then
+					iconEntity.SpriteGUIRendererComponent.ImageRUID = matrix.icon or ""
+				end
+		
+				-- 이름 설정 (Children[2])
+				local nameEntity = btn.Children[2]
+				if nameEntity ~= nil and nameEntity.TextComponent ~= nil then
+					local displayName = "[" .. (matrix.grade or "RARE") .. "] " .. (matrix.name or "")
+					nameEntity.TextComponent.Text = displayName
+				end
+		
+				-- 설명 설정 (Children[3])
+				local descEntity = btn.Children[3]
+				if descEntity ~= nil and descEntity.TextComponent ~= nil then
+					descEntity.TextComponent.Text = self:FormatDesc(matrix)
+				end
+		
+				-- 버튼 컴포넌트에 matrix 인덱스 저장
+				if btn.MatrixButton ~= nil then
+					btn.MatrixButton.matrixIndex = i
+				end
+		
+				-- 리셋 버튼 상태 업데이트
+				self:UpdateResetButtonState(i)
+			else
+				btn.Enable = false
+				btn.Visible = false
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void UpdateResetButtonState(integer index)
+		local resetBtn = self.resetButtons[index]
+		if resetBtn == nil then
+			return
+		end
+		
+		local isUsed = self.resetUsed[index] or false
+		
+		if isUsed then
+			-- 이미 사용됨 - 비활성화
+			resetBtn.Enable = true
+			if resetBtn.ButtonComponent ~= nil then
+				resetBtn.ButtonComponent.Enable = false
+			end
+		else
+			-- 사용 가능
+			resetBtn.Enable = true
+			if resetBtn.ButtonComponent ~= nil then
+				resetBtn.ButtonComponent.Enable = true
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void ResetMatrixByIndex(integer index)
+		-- 이미 사용한 리셋인지 확인
+		if self.resetUsed[index] == true then
+			return
+		end
+		
+		-- 리셋 사용 처리
+		self.resetUsed[index] = true
+		
+		-- 새 증강 생성 (무한 모드 여부에 따라 분기)
+		local newMatrix = nil
+		if self:IsInfiniteMode() then
+			-- 무한 모드: INFINITE 타입 증강만 (중복 허용)
+			newMatrix = _MatrixAugmentRepo:GenerateSingleInfiniteMatrixChoice(self.currentChoices)
+		else
+			-- 일반 모드: 기존 증강 선택
+			newMatrix = _MatrixAugmentRepo:GenerateSingleMatrixChoice(self.currentChoices)
+		end
+		
+		if newMatrix == nil then
+			return
+		end
+		
+		-- 현재 선택지 교체
+		self.currentChoices[index] = newMatrix
+		
+		-- UI 업데이트 (해당 카드만)
+		self:UpdateSingleMatrixCard(index, newMatrix)
+		
+		-- 리셋 버튼 상태 업데이트
+		self:UpdateResetButtonState(index)
+		
+	end
+
+	@ExecSpace("Client")
+	method void UpdateSingleMatrixCard(integer index, table matrix)
+		local btn = self.matrixButtons[index]
+		if btn == nil or matrix == nil then
+			return
+		end
+		
+		local modeData = _MatrixAugmentRepo:GetModeDataByGrade(matrix.grade)
+		
+		-- 등급별 색상 이미지 설정 (btn 자체)
+		if btn.SpriteGUIRendererComponent ~= nil then
+			if modeData ~= nil and modeData.colorRUID ~= nil and modeData.colorRUID ~= "" then
+				btn.SpriteGUIRendererComponent.ImageRUID = modeData.colorRUID
+			end
+		end
+		
+		-- 아이콘 설정 (Children[1])
+		local iconEntity = btn.Children[1]
+		if iconEntity ~= nil and iconEntity.SpriteGUIRendererComponent ~= nil then
+			iconEntity.SpriteGUIRendererComponent.ImageRUID = matrix.icon or ""
+		end
+		
+		-- 이름 설정 (Children[2])
+		local nameEntity = btn.Children[2]
+		if nameEntity ~= nil and nameEntity.TextComponent ~= nil then
+			local displayName = "[" .. (matrix.grade or "RARE") .. "] " .. (matrix.name or "")
+			nameEntity.TextComponent.Text = displayName
+		end
+		
+		-- 설명 설정 (Children[3])
+		local descEntity = btn.Children[3]
+		if descEntity ~= nil and descEntity.TextComponent ~= nil then
+			descEntity.TextComponent.Text = self:FormatDesc(matrix)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void CloseMatrixSelectUI()
+		-- UI 비활성화
+		if self.matrixSelectUI ~= nil then
+			self.matrixSelectUI.Enable = false
+			self.matrixSelectUI.Visible = false
+		end
+		
+		-- 게임 재개
+		if _MatrixGameManager ~= nil then
+			_MatrixGameManager:ResumeGame()
+		end
+		
+		-- 서버측 일시정지 해제 (MesoIncome 연동)
+		self:SetGamePausedOnServer(false)
+	end
+
+	@ExecSpace("Client")
+	method void SelectMatrixByIndex(integer index)
+		local matrix = self.currentChoices[index]
+		if matrix == nil then
+			return
+		end
+		
+		-- 클라이언트 UserMatrixManager에도 증강 저장 (UI 표시용)
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.UserMatrixManager ~= nil then
+			user.UserMatrixManager:AddMatrix(matrix)
+		end
+		
+		-- 증강 UI 업데이트 (타입별 분기)
+		if matrix.type == "INFINITE" then
+			self:UpdateInfiniteMatrixUI(matrix)
+		else
+			self:AddAugmentToScrollUI(matrix)
+		end
+		
+		self:SelectMatrixServer(matrix.id)
+	end
+
+	@ExecSpace("Server")
+	method void SelectMatrixServer(integer matrixId)
+		local matrix = _MatrixAugmentRepo:GetMatrixById(matrixId)
+		if matrix == nil then
+			return
+		end
+		
+		self.selectCount = self.selectCount + 1
+		
+		-- 효과 적용 (MatrixAugmentService에 위임)
+		_MatrixAugmentService:ApplyMatrixEffect(matrix)
+		
+		-- UserMatrixManager에 증강 추가
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		if user ~= nil and user.UserMatrixManager ~= nil then
+			user.UserMatrixManager:AddMatrix(matrix)
+		end
+		
+		-- 메소 UI 업데이트 (MESO/SYNERGY 타입 증강 효과 반영)
+		self:RefreshMesoIncomeUI()
+		
+		-- UI 닫기 (클라이언트)
+		self:CloseMatrixSelectUIClient()
+	end
+
+	@ExecSpace("Client")
+	method void CloseMatrixSelectUIClient()
+		self:CloseMatrixSelectUI()
+		
+		-- 시너지 UI 갱신 (시너지 증강 효과 반영)
+		local synergyUI = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/MatrixSynergyUI")
+		if synergyUI ~= nil and synergyUI.MatrixSynergyUIManager ~= nil then
+			synergyUI.MatrixSynergyUIManager:RefreshSynergyUI()
+		end
+		
+		-- 증강 선택 완료 후 다음 라운드/페이즈 진행
+		if _MatrixGameService ~= nil then
+			_MatrixGameService:OnAugmentSelected()
+		end
+	end
+
+	@ExecSpace("Client")
+	method void AddAugmentToScrollUI(table matrix)
+		if self.augmentScrollLayout == nil then
+			return
+		end
+		
+		local item = _SpawnService:SpawnByModelId("model://9f03b085-86cb-4c62-ad2d-10c011110e29", "MatrixItem", Vector3.zero, self.augmentScrollLayout)
+		
+		-- 아이콘 이미지 설정 (MatrixItem 루트)
+		if item.SpriteGUIRendererComponent ~= nil then
+			item.SpriteGUIRendererComponent.ImageRUID = matrix.icon or ""
+		end
+		
+		-- MatrixInfoBox 하위 자식 접근
+		local infoBox = item:GetChildByName("MatrixInfoBox")
+		if infoBox ~= nil then
+			local nameEntity = infoBox:GetChildByName("MatrixName")
+			if nameEntity ~= nil and nameEntity.TextComponent ~= nil then
+				nameEntity.TextComponent.Text = matrix.name or ""
+			end
+		
+			local infoEntity = infoBox:GetChildByName("MatrixInfo")
+			if infoEntity ~= nil and infoEntity.TextComponent ~= nil then
+				infoEntity.TextComponent.Text = "[" .. (matrix.grade or "RARE") .. "] " .. self:FormatDesc(matrix)
+			end
+		end
+		
+		table.insert(self.augmentItemTable, item)
+	end
+
+	@ExecSpace("Client")
+	method void UpdateInfiniteMatrixUI(table matrix)
+		if self.infiniteMatrixItem == nil then
+			return
+		end
+		
+		-- 스탯 누적
+		local effectType = matrix.effectType
+		if self.infiniteStats[effectType] ~= nil then
+			self.infiniteStats[effectType] = self.infiniteStats[effectType] + matrix.value
+		end
+		
+		-- MatrixInfo 텍스트 갱신
+		local infoBox = self.infiniteMatrixItem:GetChildByName("MatrixInfoBox")
+		if infoBox ~= nil then
+			local infoEntity = infoBox:GetChildByName("MatrixInfo")
+			if infoEntity ~= nil and infoEntity.TextComponent ~= nil then
+				infoEntity.TextComponent.Text = "공격력 : " .. tostring(self.infiniteStats.AttackDamageBuff) .. "\n" .. "체력 : " .. tostring(self.infiniteStats.MaxHealthBuff) .. "\n" .. "이동속도 : " .. tostring(self.infiniteStats.MoveSpeedBuff) .. "\n" .. "공격속도 : " .. tostring(self.infiniteStats.AttackSpeedBuff) .. "\n" .. "사거리 : " .. tostring(self.infiniteStats.AttackRangeBuff)
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void ClearAugmentScrollUI()
+		-- 동적 생성 아이템 제거
+		for _, item in ipairs(self.augmentItemTable) do
+			if isvalid(item) then
+				_EntityService:Destroy(item)
+			end
+		end
+		self.augmentItemTable = {}
+		
+		-- INFINITE 스탯 초기화
+		self.infiniteStats = {
+			AttackDamageBuff = 0,
+			MaxHealthBuff = 0,
+			MoveSpeedBuff = 0,
+			AttackSpeedBuff = 0,
+			AttackRangeBuff = 0
+		}
+		
+		-- InfiniteMatrixItem 텍스트 초기화
+		if self.infiniteMatrixItem ~= nil then
+			local infoBox = self.infiniteMatrixItem:GetChildByName("MatrixInfoBox")
+			if infoBox ~= nil then
+				local infoEntity = infoBox:GetChildByName("MatrixInfo")
+				if infoEntity ~= nil and infoEntity.TextComponent ~= nil then
+					infoEntity.TextComponent.Text = "공격력 : 0\n체력 : 0\n이동속도 : 0\n공격속도 : 0\n사거리 : 0"
+				end
+			end
+		end
+	end
+
+	method void ClearSelectState()
+		self.selectCount = 0
+		self.currentChoices = {}
+		self.isGamePaused = false
+		self.resetUsed = {false, false, false}
+		
+		-- 증강 Scroll UI 초기화
+		self:ClearAugmentScrollUI()
+	end
+
+	method string FormatDesc(table matrix)
+		if matrix == nil or matrix.desc == nil or matrix.desc == "" then
+			return ""
+		end
+		
+		local value = matrix.value or 0
+		local calcType = matrix.calcType or "FLAT"
+		local effectType = matrix.effectType or ""
+		
+		-- 포맷 값 계산
+		local formatValue = value
+		
+		if calcType == "PERCENT" then
+			-- DamageReduction, AttackSpeedBuff: (1 - value) * 100 (예: 0.9 -> 10%, 0.75 -> 25%)
+			if effectType == "DamageReduction" or effectType == "AttackSpeedBuff" then
+				formatValue = math.floor((1 - value) * 100 + 0.5)
+			-- HealOnKill: value * 100 (예: 0.1 -> 10%)
+			elseif effectType == "HealOnKill" then
+				formatValue = math.floor(value * 100 + 0.5)
+			-- 그 외 PERCENT: (value - 1) * 100 (예: 1.1 -> 10%, 1.35 -> 35%)
+			else
+				formatValue = math.floor((value - 1) * 100 + 0.5)
+			end
+		end
+		
+		-- string.format으로 desc 포맷팅
+		local success, result = pcall(function()
+			return string.format(matrix.desc, formatValue)
+		end)
+		
+		if success then
+			return result
+		else
+			return matrix.desc
+		end
+	end
+
+	method any HexToColor(string hex)
+		if hex == nil or hex == "" then
+			return Color(1, 1, 1, 1)
+		end
+		
+		-- # 제거
+		if string.sub(hex, 1, 1) == "#" then
+			hex = string.sub(hex, 2)
+		end
+		
+		local r = tonumber(string.sub(hex, 1, 2), 16) / 255
+		local g = tonumber(string.sub(hex, 3, 4), 16) / 255
+		local b = tonumber(string.sub(hex, 5, 6), 16) / 255
+		
+		return Color(r, g, b, 1)
+	end
+
+	@ExecSpace("Server")
+	method void RefreshMesoIncomeUI()
+		local mapPath = "/maps/MatrixStage"
+		local mesoIncomeEntity = _EntityService:GetEntityByPath(mapPath .. "/ingameIncome")
+		if mesoIncomeEntity ~= nil and mesoIncomeEntity.MesoIncome ~= nil then
+			mesoIncomeEntity.MesoIncome:RefreshIncomeUI()
+		end
+	end
+
+end

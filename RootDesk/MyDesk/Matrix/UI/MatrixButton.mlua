@@ -35,7 +35,7 @@ script MatrixButton extends Component
 			return
 		end
 		
-		_MatrixAugmentService:ResetMatrixByIndex(self.matrixIndex)
+		_MatrixService:ResetMatrixByIndex(self.matrixIndex)
 	end
 
 	@EventSender("Self")
@@ -44,7 +44,7 @@ script MatrixButton extends Component
 			return
 		end
 		
-		_MatrixAugmentService:SelectMatrixByIndex(self.matrixIndex)
+		_MatrixService:SelectMatrixByIndex(self.matrixIndex)
 	end
 
 end

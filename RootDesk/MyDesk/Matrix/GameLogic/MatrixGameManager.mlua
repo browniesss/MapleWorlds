@@ -475,9 +475,9 @@ script MatrixGameManager extends Logic
 			_MatrixUnitSelectService:Reset()
 		end
 
-		-- MatrixAugmentService 정리
-		if _MatrixAugmentService ~= nil then
-			_MatrixAugmentService:ClearAugmentScrollUI()
+		-- MatrixService UI 정리
+		if _MatrixService ~= nil then
+			_MatrixService:ClearAugmentScrollUI()
 		end
 
 		-- 시너지 카운트 초기화 (서버)

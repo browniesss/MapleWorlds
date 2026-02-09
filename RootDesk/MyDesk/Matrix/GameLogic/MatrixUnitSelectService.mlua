@@ -75,8 +75,8 @@ script MatrixUnitSelectService extends Logic
 		end
 
 		-- 서버측 일시정지 (MesoIncome 연동)
-		if _MatrixAugmentService ~= nil then
-			_MatrixAugmentService:SetGamePausedOnServer(true)
+		if _MatrixService ~= nil then
+			_MatrixService:SetGamePausedOnServer(true)
 		end
 
 		-- MatrixSelectUI 컨테이너 활성화
@@ -247,8 +247,8 @@ script MatrixUnitSelectService extends Logic
 		end
 		
 		-- 서버측 일시정지 해제 (MesoIncome 연동)
-		if _MatrixAugmentService ~= nil then
-			_MatrixAugmentService:SetGamePausedOnServer(false)
+		if _MatrixService ~= nil then
+			_MatrixService:SetGamePausedOnServer(false)
 		end
 	end
 
@@ -291,8 +291,8 @@ script MatrixUnitSelectService extends Logic
 		end
 
 		-- 서버측 일시정지
-		if _MatrixAugmentService ~= nil then
-			_MatrixAugmentService:SetGamePausedOnServer(true)
+		if _MatrixService ~= nil then
+			_MatrixService:SetGamePausedOnServer(true)
 		end
 
 		-- MatrixSelectUI 컨테이너 활성화

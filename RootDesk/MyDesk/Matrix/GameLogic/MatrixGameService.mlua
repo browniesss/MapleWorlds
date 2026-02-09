@@ -190,10 +190,10 @@ script MatrixGameService extends Logic
 			_MatrixGameManager:ShowMatrixSelectUI()
 		end
 
-		if _MatrixAugmentService ~= nil then
-			_MatrixAugmentService:OnMatrixEvent()
+		if _MatrixService ~= nil then
+			_MatrixService:OnMatrixEvent()
 		else
-			-- 증강 서비스가 없으면 바로 라운드 시작
+			-- 매트릭스 서비스가 없으면 바로 라운드 시작
 			self.isInitialAugmentSelection = false
 			self:StartRound(1)
 		end
@@ -498,8 +498,8 @@ script MatrixGameService extends Logic
 		end
 
 		-- 증강 선택 UI 표시
-		if _MatrixAugmentService ~= nil then
-			_MatrixAugmentService:OnMatrixEvent()
+		if _MatrixService ~= nil then
+			_MatrixService:OnMatrixEvent()
 		end
 	end
 
@@ -699,8 +699,8 @@ script MatrixGameService extends Logic
 		if _MatrixGameManager ~= nil then
 			_MatrixGameManager:ShowMatrixSelectUI()
 		end
-		if _MatrixAugmentService ~= nil then
-			_MatrixAugmentService:OnMatrixEvent()
+		if _MatrixService ~= nil then
+			_MatrixService:OnMatrixEvent()
 		end
 	end
 
