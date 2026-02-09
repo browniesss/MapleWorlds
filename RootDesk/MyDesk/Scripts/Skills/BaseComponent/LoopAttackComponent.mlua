@@ -30,23 +30,30 @@ script LoopAttackComponent extends Component
 		self.loopInterval = loopInterval
 		self.caster = caster
 		self.isHeal = isHeal or false
-		
+
 		self.timerHandle = _TimerService:SetTimerRepeat(function()
 		    self:Active(activeFunc)
 		end, self.loopInterval)
-		
+
 		-- Rotation이 아닌 FlipX로 뒤집기에, 콜라이더도 뒤집어주는 처리
-		if caster.Unit.isEnemy == false then
+		if caster.Unit ~= nil and caster.Unit.isEnemy == false then
 		    self.Entity.TriggerComponent.ColliderOffset.x = self.Entity.TriggerComponent.ColliderOffset.x * -1
 		end
 	end
 
 	method void Active(any activeFunc)
+		-- caster가 사망하여 Unit이 없으면 정리
+		if self.caster == nil or not isvalid(self.caster) or self.caster.Unit == nil then
+			_TimerService:ClearTimer(self.timerHandle)
+			self.Entity:Destroy()
+			return
+		end
+
 		self.count = self.count + 1
-		
+
 		local removeList = {}
 		for target, _ in pairs(self.insideUnit) do
-		    if target == nil or not isvalid(target) then
+		    if target == nil or not isvalid(target) or target.Unit == nil then
 		        removeList[#removeList+1] = target
 		    else
 				if self.isHeal then
@@ -56,17 +63,17 @@ script LoopAttackComponent extends Component
 					-- 공격 적용
 					target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.attackDamage, false, 1)
 				end
-		
+
 				if activeFunc ~= nil then
 					activeFunc(target)
 				end
 		    end
 		end
-		
+
 		for i = 1, #removeList do
 		    self.insideUnit[removeList[i]] = nil
 		end
-		
+
 		if self.count >= self.loopCount then
 		    _TimerService:ClearTimer(self.timerHandle)
 			self.Entity:Destroy()
@@ -78,19 +85,23 @@ script LoopAttackComponent extends Component
 		if event.TriggerBodyEntity.Unit == nil or event.TriggerBodyEntity.Name == "EnemyTower" or event.TriggerBodyEntity.Name == "MyTower" then
 			return
 		end
-		
+
+		if self.caster == nil or not isvalid(self.caster) or self.caster.Unit == nil then
+			return
+		end
+
 		if self.isHeal then
 			-- 힐 모드: 아군을 감지
-			if self.caster.Unit.isEnemy and event.TriggerBodyEntity.Unit.isEnemy then -- 적 유닛이 발사했으면서 적 유닛일 경우
+			if self.caster.Unit.isEnemy and event.TriggerBodyEntity.Unit.isEnemy then
 				self.insideUnit[event.TriggerBodyEntity] = true
-			elseif self.caster.Unit.isEnemy == false and event.TriggerBodyEntity.Unit.isEnemy == false then -- 아군 유닛이 발사했으면서 아군 유닛일 경우
+			elseif self.caster.Unit.isEnemy == false and event.TriggerBodyEntity.Unit.isEnemy == false then
 				self.insideUnit[event.TriggerBodyEntity] = true
 			end
 		else
 			-- 공격 모드: 적을 감지
-			if self.caster.Unit.isEnemy and event.TriggerBodyEntity.Unit.isEnemy == false then -- 적 유닛이 발사했으면서 아군 유닛일 경우
+			if self.caster.Unit.isEnemy and event.TriggerBodyEntity.Unit.isEnemy == false then
 				self.insideUnit[event.TriggerBodyEntity] = true
-			elseif self.caster.Unit.isEnemy == false and event.TriggerBodyEntity.Unit.isEnemy then -- 아군 유닛이 발사했으면서 적 유닛일 경우
+			elseif self.caster.Unit.isEnemy == false and event.TriggerBodyEntity.Unit.isEnemy then
 				self.insideUnit[event.TriggerBodyEntity] = true
 			end
 		end
@@ -101,19 +112,23 @@ script LoopAttackComponent extends Component
 		if event.TriggerBodyEntity.Unit == nil or event.TriggerBodyEntity.Name == "EnemyTower" or event.TriggerBodyEntity.Name == "MyTower" then
 			return
 		end
-		
+
+		if self.caster == nil or not isvalid(self.caster) or self.caster.Unit == nil then
+			return
+		end
+
 		if self.isHeal then
 			-- 힐 모드: 아군을 감지
-			if self.caster.Unit.isEnemy and event.TriggerBodyEntity.Unit.isEnemy then -- 적 유닛이 발사했으면서 적 유닛일 경우
+			if self.caster.Unit.isEnemy and event.TriggerBodyEntity.Unit.isEnemy then
 				self.insideUnit[event.TriggerBodyEntity] = nil
-			elseif self.caster.Unit.isEnemy == false and event.TriggerBodyEntity.Unit.isEnemy == false then -- 아군 유닛이 발사했으면서 아군 유닛일 경우
+			elseif self.caster.Unit.isEnemy == false and event.TriggerBodyEntity.Unit.isEnemy == false then
 				self.insideUnit[event.TriggerBodyEntity] = nil
 			end
 		else
 			-- 공격 모드: 적을 감지
-			if self.caster.Unit.isEnemy and event.TriggerBodyEntity.Unit.isEnemy == false then -- 적 유닛이 발사했으면서 아군 유닛일 경우
+			if self.caster.Unit.isEnemy and event.TriggerBodyEntity.Unit.isEnemy == false then
 				self.insideUnit[event.TriggerBodyEntity] = nil
-			elseif self.caster.Unit.isEnemy == false and event.TriggerBodyEntity.Unit.isEnemy then -- 아군 유닛이 발사했으면서 적 유닛일 경우
+			elseif self.caster.Unit.isEnemy == false and event.TriggerBodyEntity.Unit.isEnemy then
 				self.insideUnit[event.TriggerBodyEntity] = nil
 			end
 		end
