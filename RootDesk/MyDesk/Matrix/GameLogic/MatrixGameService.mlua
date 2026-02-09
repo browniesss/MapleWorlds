@@ -39,12 +39,19 @@ script MatrixGameService extends Logic
 	-- 현재 적 타워 HP (라운드 클리어 시 증가)
 	property number currentEnemyTowerHP = 0
 
+	-- 무한 모드: 마지막 웨이브 후 라운드 클리어 타이머
+	property integer infiniteRoundClearTimerId = 0
+
+	-- 무한 모드: 라운드 클리어 대기 시간 (MatrixCoinConfig에서 로드)
+	property number infiniteRoundClearTime = 30
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		-- 데이터 로드
 		self:LoadPhaseData()
 		self:LoadRoundData()
 		self:LoadSpawnPatternData()
+		self:LoadCoinConfig()
 	end
 
 	@ExecSpace("ClientOnly")
@@ -121,6 +128,20 @@ script MatrixGameService extends Logic
 		
 	end
 
+	@ExecSpace("ClientOnly")
+	method void LoadCoinConfig()
+		local dataSet = _DataService:GetTable("MatrixCoinConfig")
+		if dataSet == nil then
+			return
+		end
+
+		if dataSet:GetRowCount() < 1 then
+			return
+		end
+
+		self.infiniteRoundClearTime = tonumber(dataSet:GetCell(1, "infiniteRoundClearTime")) or 30
+	end
+
 	-- MatrixGameManager에서 호출되는 초기화 메서드
 	@ExecSpace("Client")
 	method void InitializeGameFromManager()
@@ -139,6 +160,7 @@ script MatrixGameService extends Logic
 		self.loopCount = 0
 		self.isRoundCleared = false
 		self.currentEnemyTowerHP = 0
+		self:ClearInfiniteRoundClearTimer()
 
 		-- MatrixMonsterSpawner 리셋 (이전 게임의 타이머/상태 정리)
 		if _MatrixMonsterSpawner ~= nil then
@@ -280,23 +302,15 @@ script MatrixGameService extends Logic
 
 		-- 모든 웨이브 완료 확인
 		if self.currentWaveIndex > roundData.waveCount then
-			-- 무한 모드 체크
-			local phase = self:GetCurrentPhaseData()
-			if phase ~= nil and phase.phaseType == self.PHASE_TYPE_INFINITE then
-				-- 무한 모드: 유닛 선택 후 다음 라운드 진행
-				self:OnInfiniteWaveComplete()
-				return
-			end
-
 			return
 		end
-		
+
 		-- 스폰 패턴 가져오기
 		local patterns = self.spawnPatternData[roundData.spawnPatternId]
 		if patterns == nil then
 			return
 		end
-		
+
 		-- 현재 웨이브 패턴 찾기
 		local wavePattern = nil
 		for _, pattern in ipairs(patterns) do
@@ -305,14 +319,26 @@ script MatrixGameService extends Logic
 				break
 			end
 		end
-		
+
 		if wavePattern == nil then
 			return
 		end
-		
-		
+
 		-- 몬스터 스폰
 		self:SpawnWave(wavePattern)
+
+		-- 무한 모드: 마지막 웨이브 진입 시 15초 후 라운드 클리어
+		local phase = self:GetCurrentPhaseData()
+		if phase ~= nil and phase.phaseType == self.PHASE_TYPE_INFINITE then
+			if self.currentWaveIndex == roundData.waveCount then
+				self:ClearInfiniteRoundClearTimer()
+				self.infiniteRoundClearTimerId = _TimerService:SetTimerOnce(function()
+					if not self.isRoundCleared then
+						self:OnRoundClear()
+					end
+				end, self.infiniteRoundClearTime)
+			end
+		end
 	end
 
 	@ExecSpace("Client")
@@ -398,6 +424,7 @@ script MatrixGameService extends Logic
 	@ExecSpace("Client")
 	method void OnRoundClear()
 		self.isRoundCleared = true
+		self:ClearInfiniteRoundClearTimer()
 
 		-- 미니맵 아이콘 제거
 		local map = _EntityService:GetEntityByPath("/maps/MatrixStage")
@@ -534,6 +561,7 @@ script MatrixGameService extends Logic
 
 	@ExecSpace("Client")
 	method void OnGameOver()
+		self:ClearInfiniteRoundClearTimer()
 
 		-- MatrixGameManager를 통해 게임 종료 처리
 		if _MatrixGameManager ~= nil then
@@ -671,27 +699,11 @@ script MatrixGameService extends Logic
 		return result
 	end
 
-	-- ============================================
-	-- 무한 모드: 웨이브 완료 시 유닛 선택 후 다음 라운드
-	-- ============================================
-
-	@ExecSpace("Client")
-	method void OnInfiniteWaveComplete()
-		local nextRoundId = self.currentRoundId + 1
-		local nextRoundData = self:GetRoundData(nextRoundId)
-
-		if nextRoundData == nil then
-			-- 마지막 라운드 클리어: 증강 선택 후 5-1로 돌아감
-			self:OnInfinitePhaseComplete()
-		else
-			-- 다음 라운드 있음: 유닛 선택 후 다음 라운드 진행
-			if _MatrixUnitSelectService ~= nil then
-				_MatrixUnitSelectService:StartUnitSelection(1, function()
-					self:StartRound(nextRoundId)
-				end)
-			else
-				self:StartRound(nextRoundId)
-			end
+	-- 무한 모드 라운드 클리어 타이머 정리
+	method void ClearInfiniteRoundClearTimer()
+		if self.infiniteRoundClearTimerId ~= 0 then
+			_TimerService:ClearTimer(self.infiniteRoundClearTimerId)
+			self.infiniteRoundClearTimerId = 0
 		end
 	end
 
