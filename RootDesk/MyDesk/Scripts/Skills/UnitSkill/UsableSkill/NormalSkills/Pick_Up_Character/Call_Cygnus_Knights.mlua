@@ -4,15 +4,16 @@ script Call_Cygnus_Knights extends SkillParent
 	@ExecSpace("Client")
 	method void ActivateSkill()
 		__base:ActivateSkill()
-
+		
 		local kightsMap = {}
 		kightsMap["model://9835b280-7553-451d-bab0-b480c97aeb18"] = true
 		kightsMap["model://2f0ffaca-fa8d-4d5e-a049-c43e4f5436a5"] = true
 		kightsMap["model://c1c16e15-b494-4311-a149-1dac36dfdf65"] = true
 		kightsMap["model://d695ed33-e193-4a95-adc3-40b02652be5a"] = true
-
+		kightsMap["model://dddd6d0e-ae4c-4665-a542-78d0e2dc4c15"] = true
+		
 		local targetIdList = {}
-
+		
 		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
 			-- 매트릭스 모드: Unit DataSet에서 기사단 전체를 대상으로 랜덤 선택
 			for id, _ in pairs(kightsMap) do
@@ -27,12 +28,12 @@ script Call_Cygnus_Knights extends SkillParent
 				end
 			end
 		end
-
+		
 		if #targetIdList == 0 then
 			log_error("fail to pick unit")
 			return
 		end
-
+		
 		math.randomseed(os.time())
 		local model = targetIdList[math.random(1, #targetIdList)]
 		

@@ -1,0 +1,37 @@
+@Component
+script Striker_Shark extends SkillParent
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		local hitCount = 0
+		local hitAnimationTimerID = 0
+		local effectID = 0
+		
+		local options = {
+		    FlipX = true,  -- 좌우 반전
+		}
+		
+		local function hitAnimationFunction()
+			if hitCount >= self.skillTime then
+				_TimerService:ClearTimer(hitAnimationTimerID)
+				_EffectService:RemoveEffect(effectID)
+				self:SkillEnd()
+				return
+			end
+			
+			hitCount += 1
+			_EffectService:PlayEffectAttached("8a455d60979b45dfbf3130acf11acb81", self.caster, Vector3(-1,0,0) , 0, Vector3.one, false, options)
+			self:AttackNearByEnemies(5,30)
+		end
+		
+		local function attackFunction()
+			hitAnimationTimerID = _TimerService:SetTimerRepeat(hitAnimationFunction, 0.84)
+		end
+		
+		-- 첫 번째 발사: 공격 모션 발생
+		_TimerService:SetTimerOnce(attackFunction, self.skillAttackTiming)
+	end
+
+end
