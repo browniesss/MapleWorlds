@@ -28,12 +28,32 @@ script MatrixUnitSelectService extends Logic
 	-- 초기 덱 기반 선택 모드 (유저 덱 8개에서 선택)
 	property boolean isInitialDeckSelection = false
 
+	-- 중복 선택 강화 보너스 값 (MatrixCoinConfig에서 로드)
+	property number overlapDamageBonus = 5
+	property number overlapHPBonus = 50
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		self.matrixSelectUI = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI")
 		self.unitSelectUI = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI/UnitSelectUI")
 		self.charterViewList = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI/UnitSelectUI/CharterViewList_1")
 		self.augmentPanel = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI/MatrixSelectUI")
+		self:LoadOverlapConfig()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void LoadOverlapConfig()
+		local dataSet = _DataService:GetTable("MatrixCoinConfig")
+		if dataSet == nil then
+			return
+		end
+
+		if dataSet:GetRowCount() < 1 then
+			return
+		end
+
+		self.overlapDamageBonus = tonumber(dataSet:GetCell(1, "overlapDamageBonus")) or 5
+		self.overlapHPBonus = tonumber(dataSet:GetCell(1, "overlapHPBonus")) or 50
 	end
 
 	@ExecSpace("Client")
@@ -408,15 +428,15 @@ script MatrixUnitSelectService extends Logic
 		for i = 1, math.min(4, #ownedUnitIds) do
 			local unitId = ownedUnitIds[i]
 			local buffType = "DAMAGE"
-			local buffValue = 1
+			local buffValue = self.overlapDamageBonus
 
 			-- 50% 확률로 공격력 또는 체력
 			if math.random() < 0.5 then
 				buffType = "DAMAGE"
-				buffValue = 1
+				buffValue = self.overlapDamageBonus
 			else
 				buffType = "HP"
-				buffValue = 10
+				buffValue = self.overlapHPBonus
 			end
 
 			table.insert(choices, {
