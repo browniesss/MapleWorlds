@@ -1309,8 +1309,9 @@ script Unit extends Component
 		self.mp = 0
 		self.isUsingSkill = true
 		
-		
-		self.activeSkill.SkillParent:UseSkill(self.Entity, self.curTarget, self.skillArea, self.skillAmount, self.skillProjectileSpeed, self.skillTime, self.skillAttackTiming)
+		if self.activeSkill ~= nil and self.activeSkill.SkillParent ~= nil then
+			self.activeSkill.SkillParent:UseSkill(self.Entity, self.curTarget, self.skillArea, self.skillAmount, self.skillProjectileSpeed, self.skillTime, self.skillAttackTiming)
+		end
 		
 		if self.isNotTargetUnit == true then
 			self:OnRemove()
