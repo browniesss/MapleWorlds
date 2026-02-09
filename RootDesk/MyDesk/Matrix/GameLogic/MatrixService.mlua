@@ -385,6 +385,16 @@ script MatrixService extends Logic
 			synergyUI.MatrixSynergyUIManager:RefreshSynergyUI()
 		end
 		
+		-- 증강 적용 후 돌파 스킬 갱신 (증강으로 돌파 추가 시 대응)
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.UserBreakLimitSkillProtocol ~= nil then
+			user.UserBreakLimitSkillProtocol:MatrixInitCallWithCallback(function(limitBreakRuids)
+				if limitBreakRuids ~= nil and #limitBreakRuids > 0 then
+					_ResourceService:PreloadAsync(limitBreakRuids, function() end)
+				end
+			end)
+		end
+
 		-- 증강 선택 완료 후 다음 라운드/페이즈 진행
 		if _MatrixGameService ~= nil then
 			_MatrixGameService:OnAugmentSelected()

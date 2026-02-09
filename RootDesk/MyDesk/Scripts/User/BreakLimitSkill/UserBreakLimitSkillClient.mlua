@@ -5,9 +5,20 @@ script UserBreakLimitSkillClient extends Component
 
 	property Entity ScrollUI = "86a1d64d-8a2e-4a90-82e8-60d831b0911f"
 
+	-- 매트릭스 모드용 ScrollUI
+	property Entity MatrixScrollUI = "7deddb2b-4526-4abb-b53f-0c95b86e0573"
+
 	property Entity DefaultItem = "a1e940ba-fb0c-46db-9c2a-41fc15859853"
 
 	property table buttonRuidMap = {}
+
+	-- 현재 게임 모드에 맞는 ScrollUI 반환
+	method Entity GetActiveScrollUI()
+		if _GameManager.currentGameMode == _eGameMode.Matrix then
+			return self.MatrixScrollUI
+		end
+		return self.ScrollUI
+	end
 
 	@ExecSpace("ClientOnly")
 	method void SetSkill(table list, table buttonRuidMapParam)
@@ -18,7 +29,9 @@ script UserBreakLimitSkillClient extends Component
 			self.buttonRuidMap = buttonRuidMapParam
 		end
 
-		for i, item in ipairs(self.ScrollUI.Children) do
+		local activeScrollUI = self:GetActiveScrollUI()
+
+		for i, item in ipairs(activeScrollUI.Children) do
 			item.UI_BreakLimitSkillUseItem:Disable()
 			item.Enable = false
 			item.Visible = false
@@ -34,8 +47,8 @@ script UserBreakLimitSkillClient extends Component
 
 			itemIndex = itemIndex + 1
 
-			if itemIndex > #self.ScrollUI.Children then
-				local item = _SpawnService:SpawnByEntity(self.DefaultItem, "item", Vector3.zero, self.ScrollUI, true)
+			if itemIndex > #activeScrollUI.Children then
+				local item = _SpawnService:SpawnByEntity(self.DefaultItem, "item", Vector3.zero, activeScrollUI, true)
 				item.Enable = true
 				item.Visible = true
 				item.UI_BreakLimitSkillUseItem:Init(id, self.Entity.UserBreakLimitSkillProtocol, item.Children[2])
@@ -45,7 +58,7 @@ script UserBreakLimitSkillClient extends Component
 				continue
 			end
 
-			local item = self.ScrollUI.Children[itemIndex]
+			local item = activeScrollUI.Children[itemIndex]
 			item.Enable = true
 			item.Visible = true
 			item.UI_BreakLimitSkillUseItem:Init(id, self.Entity.UserBreakLimitSkillProtocol, item.Children[2])
@@ -69,24 +82,26 @@ script UserBreakLimitSkillClient extends Component
 
 	@ExecSpace("Client")
 	method void ActivateSkill(string targetId)
+		local activeScrollUI = self:GetActiveScrollUI()
 		for i, id in ipairs(self.limitBreakSkillList) do
 			if not (id == targetId) then
 				continue
 			end
-			
-			local item = self.ScrollUI.Children[i]
+
+			local item = activeScrollUI.Children[i]
 			item.UI_BreakLimitSkillUseItem:ActivateButton()
 		end
 	end
 
 	@ExecSpace("Client")
 	method void DeactivateSkill(string targetId)
+		local activeScrollUI = self:GetActiveScrollUI()
 		for i, id in ipairs(self.limitBreakSkillList) do
 			if not (id == targetId) then
 				continue
 			end
-			
-			local item = self.ScrollUI.Children[i]
+
+			local item = activeScrollUI.Children[i]
 			item.UI_BreakLimitSkillUseItem:DeactivateButton()
 		end
 	end

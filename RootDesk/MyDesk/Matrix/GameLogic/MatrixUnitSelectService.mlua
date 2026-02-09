@@ -208,7 +208,15 @@ script MatrixUnitSelectService extends Logic
 		-- 메소 UI 업데이트 (시너지 변경 반영)
 		self:RefreshMesoIncomeUI()
 
-		
+		-- 매트릭스 돌파 스킬 갱신 (유닛 추가 시마다 돌파 스킬 목록 업데이트)
+		if user ~= nil and user.UserBreakLimitSkillProtocol ~= nil then
+			user.UserBreakLimitSkillProtocol:MatrixInitCallWithCallback(function(limitBreakRuids)
+				if limitBreakRuids ~= nil and #limitBreakRuids > 0 then
+					_ResourceService:PreloadAsync(limitBreakRuids, function() end)
+				end
+			end)
+		end
+
 		-- UI 닫기
 		self:CloseUnitSelectionUI()
 		
