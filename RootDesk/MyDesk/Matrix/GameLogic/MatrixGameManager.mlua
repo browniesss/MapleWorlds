@@ -475,9 +475,9 @@ script MatrixGameManager extends Logic
 			_MatrixUnitSelectService:Reset()
 		end
 
-		-- MatrixService UI 정리
+		-- MatrixService 상태 초기화 (selectCount, UI 등 전부 리셋)
 		if _MatrixService ~= nil then
-			_MatrixService:ClearAugmentScrollUI()
+			_MatrixService:ClearSelectState()
 		end
 
 		-- 시너지 카운트 초기화 (서버)
@@ -533,17 +533,15 @@ script MatrixGameManager extends Logic
 
 	@ExecSpace("Client")
 	method void ClearSkillCooltime()
-		local skillSlots = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group/SkillSlots")
-		if skillSlots == nil then
-			return
-		end
-
-		for i = 1, 2 do
-			local slot = skillSlots.Children[i]
-			if slot ~= nil and slot.SkillSlot ~= nil then
-				slot.SkillSlot.remainingTime = 0
-				if slot.Children[2] ~= nil and slot.Children[2].SpriteGUIRendererComponent ~= nil then
-					slot.Children[2].SpriteGUIRendererComponent.FillAmount = 0
+		-- 매트릭스 모드 스킬 슬롯 쿨타임 초기화
+		if self.skillSlots ~= nil then
+			for i = 1, 2 do
+				local slot = self.skillSlots.Children[i]
+				if slot ~= nil and slot.SkillSlot ~= nil then
+					slot.SkillSlot.remainingTime = 0
+					if slot.Children[2] ~= nil and slot.Children[2].SpriteGUIRendererComponent ~= nil then
+						slot.Children[2].SpriteGUIRendererComponent.FillAmount = 0
+					end
 				end
 			end
 		end

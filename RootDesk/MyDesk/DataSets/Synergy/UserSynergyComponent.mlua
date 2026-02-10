@@ -126,6 +126,14 @@ script UserSynergyComponent extends Component
 		local buffedUnit = BuffedUnitModel()
 		buffedUnit:Init(unit)
 
+		-- 유저 유닛 데이터에서 레벨/돌파 정보를 가져와 돌파 시너지 적용
+		local unitJson = _UserMonsterService.userMonsterDict[unitId]
+		if unitJson ~= nil then
+			local userUnitData = UserUnitModel()
+			userUnitData:DECODE(unitJson)
+			buffedUnit = _BuffedUnitService:SetUnitBuff(buffedUnit, userUnitData.level, userUnitData.limitBreak)
+		end
+		
 		for i, col in ipairs(syncCols) do
 			if buffedUnit[col] == nil then
 				continue

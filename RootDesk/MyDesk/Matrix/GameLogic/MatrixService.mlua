@@ -88,6 +88,14 @@ script MatrixService extends Logic
 	method void OnMatrixEvent()
 		-- 무한 모드가 아닌 경우에만 선택 횟수 제한 적용
 		if not self:IsInfiniteMode() and self.selectCount >= self.maxSelectCount then
+			-- ShowMatrixSelectUI()에서 이미 PauseGame 호출됐으므로 ResumeGame 필요
+			if _MatrixGameManager ~= nil then
+				_MatrixGameManager:ResumeGame()
+			end
+			-- 증강 선택 없이 다음 단계 진행
+			if _MatrixGameService ~= nil then
+				_MatrixGameService:OnAugmentSelected()
+			end
 			return
 		end
 		

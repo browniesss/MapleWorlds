@@ -1,0 +1,41 @@
+@Component
+script TowerFlameController extends Component
+
+	property Entity flame0 = nil
+	property Entity flame1 = nil
+	property Entity flame2 = nil
+	property Entity flame3 = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		local damageFlame = self.Entity:GetChildByName("TowerDamageFlame")
+		if damageFlame == nil then
+			return
+		end
+
+		self.flame0 = damageFlame:GetChildByName("TowerFlame_0")
+		self.flame1 = damageFlame:GetChildByName("TowerFlame_1")
+		self.flame2 = damageFlame:GetChildByName("TowerFlame_2")
+		self.flame3 = damageFlame:GetChildByName("TowerFlame_3")
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnUpdate(number delta)
+		local unit = self.Entity.Unit
+		if unit == nil or unit.maxHP <= 0 then
+			return
+		end
+
+		if self.flame3 == nil then
+			return
+		end
+
+		local hpPercent = (unit.hp / unit.maxHP) * 100
+
+		self.flame3.Enable = (hpPercent <= 80)
+		self.flame2.Enable = (hpPercent <= 60)
+		self.flame1.Enable = (hpPercent <= 40)
+		self.flame0.Enable = (hpPercent <= 20)
+	end
+
+end

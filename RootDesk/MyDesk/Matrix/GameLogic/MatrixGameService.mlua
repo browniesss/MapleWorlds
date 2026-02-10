@@ -158,9 +158,14 @@ script MatrixGameService extends Logic
 		self.currentRoundId = 1
 		self.currentWaveIndex = 0
 		self.loopCount = 0
-		self.isRoundCleared = false
+		self.isRoundCleared = true  -- 유닛/증강 선택 중 OnUpdate 간섭 방지 (StartRound에서 false로 전환)
 		self.currentEnemyTowerHP = 0
 		self:ClearInfiniteRoundClearTimer()
+
+		-- MatrixService 상태 초기화 (selectCount 등 이전 게임 잔여 상태 정리)
+		if _MatrixService ~= nil then
+			_MatrixService:ClearSelectState()
+		end
 
 		-- MatrixMonsterSpawner 리셋 (이전 게임의 타이머/상태 정리)
 		if _MatrixMonsterSpawner ~= nil then
@@ -175,6 +180,16 @@ script MatrixGameService extends Logic
 			self.playerTower.Unit.maxHP = playerTowerHP
 			self.playerTower.Unit.hp = playerTowerHP
 			self.playerTower.Unit.curState = "stand"
+		end
+
+		-- 적 타워 HP 임시 초기화 (유닛 선택 중 OnUpdate에서 hp<=0 감지 방지)
+		if self.enemyTower ~= nil and self.enemyTower.Unit ~= nil then
+			local phase = self.phaseData[self.currentPhaseId]
+			local initialTowerHP = (phase ~= nil and phase.towerHP or 2000)
+			self.enemyTower.Unit.originMaxHP = initialTowerHP
+			self.enemyTower.Unit.maxHP = initialTowerHP
+			self.enemyTower.Unit.hp = initialTowerHP
+			self.enemyTower.Unit.curState = "stand"
 		end
 
 		-- 메소 초기화 (meso.csv 기본값으로)
