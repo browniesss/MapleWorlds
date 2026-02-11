@@ -422,6 +422,7 @@ script UserMatrixManager extends Component
 	end
 
 	-- 보너스 픽업 캐릭터 생성 (MatrixCoinConfig의 bonusPickupLevel / bonusPickupLimitBreak 참조)
+	-- 유저가 이미 보유한 유닛의 레벨/돌파가 더 높으면 보유 유닛의 값을 사용
 	method void CreateBonusPickupPool()
 		self.bonusPool = {}
 
@@ -432,23 +433,37 @@ script UserMatrixManager extends Component
 		for _, charId in ipairs(bonusCharIds) do
 			local unitInfo = _UnitService:GetUnitByIDFromClient(charId)
 			if unitInfo ~= nil then
+				-- 유저가 이미 보유한 유닛이면 레벨/돌파 비교하여 높은 값 사용
+				local ownedUnit = self.unitPool[charId]
+				local finalLevel = targetLevel
+				local finalLimitBreak = targetLimitBreak
+
+				if ownedUnit ~= nil then
+					if ownedUnit.level > finalLevel then
+						finalLevel = ownedUnit.level
+					end
+					if ownedUnit.limitBreak > finalLimitBreak then
+						finalLimitBreak = ownedUnit.limitBreak
+					end
+				end
+
 				local buffedUnit = BuffedUnitModel()
 				buffedUnit:Init(unitInfo)
 
-				-- Level buff 적용
-				local levelBuff = _UnitLevelUpRepo:FindBuffInClient(buffedUnit.jobId, buffedUnit.grade, targetLevel)
+				-- Level buff 적용 (보유 유닛 레벨이 더 높으면 보유 유닛 레벨 사용)
+				local levelBuff = _UnitLevelUpRepo:FindBuffInClient(buffedUnit.jobId, buffedUnit.grade, finalLevel)
 				if levelBuff ~= nil and levelBuff.level ~= 0 then
 					buffedUnit:SetLevelBuff(levelBuff)
 				else
-					buffedUnit.level = targetLevel
+					buffedUnit.level = finalLevel
 				end
 
-				-- 돌파 buff 적용
-				local limitBreakBuff = _UnitLimitBreakRepo:FindBuffInClient(buffedUnit.grade, targetLimitBreak, buffedUnit.id)
+				-- 돌파 buff 적용 (보유 유닛 돌파가 더 높으면 보유 유닛 돌파 사용)
+				local limitBreakBuff = _UnitLimitBreakRepo:FindBuffInClient(buffedUnit.grade, finalLimitBreak, buffedUnit.id)
 				if limitBreakBuff ~= nil and limitBreakBuff.limitBreak ~= 0 then
 					buffedUnit:SetLimitBreakBuff(limitBreakBuff)
 				else
-					buffedUnit.limitBreak = targetLimitBreak
+					buffedUnit.limitBreak = finalLimitBreak
 				end
 
 				self.bonusPool[charId] = buffedUnit
