@@ -167,6 +167,12 @@ script MatrixGameService extends Logic
 			_MatrixService:ClearSelectState()
 		end
 
+		-- 돌파 스킬 초기화 (이전 게임의 돌파 스킬이 남아있지 않도록 빈 리스트로 리셋)
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.UserBreakLimitSkillProtocol ~= nil then
+			user.UserBreakLimitSkillProtocol:MatrixInitCall({})
+		end
+
 		-- MatrixMonsterSpawner 리셋 (이전 게임의 타이머/상태 정리)
 		if _MatrixMonsterSpawner ~= nil then
 			_MatrixMonsterSpawner:ResetOnClient()
