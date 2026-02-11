@@ -323,6 +323,10 @@ script MatrixAugmentService extends Logic
 			return
 		end
 
+		if killer.Unit == nil then
+			return
+		end
+
 		local triggerEffects = self:GetTriggerEffects("OnKill")
 
 		for _, effect in ipairs(triggerEffects) do

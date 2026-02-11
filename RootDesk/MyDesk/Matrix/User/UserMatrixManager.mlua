@@ -18,6 +18,11 @@ script UserMatrixManager extends Component
 	-- 증강 효과 목록
 	property table matrixEffects = {}
 
+	-- 매트릭스 설정값 (MatrixCoinConfig에서 로드)
+	property integer minPoolLevel = 15
+	property integer bonusPickupLevel = 30
+	property integer bonusPickupLimitBreak = 6
+
 	-- 매트릭스 플레이 시간 (초 단위, 맵 진입 시 초기화)
 	property number playTime = 0
 
@@ -91,6 +96,7 @@ script UserMatrixManager extends Component
 	method void OnMapEnter(Entity enteredMap)
 		if enteredMap.Name == "MatrixStage" then
 			self.playTime = 0
+			self:LoadMatrixConfig()
 			self:LoadUnitPoolFromUser()
 
 			-- 맵 진입 시 게임 초기화 (맵이 로드된 후 호출되므로 엔티티 참조가 안전함)
@@ -100,7 +106,24 @@ script UserMatrixManager extends Component
 		end
 	end
 
+	-- MatrixCoinConfig에서 설정값 로드
+	method void LoadMatrixConfig()
+		local dataSet = _DataService:GetTable("MatrixCoinConfig")
+		if dataSet == nil then
+			return
+		end
+
+		if dataSet:GetRowCount() < 1 then
+			return
+		end
+
+		self.minPoolLevel = tonumber(dataSet:GetCell(1, "minPoolLevel")) or 15
+		self.bonusPickupLevel = tonumber(dataSet:GetCell(1, "bonusPickupLevel")) or 30
+		self.bonusPickupLimitBreak = tonumber(dataSet:GetCell(1, "bonusPickupLimitBreak")) or 6
+	end
+
 	-- 유저가 보유한 전체 유닛을 unitPool에 로드 (시그너스는 시너지 보너스 유닛이므로 제외)
+	-- minPoolLevel 미만인 유닛은 minPoolLevel로 보정
 	method void LoadUnitPoolFromUser()
 		self.unitPool = {}
 
@@ -113,11 +136,53 @@ script UserMatrixManager extends Component
 		local count = 0
 		for unitId, unitData in pairs(userUnitStore.UserUnitMap) do
 			if unitId ~= cygnusModelId then
-				self.unitPool[unitId] = unitData
+				if unitData.level < self.minPoolLevel then
+					-- 최소 레벨 미만이면 새로 생성하여 보정
+					local buffedUnit = self:CreateBuffedUnitWithMinLevel(unitId, unitData)
+					if buffedUnit ~= nil then
+						self.unitPool[unitId] = buffedUnit
+					else
+						self.unitPool[unitId] = unitData
+					end
+				else
+					self.unitPool[unitId] = unitData
+				end
 				count = count + 1
 			end
 		end
 
+	end
+
+	-- 최소 레벨 보정된 BuffedUnitModel 생성
+	method BuffedUnitModel CreateBuffedUnitWithMinLevel(string unitId, BuffedUnitModel originalUnit)
+		local unitInfo = _UnitService:GetUnitByIDFromClient(unitId)
+		if unitInfo == nil then
+			return nil
+		end
+
+		local buffedUnit = BuffedUnitModel()
+		buffedUnit:Init(unitInfo)
+
+		-- minPoolLevel buff 적용
+		local levelBuff = _UnitLevelUpRepo:FindBuffInClient(buffedUnit.jobId, buffedUnit.grade, self.minPoolLevel)
+		if levelBuff ~= nil and levelBuff.level ~= 0 then
+			buffedUnit:SetLevelBuff(levelBuff)
+		else
+			buffedUnit.level = self.minPoolLevel
+		end
+
+		-- 원래 유닛의 돌파(limitBreak) 유지
+		local originalLimitBreak = originalUnit.limitBreak
+		if originalLimitBreak > 1 then
+			local limitBreakBuff = _UnitLimitBreakRepo:FindBuffInClient(buffedUnit.grade, originalLimitBreak, buffedUnit.id)
+			if limitBreakBuff ~= nil and limitBreakBuff.limitBreak ~= 0 then
+				buffedUnit:SetLimitBreakBuff(limitBreakBuff)
+			else
+				buffedUnit.limitBreak = originalLimitBreak
+			end
+		end
+
+		return buffedUnit
 	end
 
 	method void OnMapLeave(Entity leftMap)
@@ -356,12 +421,13 @@ script UserMatrixManager extends Component
 		return ids
 	end
 
-	-- 보너스 픽업 캐릭터 생성 (Lv30 / 5돌파 = limitBreak 6)
+	-- 보너스 픽업 캐릭터 생성 (MatrixCoinConfig의 bonusPickupLevel / bonusPickupLimitBreak 참조)
 	method void CreateBonusPickupPool()
 		self.bonusPool = {}
 
 		local bonusCharIds = self:GetBonusPickupCharIds()
-		local maxLimitBreak = _UnitLimitBreakRepo.UserMaxLevel
+		local targetLevel = self.bonusPickupLevel
+		local targetLimitBreak = self.bonusPickupLimitBreak
 
 		for _, charId in ipairs(bonusCharIds) do
 			local unitInfo = _UnitService:GetUnitByIDFromClient(charId)
@@ -369,20 +435,20 @@ script UserMatrixManager extends Component
 				local buffedUnit = BuffedUnitModel()
 				buffedUnit:Init(unitInfo)
 
-				-- Level 30 buff 적용
-				local levelBuff = _UnitLevelUpRepo:FindBuffInClient(buffedUnit.jobId, buffedUnit.grade, 30)
+				-- Level buff 적용
+				local levelBuff = _UnitLevelUpRepo:FindBuffInClient(buffedUnit.jobId, buffedUnit.grade, targetLevel)
 				if levelBuff ~= nil and levelBuff.level ~= 0 then
 					buffedUnit:SetLevelBuff(levelBuff)
 				else
-					buffedUnit.level = 30
+					buffedUnit.level = targetLevel
 				end
 
-				-- 5돌파 buff 적용 (5돌파 = limitBreak 6 = UserMaxLevel)
-				local limitBreakBuff = _UnitLimitBreakRepo:FindBuffInClient(buffedUnit.grade, maxLimitBreak, buffedUnit.id)
+				-- 돌파 buff 적용
+				local limitBreakBuff = _UnitLimitBreakRepo:FindBuffInClient(buffedUnit.grade, targetLimitBreak, buffedUnit.id)
 				if limitBreakBuff ~= nil and limitBreakBuff.limitBreak ~= 0 then
 					buffedUnit:SetLimitBreakBuff(limitBreakBuff)
 				else
-					buffedUnit.limitBreak = maxLimitBreak
+					buffedUnit.limitBreak = targetLimitBreak
 				end
 
 				self.bonusPool[charId] = buffedUnit

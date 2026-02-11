@@ -1,44 +1,40 @@
 @Logic
 script MatrixSpawnManager extends Logic
 
-	-- ============================================
-	-- 매트릭스 전용 유닛 소환
-	-- ============================================
-
 	@ExecSpace("Server")
 	method void Spawn(string modelID, integer price, Vector3 pos, integer level, integer limitBreak)
 		_ProtocolService:CommonCall(senderUserId)
-
+		
 		if modelID == "model://6194a4e3-0eb4-417a-92b5-891af548b672" then
 			self:SpawnCygnus(pos, senderUserId)
 			return
 		end
-
+		
 		local unitModel = _BuffedUnitService:GetBuffedUnitModel(senderUserId, modelID)
 		local user = _UserService:GetUserEntityByUserId(senderUserId)
-
+		
 		if not self:IsCanSpawn(price) then
 			return
 		end
-
+		
 		local spawnParent = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList")
 		local spawnPos = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList/MySpawnPoint")
-
+		
 		if pos == Vector3.zero then
 			pos = spawnPos.TransformComponent.Position
 		end
-
+		
 		local spawnEntity = _SpawnService:SpawnByModelId(modelID, "Pig", pos, spawnParent)
 		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
-
+		
 		-- 시너지 컴포넌트 적용
 		local jobID = tostring(unitModel.jobId)
 		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(unitModel.jobId)
 		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(jobID, count)
-
+		
 		if synergy:length() > 0 then
 			local item = synergy:Get(1)
-
+		
 			if jobID == "1" then
 				spawnEntity:RemoveComponent("IncreaseHpByTime")
 				spawnEntity:AddComponent("IncreaseHpByTime")
@@ -46,7 +42,7 @@ script MatrixSpawnManager extends Logic
 				spawnEntity.IncreaseHpByTime.type = item.type
 				spawnEntity.IncreaseHpByTime.value = item.value
 			end
-
+		
 			if jobID == "2" then
 				spawnEntity:RemoveComponent("CriticalAttack")
 				spawnEntity:AddComponent("CriticalAttack")
@@ -54,7 +50,7 @@ script MatrixSpawnManager extends Logic
 				spawnEntity.CriticalAttack.type = item.type
 				spawnEntity.CriticalAttack.value = item.value
 			end
-
+		
 			if jobID == "3" then
 				spawnEntity:RemoveComponent("IncreaseMpByTime")
 				spawnEntity:AddComponent("IncreaseMpByTime")
@@ -62,7 +58,7 @@ script MatrixSpawnManager extends Logic
 				spawnEntity.IncreaseMpByTime.type = item.type
 				spawnEntity.IncreaseMpByTime.value = item.value
 			end
-
+		
 			if jobID == "4" then
 				spawnEntity:RemoveComponent("AddSummonPointAfterKill")
 				spawnEntity:AddComponent("AddSummonPointAfterKill")
@@ -72,33 +68,29 @@ script MatrixSpawnManager extends Logic
 				spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet()
 			end
 		end
-
+		
 		-- 클라이언트에서 전달받은 level/limitBreak로 버프 적용
 		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, level, limitBreak)
 		user.UserBreakLimitSkillClient:ActivateSkill(unitModel.LimitBreakActiveSkill)
 		spawnEntity.Unit:Spawn(unitModel, skillData)
-
+		
 		-- 매트릭스 증강 버프 적용
 		if _MatrixAugmentService ~= nil then
 			_MatrixAugmentService:ApplySpawnBuffs(spawnEntity, user)
 		end
-
+		
 		-- 유닛 중복 강화 적용
 		if _MatrixUnitSelectService ~= nil then
 			_MatrixUnitSelectService:ApplyStoredUpgrades(spawnEntity)
 		end
-
+		
 		self:GetUserWallet().MesoWallet:UseMeso(price)
 	end
-
-	-- ============================================
-	-- 매트릭스 전용 스킬 소환
-	-- ============================================
 
 	@ExecSpace("Server")
 	method void SkillSpawn(string target, string summoner, Vector3 pos)
 		local unitData = _UnitService:GetUnitByIDFromServer(target)
-
+		
 		-- 소환자의 레벨을 MyMonsterList에서 찾기
 		local summonerLevel = 1
 		local myMonsterList = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList")
@@ -110,31 +102,31 @@ script MatrixSpawnManager extends Logic
 				end
 			end
 		end
-
+		
 		local unitModel = BuffedUnitModel()
 		unitModel:Init(unitData)
-
+		
 		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, summonerLevel, 1)
-
+		
 		local spawnParent = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList")
 		local spawnPos = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList/MySpawnPoint")
-
+		
 		if pos == Vector3.zero then
 			pos = spawnPos.TransformComponent.Position
 		end
-
+		
 		local spawnEntity = _SpawnService:SpawnByModelId(unitModel.id, "Pig", pos, spawnParent)
 		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
-
+		
 		if senderUserId ~= nil then
 			local user = _UserService:GetUserEntityByUserId(senderUserId)
 			local jobID = tostring(unitModel.jobId)
 			local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(unitModel.jobId)
 			local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(jobID, count)
-
+		
 			if synergy:length() > 0 then
 				local item = synergy:Get(1)
-
+		
 				if jobID == "1" then
 					spawnEntity:RemoveComponent("IncreaseHpByTime")
 					spawnEntity:AddComponent("IncreaseHpByTime")
@@ -142,7 +134,7 @@ script MatrixSpawnManager extends Logic
 					spawnEntity.IncreaseHpByTime.type = item.type
 					spawnEntity.IncreaseHpByTime.value = item.value
 				end
-
+		
 				if jobID == "2" then
 					spawnEntity:RemoveComponent("CriticalAttack")
 					spawnEntity:AddComponent("CriticalAttack")
@@ -150,7 +142,7 @@ script MatrixSpawnManager extends Logic
 					spawnEntity.CriticalAttack.type = item.type
 					spawnEntity.CriticalAttack.value = item.value
 				end
-
+		
 				if jobID == "3" then
 					spawnEntity:RemoveComponent("IncreaseMpByTime")
 					spawnEntity:AddComponent("IncreaseMpByTime")
@@ -158,7 +150,7 @@ script MatrixSpawnManager extends Logic
 					spawnEntity.IncreaseMpByTime.type = item.type
 					spawnEntity.IncreaseMpByTime.value = item.value
 				end
-
+		
 				if jobID == "4" then
 					spawnEntity:RemoveComponent("AddSummonPointAfterKill")
 					spawnEntity:AddComponent("AddSummonPointAfterKill")
@@ -168,65 +160,61 @@ script MatrixSpawnManager extends Logic
 					spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet()
 				end
 			end
-
+		
 			-- 매트릭스 증강 버프 적용
 			if _MatrixAugmentService ~= nil then
 				_MatrixAugmentService:ApplySpawnBuffs(spawnEntity, user)
 			end
 		end
 		spawnEntity.Unit:Spawn(unitModel, skillData)
-
+		
 		-- 유닛 중복 강화 적용
 		if _MatrixUnitSelectService ~= nil then
 			_MatrixUnitSelectService:ApplyStoredUpgrades(spawnEntity)
 		end
 	end
 
-	-- ============================================
-	-- 매트릭스 전용 시그너스 소환
-	-- ============================================
-
 	@ExecSpace("ServerOnly")
 	method void SpawnCygnus(Vector3 pos, string userID)
 		local modelID = "model://6194a4e3-0eb4-417a-92b5-891af548b672"
 		local unitModel = _BuffedUnitService:GetBuffedUnitModel(userID, modelID)
 		local user = _UserService:GetUserEntityByUserId(userID)
-
+		
 		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(102)
 		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE("102", count)
-
+		
 		if synergy:length() <= 0 then
 			return
 		end
-
+		
 		local item = synergy:Get(1)
-
+		
 		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, math.floor(item.value), 1)
 		local price = unitModel.summonCost
-
+		
 		if not self:IsCanSpawn(price) then
 			return
 		end
-
+		
 		self:GetUserWallet().MesoWallet:UseMeso(price)
-
+		
 		local spawnParent = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList")
 		local spawnPos = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList/MySpawnPoint")
-
+		
 		if pos == Vector3.zero then
 			pos = spawnPos.TransformComponent.Position
 		end
-
+		
 		local spawnEntity = _SpawnService:SpawnByModelId(modelID, unitModel.name, pos, spawnParent)
-
+		
 		for i = 1, 4 do
 			local jobID = tostring(i)
 			local jobCount = user.UserSynergyComponent:GET_SYNERGY_COUNT(i)
 			local jobSynergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(jobID, jobCount)
-
+		
 			if jobSynergy:length() > 0 then
 				local jobItem = jobSynergy:Get(1)
-
+		
 				if jobID == "1" then
 					spawnEntity:RemoveComponent("IncreaseHpByTime")
 					spawnEntity:AddComponent("IncreaseHpByTime")
@@ -234,7 +222,7 @@ script MatrixSpawnManager extends Logic
 					spawnEntity.IncreaseHpByTime.type = jobItem.type
 					spawnEntity.IncreaseHpByTime.value = jobItem.value
 				end
-
+		
 				if jobID == "2" then
 					spawnEntity:RemoveComponent("CriticalAttack")
 					spawnEntity:AddComponent("CriticalAttack")
@@ -242,7 +230,7 @@ script MatrixSpawnManager extends Logic
 					spawnEntity.CriticalAttack.type = jobItem.type
 					spawnEntity.CriticalAttack.value = jobItem.value
 				end
-
+		
 				if jobID == "3" then
 					spawnEntity:RemoveComponent("IncreaseMpByTime")
 					spawnEntity:AddComponent("IncreaseMpByTime")
@@ -250,7 +238,7 @@ script MatrixSpawnManager extends Logic
 					spawnEntity.IncreaseMpByTime.type = jobItem.type
 					spawnEntity.IncreaseMpByTime.value = jobItem.value
 				end
-
+		
 				if jobID == "4" then
 					spawnEntity:RemoveComponent("AddSummonPointAfterKill")
 					spawnEntity:AddComponent("AddSummonPointAfterKill")
@@ -261,79 +249,71 @@ script MatrixSpawnManager extends Logic
 				end
 			end
 		end
-
+		
 		-- 매트릭스 증강 버프 적용
 		if _MatrixAugmentService ~= nil then
 			_MatrixAugmentService:ApplySpawnBuffs(spawnEntity, user)
 		end
-
+		
 		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
 		spawnEntity.Unit:Spawn(unitModel, skillData)
 	end
 
-	-- ============================================
-	-- 매트릭스 전용 시그너스 기사단 스킬 소환
-	-- ============================================
-
 	@ExecSpace("Server")
 	method void CygnusSkillSpawn(string modelID, Vector3 pos)
 		_ProtocolService:CommonCall(senderUserId)
-
+		
 		local user = _UserService:GetUserEntityByUserId(senderUserId)
-
+		
 		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(102)
 		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE("102", count)
-
+		
 		if synergy:length() <= 0 then
 			return
 		end
-
+		
 		local item = synergy:Get(1)
-
+		
 		-- 매트릭스: Unit DataSet에서 기사단 데이터 직접 참조
 		local unitData = _UnitService:GetUnitByIDFromServer(modelID)
 		local unitModel = BuffedUnitModel()
 		unitModel:Init(unitData)
-
+		
 		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, math.floor(item.value), 1)
-
+		
 		local spawnParent = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList")
 		local spawnPos = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList/MySpawnPoint")
-
+		
 		if pos == Vector3.zero then
 			pos = spawnPos.TransformComponent.Position
 		end
-
+		
 		local spawnEntity = _SpawnService:SpawnByModelId(modelID, unitModel.name, pos, spawnParent)
 		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
 		local effectId = _EffectService:PlayEffectAttached("e0054745636944e091b5f3830b8be73a", spawnEntity, Vector3.zero, 0, Vector3.one, true)
-
+		
 		unitModel.spawnSkill = ""
 		unitModel.startMp = unitModel.maxMp + 1
 		spawnEntity.Unit:Spawn(unitModel, skillData)
 		spawnEntity.Unit.isNotTargetUnit = true
 		spawnEntity.Unit.effectId = effectId
-
+		
 		-- 매트릭스 증강 버프 적용
 		if _MatrixAugmentService ~= nil then
 			_MatrixAugmentService:ApplySpawnBuffs(spawnEntity, user)
 		end
-
+		
 		_TimerService:SetTimerOnce(
 			function()
 				if spawnEntity.Unit.curState == "useSkill" then
 					return
 				end
-
+		
 				spawnEntity.Unit:OnRemove()
 			end,
 			5
 		)
 	end
-
-	-- ============================================
-	-- 유틸리티
-	-- ============================================
 
 	method boolean IsCanSpawn(integer price)
 		return self:GetUserWallet().MesoWallet:GetMeso() >= price

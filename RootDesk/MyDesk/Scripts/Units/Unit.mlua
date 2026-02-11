@@ -643,26 +643,32 @@ script Unit extends Component
 			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
 		end
 		
+		local capturedTarget = self.curTarget
+
 		if self.isUsableCharacter then
 			local animationPlayTime = _DataManager:GetMotionDuration(self.animationName)
 			local animationPlaySpeed = animationPlayTime / (self.attackSpeed - 0.1)
-				
+
 			self.Entity.AvatarAnimationComponent:PlayOnce(self.animationName, animationPlaySpeed, function()
 				if self.curState == "die" then
 					return
 				end
-				
+
 				self:SetAnimationState("stand")
 				self.Entity.AvatarRendererComponent.PlayRate = 1
-		
+
 				self:IncreaseMp()
 			end)
-			
+
 			local attackFunction = function()
 				if self.curState == "die" then
 					return
 				end
-				
+
+				if capturedTarget == nil or not isvalid(capturedTarget) then
+					return
+				end
+
 				_CustomSoundService:PlaySoundAtPos("4346b64f2d0a4cf683980bb0d318b14a", self.Entity.TransformComponent.WorldPosition, self.Entity)
 				local projectile = _SpawnService:SpawnByModelId("model://cd38ad89-1c52-45f2-8d86-d6be27475ba9",
 					"Projectile",
@@ -681,7 +687,7 @@ script Unit extends Component
 					finalDamage = _MatrixAugmentService:CalcAttackDamage(self.Entity, finalDamage)
 				end
 
-				projectile.Projectile:SetShoot(self.projectileSpriteRUID, 1, self.projectileSpeed, self.curTarget, true, finalDamage)
+				projectile.Projectile:SetShoot(self.projectileSpriteRUID, 1, self.projectileSpeed, capturedTarget, true, finalDamage)
 			end
 
 			local timerTiming = self.attackTiming / animationPlaySpeed
@@ -711,10 +717,7 @@ script Unit extends Component
 			_CustomSoundService:PlaySoundAtPos("4346b64f2d0a4cf683980bb0d318b14a", self.Entity.TransformComponent.WorldPosition, self.Entity)
 			
 			local attackFunction = function()
-				-- 타이머 실행 시점에 curTarget이 유효한지 체크
-				if self.curTarget == nil or not isvalid(self.curTarget) then
-					self.curTarget = nil
-					self:SetState("stand")
+				if capturedTarget == nil or not isvalid(capturedTarget) then
 					return
 				end
 
@@ -731,7 +734,7 @@ script Unit extends Component
 					finalDamage = _MatrixAugmentService:CalcAttackDamage(self.Entity, finalDamage)
 				end
 
-				projectile.Projectile:SetShoot(self.projectileSpriteRUID, 1, self.projectileSpeed, self.curTarget, true, finalDamage)
+				projectile.Projectile:SetShoot(self.projectileSpriteRUID, 1, self.projectileSpeed, capturedTarget, true, finalDamage)
 
 				-- 마나 충전
 				self:IncreaseMp()
