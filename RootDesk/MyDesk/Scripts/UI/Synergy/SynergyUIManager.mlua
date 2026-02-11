@@ -29,16 +29,25 @@ script SynergyUIManager extends Component
 		for k, v in pairs(self.SynergyItemTable) do
 			_EntityService:Destroy(self.SynergyItemTable[k])
 		end
-		
+		self.SynergyItemTable = {}
+
 		-- 시너지 아이템 추가
-		local activeSynergy = _UserService.LocalPlayer.UserSynergyComponent.countMap
-		
+		local user = _UserService.LocalPlayer
+		if user == nil then
+			return
+		end
+		if user.UserSynergyComponent == nil then
+			return
+		end
+
+		local activeSynergy = user.UserSynergyComponent.countMap
+
 		local keys = {}
 		for k, v in pairs(activeSynergy) do
 			table.insert(keys, {id = k, count = v})
 		end
-		
-		table.sort(keys, function(a, b) 
+
+		table.sort(keys, function(a, b)
 			if _SynergyRepo:IsSynergyActive(a.id, a.count) == false and _SynergyRepo:IsSynergyActive(b.id, b.count) then
 				return false
 			elseif _SynergyRepo:IsSynergyActive(a.id, a.count) and _SynergyRepo:IsSynergyActive(b.id, b.count) == false then
@@ -54,26 +63,22 @@ script SynergyUIManager extends Component
 		
 		for i, k in ipairs(keys) do
 			if k.count ==  0 then
-				_EntityService:Destroy(self.SynergyItemTable[k.id])
-				continue		
+				continue
 			end
-			
-			local synergyItem = _SpawnService:SpawnByModelId("model://b001dcdc-ff48-4c91-a232-be30a46f74ee", "SynergyItem", Vector3.zero, self.SynergyScrollView)
-			
-			synergyItem.SynergySettingItem:SetSynergyItem(self:GetSynergyDataItem(k.id), k.count)
-		
-			self.SynergyItemTable[k.id] = synergyItem
-			
-		end
-	end
 
-	@EventSender("Self")
-	handler HandleComponentEnabledInHierarchyChangedEvent(ComponentEnabledInHierarchyChangedEvent event)
-		if event.EnabledInHierarchy == nil then
-			return
+			local synergyData = self:GetSynergyDataItem(k.id)
+
+			local synergyItem = _SpawnService:SpawnByModelId("model://b001dcdc-ff48-4c91-a232-be30a46f74ee", "SynergyItem", Vector3.zero, self.SynergyScrollView)
+
+			if synergyItem == nil then
+				continue
+			end
+
+			synergyItem.SynergySettingItem:SetSynergyItem(synergyData, k.count)
+
+			self.SynergyItemTable[k.id] = synergyItem
+
 		end
-		
-		--self:SetSynergyItem()
 	end
 
 end

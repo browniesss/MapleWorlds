@@ -124,7 +124,7 @@ script UserMatrixManager extends Component
 		if leftMap.Name == "MatrixStage" then
 			self:InitMatrixUserData()
 
-			-- 기존 덱 기반으로 시너지 복원 (서버에서만 실행)
+			-- 서버에서 직접 시너지 복원 (RPC가 아닌 직접 호출이므로 타이밍 이슈 없음)
 			if _Server ~= nil and self.Entity.UserSynergyComponent ~= nil then
 				self.Entity.UserSynergyComponent:RestoreSynergyFromDeck()
 			end

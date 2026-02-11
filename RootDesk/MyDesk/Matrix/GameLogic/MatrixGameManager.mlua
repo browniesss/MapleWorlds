@@ -485,10 +485,10 @@ script MatrixGameManager extends Logic
 			_MatrixService:ClearSelectState()
 		end
 
-		-- 시너지 카운트 초기화 (서버)
+		-- 시너지를 일반 모드 덱으로 복원 (서버)
 		local user = _UserService.LocalPlayer
 		if user ~= nil and user.UserSynergyComponent ~= nil then
-			user.UserSynergyComponent:ResetCountMapFromClient()
+			user.UserSynergyComponent:RestoreSynergyFromDeck()
 		end
 
 		-- 메소 초기화 (서버)
@@ -634,6 +634,14 @@ script MatrixGameManager extends Logic
 		if lobbyInfoUI ~= nil then
 			lobbyInfoUI.Enable = true
 		end
+
+		-- SynergyUI 갱신 (서버 countMap 동기화 후 UI 반영을 위해 지연 호출)
+		_TimerService:SetTimerOnce(function()
+			local synergyEntity = _EntityService:GetEntityByPath("/ui/SynergyUI")
+			if synergyEntity ~= nil and synergyEntity.SynergyUIManager ~= nil then
+				synergyEntity.SynergyUIManager:SetSynergyItem()
+			end
+		end, 1.0)
 
 		-- 주간 매트릭스 코인 UI 갱신
 		if _MatrixCoinService ~= nil then
