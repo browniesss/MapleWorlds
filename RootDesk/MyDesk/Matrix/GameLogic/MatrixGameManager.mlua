@@ -428,6 +428,11 @@ script MatrixGameManager extends Logic
 		self.isPlaying = false
 		self.isPaused = false
 
+		-- 배속 저장 후 초기화
+		if _TimeScaleManager ~= nil then
+			_TimeScaleManager:SaveAndReset()
+		end
+
 		-- 서버에도 isPlaying 상태 동기화
 		self:SetPlayingStateOnServer(false)
 

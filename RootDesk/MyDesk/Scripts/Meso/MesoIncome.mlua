@@ -77,14 +77,9 @@ script MesoIncome extends Component
 				return
 			end
 
-			-- 타임 스케일에 따른 쿨타임 조정 (2배속 시 0.5초마다 지급)
-			local adjustedCooltime = self.incomeCooltime
-			if _TimeScaleManager ~= nil and _TimeScaleManager.timeScale > 0 then
-				adjustedCooltime = self.incomeCooltime / _TimeScaleManager.timeScale
-			end
-
+			-- matrixDelta가 이미 타임스케일 반영됨 (쿨타임 나누기 불필요)
 			self.currentTs = self.currentTs + matrixDelta
-			if self.currentTs >= adjustedCooltime then
+			if self.currentTs >= self.incomeCooltime then
 				self.currentTs = 0
 				self:AddMeso()
 			end
