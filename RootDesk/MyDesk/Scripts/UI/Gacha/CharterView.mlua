@@ -137,6 +137,22 @@ script CharterView extends Component
 		end
 	end
 
+	-- 보너스 픽업 캐릭터 초기화 (BONUS PICK UP 표시)
+	method void InitBonusPickup(table unitData)
+		-- 기존 유닛 정보 표시
+		self:InitGacha(unitData)
+
+		-- UnitUpgradeBackground를 재활용하여 "BONUS PICK UP" 표시
+		if self.UnitUpgradeBackground ~= nil then
+			self.UnitUpgradeBackground.Enable = true
+
+			local upgradeText = self.UnitUpgradeBackground:GetChildByName("UnitUpgradeText")
+			if upgradeText ~= nil and upgradeText.TextComponent ~= nil then
+				upgradeText.TextComponent.Text = "<color=#FFD700>BONUS PICK UP</color>"
+			end
+		end
+	end
+
 	-- 강화 UI 숨기기
 	method void HideUpgradeUI()
 		if self.UnitUpgradeBackground ~= nil then

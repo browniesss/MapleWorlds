@@ -12,6 +12,9 @@ script UserMatrixManager extends Component
 	-- 서브 유닛 리스트 (시너지 보너스로 추가되는 유닛: 시그너스 등)
 	property table subUnitList = {}
 
+	-- 보너스 픽업 유닛 풀 (매트릭스 첫 유닛 선택에서만 사용)
+	property table bonusPool = {}
+
 	-- 증강 효과 목록
 	property table matrixEffects = {}
 
@@ -133,6 +136,7 @@ script UserMatrixManager extends Component
 		self.unitList = {}
 		self.unitListCount = 0
 		self.subUnitList = {}
+		self.bonusPool = {}
 		self.matrixEffects = {}
 		self.playTime = 0
 		self:ResetScoreData()
@@ -326,6 +330,59 @@ script UserMatrixManager extends Component
 	-- subUnitList 조회
 	method table GetSubUnitList()
 		return self.subUnitList
+	end
+
+	-- ============================================
+	-- 보너스 픽업 캐릭터 (매트릭스 첫 선택용)
+	-- ============================================
+
+	-- 현재 가챠 픽업 캐릭터 ID 목록 반환
+	method table GetBonusPickupCharIds()
+		local ids = {}
+
+		local pickupKey1 = _GachaManager.PickUpSummonKey
+		local pickupKey2 = _GachaManager.PickUp_2_SummonKey
+
+		local setting1 = _SummonService:GET_SETTING(pickupKey1)
+		if setting1 ~= nil and setting1.pickup_char_id ~= nil and setting1.pickup_char_id ~= "-" then
+			table.insert(ids, setting1.pickup_char_id)
+		end
+
+		local setting2 = _SummonService:GET_SETTING(pickupKey2)
+		if setting2 ~= nil and setting2.pickup_char_id ~= nil and setting2.pickup_char_id ~= "-" then
+			table.insert(ids, setting2.pickup_char_id)
+		end
+
+		return ids
+	end
+
+	-- 보너스 픽업 캐릭터 생성 (Lv30 / LimitBreak 5)
+	method void CreateBonusPickupPool()
+		self.bonusPool = {}
+
+		local bonusCharIds = self:GetBonusPickupCharIds()
+
+		for _, charId in ipairs(bonusCharIds) do
+			local unitInfo = _UnitService:GetUnitByIDFromClient(charId)
+			if unitInfo ~= nil then
+				local buffedUnit = BuffedUnitModel()
+				buffedUnit:Init(unitInfo)
+
+				-- Level 30 buff 적용
+				local levelBuff = _UnitLevelUpRepo:FindBuffInClient(buffedUnit.jobId, buffedUnit.grade, 30)
+				if levelBuff ~= nil and levelBuff.level ~= 0 then
+					buffedUnit:SetLevelBuff(levelBuff)
+				end
+
+				-- LimitBreak 5 buff 적용
+				local limitBreakBuff = _UnitLimitBreakRepo:FindBuffInClient(buffedUnit.grade, 5, buffedUnit.id)
+				if limitBreakBuff ~= nil and limitBreakBuff.limitBreak ~= 0 then
+					buffedUnit:SetLimitBreakBuff(limitBreakBuff)
+				end
+
+				self.bonusPool[charId] = buffedUnit
+			end
+		end
 	end
 
 end

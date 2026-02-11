@@ -28,6 +28,11 @@ script MatrixUnitSelectService extends Logic
 	-- 초기 덱 기반 선택 모드 (유저 덱 8개에서 선택)
 	property boolean isInitialDeckSelection = false
 
+	-- 보너스 픽업 모드 (초기 덱 선택 시에만 활성화)
+	property boolean isBonusPickupMode = false
+	-- currentChoiceIds에서 보너스 캐릭터 인덱스 추적 (true = bonus)
+	property table bonusChoiceFlags = {}
+
 	-- 중복 선택 강화 보너스 값 (MatrixCoinConfig에서 로드)
 	property number overlapDamageBonus = 5
 	property number overlapHPBonus = 50
@@ -78,6 +83,7 @@ script MatrixUnitSelectService extends Logic
 
 		self.isSelectingUnit = true
 		self.isUpgradeMode = false
+		self.bonusChoiceFlags = {}
 
 		-- 초기 덱 선택 모드이면 유저 덱에서, 아니면 전체 풀에서 랜덤 생성
 		local choices
@@ -131,13 +137,13 @@ script MatrixUnitSelectService extends Logic
 			return
 		end
 
-
 		local user = _UserService.LocalPlayer
 		if user == nil or user.UserMatrixManager == nil then
 			return
 		end
 
 		local unitPool = user.UserMatrixManager.unitPool
+		local bonusPool = user.UserMatrixManager.bonusPool
 		local children = self.charterViewList.Children
 		local index = 1
 
@@ -148,15 +154,26 @@ script MatrixUnitSelectService extends Logic
 				else
 					child.CharterView.Entity.Enable = true
 					local unitId = choiceIds[index]
-					-- unitPool에서 BuffedUnitModel 가져오기
-					local unitData = unitPool[unitId]
 
-					child.CharterView:InitGacha(unitData)
+					-- 보너스 픽업 캐릭터 여부 확인
+					local isBonus = self.bonusChoiceFlags[index] or false
+
+					local unitData = nil
+					if isBonus then
+						unitData = bonusPool[unitId]
+					else
+						unitData = unitPool[unitId]
+					end
+
+					if isBonus and unitData ~= nil then
+						child.CharterView:InitBonusPickup(unitData)
+					else
+						child.CharterView:InitGacha(unitData)
+					end
 				end
 				index = index + 1
 			end
 		end
-
 	end
 
 	method table GenerateUnitChoices()
@@ -200,7 +217,7 @@ script MatrixUnitSelectService extends Logic
 		return choices
 	end
 
-	-- 유저 덱(8개)에서 아직 선택하지 않은 유닛 중 랜덤 4개 반환
+	-- 유저 덱(8개)에서 아직 선택하지 않은 유닛 중 랜덤 선택 + 보너스 픽업 캐릭터
 	method table GenerateDeckUnitChoices()
 		local user = _UserService.LocalPlayer
 		if user == nil then
@@ -219,11 +236,12 @@ script MatrixUnitSelectService extends Logic
 
 		local unitList = matrixManager.unitList
 
-		-- 덱에서 아직 선택하지 않은 유닛만 추출
+		-- 덱에서 아직 선택하지 않은 유닛만 추출 (보너스 픽업 캐릭터 제외)
+		local bonusPool = matrixManager.bonusPool
 		local available = {}
 		for i = 1, 8 do
 			local unitId = userDeck.userDeck[i]
-			if unitId ~= nil and unitList[unitId] == nil then
+			if unitId ~= nil and unitList[unitId] == nil and bonusPool[unitId] == nil then
 				table.insert(available, unitId)
 			end
 		end
@@ -234,11 +252,33 @@ script MatrixUnitSelectService extends Logic
 			available[i], available[j] = available[j], available[i]
 		end
 
-		-- 최대 4개 반환
-		local choices = {}
-		for i = 1, math.min(4, #available) do
-			table.insert(choices, available[i])
+		-- 보너스 캐릭터 수집
+		local bonusIds = {}
+		for bonusId, _ in pairs(matrixManager.bonusPool) do
+			table.insert(bonusIds, bonusId)
 		end
+
+		-- 보너스 캐릭터 수에 따라 덱 유닛 수 결정 (총 4개 유지)
+		local bonusCount = math.min(#bonusIds, 2)
+		local deckCount = math.min(4 - bonusCount, #available)
+
+		local choices = {}
+		self.bonusChoiceFlags = {}
+
+		-- 덱 유닛 추가
+		for i = 1, deckCount do
+			table.insert(choices, available[i])
+			self.bonusChoiceFlags[#choices] = false
+		end
+
+		-- 보너스 캐릭터 추가
+		for i = 1, bonusCount do
+			table.insert(choices, bonusIds[i])
+			self.bonusChoiceFlags[#choices] = true
+		end
+
+		-- 보너스 캐릭터가 있으면 모드 활성화
+		self.isBonusPickupMode = (bonusCount > 0)
 
 		return choices
 	end
@@ -256,11 +296,31 @@ script MatrixUnitSelectService extends Logic
 
 		self.isSelectingUnit = false
 
-		-- UserMatrixManager.unitList에 추가 (unitPool에서 BuffedUnitModel 가져옴)
 		local user = _UserService.LocalPlayer
 		if user ~= nil and user.UserMatrixManager ~= nil then
-			local unitData = user.UserMatrixManager.unitPool[unitId]
-			user.UserMatrixManager:AddUnitToList(unitId, unitData)
+			local matrixManager = user.UserMatrixManager
+			local isBonus = self.bonusChoiceFlags[index] or false
+
+			local unitData = nil
+			if isBonus then
+				-- 보너스 풀에서 가져와서 unitPool에 추가
+				unitData = matrixManager.bonusPool[unitId]
+				if unitData ~= nil then
+					matrixManager:AddUnitToPool(unitId, unitData)
+				end
+			else
+				unitData = matrixManager.unitPool[unitId]
+			end
+
+			matrixManager:AddUnitToList(unitId, unitData)
+		end
+
+		-- 보너스 모드 해제 및 bonusPool 정리 (선택되지 않은 보너스 캐릭터 제거)
+		if self.isBonusPickupMode then
+			self.isBonusPickupMode = false
+			if user ~= nil and user.UserMatrixManager ~= nil then
+				user.UserMatrixManager.bonusPool = {}
+			end
 		end
 
 		-- MatrixExtendUnitShop에 유닛 추가
@@ -290,10 +350,10 @@ script MatrixUnitSelectService extends Logic
 
 		-- UI 닫기
 		self:CloseUnitSelectionUI()
-		
+
 		-- 남은 선택 처리
 		self.remainingSelections = self.remainingSelections - 1
-		
+
 		if self.remainingSelections > 0 then
 			-- 다음 선택 (0.5초 딜레이)
 			_TimerService:SetTimerOnce(function()
@@ -343,6 +403,8 @@ script MatrixUnitSelectService extends Logic
 		self.currentUpgradeChoices = {}
 		self.onSelectionCompleteCallback = nil
 		self.unitUpgrades = {}
+		self.isBonusPickupMode = false
+		self.bonusChoiceFlags = {}
 	end
 
 	-- ============================================

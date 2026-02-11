@@ -197,6 +197,12 @@ script MatrixGameService extends Logic
 
 		-- unitPool은 UserMatrixManager.OnMapEnter에서 이미 로드됨
 
+		-- 보너스 픽업 유닛 풀 생성 (Lv30 / 5돌파)
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.UserMatrixManager ~= nil then
+			user.UserMatrixManager:CreateBonusPickupPool()
+		end
+
 		-- 초기 유닛 선택: 덱 기반 1회 → 전체 풀 2회 → 증강 선택
 		if _MatrixUnitSelectService ~= nil then
 			-- 1단계: 유저 덱(8개) 중 랜덤 4개 표시 → 1개 선택
