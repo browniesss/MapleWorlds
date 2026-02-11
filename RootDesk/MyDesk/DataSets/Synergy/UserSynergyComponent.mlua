@@ -155,6 +155,42 @@ script UserSynergyComponent extends Component
 		end
 	end
 
+	-- 매트릭스 전용: 클라이언트에서 level/limitBreak를 직접 전달받아 시너지 계산
+	@ExecSpace("Server")
+	method void MatrixAddCountFromClient(string unitId, integer level, integer limitBreak)
+		local unit = _UnitService:GetUnitByIDFromServer(unitId)
+		if unit == nil then
+			return
+		end
+
+		local syncCols = {"jobId", "countryId", "regionId", "LimitBreakCountryId", "LimitBreakJobId"}
+		local buffedUnit = BuffedUnitModel()
+		buffedUnit:Init(unit)
+
+		-- 매트릭스 전용: 클라이언트에서 전달받은 level/limitBreak로 버프 적용
+		buffedUnit = _BuffedUnitService:SetUnitBuff(buffedUnit, level, limitBreak)
+
+		for i, col in ipairs(syncCols) do
+			if buffedUnit[col] == nil then
+				continue
+			end
+
+			if buffedUnit[col] == 0 then
+				continue
+			end
+
+			self:AddCount(buffedUnit[col])
+		end
+
+		-- 매트릭스 모드에서 시너지 보너스 유닛 체크 (시그너스 등)
+		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
+			local userMatrixManager = self.Entity.UserMatrixManager
+			if userMatrixManager ~= nil then
+				userMatrixManager:CheckAndAddSynergyUnits()
+			end
+		end
+	end
+
 	@ExecSpace("Server")
 	method void ResetCountMapFromClient()
 		for k, v in pairs(self.countMap) do

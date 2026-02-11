@@ -4,15 +4,15 @@ script BuffedUnitService extends Logic
 	@ExecSpace("ServerOnly")
 	method BuffedUnitModel SetUnitBuff(BuffedUnitModel model, integer level, integer limitBreak)
 		local levelBuff = _UnitLevelUpRepo:GetBuff(model.jobId, model.grade, level)
-		if not (levelBuff == nil) then
+		if not (levelBuff == nil) and levelBuff.level ~= 0 then
 			model:SetLevelBuff(levelBuff)
 		end
-		
+
 		local limitBreakBuff = _UnitLimitBreakRepo:GetBuff(model.grade, limitBreak, model.id)
-		if not (limitBreakBuff == nil) then
+		if not (limitBreakBuff == nil) and limitBreakBuff.limitBreak ~= 0 then
 			model:SetLimitBreakBuff(limitBreakBuff)
 		end
-		
+
 		return model
 	end
 

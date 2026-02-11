@@ -101,25 +101,17 @@ script UserBreakLimitSkillProtocol extends Component
 	end
 
 	-- 매트릭스 모드용 돌파 스킬 초기화 (서버)
-	-- 일반 덱 대신 매트릭스에서 선택한 유닛 목록 기준으로 돌파 스킬 등록
+	-- 클라이언트의 unitPool 레벨/돌파 정보 기준으로 돌파 스킬 등록
 	@ExecSpace("Server")
-	method void MatrixInitCall(table matrixUnitIds)
+	method void MatrixInitCall(table matrixUnitIds, table unitLevelData)
 		_ProtocolService:CommonCall(senderUserId)
 
 		local user = _UserService:GetUserEntityByUserId(senderUserId)
 		local eventService = user.UserBreakLimitSkillServer
 
-		local unitData = _UnitService:GetUnitAll()
+		local unitDataAll = _UnitService:GetUnitAll()
 		_UserMonsterService:INIT(senderUserId)
 		local userMonsterData = _UserMonsterService.userMonsterDict
-
-		-- 매트릭스 유닛 ID를 빠른 조회용 set으로 변환
-		local matrixUnitSet = {}
-		for _, unitId in ipairs(matrixUnitIds) do
-			if unitId ~= nil and unitId ~= "" then
-				matrixUnitSet[unitId] = true
-			end
-		end
 
 		-- 기존 데이터 초기화
 		for _, id in ipairs(eventService:GetIdList()) do
@@ -131,19 +123,30 @@ script UserBreakLimitSkillProtocol extends Component
 		-- 스킬ID -> buttonRUID 매핑
 		local buttonRuidMap = {}
 
-		-- 데이터 설정 (매트릭스 선택 유닛만)
-		for id, json in pairs(userMonsterData) do
-			if not matrixUnitSet[id] then
+		-- 데이터 설정 (매트릭스 선택 유닛 순회)
+		for _, unitId in ipairs(matrixUnitIds) do
+			if unitDataAll[unitId] == nil then
 				continue
 			end
 
-			local userUnitModel = UserUnitModel()
-			userUnitModel:DECODE(json)
-
 			local buffedUnit = BuffedUnitModel()
-			buffedUnit:Init(unitData[id])
+			buffedUnit:Init(unitDataAll[unitId])
 
-			buffedUnit = _BuffedUnitService:SetUnitBuff(buffedUnit, userUnitModel.level, userUnitModel.limitBreak)
+			-- 클라이언트에서 전달받은 레벨/돌파 정보 우선 사용
+			local unitLevel = 1
+			local unitLimitBreak = 1
+
+			if unitLevelData ~= nil and unitLevelData[unitId] ~= nil then
+				unitLevel = unitLevelData[unitId].level or 1
+				unitLimitBreak = unitLevelData[unitId].limitBreak or 1
+			elseif userMonsterData[unitId] ~= nil then
+				local userUnitModel = UserUnitModel()
+				userUnitModel:DECODE(userMonsterData[unitId])
+				unitLevel = userUnitModel.level
+				unitLimitBreak = userUnitModel.limitBreak
+			end
+
+			buffedUnit = _BuffedUnitService:SetUnitBuff(buffedUnit, unitLevel, unitLimitBreak)
 
 			if buffedUnit.LimitBreakActiveSkill == nil or buffedUnit.LimitBreakActiveSkill == "" or buffedUnit.LimitBreakActiveSkill == "0" then
 				continue
@@ -181,14 +184,16 @@ script UserBreakLimitSkillProtocol extends Component
 			return
 		end
 
-		-- 현재 매트릭스 유닛 리스트에서 유닛 ID 수집
+		-- 현재 매트릭스 유닛 리스트에서 유닛 ID 및 레벨/돌파 정보 수집
 		local matrixUnitIds = {}
-		for unitId, _ in pairs(user.UserMatrixManager.unitList) do
+		local unitLevelData = {}
+		for unitId, unitData in pairs(user.UserMatrixManager.unitList) do
 			table.insert(matrixUnitIds, unitId)
+			unitLevelData[unitId] = {level = unitData.level or 1, limitBreak = unitData.limitBreak or 1}
 		end
 
 		self.onInitCompleteCallback = callback
-		self:MatrixInitCall(matrixUnitIds)
+		self:MatrixInitCall(matrixUnitIds, unitLevelData)
 	end
 
 	@ExecSpace("Server")

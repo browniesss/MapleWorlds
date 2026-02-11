@@ -44,7 +44,11 @@ script Call_Cygnus_Knights extends SkillParent
 		
 		if self.caster.Unit.isEnemy == false then
 			local pos = Vector3(self.caster.TransformComponent.Position.x - 0.5, self.caster.TransformComponent.Position.y + 0.5, 0)
-			_SpawnManager:CygnusSkillSpawn(model, pos)
+			if _GameManager.currentGameMode == _eGameMode.Matrix and _MatrixSpawnManager ~= nil then
+				_MatrixSpawnManager:CygnusSkillSpawn(model, pos)
+			else
+				_SpawnManager:CygnusSkillSpawn(model, pos)
+			end
 		end
 		
 		-- 스킬 사용 종료 처리

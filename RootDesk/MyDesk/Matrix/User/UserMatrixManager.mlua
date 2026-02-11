@@ -356,11 +356,12 @@ script UserMatrixManager extends Component
 		return ids
 	end
 
-	-- 보너스 픽업 캐릭터 생성 (Lv30 / LimitBreak 5)
+	-- 보너스 픽업 캐릭터 생성 (Lv30 / 5돌파 = limitBreak 6)
 	method void CreateBonusPickupPool()
 		self.bonusPool = {}
 
 		local bonusCharIds = self:GetBonusPickupCharIds()
+		local maxLimitBreak = _UnitLimitBreakRepo.UserMaxLevel
 
 		for _, charId in ipairs(bonusCharIds) do
 			local unitInfo = _UnitService:GetUnitByIDFromClient(charId)
@@ -372,12 +373,16 @@ script UserMatrixManager extends Component
 				local levelBuff = _UnitLevelUpRepo:FindBuffInClient(buffedUnit.jobId, buffedUnit.grade, 30)
 				if levelBuff ~= nil and levelBuff.level ~= 0 then
 					buffedUnit:SetLevelBuff(levelBuff)
+				else
+					buffedUnit.level = 30
 				end
 
-				-- LimitBreak 5 buff 적용
-				local limitBreakBuff = _UnitLimitBreakRepo:FindBuffInClient(buffedUnit.grade, 5, buffedUnit.id)
+				-- 5돌파 buff 적용 (5돌파 = limitBreak 6 = UserMaxLevel)
+				local limitBreakBuff = _UnitLimitBreakRepo:FindBuffInClient(buffedUnit.grade, maxLimitBreak, buffedUnit.id)
 				if limitBreakBuff ~= nil and limitBreakBuff.limitBreak ~= 0 then
 					buffedUnit:SetLimitBreakBuff(limitBreakBuff)
+				else
+					buffedUnit.limitBreak = maxLimitBreak
 				end
 
 				self.bonusPool[charId] = buffedUnit

@@ -167,7 +167,11 @@ script UnitShopItem extends Component
 			return
 		end
 
-		_SpawnManager:Spawn(self.unitData['id'], self.price, Vector3.zero)
+		if _GameManager.currentGameMode == _eGameMode.Matrix and _MatrixSpawnManager ~= nil then
+			_MatrixSpawnManager:Spawn(self.unitData['id'], self.price, Vector3.zero, self.unitData.level, self.unitData.limitBreak)
+		else
+			_SpawnManager:Spawn(self.unitData['id'], self.price, Vector3.zero)
+		end
 
 		self.shop:OnSpawn(self.id, self.price)
 
@@ -284,7 +288,11 @@ script UnitShopItem extends Component
 			return
 		end
 
-		_SpawnManager:Spawn(self.unitData['id'], self.price, Vector3.zero)
+		if _GameManager.currentGameMode == _eGameMode.Matrix and _MatrixSpawnManager ~= nil then
+			_MatrixSpawnManager:Spawn(self.unitData['id'], self.price, Vector3.zero, self.unitData.level, self.unitData.limitBreak)
+		else
+			_SpawnManager:Spawn(self.unitData['id'], self.price, Vector3.zero)
+		end
 
 		self.shop:OnSpawn(self.id, self.price)
 

@@ -297,6 +297,8 @@ script MatrixUnitSelectService extends Logic
 		self.isSelectingUnit = false
 
 		local user = _UserService.LocalPlayer
+		local unitLevel = 1
+		local unitLimitBreak = 1
 		if user ~= nil and user.UserMatrixManager ~= nil then
 			local matrixManager = user.UserMatrixManager
 			local isBonus = self.bonusChoiceFlags[index] or false
@@ -310,6 +312,11 @@ script MatrixUnitSelectService extends Logic
 				end
 			else
 				unitData = matrixManager.unitPool[unitId]
+			end
+
+			if unitData ~= nil then
+				unitLevel = unitData.level or 1
+				unitLimitBreak = unitData.limitBreak or 1
 			end
 
 			matrixManager:AddUnitToList(unitId, unitData)
@@ -331,9 +338,9 @@ script MatrixUnitSelectService extends Logic
 			end
 		end
 
-		-- 시너지 카운트 업데이트 (서버로 전송)
+		-- 시너지 카운트 업데이트 (서버로 전송, 매트릭스 유닛 레벨/돌파 정보 포함)
 		if user ~= nil and user.UserSynergyComponent ~= nil then
-			user.UserSynergyComponent:AddCountFromClient(unitId)
+			user.UserSynergyComponent:MatrixAddCountFromClient(unitId, unitLevel, unitLimitBreak)
 		end
 
 		-- 메소 UI 업데이트 (시너지 변경 반영)

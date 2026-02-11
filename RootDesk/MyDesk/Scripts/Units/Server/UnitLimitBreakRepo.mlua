@@ -33,7 +33,7 @@ script UnitLimitBreakRepo extends Logic
 					self.dataMap[tostring(grade)][item.id] = {}
 				end
 				
-				self.dataMap[tostring(grade)][item.id][tostring(item.limitBreak)] = item
+				self.dataMap[tostring(grade)][item.id][item.limitBreak] = item
 			end
 		end
 	end
@@ -54,11 +54,11 @@ script UnitLimitBreakRepo extends Logic
 			return LimitBreakModel()
 		end
 		
-		local buffData = unitMap[tostring(limitBreak)]
+		local buffData = unitMap[limitBreak]
 		if buffData == nil then
 			return LimitBreakModel()
 		end
-		
+
 		return buffData
 	end
 
@@ -77,13 +77,13 @@ script UnitLimitBreakRepo extends Logic
 		if gradeMap == nil then
 			return LimitBreakModel()
 		end
-		
+
 		local unitMap = gradeMap[tostring(id)]
 		if unitMap == nil then
 			return LimitBreakModel()
 		end
-		
-		local buffData = unitMap[tostring(limitBreak)]
+
+		local buffData = unitMap[limitBreak]
 		if buffData == nil then
 			return LimitBreakModel()
 		end
