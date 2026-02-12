@@ -14,9 +14,17 @@ script CharterView extends Component
 	-- 유닛 강화 모드용 UI
 	property Entity UnitUpgradeBackground = nil
 
+	-- 스킬 정보 UI
+	property Entity SkillBackground = nil
+	property Entity NormalSkillInfo = nil
+	property Entity SpawnSkillInfo = nil
+	property Entity LimitBreakSkillInfo = nil
+	property any unitInfoButtonHandler = nil
+
 	method void InitGacha(table unitData)
 		-- 강화 UI 숨기기
 		self:HideUpgradeUI()
+		self:HideSkillUI()
 		self.EffectEntity.Visible = false
 
 		-- 해당 슬롯에 장착한 유닛이 없을 경우
@@ -28,6 +36,10 @@ script CharterView extends Component
 			if self.SynergyIcon ~= nil then
 				self.SynergyIcon.Enable = false
 			end
+			-- PriceSprite 숨기기
+			self:HidePriceUI()
+			-- UnitInfo 버튼 숨기기
+			self:HideUnitInfoButton()
 		else
 			self.Monster.Visible = true
 			self.Name.Visible = true
@@ -55,6 +67,13 @@ script CharterView extends Component
 					self.EffectEntity.Visible = true
 				end
 			end
+
+			-- 소환 코스트 표시
+			self:ShowPriceUI(unitData)
+
+			-- 스킬 정보 세팅 및 UnitInfo 버튼 활성화
+			self:SetSkillInfo(unitData)
+			self:SetupUnitInfoButton()
 		end
 	end
 
@@ -93,6 +112,10 @@ script CharterView extends Component
 
 		self.Entity.Enable = true
 
+		-- 소환 코스트 숨기기 (강화 모드에서는 불필요)
+		self:HidePriceUI()
+		self:HideSkillUI()
+
 		-- 기존 유닛 표시 (InitGacha와 유사)
 		self.EffectEntity.Visible = false
 		self.Monster.Visible = true
@@ -120,6 +143,10 @@ script CharterView extends Component
 				self.EffectEntity.Visible = true
 			end
 		end
+
+		-- 스킬 정보 세팅 및 UnitInfo 버튼 활성화
+		self:SetSkillInfo(unitData)
+		self:SetupUnitInfoButton()
 
 		-- 강화 UI 표시
 		if self.UnitUpgradeBackground ~= nil then
@@ -157,6 +184,107 @@ script CharterView extends Component
 	method void HideUpgradeUI()
 		if self.UnitUpgradeBackground ~= nil then
 			self.UnitUpgradeBackground.Enable = false
+		end
+	end
+
+	-- 소환 코스트 표시
+	method void ShowPriceUI(table unitData)
+		local priceSprite = self.Entity:GetChildByName("PriceSprite")
+		if priceSprite ~= nil then
+			priceSprite.Enable = true
+			local priceLabel = priceSprite:GetChildByName("PriceLabel")
+			if priceLabel ~= nil and priceLabel.TextComponent ~= nil then
+				priceLabel.TextComponent.Text = tostring(unitData['summonCost'])
+			end
+		end
+	end
+
+	-- 소환 코스트 숨기기
+	method void HidePriceUI()
+		local priceSprite = self.Entity:GetChildByName("PriceSprite")
+		if priceSprite ~= nil then
+			priceSprite.Enable = false
+		end
+	end
+
+	-- 스킬 정보 세팅
+	method void SetSkillInfo(table unitData)
+		if self.NormalSkillInfo == nil then
+			return
+		end
+
+		-- Normal Skill
+		local normalSkillData = _SkillService:GetSkillByIDFromClient(unitData["skillID"])
+		self.NormalSkillInfo.UnitSkillInfo:Init(normalSkillData)
+
+		-- Spawn Skill
+		if unitData["spawnSkill"] == nil or unitData["spawnSkill"] == "" then
+			self.SpawnSkillInfo.Enable = false
+			self.SpawnSkillInfo.Visible = false
+		else
+			local spawnSkillData = _SkillService:GetSkillByIDFromClient(unitData["spawnSkill"])
+			if spawnSkillData == nil then
+				self.SpawnSkillInfo.Enable = false
+				self.SpawnSkillInfo.Visible = false
+			else
+				self.SpawnSkillInfo.Enable = true
+				self.SpawnSkillInfo.Visible = true
+				self.SpawnSkillInfo.UnitSkillInfo:Init(spawnSkillData)
+			end
+		end
+
+		-- Limit Break Skill
+		self.LimitBreakSkillInfo.Enable = false
+		self.LimitBreakSkillInfo.Visible = false
+		if unitData.grade ~= nil and unitData.grade >= 5 then
+			local limitBreakData = _UnitLimitBreakRepo:FindBuffInClient(unitData.grade, 6, unitData["id"])
+			if not (limitBreakData == nil or limitBreakData.limitBreak == 0) then
+				local limitBreakSkillData = _SkillService:GetSkillByIDFromClient(limitBreakData.skillID)
+				self.LimitBreakSkillInfo.UnitSkillInfo:Init(limitBreakSkillData)
+				self.LimitBreakSkillInfo.Enable = true
+				self.LimitBreakSkillInfo.Visible = true
+			end
+		end
+	end
+
+	-- UnitInfo 버튼 세팅
+	method void SetupUnitInfoButton()
+		local unitInfoButton = self.Entity:GetChildByName("UnitInfo")
+		if unitInfoButton == nil then
+			return
+		end
+
+		unitInfoButton.Enable = true
+
+		if self.unitInfoButtonHandler ~= nil then
+			unitInfoButton:DisconnectEvent(ButtonClickEvent, self.unitInfoButtonHandler)
+			self.unitInfoButtonHandler = nil
+		end
+
+		self.unitInfoButtonHandler = unitInfoButton:ConnectEvent(ButtonClickEvent, function()
+			self:ToggleSkillUI()
+		end)
+	end
+
+	-- UnitInfo 버튼 숨기기
+	method void HideUnitInfoButton()
+		local unitInfoButton = self.Entity:GetChildByName("UnitInfo")
+		if unitInfoButton ~= nil then
+			unitInfoButton.Enable = false
+		end
+	end
+
+	-- 스킬 UI 토글
+	method void ToggleSkillUI()
+		if self.SkillBackground ~= nil then
+			self.SkillBackground.Enable = not self.SkillBackground.Enable
+		end
+	end
+
+	-- 스킬 UI 숨기기
+	method void HideSkillUI()
+		if self.SkillBackground ~= nil then
+			self.SkillBackground.Enable = false
 		end
 	end
 
