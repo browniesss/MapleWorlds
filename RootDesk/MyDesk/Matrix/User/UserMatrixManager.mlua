@@ -31,8 +31,6 @@ script UserMatrixManager extends Component
 	-- ============================================
 	property integer totalScore = 0
 	property table phaseKillCount = {}
-	property table phaseStartTime = {}
-	property integer currentPhaseScore = 0
 
 	-- ============================================
 	-- 유닛 풀 (UnitPool)
@@ -227,62 +225,17 @@ script UserMatrixManager extends Component
 		end
 	end
 
-	-- 페이즈 시작 시 호출 (시간 기록)
-	method void OnPhaseStart(integer phaseId)
-		if _MatrixGameManager ~= nil then
-			self.phaseStartTime[phaseId] = _MatrixGameManager.matrixTime
-		else
-			self.phaseStartTime[phaseId] = self.playTime
-		end
-	end
-
-	-- 페이즈 종료 시 점수 계산 (1~3페이즈용)
-	method integer CalculatePhaseScore(integer phaseId)
+	-- 페이즈 클리어 보너스 점수 (baseScore 그대로 지급)
+	method integer AddPhaseClearScore(integer phaseId)
 		local phaseData = _MatrixGameService.phaseData[phaseId]
 		if phaseData == nil then
 			return 0
 		end
 
 		local baseScore = phaseData.baseScore or 0
-		if baseScore == 0 then
-			return 0
-		end
+		self.totalScore = self.totalScore + baseScore
 
-		-- 페이즈 경과 시간 계산
-		local startTime = self.phaseStartTime[phaseId] or 0
-		local currentTime = 0
-		if _MatrixGameManager ~= nil then
-			currentTime = _MatrixGameManager.matrixTime
-		else
-			currentTime = self.playTime
-		end
-		local elapsedTime = currentTime - startTime
-
-		-- 기준 점수에서 초당 1점 감소 (최소 0점)
-		local timeScore = math.max(0, baseScore - math.floor(elapsedTime))
-		self.totalScore = self.totalScore + timeScore
-
-		return timeScore
-	end
-
-	-- 무한모드 점수 계산 (초당 점수)
-	method integer CalculateInfiniteScore()
-		local currentTime = 0
-		if _MatrixGameManager ~= nil then
-			currentTime = _MatrixGameManager.matrixTime
-		else
-			currentTime = self.playTime
-		end
-
-		-- 4페이즈 시작 시간부터 계산
-		local phase4StartTime = self.phaseStartTime[4] or 0
-		local infiniteTime = currentTime - phase4StartTime
-
-		-- 초당 1점
-		local timeScore = math.floor(infiniteTime)
-		self.totalScore = self.totalScore + timeScore
-
-		return timeScore
+		return baseScore
 	end
 
 	-- 총 점수 반환
@@ -294,8 +247,6 @@ script UserMatrixManager extends Component
 	method void ResetScoreData()
 		self.totalScore = 0
 		self.phaseKillCount = {}
-		self.phaseStartTime = {}
-		self.currentPhaseScore = 0
 	end
 
 	-- ============================================

@@ -9283,14 +9283,14 @@
         }
       },
       {
-        "id": "81ade8bd-2cc6-41ed-853d-73f1400a6932",
-        "path": "/ui/MatrixUI/IngameUI/IngameInfoUI/PauseButton",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent,script.PauseButton",
+        "id": "5440abb4-68bd-4967-84a3-e201646f0ef3",
+        "path": "/ui/MatrixUI/IngameUI/IngameInfoUI/ScoreUI",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,script.ScoreUI",
         "jsonString": {
-          "name": "PauseButton",
-          "path": "/ui/MatrixUI/IngameUI/IngameInfoUI/PauseButton",
+          "name": "ScoreUI",
+          "path": "/ui/MatrixUI/IngameUI/IngameInfoUI/ScoreUI",
           "nameEditable": true,
-          "enable": false,
+          "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 9,
@@ -9298,12 +9298,12 @@
           "revision": 1,
           "origin": {
             "type": "Model",
-            "entry_id": "uibutton",
+            "entry_id": "uisprite",
             "sub_entity_id": null,
-            "root_entity_id": "e3ee11fa-07e0-4381-b8d3-21dbae64e35f",
+            "root_entity_id": "5440abb4-68bd-4967-84a3-e201646f0ef3",
             "replaced_model_id": null
           },
-          "modelId": "uibutton",
+          "modelId": "uisprite",
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
@@ -9318,35 +9318,30 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": -374.0,
-                "y": 400.0
+                "x": -385.0,
+                "y": 390.0
               },
               "OffsetMin": {
-                "x": -436.0,
-                "y": 336.0
+                "x": -505.0,
+                "y": 330.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 62.0,
-                "y": 64.0
+                "x": 120.0,
+                "y": 60.0
               },
               "UIMode": 1,
-              "UIScale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -405.0,
-                "y": 368.0
+                "x": -445.0,
+                "y": 360.0
               },
               "Position": {
-                "x": 555.0,
-                "y": 368.0,
+                "x": 515.0,
+                "y": 360.0,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -9355,17 +9350,12 @@
                 "z": 0.0,
                 "w": 1.0
               },
-              "Scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-              },
               "Enable": true
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
               "ImageRUID": {
-                "DataId": "52862b3dd1e242b5b11ca9dd2fe40dd1"
+                "DataId": "8738db49d13cefd47b786c6005dbb4c7"
               },
               "LocalScale": {
                 "x": 1.5,
@@ -9373,71 +9363,29 @@
               },
               "OverrideSorting": false,
               "SortingLayer": "MapLayer0",
-              "Type": 0,
               "Enable": true
             },
             {
-              "@type": "MOD.Core.ButtonComponent",
-              "Colors": {
-                "NormalColor": {
-                  "r": 1.0,
-                  "g": 1.0,
-                  "b": 1.0,
-                  "a": 1.0
-                },
-                "HighlightedColor": {
-                  "r": 0.9607843,
-                  "g": 0.9607843,
-                  "b": 0.9607843,
-                  "a": 1.0
-                },
-                "PressedColor": {
-                  "r": 0.784313738,
-                  "g": 0.784313738,
-                  "b": 0.784313738,
-                  "a": 1.0
-                },
-                "SelectedColor": {
-                  "r": 0.9607843,
-                  "g": 0.9607843,
-                  "b": 0.9607843,
-                  "a": 1.0
-                },
-                "DisabledColor": {
-                  "r": 0.784313738,
-                  "g": 0.784313738,
-                  "b": 0.784313738,
-                  "a": 0.5019608
-                },
-                "ColorMultiplier": 1.0,
-                "FadeDuration": 0.1
-              },
-              "ImageRUIDs": {
-                "HighlightedSprite": null,
-                "PressedSprite": null,
-                "SelectedSprite": null,
-                "DisabledSprite": null
-              },
-              "OverrideSorting": false,
-              "Enable": true
-            },
-            {
-              "@type": "script.PauseButton",
+              "@type": "script.ScoreUI",
               "Enable": true,
-              "pauseIconRUID": "713d229e27f249058a43bbc6a5e60125",
-              "playIconRUID": "778c24a954694af294f24d3332e5ffbb"
+              "scoreCount": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "52e77674-447c-4ec0-81d1-95715b97c74e",
+                "Version2": false
+              }
             }
           ],
           "@version": 1
         }
       },
       {
-        "id": "9c506f59-7f4b-4fb1-8922-aa8b765e2702",
-        "path": "/ui/MatrixUI/IngameUI/IngameInfoUI/PauseButton/Icon",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
+        "id": "52e77674-447c-4ec0-81d1-95715b97c74e",
+        "path": "/ui/MatrixUI/IngameUI/IngameInfoUI/ScoreUI/ScoreCount",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
-          "name": "Icon",
-          "path": "/ui/MatrixUI/IngameUI/IngameInfoUI/PauseButton/Icon",
+          "name": "ScoreCount",
+          "path": "/ui/MatrixUI/IngameUI/IngameInfoUI/ScoreUI/ScoreCount",
           "nameEditable": true,
           "enable": true,
           "visible": true,
@@ -9447,66 +9395,99 @@
           "revision": 1,
           "origin": {
             "type": "Model",
-            "entry_id": "uisprite",
+            "entry_id": "uitext",
             "sub_entity_id": null,
-            "root_entity_id": "9c506f59-7f4b-4fb1-8922-aa8b765e2702",
+            "root_entity_id": "52e77674-447c-4ec0-81d1-95715b97c74e",
             "replaced_model_id": null
           },
-          "modelId": "uisprite",
+          "modelId": "uitext",
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 0,
+              "AlignmentOption": 15,
               "AnchorsMax": {
-                "x": 0.5,
-                "y": 0.5
+                "x": 1.0,
+                "y": 1.0
               },
               "AnchorsMin": {
-                "x": 0.5,
-                "y": 0.5
+                "x": 0.0,
+                "y": 0.0
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 24.9999981,
-                "y": 30.0
+                "x": 15.0,
+                "y": 10.0
               },
               "OffsetMin": {
-                "x": -25.0000019,
-                "y": -20.0
+                "x": -15.0,
+                "y": 5.0
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 50.0,
-                "y": 50.0
+                "x": 150.0,
+                "y": 65.0
               },
               "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -1.97440386E-06,
-                "y": 5.0
+                "x": 0.0,
+                "y": 7.5
+              },
+              "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
               },
               "Position": {
-                "x": -1.97440386E-06,
-                "y": 5.0,
+                "x": 0.0,
+                "y": 7.5,
                 "z": 0.0
               },
               "QuaternionRotation": {
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0,
-                "w": 1.0
+                "w": -1.0
               },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "ZRotation": 0.0,
               "Enable": true
             },
             {
               "@type": "MOD.Core.SpriteGUIRendererComponent",
-              "ImageRUID": {
-                "DataId": "713d229e27f249058a43bbc6a5e60125"
+              "OverrideSorting": false,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TextComponent",
+              "BestFit": true,
+              "Bold": false,
+              "Font": 3,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "MaxSize": 38,
+              "OutlineDistance": {
+                "x": 1.0,
+                "y": -1.0
               },
               "OverrideSorting": false,
+              "Text": "10000",
               "Enable": true
             }
           ],

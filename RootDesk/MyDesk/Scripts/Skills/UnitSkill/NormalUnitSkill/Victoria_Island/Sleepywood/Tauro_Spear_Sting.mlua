@@ -10,13 +10,13 @@ script Tauro_Spear_Sting extends SkillParent
 		local damageFunctionTimerID = 0
 		
 		local damageFunction = function()
-			if damageCount >= self.skillTime or isvalid(self.caster) == false or self.caster.Unit.curState == "die" then
+			if damageCount >= self.skillTime or isvalid(self.caster) == false or self.caster.Unit == nil or self.caster.Unit.curState == "die" or isvalid(self.target) == false or self.target.Unit == nil or self.target.Unit.curState == "die" then
 				_TimerService:ClearTimer(damageFunctionTimerID)
 				_EffectService:RemoveEffect(effectID)
 				self:SkillEnd()
 				return
 			end
-			
+
 			self.target.Unit:OnHit(self.caster, self.skillAmount * self.caster.Unit.damage, false, 1)
 			_EffectService:PlayEffectAttached("b4a972fde22d44128a614b6baa10a2ed", self.target, Vector3.one, 0, Vector3.one)
 			damageCount += 1

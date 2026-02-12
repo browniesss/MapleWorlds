@@ -17,19 +17,9 @@ script MatrixGiveUpButton extends Component
 		-- 게임 플레이 중지
 		_MatrixGameManager.isPlaying = false
 		
-		-- 현재 상태에 맞는 점수 계산 및 랭킹 저장
+		-- 최종 점수 및 랭킹 저장
 		local user = _UserService.LocalPlayer
 		if user ~= nil and user.UserMatrixManager ~= nil then
-			if _MatrixGameService ~= nil then
-				local phaseData = _MatrixGameService:GetCurrentPhaseData()
-				if phaseData ~= nil and phaseData.timeBonus > 0 then
-					-- 무한모드: 초당 점수 계산
-					user.UserMatrixManager:CalculateInfiniteScore()
-				end
-			end
-			-- 1~3페이즈에서 포기하면 킬 점수만 (시간 점수는 클리어 시에만)
-		
-			-- 최종 점수 및 랭킹 저장
 			local finalScore = user.UserMatrixManager:GetTotalScore()
 			local userName = user.PlayerComponent.Nickname
 		

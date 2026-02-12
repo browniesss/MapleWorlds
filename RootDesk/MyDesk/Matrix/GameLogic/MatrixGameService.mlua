@@ -264,25 +264,16 @@ script MatrixGameService extends Logic
 		local previousPhaseId = self.currentPhaseId
 		local newPhaseId = roundData.phaseId
 
-		-- 이전 페이즈 시간 점수 계산 (페이즈가 변경된 경우)
+		-- 페이즈 변경 시 클리어 보너스 점수 지급 및 currentPhaseId 갱신
 		if previousPhaseId ~= newPhaseId and previousPhaseId > 0 then
 			local user = _UserService.LocalPlayer
 			if user ~= nil and user.UserMatrixManager ~= nil then
-				local prevPhaseData = self.phaseData[previousPhaseId]
-				if prevPhaseData ~= nil and prevPhaseData.timeBonus == 0 then
-					-- 일반 페이즈: 기준 점수에서 시간 감소
-					user.UserMatrixManager:CalculatePhaseScore(previousPhaseId)
-				end
+				user.UserMatrixManager:AddPhaseClearScore(previousPhaseId)
 			end
 		end
 
-		-- 새로운 페이즈 시작 시 시간 기록
 		if previousPhaseId ~= newPhaseId or roundId == 1 then
 			self.currentPhaseId = newPhaseId
-			local user = _UserService.LocalPlayer
-			if user ~= nil and user.UserMatrixManager ~= nil then
-				user.UserMatrixManager:OnPhaseStart(newPhaseId)
-			end
 		end
 
 		self.currentRoundId = roundId
@@ -542,14 +533,7 @@ script MatrixGameService extends Logic
 
 	@ExecSpace("Client")
 	method void OnPhaseComplete()
-		-- 현재 페이즈가 무한 모드인지 확인
-		local currentPhase = self.phaseData[self.currentPhaseId]
-		if currentPhase ~= nil and currentPhase.phaseType == self.PHASE_TYPE_INFINITE then
-			-- 무한 모드: 페이즈 유지 (루프 반복)
-		else
-			-- 일반 모드: 다음 페이즈로 진행
-			self.currentPhaseId = self.currentPhaseId + 1
-		end
+		-- currentPhaseId 갱신은 StartRound에서 처리 (페이즈 클리어 보너스 점수 계산을 위해)
 
 		-- 증강 선택 UI 표시 (MatrixGameManager 통해)
 		if _MatrixGameManager ~= nil then
@@ -598,16 +582,6 @@ script MatrixGameService extends Logic
 		-- 최종 점수 계산 및 랭킹 제출
 		local user = _UserService.LocalPlayer
 		if user ~= nil and user.UserMatrixManager ~= nil then
-			-- 4페이즈 이상(무한모드)에서만 시간 점수 계산
-			-- 1~3페이즈에서 죽으면 해당 페이즈 시간 점수는 제외 (킬 점수만)
-			local phaseData = self:GetCurrentPhaseData()
-			if phaseData ~= nil and phaseData.timeBonus > 0 then
-				-- 무한모드: 초당 점수
-				user.UserMatrixManager:CalculateInfiniteScore()
-			end
-			-- 1~3페이즈에서 죽으면 시간 점수 계산 안 함
-			-- (클리어한 페이즈의 시간 점수는 StartRound에서 이미 계산됨)
-
 			-- 최종 점수 및 랭킹 저장
 			local finalScore = user.UserMatrixManager:GetTotalScore()
 			local userName = user.PlayerComponent.Nickname

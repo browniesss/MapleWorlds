@@ -1,0 +1,31 @@
+@Component
+script ScoreUI extends Component
+
+	property Entity scoreCount = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.scoreCount = self.Entity:GetChildByName("ScoreCount")
+		self:UpdateScore()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnUpdate(number delta)
+		self:UpdateScore()
+	end
+
+	method void UpdateScore()
+		if self.scoreCount == nil then
+			return
+		end
+		
+		local user = _UserService.LocalPlayer
+		if user == nil or user.UserMatrixManager == nil then
+			return
+		end
+		
+		local score = user.UserMatrixManager:GetTotalScore()
+		self.scoreCount.TextComponent.Text = tostring(score)
+	end
+
+end
