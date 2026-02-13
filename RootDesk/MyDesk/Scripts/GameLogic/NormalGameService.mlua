@@ -98,12 +98,10 @@ script NormalGameService extends Logic
 		-- 클라이언트 UI 업데이트 콜백 (일반 모드는 토큰 0)
 		_GameManager:StageClearClientCallback(isFirstClear, 0, senderUserId)
 
-		-- 최초 클리어: cleared 목록에 추가 및 다음 스테이지 오픈
-		if userStage:IsClearStage(clearedChapter, clearedStage) == false then
-			local nextStage = _StageService:GetNextOpenStageIdFromServer(userStage.openChapter, userStage.openStage)
-			if nextStage.chapter ~= userStage.openChapter or nextStage.stage ~= userStage.openStage then
-				userStage:SetClearStage(nextStage.chapter, nextStage.stage)
-			end
+		-- 기존 클리어 여부와 관계없이 다음 스테이지 오픈 체크 (새 챕터 추가 시 기존 유저도 다음 챕터 진행 가능하도록)
+		local nextStage = _StageService:GetNextOpenStageIdFromServer(userStage.openChapter, userStage.openStage)
+		if nextStage.chapter ~= userStage.openChapter or nextStage.stage ~= userStage.openStage then
+			userStage:SetClearStage(nextStage.chapter, nextStage.stage)
 		end
 		userStage:AddClearedStage(clearedChapter, clearedStage)
 
