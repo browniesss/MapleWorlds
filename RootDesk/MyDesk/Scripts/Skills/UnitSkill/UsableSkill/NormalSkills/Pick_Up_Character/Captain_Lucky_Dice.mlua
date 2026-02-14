@@ -1,0 +1,177 @@
+@Component
+script Captain_Lucky_Dice extends SkillParent
+
+	property string diceEffect1 = "afbb903f82bc4816bf23d087deabbce2"
+
+	property string diceEffect2 = "95fcd00df118436f960ec4666016e643"
+
+	property string diceEffect3 = "392a9db7194a430ea7965aa55103a045"
+
+	property string diceEffect4 = "07d2dcc5fc1c4414bb8c16774c6879ec"
+
+	property string diceEffect5 = "97a7987fbd474151affa6ce20fd0f9ed"
+
+	property string diceEffect6 = "013f8c0449e94c2692697ae32ae7e045"
+
+	@ExecSpace("Client")
+	method void ActivateSkill()
+		__base:ActivateSkill()
+		
+		if self._T.projectileParent == nil then
+			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+		end
+		
+		local diceResult = math.random(1, 6)
+		local effectRuid = self:GetDiceEffectRuid(diceResult)
+		
+		-- 주사위 이펙트 출력
+		local effectDuration = 0
+		if effectRuid ~= "" then
+			_EffectService:PlayEffectAttached(effectRuid, self.caster, Vector3.zero, 0, Vector3.one)
+			effectDuration = _Utils:GetRUIDTime(effectRuid)
+		end
+		
+		-- 이펙트 끝난 후 스킬 효과 적용
+		_TimerService:SetTimerOnce(function()
+			self:ApplyDiceEffect(diceResult)
+		end, effectDuration)
+	end
+
+	method string GetDiceEffectRuid(integer diceResult)
+		if diceResult == 1 then return self.diceEffect1
+		elseif diceResult == 2 then return self.diceEffect2
+		elseif diceResult == 3 then return self.diceEffect3
+		elseif diceResult == 4 then return self.diceEffect4
+		elseif diceResult == 5 then return self.diceEffect5
+		elseif diceResult == 6 then return self.diceEffect6
+		end
+		return ""
+	end
+
+	method void ApplyDiceEffect(integer diceResult)
+		-- TODO: 주사위 눈별 스킬 효과 구현
+		if diceResult == 1 then
+			self:OnDice1()
+		elseif diceResult == 2 then
+			self:OnDice2()
+		elseif diceResult == 3 then
+			self:OnDice3()
+		elseif diceResult == 4 then
+			self:OnDice4()
+		elseif diceResult == 5 then
+			self:OnDice5()
+		elseif diceResult == 6 then
+			self:OnDice6()
+		end
+	end
+
+	method void OnDice1()
+		-- 주사위 1 : 꽝
+		self:SkillEnd()
+	end
+
+	method void OnDice2()
+		-- 주사위 2: 공속 버프
+		self.caster.Unit:GetBuff(_eBuffType.AttackSpeedBuff, self.skillAmount, self.skillTime)
+		self:SkillEnd()
+	end
+
+	method void OnDice3()
+		local options = {
+		    FlipX = true,  -- 좌우 반전
+		}
+		
+		-- 주사위 3: 더블 배럴 샷
+		local firstSpawnFunction = function()
+			_EffectService:PlayEffectAttached("ba9e242e91d14d57b8a275331718dc5b", self.caster, Vector3.zero, 0, Vector3.one, false, options)
+		end
+		
+		local damageFunction = function()
+			self:AttackNearByEnemies(2, 20)
+			self:SkillEnd()
+		end
+		
+		_TimerService:SetTimerOnce(firstSpawnFunction, 0)
+		_TimerService:SetTimerOnce(damageFunction, 0.6)
+	end
+
+	method void OnDice4()
+		-- 주사위 4: 헤드샷
+		local options = {
+		    FlipX = true,  -- 좌우 반전
+		}
+		
+		_EffectService:PlayEffectAttached("4bdd2ce1a97943b6a93475afc4a90a4c", self.caster, Vector3.zero, 0, Vector3.one, false, options)
+		
+		local targetList = self:GetFarthestEnemies(3)
+		local effectFunction = function()
+			for _, target in ipairs(targetList) do
+			    if isvalid(target) and target.Unit and target.Unit.curState ~= "die" then
+					_EffectService:PlayEffectAttached("873c3aedcbe143f2b9bd457a9df7e374", target, Vector3.zero , 0, Vector3.one, false)
+				end
+			end
+		end
+		
+		local damageFunction = function()
+			for _, target in ipairs(targetList) do
+			    if isvalid(target) and target.Unit and target.Unit.curState ~= "die" then
+					target.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, false, 1)
+					_EffectService:PlayEffectAttached("09a4878dec8643f7b1da2bebfc94ee95", target, Vector3.zero , 0, Vector3.one, false)
+				end
+			end
+		end
+		
+		_TimerService:SetTimerOnce(effectFunction, 0)
+		_TimerService:SetTimerOnce(damageFunction, self.skillAttackTiming)
+		_TimerService:SetTimerOnce(function()
+			self:SkillEnd()
+		end, self.skillTime)
+		
+	end
+
+	method void OnDice5()
+		-- 주사위 5: 초사이언 버프
+		
+		local loopEffect
+		loopEffect = _EffectService:PlayEffectAttached("9d1eb23df29546219f5f3d8984ac8396", self.caster, Vector3(0, 1, 0) , 0, Vector3.one, true, options)
+		
+		self.caster.Unit:GetBuff(_eBuffType.AttackSpeedBuff, self.skillAmount * 3, self.skillTime * 3)
+		self.caster.Unit:GetBuff(_eBuffType.AttackDamageBuff, self.skillAmount * 3, self.skillTime * 3)
+		
+		local function clearFunction()
+			_EffectService:RemoveEffect(loopEffect)
+		end
+		
+		self:SkillEnd()
+		_TimerService:SetTimerOnce(clearFunction, self.skillTime * 3)
+	end
+
+	method void OnDice6()
+		-- 주사위 6: 전함 노틸러스
+		
+		_EffectService:PlayEffectAttached("f34b2937d191442f8e0e2800123d7c3e", self.caster, Vector3(0, 2, 0), 0, Vector3.one, false)
+		
+		local enemyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
+		local enemies = enemyListParent.Children
+		
+		local hitFunction = function()
+			for index in ipairs(enemies) do
+				local monster = enemies[index]
+			
+				if monster.Name == "EnemySpawnPoint" then
+					continue
+				end
+				
+				if monster.Enable then
+					monster.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount * 3, true, 7)
+				end
+			end
+		end
+		
+		_TimerService:SetTimerOnce(hitFunction, 2)
+		_TimerService:SetTimerOnce(function()
+			self:SkillEnd()
+		end, 2.5)
+	end
+
+end
