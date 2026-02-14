@@ -115,6 +115,11 @@ script MonsterSpawnService extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnMapEnter(Entity enteredMap)
+		local isMatrixMap = string.find(enteredMap.Name, "MatrixStage") ~= nil
+		if isMatrixMap then
+			return
+		end
+
 		local isStageMap = string.find(enteredMap.Name, "Stage") ~= nil
 		local isEventMap = string.find(enteredMap.Name, "Event") ~= nil
 
