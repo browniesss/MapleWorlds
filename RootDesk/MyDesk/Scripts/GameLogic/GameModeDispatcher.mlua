@@ -3,7 +3,9 @@ script GameModeDispatcher extends Logic
 
 	-- 현재 유저의 게임 모드 반환
 	method string GetCurrentMode()
-		if _GameManager.currentGameMode == _eGameMode.Event then
+		if _GameManager.currentGameMode == _eGameMode.PvP then
+			return "PVP"
+		elseif _GameManager.currentGameMode == _eGameMode.Event then
 			return "EVENT"
 		elseif _GameManager.currentGameMode == _eGameMode.Matrix then
 			return "MATRIX"
@@ -17,7 +19,10 @@ script GameModeDispatcher extends Logic
 	@ExecSpace("Client")
 	method void StartGame()
 		local mode = self:GetCurrentMode()
-		if mode == "EVENT" then
+		if mode == "PVP" then
+			-- PvP는 pvpMatcherMakerComponent:StartMatchCall에서 직접 시작
+			return
+		elseif mode == "EVENT" then
 			_EventGameService:StartGame()
 		elseif mode == "MATRIX" then
 			_MatrixGameService:StartGame()
@@ -30,7 +35,10 @@ script GameModeDispatcher extends Logic
 	@ExecSpace("Client")
 	method void OnStageClear()
 		local mode = self:GetCurrentMode()
-		if mode == "EVENT" then
+		if mode == "PVP" then
+			-- PvP는 pvpCombatComponent가 승패 처리
+			return
+		elseif mode == "EVENT" then
 			_EventGameService:OnStageClear()
 		elseif mode == "NORMAL" then
 			_NormalGameService:OnStageClear()
@@ -41,7 +49,10 @@ script GameModeDispatcher extends Logic
 	@ExecSpace("Server")
 	method void LogStageFail()
 		local mode = self:GetCurrentMode()
-		if mode == "EVENT" then
+		if mode == "PVP" then
+			-- PvP는 pvpCombatComponent가 승패 처리
+			return
+		elseif mode == "EVENT" then
 			_EventGameService:LogStageFail()
 		elseif mode == "NORMAL" then
 			_NormalGameService:LogStageFail()

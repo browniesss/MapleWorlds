@@ -1,0 +1,59 @@
+@Logic
+script pvpUserService extends Logic
+
+	property string PVP_MODE_KEY = "PVP_MODE_USER"
+
+	property integer MAX_PLAY_COIN = 5
+
+	property integer PLAY_COIN_UPDATE = 60000
+
+	@ExecSpace("ServerOnly")
+	method table GetUserData(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local code, json = ds:GetAndWait(self.PVP_MODE_KEY)
+		if not (code == 0) then
+			return {
+				code=code
+			}
+		end
+		
+		if json == nil then
+			local data = {
+				play_coin=5,
+				offense_deck={},
+				defense_deck={},
+				next_play_coin=0,
+				code = 0
+			}
+			
+			local updateCode = self:UpdateUserData(uid, data)
+			if not (updateCode == 0) then
+				return {
+					code=updateCode
+				}
+			end
+			return data
+			
+		end
+		
+		return _HttpService:JSONDecode(json)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer UpdateUserData(string uid, integer play_coin, integer next_play_coin, table offense_deck, table defense_deck)
+		local data = {
+			play_coin=play_coin,
+			offense_deck=offense_deck,
+			defense_deck=defense_deck,
+			next_play_coin=next_play_coin,
+			code = 0
+		}
+		
+		-- TODO: data validataion
+		
+		local json =  _HttpService:JSONEncode(data)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		return ds:SetAndWait(self.PVP_MODE_KEY, json)
+	end
+
+end

@@ -1,0 +1,228 @@
+@Component
+script pvpCombatComponent extends Component
+
+	property Entity UserTower = "add7715d-0f35-4a67-8da8-9b662dd3d920"
+
+	property Entity EnemyTower = "3c23fbd3-219d-4f45-8f64-1a96e29a64c6"
+
+	@Sync
+	property boolean isPlaying = false
+
+	@Sync
+	property number gameTimer = 0
+
+	property number maxGameTime = 120
+
+	property number gameTimerAccum = 0
+
+	property table matchInfo = {}
+
+	property string currentUserId = ""
+
+	@ExecSpace("Server")
+	method void GameStartCall()
+		_ProtocolService:CommonCall(senderUserId)
+
+		self.currentUserId = senderUserId
+
+		-- 코인 소비
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		if user == nil then
+			return
+		end
+
+		local pvpUser = user.pvpUserComponent
+		if pvpUser == nil then
+			return
+		end
+
+		if not pvpUser:CanUseCoin() then
+			return
+		end
+		pvpUser:UseCoin()
+
+		-- 타워 HP 초기화
+		local towerHP = _pvpService.USER_TOWER_HP
+		local enemyTowerHP = _pvpService.ENEMY_TOWER_HP
+
+		self.UserTower.Unit.originMaxHP = towerHP
+		self.UserTower.Unit.maxHP = towerHP
+		self.UserTower.Unit.hp = towerHP
+
+		self.EnemyTower.Unit.originMaxHP = enemyTowerHP
+		self.EnemyTower.Unit.maxHP = enemyTowerHP
+		self.EnemyTower.Unit.hp = enemyTowerHP
+
+		-- 유저 소환 시스템 시작
+		local pvpUserSpawn = self.Entity.pvpUserSpawnComponent
+		if pvpUserSpawn ~= nil then
+			pvpUserSpawn:StartGame()
+		end
+
+		-- AI 시작
+		local pvpAi = self.Entity.pvpAiPlayerComponent
+		if pvpAi ~= nil then
+			local enemyDeck = self.matchInfo.defense_deck or {}
+			local enemyUnitInfo = self.matchInfo.unitInfo or {}
+			pvpAi:StartGame(enemyDeck, enemyUnitInfo)
+		end
+
+		-- 게임 상태 초기화
+		self.isPlaying = true
+		self.gameTimer = 0
+		self.gameTimerAccum = 0
+		self.maxGameTime = _pvpService.MAX_GAME_TIME
+
+		self:GameStartBack()
+	end
+
+	@ExecSpace("Client")
+	method void GameStartBack()
+		-- PvP 인게임 UI 활성화
+		local pvpIngameUI = _EntityService:GetEntityByPath("/ui/PvPIngameUI")
+		if pvpIngameUI ~= nil then
+			pvpIngameUI.Enable = true
+			pvpIngameUI.Visible = true
+			if pvpIngameUI.PvPIngameUI ~= nil then
+				pvpIngameUI.PvPIngameUI:InitUI(self.UserTower, self.EnemyTower)
+			end
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void OnUpdate(number delta)
+		if not self.isPlaying then
+			return
+		end
+
+		-- 타이머 업데이트
+		self.gameTimerAccum = self.gameTimerAccum + delta
+		if self.gameTimerAccum >= 1.0 then
+			self.gameTimerAccum = self.gameTimerAccum - 1.0
+			self.gameTimer = self.gameTimer + 1
+			self:SyncTimer(self.gameTimer)
+		end
+
+		-- 승패 판정: 적 타워 파괴
+		if self.EnemyTower.Unit.hp <= 0 then
+			self:GameEndCall(true)
+			return
+		end
+
+		-- 승패 판정: 아군 타워 파괴
+		if self.UserTower.Unit.hp <= 0 then
+			self:GameEndCall(false)
+			return
+		end
+
+		-- 시간 초과 → HP 비율 판정
+		if self.gameTimer >= self.maxGameTime then
+			local userRatio = self.UserTower.Unit.hp / self.UserTower.Unit.maxHP
+			local enemyRatio = self.EnemyTower.Unit.hp / self.EnemyTower.Unit.maxHP
+			self:GameEndCall(userRatio > enemyRatio)
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void GameEndCall(boolean isWin)
+		self.isPlaying = false
+
+		-- AI 정리
+		local pvpAi = self.Entity.pvpAiPlayerComponent
+		if pvpAi ~= nil then
+			pvpAi:EndGame()
+		end
+
+		-- 모든 유닛 제거
+		self:DestroyAllUnits()
+
+		-- 랭킹 점수 업데이트
+		local deltaScore = 0
+		local newScore = 0
+		if self.currentUserId ~= "" then
+			if isWin then
+				deltaScore = _pvpService.WIN_SCORE
+			else
+				deltaScore = _pvpService.LOSE_SCORE
+			end
+
+			local result = _pvpRankingService:SetPoint(self.currentUserId, deltaScore)
+			if result.code == 0 then
+				newScore = result.score
+				-- 최소 0점
+				if newScore < 0 then
+					_pvpRankingService:SetPoint(self.currentUserId, -newScore)
+					newScore = 0
+				end
+			end
+		end
+
+		self:GameEndBack(isWin, deltaScore, newScore)
+	end
+
+	@ExecSpace("Client")
+	method void GameEndBack(boolean isWin, integer deltaScore, integer newScore)
+		-- 인게임 UI 비활성화
+		local pvpIngameUI = _EntityService:GetEntityByPath("/ui/PvPIngameUI")
+		if pvpIngameUI ~= nil then
+			pvpIngameUI.Enable = false
+			pvpIngameUI.Visible = false
+		end
+
+		-- 결과 UI 표시
+		local pvpResultUI = _EntityService:GetEntityByPath("/ui/PvPResultUI")
+		if pvpResultUI ~= nil then
+			pvpResultUI.Enable = true
+			pvpResultUI.Visible = true
+			if pvpResultUI.PvPResultUI ~= nil then
+				pvpResultUI.PvPResultUI:ShowResult(isWin, deltaScore, newScore)
+			end
+		end
+	end
+
+	@ExecSpace("Client")
+	method void SyncTimer(number time)
+		self.gameTimer = time
+	end
+
+	@ExecSpace("ServerOnly")
+	method void SetMatchInfo(table info)
+		self.matchInfo = info
+	end
+
+	@ExecSpace("ServerOnly")
+	method void DestroyAllUnits()
+		local mapPath = _pvpService.PVP_STAGE_PATH
+
+		local myMonsterList = _EntityService:GetEntityByPath(mapPath .. "/MyMonsterList")
+		if myMonsterList ~= nil and myMonsterList.Children ~= nil then
+			local targets = {}
+			for idx, child in ipairs(myMonsterList.Children) do
+				if idx ~= 1 then
+					table.insert(targets, child)
+				end
+			end
+			for _, e in ipairs(targets) do
+				if e ~= nil then
+					e:Destroy()
+				end
+			end
+		end
+
+		local enemyList = _EntityService:GetEntityByPath(mapPath .. "/EnemyList")
+		if enemyList ~= nil and enemyList.Children ~= nil then
+			local targets = {}
+			for idx, child in ipairs(enemyList.Children) do
+				if idx ~= 1 then
+					table.insert(targets, child)
+				end
+			end
+			for _, e in ipairs(targets) do
+				if e ~= nil then
+					e:Destroy()
+				end
+			end
+		end
+	end
+
+end

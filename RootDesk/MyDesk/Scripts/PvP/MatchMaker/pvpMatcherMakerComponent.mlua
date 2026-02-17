@@ -1,0 +1,137 @@
+@Component
+script pvpMatcherMakerComponent extends Component
+
+	property table targetUserList = {}
+
+	@Sync
+	property integer selected = 0
+
+	@ExecSpace("Server")
+	method void RefreshListCall()
+		_ProtocolService:CommonCall(senderUserId)
+
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+
+		local score = user.pvpRankingComponent.score
+
+		local tierPool = _pvpRankingService:GetUserListByTier(score)
+
+		-- 자기 자신 제거
+		local filteredPool = {}
+		for _, u in ipairs(tierPool) do
+			if u.uid ~= senderUserId then
+				table.insert(filteredPool, u)
+			end
+		end
+		tierPool = filteredPool
+
+		-- 티어 풀이 4명 미만일 때 더미 덱 생성
+		if #tierPool < 4 then
+			local dummyNames = {"MapleBot_A", "MapleBot_B", "MapleBot_C", "MapleBot_D"}
+			local dummyScore = math.max(0, score - 10)
+			for i = #tierPool + 1, 4 do
+				local dummyUser = {
+					uid = "dummy_" .. i,
+					score = dummyScore + math.random(0, 20),
+					rank = 0,
+					nickname = dummyNames[i] or ("MapleBot_" .. i),
+					isDummy = true,
+					defense_deck = {},
+					unitInfo = {}
+				}
+				table.insert(tierPool, dummyUser)
+			end
+		end
+
+		local newList = {}
+
+		math.randomseed(os.time())
+		for i = #tierPool, 2, -1 do
+			local j = math.random(1, i)
+			tierPool[i], tierPool[j] = tierPool[j], tierPool[i]
+		end
+
+		-- 최대 4명 선택
+		for i = 1, math.min(4, #tierPool) do
+			newList[#newList + 1] = tierPool[i]
+		end
+
+		self.targetUserList = newList
+		self:RefeshListBack(newList)
+	end
+
+	@ExecSpace("Client")
+	method void RefeshListBack(table list)
+		self.targetUserList = list
+	end
+
+	@ExecSpace("Server")
+	method void StartMatchCall(integer index)
+		_ProtocolService:CommonCall(senderUserId)
+
+		if index < 1 or index > #self.targetUserList then
+			return
+		end
+
+		local target = self.targetUserList[index]
+		if target == nil then
+			return
+		end
+
+		-- 상대 방어 덱 로드
+		local matchData = {
+			uid = target.uid,
+			defense_deck = {},
+			unitInfo = {},
+			nickname = target.nickname or "",
+			isDummy = target.isDummy or false
+		}
+
+		-- 실제 유저인 경우 defense_deck 로드
+		if not target.isDummy then
+			local targetData = _pvpUserService:GetUserData(target.uid)
+			if targetData.code == 0 then
+				matchData.defense_deck = targetData.defense_deck or {}
+			end
+
+			-- 유닛 정보 로드
+			local unitInfo = {}
+			for _, unitId in ipairs(matchData.defense_deck) do
+				if unitId ~= nil and unitId ~= "" then
+					local unitData = _UnitService:GetUnitByIDFromServer(unitId)
+					if unitData ~= nil then
+						unitInfo[unitId] = {
+							id = unitId,
+							level = 1,
+							limitBreak = 1,
+							cost = unitData["cost"] or unitData["summonCost"] or 0
+						}
+					end
+				end
+			end
+			matchData.unitInfo = unitInfo
+		end
+
+		-- pvpCombatComponent에 매치 정보 설정
+		local pvpCombat = self.Entity.pvpCombatComponent
+		if pvpCombat ~= nil then
+			pvpCombat:SetMatchInfo(matchData)
+		end
+
+		-- 게임 모드 설정
+		_GameManager.currentGameMode = _eGameMode.PvP
+
+		-- 맵 텔레포트
+		_TeleportService:TeleportToMapPosition(
+			_UserService:GetUserEntityByUserId(senderUserId),
+			Vector3.zero,
+			"StagePvP"
+		)
+
+		-- 게임 시작
+		if pvpCombat ~= nil then
+			pvpCombat:GameStartCall()
+		end
+	end
+
+end

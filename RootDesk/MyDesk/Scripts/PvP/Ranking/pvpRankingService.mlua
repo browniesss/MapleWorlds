@@ -1,0 +1,139 @@
+@Logic
+script pvpRankingService extends Logic
+
+	property string PVP_RANK_KEY = "PVP_MODE_RANK"
+
+	property table RANK_LIST = {}
+
+	property integer NEXT_UPDATE_TS = 0
+
+	property integer silver = 100
+
+	property integer gold = 200
+
+	property integer platinum = 300
+
+	property integer dia = 400
+
+	@ExecSpace("ServerOnly")
+	method integer UpdateTable()
+		local nowTs = DateTime.UtcNow.Elapsed
+		
+		if nowTs < self.NEXT_UPDATE_TS then
+			return 0
+		end
+		self.NEXT_UPDATE_TS = nowTs + 60000
+		
+		-- 캐시가 만료된 경우
+		local ds = _DataStorageService:GetSortableDataStorage(self:GET_PVP_RANK_KEY())
+		 
+		-- 데이터들을 정렬된 순서로 가져옵니다.
+		local errorCode, itemPages = ds:GetSortedAndWait(SortDirection.Descending, 0, 999999)
+		if errorCode ~= 0 then
+			return errorCode
+		end
+		local rank = 1
+		local rankList = {}
+		while true do
+		    -- GetCurrentPageDatas()로 현재 페이지의 목록을 가져올 수 있습니다.
+		    local items = itemPages:GetCurrentPageDatas()
+		    for _, item in pairs(items) do
+		         -- SortableDataStorageItem을 통해 Key값과 Value값을 조회할 수 있습니다.
+				rankList[#rankList + 1] = {uid=item.KeyInfo.Key, score=item.Value, rank=rank}
+				rank += 1
+		    end
+		     
+		    -- IsLastPage 프로퍼티를 통해 현재 페이지가 마지막 페이지인지 확인할 수 있습니다.
+		    if itemPages.IsLastPage == true then
+		        break
+		    end
+		     
+		    -- MoveToNextPageAndWait()로 다음 페이지로 넘어갈 수 있습니다.
+		    itemPages:MoveToNextPageAndWait()
+		end
+
+		self.RANK_LIST = rankList
+
+		return 0
+	end
+
+	@ExecSpace("ServerOnly")
+	method string GET_PVP_RANK_KEY()
+		return self.PVP_RANK_KEY .. "_VER_" .. _pvpService.PVP_MODE_VER
+	end
+
+	@ExecSpace("ServerOnly")
+	method table SetPoint(string uid, integer delta)
+		local ds = _DataStorageService:GetSortableDataStorage(self:GET_PVP_RANK_KEY())
+		local errCode, score = ds:IncreaseAndWait(uid, delta)
+		
+		if not (errCode == 0) then
+			return {
+				code=errCode,
+				score = 0
+			}
+		end
+		
+		return {
+			code = 0,
+			score=score
+		}
+	end
+
+	@ExecSpace("ServerOnly")
+	method table GetUserListByTier(integer userScore)
+		local min = 0
+		local max = self.silver - 1
+		
+		if userScore >= self.silver then
+			min = self.silver
+			max = self.gold - 1
+		end
+		
+		if userScore >= self.gold then
+			min = self.gold
+			max = self.platinum - 1
+		end
+		
+		if userScore >= self.platinum then
+			min = self.platinum
+			max = self.dia - 1
+		end
+		
+		if userScore >= self.dia then
+			min = self.dia
+			max = 999999
+		end
+		
+		local ds = _DataStorageService:GetSortableDataStorage(self:GET_PVP_RANK_KEY())
+		 
+		-- 데이터들을 정렬된 순서로 가져옵니다.
+		local errorCode, itemPages = ds:GetSortedAndWait(SortDirection.Descending, min, max)
+		if errorCode ~= 0 then
+			return {code=errorCode}
+		end
+		
+		local rankList = {}
+		local rank = 1
+		while true do
+		    -- GetCurrentPageDatas()로 현재 페이지의 목록을 가져올 수 있습니다.
+		    local items = itemPages:GetCurrentPageDatas()
+		    for _, item in pairs(items) do
+		         -- SortableDataStorageItem을 통해 Key값과 Value값을 조회할 수 있습니다.
+				rankList[#rankList + 1] = {uid=item.KeyInfo.Key, score=item.Value, rank=rank}
+				rank += 1
+		    end
+		     
+		    -- IsLastPage 프로퍼티를 통해 현재 페이지가 마지막 페이지인지 확인할 수 있습니다.
+		    if itemPages.IsLastPage == true then
+		        break
+		    end
+		     
+		    -- MoveToNextPageAndWait()로 다음 페이지로 넘어갈 수 있습니다.
+		    itemPages:MoveToNextPageAndWait()
+		end
+		
+		return rankList
+	end
+
+end

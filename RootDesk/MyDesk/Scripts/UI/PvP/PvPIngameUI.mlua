@@ -1,0 +1,144 @@
+@Component
+script PvPIngameUI extends Component
+
+	property Entity userHPBar = nil
+
+	property Entity enemyHPBar = nil
+
+	property Entity timerText = nil
+
+	property Entity pointText = nil
+
+	property Entity userTower = nil
+
+	property Entity enemyTower = nil
+
+	property table unitSlots = {}
+
+	property table slotHandlers = {}
+
+	@ExecSpace("ClientOnly")
+	method void InitUI(Entity userTowerEntity, Entity enemyTowerEntity)
+		self.userTower = userTowerEntity
+		self.enemyTower = enemyTowerEntity
+		
+		-- HP 바 연결
+		if self.userHPBar ~= nil and self.userHPBar.OurHealthBar ~= nil then
+			self.userHPBar.OurHealthBar.tower = userTowerEntity
+		end
+		
+		if self.enemyHPBar ~= nil and self.enemyHPBar.EnemyHealthBar ~= nil then
+			self.enemyHPBar.EnemyHealthBar.tower = enemyTowerEntity
+		end
+		
+		-- 유닛 소환 슬롯 초기화
+		self:InitUnitSlots()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void InitUnitSlots()
+		-- 기존 핸들러 정리
+		for _, handler in pairs(self.slotHandlers) do
+			if handler ~= nil then
+				handler:Disconnect()
+			end
+		end
+		self.slotHandlers = {}
+		
+		local user = _UserService.LocalPlayer
+		if user == nil then
+			return
+		end
+		
+		local pvpUser = user.pvpUserComponent
+		if pvpUser == nil then
+			return
+		end
+		
+		-- 공격 덱의 유닛들로 슬롯 구성
+		local offenseDeck = pvpUser.offense_deck
+		for i = 1, math.min(8, #offenseDeck) do
+			local unitId = offenseDeck[i]
+			if unitId ~= nil and unitId ~= "" and self.unitSlots[i] ~= nil then
+				local slot = self.unitSlots[i]
+				slot.Enable = true
+				slot.Visible = true
+		
+				-- 유닛 데이터 표시
+				local unitData = _UnitService:GetUnitByIDFromClient(unitId)
+				if unitData ~= nil then
+					-- 이름 표시
+					local nameText = slot.Children[1]
+					if nameText ~= nil then
+						nameText.TextComponent.Text = unitData["name"] or ""
+					end
+		
+					-- 코스트 표시
+					local costText = slot.Children[2]
+					if costText ~= nil then
+						costText.TextComponent.Text = tostring(unitData["cost"] or unitData["summonCost"] or 0)
+					end
+				end
+		
+				-- 클릭 핸들러
+				if slot.ButtonComponent ~= nil then
+					local capturedUnitId = unitId
+					self.slotHandlers[i] = slot.ButtonComponent.OnClick:Connect(function()
+						self:OnUnitSlotClick(capturedUnitId)
+					end)
+				end
+			end
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnUnitSlotClick(string unitId)
+		local user = _UserService.LocalPlayer
+		if user == nil then
+			return
+		end
+		
+		local pvpUserSpawn = user.pvpUserSpawnComponent
+		if pvpUserSpawn == nil then
+			return
+		end
+		
+		pvpUserSpawn:SpawnUnit(unitId, Vector3.zero)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnUpdate(number delta)
+		-- 타이머 표시 업데이트
+		if self.timerText ~= nil then
+			local user = _UserService.LocalPlayer
+			if user ~= nil and user.pvpCombatComponent ~= nil then
+				local remaining = _pvpService.MAX_GAME_TIME - user.pvpCombatComponent.gameTimer
+				if remaining < 0 then
+					remaining = 0
+				end
+				local m = math.floor(remaining / 60)
+				local s = remaining % 60
+				self.timerText.TextComponent.Text = string.format("%d:%02d", m, s)
+			end
+		end
+		
+		-- 포인트 표시 업데이트
+		if self.pointText ~= nil then
+			local user = _UserService.LocalPlayer
+			if user ~= nil and user.pvpUserSpawnComponent ~= nil then
+				self.pointText.TextComponent.Text = tostring(math.floor(user.pvpUserSpawnComponent.point))
+			end
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnEndPlay()
+		for _, handler in pairs(self.slotHandlers) do
+			if handler ~= nil then
+				handler:Disconnect()
+			end
+		end
+		self.slotHandlers = {}
+	end
+
+end

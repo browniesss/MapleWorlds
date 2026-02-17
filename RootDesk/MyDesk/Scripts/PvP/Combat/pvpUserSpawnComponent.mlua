@@ -1,0 +1,88 @@
+@Component
+script pvpUserSpawnComponent extends Component
+
+	property number point = 0
+
+	property number pointInc = 1
+
+	property number pointUpdateTimer = 0
+
+	@ExecSpace("ServerOnly")
+	method void StartGame()
+		self.point = 0
+		self.pointInc = 1
+		self.pointUpdateTimer = 0
+	end
+
+	@ExecSpace("ServerOnly")
+	method void OnUpdate(number delta)
+		local pvpCombat = self.Entity.pvpCombatComponent
+		if pvpCombat == nil or not pvpCombat.isPlaying then
+			return
+		end
+		
+		self.pointUpdateTimer = self.pointUpdateTimer + delta
+		if self.pointUpdateTimer < 0.5 then
+			return
+		end
+		
+		self.pointUpdateTimer = 0
+		self.point = self.point + self.pointInc
+		self:SyncPoint(self.point)
+	end
+
+	@ExecSpace("Server")
+	method void SpawnUnit(string modelID, Vector3 pos)
+		_ProtocolService:CommonCall(senderUserId)
+		
+		local pvpCombat = self.Entity.pvpCombatComponent
+		if pvpCombat == nil or not pvpCombat.isPlaying then
+			return
+		end
+		
+		-- 유닛 데이터 로드
+		local unitData = _UnitService:GetUnitByIDFromServer(modelID)
+		if unitData == nil then
+			return
+		end
+		
+		-- 포인트 체크
+		local cost = unitData["cost"] or unitData["summonCost"] or 0
+		if cost > self.point then
+			return
+		end
+		
+		-- 소환 위치
+		local mapPath = _pvpService.PVP_STAGE_PATH
+		local spawnParent = _EntityService:GetEntityByPath(mapPath .. "/MyMonsterList")
+		local spawnPos = _EntityService:GetEntityByPath(mapPath .. "/MyMonsterList/MySpawnPoint")
+		
+		if spawnParent == nil or spawnPos == nil then
+			return
+		end
+		
+		if pos == Vector3.zero then
+			pos = spawnPos.TransformComponent.Position
+		end
+		
+		-- 유닛 소환 (PvP에서는 시너지/매트릭스 미적용)
+		local unitModel = _BuffedUnitService:GetBuffedUnitModel(senderUserId, modelID)
+		local spawnEntity = _SpawnService:SpawnByModelId(modelID, "Pig", pos, spawnParent)
+		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
+		
+		local userUnitModel = UserUnitModel()
+		userUnitModel:DECODE(_UserMonsterService.userMonsterDict[unitModel.id])
+		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, userUnitModel.level, userUnitModel.limitBreak)
+		spawnEntity.Unit:Spawn(unitModel, skillData)
+		
+		-- 포인트 차감
+		self.point = self.point - cost
+		self:SyncPoint(self.point)
+	end
+
+	@ExecSpace("Client")
+	method void SyncPoint(number point)
+		self.point = point
+	end
+
+end

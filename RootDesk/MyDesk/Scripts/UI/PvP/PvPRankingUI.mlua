@@ -1,0 +1,131 @@
+@Component
+script PvPRankingUI extends Component
+
+	property Entity rankListParent = nil
+
+	property Entity myRankText = nil
+
+	property Entity myScoreText = nil
+
+	property Entity myTierText = nil
+
+	property Entity closeButton = nil
+
+	property any closeHandler = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		if self.closeButton ~= nil and self.closeButton.ButtonComponent ~= nil then
+			self.closeHandler = self.closeButton.ButtonComponent.OnClick:Connect(function()
+				self.Entity.Enable = false
+				self.Entity.Visible = false
+			end)
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnEndPlay()
+		if self.closeHandler ~= nil then
+			self.closeHandler:Disconnect()
+			self.closeHandler = nil
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void RefreshRanking()
+		local user = _UserService.LocalPlayer
+		if user == nil then
+			return
+		end
+		
+		-- 랭킹 데이터 요청
+		if user.pvpRankingComponent ~= nil then
+			user.pvpRankingComponent:GetRankingInfoCall()
+		end
+		
+		-- 약간의 딜레이 후 UI 업데이트
+		_TimerService:SetTimerOnce(function()
+			self:UpdateUI()
+		end, 0.5)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void UpdateUI()
+		local user = _UserService.LocalPlayer
+		if user == nil or user.pvpRankingComponent == nil then
+			return
+		end
+		
+		local rankComp = user.pvpRankingComponent
+		
+		-- 내 정보 표시
+		if self.myRankText ~= nil then
+			if rankComp.rank > 0 then
+				self.myRankText.TextComponent.Text = "#" .. tostring(rankComp.rank)
+			else
+				self.myRankText.TextComponent.Text = "-"
+			end
+		end
+		
+		if self.myScoreText ~= nil then
+			self.myScoreText.TextComponent.Text = tostring(rankComp.score)
+		end
+		
+		if self.myTierText ~= nil then
+			self.myTierText.TextComponent.Text = self:GetTierName(rankComp.score)
+		end
+		
+		-- 순위 리스트 표시
+		if self.rankListParent ~= nil then
+			local rankList = rankComp.ranking_list
+			for i, child in ipairs(self.rankListParent.Children) do
+				if i <= #rankList then
+					local info = rankList[i]
+					child.Enable = true
+					child.Visible = true
+		
+					-- 순위
+					local rankText = child.Children[1]
+					if rankText ~= nil then
+						rankText.TextComponent.Text = tostring(info.rank or i)
+					end
+		
+					-- 닉네임/UID
+					local nameText = child.Children[2]
+					if nameText ~= nil then
+						nameText.TextComponent.Text = info.uid or ""
+					end
+		
+					-- 점수
+					local scoreText = child.Children[3]
+					if scoreText ~= nil then
+						scoreText.TextComponent.Text = tostring(info.score or 0)
+					end
+		
+					-- 티어
+					local tierText = child.Children[4]
+					if tierText ~= nil then
+						tierText.TextComponent.Text = self:GetTierName(info.score or 0)
+					end
+				else
+					child.Enable = false
+					child.Visible = false
+				end
+			end
+		end
+	end
+
+	method string GetTierName(integer score)
+		if score >= _pvpRankingService.dia then
+			return "Diamond"
+		elseif score >= _pvpRankingService.platinum then
+			return "Platinum"
+		elseif score >= _pvpRankingService.gold then
+			return "Gold"
+		elseif score >= _pvpRankingService.silver then
+			return "Silver"
+		end
+		return "Bronze"
+	end
+
+end

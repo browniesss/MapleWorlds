@@ -1,0 +1,140 @@
+@Component
+script PvPResultUI extends Component
+
+	property Entity resultTitle = nil
+
+	property Entity scoreChangeText = nil
+
+	property Entity currentScoreText = nil
+
+	property Entity tierText = nil
+
+	property Entity retryButton = nil
+
+	property Entity lobbyButton = nil
+
+	property any retryHandler = nil
+
+	property any lobbyHandler = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnEndPlay()
+		self:ClearHandlers()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void ClearHandlers()
+		if self.retryHandler ~= nil then
+			self.retryHandler:Disconnect()
+			self.retryHandler = nil
+		end
+		
+		if self.lobbyHandler ~= nil then
+			self.lobbyHandler:Disconnect()
+			self.lobbyHandler = nil
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void ShowResult(boolean isWin, integer deltaScore, integer newScore)
+		self:ClearHandlers()
+		
+		-- 승리/패배 타이틀
+		if self.resultTitle ~= nil then
+			if isWin then
+				self.resultTitle.TextComponent.Text = "VICTORY!"
+			else
+				self.resultTitle.TextComponent.Text = "DEFEAT"
+			end
+		end
+		
+		-- 점수 변동
+		if self.scoreChangeText ~= nil then
+			if deltaScore >= 0 then
+				self.scoreChangeText.TextComponent.Text = "+" .. tostring(deltaScore)
+			else
+				self.scoreChangeText.TextComponent.Text = tostring(deltaScore)
+			end
+		end
+		
+		-- 현재 점수
+		if self.currentScoreText ~= nil then
+			self.currentScoreText.TextComponent.Text = tostring(newScore)
+		end
+		
+		-- 티어 표시
+		if self.tierText ~= nil then
+			self.tierText.TextComponent.Text = self:GetTierName(newScore)
+		end
+		
+		-- 다시하기 버튼
+		if self.retryButton ~= nil and self.retryButton.ButtonComponent ~= nil then
+			self.retryHandler = self.retryButton.ButtonComponent.OnClick:Connect(function()
+				self:OnRetryClick()
+			end)
+		end
+		
+		-- 로비로 버튼
+		if self.lobbyButton ~= nil and self.lobbyButton.ButtonComponent ~= nil then
+			self.lobbyHandler = self.lobbyButton.ButtonComponent.OnClick:Connect(function()
+				self:OnLobbyClick()
+			end)
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnRetryClick()
+		-- 결과 UI 닫기
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+		
+		-- PvP 로비 UI 열기
+		local pvpLobbyUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI")
+		if pvpLobbyUI ~= nil then
+			pvpLobbyUI.Enable = true
+			pvpLobbyUI.Visible = true
+		
+			if pvpLobbyUI.PvPLobbyUI ~= nil then
+				pvpLobbyUI.PvPLobbyUI:UpdateCoinDisplay()
+				pvpLobbyUI.PvPLobbyUI:UpdateScoreDisplay()
+			end
+		end
+		
+		-- 상대 목록 새로고침
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.pvpMatcherMakerComponent ~= nil then
+			user.pvpMatcherMakerComponent:RefreshListCall()
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnLobbyClick()
+		-- 결과 UI 닫기
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+		
+		-- 게임 모드 초기화
+		_GameManager.currentGameMode = _eGameMode.Normal
+		
+		-- 메인 로비로 텔레포트
+		_TeleportService:TeleportToMapPosition(
+			_UserService.LocalPlayer,
+			Vector3.zero,
+			"Lobby"
+		)
+	end
+
+	method string GetTierName(integer score)
+		if score >= _pvpRankingService.dia then
+			return "Diamond"
+		elseif score >= _pvpRankingService.platinum then
+			return "Platinum"
+		elseif score >= _pvpRankingService.gold then
+			return "Gold"
+		elseif score >= _pvpRankingService.silver then
+			return "Silver"
+		end
+		return "Bronze"
+	end
+
+end

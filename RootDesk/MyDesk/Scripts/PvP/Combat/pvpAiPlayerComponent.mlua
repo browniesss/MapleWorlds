@@ -1,0 +1,183 @@
+@Component
+script pvpAiPlayerComponent extends Component
+
+	property number point = 0
+
+	property number pointInc = 1
+
+	property table synergyMap = {}
+
+	property table summonDeck = {}
+
+	property table summonPools = {}
+
+	property table summonQueue = {}
+
+	property table userUnitList = {}
+
+	property number pointUpdateTimer = 0
+
+	property table unitPriorityDict = {}
+
+	@ExecSpace("ServerOnly")
+	method void StartGame(table playerDeck, table playerUnitInfo)
+		self.point = 0
+		self.pointInc = 1
+		self.pointUpdateTimer = 0
+		
+		-- TODO: init process for dummy
+		
+		table.clear(self.summonPools)
+		table.clear(self.summonQueue)
+		table.clear(self.summonDeck)
+		table.clear(self.userUnitList)
+		table.clear(self.unitPriorityDict)
+		
+		-- init everything
+		for i, unit in ipairs(playerDeck) do
+			self.unitPriorityDict[unit.id] = i
+		end
+		
+		self.userUnitList = playerUnitInfo
+		
+		-- 덱(최대 8장) -> 풀에 채우기
+		for i = 1, 8 do
+			local modelId = playerDeck[i]
+			if modelId and modelId ~= 0 then
+				table.insert(self.summonPools, modelId)
+			end
+		end
+		
+		
+		math.randomseed(os.time())
+		for i = #self.summonPools, 2, -1 do
+			local j = math.random(1, i)
+			self.summonPools[i], self.summonPools[j] = self.summonPools[j], self.summonPools[i]
+		end
+		
+		-- 앞 4장은 화면, 나머지는 큐
+		for i = 1, 4 do
+			self.summonDeck[i] = i
+		end
+		
+		for i = 4 + 1, 8 + #playerDeck.userSubDeck do
+			table.insert(self.summonQueue, i)
+		end
+		
+		-- 덱을 소환 우선 순위에 맞춰 정렬
+		table.sort(self.summonDeck, function(a, b)
+			local unitA = self.summonPools[a]
+			local unitB = self.summonPools[b]
+			
+			local priotA = self.unitPriorityDict[unitA]
+			local pritoB = self.unitPriorityDict[unitB]
+			
+			return priotA < pritoB
+		end)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void OnUpdate(number delta)
+		if self.summonDeck == nil or #self.summonDeck == 0 then
+			return
+		end
+		
+		self.pointUpdateTimer += delta
+		if self.pointUpdateTimer < 0.5 then
+			return
+		end
+		
+		self.pointUpdateTimer = 0
+		self.point += self.pointInc
+		
+		local unitId = self:NextSummonId()
+		local unit = self:GetUnitInfo(unitId)
+		
+		if self:IsSummonAvailable(unit.cost) then
+			self:Summon()
+		end
+		
+		self:SyncPoint(self.point)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void EndGame()
+		self.synergyMap = {}
+		self.summonDeck = {}
+		self.summonPools = {}
+		self.summonQueue = {}
+		self.userUnitList = {}
+		self.unitPriorityDict = {}
+		self.point = 0
+		self.pointInc = 1
+	end
+
+	@ExecSpace("ServerOnly")
+	method string NextSummonId()
+		local idx = self.summonDeck[1]
+		return self.summonPools[idx]
+	end
+
+	@ExecSpace("ServerOnly")
+	method void Summon()
+		-- 사용한 인덱스를 큐 뒤로, 큐 앞을 꺼내 슬롯 채우기
+		local usedIdx = self.summonDeck[1]
+		if not usedIdx then 
+			return 
+		end
+		
+		local unitId = self:NextSummonId()
+		local userUnitInfo = self:GetUnitInfo(unitId)
+		
+		-- 실제 유닛을 소환
+		local spawnParent = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .."/EnemyList")
+		local spawnPos = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .."/EnemyList/EnemySpawnPoint")
+		local unitData = _UnitService:GetUnitByIDFromServer(unitId)
+		local skillData = _SkillService:GetSkillByIDFromServer(unitData["skillID"])
+		local spawnEntity = _SpawnService:SpawnByModelId(unitId, "Pig", spawnPos.TransformComponent.Position, spawnParent)
+		
+		local buffedUnit = BuffedUnitModel()
+		buffedUnit:Init(unitData)
+		buffedUnit = _BuffedUnitService:SetUnitBuff(buffedUnit, userUnitInfo.level, userUnitInfo.limitBreak)
+		spawnEntity.Unit:SpawnEnemy(buffedUnit, skillData)
+		
+		self.point -= unitData.cost
+		
+		-- 사용한 인덱스를 큐 뒤로, 큐 앞을 꺼내 슬롯 채우기
+		table.insert(self.summonQueue, usedIdx)
+		local nextIdx = table.remove(self.summonQueue, 1)
+		self.summonDeck[1] = nextIdx
+		
+		-- 덱을 포인트에 맞춰서 정렬
+		table.sort(self.summonDeck, function(a, b)
+			local unitA = self.summonPools[a]
+			local unitB = self.summonPools[b]
+			
+			local priotA = self.unitPriorityDict[unitA]
+			local pritoB = self.unitPriorityDict[unitB]
+			
+			return priotA < pritoB
+		end)
+		
+	end
+
+	@ExecSpace("ServerOnly")
+	method table GetUnitInfo(string id)
+		return self.userUnitList[id]
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean IsSummonAvailable(number needPoint)
+		if needPoint <= self.point then
+			return true
+		end
+
+		return false
+	end
+
+	@ExecSpace("Client")
+	method void SyncPoint(number curPoint)
+		self.point = curPoint
+	end
+
+end

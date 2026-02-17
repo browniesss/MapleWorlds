@@ -1,0 +1,41 @@
+@Component
+script pvpRankingComponent extends Component
+
+	property table ranking_list = {}
+
+	property integer score = 0
+
+	property integer rank = 0
+
+	@ExecSpace("Server")
+	method void GetRankingInfoCall()
+		_ProtocolService:CommonCall(senderUserId)
+
+		if #_pvpRankingService.RANK_LIST > 0 then
+			self:GetRankingInfoBack(_pvpRankingService.RANK_LIST)
+			return
+		end
+
+		_pvpRankingService:UpdateTable()
+
+		self:GetRankingInfoBack(_pvpRankingService.RANK_LIST)
+	end
+
+	@ExecSpace("Client")
+	method void GetRankingInfoBack(table res)
+		self.ranking_list = res
+		for rank, info in ipairs(self.ranking_list) do
+			if info.uid == _UserService.LocalPlayer.PlayerComponent.UserId then
+				self.score = info.score
+				self.rank = rank
+				return
+			end
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self:GetRankingInfoCall()
+	end
+
+end

@@ -212,6 +212,12 @@ script GameManager extends Logic
 	end
 
 	method void GameEnd()
+		-- PvP 모드는 pvpCombatComponent에서 별도 처리
+		if self.currentGameMode == _eGameMode.PvP then
+			self.currentGameMode = _eGameMode.Normal
+			return
+		end
+
 		-- 배속 저장 후 초기화
 		if _TimeScaleManager ~= nil then
 			_TimeScaleManager:SaveAndReset()
@@ -246,7 +252,9 @@ script GameManager extends Logic
 	end
 
 	method string GetGameMapName()
-		if self.currentGameMode == _eGameMode.Matrix then
+		if self.currentGameMode == _eGameMode.PvP then
+			return _pvpService.PVP_STAGE_PATH
+		elseif self.currentGameMode == _eGameMode.Matrix then
 			return "/maps/MatrixStage"
 		elseif self.currentGameMode == _eGameMode.Test then
 			return "/maps/TestMap"

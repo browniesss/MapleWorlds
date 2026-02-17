@@ -1,0 +1,177 @@
+@Component
+script PvPLobbyUI extends Component
+
+	property Entity coinText = nil
+
+	property Entity scoreText = nil
+
+	property Entity matchButton = nil
+
+	property Entity refreshButton = nil
+
+	property table slotList = {}
+
+	property any matchButtonHandler = nil
+
+	property any refreshButtonHandler = nil
+
+	property table slotHandlers = {}
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self:InitUI()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnEndPlay()
+		self:ClearHandlers()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void InitUI()
+		self:ClearHandlers()
+		
+		-- 코인 표시 업데이트
+		self:UpdateCoinDisplay()
+		
+		-- 스코어 표시 업데이트
+		self:UpdateScoreDisplay()
+		
+		-- 매치 버튼 핸들러
+		if self.matchButton ~= nil and self.matchButton.ButtonComponent ~= nil then
+			self.matchButtonHandler = self.matchButton.ButtonComponent.OnClick:Connect(function()
+				self:OnMatchButtonClick()
+			end)
+		end
+		
+		-- 새로고침 버튼 핸들러
+		if self.refreshButton ~= nil and self.refreshButton.ButtonComponent ~= nil then
+			self.refreshButtonHandler = self.refreshButton.ButtonComponent.OnClick:Connect(function()
+				self:OnRefreshButtonClick()
+			end)
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void ClearHandlers()
+		if self.matchButtonHandler ~= nil then
+			self.matchButtonHandler:Disconnect()
+			self.matchButtonHandler = nil
+		end
+		
+		if self.refreshButtonHandler ~= nil then
+			self.refreshButtonHandler:Disconnect()
+			self.refreshButtonHandler = nil
+		end
+		
+		for _, handler in pairs(self.slotHandlers) do
+			if handler ~= nil then
+				handler:Disconnect()
+			end
+		end
+		self.slotHandlers = {}
+	end
+
+	@ExecSpace("ClientOnly")
+	method void UpdateCoinDisplay()
+		if self.coinText == nil then
+			return
+		end
+		
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.pvpUserComponent ~= nil then
+			self.coinText.TextComponent.Text = tostring(user.pvpUserComponent.play_coin)
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void UpdateScoreDisplay()
+		if self.scoreText == nil then
+			return
+		end
+		
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.pvpRankingComponent ~= nil then
+			local score = user.pvpRankingComponent.score
+			local tier = self:GetTierName(score)
+			self.scoreText.TextComponent.Text = tier .. " (" .. tostring(score) .. ")"
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnRefreshButtonClick()
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.pvpMatcherMakerComponent ~= nil then
+			user.pvpMatcherMakerComponent:RefreshListCall()
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnMatchButtonClick()
+		local user = _UserService.LocalPlayer
+		if user == nil then
+			return
+		end
+		
+		-- 코인 체크
+		if user.pvpUserComponent ~= nil and user.pvpUserComponent.play_coin <= 0 then
+			return
+		end
+		
+		local matcher = user.pvpMatcherMakerComponent
+		if matcher == nil then
+			return
+		end
+		
+		local selected = matcher.selected
+		if selected < 1 or selected > #matcher.targetUserList then
+			return
+		end
+		
+		matcher:StartMatchCall(selected)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void UpdateSlots(table userList)
+		-- 슬롯 UI 업데이트
+		for i = 1, 4 do
+			if self.slotList[i] ~= nil then
+				local slot = self.slotList[i]
+				if i <= #userList then
+					local info = userList[i]
+					slot.Enable = true
+					slot.Visible = true
+		
+					-- 닉네임
+					local nameText = slot.Children[1]
+					if nameText ~= nil then
+						nameText.TextComponent.Text = info.nickname or info.uid or "???"
+					end
+		
+					-- 점수
+					local scoreText = slot.Children[2]
+					if scoreText ~= nil then
+						scoreText.TextComponent.Text = tostring(info.score or 0)
+					end
+				else
+					slot.Enable = false
+					slot.Visible = false
+				end
+			end
+		end
+	end
+
+	method string GetTierName(integer score)
+		if score >= _pvpRankingService.dia then
+			return "Diamond"
+		elseif score >= _pvpRankingService.platinum then
+			return "Platinum"
+		elseif score >= _pvpRankingService.gold then
+			return "Gold"
+		elseif score >= _pvpRankingService.silver then
+			return "Silver"
+		end
+		return "Bronze"
+	end
+
+end

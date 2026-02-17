@@ -1,0 +1,151 @@
+@Component
+script pvpUserComponent extends Component
+
+	property integer play_coin = 5
+
+	property table offense_deck = {}
+
+	property table defense_deck = {}
+
+	property integer next_play_coin = 0
+
+	@ExecSpace("ServerOnly")
+	method void OnUpdate(number delta)
+		local nowTs = DateTime.UtcNow.Elapsed
+		if self.next_play_coin > nowTs then
+			return
+		end
+		
+		if self.play_coin >= 5 then
+			return
+		end
+		
+		local addCoin = math.floor((nowTs - self.next_play_coin) / _pvpUserService.PLAY_COIN_UPDATE) + 1
+		
+		self.play_coin += addCoin
+		if self.play_coin > _pvpUserService.MAX_PLAY_COIN then
+			self.play_coin = _pvpUserService.MAX_PLAY_COIN
+		end
+		
+		self.next_play_coin = nowTs + _pvpUserService.PLAY_COIN_UPDATE
+		
+		self:UserCoinBack(self.play_coin)
+		self:UpdateCoinNextTs(self.next_play_coin)
+	end
+
+	@ExecSpace("Server")
+	method void GetUserDataCall()
+		_ProtocolService:CommonCall(senderUserId)
+		
+		local data = _pvpUserService:GetUserData(senderUserId)
+		if not (data.code == 0) then
+			-- TODO: Kick and log user
+			log_error("fail at _pvpUserService:GetUserData " .. senderUserId)
+			return
+		end
+		
+		self.play_coin = data.play_coin
+		self.next_play_coin = data.next_play_coin
+		self.offense_deck = data.offense_deck
+		self.defense_deck = data.defense_deck
+		
+		self:GetUserDataBack(data)
+	end
+
+	@ExecSpace("Client")
+	method void GetUserDataBack(table data)
+		self.play_coin = data.play_coin
+		self.next_play_coin = data.next_play_coin
+		self.offense_deck = data.offense_deck
+		self.defense_deck = data.defense_deck
+	end
+
+	@ExecSpace("Client")
+	method void UserCoinBack(integer coin)
+		self.play_coin = coin
+	end
+
+	@ExecSpace("Client")
+	method void UpdateCoinNextTs(integer ts)
+		self.next_play_coin = ts
+	end
+
+	@ExecSpace("Server")
+	method void SetOffeseUnitCall(integer index, string unit_id)
+		_ProtocolService:CommonCall(senderUserId)
+		
+		self.offense_deck[index] = unit_id
+		
+		local code = _pvpUserService:UpdateUserData(senderUserId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck)
+		
+		if not (code == 0) then
+			return
+		end
+		
+		self:SetOffenseUnitBack(self.offense_deck)
+	end
+
+	@ExecSpace("Client")
+	method void SetOffenseUnitBack(table deck)
+		self.offense_deck = deck
+	end
+
+	@ExecSpace("Server")
+	method void SetDefenseUnitCall(integer index, string unit_id)
+		_ProtocolService:CommonCall(senderUserId)
+		
+		self.defense_deck[index] = unit_id
+		
+		local code = _pvpUserService:UpdateUserData(senderUserId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck)
+		
+		if not (code == 0) then
+			return
+		end
+		
+		self:SetOffenseUnitBack(self.defense_deck)
+	end
+
+	@ExecSpace("Client")
+	method void SetDefenseUnitBack(table deck)
+		self.defense_deck = deck
+	end
+
+	@ExecSpace("Server")
+	method void UseCoin()
+		_ProtocolService:CommonCall(senderUserId)
+		if not self:CanUseCoin() then
+			return
+		end
+		
+		self.play_coin -= 1
+		
+		local code = _pvpUserService:UpdateUserData(senderUserId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck)
+		
+		if not (code == 0) then
+			return
+		end
+		
+		
+		self:UserCoinBack(self.play_coin)
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean CanUseCoin()
+		return self.play_coin > 0
+	end
+
+	@EventSender("Service", "UserService")
+	handler HandleUserEnterEvent(UserEnterEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: UserService
+		-- Space: Server
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local ProfileCode = event.ProfileCode
+		-- local UserId = event.UserId
+		---------------------------------------------------------
+		self:GetUserDataCall()
+	end
+
+end
