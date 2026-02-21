@@ -22,11 +22,13 @@ script pvpUserService extends Logic
 				play_coin=5,
 				offense_deck={},
 				defense_deck={},
+				offense_synergy={},
+				defense_synergy={},
 				next_play_coin=0,
 				code = 0
 			}
 
-			local updateCode = self:UpdateUserData(uid, data.play_coin, data.next_play_coin, data.offense_deck, data.defense_deck)
+			local updateCode = self:UpdateUserData(uid, data.play_coin, data.next_play_coin, data.offense_deck, data.defense_deck, data.offense_synergy, data.defense_synergy)
 			if not (updateCode == 0) then
 				return {
 					code=updateCode
@@ -44,19 +46,36 @@ script pvpUserService extends Logic
 		if type(decoded.defense_deck) == "string" then
 			decoded.defense_deck = _HttpService:JSONDecode(decoded.defense_deck)
 		end
+		-- offense_synergy, defense_synergy 디코딩
+		if type(decoded.offense_synergy) == "string" then
+			decoded.offense_synergy = _HttpService:JSONDecode(decoded.offense_synergy)
+		end
+		if decoded.offense_synergy == nil then
+			decoded.offense_synergy = {}
+		end
+		if type(decoded.defense_synergy) == "string" then
+			decoded.defense_synergy = _HttpService:JSONDecode(decoded.defense_synergy)
+		end
+		if decoded.defense_synergy == nil then
+			decoded.defense_synergy = {}
+		end
 		return decoded
 	end
 
 	@ExecSpace("ServerOnly")
-	method integer UpdateUserData(string uid, integer play_coin, integer next_play_coin, table offense_deck, table defense_deck)
+	method integer UpdateUserData(string uid, integer play_coin, integer next_play_coin, table offense_deck, table defense_deck, table offense_synergy, table defense_synergy)
 		-- 중첩 table은 JSONEncode가 지원하지 않으므로 별도로 직렬화
 		local offense_str = _HttpService:JSONEncode(offense_deck)
 		local defense_str = _HttpService:JSONEncode(defense_deck)
+		local offense_syn_str = _HttpService:JSONEncode(offense_synergy)
+		local defense_syn_str = _HttpService:JSONEncode(defense_synergy)
 
 		local data = {
 			play_coin=play_coin,
 			offense_deck=offense_str,
 			defense_deck=defense_str,
+			offense_synergy=offense_syn_str,
+			defense_synergy=defense_syn_str,
 			next_play_coin=next_play_coin,
 			code = 0
 		}

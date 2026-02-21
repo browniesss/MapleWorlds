@@ -6,6 +6,22 @@ script UserDeckUI extends Component
 
 	property Entity unitListUI = "6842c710-d474-4a17-a497-3f26d4842aed"
 
+	property boolean pvpMode = false
+
+	property string activeDeckType = "offense"
+
+	property Entity offenseTabButton = nil
+
+	property Entity defenseTabButton = nil
+
+	property Entity offenseTabLabel = nil
+
+	property Entity defenseTabLabel = nil
+
+	property any offenseTabHandler = nil
+
+	property any defenseTabHandler = nil
+
 	method void OnBeginPlay()
 		for i = 1, 8 do
 			self.deckItems[i] = self.Entity.Children[1].Children[i]
@@ -13,22 +29,167 @@ script UserDeckUI extends Component
 	end
 
 	method void OpenUserDeckUI()
+		self.pvpMode = false
+		self:ShowTabs(false)
+		self:DisconnectTabHandlers()
+
 		local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
-		 
+
 		for i = 1, 8 do
 			self.deckItems[i].DeckItem.itemIndex = i
 			local unitData = _EntityService:GetEntityByTag("Player").UserUnitStore.UserUnitMap[playerDeck.userDeck[i]]
 			if unitData == nil then
 				continue
 			end
-			
+
 			local skillData
 			if unitData ~= nil then
 				skillData = _SkillService:GetSkillByIDFromClient(unitData.skillID)
 			end
-			
+
 			self.deckItems[i].DeckItem:Init(unitData, skillData)
 		end
+	end
+
+	method void OpenPvPDeckUI()
+		self.pvpMode = true
+		self.activeDeckType = "offense"
+		self:ShowTabs(true)
+		self:ConnectTabHandlers()
+		self:UpdateTabVisuals()
+		self:LoadPvPDeck()
+	end
+
+	method void LoadPvPDeck()
+		local user = _UserService.LocalPlayer
+		if user == nil or user.pvpUserComponent == nil then
+			return
+		end
+
+		local deck = {}
+		if self.activeDeckType == "offense" then
+			deck = user.pvpUserComponent.offense_deck
+		else
+			deck = user.pvpUserComponent.defense_deck
+		end
+
+		local player = _EntityService:GetEntityByTag("Player")
+
+		for i = 1, 8 do
+			self.deckItems[i].DeckItem.itemIndex = i
+			local unitId = deck[i]
+			if unitId == nil or unitId == "" then
+				self.deckItems[i].DeckItem.unitData = nil
+				self.deckItems[i].DeckItem.skillData = {}
+				self.deckItems[i].DeckItem.redDotSprite = self.deckItems[i].Children[2]
+				self.deckItems[i].DeckItem.unitSprite = self.deckItems[i].Children[3]
+				self.deckItems[i].DeckItem.unitAvartarRenderer = self.deckItems[i].Children[4]
+				self.deckItems[i].DeckItem.unitName = self.deckItems[i].Children[5]
+				self.deckItems[i].DeckItem.unitPriceSprite = self.deckItems[i].Children[6]
+				self.deckItems[i].DeckItem.unitPriceLabel = self.deckItems[i].Children[7]
+				self.deckItems[i].DeckItem.unitFrameSprite = self.deckItems[i]
+				self.deckItems[i].DeckItem:RefreshUI()
+				continue
+			end
+
+			local unitData = player.UserUnitStore.UserUnitMap[unitId]
+			if unitData == nil then
+				self.deckItems[i].DeckItem.unitData = nil
+				self.deckItems[i].DeckItem.skillData = {}
+				self.deckItems[i].DeckItem.redDotSprite = self.deckItems[i].Children[2]
+				self.deckItems[i].DeckItem.unitSprite = self.deckItems[i].Children[3]
+				self.deckItems[i].DeckItem.unitAvartarRenderer = self.deckItems[i].Children[4]
+				self.deckItems[i].DeckItem.unitName = self.deckItems[i].Children[5]
+				self.deckItems[i].DeckItem.unitPriceSprite = self.deckItems[i].Children[6]
+				self.deckItems[i].DeckItem.unitPriceLabel = self.deckItems[i].Children[7]
+				self.deckItems[i].DeckItem.unitFrameSprite = self.deckItems[i]
+				self.deckItems[i].DeckItem:RefreshUI()
+				continue
+			end
+
+			local skillData
+			if unitData ~= nil then
+				skillData = _SkillService:GetSkillByIDFromClient(unitData.skillID)
+			end
+
+			self.deckItems[i].DeckItem:Init(unitData, skillData)
+		end
+	end
+
+	method void OnOffenseTabClick(Entity entity)
+		if self.activeDeckType == "offense" then
+			return
+		end
+		self.activeDeckType = "offense"
+		self:UpdateTabVisuals()
+		self:LoadPvPDeck()
+	end
+
+	method void OnDefenseTabClick(Entity entity)
+		if self.activeDeckType == "defense" then
+			return
+		end
+		self.activeDeckType = "defense"
+		self:UpdateTabVisuals()
+		self:LoadPvPDeck()
+	end
+
+	method void UpdateTabVisuals()
+		if self.offenseTabLabel ~= nil then
+			if self.activeDeckType == "offense" then
+				self.offenseTabLabel.TextComponent.FontColor = Color(1.0, 1.0, 1.0, 1.0)
+			else
+				self.offenseTabLabel.TextComponent.FontColor = Color(0.5, 0.5, 0.5, 1.0)
+			end
+		end
+
+		if self.defenseTabLabel ~= nil then
+			if self.activeDeckType == "defense" then
+				self.defenseTabLabel.TextComponent.FontColor = Color(1.0, 1.0, 1.0, 1.0)
+			else
+				self.defenseTabLabel.TextComponent.FontColor = Color(0.5, 0.5, 0.5, 1.0)
+			end
+		end
+	end
+
+	method void ShowTabs(boolean show)
+		if self.offenseTabButton ~= nil then
+			self.offenseTabButton.Enable = show
+			self.offenseTabButton.Visible = show
+		end
+		if self.defenseTabButton ~= nil then
+			self.defenseTabButton.Enable = show
+			self.defenseTabButton.Visible = show
+		end
+	end
+
+	method void ConnectTabHandlers()
+		self:DisconnectTabHandlers()
+
+		if self.offenseTabButton ~= nil and self.offenseTabButton.ButtonComponent ~= nil then
+			self.offenseTabHandler = self.offenseTabButton:ConnectEvent(ButtonClickEvent, self.OnOffenseTabClick)
+		end
+		if self.defenseTabButton ~= nil and self.defenseTabButton.ButtonComponent ~= nil then
+			self.defenseTabHandler = self.defenseTabButton:ConnectEvent(ButtonClickEvent, self.OnDefenseTabClick)
+		end
+	end
+
+	method void DisconnectTabHandlers()
+		if self.offenseTabHandler ~= nil and self.offenseTabButton ~= nil then
+			self.offenseTabButton:DisconnectEvent(ButtonClickEvent, self.offenseTabHandler)
+			self.offenseTabHandler = nil
+		end
+		if self.defenseTabHandler ~= nil and self.defenseTabButton ~= nil then
+			self.defenseTabButton:DisconnectEvent(ButtonClickEvent, self.defenseTabHandler)
+			self.defenseTabHandler = nil
+		end
+	end
+
+	method void ClosePvPDeckUI()
+		self:DisconnectTabHandlers()
+		self.pvpMode = false
+		self.activeDeckType = "offense"
+		self:ShowTabs(false)
 	end
 
 end

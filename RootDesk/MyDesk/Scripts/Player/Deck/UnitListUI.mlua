@@ -28,7 +28,24 @@ script UnitListUI extends Component
 		-- 1) 덱에 장착된 유닛 ID를 set로 만들기
 		local equipped = {}
 		local player = _EntityService:GetEntityByTag("Player")
-		if player and player.UserDeck and player.UserDeck.userDeck then
+		local userDeckUI = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck").UserDeckUI
+		if userDeckUI.pvpMode then
+			local user = _UserService.LocalPlayer
+			if user ~= nil and user.pvpUserComponent ~= nil then
+				local pvpDeck = {}
+				if userDeckUI.activeDeckType == "offense" then
+					pvpDeck = user.pvpUserComponent.offense_deck
+				else
+					pvpDeck = user.pvpUserComponent.defense_deck
+				end
+				for i = 1, 8 do
+					local uid = pvpDeck[i]
+					if uid ~= nil and uid ~= "" then
+						equipped[uid] = true
+					end
+				end
+			end
+		elseif player and player.UserDeck and player.UserDeck.userDeck then
 		    for i = 1, 8 do
 		        local uid = player.UserDeck.userDeck[i]
 		        if uid ~= nil then
@@ -63,7 +80,24 @@ script UnitListUI extends Component
 		-- 1) 덱에 장착된 유닛 ID를 set로 만들기
 		local equipped = {}
 		local player = _EntityService:GetEntityByTag("Player")
-		if player and player.UserDeck and player.UserDeck.userDeck then
+		local userDeckUI = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck").UserDeckUI
+		if userDeckUI.pvpMode then
+			local user = _UserService.LocalPlayer
+			if user ~= nil and user.pvpUserComponent ~= nil then
+				local pvpDeck = {}
+				if userDeckUI.activeDeckType == "offense" then
+					pvpDeck = user.pvpUserComponent.offense_deck
+				else
+					pvpDeck = user.pvpUserComponent.defense_deck
+				end
+				for i = 1, 8 do
+					local uid = pvpDeck[i]
+					if uid ~= nil and uid ~= "" then
+						equipped[uid] = true
+					end
+				end
+			end
+		elseif player and player.UserDeck and player.UserDeck.userDeck then
 		    for i = 1, 8 do
 		        local uid = player.UserDeck.userDeck[i]
 		        if uid ~= nil then

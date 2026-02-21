@@ -52,8 +52,13 @@ script UnitInfoPanel extends Component
 			self.limitBreakSkillInfo.Visible = true
 		end
 		
-		self.LevelUpButton.Enable = true
-		
+		local userDeckUI = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck").UserDeckUI
+		if userDeckUI.pvpMode then
+			self.LevelUpButton.Enable = false
+		else
+			self.LevelUpButton.Enable = true
+		end
+
 	end
 
 	@EventSender("Entity", "12461fd8-902c-4e93-bccd-0008d63b5b34")

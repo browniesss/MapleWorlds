@@ -7,18 +7,34 @@ script UserDeckSaveButton extends Component
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
-		local player = _EntityService:GetEntityByTag("Player")
-		_UserDeckService:SAVE(player.PlayerComponent.UserId)
-		
-		self.userDeckUI.Enable = false
-		self.userDeckUI.Visible = false
-		
-		self.userSynergyUI.Enable = false
-		
-		local lobbyInfoUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI")
-		
-		lobbyInfoUI.Enable = true
-		lobbyInfoUI.Visible = true
+		local userDeckUI = self.userDeckUI.Children[3].UserDeckUI
+
+		if userDeckUI.pvpMode then
+			userDeckUI:ClosePvPDeckUI()
+
+			self.userDeckUI.Enable = false
+			self.userDeckUI.Visible = false
+
+			self.userSynergyUI.Enable = false
+
+			local pvpLobbyUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI")
+			pvpLobbyUI.Enable = true
+			pvpLobbyUI.Visible = true
+			pvpLobbyUI.PvPLobbyUI:UpdateCoinDisplay()
+			pvpLobbyUI.PvPLobbyUI:UpdateScoreDisplay()
+		else
+			local player = _EntityService:GetEntityByTag("Player")
+			_UserDeckService:SAVE(player.PlayerComponent.UserId)
+
+			self.userDeckUI.Enable = false
+			self.userDeckUI.Visible = false
+
+			self.userSynergyUI.Enable = false
+
+			local lobbyInfoUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI")
+			lobbyInfoUI.Enable = true
+			lobbyInfoUI.Visible = true
+		end
 	end
 
 end

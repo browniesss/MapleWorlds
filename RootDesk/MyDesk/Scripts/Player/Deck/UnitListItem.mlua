@@ -100,21 +100,33 @@ script UnitListItem extends Component
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
-		local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
 		local userDeckUI = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck").UserDeckUI
 		local unitListUI = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck/UnitListUI").UnitListUI
 		local unitInfoPanel = _EntityService:GetEntityByPath("/ui/UserDeckUI/UnitInfoPanel")
 		local index = unitListUI.itemIndex
-		
+
 		userDeckUI.deckItems[index].DeckItem:Init(self.unitData, self.skillData)
 		userDeckUI.unitListUI.Enable = false
 		userDeckUI.unitListUI.Visible = false
-		playerDeck:SetDeckItem(self.unitData['id'], index)
-		
+
+		if userDeckUI.pvpMode then
+			local user = _UserService.LocalPlayer
+			if user ~= nil and user.pvpUserComponent ~= nil then
+				if userDeckUI.activeDeckType == "offense" then
+					user.pvpUserComponent:SetOffeseUnitCall(index, self.unitData['id'])
+				else
+					user.pvpUserComponent:SetDefenseUnitCall(index, self.unitData['id'])
+				end
+			end
+		else
+			local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
+			playerDeck:SetDeckItem(self.unitData['id'], index)
+		end
+
 		if self.unitData["spawnSkill"] ~= nil then
 			self.spawnSkillData = _SkillService:GetSkillByIDFromClient(self.unitData["spawnSkill"])
 		end
-		
+
 		self.limitBreakSkillData = nil
 		if self.unitData.grade >= 5 then
 			local limitBreakData = _UnitLimitBreakRepo:FindBuffInClient(self.unitData.grade, 6, self.unitData.id)
@@ -122,7 +134,7 @@ script UnitListItem extends Component
 				self.limitBreakSkillData = _SkillService:GetSkillByIDFromClient(limitBreakData.skillID)
 			end
 		end
-		
+
 		unitInfoPanel.UnitInfoPanel:Init(self.unitData, self.skillData, self.spawnSkillData, self.limitBreakSkillData, index)
 	end
 

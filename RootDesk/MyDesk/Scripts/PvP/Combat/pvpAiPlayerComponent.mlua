@@ -141,7 +141,7 @@ script pvpAiPlayerComponent extends Component
 		buffedUnit = _BuffedUnitService:SetUnitBuff(buffedUnit, userUnitInfo.level, userUnitInfo.limitBreak)
 		spawnEntity.Unit:SpawnEnemy(buffedUnit, skillData)
 		
-		self.point -= unitData.cost
+		self.point -= userUnitInfo.cost
 		
 		-- 사용한 인덱스를 큐 뒤로, 큐 앞을 꺼내 슬롯 채우기
 		table.insert(self.summonQueue, usedIdx)
