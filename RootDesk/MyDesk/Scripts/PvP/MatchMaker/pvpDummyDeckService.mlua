@@ -1,0 +1,116 @@
+@Logic
+script pvpDummyDeckService extends Logic
+
+	property table deckList = {}
+
+	method void OnBeginPlay()
+		self:InitDecks()
+	end
+
+	@ExecSpace("ServerOnly")
+	method void InitDecks()
+		table.clear(self.deckList)
+
+		-- Deck 1 (Easy)
+		local deck1 = {
+			"model://5aac7c14-9173-4d47-96f1-5fc5429e36c4",
+			"model://f2205e74-b8c8-4103-a768-59b58f8e2f55",
+			"model://eacb328a-428a-474c-b7e3-cb313b099806",
+			"model://af857ac1-d3ad-4509-b262-6a938c2a717c",
+			"model://62f3f55c-28fa-4151-bb73-39758b57801a",
+			"model://c57eb6a8-03e3-4115-999a-8b8c607e79da",
+			"model://f8e671ed-be6c-4fc5-8b44-71d7feffe832",
+			"model://2e2f8b7d-3988-44e6-9939-31b203425f2b"
+		}
+		local info1 = {}
+		info1["model://5aac7c14-9173-4d47-96f1-5fc5429e36c4"] = {id = "model://5aac7c14-9173-4d47-96f1-5fc5429e36c4", level = 1, limitBreak = 1, cost = 4}
+		info1["model://f2205e74-b8c8-4103-a768-59b58f8e2f55"] = {id = "model://f2205e74-b8c8-4103-a768-59b58f8e2f55", level = 1, limitBreak = 1, cost = 4}
+		info1["model://eacb328a-428a-474c-b7e3-cb313b099806"] = {id = "model://eacb328a-428a-474c-b7e3-cb313b099806", level = 1, limitBreak = 1, cost = 6}
+		info1["model://af857ac1-d3ad-4509-b262-6a938c2a717c"] = {id = "model://af857ac1-d3ad-4509-b262-6a938c2a717c", level = 1, limitBreak = 1, cost = 7}
+		info1["model://62f3f55c-28fa-4151-bb73-39758b57801a"] = {id = "model://62f3f55c-28fa-4151-bb73-39758b57801a", level = 1, limitBreak = 1, cost = 8}
+		info1["model://c57eb6a8-03e3-4115-999a-8b8c607e79da"] = {id = "model://c57eb6a8-03e3-4115-999a-8b8c607e79da", level = 1, limitBreak = 1, cost = 9}
+		info1["model://f8e671ed-be6c-4fc5-8b44-71d7feffe832"] = {id = "model://f8e671ed-be6c-4fc5-8b44-71d7feffe832", level = 1, limitBreak = 1, cost = 15}
+		info1["model://2e2f8b7d-3988-44e6-9939-31b203425f2b"] = {id = "model://2e2f8b7d-3988-44e6-9939-31b203425f2b", level = 1, limitBreak = 1, cost = 17}
+
+		-- Deck 2 (Normal)
+		local deck2 = {
+			"model://4a6f379a-312c-4ba4-8837-8b4a2a117b60",
+			"model://3b308c48-d7a0-420c-99bf-502e034642ad",
+			"model://f37a2185-c6a9-43b6-90ea-75d69a3305f4",
+			"model://acbba4d1-8524-4ad2-9d8e-ba8b94a7f5e6",
+			"model://c54b7465-79e2-4b6f-8bd5-be17dd7e4b23",
+			"model://a9c20d29-4d1e-415d-89a0-38a830c3a8be",
+			"model://aefa4ccd-c6cf-4c37-acc6-87ac97a23036",
+			"model://397e3aa9-6cbf-4950-a18a-51c62a559dfb"
+		}
+		local info2 = {}
+		info2["model://4a6f379a-312c-4ba4-8837-8b4a2a117b60"] = {id = "model://4a6f379a-312c-4ba4-8837-8b4a2a117b60", level = 1, limitBreak = 1, cost = 11}
+		info2["model://3b308c48-d7a0-420c-99bf-502e034642ad"] = {id = "model://3b308c48-d7a0-420c-99bf-502e034642ad", level = 1, limitBreak = 1, cost = 14}
+		info2["model://f37a2185-c6a9-43b6-90ea-75d69a3305f4"] = {id = "model://f37a2185-c6a9-43b6-90ea-75d69a3305f4", level = 1, limitBreak = 1, cost = 15}
+		info2["model://acbba4d1-8524-4ad2-9d8e-ba8b94a7f5e6"] = {id = "model://acbba4d1-8524-4ad2-9d8e-ba8b94a7f5e6", level = 1, limitBreak = 1, cost = 16}
+		info2["model://c54b7465-79e2-4b6f-8bd5-be17dd7e4b23"] = {id = "model://c54b7465-79e2-4b6f-8bd5-be17dd7e4b23", level = 1, limitBreak = 1, cost = 16}
+		info2["model://a9c20d29-4d1e-415d-89a0-38a830c3a8be"] = {id = "model://a9c20d29-4d1e-415d-89a0-38a830c3a8be", level = 1, limitBreak = 1, cost = 16}
+		info2["model://aefa4ccd-c6cf-4c37-acc6-87ac97a23036"] = {id = "model://aefa4ccd-c6cf-4c37-acc6-87ac97a23036", level = 1, limitBreak = 1, cost = 18}
+		info2["model://397e3aa9-6cbf-4950-a18a-51c62a559dfb"] = {id = "model://397e3aa9-6cbf-4950-a18a-51c62a559dfb", level = 1, limitBreak = 1, cost = 19}
+
+		-- Deck 3 (Hard)
+		local deck3 = {
+			"model://96e0a3c4-6bdc-4618-b484-d336b13d56eb",
+			"model://23f0df68-18dd-472b-8bcd-82acc77cbd18",
+			"model://28b6e793-0c47-490c-80b3-4cb544dfcc33",
+			"model://75a4fefc-2255-4b50-bd06-62ca565cfbe9",
+			"model://542d5bbb-981c-426c-9c84-113195c8f764",
+			"model://899a3457-6d13-42ec-a63e-224a9c736047",
+			"model://458add3f-20cb-48a2-9429-5673dbc5ae5d",
+			"model://0835a3e4-13ca-47e3-89e1-cc8c0b1de90b"
+		}
+		local info3 = {}
+		info3["model://96e0a3c4-6bdc-4618-b484-d336b13d56eb"] = {id = "model://96e0a3c4-6bdc-4618-b484-d336b13d56eb", level = 1, limitBreak = 1, cost = 20}
+		info3["model://23f0df68-18dd-472b-8bcd-82acc77cbd18"] = {id = "model://23f0df68-18dd-472b-8bcd-82acc77cbd18", level = 1, limitBreak = 1, cost = 20}
+		info3["model://28b6e793-0c47-490c-80b3-4cb544dfcc33"] = {id = "model://28b6e793-0c47-490c-80b3-4cb544dfcc33", level = 1, limitBreak = 1, cost = 20}
+		info3["model://75a4fefc-2255-4b50-bd06-62ca565cfbe9"] = {id = "model://75a4fefc-2255-4b50-bd06-62ca565cfbe9", level = 1, limitBreak = 1, cost = 21}
+		info3["model://542d5bbb-981c-426c-9c84-113195c8f764"] = {id = "model://542d5bbb-981c-426c-9c84-113195c8f764", level = 1, limitBreak = 1, cost = 23}
+		info3["model://899a3457-6d13-42ec-a63e-224a9c736047"] = {id = "model://899a3457-6d13-42ec-a63e-224a9c736047", level = 1, limitBreak = 1, cost = 20}
+		info3["model://458add3f-20cb-48a2-9429-5673dbc5ae5d"] = {id = "model://458add3f-20cb-48a2-9429-5673dbc5ae5d", level = 1, limitBreak = 1, cost = 21}
+		info3["model://0835a3e4-13ca-47e3-89e1-cc8c0b1de90b"] = {id = "model://0835a3e4-13ca-47e3-89e1-cc8c0b1de90b", level = 1, limitBreak = 1, cost = 22}
+
+		-- Deck 4 (Very Hard)
+		local deck4 = {
+			"model://2e70488f-dc60-48d0-ad91-fd2dc035a7c6",
+			"model://f25e76d6-61e8-4543-a497-3eccb4c2e541",
+			"model://d748522d-07cd-4c0d-b42f-15f6690d254f",
+			"model://2979d6ea-be9b-46bf-8f2c-5f5ed3fb53f5",
+			"model://3a51a020-bfa0-4d79-97c5-b9fe3647507b",
+			"model://90507375-b1a4-4a84-946c-9ea9ad96797f",
+			"model://376e9ea2-9b56-41b3-b9c9-9a696fe76c98",
+			"model://8f5cf161-d65c-46c9-aadd-86344a6d5ca0"
+		}
+		local info4 = {}
+		info4["model://2e70488f-dc60-48d0-ad91-fd2dc035a7c6"] = {id = "model://2e70488f-dc60-48d0-ad91-fd2dc035a7c6", level = 1, limitBreak = 1, cost = 29}
+		info4["model://f25e76d6-61e8-4543-a497-3eccb4c2e541"] = {id = "model://f25e76d6-61e8-4543-a497-3eccb4c2e541", level = 1, limitBreak = 1, cost = 24}
+		info4["model://d748522d-07cd-4c0d-b42f-15f6690d254f"] = {id = "model://d748522d-07cd-4c0d-b42f-15f6690d254f", level = 1, limitBreak = 1, cost = 33}
+		info4["model://2979d6ea-be9b-46bf-8f2c-5f5ed3fb53f5"] = {id = "model://2979d6ea-be9b-46bf-8f2c-5f5ed3fb53f5", level = 1, limitBreak = 1, cost = 30}
+		info4["model://3a51a020-bfa0-4d79-97c5-b9fe3647507b"] = {id = "model://3a51a020-bfa0-4d79-97c5-b9fe3647507b", level = 1, limitBreak = 1, cost = 34}
+		info4["model://90507375-b1a4-4a84-946c-9ea9ad96797f"] = {id = "model://90507375-b1a4-4a84-946c-9ea9ad96797f", level = 1, limitBreak = 1, cost = 30}
+		info4["model://376e9ea2-9b56-41b3-b9c9-9a696fe76c98"] = {id = "model://376e9ea2-9b56-41b3-b9c9-9a696fe76c98", level = 1, limitBreak = 1, cost = 32}
+		info4["model://8f5cf161-d65c-46c9-aadd-86344a6d5ca0"] = {id = "model://8f5cf161-d65c-46c9-aadd-86344a6d5ca0", level = 1, limitBreak = 1, cost = 34}
+
+		self.deckList = {
+			{defense_deck = deck1, unitInfo = info1},
+			{defense_deck = deck2, unitInfo = info2},
+			{defense_deck = deck3, unitInfo = info3},
+			{defense_deck = deck4, unitInfo = info4}
+		}
+	end
+
+	@ExecSpace("ServerOnly")
+	method table GetDummyDeck()
+		if #self.deckList == 0 then
+			self:InitDecks()
+		end
+
+		local index = math.random(1, #self.deckList)
+		return self.deckList[index]
+	end
+
+end

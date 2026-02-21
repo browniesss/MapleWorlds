@@ -115,6 +115,11 @@ script pvpMatcherMakerComponent extends Component
 				end
 			end
 			matchData.unitInfo = unitInfo
+		else
+			-- 더미 유저인 경우 pvpDummyDeckService에서 덱 가져오기
+			local dummyDeck = _pvpDummyDeckService:GetDummyDeck()
+			matchData.defense_deck = dummyDeck.defense_deck
+			matchData.unitInfo = dummyDeck.unitInfo
 		end
 
 		-- pvpCombatComponent에 매치 정보 설정
