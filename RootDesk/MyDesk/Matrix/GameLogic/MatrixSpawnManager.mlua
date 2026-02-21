@@ -178,6 +178,24 @@ script MatrixSpawnManager extends Logic
 	end
 
 	@ExecSpace("Server")
+	method void SpawnSkeletonDog(Vector3 pos)
+		local modelID = "model://c57eb6a8-03e3-4115-999a-8b8c607e79da"
+		local unitData = _UnitService:GetUnitByIDFromServer(modelID)
+		local unitModel = BuffedUnitModel()
+		unitModel:Init(unitData)
+
+		-- 레벨 30 고정
+		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, 30, 1)
+
+		-- 적 위치에 소환
+		local spawnParent = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList")
+		local spawnEntity = _SpawnService:SpawnByModelId(modelID, "SkeletonDog", pos, spawnParent)
+
+		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
+		spawnEntity.Unit:Spawn(unitModel, skillData)
+	end
+
+	@ExecSpace("Server")
 	method void SkillSpawn(string target, string summoner, Vector3 pos)
 		local unitData = _UnitService:GetUnitByIDFromServer(target)
 		

@@ -448,6 +448,13 @@ script MatrixAugmentService extends Logic
 				if mesoWallet ~= nil and mesoWallet.MesoWallet ~= nil then
 					mesoWallet.MesoWallet:AddMeso(goldAmount)
 				end
+			elseif effect.effectType == "SpawnOnKill" then
+				-- 처치 시 확률적으로 스켈독 소환
+				local roll = math.random()
+				if roll <= effect.value then
+					local pos = victim.TransformComponent.Position
+					_MatrixSpawnManager:SpawnSkeletonDog(pos)
+				end
 			end
 		end
 	end
