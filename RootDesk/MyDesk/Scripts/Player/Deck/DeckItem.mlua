@@ -142,6 +142,9 @@ script DeckItem extends Component
 
 		-- PvP 모드에서 빈 슬롯 클릭 시 UnitListUI로 바로 이동
 		if userDeckUI.pvpMode and self.unitData == nil then
+			if userDeckUI.opponentViewMode then
+				return
+			end
 			deckPanel.Children[1].UITransformComponent.anchoredPosition = Vector2(-200, 50)
 			userDeckUI.unitListUI.Enable = true
 			userDeckUI.unitListUI.Visible = true

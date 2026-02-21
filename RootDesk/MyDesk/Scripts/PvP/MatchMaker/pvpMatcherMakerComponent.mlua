@@ -71,6 +71,95 @@ script pvpMatcherMakerComponent extends Component
 	end
 
 	@ExecSpace("Server")
+	method void FetchOpponentDeckCall(integer index)
+		_ProtocolService:CommonCall(senderUserId)
+
+		if index < 1 or index > #self.targetUserList then
+			return
+		end
+
+		local target = self.targetUserList[index]
+		if target == nil then
+			return
+		end
+
+		local deckData = {defense_deck = {}, unitInfo = {}, nickname = target.nickname or ""}
+
+		if not (target.isDummy or false) then
+			local targetData = _pvpUserService:GetUserData(target.uid)
+			if targetData.code == 0 then
+				deckData.defense_deck = targetData.defense_deck or {}
+			end
+
+			-- 상대 유닛 데이터 일괄 조회 (level, limitBreak)
+			local opponentDS = _DataStorageService:GetUserDataStorage(target.uid)
+			local unitKeys = {}
+			for _, unitId in ipairs(deckData.defense_deck) do
+				if unitId ~= nil and unitId ~= "" then
+					unitKeys[#unitKeys + 1] = "USER_" .. unitId
+				end
+			end
+
+			local unitDataMap = {}
+			if #unitKeys > 0 then
+				local errCode, pages = opponentDS:BatchGetAndWait(unitKeys)
+				if errCode == 0 then
+					while true do
+						local datas = pages:GetCurrentPageDatas()
+						for _, data in pairs(datas) do
+							if data.Value ~= nil then
+								local model = UserUnitModel()
+								if model:DECODE(data.Value) then
+									unitDataMap[model.id] = model
+								end
+							end
+						end
+						if pages.IsLastPage then
+							break
+						end
+						pages:MoveToNextPageAndWait()
+					end
+				end
+			end
+
+			for _, unitId in ipairs(deckData.defense_deck) do
+				if unitId ~= nil and unitId ~= "" then
+					local unitData = _UnitService:GetUnitByIDFromServer(unitId)
+					if unitData ~= nil then
+						local level = 1
+						local limitBreak = 1
+						local userUnit = unitDataMap[unitId]
+						if userUnit ~= nil then
+							level = userUnit.level
+							limitBreak = userUnit.limitBreak
+						end
+						deckData.unitInfo[unitId] = {
+							id = unitId,
+							level = level,
+							limitBreak = limitBreak,
+							cost = unitData["cost"] or unitData["summonCost"] or 0
+						}
+					end
+				end
+			end
+		else
+			local dummyDeck = _pvpDummyDeckService:GetDummyDeck()
+			deckData.defense_deck = dummyDeck.defense_deck
+			deckData.unitInfo = dummyDeck.unitInfo
+		end
+
+		self:FetchOpponentDeckBack(deckData)
+	end
+
+	@ExecSpace("Client")
+	method void FetchOpponentDeckBack(table deckData)
+		local pvpLobbyUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI")
+		if pvpLobbyUI ~= nil and pvpLobbyUI.PvPLobbyUI ~= nil then
+			pvpLobbyUI.PvPLobbyUI:ShowOpponentDeck(deckData)
+		end
+	end
+
+	@ExecSpace("Server")
 	method void StartMatchCall(integer index)
 		_ProtocolService:CommonCall(senderUserId)
 

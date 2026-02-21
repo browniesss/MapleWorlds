@@ -59,12 +59,25 @@ script UnitInfoPanel extends Component
 			self.LevelUpButton.Enable = true
 		end
 
+		-- 상대 덱 보기 모드: 교체 버튼 비활성화
+		local changeButton = _EntityService:GetEntityByPath("/ui/UserDeckUI/UnitInfoPanel/ChangeButton")
+		if changeButton ~= nil and changeButton.ButtonComponent ~= nil then
+			if userDeckUI.opponentViewMode then
+				changeButton.ButtonComponent.Enable = false
+			else
+				changeButton.ButtonComponent.Enable = true
+			end
+		end
+
 	end
 
 	@EventSender("Entity", "12461fd8-902c-4e93-bccd-0008d63b5b34")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
 		local userDeckUI = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck").UserDeckUI
-		
+		if userDeckUI.opponentViewMode then
+			return
+		end
+
 		userDeckUI.unitListUI.Enable = true
 		userDeckUI.unitListUI.UnitListUI:OpenListUI(self.itemIndex)
 		userDeckUI.unitListUI.Visible = true

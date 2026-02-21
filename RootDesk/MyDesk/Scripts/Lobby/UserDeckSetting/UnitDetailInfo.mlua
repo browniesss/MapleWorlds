@@ -55,6 +55,20 @@ script UnitDetailInfo extends Component
 		
 		self:SetSprite()
 		self:SetLabel()
+		
+		local userDeckUI = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck").UserDeckUI
+		if userDeckUI.opponentViewMode then
+			self.levelUpPanel.Entity.Enable = false
+			self.levelUpPanel.Entity.Visible = false
+			self.limitBreakPanel.Entity.Enable = false
+			self.limitBreakPanel.Entity.Visible = false
+			return
+		end
+		
+		self.levelUpPanel.Entity.Enable = true
+		self.levelUpPanel.Entity.Visible = true
+		self.limitBreakPanel.Entity.Enable = true
+		self.limitBreakPanel.Entity.Visible = true
 		self.levelUpPanel:InitPanel(unitData)
 		self.limitBreakPanel:InitPanel(unitData)
 	end
@@ -98,14 +112,29 @@ script UnitDetailInfo extends Component
 	end
 
 	method void SetLabel()
-		local data = _UserMonsterService:GetOne(self.unitData.id)
+		local userDeckUI = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck").UserDeckUI
+		
 		local count = ""
 		local level = 1
-		if not (data == nil) then
-			if data.limitBreak > 2 then
-				count = " X" .. (data.limitBreak - 1)
+		
+		if userDeckUI.opponentViewMode then
+			-- 상대 유닛: BuffedUnitModel의 데이터 사용
+			level = self.unitData.level or 1
+			local lb = self.unitData.limitBreak or 1
+			if lb <= 1 then
+				count = " (돌파 없음)"
+			elseif lb > 1 then
+				count = " X" .. (lb - 1)
 			end
-			level = data.level
+		else
+			-- 내 유닛: 기존 로직 (UserMonsterService 조회)
+			local data = _UserMonsterService:GetOne(self.unitData.id)
+			if not (data == nil) then
+				if data.limitBreak > 2 then
+					count = " X" .. (data.limitBreak - 1)
+				end
+				level = data.level
+			end
 		end
 		
 		self.unitName.TextComponent.Text = self.unitData['name'] .. count
@@ -115,7 +144,7 @@ script UnitDetailInfo extends Component
 		self.attackRangeLabel.TextComponent.Text = self.unitData['attackRange']
 		self.attackSpeedLabel.TextComponent.Text = self.unitData['attackSpeed']
 		self.mpLabel.TextComponent.Text = self.unitData['maxMp']
-		self.levelLabel.TextComponent.Text = "Level: ".. level
+		self.levelLabel.TextComponent.Text = "Level: " .. level
 	end
 
 	method void InitForGacha(BuffedUnitModel unitData)

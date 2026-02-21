@@ -33,6 +33,10 @@ script PvPLobbyUI extends Component
 
 	property any backButtonHandler = nil
 
+	property Entity viewDeckButton = nil
+
+	property any viewDeckButtonHandler = nil
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		self:InitUI()
@@ -73,6 +77,11 @@ script PvPLobbyUI extends Component
 			self.backButtonHandler = self.backButton:ConnectEvent(ButtonClickEvent, self.OnBackButtonClicked)
 		end
 
+		-- 덱 보기 버튼 핸들러
+		if self.viewDeckButton ~= nil and self.viewDeckButton.ButtonComponent ~= nil then
+			self.viewDeckButtonHandler = self.viewDeckButton:ConnectEvent(ButtonClickEvent, self.OnViewDeckButtonClicked)
+		end
+
 		-- 슬롯 목록 및 클릭 핸들러 구성
 		for i, slot in ipairs(self.userList.Children) do
 			self.slotList[#self.slotList + 1] = slot
@@ -109,6 +118,11 @@ script PvPLobbyUI extends Component
 		if self.backButtonHandler ~= nil and self.backButton ~= nil then
 			self.backButton:DisconnectEvent(ButtonClickEvent, self.backButtonHandler)
 			self.backButtonHandler = nil
+		end
+
+		if self.viewDeckButtonHandler ~= nil and self.viewDeckButton ~= nil then
+			self.viewDeckButton:DisconnectEvent(ButtonClickEvent, self.viewDeckButtonHandler)
+			self.viewDeckButtonHandler = nil
 		end
 
 		if self.slot1Handler ~= nil and self.slotList[1] ~= nil then
@@ -316,6 +330,50 @@ script PvPLobbyUI extends Component
 		unitInfoPanel.Visible = false
 
 		deckPanel.UserDeckUI:OpenPvPDeckUI()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnViewDeckButtonClicked(Entity entity)
+		self:OnViewDeckButtonClick()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnViewDeckButtonClick()
+		local user = _UserService.LocalPlayer
+		if user == nil then
+			return
+		end
+		local matcher = user.pvpMatcherMakerComponent
+		if matcher == nil then
+			return
+		end
+		local selected = matcher.selected
+		if selected < 1 or selected > #matcher.targetUserList then
+			return
+		end
+		matcher:FetchOpponentDeckCall(selected)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void ShowOpponentDeck(table deckData)
+		-- PvPLobbyUI 숨기기
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+
+		-- UserDeckUI 열기 (상대 덱 보기 모드)
+		local userDeckUIRoot = _EntityService:GetEntityByPath("/ui/UserDeckUI")
+		userDeckUIRoot.Enable = true
+		userDeckUIRoot.Visible = true
+
+		local deckPanel = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck")
+		local unitInfoPanel = _EntityService:GetEntityByPath("/ui/UserDeckUI/UnitInfoPanel")
+
+		deckPanel.Children[1].UITransformComponent.anchoredPosition = Vector2(0, 50)
+
+		unitInfoPanel.Enable = false
+		unitInfoPanel.Visible = false
+
+		deckPanel.UserDeckUI:OpenOpponentDeckUI(deckData)
 	end
 
 	method string GetTierName(integer score)

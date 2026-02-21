@@ -8,6 +8,8 @@ script UserDeckUI extends Component
 
 	property boolean pvpMode = false
 
+	property boolean opponentViewMode = false
+
 	property string activeDeckType = "offense"
 
 	property Entity offenseTabButton = nil
@@ -188,8 +190,88 @@ script UserDeckUI extends Component
 	method void ClosePvPDeckUI()
 		self:DisconnectTabHandlers()
 		self.pvpMode = false
+		self.opponentViewMode = false
 		self.activeDeckType = "offense"
 		self:ShowTabs(false)
+
+		-- 저장 버튼 텍스트 복원
+		local saveButtonText = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck/SaveButton/UIText")
+		if saveButtonText ~= nil then
+			saveButtonText.TextComponent.Text = "편성 저장"
+		end
+	end
+
+	method void OpenOpponentDeckUI(table deckData)
+		self.pvpMode = true
+		self.opponentViewMode = true
+		self:ShowTabs(false)
+		self:DisconnectTabHandlers()
+
+		-- 저장 버튼 텍스트를 "돌아가기"로 변경
+		local saveButtonText = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck/SaveButton/UIText")
+		if saveButtonText ~= nil then
+			saveButtonText.TextComponent.Text = "돌아가기"
+		end
+
+		local deck = deckData.defense_deck or {}
+		local unitInfoMap = deckData.unitInfo or {}
+
+		for i = 1, 8 do
+			self.deckItems[i].DeckItem.itemIndex = i
+			local unitId = deck[i]
+			if unitId == nil then
+				unitId = deck[tostring(i)]
+			end
+			if unitId == nil or unitId == "" then
+				self.deckItems[i].DeckItem.unitData = nil
+				self.deckItems[i].DeckItem.skillData = {}
+				self.deckItems[i].DeckItem.redDotSprite = self.deckItems[i].Children[2]
+				self.deckItems[i].DeckItem.unitSprite = self.deckItems[i].Children[3]
+				self.deckItems[i].DeckItem.unitAvartarRenderer = self.deckItems[i].Children[4]
+				self.deckItems[i].DeckItem.unitName = self.deckItems[i].Children[5]
+				self.deckItems[i].DeckItem.unitPriceSprite = self.deckItems[i].Children[6]
+				self.deckItems[i].DeckItem.unitPriceLabel = self.deckItems[i].Children[7]
+				self.deckItems[i].DeckItem.unitFrameSprite = self.deckItems[i]
+				self.deckItems[i].DeckItem:RefreshUI()
+				continue
+			end
+
+			local unitTable = _UnitService:GetUnitByIDFromClient(unitId)
+			if unitTable == nil then
+				self.deckItems[i].DeckItem.unitData = nil
+				self.deckItems[i].DeckItem.skillData = {}
+				self.deckItems[i].DeckItem.redDotSprite = self.deckItems[i].Children[2]
+				self.deckItems[i].DeckItem.unitSprite = self.deckItems[i].Children[3]
+				self.deckItems[i].DeckItem.unitAvartarRenderer = self.deckItems[i].Children[4]
+				self.deckItems[i].DeckItem.unitName = self.deckItems[i].Children[5]
+				self.deckItems[i].DeckItem.unitPriceSprite = self.deckItems[i].Children[6]
+				self.deckItems[i].DeckItem.unitPriceLabel = self.deckItems[i].Children[7]
+				self.deckItems[i].DeckItem.unitFrameSprite = self.deckItems[i]
+				self.deckItems[i].DeckItem:RefreshUI()
+				continue
+			end
+
+			-- 상대 유닛의 실제 level/limitBreak 사용
+			local level = 1
+			local limitBreak = 1
+			local unitMeta = unitInfoMap[unitId]
+			if unitMeta ~= nil then
+				level = unitMeta.level or 1
+				limitBreak = unitMeta.limitBreak or 1
+			end
+
+			local buffedUnit = BuffedUnitModel()
+			buffedUnit:Init(unitTable)
+			local buffed = _BuffedUnitService:SetUnitBuff(buffedUnit, level, limitBreak)
+			if buffed ~= nil then
+				buffedUnit = buffed
+			else
+				buffedUnit.level = level
+				buffedUnit.limitBreak = limitBreak
+			end
+			local skillData = _SkillService:GetSkillByIDFromClient(buffedUnit.skillID)
+			self.deckItems[i].DeckItem:Init(buffedUnit, skillData)
+		end
 	end
 
 end
