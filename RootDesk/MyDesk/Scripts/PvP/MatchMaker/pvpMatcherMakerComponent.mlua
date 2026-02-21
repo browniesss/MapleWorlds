@@ -63,6 +63,11 @@ script pvpMatcherMakerComponent extends Component
 	@ExecSpace("Client")
 	method void RefeshListBack(table list)
 		self.targetUserList = list
+
+		local pvpLobbyUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI")
+		if pvpLobbyUI ~= nil and pvpLobbyUI.PvPLobbyUI ~= nil then
+			pvpLobbyUI.PvPLobbyUI:UpdateSlots(list)
+		end
 	end
 
 	@ExecSpace("Server")
@@ -113,7 +118,8 @@ script pvpMatcherMakerComponent extends Component
 		end
 
 		-- pvpCombatComponent에 매치 정보 설정
-		local pvpCombat = self.Entity.pvpCombatComponent
+		local pvpManager = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/PvPManager")
+		local pvpCombat = pvpManager ~= nil and pvpManager.pvpCombatComponent or nil
 		if pvpCombat ~= nil then
 			pvpCombat:SetMatchInfo(matchData)
 		end

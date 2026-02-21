@@ -35,7 +35,10 @@
         "script.UserBreakLimitSkillProtocol",
         "script.AdminToolUI",
         "script.AdminProtocol",
-        "script.UserMatrixManager"
+        "script.UserMatrixManager",
+        "script.pvpUserComponent",
+        "script.pvpMatcherMakerComponent",
+        "script.pvpRankingComponent"
       ],
       "Properties": [],
       "Values": [
@@ -804,6 +807,42 @@
         },
         {
           "TargetType": "script.AdminProtocol",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "script.UserMatrixManager",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "script.pvpUserComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "script.pvpMatcherMakerComponent",
+          "Name": "Enable",
+          "ValueType": {
+            "$type": "MODNativeType",
+            "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+          },
+          "Value": true
+        },
+        {
+          "TargetType": "script.pvpRankingComponent",
           "Name": "Enable",
           "ValueType": {
             "$type": "MODNativeType",

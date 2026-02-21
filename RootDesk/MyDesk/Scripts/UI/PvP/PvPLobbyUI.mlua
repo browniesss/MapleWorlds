@@ -17,6 +17,8 @@ script PvPLobbyUI extends Component
 
 	property table slotHandlers = {}
 
+	property Entity userList = nil
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		self:InitUI()
@@ -49,6 +51,23 @@ script PvPLobbyUI extends Component
 			self.refreshButtonHandler = self.refreshButton.ButtonComponent.OnClick:Connect(function()
 				self:OnRefreshButtonClick()
 			end)
+		end
+		
+		for i, slot in ipairs(self.userList.Children) do
+			self.slotList[#self.slotList + 1] = slot
+
+			-- 슬롯 클릭 핸들러 연결
+			if slot.ButtonComponent ~= nil then
+				local capturedIndex = i
+				local handler = slot.ButtonComponent.OnClick:Connect(function()
+					local user = _UserService.LocalPlayer
+					if user ~= nil and user.pvpMatcherMakerComponent ~= nil then
+						user.pvpMatcherMakerComponent.selected = capturedIndex
+						self:HighlightSlot(capturedIndex)
+					end
+				end)
+				self.slotHandlers[#self.slotHandlers + 1] = handler
+			end
 		end
 	end
 
@@ -156,6 +175,23 @@ script PvPLobbyUI extends Component
 				else
 					slot.Enable = false
 					slot.Visible = false
+				end
+			end
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void HighlightSlot(integer index)
+		for i = 1, #self.slotList do
+			local slot = self.slotList[i]
+			if slot == nil then
+				continue
+			end
+			if slot.SpriteGUIRendererComponent ~= nil then
+				if i == index then
+					slot.SpriteGUIRendererComponent.Color = Color(1.0, 0.9, 0.3, 1.0)
+				else
+					slot.SpriteGUIRendererComponent.Color = Color(1.0, 1.0, 1.0, 1.0)
 				end
 			end
 		end

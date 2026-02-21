@@ -163,6 +163,18 @@ script UnitShopItem extends Component
 			return
 		end
 
+		-- PvP 모드 처리
+		if _GameManager.currentGameMode == _eGameMode.PvP then
+			local pvpManager = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/PvPManager")
+			if pvpManager == nil then return end
+			local pvpUserSpawn = pvpManager.pvpUserSpawnComponent
+			if pvpUserSpawn == nil then return end
+			if pvpUserSpawn.point < self.price then return end
+			pvpUserSpawn:SpawnUnit(self.unitData['id'], Vector3.zero)
+			self.shop:OnSpawn(self.id, self.price)
+			return
+		end
+
 		if not _SpawnManager:IsCanSpawn(self.price)then
 			return
 		end
@@ -247,6 +259,7 @@ script UnitShopItem extends Component
 		-- 일반 모드 또는 매트릭스 모드 체크
 		local isPlaying = _GameManager.isPlaying
 		local isMatrixMode = false
+		local isPvPMode = _GameManager.currentGameMode == _eGameMode.PvP
 		if _MatrixGameManager ~= nil and _MatrixGameManager.isPlaying then
 			isPlaying = true
 			isMatrixMode = true
@@ -259,13 +272,19 @@ script UnitShopItem extends Component
 		-- 현재 게임 모드에 맞는 상점인지 확인
 		local shopPath = self.shop.Entity.Path or ""
 		local isMatrixShop = string.find(shopPath, "MatrixUI") ~= nil
+		local isPvPShop = string.find(shopPath, "Ingame_Shop_Group") ~= nil
 
-		-- 매트릭스 모드인데 일반 상점이면 무시
+		-- 매트릭스 모드인데 일반/PvP 상점이면 무시
 		if isMatrixMode and not isMatrixShop then
 			return
 		end
-		-- 일반 모드인데 매트릭스 상점이면 무시
+		-- 일반/PvP 모드인데 매트릭스 상점이면 무시
 		if not isMatrixMode and isMatrixShop then
+			return
+		end
+
+		-- PvP 모드인데 PvP 상점(Ingame_Shop_Group)이 아니면 무시
+		if isPvPMode and not isPvPShop then
 			return
 		end
 
@@ -281,10 +300,28 @@ script UnitShopItem extends Component
 		elseif event.key == KeyboardKey.E and self.shopItemIndex == 3 then
 			isKeyDown = true
 		elseif event.key == KeyboardKey.R and self.shopItemIndex == 4 then
-			isKeyDown = true	
+			isKeyDown = true
 		end
-		
-		if not isKeyDown or not _SpawnManager:IsCanSpawn(self.price) or  _UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill then
+
+		if not isKeyDown or _UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill then
+			return
+		end
+
+		-- PvP 모드 스폰 처리
+		if isPvPMode then
+			local pvpManager = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/PvPManager")
+			if pvpManager == nil then return end
+			local pvpCombat = pvpManager.pvpCombatComponent
+			if pvpCombat == nil or not pvpCombat.isPlaying then return end
+			local pvpUserSpawn = pvpManager.pvpUserSpawnComponent
+			if pvpUserSpawn == nil then return end
+			if pvpUserSpawn.point < self.price then return end
+			pvpUserSpawn:SpawnUnit(self.unitData['id'], Vector3.zero)
+			self.shop:OnSpawn(self.id, self.price)
+			return
+		end
+
+		if not _SpawnManager:IsCanSpawn(self.price) then
 			return
 		end
 

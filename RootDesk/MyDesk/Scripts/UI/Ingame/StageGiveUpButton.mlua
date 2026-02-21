@@ -8,6 +8,15 @@ script StageGiveUpButton extends Component
 			return
 		end
 
+		-- PvP 모드 처리: 포기 = 패배
+		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.PvP then
+			local pvpManager = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/PvPManager")
+			if pvpManager ~= nil and pvpManager.pvpCombatComponent ~= nil then
+				pvpManager.pvpCombatComponent:GiveUpCall()
+			end
+			return
+		end
+
 		-- 튜토리얼 모드(Stage000)에서 포기한 경우 체크
 		-- chapterIndex와 mapIndex로 직접 판단 (동기화 문제 해결)
 		local wasTutorialMode = false

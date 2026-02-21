@@ -83,6 +83,12 @@ script pvpUserSpawnComponent extends Component
 	@ExecSpace("Client")
 	method void SyncPoint(number point)
 		self.point = point
+
+		-- 포인트 UI 업데이트
+		local coinText = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group/User_Coin_Bar/ingame_money")
+		if coinText ~= nil then
+			coinText.TextComponent.Text = tostring(math.floor(point))
+		end
 	end
 
 end

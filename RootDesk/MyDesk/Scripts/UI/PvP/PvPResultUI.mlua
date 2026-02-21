@@ -112,16 +112,50 @@ script PvPResultUI extends Component
 		-- 결과 UI 닫기
 		self.Entity.Enable = false
 		self.Entity.Visible = false
-		
+
 		-- 게임 모드 초기화
 		_GameManager.currentGameMode = _eGameMode.Normal
-		
+
+		-- 로딩 화면 표시
+		_LoadingManager:Show()
+
 		-- 메인 로비로 텔레포트
 		_TeleportService:TeleportToMapPosition(
 			_UserService.LocalPlayer,
 			Vector3.zero,
-			"Lobby"
+			"MainLobbyMap"
 		)
+
+		-- MainLobbyUI 재활성화
+		local mainLobbyUI = _EntityService:GetEntityByPath("/ui/MainLobbyUI")
+		if mainLobbyUI ~= nil then
+			mainLobbyUI.Enable = true
+			mainLobbyUI.Visible = true
+		end
+
+		local lobbyBadgeButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton")
+		if lobbyBadgeButton ~= nil then
+			lobbyBadgeButton.Enable = true
+		end
+		local lobbyCodexButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/CodexButton")
+		if lobbyCodexButton ~= nil then
+			lobbyCodexButton.Enable = true
+		end
+		local lobbyCouponButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/CouponButton")
+		if lobbyCouponButton ~= nil then
+			lobbyCouponButton.Enable = true
+		end
+
+		if Environment:IsMobilePlatform() then
+			local lobbyJoyStick = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIJoystick")
+			if lobbyJoyStick ~= nil then
+				lobbyJoyStick.Enable = true
+			end
+			local lobbyJumpButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/JumpButton")
+			if lobbyJumpButton ~= nil then
+				lobbyJumpButton.Enable = true
+			end
+		end
 	end
 
 	method string GetTierName(integer score)

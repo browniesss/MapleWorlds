@@ -73,19 +73,93 @@ script pvpCombatComponent extends Component
 		self.gameTimerAccum = 0
 		self.maxGameTime = _pvpService.MAX_GAME_TIME
 
+		-- isPlaying 플래그 설정 (UnitShopItem 키 입력에 필요)
+		_GameManager.isPlaying = true
+
+		-- 메소 수입 차단 (포인트 표시 간섭 방지)
+		local ingameIncome = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/ingameIncome")
+		if ingameIncome ~= nil then
+			ingameIncome.Enable = false
+		end
+
 		self:GameStartBack()
 	end
 
 	@ExecSpace("Client")
 	method void GameStartBack()
-		-- PvP 인게임 UI 활성화
-		local pvpIngameUI = _EntityService:GetEntityByPath("/ui/PvPIngameUI")
-		if pvpIngameUI ~= nil then
-			pvpIngameUI.Enable = true
-			pvpIngameUI.Visible = true
-			if pvpIngameUI.PvPIngameUI ~= nil then
-				pvpIngameUI.PvPIngameUI:InitUI(self.UserTower, self.EnemyTower)
+		-- PvPLobbyUI 숨기기
+		local pvpLobbyUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI")
+		if pvpLobbyUI ~= nil then
+			pvpLobbyUI.Enable = false
+			pvpLobbyUI.Visible = false
+		end
+
+		-- Ingame_Shop_Group 활성화
+		local ingameShop = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group")
+		if ingameShop ~= nil then
+			ingameShop.Enable = true
+			ingameShop.Visible = true
+		end
+
+		-- Ingame_Info_UI_Group 활성화
+		local ingameInfo = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group")
+		if ingameInfo ~= nil then
+			ingameInfo.Enable = true
+			ingameInfo.Visible = true
+		end
+
+		-- HP 바 연결
+		local ourHealthBarUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/Player_HP_bar")
+		if ourHealthBarUI ~= nil and ourHealthBarUI.OurHealthBar ~= nil then
+			ourHealthBarUI.OurHealthBar.tower = self.UserTower
+		end
+
+		local enemyHealthBarUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/EnemyHealthBar")
+		if enemyHealthBarUI ~= nil and enemyHealthBarUI.EnemyHealthBar ~= nil then
+			enemyHealthBarUI.EnemyHealthBar.tower = self.EnemyTower
+		end
+
+		-- 유저 닉네임 표시
+		local userNameUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/UserInfo/UserName")
+		if userNameUI ~= nil then
+			local user = _UserService.LocalPlayer
+			if user ~= nil then
+				userNameUI.TextComponent.Text = user.PlayerComponent.Nickname
 			end
+		end
+
+		-- ingameWalletUI 비활성화 (MesoUI 포인트 표시 간섭 방지)
+		local ingameWalletUI = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/ingameWalletUI")
+		if ingameWalletUI ~= nil then
+			ingameWalletUI.Enable = false
+		end
+
+		-- 타이머 초기값 표시 (남은 시간: maxGameTime - gameTimer)
+		local remaining = self.maxGameTime - self.gameTimer
+		if remaining < 0 then remaining = 0 end
+		local minutes = math.floor(remaining / 60)
+		local seconds = math.floor(remaining % 60)
+		local timeText = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/CenterUI/TimeText")
+		if timeText ~= nil then
+			timeText.TextComponent.Text = string.format("%d:%02d", minutes, seconds)
+		end
+
+		-- SkillSlots 비활성화 (PvP v1에서는 미사용)
+		local skillSlots = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group/SkillSlots")
+		if skillSlots ~= nil then
+			skillSlots.Enable = false
+		end
+
+		-- UnitShop 초기화 (PvP 모드 감지하여 offense_deck 사용)
+		local unitShopEntity = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group/UnitShop")
+		if unitShopEntity ~= nil and unitShopEntity.UnitShop ~= nil then
+			unitShopEntity.UnitShop:InitShop()
+		end
+
+		-- 포인트 초기 표시
+		local coinText = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group/User_Coin_Bar/ingame_money")
+		if coinText ~= nil then
+			coinText.TextComponent.Text = "0"
 		end
 	end
 
@@ -127,6 +201,9 @@ script pvpCombatComponent extends Component
 	method void GameEndCall(boolean isWin)
 		self.isPlaying = false
 
+		-- isPlaying 플래그 초기화
+		_GameManager.isPlaying = false
+
 		-- AI 정리
 		local pvpAi = self.Entity.pvpAiPlayerComponent
 		if pvpAi ~= nil then
@@ -135,6 +212,12 @@ script pvpCombatComponent extends Component
 
 		-- 모든 유닛 제거
 		self:DestroyAllUnits()
+
+		-- 메소 수입 복원
+		local ingameIncome = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/ingameIncome")
+		if ingameIncome ~= nil then
+			ingameIncome.Enable = true
+		end
 
 		-- 랭킹 점수 업데이트
 		local deltaScore = 0
@@ -162,11 +245,18 @@ script pvpCombatComponent extends Component
 
 	@ExecSpace("Client")
 	method void GameEndBack(boolean isWin, integer deltaScore, integer newScore)
-		-- 인게임 UI 비활성화
-		local pvpIngameUI = _EntityService:GetEntityByPath("/ui/PvPIngameUI")
-		if pvpIngameUI ~= nil then
-			pvpIngameUI.Enable = false
-			pvpIngameUI.Visible = false
+		-- Ingame_Shop_Group 비활성화
+		local ingameShop = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group")
+		if ingameShop ~= nil then
+			ingameShop.Enable = false
+			ingameShop.Visible = false
+		end
+
+		-- Ingame_Info_UI_Group 비활성화
+		local ingameInfo = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group")
+		if ingameInfo ~= nil then
+			ingameInfo.Enable = false
+			ingameInfo.Visible = false
 		end
 
 		-- 결과 UI 표시
@@ -183,6 +273,27 @@ script pvpCombatComponent extends Component
 	@ExecSpace("Client")
 	method void SyncTimer(number time)
 		self.gameTimer = time
+
+		-- 타이머 UI 업데이트
+		local remaining = self.maxGameTime - time
+		if remaining < 0 then remaining = 0 end
+		local minutes = math.floor(remaining / 60)
+		local seconds = math.floor(remaining % 60)
+		local timeText = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/CenterUI/TimeText")
+		if timeText ~= nil then
+			timeText.TextComponent.Text = string.format("%d:%02d", minutes, seconds)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void GiveUpCall()
+		_ProtocolService:CommonCall(senderUserId)
+
+		if not self.isPlaying then
+			return
+		end
+
+		self:GameEndCall(false)
 	end
 
 	@ExecSpace("ServerOnly")

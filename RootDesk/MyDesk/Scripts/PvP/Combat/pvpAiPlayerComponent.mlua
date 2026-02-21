@@ -34,8 +34,8 @@ script pvpAiPlayerComponent extends Component
 		table.clear(self.unitPriorityDict)
 		
 		-- init everything
-		for i, unit in ipairs(playerDeck) do
-			self.unitPriorityDict[unit.id] = i
+		for i, unitId in ipairs(playerDeck) do
+			self.unitPriorityDict[unitId] = i
 		end
 		
 		self.userUnitList = playerUnitInfo
@@ -43,7 +43,7 @@ script pvpAiPlayerComponent extends Component
 		-- 덱(최대 8장) -> 풀에 채우기
 		for i = 1, 8 do
 			local modelId = playerDeck[i]
-			if modelId and modelId ~= 0 then
+			if modelId and modelId ~= 0 and modelId ~= "" then
 				table.insert(self.summonPools, modelId)
 			end
 		end
@@ -60,7 +60,7 @@ script pvpAiPlayerComponent extends Component
 			self.summonDeck[i] = i
 		end
 		
-		for i = 4 + 1, 8 + #playerDeck.userSubDeck do
+		for i = 5, #self.summonPools do
 			table.insert(self.summonQueue, i)
 		end
 		
