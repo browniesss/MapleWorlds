@@ -196,6 +196,79 @@ script MatrixSpawnManager extends Logic
 	end
 
 	@ExecSpace("Server")
+	method void SpawnMiniClone(string modelID, Vector3 pos, integer level, integer limitBreak, number ratio, number targetOffsetX)
+		local unitData = _UnitService:GetUnitByIDFromServer(modelID)
+		if unitData == nil then
+			return
+		end
+
+		local unitModel = BuffedUnitModel()
+		unitModel:Init(unitData)
+		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, level, limitBreak)
+
+		-- 등장 스킬 비활성화
+		unitModel.spawnSkill = ""
+
+		-- 최종 위치에 소환 (포물선 도착 지점)
+		local finalPos = Vector3(pos.x + targetOffsetX, pos.y, pos.z)
+		local spawnParent = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList")
+		local spawnEntity = _SpawnService:SpawnByModelId(modelID, "MiniClone", finalPos, spawnParent)
+
+		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
+		spawnEntity.Unit:Spawn(unitModel, skillData)
+
+		local unit = spawnEntity.Unit
+
+		-- 스탯 감소 (ratio 비율)
+		unit.damage = math.floor(unit.damage * ratio)
+		unit.originDamage = math.floor(unit.originDamage * ratio)
+		unit.maxHP = math.floor(unit.maxHP * ratio)
+		unit.originMaxHP = math.floor(unit.originMaxHP * ratio)
+		unit.hp = unit.maxHP
+
+		-- 초록색 틴트
+		if unit.isUsableCharacter then
+			spawnEntity.AvatarRendererComponent:SetColor(0.3, 1.0, 0.3, 1.0)
+		else
+			spawnEntity.SpriteRendererComponent.Color = Color(0.3, 1.0, 0.3, 1.0)
+		end
+
+		-- 클라이언트에서 스케일 + 포물선 애니메이션 처리
+		self:AnimateMiniClone(spawnEntity, pos, finalPos)
+	end
+
+	@ExecSpace("Client")
+	method void AnimateMiniClone(Entity entity, Vector3 startPos, Vector3 endPos)
+		if not isvalid(entity) then
+			return
+		end
+
+		-- 크기 조정 (0.8 고정)
+		local currentScale = entity.TransformComponent.Scale
+		entity.TransformComponent.Scale = Vector3(currentScale.x * 0.8, currentScale.y * 0.8, currentScale.z)
+
+		-- 시작 위치로 이동 (포물선 출발점)
+		entity.TransformComponent.WorldPosition = startPos
+
+		-- 포물선 이동 애니메이션
+		local arcHeight = 1.5
+		local steps = 15
+		local stepTime = 0.02
+
+		for i = 1, steps do
+			_TimerService:SetTimerOnce(function()
+				if isvalid(entity) then
+					local progress = i / steps
+					local yOffset = 4 * arcHeight * progress * (1 - progress)
+					local newX = startPos.x + (endPos.x - startPos.x) * progress
+					local newY = startPos.y + yOffset
+					entity.TransformComponent.WorldPosition = Vector3(newX, newY, 0)
+				end
+			end, stepTime * i)
+		end
+	end
+
+	@ExecSpace("Server")
 	method void SkillSpawn(string target, string summoner, Vector3 pos)
 		local unitData = _UnitService:GetUnitByIDFromServer(target)
 		

@@ -569,7 +569,7 @@ script MatrixService extends Logic
 			else
 				formatValue = math.floor((value - 1) * 100 + 0.5)
 			end
-		elseif effectType == "Multiplier" or effectType == "SpawnOnKill" then
+		elseif effectType == "Multiplier" or effectType == "SpawnOnKill" or effectType == "SpawnOnDie" then
 			-- value * 100 (예: 0.5 -> 50%)
 			formatValue = math.floor(value * 100 + 0.5)
 		end

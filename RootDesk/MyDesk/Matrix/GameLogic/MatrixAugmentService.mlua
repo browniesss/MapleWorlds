@@ -517,6 +517,16 @@ script MatrixAugmentService extends Logic
 				self:ApplyFreezeOnDie(deadPos, enemyList, effect)
 			elseif effect.effectType == "KnockbackOnDie" then
 				self:ApplyKnockbackOnDie(deadPos, enemyList, effect)
+			elseif effect.effectType == "SpawnOnDie" then
+				-- 미니 복제본 2개 소환 (MiniClone은 재귀 방지)
+				if deadUnit.Name ~= "MiniClone" then
+					local modelID = deadUnit.Unit.id
+					local level = deadUnit.Unit.level
+					local limitBreak = deadUnit.Unit.limitBreak
+					local ratio = effect.value
+					_MatrixSpawnManager:SpawnMiniClone(modelID, deadPos, level, limitBreak, ratio, -2)
+					_MatrixSpawnManager:SpawnMiniClone(modelID, deadPos, level, limitBreak, ratio, -1)
+				end
 			end
 		end
 	end
