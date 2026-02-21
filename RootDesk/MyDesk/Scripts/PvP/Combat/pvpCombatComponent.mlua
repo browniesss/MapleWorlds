@@ -175,23 +175,10 @@ script pvpCombatComponent extends Component
 			self:SyncTimer(self.gameTimer)
 		end
 
-		-- 승패 판정: 적 타워 파괴
-		if self.EnemyTower.Unit.hp <= 0 then
-			self:GameEndCall(true)
-			return
-		end
-
-		-- 승패 판정: 아군 타워 파괴
-		if self.UserTower.Unit.hp <= 0 then
-			self:GameEndCall(false)
-			return
-		end
-
-		-- 시간 초과 → HP 비율 판정
+		-- 시간 초과 → 클라이언트에서 HP 비율 판정
 		if self.gameTimer >= self.maxGameTime then
-			local userRatio = self.UserTower.Unit.hp / self.UserTower.Unit.maxHP
-			local enemyRatio = self.EnemyTower.Unit.hp / self.EnemyTower.Unit.maxHP
-			self:GameEndCall(userRatio > enemyRatio)
+			self.isPlaying = false
+			self:TimeoutGameEnd()
 		end
 	end
 
@@ -206,6 +193,12 @@ script pvpCombatComponent extends Component
 		local pvpAi = self.Entity.pvpAiPlayerComponent
 		if pvpAi ~= nil then
 			pvpAi:EndGame()
+		end
+
+		-- 유저 소환 정리
+		local pvpUserSpawn = self.Entity.pvpUserSpawnComponent
+		if pvpUserSpawn ~= nil then
+			pvpUserSpawn:EndGame()
 		end
 
 		-- 모든 유닛 제거
@@ -235,6 +228,11 @@ script pvpCombatComponent extends Component
 					_pvpRankingService:SetPoint(self.currentUserId, -newScore)
 					newScore = 0
 				end
+				-- 서버 측 pvpRankingComponent.score 갱신 (매치메이킹 티어용)
+				local user = _UserService:GetUserEntityByUserId(self.currentUserId)
+				if user ~= nil and user.pvpRankingComponent ~= nil then
+					user.pvpRankingComponent.score = newScore
+				end
 			end
 		end
 
@@ -255,6 +253,18 @@ script pvpCombatComponent extends Component
 		if ingameInfo ~= nil then
 			ingameInfo.Enable = false
 			ingameInfo.Visible = false
+		end
+
+		-- 클라이언트 랭킹 점수 동기화
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.pvpRankingComponent ~= nil then
+			user.pvpRankingComponent.score = newScore
+		end
+
+		-- 로비 점수 텍스트 갱신
+		local pvpLobbyUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI")
+		if pvpLobbyUI ~= nil and pvpLobbyUI.PvPLobbyUI ~= nil then
+			pvpLobbyUI.PvPLobbyUI:UpdateScoreDisplay()
 		end
 
 		-- 결과 UI 표시
@@ -281,6 +291,26 @@ script pvpCombatComponent extends Component
 		if timeText ~= nil then
 			timeText.TextComponent.Text = string.format("%d:%02d", minutes, seconds)
 		end
+	end
+
+	@ExecSpace("Server")
+	method void RequestGameEnd(boolean isWin)
+		if not self.isPlaying then
+			return
+		end
+		self:GameEndCall(isWin)
+	end
+
+	@ExecSpace("Client")
+	method void TimeoutGameEnd()
+		local userRatio = self.UserTower.Unit.hp / self.UserTower.Unit.maxHP
+		local enemyRatio = self.EnemyTower.Unit.hp / self.EnemyTower.Unit.maxHP
+		self:TimeoutGameEndResult(userRatio > enemyRatio)
+	end
+
+	@ExecSpace("Server")
+	method void TimeoutGameEndResult(boolean isWin)
+		self:GameEndCall(isWin)
 	end
 
 	@ExecSpace("Server")

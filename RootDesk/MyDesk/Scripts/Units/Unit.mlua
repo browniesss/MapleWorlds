@@ -1094,6 +1094,14 @@ script Unit extends Component
 			if _GameManager.currentGameMode == _eGameMode.Matrix then
 				return
 			end
+			-- PvP 모드에서는 pvpCombatComponent에서 처리
+			if _GameManager.currentGameMode == _eGameMode.PvP then
+				local pvpManager = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/PvPManager")
+				if pvpManager ~= nil and pvpManager.pvpCombatComponent ~= nil then
+					pvpManager.pvpCombatComponent:RequestGameEnd(false)
+				end
+				return
+			end
 
 			local shopUI = _GameManager.shopUI
 			local failPopupUI = _GameManager.failPopupUI

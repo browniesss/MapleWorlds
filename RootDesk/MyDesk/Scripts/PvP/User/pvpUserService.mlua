@@ -12,16 +12,18 @@ script pvpUserService extends Logic
 		local ds = _DataStorageService:GetUserDataStorage(uid)
 		local code, json = ds:GetAndWait(self.PVP_MODE_KEY)
 		if not (code == 0) then
+			log_error("[PVP] GetUserData DataStorage error, uid=" .. uid .. " code=" .. tostring(code))
 			return {
 				code=code
 			}
 		end
 
 		if json == nil then
+			log("[PVP] GetUserData first time, creating defaults for uid=" .. uid)
 			local data = {
 				play_coin=5,
-				offense_deck={},
-				defense_deck={},
+				offense_deck={"","","","","","","",""},
+				defense_deck={"","","","","","","",""},
 				offense_synergy={},
 				defense_synergy={},
 				next_play_coin=0,
@@ -30,6 +32,7 @@ script pvpUserService extends Logic
 
 			local updateCode = self:UpdateUserData(uid, data.play_coin, data.next_play_coin, data.offense_deck, data.defense_deck, data.offense_synergy, data.defense_synergy)
 			if not (updateCode == 0) then
+				log_error("[PVP] GetUserData failed to save defaults, uid=" .. uid .. " code=" .. tostring(updateCode))
 				return {
 					code=updateCode
 				}
@@ -39,6 +42,13 @@ script pvpUserService extends Logic
 		end
 
 		local decoded = _HttpService:JSONDecode(json)
+		if decoded == nil then
+			log_error("[PVP] GetUserData JSONDecode failed, uid=" .. uid)
+			return {
+				code=-1
+			}
+		end
+
 		-- offense_deck, defense_deck는 JSON 문자열로 저장되어 있으므로 다시 디코딩
 		if type(decoded.offense_deck) == "string" then
 			decoded.offense_deck = _HttpService:JSONDecode(decoded.offense_deck)
@@ -46,6 +56,9 @@ script pvpUserService extends Logic
 		if type(decoded.defense_deck) == "string" then
 			decoded.defense_deck = _HttpService:JSONDecode(decoded.defense_deck)
 		end
+		-- 덱 배열을 8요소로 정규화 (sparse array JSON 문제 방지)
+		decoded.offense_deck = self:NormalizeDeck(decoded.offense_deck)
+		decoded.defense_deck = self:NormalizeDeck(decoded.defense_deck)
 		-- offense_synergy, defense_synergy 디코딩
 		if type(decoded.offense_synergy) == "string" then
 			decoded.offense_synergy = _HttpService:JSONDecode(decoded.offense_synergy)
@@ -59,11 +72,47 @@ script pvpUserService extends Logic
 		if decoded.defense_synergy == nil then
 			decoded.defense_synergy = {}
 		end
+
+		-- play_coin, next_play_coin 기본값 보정
+		if decoded.play_coin == nil then
+			decoded.play_coin = 5
+		end
+		if decoded.next_play_coin == nil then
+			decoded.next_play_coin = 0
+		end
+
+		-- code 필드는 저장 데이터에 의존하지 않고 명시적으로 설정
+		decoded.code = 0
+
 		return decoded
 	end
 
 	@ExecSpace("ServerOnly")
+	method table NormalizeDeck(table deck)
+		if deck == nil then
+			return {"","","","","","","",""}
+		end
+		local result = {}
+		for i = 1, 8 do
+			local val = deck[i]
+			if val == nil then
+				-- JSON 디코딩 후 문자열 키가 될 수 있으므로 체크
+				val = deck[tostring(i)]
+			end
+			if val == nil or val == "" then
+				result[i] = ""
+			else
+				result[i] = val
+			end
+		end
+		return result
+	end
+
+	@ExecSpace("ServerOnly")
 	method integer UpdateUserData(string uid, integer play_coin, integer next_play_coin, table offense_deck, table defense_deck, table offense_synergy, table defense_synergy)
+		-- 덱 정규화 (sparse array 방지)
+		offense_deck = self:NormalizeDeck(offense_deck)
+		defense_deck = self:NormalizeDeck(defense_deck)
 		-- 중첩 table은 JSONEncode가 지원하지 않으므로 별도로 직렬화
 		local offense_str = _HttpService:JSONEncode(offense_deck)
 		local defense_str = _HttpService:JSONEncode(defense_deck)
@@ -76,13 +125,16 @@ script pvpUserService extends Logic
 			defense_deck=defense_str,
 			offense_synergy=offense_syn_str,
 			defense_synergy=defense_syn_str,
-			next_play_coin=next_play_coin,
-			code = 0
+			next_play_coin=next_play_coin
 		}
 
 		local json = _HttpService:JSONEncode(data)
 		local ds = _DataStorageService:GetUserDataStorage(uid)
-		return ds:SetAndWait(self.PVP_MODE_KEY, json)
+		local saveCode = ds:SetAndWait(self.PVP_MODE_KEY, json)
+		if not (saveCode == 0) then
+			log_error("[PVP] UpdateUserData save failed, uid=" .. uid .. " code=" .. tostring(saveCode))
+		end
+		return saveCode
 	end
 
 end

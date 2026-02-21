@@ -15,8 +15,16 @@ script GameClearChecker extends Component
 			return
 		end
 
-		-- PvP 모드에서는 pvpCombatComponent가 타워 HP를 체크하므로 여기서는 처리하지 않음
+		-- PvP 모드: 적 타워 HP 0 → 서버에 승리 요청
 		if _GameManager.currentGameMode == _eGameMode.PvP then
+			local hp = self.Entity.Unit.hp
+			if hp <= 0 then
+				self.isClear = true
+				local pvpManager = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/PvPManager")
+				if pvpManager ~= nil and pvpManager.pvpCombatComponent ~= nil then
+					pvpManager.pvpCombatComponent:RequestGameEnd(true)
+				end
+			end
 			return
 		end
 

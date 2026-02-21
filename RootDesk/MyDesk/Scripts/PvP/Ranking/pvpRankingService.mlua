@@ -73,7 +73,9 @@ script pvpRankingService extends Logic
 				score = 0
 			}
 		end
-		
+
+		self.NEXT_UPDATE_TS = 0
+
 		return {
 			code = 0,
 			score=score

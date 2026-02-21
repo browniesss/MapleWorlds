@@ -137,14 +137,25 @@ script DeckItem extends Component
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
-		local unitInfoPanel = _EntityService:GetEntityByPath("/ui/UserDeckUI/UnitInfoPanel")
 		local deckPanel = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck")
-		
+		local userDeckUI = deckPanel.UserDeckUI
+
+		-- PvP 모드에서 빈 슬롯 클릭 시 UnitListUI로 바로 이동
+		if userDeckUI.pvpMode and self.unitData == nil then
+			deckPanel.Children[1].UITransformComponent.anchoredPosition = Vector2(-200, 50)
+			userDeckUI.unitListUI.Enable = true
+			userDeckUI.unitListUI.Visible = true
+			userDeckUI.unitListUI.UnitListUI:OpenListUI(self.itemIndex)
+			return
+		end
+
+		local unitInfoPanel = _EntityService:GetEntityByPath("/ui/UserDeckUI/UnitInfoPanel")
+
 		deckPanel.Children[1].UITransformComponent.anchoredPosition = Vector2(-200, 50)
-		
+
 		unitInfoPanel.Enable = true
 		unitInfoPanel.Visible = true
-		
+
 		unitInfoPanel.UnitInfoPanel:Init(self.unitData, self.skillData, self.spawnSkillData, self.limitBreakSkillData, self.itemIndex)
 	end
 

@@ -24,13 +24,13 @@ script PvPResultUI extends Component
 
 	@ExecSpace("ClientOnly")
 	method void ClearHandlers()
-		if self.retryHandler ~= nil then
-			self.retryHandler:Disconnect()
+		if self.retryHandler ~= nil and self.retryButton ~= nil then
+			self.retryButton:DisconnectEvent(ButtonClickEvent, self.retryHandler)
 			self.retryHandler = nil
 		end
-		
-		if self.lobbyHandler ~= nil then
-			self.lobbyHandler:Disconnect()
+
+		if self.lobbyHandler ~= nil and self.lobbyButton ~= nil then
+			self.lobbyButton:DisconnectEvent(ButtonClickEvent, self.lobbyHandler)
 			self.lobbyHandler = nil
 		end
 	end
@@ -68,22 +68,30 @@ script PvPResultUI extends Component
 		end
 		
 		-- 다시하기 버튼
-		if self.retryButton ~= nil and self.retryButton.ButtonComponent ~= nil then
-			self.retryHandler = self.retryButton.ButtonComponent.OnClick:Connect(function()
-				self:OnRetryClick()
-			end)
+		if self.retryButton ~= nil then
+			self.retryHandler = self.retryButton:ConnectEvent(ButtonClickEvent, self.OnRetryButtonClicked)
 		end
-		
+
 		-- 로비로 버튼
-		if self.lobbyButton ~= nil and self.lobbyButton.ButtonComponent ~= nil then
-			self.lobbyHandler = self.lobbyButton.ButtonComponent.OnClick:Connect(function()
-				self:OnLobbyClick()
-			end)
+		if self.lobbyButton ~= nil then
+			self.lobbyHandler = self.lobbyButton:ConnectEvent(ButtonClickEvent, self.OnLobbyButtonClicked)
 		end
 	end
 
 	@ExecSpace("ClientOnly")
+	method void OnRetryButtonClicked(Entity entity)
+		self:OnRetryClick()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnLobbyButtonClicked(Entity entity)
+		self:OnLobbyClick()
+	end
+
+	@ExecSpace("ClientOnly")
 	method void OnRetryClick()
+		self:ClearHandlers()
+
 		-- 결과 UI 닫기
 		self.Entity.Enable = false
 		self.Entity.Visible = false
@@ -109,6 +117,8 @@ script PvPResultUI extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnLobbyClick()
+		self:ClearHandlers()
+
 		-- 결과 UI 닫기
 		self.Entity.Enable = false
 		self.Entity.Visible = false

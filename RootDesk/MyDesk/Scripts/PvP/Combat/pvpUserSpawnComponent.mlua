@@ -15,6 +15,13 @@ script pvpUserSpawnComponent extends Component
 	end
 
 	@ExecSpace("ServerOnly")
+	method void EndGame()
+		self.point = 0
+		self.pointInc = 1
+		self.pointUpdateTimer = 0
+	end
+
+	@ExecSpace("ServerOnly")
 	method void OnUpdate(number delta)
 		local pvpCombat = self.Entity.pvpCombatComponent
 		if pvpCombat == nil or not pvpCombat.isPlaying then

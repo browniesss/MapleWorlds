@@ -29,6 +29,10 @@ script PvPLobbyUI extends Component
 
 	property any deckEditButtonHandler = nil
 
+	property Entity backButton = nil
+
+	property any backButtonHandler = nil
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		self:InitUI()
@@ -64,6 +68,11 @@ script PvPLobbyUI extends Component
 			self.deckEditButtonHandler = self.deckEditButton:ConnectEvent(ButtonClickEvent, self.OnDeckEditButtonClicked)
 		end
 
+		-- 돌아가기 버튼 핸들러
+		if self.backButton ~= nil and self.backButton.ButtonComponent ~= nil then
+			self.backButtonHandler = self.backButton:ConnectEvent(ButtonClickEvent, self.OnBackButtonClicked)
+		end
+
 		-- 슬롯 목록 및 클릭 핸들러 구성
 		for i, slot in ipairs(self.userList.Children) do
 			self.slotList[#self.slotList + 1] = slot
@@ -95,6 +104,11 @@ script PvPLobbyUI extends Component
 		if self.deckEditButtonHandler ~= nil and self.deckEditButton ~= nil then
 			self.deckEditButton:DisconnectEvent(ButtonClickEvent, self.deckEditButtonHandler)
 			self.deckEditButtonHandler = nil
+		end
+
+		if self.backButtonHandler ~= nil and self.backButton ~= nil then
+			self.backButton:DisconnectEvent(ButtonClickEvent, self.backButtonHandler)
+			self.backButtonHandler = nil
 		end
 
 		if self.slot1Handler ~= nil and self.slotList[1] ~= nil then
@@ -263,6 +277,18 @@ script PvPLobbyUI extends Component
 				end
 			end
 		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnBackButtonClicked(Entity entity)
+		self:OnBackButtonClick()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnBackButtonClick()
+		-- PvPLobbyUI 숨기기
+		self.Entity.Enable = false
+		self.Entity.Visible = false
 	end
 
 	@ExecSpace("ClientOnly")

@@ -28,8 +28,12 @@ script pvpRankingComponent extends Component
 			if info.uid == _UserService.LocalPlayer.PlayerComponent.UserId then
 				self.score = info.score
 				self.rank = rank
-				return
+				break
 			end
+		end
+		local pvpLobbyUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI")
+		if pvpLobbyUI ~= nil and pvpLobbyUI.PvPLobbyUI ~= nil then
+			pvpLobbyUI.PvPLobbyUI:UpdateScoreDisplay()
 		end
 	end
 

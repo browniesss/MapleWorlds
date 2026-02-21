@@ -6025,6 +6025,154 @@
         }
       },
       {
+        "id": "9a75ac06-4d06-487a-8a88-4af33530cc16",
+        "path": "/maps/MainLobbyMap/NpcRoot/npc-pvp모드",
+        "componentNames": "MOD.Core.TransformComponent,MOD.Core.SpriteRendererComponent,MOD.Core.RigidbodyComponent,MOD.Core.StateComponent,MOD.Core.ChatBalloonComponent,MOD.Core.StateAnimationComponent,MOD.Core.NameTagComponent,script.NPCClickHandler,MOD.Core.TouchReceiveComponent",
+        "jsonString": {
+          "name": "npc-pvp모드",
+          "path": "/maps/MainLobbyMap/NpcRoot/npc-pvp모드",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": false,
+          "displayOrder": 4,
+          "pathConstraints": "////",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "StaticNPC",
+            "sub_entity_id": null,
+            "root_entity_id": null,
+            "replaced_model_id": null
+          },
+          "modelId": "staticnpc",
+          "@components": [
+            {
+              "@type": "MOD.Core.TransformComponent",
+              "Position": {
+                "x": -2.9198,
+                "y": -1.046,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteRendererComponent",
+              "ActionSheet": {},
+              "EndFrameIndex": 0,
+              "RenderSetting": 1,
+              "SortingLayer": "MapLayer0",
+              "SpriteRUID": "267469249d5f45058a85f5ad65cd373e",
+              "StartFrameIndex": 0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.RigidbodyComponent",
+              "MoveVelocity": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "RealMoveVelocity": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.StateComponent",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ChatBalloonComponent",
+              "AutoShowEnabled": true,
+              "BalloonScale": 2.0,
+              "ChatBalloonRUID": {
+                "DataId": "7b6bd117bd0446a5bacec8ea6831c997"
+              },
+              "ChatModeEnabled": false,
+              "FontColor": {
+                "r": 0.545098066,
+                "g": 0.02745098,
+                "b": 0.02745098,
+                "a": 1.0
+              },
+              "FontSize": 1.5,
+              "Message": "다른 유저들과 전투하려면 나를 클릭해",
+              "Offset": -2.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.StateAnimationComponent",
+              "ActionSheet": {
+                "stand": "267469249d5f45058a85f5ad65cd373e",
+                "say": "d8b8dbdeacfe471cbdb7d0ec8a3f4ebb",
+                "eye": "19e14ff55ddb414795d347f2630abbde",
+                "rotate": "ae4605d20e104422b7b986fcf5e0a820"
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.NameTagComponent",
+              "Bold": true,
+              "FontColor": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "FontOffset": {
+                "x": 0.02,
+                "y": -0.01
+              },
+              "FontSize": 1.5,
+              "Name": "PvP 모드",
+              "NameTagRUID": {
+                "DataId": "4e15326a29ee491a89a7fbcd9fa7913c"
+              },
+              "OffsetY": -0.01,
+              "Enable": true
+            },
+            {
+              "@type": "script.NPCClickHandler",
+              "Enable": true,
+              "targetUIPath": "",
+              "targetUIEntity": {
+                "tempEntityId": null,
+                "IsRelative": false,
+                "EntityId": "fc6bb21c-1a6c-489f-82d6-47a4e3f11f25",
+                "Version2": false
+              }
+            },
+            {
+              "@type": "MOD.Core.TouchReceiveComponent",
+              "AutoFitToSize": false,
+              "Offset": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "RelayEventToBehind": false,
+              "TouchArea": {
+                "x": 1.0,
+                "y": 2.0
+              },
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
         "id": "e0e3f6c6-d86b-4914-870e-44bd986b0aed",
         "path": "/maps/MainLobbyMap/object-13766",
         "componentNames": "MOD.Core.TransformComponent,MOD.Core.SpriteRendererComponent",

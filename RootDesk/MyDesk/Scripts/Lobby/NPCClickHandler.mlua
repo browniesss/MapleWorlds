@@ -17,6 +17,9 @@ script NPCClickHandler extends Component
 		if self.targetUIEntity ~= nil then
 			self.targetUIEntity.Enable = true
 			self.targetUIEntity.Visible = true
+			if self.targetUIEntity.PvPLobbyUI ~= nil then
+				self.targetUIEntity.PvPLobbyUI:OnRefreshButtonClick()
+			end
 		end
 	end
 

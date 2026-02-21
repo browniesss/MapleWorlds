@@ -13,6 +13,8 @@ script pvpUserComponent extends Component
 
 	property integer next_play_coin = 0
 
+	property boolean dataLoaded = false
+
 	@ExecSpace("ServerOnly")
 	method void OnUpdate(number delta)
 		local nowTs = DateTime.UtcNow.Elapsed
@@ -43,7 +45,7 @@ script pvpUserComponent extends Component
 
 		local data = _pvpUserService:GetUserData(senderUserId)
 		if not (data.code == 0) then
-			log_error("fail at _pvpUserService:GetUserData " .. senderUserId)
+			log_error("[PVP] fail at GetUserData uid=" .. senderUserId .. " code=" .. tostring(data.code))
 			return
 		end
 
@@ -53,28 +55,107 @@ script pvpUserComponent extends Component
 		self.defense_deck = data.defense_deck
 		self.offense_synergy = data.offense_synergy
 		self.defense_synergy = data.defense_synergy
+		self.dataLoaded = true
 
-		self:GetUserDataBack(data)
+		-- 공격덱/방어덱이 비어있으면 노멀 스테이지 덱을 복사
+		local offenseEmpty = self:IsDeckEmpty(self.offense_deck)
+		local defenseEmpty = self:IsDeckEmpty(self.defense_deck)
+		if offenseEmpty or defenseEmpty then
+			local normalDeck = self:LoadNormalDeck(senderUserId)
+			if normalDeck ~= nil then
+				if offenseEmpty then
+					self.offense_deck = _pvpUserService:NormalizeDeck(normalDeck)
+					self.offense_synergy = self:ComputeSynergy(self.offense_deck)
+				end
+				if defenseEmpty then
+					self.defense_deck = _pvpUserService:NormalizeDeck(normalDeck)
+					self.defense_synergy = self:ComputeSynergy(self.defense_deck)
+				end
+				_pvpUserService:UpdateUserData(senderUserId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy)
+				data.offense_deck = self.offense_deck
+				data.defense_deck = self.defense_deck
+				data.offense_synergy = self.offense_synergy
+				data.defense_synergy = self.defense_synergy
+			end
+		end
+
+		-- 검증된 기존 콜백 재사용 (각 1~2 파라미터)
+		self:UserCoinBack(data.play_coin)
+		self:UpdateCoinNextTs(data.next_play_coin)
+		self:SetOffenseUnitBack(data.offense_deck, data.offense_synergy)
+		self:SetDefenseUnitBack(data.defense_deck, data.defense_synergy)
 	end
 
-	@ExecSpace("Client")
-	method void GetUserDataBack(table data)
-		self.play_coin = data.play_coin
-		self.next_play_coin = data.next_play_coin
-		self.offense_deck = data.offense_deck
-		self.defense_deck = data.defense_deck
-		self.offense_synergy = data.offense_synergy
-		self.defense_synergy = data.defense_synergy
+	@ExecSpace("ClientOnly")
+	method void RefreshPvPDeckUI()
+		local deckPanel = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck")
+		if deckPanel ~= nil and deckPanel.UserDeckUI ~= nil and deckPanel.UserDeckUI.pvpMode then
+			deckPanel.UserDeckUI:LoadPvPDeck()
+		end
 	end
 
 	@ExecSpace("Client")
 	method void UserCoinBack(integer coin)
 		self.play_coin = coin
+		local pvpLobbyUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI")
+		if pvpLobbyUI ~= nil and pvpLobbyUI.PvPLobbyUI ~= nil then
+			pvpLobbyUI.PvPLobbyUI:UpdateCoinDisplay()
+		end
 	end
 
 	@ExecSpace("Client")
 	method void UpdateCoinNextTs(integer ts)
 		self.next_play_coin = ts
+	end
+
+	method table NormalizeDeckClient(table deck)
+		if deck == nil then
+			return {"","","","","","","",""}
+		end
+		local result = {}
+		for i = 1, 8 do
+			local val = deck[i]
+			if val == nil then
+				val = deck[tostring(i)]
+			end
+			if val == nil or val == "" then
+				result[i] = ""
+			else
+				result[i] = val
+			end
+		end
+		return result
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean IsDeckEmpty(table deck)
+		if deck == nil then
+			return true
+		end
+		for i = 1, 8 do
+			local val = deck[i]
+			if val == nil then
+				val = deck[tostring(i)]
+			end
+			if val ~= nil and val ~= "" then
+				return false
+			end
+		end
+		return true
+	end
+
+	@ExecSpace("ServerOnly")
+	method table LoadNormalDeck(string userId)
+		local ds = _DataStorageService:GetUserDataStorage(userId)
+		local errCode, res = ds:GetAndWait("USER_DECK")
+		if errCode ~= 0 or res == nil then
+			return nil
+		end
+		local resTable = _HttpService:JSONDecode(res)
+		if resTable == nil or resTable["UserDeck"] == nil then
+			return nil
+		end
+		return resTable["UserDeck"]
 	end
 
 	@ExecSpace("ServerOnly")
@@ -125,12 +206,18 @@ script pvpUserComponent extends Component
 	method void SetOffeseUnitCall(integer index, string unit_id)
 		_ProtocolService:CommonCall(senderUserId)
 
+		if not self.dataLoaded then
+			log_error("[PVP] SetOffeseUnitCall before data loaded, uid=" .. senderUserId)
+			return
+		end
+
 		self.offense_deck[index] = unit_id
 		self.offense_synergy = self:ComputeSynergy(self.offense_deck)
 
 		local code = _pvpUserService:UpdateUserData(senderUserId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy)
 
 		if not (code == 0) then
+			log_error("[PVP] SetOffeseUnitCall save failed, uid=" .. senderUserId .. " code=" .. tostring(code))
 			return
 		end
 
@@ -139,13 +226,19 @@ script pvpUserComponent extends Component
 
 	@ExecSpace("Client")
 	method void SetOffenseUnitBack(table deck, table synergy)
-		self.offense_deck = deck
+		self.offense_deck = self:NormalizeDeckClient(deck)
 		self.offense_synergy = synergy
+		self:RefreshPvPDeckUI()
 	end
 
 	@ExecSpace("Server")
 	method void SetDefenseUnitCall(integer index, string unit_id)
 		_ProtocolService:CommonCall(senderUserId)
+
+		if not self.dataLoaded then
+			log_error("[PVP] SetDefenseUnitCall before data loaded, uid=" .. senderUserId)
+			return
+		end
 
 		self.defense_deck[index] = unit_id
 		self.defense_synergy = self:ComputeSynergy(self.defense_deck)
@@ -153,6 +246,7 @@ script pvpUserComponent extends Component
 		local code = _pvpUserService:UpdateUserData(senderUserId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy)
 
 		if not (code == 0) then
+			log_error("[PVP] SetDefenseUnitCall save failed, uid=" .. senderUserId .. " code=" .. tostring(code))
 			return
 		end
 
@@ -161,8 +255,9 @@ script pvpUserComponent extends Component
 
 	@ExecSpace("Client")
 	method void SetDefenseUnitBack(table deck, table synergy)
-		self.defense_deck = deck
+		self.defense_deck = self:NormalizeDeckClient(deck)
 		self.defense_synergy = synergy
+		self:RefreshPvPDeckUI()
 	end
 
 	@ExecSpace("ServerOnly")
@@ -171,11 +266,20 @@ script pvpUserComponent extends Component
 			return
 		end
 
+		if not self.dataLoaded then
+			log_error("[PVP] UseCoin before data loaded, uid=" .. userId)
+			return
+		end
+
 		self.play_coin -= 1
+		if self.play_coin < _pvpUserService.MAX_PLAY_COIN then
+			self.next_play_coin = DateTime.UtcNow.Elapsed + _pvpUserService.PLAY_COIN_UPDATE
+		end
 
 		local code = _pvpUserService:UpdateUserData(userId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy)
 
 		if not (code == 0) then
+			log_error("[PVP] UseCoin save failed, uid=" .. userId .. " code=" .. tostring(code))
 			return
 		end
 
@@ -187,17 +291,8 @@ script pvpUserComponent extends Component
 		return self.play_coin > 0
 	end
 
-	@EventSender("Service", "UserService")
-	handler HandleUserEnterEvent(UserEnterEvent event)
-		--------------- Native Event Sender Info ----------------
-		-- Sender: UserService
-		-- Space: Server
-		---------------------------------------------------------
-
-		-- Parameters
-		-- local ProfileCode = event.ProfileCode
-		-- local UserId = event.UserId
-		---------------------------------------------------------
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
 		self:GetUserDataCall()
 	end
 
