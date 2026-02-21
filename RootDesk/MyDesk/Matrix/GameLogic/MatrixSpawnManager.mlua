@@ -85,6 +85,96 @@ script MatrixSpawnManager extends Logic
 		end
 		
 		self:GetUserWallet().MesoWallet:UseMeso(price)
+
+		-- 멀티플라이어: 복제본 추가 스폰 (0.3초 딜레이)
+		if _MatrixAugmentService ~= nil and _MatrixAugmentService.isMultiplierActive and not _MatrixAugmentService.isCloneSpawn then
+			_TimerService:SetTimerOnce(function()
+				self:SpawnClone(modelID, pos, level, limitBreak, senderUserId)
+			end, 0.3)
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void SpawnClone(string modelID, Vector3 pos, integer level, integer limitBreak, string userID)
+		_MatrixAugmentService.isCloneSpawn = true
+
+		local unitModel = _BuffedUnitService:GetBuffedUnitModel(userID, modelID)
+		local user = _UserService:GetUserEntityByUserId(userID)
+		local spawnParent = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList")
+		local spawnEntity = _SpawnService:SpawnByModelId(modelID, "Pig", pos, spawnParent)
+		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
+
+		-- 시너지 컴포넌트 적용
+		local jobID = tostring(unitModel.jobId)
+		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(unitModel.jobId)
+		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(jobID, count)
+
+		if synergy:length() > 0 then
+			local item = synergy:Get(1)
+
+			if jobID == "1" then
+				spawnEntity:RemoveComponent("IncreaseHpByTime")
+				spawnEntity:AddComponent("IncreaseHpByTime")
+				spawnEntity.IncreaseHpByTime.Enable = true
+				spawnEntity.IncreaseHpByTime.type = item.type
+				spawnEntity.IncreaseHpByTime.value = item.value
+			end
+
+			if jobID == "2" then
+				spawnEntity:RemoveComponent("CriticalAttack")
+				spawnEntity:AddComponent("CriticalAttack")
+				spawnEntity.CriticalAttack.Enable = true
+				spawnEntity.CriticalAttack.type = item.type
+				spawnEntity.CriticalAttack.value = item.value
+			end
+
+			if jobID == "3" then
+				spawnEntity:RemoveComponent("IncreaseMpByTime")
+				spawnEntity:AddComponent("IncreaseMpByTime")
+				spawnEntity.IncreaseMpByTime.Enable = true
+				spawnEntity.IncreaseMpByTime.type = item.type
+				spawnEntity.IncreaseMpByTime.value = item.value
+			end
+
+			if jobID == "4" then
+				spawnEntity:RemoveComponent("AddSummonPointAfterKill")
+				spawnEntity:AddComponent("AddSummonPointAfterKill")
+				spawnEntity.AddSummonPointAfterKill.Enable = true
+				spawnEntity.AddSummonPointAfterKill.type = item.type
+				spawnEntity.AddSummonPointAfterKill.value = item.value
+				spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet()
+			end
+		end
+
+		-- 레벨/돌파 버프 적용
+		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, level, limitBreak)
+
+		-- 복제본은 등장 스킬 비활성화
+		unitModel.spawnSkill = ""
+
+		spawnEntity.Unit:Spawn(unitModel, skillData)
+
+		-- 매트릭스 증강 버프 적용
+		if _MatrixAugmentService ~= nil then
+			_MatrixAugmentService:ApplySpawnBuffs(spawnEntity, user)
+		end
+
+		-- 유닛 중복 강화 적용
+		if _MatrixUnitSelectService ~= nil then
+			_MatrixUnitSelectService:ApplyStoredUpgrades(spawnEntity)
+		end
+
+		-- 복제본 스탯 감소 (모든 버프 적용 후)
+		_MatrixAugmentService:ApplyCloneStatReduction(spawnEntity.Unit, _MatrixAugmentService.multiplierStatRatio)
+
+		-- 복제본 시각 효과 (검은색 틴트)
+		if spawnEntity.Unit.isUsableCharacter then
+			spawnEntity.AvatarRendererComponent:SetColor(0.3, 0.3, 0.3, 1.0)
+		else
+			spawnEntity.SpriteRendererComponent.Color = Color(0.3, 0.3, 0.3, 1.0)
+		end
+
+		_MatrixAugmentService.isCloneSpawn = false
 	end
 
 	@ExecSpace("Server")
@@ -257,6 +347,105 @@ script MatrixSpawnManager extends Logic
 		
 		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
 		spawnEntity.Unit:Spawn(unitModel, skillData)
+
+		-- 멀티플라이어: 시그너스 복제본 추가 스폰 (0.3초 딜레이)
+		if _MatrixAugmentService ~= nil and _MatrixAugmentService.isMultiplierActive and not _MatrixAugmentService.isCloneSpawn then
+			_TimerService:SetTimerOnce(function()
+				self:SpawnCygnusClone(pos, userID)
+			end, 0.3)
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void SpawnCygnusClone(Vector3 pos, string userID)
+		_MatrixAugmentService.isCloneSpawn = true
+
+		local modelID = "model://6194a4e3-0eb4-417a-92b5-891af548b672"
+		local unitModel = _BuffedUnitService:GetBuffedUnitModel(userID, modelID)
+		local user = _UserService:GetUserEntityByUserId(userID)
+
+		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(102)
+		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE("102", count)
+
+		if synergy:length() <= 0 then
+			_MatrixAugmentService.isCloneSpawn = false
+			return
+		end
+
+		local item = synergy:Get(1)
+		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, math.floor(item.value), 1)
+
+		local spawnParent = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList")
+		local spawnEntity = _SpawnService:SpawnByModelId(modelID, unitModel.name, pos, spawnParent)
+
+		-- 시너지 컴포넌트 적용 (SpawnCygnus와 동일)
+		for i = 1, 4 do
+			local jobID = tostring(i)
+			local jobCount = user.UserSynergyComponent:GET_SYNERGY_COUNT(i)
+			local jobSynergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(jobID, jobCount)
+
+			if jobSynergy:length() > 0 then
+				local jobItem = jobSynergy:Get(1)
+
+				if jobID == "1" then
+					spawnEntity:RemoveComponent("IncreaseHpByTime")
+					spawnEntity:AddComponent("IncreaseHpByTime")
+					spawnEntity.IncreaseHpByTime.Enable = true
+					spawnEntity.IncreaseHpByTime.type = jobItem.type
+					spawnEntity.IncreaseHpByTime.value = jobItem.value
+				end
+
+				if jobID == "2" then
+					spawnEntity:RemoveComponent("CriticalAttack")
+					spawnEntity:AddComponent("CriticalAttack")
+					spawnEntity.CriticalAttack.Enable = true
+					spawnEntity.CriticalAttack.type = jobItem.type
+					spawnEntity.CriticalAttack.value = jobItem.value
+				end
+
+				if jobID == "3" then
+					spawnEntity:RemoveComponent("IncreaseMpByTime")
+					spawnEntity:AddComponent("IncreaseMpByTime")
+					spawnEntity.IncreaseMpByTime.Enable = true
+					spawnEntity.IncreaseMpByTime.type = jobItem.type
+					spawnEntity.IncreaseMpByTime.value = jobItem.value
+				end
+
+				if jobID == "4" then
+					spawnEntity:RemoveComponent("AddSummonPointAfterKill")
+					spawnEntity:AddComponent("AddSummonPointAfterKill")
+					spawnEntity.AddSummonPointAfterKill.Enable = true
+					spawnEntity.AddSummonPointAfterKill.type = jobItem.type
+					spawnEntity.AddSummonPointAfterKill.value = jobItem.value
+					spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet()
+				end
+			end
+		end
+
+		-- 매트릭스 증강 버프 적용
+		if _MatrixAugmentService ~= nil then
+			_MatrixAugmentService:ApplySpawnBuffs(spawnEntity, user)
+		end
+
+		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
+		spawnEntity.Unit:Spawn(unitModel, skillData)
+
+		-- 유닛 중복 강화 적용
+		if _MatrixUnitSelectService ~= nil then
+			_MatrixUnitSelectService:ApplyStoredUpgrades(spawnEntity)
+		end
+
+		-- 복제본 스탯 감소 (모든 버프 적용 후)
+		_MatrixAugmentService:ApplyCloneStatReduction(spawnEntity.Unit, _MatrixAugmentService.multiplierStatRatio)
+
+		-- 복제본 시각 효과 (검은색 틴트)
+		if spawnEntity.Unit.isUsableCharacter then
+			spawnEntity.AvatarRendererComponent:SetColor(0.3, 0.3, 0.3, 1.0)
+		else
+			spawnEntity.SpriteRendererComponent.Color = Color(0.3, 0.3, 0.3, 1.0)
+		end
+
+		_MatrixAugmentService.isCloneSpawn = false
 	end
 
 	@ExecSpace("Server")

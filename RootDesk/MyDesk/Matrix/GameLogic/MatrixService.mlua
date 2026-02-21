@@ -569,6 +569,9 @@ script MatrixService extends Logic
 			else
 				formatValue = math.floor((value - 1) * 100 + 0.5)
 			end
+		elseif effectType == "Multiplier" then
+			-- Multiplier: value * 100 (예: 0.5 -> 50%)
+			formatValue = math.floor(value * 100 + 0.5)
 		end
 		
 		-- string.format으로 desc 포맷팅

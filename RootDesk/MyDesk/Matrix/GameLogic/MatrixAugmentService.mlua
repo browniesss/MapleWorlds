@@ -9,6 +9,11 @@ script MatrixAugmentService extends Logic
 	-- T.U.R.B.O 모드 활성화 여부
 	property boolean isTurboActive = false
 
+	-- 멀티플라이어 관련
+	property boolean isMultiplierActive = false
+	property number multiplierStatRatio = 1.0
+	property boolean isCloneSpawn = false
+
 	-- ============================================
 	-- 효과 적용
 	-- ============================================
@@ -123,6 +128,8 @@ script MatrixAugmentService extends Logic
 			-- 스킬 쿨타임 감소 (추후 구현)
 		elseif effectType == "TurboMode" then
 			self:ApplyTurboMode(matrixData)
+		elseif effectType == "Multiplier" then
+			self:ApplyMultiplierMode(matrixData)
 		end
 	end
 
@@ -163,6 +170,24 @@ script MatrixAugmentService extends Logic
 
 		-- 체력: 현재 최종 maxHP의 1.5배 (GetMatrix가 현재 maxHP 기준으로 곱셈)
 		unit:GetMatrix(_eBuffType.MaxHealthMultiplyBuff, 1.5)
+	end
+
+	-- 멀티플라이어 모드 적용 (소환 시 복제본 추가 생성)
+	@ExecSpace("Server")
+	method void ApplyMultiplierMode(table matrixData)
+		self.isMultiplierActive = true
+		self.multiplierStatRatio = matrixData.value
+	end
+
+	-- 복제본 스탯 감소 적용
+	method void ApplyCloneStatReduction(any unit, number ratio)
+		unit.damage = math.floor(unit.damage * ratio)
+		unit.originDamage = math.floor(unit.originDamage * ratio)
+
+		local hpRatio = unit.hp / unit.maxHP
+		unit.maxHP = math.floor(unit.maxHP * ratio)
+		unit.originMaxHP = math.floor(unit.originMaxHP * ratio)
+		unit.hp = math.floor(unit.maxHP * hpRatio)
 	end
 
 	-- 속도 토글 버튼 활성화/비활성화
@@ -606,6 +631,11 @@ script MatrixAugmentService extends Logic
 		-- T.U.R.B.O 모드 초기화 (항상 리셋하여 상태 불일치 방지)
 		self.isTurboActive = false
 		self:SetSpeedToggleButtonEnabled(true)
+
+		-- 멀티플라이어 초기화
+		self.isMultiplierActive = false
+		self.multiplierStatRatio = 1.0
+		self.isCloneSpawn = false
 
 		-- MatrixService 상태 초기화
 		if _MatrixService ~= nil then
