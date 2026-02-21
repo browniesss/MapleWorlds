@@ -6,6 +6,9 @@ script MatrixAugmentService extends Logic
 	-- 메소 수입 배율 (증강 효과로 변동)
 	property number mesoIncomeMultiplier = 1.0
 
+	-- T.U.R.B.O 모드 활성화 여부
+	property boolean isTurboActive = false
+
 	-- ============================================
 	-- 효과 적용
 	-- ============================================
@@ -118,9 +121,77 @@ script MatrixAugmentService extends Logic
 		-- 커스텀 특수 효과 처리 (확장 가능)
 		if effectType == "SkillCooldownReduction" then
 			-- 스킬 쿨타임 감소 (추후 구현)
+		elseif effectType == "TurboMode" then
+			self:ApplyTurboMode(matrixData)
+		end
+	end
+
+	-- T.U.R.B.O 모드 적용 (게임 속도 x3 + 아군 공격력/체력 1.5배)
+	@ExecSpace("Server")
+	method void ApplyTurboMode(table matrixData)
+		local speedValue = matrixData.value
+
+		-- 게임 속도 설정
+		_TimeScaleManager.timeScale = speedValue
+		_TimeScaleManager.isSpeedUp = true
+		_TimeScaleManager:ApplyTimeScaleToAllClients(speedValue)
+
+		-- 모든 현재 아군 유닛에 공격력/체력 1.5배 적용
+		local gameMapPath = _GameManager:GetGameMapName()
+		local myMonsterList = _EntityService:GetEntityByPath(gameMapPath.."/MyMonsterList")
+
+		if myMonsterList ~= nil then
+			for _, child in ipairs(myMonsterList.Children) do
+				if child.Unit ~= nil then
+					self:ApplyTurboBuffToUnit(child.Unit)
+				end
+			end
 		end
 
-		-- 추가 특수 효과는 여기에 분기 추가
+		-- 터보 활성화 플래그
+		self.isTurboActive = true
+
+		-- 클라이언트에 속도 토글 버튼 비활성화 요청
+		self:SetSpeedToggleButtonEnabled(false)
+	end
+
+	-- T.U.R.B.O 버프를 단일 유닛에 적용 (최종 스탯의 1.5배)
+	method void ApplyTurboBuffToUnit(any unit)
+		-- 공격력: 현재 최종 damage의 1.5배
+		local attackBonus = unit.damage * 0.5
+		unit:GetMatrix(_eBuffType.AttackDamageBuff, attackBonus)
+
+		-- 체력: 현재 최종 maxHP의 1.5배 (GetMatrix가 현재 maxHP 기준으로 곱셈)
+		unit:GetMatrix(_eBuffType.MaxHealthMultiplyBuff, 1.5)
+	end
+
+	-- 속도 토글 버튼 활성화/비활성화
+	@ExecSpace("Client")
+	method void SetSpeedToggleButtonEnabled(boolean enabled)
+		local button = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/IngameInfoUI/PlaySpeedButton")
+		if button == nil then
+			return
+		end
+
+		-- x3 표시용 Root 오브젝트 활성화/비활성화
+		local root = button:GetChildByName("Root")
+		if root ~= nil then
+			root.Enable = not enabled
+		end
+
+		-- 터보 모드 해제 시: 아이콘을 현재 상태에 맞게 복원
+		if enabled and button.SpeedToggleButton ~= nil then
+			if _TimeScaleManager ~= nil then
+				button.SpeedToggleButton.localIsSpeedUp = _TimeScaleManager.isSpeedUp
+			else
+				button.SpeedToggleButton.localIsSpeedUp = false
+			end
+			button.SpeedToggleButton:UpdateIcon()
+		end
+
+		if button.ButtonComponent ~= nil then
+			button.ButtonComponent.Enable = enabled
+		end
 	end
 
 	@ExecSpace("Server")
@@ -223,6 +294,11 @@ script MatrixAugmentService extends Logic
 			elseif matrix.type == "STAT" or matrix.type == "BUFF" then
 				self:ApplyBuffToUnit(unit, matrix)
 			end
+		end
+
+		-- T.U.R.B.O 모드 활성화 시 공격력/체력 1.5배 자동 적용
+		if self.isTurboActive then
+			self:ApplyTurboBuffToUnit(unit)
 		end
 	end
 
@@ -415,7 +491,9 @@ script MatrixAugmentService extends Logic
 
 	-- 등급별 범위 반환
 	method number GetOnDieRange(string grade)
-		if grade == "LEGENDARY" then
+		if grade == "LEGENDARY+" then
+			return 6
+		elseif grade == "LEGENDARY" then
 			return 5
 		elseif grade == "UNIQUE" then
 			return 4
@@ -524,6 +602,10 @@ script MatrixAugmentService extends Logic
 		-- 상태 초기화
 		self.synergyBonusMap = {}
 		self.mesoIncomeMultiplier = 1.0
+
+		-- T.U.R.B.O 모드 초기화 (항상 리셋하여 상태 불일치 방지)
+		self.isTurboActive = false
+		self:SetSpeedToggleButtonEnabled(true)
 
 		-- MatrixService 상태 초기화
 		if _MatrixService ~= nil then

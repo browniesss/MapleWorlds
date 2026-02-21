@@ -5,7 +5,7 @@ script MatrixAugmentRepo extends Logic
 
 	property table modeData = {}
 
-	property table gradeList = {"RARE", "EPIC", "UNIQUE", "LEGENDARY"}
+	property table gradeList = {"RARE", "EPIC", "UNIQUE", "LEGENDARY", "LEGENDARY+"}
 
 	method void OnBeginPlay()
 		self:LoadMatrixData()
@@ -91,7 +91,13 @@ script MatrixAugmentRepo extends Logic
 		end
 
 		for i = 1, 3 do
-			local grade = self:GetRandomGrade()
+			-- [TEST] 첫 번째 슬롯은 LEGENDARY+ 강제
+			local grade = nil
+			if i == 1 then
+				grade = "LEGENDARY+"
+			else
+				grade = self:GetRandomGrade()
+			end
 			local matrix = self:GetRandomMatrixByGradeExcludeInfinite(grade)
 
 			if matrix ~= nil then
