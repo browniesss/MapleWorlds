@@ -110,22 +110,20 @@ script pvpUserComponent extends Component
 		self.defense_deck = deck
 	end
 
-	@ExecSpace("Server")
-	method void UseCoin()
-		_ProtocolService:CommonCall(senderUserId)
+	@ExecSpace("ServerOnly")
+	method void UseCoin(string userId)
 		if not self:CanUseCoin() then
 			return
 		end
-		
+
 		self.play_coin -= 1
-		
-		local code = _pvpUserService:UpdateUserData(senderUserId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck)
-		
+
+		local code = _pvpUserService:UpdateUserData(userId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck)
+
 		if not (code == 0) then
 			return
 		end
-		
-		
+
 		self:UserCoinBack(self.play_coin)
 	end
 

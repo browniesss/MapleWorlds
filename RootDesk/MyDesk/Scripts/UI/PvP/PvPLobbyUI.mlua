@@ -15,7 +15,13 @@ script PvPLobbyUI extends Component
 
 	property any refreshButtonHandler = nil
 
-	property table slotHandlers = {}
+	property any slot1Handler = nil
+
+	property any slot2Handler = nil
+
+	property any slot3Handler = nil
+
+	property any slot4Handler = nil
 
 	property Entity userList = nil
 
@@ -32,63 +38,111 @@ script PvPLobbyUI extends Component
 	@ExecSpace("ClientOnly")
 	method void InitUI()
 		self:ClearHandlers()
-		
+
 		-- 코인 표시 업데이트
 		self:UpdateCoinDisplay()
-		
+
 		-- 스코어 표시 업데이트
 		self:UpdateScoreDisplay()
-		
+
 		-- 매치 버튼 핸들러
 		if self.matchButton ~= nil and self.matchButton.ButtonComponent ~= nil then
-			self.matchButtonHandler = self.matchButton.ButtonComponent.OnClick:Connect(function()
-				self:OnMatchButtonClick()
-			end)
+			self.matchButtonHandler = self.matchButton:ConnectEvent(ButtonClickEvent, self.OnMatchButtonClicked)
 		end
-		
+
 		-- 새로고침 버튼 핸들러
 		if self.refreshButton ~= nil and self.refreshButton.ButtonComponent ~= nil then
-			self.refreshButtonHandler = self.refreshButton.ButtonComponent.OnClick:Connect(function()
-				self:OnRefreshButtonClick()
-			end)
+			self.refreshButtonHandler = self.refreshButton:ConnectEvent(ButtonClickEvent, self.OnRefreshButtonClicked)
 		end
-		
+
+		-- 슬롯 목록 및 클릭 핸들러 구성
 		for i, slot in ipairs(self.userList.Children) do
 			self.slotList[#self.slotList + 1] = slot
 
-			-- 슬롯 클릭 핸들러 연결
-			if slot.ButtonComponent ~= nil then
-				local capturedIndex = i
-				local handler = slot.ButtonComponent.OnClick:Connect(function()
-					local user = _UserService.LocalPlayer
-					if user ~= nil and user.pvpMatcherMakerComponent ~= nil then
-						user.pvpMatcherMakerComponent.selected = capturedIndex
-						self:HighlightSlot(capturedIndex)
-					end
-				end)
-				self.slotHandlers[#self.slotHandlers + 1] = handler
+			if i == 1 then
+				self.slot1Handler = slot:ConnectEvent(ButtonClickEvent, self.OnSlot1Click)
+			elseif i == 2 then
+				self.slot2Handler = slot:ConnectEvent(ButtonClickEvent, self.OnSlot2Click)
+			elseif i == 3 then
+				self.slot3Handler = slot:ConnectEvent(ButtonClickEvent, self.OnSlot3Click)
+			elseif i == 4 then
+				self.slot4Handler = slot:ConnectEvent(ButtonClickEvent, self.OnSlot4Click)
 			end
 		end
 	end
 
 	@ExecSpace("ClientOnly")
 	method void ClearHandlers()
-		if self.matchButtonHandler ~= nil then
-			self.matchButtonHandler:Disconnect()
+		if self.matchButtonHandler ~= nil and self.matchButton ~= nil then
+			self.matchButton:DisconnectEvent(ButtonClickEvent, self.matchButtonHandler)
 			self.matchButtonHandler = nil
 		end
-		
-		if self.refreshButtonHandler ~= nil then
-			self.refreshButtonHandler:Disconnect()
+
+		if self.refreshButtonHandler ~= nil and self.refreshButton ~= nil then
+			self.refreshButton:DisconnectEvent(ButtonClickEvent, self.refreshButtonHandler)
 			self.refreshButtonHandler = nil
 		end
-		
-		for _, handler in pairs(self.slotHandlers) do
-			if handler ~= nil then
-				handler:Disconnect()
-			end
+
+		if self.slot1Handler ~= nil and self.slotList[1] ~= nil then
+			self.slotList[1]:DisconnectEvent(ButtonClickEvent, self.slot1Handler)
+			self.slot1Handler = nil
 		end
-		self.slotHandlers = {}
+
+		if self.slot2Handler ~= nil and self.slotList[2] ~= nil then
+			self.slotList[2]:DisconnectEvent(ButtonClickEvent, self.slot2Handler)
+			self.slot2Handler = nil
+		end
+
+		if self.slot3Handler ~= nil and self.slotList[3] ~= nil then
+			self.slotList[3]:DisconnectEvent(ButtonClickEvent, self.slot3Handler)
+			self.slot3Handler = nil
+		end
+
+		if self.slot4Handler ~= nil and self.slotList[4] ~= nil then
+			self.slotList[4]:DisconnectEvent(ButtonClickEvent, self.slot4Handler)
+			self.slot4Handler = nil
+		end
+
+		table.clear(self.slotList)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnMatchButtonClicked(Entity entity)
+		self:OnMatchButtonClick()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnRefreshButtonClicked(Entity entity)
+		self:OnRefreshButtonClick()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnSlotClick(integer index)
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.pvpMatcherMakerComponent ~= nil then
+			user.pvpMatcherMakerComponent.selected = index
+			self:HighlightSlot(index)
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnSlot1Click(Entity entity)
+		self:OnSlotClick(1)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnSlot2Click(Entity entity)
+		self:OnSlotClick(2)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnSlot3Click(Entity entity)
+		self:OnSlotClick(3)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnSlot4Click(Entity entity)
+		self:OnSlotClick(4)
 	end
 
 	@ExecSpace("ClientOnly")
@@ -96,7 +150,7 @@ script PvPLobbyUI extends Component
 		if self.coinText == nil then
 			return
 		end
-		
+
 		local user = _UserService.LocalPlayer
 		if user ~= nil and user.pvpUserComponent ~= nil then
 			self.coinText.TextComponent.Text = tostring(user.pvpUserComponent.play_coin)
@@ -108,7 +162,7 @@ script PvPLobbyUI extends Component
 		if self.scoreText == nil then
 			return
 		end
-		
+
 		local user = _UserService.LocalPlayer
 		if user ~= nil and user.pvpRankingComponent ~= nil then
 			local score = user.pvpRankingComponent.score
@@ -131,22 +185,22 @@ script PvPLobbyUI extends Component
 		if user == nil then
 			return
 		end
-		
+
 		-- 코인 체크
 		if user.pvpUserComponent ~= nil and user.pvpUserComponent.play_coin <= 0 then
 			return
 		end
-		
+
 		local matcher = user.pvpMatcherMakerComponent
 		if matcher == nil then
 			return
 		end
-		
+
 		local selected = matcher.selected
 		if selected < 1 or selected > #matcher.targetUserList then
 			return
 		end
-		
+
 		matcher:StartMatchCall(selected)
 	end
 
@@ -160,13 +214,13 @@ script PvPLobbyUI extends Component
 					local info = userList[i]
 					slot.Enable = true
 					slot.Visible = true
-		
+
 					-- 닉네임
 					local nameText = slot.Children[1]
 					if nameText ~= nil then
 						nameText.TextComponent.Text = info.nickname or info.uid or "???"
 					end
-		
+
 					-- 점수
 					local scoreText = slot.Children[2]
 					if scoreText ~= nil then

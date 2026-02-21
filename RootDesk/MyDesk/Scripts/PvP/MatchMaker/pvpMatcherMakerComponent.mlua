@@ -136,7 +136,7 @@ script pvpMatcherMakerComponent extends Component
 
 		-- 게임 시작
 		if pvpCombat ~= nil then
-			pvpCombat:GameStartCall()
+			pvpCombat:GameStartCall(senderUserId)
 		end
 	end
 

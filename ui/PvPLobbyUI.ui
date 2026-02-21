@@ -38,23 +38,23 @@
           "@components": [
             {
               "@type": "MOD.Core.UITransformComponent",
-              "AlignmentOption": 0,
+              "AlignmentOption": 15,
               "AnchorsMax": {
-                "x": 0.5,
-                "y": 0.5
+                "x": 1.0,
+                "y": 1.0
               },
               "AnchorsMin": {
-                "x": 0.5,
-                "y": 0.5
+                "x": 0.0,
+                "y": 0.0
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 960.0,
-                "y": 540.0
+                "x": 0.0,
+                "y": 0.0
               },
               "OffsetMin": {
-                "x": -960.0,
-                "y": -540.0
+                "x": 0.0,
+                "y": 0.0
               },
               "Pivot": {
                 "x": 0.5,
@@ -346,12 +346,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 804.2467,
-                "y": 137.5
+                "x": 762.5878,
+                "y": 3.75320053
               },
               "OffsetMin": {
-                "x": 704.2467,
-                "y": 37.5
+                "x": 662.5878,
+                "y": -96.2467957
               },
               "Pivot": {
                 "x": 0.5,
@@ -364,12 +364,12 @@
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 754.2467,
-                "y": 87.5
+                "x": 712.5878,
+                "y": -46.2468
               },
               "Position": {
-                "x": 754.2467,
-                "y": 87.5,
+                "x": 712.5878,
+                "y": -46.2468,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -446,11 +446,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 504.5592,
+                "x": 489.2117,
                 "y": 540.0
               },
               "OffsetMin": {
-                "x": 404.5592,
+                "x": 389.2117,
                 "y": 440.0
               },
               "Pivot": {
@@ -464,11 +464,11 @@
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 454.5592,
+                "x": 439.2117,
                 "y": 490.0
               },
               "Position": {
-                "x": 454.5592,
+                "x": 439.2117,
                 "y": 490.0,
                 "z": 0.0
               },
@@ -546,12 +546,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 582.366455,
-                "y": 410.2379
+                "x": 355.0813,
+                "y": 314.1655
               },
               "OffsetMin": {
-                "x": 382.3665,
-                "y": 335.2379
+                "x": 155.0813,
+                "y": 239.1655
               },
               "Pivot": {
                 "x": 0.5,
@@ -564,12 +564,12 @@
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 482.3665,
-                "y": 372.7379
+                "x": 255.0813,
+                "y": 276.6655
               },
               "Position": {
-                "x": 482.3665,
-                "y": 372.7379,
+                "x": 255.0813,
+                "y": 276.6655,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -787,30 +787,30 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 858.6316,
-                "y": -19.5071983
+                "x": 799.4347,
+                "y": 413.748383
               },
               "OffsetMin": {
-                "x": 658.6316,
-                "y": -94.5072
+                "x": 502.3607,
+                "y": 302.3456
               },
               "Pivot": {
                 "x": 0.5,
                 "y": 0.5
               },
               "RectSize": {
-                "x": 200.0,
-                "y": 75.0
+                "x": 297.074036,
+                "y": 111.402756
               },
               "UIMode": 1,
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 758.6316,
-                "y": -57.0072
+                "x": 650.8977,
+                "y": 358.047
               },
               "Position": {
-                "x": 758.6316,
-                "y": -57.0072,
+                "x": 650.8977,
+                "y": 358.047,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -923,8 +923,8 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 200.0,
-                "y": 75.0
+                "x": 297.074036,
+                "y": 111.402756
               },
               "UIMode": 1,
               "UIScale": {
@@ -1178,7 +1178,7 @@
       {
         "id": "24808f7a-346e-46b6-8c39-77c772aa867d",
         "path": "/ui/PvPLobbyUI/Window/UserList/Slot_1",
-        "componentNames": "MOD.Core.UITransformComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
         "jsonString": {
           "name": "Slot_1",
           "path": "/ui/PvPLobbyUI/Window/UserList/Slot_1",
@@ -1259,6 +1259,67 @@
                 "z": 1.0
               },
               "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": ""
+              },
+              "OverrideSorting": false,
+              "Color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "RaycastTarget": true,
+              "Type": 1,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ButtonComponent",
+              "Colors": {
+                "NormalColor": {
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                },
+                "HighlightedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "PressedColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 1.0
+                },
+                "SelectedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "DisabledColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 0.5019608
+                },
+                "ColorMultiplier": 1.0,
+                "FadeDuration": 0.1
+              },
+              "ImageRUIDs": {
+                "HighlightedSprite": null,
+                "PressedSprite": null,
+                "SelectedSprite": null,
+                "DisabledSprite": null
+              },
+              "OverrideSorting": false,
               "Enable": true
             }
           ],
@@ -1502,7 +1563,7 @@
       {
         "id": "58244a77-8813-4ce7-bc42-2cf71c5f7718",
         "path": "/ui/PvPLobbyUI/Window/UserList/Slot_2",
-        "componentNames": "MOD.Core.UITransformComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
         "jsonString": {
           "name": "Slot_2",
           "path": "/ui/PvPLobbyUI/Window/UserList/Slot_2",
@@ -1583,6 +1644,67 @@
                 "z": 1.0
               },
               "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": ""
+              },
+              "OverrideSorting": false,
+              "Color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "RaycastTarget": true,
+              "Type": 1,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ButtonComponent",
+              "Colors": {
+                "NormalColor": {
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                },
+                "HighlightedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "PressedColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 1.0
+                },
+                "SelectedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "DisabledColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 0.5019608
+                },
+                "ColorMultiplier": 1.0,
+                "FadeDuration": 0.1
+              },
+              "ImageRUIDs": {
+                "HighlightedSprite": null,
+                "PressedSprite": null,
+                "SelectedSprite": null,
+                "DisabledSprite": null
+              },
+              "OverrideSorting": false,
               "Enable": true
             }
           ],
@@ -1826,7 +1948,7 @@
       {
         "id": "01e5f7b0-829c-44cd-a353-e2fa8f9cc18b",
         "path": "/ui/PvPLobbyUI/Window/UserList/Slot_3",
-        "componentNames": "MOD.Core.UITransformComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
         "jsonString": {
           "name": "Slot_3",
           "path": "/ui/PvPLobbyUI/Window/UserList/Slot_3",
@@ -1907,6 +2029,67 @@
                 "z": 1.0
               },
               "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": ""
+              },
+              "OverrideSorting": false,
+              "Color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "RaycastTarget": true,
+              "Type": 1,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ButtonComponent",
+              "Colors": {
+                "NormalColor": {
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                },
+                "HighlightedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "PressedColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 1.0
+                },
+                "SelectedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "DisabledColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 0.5019608
+                },
+                "ColorMultiplier": 1.0,
+                "FadeDuration": 0.1
+              },
+              "ImageRUIDs": {
+                "HighlightedSprite": null,
+                "PressedSprite": null,
+                "SelectedSprite": null,
+                "DisabledSprite": null
+              },
+              "OverrideSorting": false,
               "Enable": true
             }
           ],
@@ -2150,7 +2333,7 @@
       {
         "id": "ccff3267-0fff-49e5-93b5-d8e060021634",
         "path": "/ui/PvPLobbyUI/Window/UserList/Slot_4",
-        "componentNames": "MOD.Core.UITransformComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
         "jsonString": {
           "name": "Slot_4",
           "path": "/ui/PvPLobbyUI/Window/UserList/Slot_4",
@@ -2231,6 +2414,67 @@
                 "z": 1.0
               },
               "ZRotation": 0.0,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": ""
+              },
+              "OverrideSorting": false,
+              "Color": {
+                "r": 1.0,
+                "g": 1.0,
+                "b": 1.0,
+                "a": 1.0
+              },
+              "RaycastTarget": true,
+              "Type": 1,
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.ButtonComponent",
+              "Colors": {
+                "NormalColor": {
+                  "r": 1.0,
+                  "g": 1.0,
+                  "b": 1.0,
+                  "a": 1.0
+                },
+                "HighlightedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "PressedColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 1.0
+                },
+                "SelectedColor": {
+                  "r": 0.9607843,
+                  "g": 0.9607843,
+                  "b": 0.9607843,
+                  "a": 1.0
+                },
+                "DisabledColor": {
+                  "r": 0.784313738,
+                  "g": 0.784313738,
+                  "b": 0.784313738,
+                  "a": 0.5019608
+                },
+                "ColorMultiplier": 1.0,
+                "FadeDuration": 0.1
+              },
+              "ImageRUIDs": {
+                "HighlightedSprite": null,
+                "PressedSprite": null,
+                "SelectedSprite": null,
+                "DisabledSprite": null
+              },
+              "OverrideSorting": false,
               "Enable": true
             }
           ],

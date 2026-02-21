@@ -19,14 +19,12 @@ script pvpCombatComponent extends Component
 
 	property string currentUserId = ""
 
-	@ExecSpace("Server")
-	method void GameStartCall()
-		_ProtocolService:CommonCall(senderUserId)
-
-		self.currentUserId = senderUserId
+	@ExecSpace("ServerOnly")
+	method void GameStartCall(string userId)
+		self.currentUserId = userId
 
 		-- 코인 소비
-		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		local user = _UserService:GetUserEntityByUserId(userId)
 		if user == nil then
 			return
 		end
@@ -39,7 +37,7 @@ script pvpCombatComponent extends Component
 		if not pvpUser:CanUseCoin() then
 			return
 		end
-		pvpUser:UseCoin()
+		pvpUser:UseCoin(userId)
 
 		-- 타워 HP 초기화
 		local towerHP = _pvpService.USER_TOWER_HP

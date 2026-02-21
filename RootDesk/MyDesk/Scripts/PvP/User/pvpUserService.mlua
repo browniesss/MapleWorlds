@@ -16,7 +16,7 @@ script pvpUserService extends Logic
 				code=code
 			}
 		end
-		
+
 		if json == nil then
 			local data = {
 				play_coin=5,
@@ -25,33 +25,43 @@ script pvpUserService extends Logic
 				next_play_coin=0,
 				code = 0
 			}
-			
-			local updateCode = self:UpdateUserData(uid, data)
+
+			local updateCode = self:UpdateUserData(uid, data.play_coin, data.next_play_coin, data.offense_deck, data.defense_deck)
 			if not (updateCode == 0) then
 				return {
 					code=updateCode
 				}
 			end
 			return data
-			
+
 		end
-		
-		return _HttpService:JSONDecode(json)
+
+		local decoded = _HttpService:JSONDecode(json)
+		-- offense_deck, defense_deck는 JSON 문자열로 저장되어 있으므로 다시 디코딩
+		if type(decoded.offense_deck) == "string" then
+			decoded.offense_deck = _HttpService:JSONDecode(decoded.offense_deck)
+		end
+		if type(decoded.defense_deck) == "string" then
+			decoded.defense_deck = _HttpService:JSONDecode(decoded.defense_deck)
+		end
+		return decoded
 	end
 
 	@ExecSpace("ServerOnly")
 	method integer UpdateUserData(string uid, integer play_coin, integer next_play_coin, table offense_deck, table defense_deck)
+		-- 중첩 table은 JSONEncode가 지원하지 않으므로 별도로 직렬화
+		local offense_str = _HttpService:JSONEncode(offense_deck)
+		local defense_str = _HttpService:JSONEncode(defense_deck)
+
 		local data = {
 			play_coin=play_coin,
-			offense_deck=offense_deck,
-			defense_deck=defense_deck,
+			offense_deck=offense_str,
+			defense_deck=defense_str,
 			next_play_coin=next_play_coin,
 			code = 0
 		}
-		
-		-- TODO: data validataion
-		
-		local json =  _HttpService:JSONEncode(data)
+
+		local json = _HttpService:JSONEncode(data)
 		local ds = _DataStorageService:GetUserDataStorage(uid)
 		return ds:SetAndWait(self.PVP_MODE_KEY, json)
 	end
