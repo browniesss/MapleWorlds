@@ -8,6 +8,8 @@ script MatrixAugmentService extends Logic
 
 	-- T.U.R.B.O 모드 활성화 여부
 	property boolean isTurboActive = false
+	property number preTurboTimeScale = 1.0
+	property boolean preTurboIsSpeedUp = false
 
 	-- 멀티플라이어 관련
 	property boolean isMultiplierActive = false
@@ -137,6 +139,10 @@ script MatrixAugmentService extends Logic
 	@ExecSpace("Server")
 	method void ApplyTurboMode(table matrixData)
 		local speedValue = matrixData.value
+
+		-- 원래 배속 저장 (복원용)
+		self.preTurboTimeScale = _TimeScaleManager.timeScale
+		self.preTurboIsSpeedUp = _TimeScaleManager.isSpeedUp
 
 		-- 게임 속도 설정
 		_TimeScaleManager.timeScale = speedValue
@@ -646,7 +652,15 @@ script MatrixAugmentService extends Logic
 		self.mesoIncomeMultiplier = 1.0
 
 		-- T.U.R.B.O 모드 초기화 (항상 리셋하여 상태 불일치 방지)
+		-- SaveAndReset이 터보 상태를 저장하지 않도록 원래 배속으로 복원
+		if _TimeScaleManager ~= nil then
+			_TimeScaleManager.lastTimeScale = self.preTurboTimeScale
+			_TimeScaleManager.lastIsSpeedUp = self.preTurboIsSpeedUp
+		end
 		self.isTurboActive = false
+		self.preTurboTimeScale = 1.0
+		self.preTurboIsSpeedUp = false
+
 		self:SetSpeedToggleButtonEnabled(true)
 
 		-- 멀티플라이어 초기화
