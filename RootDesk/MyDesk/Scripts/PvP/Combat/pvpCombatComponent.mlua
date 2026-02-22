@@ -23,6 +23,9 @@ script pvpCombatComponent extends Component
 	method void GameStartCall(string userId)
 		self.currentUserId = userId
 
+		-- 이전 게임 잔여 데이터 정리
+		self:CleanupPreviousGame()
+
 		-- 코인 소비
 		local user = _UserService:GetUserEntityByUserId(userId)
 		if user == nil then
@@ -38,18 +41,6 @@ script pvpCombatComponent extends Component
 			return
 		end
 		pvpUser:UseCoin(userId)
-
-		-- 타워 HP 초기화
-		local towerHP = _pvpService.USER_TOWER_HP
-		local enemyTowerHP = _pvpService.ENEMY_TOWER_HP
-
-		self.UserTower.Unit.originMaxHP = towerHP
-		self.UserTower.Unit.maxHP = towerHP
-		self.UserTower.Unit.hp = towerHP
-
-		self.EnemyTower.Unit.originMaxHP = enemyTowerHP
-		self.EnemyTower.Unit.maxHP = enemyTowerHP
-		self.EnemyTower.Unit.hp = enemyTowerHP
 
 		-- 시너지 데이터 준비
 		local offenseSynergy = pvpUser.offense_synergy or {}
@@ -92,6 +83,16 @@ script pvpCombatComponent extends Component
 
 	@ExecSpace("Client")
 	method void GameStartBack()
+		-- 클라이언트 측 게임 모드 설정 (@Sync 재전파 미발생 대비)
+		_GameManager.currentGameMode = _eGameMode.PvP
+
+		-- 이전 게임 클라이언트 잔여 데이터 정리 (미니맵 아이콘)
+		local minimapPath = "/ui/Ingame_Info_UI_Group/Minimap Group/Minimap Background"
+		local minimap = _EntityService:GetEntityByPath(minimapPath)
+		if minimap ~= nil then
+			_GameManager:DestroyChildrenInClient(minimap, true)
+		end
+
 		-- PvPLobbyUI 숨기기
 		local pvpLobbyUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI")
 		if pvpLobbyUI ~= nil then
@@ -221,6 +222,17 @@ script pvpCombatComponent extends Component
 		-- 모든 유닛 제거
 		self:DestroyAllUnits()
 
+		-- 스킬/투사체 정리
+		local mapPath = _pvpService.PVP_STAGE_PATH
+		local skillParent = _EntityService:GetEntityByPath(mapPath .. "/SkillParent")
+		if skillParent ~= nil then
+			_GameManager:DestroyChildren(skillParent, false)
+		end
+		local projectileParent = _EntityService:GetEntityByPath(mapPath .. "/ProjectileParent")
+		if projectileParent ~= nil then
+			_GameManager:DestroyChildren(projectileParent, false)
+		end
+
 		-- 노멀 덱 시너지 복원
 		if self.currentUserId ~= "" then
 			local endUser = _UserService:GetUserEntityByUserId(self.currentUserId)
@@ -290,6 +302,13 @@ script pvpCombatComponent extends Component
 		local pvpLobbyUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI")
 		if pvpLobbyUI ~= nil and pvpLobbyUI.PvPLobbyUI ~= nil then
 			pvpLobbyUI.PvPLobbyUI:UpdateScoreDisplay()
+		end
+
+		-- 미니맵 아이콘 정리
+		local minimapPath = "/ui/Ingame_Info_UI_Group/Minimap Group/Minimap Background"
+		local minimap = _EntityService:GetEntityByPath(minimapPath)
+		if minimap ~= nil then
+			_GameManager:DestroyChildrenInClient(minimap, true)
 		end
 
 		-- 결과 UI 표시
@@ -389,6 +408,72 @@ script pvpCombatComponent extends Component
 		end
 
 		return countMap
+	end
+
+	@ExecSpace("ServerOnly")
+	method void CleanupPreviousGame()
+		-- 잔여 유닛 제거
+		self:DestroyAllUnits()
+
+		-- 잔여 스킬/투사체 제거
+		local mapPath = _pvpService.PVP_STAGE_PATH
+		local skillParent = _EntityService:GetEntityByPath(mapPath .. "/SkillParent")
+		if skillParent ~= nil then
+			_GameManager:DestroyChildren(skillParent, false)
+		end
+		local projectileParent = _EntityService:GetEntityByPath(mapPath .. "/ProjectileParent")
+		if projectileParent ~= nil then
+			_GameManager:DestroyChildren(projectileParent, false)
+		end
+
+		-- 타워를 경로로 직접 가져오기 (property Entity 참조가 stale될 수 있음)
+		local userTower = _EntityService:GetEntityByPath(mapPath .. "/PlayerTower")
+		local enemyTower = _EntityService:GetEntityByPath(mapPath .. "/EnemyTower")
+
+		-- 타워 Unit 상태 초기화
+		self:ResetTowerState(userTower)
+		self:ResetTowerState(enemyTower)
+
+		-- 타워 HP 초기화
+		local towerHP = _pvpService.USER_TOWER_HP
+		local enemyTowerHP = _pvpService.ENEMY_TOWER_HP
+
+		if userTower ~= nil and userTower.Unit ~= nil then
+			userTower.Unit.originMaxHP = towerHP
+			userTower.Unit.maxHP = towerHP
+			userTower.Unit.hp = towerHP
+		end
+
+		if enemyTower ~= nil and enemyTower.Unit ~= nil then
+			enemyTower.Unit.originMaxHP = enemyTowerHP
+			enemyTower.Unit.maxHP = enemyTowerHP
+			enemyTower.Unit.hp = enemyTowerHP
+		end
+
+		-- GameClearChecker 리셋
+		if userTower ~= nil and userTower.GameClearChecker ~= nil then
+			userTower.GameClearChecker.isClear = false
+		end
+		if enemyTower ~= nil and enemyTower.GameClearChecker ~= nil then
+			enemyTower.GameClearChecker.isClear = false
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void ResetTowerState(Entity tower)
+		if tower == nil or tower.Unit == nil then
+			return
+		end
+		local unit = tower.Unit
+		-- curState가 "die"면 SetState가 무시되므로 직접 설정
+		unit.curState = "stand"
+		unit.curTarget = nil
+		unit.stunTime = 0
+		unit.stunTimeCounter = 0
+		unit.freezeTime = 0
+		unit.freezeTimeCounter = 0
+		unit.debuffState = 0
+		unit.isUsingSkill = false
 	end
 
 	@ExecSpace("ServerOnly")

@@ -13,8 +13,6 @@ script PvPResultUI extends Component
 
 	property Entity lobbyButton = nil
 
-	property any retryHandler = nil
-
 	property any lobbyHandler = nil
 
 	@ExecSpace("ClientOnly")
@@ -24,11 +22,6 @@ script PvPResultUI extends Component
 
 	@ExecSpace("ClientOnly")
 	method void ClearHandlers()
-		if self.retryHandler ~= nil and self.retryButton ~= nil then
-			self.retryButton:DisconnectEvent(ButtonClickEvent, self.retryHandler)
-			self.retryHandler = nil
-		end
-
 		if self.lobbyHandler ~= nil and self.lobbyButton ~= nil then
 			self.lobbyButton:DisconnectEvent(ButtonClickEvent, self.lobbyHandler)
 			self.lobbyHandler = nil
@@ -38,7 +31,7 @@ script PvPResultUI extends Component
 	@ExecSpace("ClientOnly")
 	method void ShowResult(boolean isWin, integer deltaScore, integer newScore)
 		self:ClearHandlers()
-		
+
 		-- 승리/패배 타이틀
 		if self.resultTitle ~= nil then
 			if isWin then
@@ -47,7 +40,7 @@ script PvPResultUI extends Component
 				self.resultTitle.TextComponent.Text = "DEFEAT"
 			end
 		end
-		
+
 		-- 점수 변동
 		if self.scoreChangeText ~= nil then
 			if deltaScore >= 0 then
@@ -56,20 +49,20 @@ script PvPResultUI extends Component
 				self.scoreChangeText.TextComponent.Text = tostring(deltaScore)
 			end
 		end
-		
+
 		-- 현재 점수
 		if self.currentScoreText ~= nil then
 			self.currentScoreText.TextComponent.Text = tostring(newScore)
 		end
-		
+
 		-- 티어 표시
 		if self.tierText ~= nil then
 			self.tierText.TextComponent.Text = self:GetTierName(newScore)
 		end
-		
-		-- 다시하기 버튼
+
+		-- 리트라이 버튼 숨기기
 		if self.retryButton ~= nil then
-			self.retryHandler = self.retryButton:ConnectEvent(ButtonClickEvent, self.OnRetryButtonClicked)
+			self.retryButton.Enable = false
 		end
 
 		-- 로비로 버튼
@@ -79,40 +72,8 @@ script PvPResultUI extends Component
 	end
 
 	@ExecSpace("ClientOnly")
-	method void OnRetryButtonClicked(Entity entity)
-		self:OnRetryClick()
-	end
-
-	@ExecSpace("ClientOnly")
 	method void OnLobbyButtonClicked(Entity entity)
 		self:OnLobbyClick()
-	end
-
-	@ExecSpace("ClientOnly")
-	method void OnRetryClick()
-		self:ClearHandlers()
-
-		-- 결과 UI 닫기
-		self.Entity.Enable = false
-		self.Entity.Visible = false
-		
-		-- PvP 로비 UI 열기
-		local pvpLobbyUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI")
-		if pvpLobbyUI ~= nil then
-			pvpLobbyUI.Enable = true
-			pvpLobbyUI.Visible = true
-		
-			if pvpLobbyUI.PvPLobbyUI ~= nil then
-				pvpLobbyUI.PvPLobbyUI:UpdateCoinDisplay()
-				pvpLobbyUI.PvPLobbyUI:UpdateScoreDisplay()
-			end
-		end
-		
-		-- 상대 목록 새로고침
-		local user = _UserService.LocalPlayer
-		if user ~= nil and user.pvpMatcherMakerComponent ~= nil then
-			user.pvpMatcherMakerComponent:RefreshListCall()
-		end
 	end
 
 	@ExecSpace("ClientOnly")
@@ -126,17 +87,15 @@ script PvPResultUI extends Component
 		-- 게임 모드 초기화
 		_GameManager.currentGameMode = _eGameMode.Normal
 
-		-- 로딩 화면 표시
-		_LoadingManager:Show()
-
 		-- 메인 로비로 텔레포트
+		_LoadingManager:Show()
 		_TeleportService:TeleportToMapPosition(
 			_UserService.LocalPlayer,
 			Vector3.zero,
 			"MainLobbyMap"
 		)
 
-		-- MainLobbyUI 재활성화
+		-- MainLobbyUI 활성화
 		local mainLobbyUI = _EntityService:GetEntityByPath("/ui/MainLobbyUI")
 		if mainLobbyUI ~= nil then
 			mainLobbyUI.Enable = true
@@ -165,6 +124,13 @@ script PvPResultUI extends Component
 			if lobbyJumpButton ~= nil then
 				lobbyJumpButton.Enable = true
 			end
+		end
+
+		-- PvP 로비 UI 표시 (상대 리스트 리프레시 없이)
+		local pvpLobbyUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI")
+		if pvpLobbyUI ~= nil then
+			pvpLobbyUI.Enable = true
+			pvpLobbyUI.Visible = true
 		end
 	end
 

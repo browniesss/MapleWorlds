@@ -1125,8 +1125,10 @@ script Unit extends Component
 		
 		-- 맵마다 Path 다르게 설정 필요
 		local map = _EntityService:GetEntityByPath(_GameManager:GetGameMapName())
-		map.MinimapManager:RemoveEntityList(self.Entity)
-		
+		if map ~= nil and map.MinimapManager ~= nil then
+			map.MinimapManager:RemoveEntityList(self.Entity)
+		end
+
 		self:DestroyProjectile()
 		self:ClearAttackerInfo()
 		
@@ -1525,7 +1527,9 @@ script Unit extends Component
 	@ExecSpace("Client")
 	method void CreateMinimapIcon(boolean isEnemy)
 		local map = _EntityService:GetEntityByPath(_GameManager:GetGameMapName())
-		map.MinimapManager:AddEntityList(self.Entity, isEnemy)
+		if map ~= nil and map.MinimapManager ~= nil then
+			map.MinimapManager:AddEntityList(self.Entity, isEnemy)
+		end
 	end
 
 	@ExecSpace("Server")
@@ -1577,7 +1581,9 @@ script Unit extends Component
 		if self.baseData.returnCost <= 0 then
 			return
 		end
-		
+		if _GameManager.currentGameMode == _eGameMode.PvP then
+			return
+		end
 		_SpawnManager:GetUserWallet().MesoWallet:AddMeso(self.baseData.returnCost)
 	end
 
@@ -1592,8 +1598,10 @@ script Unit extends Component
 		
 		_EffectService:RemoveEffect(self.effectId)
 		local map = _EntityService:GetEntityByPath(_GameManager:GetGameMapName())
-		map.MinimapManager:RemoveEntityList(self.Entity)
-		
+		if map ~= nil and map.MinimapManager ~= nil then
+			map.MinimapManager:RemoveEntityList(self.Entity)
+		end
+
 		_TimerService:SetTimerOnce(function()
 			self:SetState("die")
 			self:ClearSkill()

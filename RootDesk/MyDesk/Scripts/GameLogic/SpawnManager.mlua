@@ -142,7 +142,11 @@ script SpawnManager extends Logic
 	end
 
 	method boolean IsCanSpawn(integer price)
-		return self:GetUserWallet().MesoWallet:GetMeso() >= price
+		local wallet = self:GetUserWallet()
+		if wallet == nil or wallet.MesoWallet == nil then
+			return false
+		end
+		return wallet.MesoWallet:GetMeso() >= price
 	end
 
 	method Entity GetUserWallet()
