@@ -26,6 +26,14 @@ script pvpAiPlayerComponent extends Component
 		self.pointUpdateTimer = 0
 		self.synergyMap = synergy or {}
 
+		-- 시너지 101: 모험가 포인트 증가 보너스 (AI)
+		local adventurerCount = self.synergyMap["101"] or 0
+		local adventurerSynergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE("101", adventurerCount)
+		if adventurerSynergy:length() > 0 then
+			local item = adventurerSynergy:Get(1)
+			self.pointInc = self.pointInc * (1.0 + (item.value / 100000))
+		end
+
 		table.clear(self.summonPools)
 		table.clear(self.summonQueue)
 		table.clear(self.summonDeck)

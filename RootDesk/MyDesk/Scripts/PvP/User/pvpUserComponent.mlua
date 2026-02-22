@@ -290,6 +290,7 @@ script pvpUserComponent extends Component
 		end
 
 		self:UserCoinBack(self.play_coin)
+		self:UpdateCoinNextTs(self.next_play_coin)
 	end
 
 	@ExecSpace("ServerOnly")

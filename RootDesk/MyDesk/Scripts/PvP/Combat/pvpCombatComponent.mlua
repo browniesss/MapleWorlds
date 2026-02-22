@@ -164,7 +164,17 @@ script pvpCombatComponent extends Component
 		-- 포인트 초기 표시
 		local coinText = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group/User_Coin_Bar/ingame_money")
 		if coinText ~= nil then
-			coinText.TextComponent.Text = "0"
+			local pvpUserSpawn = self.Entity.pvpUserSpawnComponent
+			local incText = "1"
+			if pvpUserSpawn ~= nil then
+				local inc = pvpUserSpawn.pointInc
+				if inc % 1 == 0 then
+					incText = tostring(math.floor(inc))
+				else
+					incText = string.format("%.1f", inc)
+				end
+			end
+			coinText.TextComponent.Text = "0 + " .. incText
 		end
 	end
 

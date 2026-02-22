@@ -15,6 +15,16 @@ script pvpUserSpawnComponent extends Component
 		self.pointInc = 1
 		self.pointUpdateTimer = 0
 		self.synergyMap = synergy or {}
+
+		-- 시너지 101: 모험가 포인트 증가 보너스
+		local adventurerCount = self.synergyMap["101"] or 0
+		local adventurerSynergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE("101", adventurerCount)
+		if adventurerSynergy:length() > 0 then
+			local item = adventurerSynergy:Get(1)
+			self.pointInc = self.pointInc * (1.0 + (item.value / 100000))
+		end
+
+		self:SyncPointInc(self.pointInc)
 	end
 
 	@ExecSpace("ServerOnly")
@@ -155,8 +165,19 @@ script pvpUserSpawnComponent extends Component
 		-- 포인트 UI 업데이트
 		local coinText = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group/User_Coin_Bar/ingame_money")
 		if coinText ~= nil then
-			coinText.TextComponent.Text = tostring(math.floor(point))
+			local incText = ""
+			if self.pointInc % 1 == 0 then
+				incText = tostring(math.floor(self.pointInc))
+			else
+				incText = string.format("%.1f", self.pointInc)
+			end
+			coinText.TextComponent.Text = tostring(math.floor(point)) .. " + " .. incText
 		end
+	end
+
+	@ExecSpace("Client")
+	method void SyncPointInc(number inc)
+		self.pointInc = inc
 	end
 
 end

@@ -188,15 +188,41 @@ script PvPLobbyUI extends Component
 	end
 
 	@ExecSpace("ClientOnly")
+	method void OnUpdate(number delta)
+		self:UpdateCoinDisplay()
+	end
+
+	@ExecSpace("ClientOnly")
 	method void UpdateCoinDisplay()
 		if self.coinText == nil then
 			return
 		end
 
 		local user = _UserService.LocalPlayer
-		if user ~= nil and user.pvpUserComponent ~= nil then
-			self.coinText.TextComponent.Text = tostring(user.pvpUserComponent.play_coin)
+		if user == nil or user.pvpUserComponent == nil then
+			return
 		end
+
+		local pvpUser = user.pvpUserComponent
+		local coin = pvpUser.play_coin
+
+		-- 코인이 최대일 때는 숫자만 표시
+		if coin >= _pvpUserService.MAX_PLAY_COIN then
+			self.coinText.TextComponent.Text = tostring(coin)
+			return
+		end
+
+		-- 남은 시간 계산
+		local remainMs = pvpUser.next_play_coin - DateTime.UtcNow.Elapsed
+		if remainMs <= 0 then
+			self.coinText.TextComponent.Text = tostring(coin)
+			return
+		end
+
+		local remainSec = math.floor(remainMs / 1000)
+		local m = math.floor(remainSec / 60)
+		local s = remainSec % 60
+		self.coinText.TextComponent.Text = tostring(coin) .. " + " .. string.format("%02d:%02d", m, s)
 	end
 
 	@ExecSpace("ClientOnly")
