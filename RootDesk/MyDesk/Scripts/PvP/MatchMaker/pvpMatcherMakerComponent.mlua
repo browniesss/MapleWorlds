@@ -75,6 +75,27 @@ script pvpMatcherMakerComponent extends Component
 			newList[#newList + 1] = tierPool[i]
 		end
 
+		-- 덱 데이터 프리페치 (REFRESH 시점에 캐싱)
+		for i = 1, #newList do
+			local target = newList[i]
+			if not (target.isDummy or false) then
+				local targetData = _pvpUserService:GetUserData(target.uid)
+				if targetData.code == 0 then
+					target.cachedDeck = targetData.defense_deck or {}
+					target.cachedSynergy = targetData.defense_synergy or {}
+				else
+					target.cachedDeck = {}
+					target.cachedSynergy = {}
+				end
+				target.cachedUnitInfo = self:FetchUnitInfo(target.uid, target.cachedDeck)
+			else
+				local dummyDeck = _pvpDummyDeckService:GetDummyDeckByTier(target.tierName or "bronze")
+				target.cachedDeck = dummyDeck.defense_deck
+				target.cachedUnitInfo = dummyDeck.unitInfo
+				target.cachedSynergy = dummyDeck.defense_synergy or {}
+			end
+		end
+
 		self.targetUserList = newList
 		self:RefeshListBack(newList)
 	end
@@ -87,6 +108,63 @@ script pvpMatcherMakerComponent extends Component
 		if pvpLobbyUI ~= nil and pvpLobbyUI.PvPLobbyUI ~= nil then
 			pvpLobbyUI.PvPLobbyUI:UpdateSlots(list)
 		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method table FetchUnitInfo(string uid, table defenseDeck)
+		local opponentDS = _DataStorageService:GetUserDataStorage(uid)
+		local unitKeys = {}
+		for _, unitId in ipairs(defenseDeck) do
+			if unitId ~= nil and unitId ~= "" then
+				unitKeys[#unitKeys + 1] = "USER_" .. unitId
+			end
+		end
+
+		local unitDataMap = {}
+		if #unitKeys > 0 then
+			local errCode, pages = opponentDS:BatchGetAndWait(unitKeys)
+			if errCode == 0 then
+				while true do
+					local datas = pages:GetCurrentPageDatas()
+					for _, data in pairs(datas) do
+						if data.Value ~= nil then
+							local model = UserUnitModel()
+							if model:DECODE(data.Value) then
+								unitDataMap[model.id] = model
+							end
+						end
+					end
+					if pages.IsLastPage then
+						break
+					end
+					pages:MoveToNextPageAndWait()
+				end
+			end
+		end
+
+		local unitInfo = {}
+		for _, unitId in ipairs(defenseDeck) do
+			if unitId ~= nil and unitId ~= "" then
+				local unitData = _UnitService:GetUnitByIDFromServer(unitId)
+				if unitData ~= nil then
+					local level = 1
+					local limitBreak = 1
+					local userUnit = unitDataMap[unitId]
+					if userUnit ~= nil then
+						level = userUnit.level
+						limitBreak = userUnit.limitBreak
+					end
+					unitInfo[unitId] = {
+						id = unitId,
+						level = level,
+						limitBreak = limitBreak,
+						cost = unitData["cost"] or unitData["summonCost"] or 0
+					}
+				end
+			end
+		end
+
+		return unitInfo
 	end
 
 	@ExecSpace("Server")
@@ -102,72 +180,13 @@ script pvpMatcherMakerComponent extends Component
 			return
 		end
 
-		local deckData = {defense_deck = {}, unitInfo = {}, nickname = target.nickname or "", defense_synergy = {}}
-
-		if not (target.isDummy or false) then
-			local targetData = _pvpUserService:GetUserData(target.uid)
-			if targetData.code == 0 then
-				deckData.defense_deck = targetData.defense_deck or {}
-				deckData.defense_synergy = targetData.defense_synergy or {}
-			end
-
-			-- 상대 유닛 데이터 일괄 조회 (level, limitBreak)
-			local opponentDS = _DataStorageService:GetUserDataStorage(target.uid)
-			local unitKeys = {}
-			for _, unitId in ipairs(deckData.defense_deck) do
-				if unitId ~= nil and unitId ~= "" then
-					unitKeys[#unitKeys + 1] = "USER_" .. unitId
-				end
-			end
-
-			local unitDataMap = {}
-			if #unitKeys > 0 then
-				local errCode, pages = opponentDS:BatchGetAndWait(unitKeys)
-				if errCode == 0 then
-					while true do
-						local datas = pages:GetCurrentPageDatas()
-						for _, data in pairs(datas) do
-							if data.Value ~= nil then
-								local model = UserUnitModel()
-								if model:DECODE(data.Value) then
-									unitDataMap[model.id] = model
-								end
-							end
-						end
-						if pages.IsLastPage then
-							break
-						end
-						pages:MoveToNextPageAndWait()
-					end
-				end
-			end
-
-			for _, unitId in ipairs(deckData.defense_deck) do
-				if unitId ~= nil and unitId ~= "" then
-					local unitData = _UnitService:GetUnitByIDFromServer(unitId)
-					if unitData ~= nil then
-						local level = 1
-						local limitBreak = 1
-						local userUnit = unitDataMap[unitId]
-						if userUnit ~= nil then
-							level = userUnit.level
-							limitBreak = userUnit.limitBreak
-						end
-						deckData.unitInfo[unitId] = {
-							id = unitId,
-							level = level,
-							limitBreak = limitBreak,
-							cost = unitData["cost"] or unitData["summonCost"] or 0
-						}
-					end
-				end
-			end
-		else
-			local dummyDeck = _pvpDummyDeckService:GetDummyDeckByTier(target.tierName or "bronze")
-			deckData.defense_deck = dummyDeck.defense_deck
-			deckData.unitInfo = dummyDeck.unitInfo
-			deckData.defense_synergy = dummyDeck.defense_synergy or {}
-		end
+		-- 캐시된 덱 데이터 사용
+		local deckData = {
+			defense_deck = target.cachedDeck or {},
+			unitInfo = target.cachedUnitInfo or {},
+			nickname = target.nickname or "",
+			defense_synergy = target.cachedSynergy or {}
+		}
 
 		self:FetchOpponentDeckBack(deckData)
 	end
@@ -193,44 +212,14 @@ script pvpMatcherMakerComponent extends Component
 			return
 		end
 
-		-- 상대 방어 덱 로드
+		-- 캐시된 덱 데이터 사용
 		local matchData = {
 			uid = target.uid,
-			defense_deck = {},
-			unitInfo = {},
+			defense_deck = target.cachedDeck or {},
+			unitInfo = target.cachedUnitInfo or {},
 			nickname = target.nickname or "",
 			isDummy = target.isDummy or false
 		}
-
-		-- 실제 유저인 경우 defense_deck 로드
-		if not target.isDummy then
-			local targetData = _pvpUserService:GetUserData(target.uid)
-			if targetData.code == 0 then
-				matchData.defense_deck = targetData.defense_deck or {}
-			end
-
-			-- 유닛 정보 로드
-			local unitInfo = {}
-			for _, unitId in ipairs(matchData.defense_deck) do
-				if unitId ~= nil and unitId ~= "" then
-					local unitData = _UnitService:GetUnitByIDFromServer(unitId)
-					if unitData ~= nil then
-						unitInfo[unitId] = {
-							id = unitId,
-							level = 1,
-							limitBreak = 1,
-							cost = unitData["cost"] or unitData["summonCost"] or 0
-						}
-					end
-				end
-			end
-			matchData.unitInfo = unitInfo
-		else
-			-- 더미 유저인 경우 티어별 덱 사용
-			local dummyDeck = _pvpDummyDeckService:GetDummyDeckByTier(target.tierName or "bronze")
-			matchData.defense_deck = dummyDeck.defense_deck
-			matchData.unitInfo = dummyDeck.unitInfo
-		end
 
 		-- pvpCombatComponent에 매치 정보 설정
 		local pvpManager = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/PvPManager")
