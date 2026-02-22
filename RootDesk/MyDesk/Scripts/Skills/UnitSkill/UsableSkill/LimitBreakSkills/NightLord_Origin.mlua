@@ -9,7 +9,8 @@ script NightLord_Origin extends SkillParent
 		_UserService.LocalPlayer.PlayerCharacter.isLimitBreakSkill = true
 		
 		local targetListParent
-		if self.caster.Unit.isEnemy then
+		local isEnemy = self.caster.Unit ~= nil and self.caster.Unit.isEnemy
+		if isEnemy then
 			targetListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
 		else
 			targetListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
