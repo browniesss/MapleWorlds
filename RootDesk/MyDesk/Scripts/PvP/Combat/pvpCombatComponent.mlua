@@ -93,6 +93,13 @@ script pvpCombatComponent extends Component
 			_GameManager:DestroyChildrenInClient(minimap, true)
 		end
 
+		-- MainLobbyUI 비활성화
+		local mainLobbyUI = _EntityService:GetEntityByPath("/ui/MainLobbyUI")
+		if mainLobbyUI ~= nil then
+			mainLobbyUI.Enable = false
+			mainLobbyUI.Visible = false
+		end
+
 		-- PvPLobbyUI 숨기기
 		local pvpLobbyUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI")
 		if pvpLobbyUI ~= nil then
