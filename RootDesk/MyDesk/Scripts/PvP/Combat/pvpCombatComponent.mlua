@@ -280,6 +280,14 @@ script pvpCombatComponent extends Component
 			end
 		end
 
+		-- 플레이/승리 횟수 업데이트
+		if self.currentUserId ~= "" then
+			local statsUser = _UserService:GetUserEntityByUserId(self.currentUserId)
+			if statsUser ~= nil and statsUser.pvpUserComponent ~= nil then
+				statsUser.pvpUserComponent:AddGameResult(self.currentUserId, isWin)
+			end
+		end
+
 		self:GameEndBack(isWin, deltaScore, newScore)
 	end
 

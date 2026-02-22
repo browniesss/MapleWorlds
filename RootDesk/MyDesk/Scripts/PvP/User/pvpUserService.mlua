@@ -27,10 +27,13 @@ script pvpUserService extends Logic
 				offense_synergy={},
 				defense_synergy={},
 				next_play_coin=0,
+				win_count=0,
+				play_count=0,
+				season_ver=_pvpService.PVP_MODE_VER,
 				code = 0
 			}
 
-			local updateCode = self:UpdateUserData(uid, data.play_coin, data.next_play_coin, data.offense_deck, data.defense_deck, data.offense_synergy, data.defense_synergy)
+			local updateCode = self:UpdateUserData(uid, data.play_coin, data.next_play_coin, data.offense_deck, data.defense_deck, data.offense_synergy, data.defense_synergy, data.win_count, data.play_count)
 			if not (updateCode == 0) then
 				log_error("[PVP] GetUserData failed to save defaults, uid=" .. uid .. " code=" .. tostring(updateCode))
 				return {
@@ -81,6 +84,18 @@ script pvpUserService extends Logic
 			decoded.next_play_coin = 0
 		end
 
+		-- 승리/플레이 횟수 기본값 보정 및 시즌 초기화
+		if decoded.win_count == nil then
+			decoded.win_count = 0
+		end
+		if decoded.play_count == nil then
+			decoded.play_count = 0
+		end
+		if decoded.season_ver ~= _pvpService.PVP_MODE_VER then
+			decoded.win_count = 0
+			decoded.play_count = 0
+		end
+
 		-- code 필드는 저장 데이터에 의존하지 않고 명시적으로 설정
 		decoded.code = 0
 
@@ -109,7 +124,7 @@ script pvpUserService extends Logic
 	end
 
 	@ExecSpace("ServerOnly")
-	method integer UpdateUserData(string uid, integer play_coin, integer next_play_coin, table offense_deck, table defense_deck, table offense_synergy, table defense_synergy)
+	method integer UpdateUserData(string uid, integer play_coin, integer next_play_coin, table offense_deck, table defense_deck, table offense_synergy, table defense_synergy, integer win_count, integer play_count)
 		-- 덱 정규화 (sparse array 방지)
 		offense_deck = self:NormalizeDeck(offense_deck)
 		defense_deck = self:NormalizeDeck(defense_deck)
@@ -125,7 +140,10 @@ script pvpUserService extends Logic
 			defense_deck=defense_str,
 			offense_synergy=offense_syn_str,
 			defense_synergy=defense_syn_str,
-			next_play_coin=next_play_coin
+			next_play_coin=next_play_coin,
+			win_count=win_count,
+			play_count=play_count,
+			season_ver=_pvpService.PVP_MODE_VER
 		}
 
 		local json = _HttpService:JSONEncode(data)
