@@ -107,10 +107,14 @@ script pvpAiPlayerComponent extends Component
 		end
 		
 		self.pointUpdateTimer += delta
-		if self.pointUpdateTimer < 0.5 then
+		local updateInterval = 0.5
+		if _TimeScaleManager ~= nil and _TimeScaleManager.timeScale > 0 then
+			updateInterval = 0.5 / _TimeScaleManager.timeScale
+		end
+		if self.pointUpdateTimer < updateInterval then
 			return
 		end
-		
+
 		self.pointUpdateTimer = 0
 		self.point += self.pointInc
 		

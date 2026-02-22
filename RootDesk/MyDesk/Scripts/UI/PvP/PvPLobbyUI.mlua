@@ -242,8 +242,23 @@ script PvPLobbyUI extends Component
 		end
 		
 		local pvpUser = user.pvpUserComponent
+
+		-- 낙천적 업데이트: 타이머 만료 시 클라이언트에서 즉시 코인 증가
+		if pvpUser.play_coin < _pvpUserService.MAX_PLAY_COIN and pvpUser.next_play_coin > 0 then
+			local nowTs = DateTime.UtcNow.Elapsed
+			if pvpUser.next_play_coin <= nowTs then
+				pvpUser.play_coin = pvpUser.play_coin + 1
+				if pvpUser.play_coin >= _pvpUserService.MAX_PLAY_COIN then
+					pvpUser.play_coin = _pvpUserService.MAX_PLAY_COIN
+					pvpUser.next_play_coin = 0
+				else
+					pvpUser.next_play_coin = pvpUser.next_play_coin + _pvpUserService.PLAY_COIN_UPDATE
+				end
+			end
+		end
+
 		local coin = pvpUser.play_coin
-		
+
 		-- 코인이 최대일 때는 숫자만 표시
 		if coin >= _pvpUserService.MAX_PLAY_COIN then
 			self.coinText.TextComponent.Text = tostring(coin)

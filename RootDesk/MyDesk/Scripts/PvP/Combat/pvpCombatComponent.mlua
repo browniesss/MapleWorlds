@@ -239,6 +239,11 @@ script pvpCombatComponent extends Component
 	method void GameEndCall(boolean isWin)
 		self.isPlaying = false
 
+		-- 배속 초기화
+		if _TimeScaleManager ~= nil then
+			_TimeScaleManager:ResetTimeScale()
+		end
+
 		-- isPlaying 플래그 초기화
 		_GameManager.isPlaying = false
 
