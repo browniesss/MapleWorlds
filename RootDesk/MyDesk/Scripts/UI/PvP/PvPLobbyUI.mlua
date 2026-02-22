@@ -272,30 +272,40 @@ script PvPLobbyUI extends Component
 
 	@ExecSpace("ClientOnly")
 	method void UpdateScoreDisplay()
-		if self.scoreText == nil then
-			return
-		end
-		
 		local user = _UserService.LocalPlayer
 		if user == nil then
 			return
 		end
-		
-		local text = ""
-		if user.pvpRankingComponent ~= nil then
-			local score = user.pvpRankingComponent.score
-			local rank = user.pvpRankingComponent.rank
-			local tier = self:GetTierName(score, rank)
-			text = tier .. " (" .. tostring(score) .. ")"
+
+		-- 티어 + 점수
+		if self.scoreText ~= nil and self.scoreText.TextComponent ~= nil then
+			if user.pvpRankingComponent ~= nil then
+				local score = user.pvpRankingComponent.score
+				local rank = user.pvpRankingComponent.rank
+				local tier = self:GetTierName(score, rank)
+				self.scoreText.TextComponent.Text = tier .. " (" .. tostring(score) .. ")"
+			else
+				self.scoreText.TextComponent.Text = ""
+			end
 		end
-		
-		if user.pvpUserComponent ~= nil then
-			local win = user.pvpUserComponent.win_count
-			local total = user.pvpUserComponent.play_count
-			text = text .. " | " .. tostring(win) .. "승 " .. tostring(total) .. "전"
+
+		-- 승리 횟수
+		if self.winCountText ~= nil and self.winCountText.TextComponent ~= nil then
+			if user.pvpUserComponent ~= nil then
+				self.winCountText.TextComponent.Text = "Win: " .. tostring(user.pvpUserComponent.win_count)
+			else
+				self.winCountText.TextComponent.Text = "Win: 0"
+			end
 		end
-		
-		self.scoreText.TextComponent.Text = text
+
+		-- 전체 전투 횟수
+		if self.playCountText ~= nil and self.playCountText.TextComponent ~= nil then
+			if user.pvpUserComponent ~= nil then
+				self.playCountText.TextComponent.Text = "Play: " .. tostring(user.pvpUserComponent.play_count)
+			else
+				self.playCountText.TextComponent.Text = "Play: 0"
+			end
+		end
 	end
 
 	@ExecSpace("ClientOnly")
