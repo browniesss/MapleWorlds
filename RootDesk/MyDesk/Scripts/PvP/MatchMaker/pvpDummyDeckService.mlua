@@ -2,6 +2,7 @@
 script pvpDummyDeckService extends Logic
 
 	property table deckList = {}
+
 	property table nicknamePool = {}
 
 	method void OnBeginPlay()
@@ -19,7 +20,6 @@ script pvpDummyDeckService extends Logic
 		self:InitNicknames()
 	end
 
-	-- 유닛 배열 + 레벨/돌파 범위로 덱 데이터 생성
 	@ExecSpace("ServerOnly")
 	method table BuildDeck(table units, integer minLevel, integer maxLevel, integer minLB, integer maxLB)
 		local deck = {}
@@ -40,7 +40,6 @@ script pvpDummyDeckService extends Logic
 		}
 	end
 
-	-- ========== Bronze (level 2-4, LB 1) ==========
 	@ExecSpace("ServerOnly")
 	method void InitBronzeDecks()
 		local t = self.deckList.bronze
@@ -156,7 +155,6 @@ script pvpDummyDeckService extends Logic
 		}, 2, 4, 1, 1))
 	end
 
-	-- ========== Silver (level 5-10, LB 1) ==========
 	@ExecSpace("ServerOnly")
 	method void InitSilverDecks()
 		local t = self.deckList.silver
@@ -272,7 +270,6 @@ script pvpDummyDeckService extends Logic
 		}, 5, 10, 1, 1))
 	end
 
-	-- ========== Gold (level 11-20, LB 1-2) ==========
 	@ExecSpace("ServerOnly")
 	method void InitGoldDecks()
 		local t = self.deckList.gold
@@ -388,7 +385,6 @@ script pvpDummyDeckService extends Logic
 		}, 11, 20, 1, 2))
 	end
 
-	-- ========== Platinum (level 11-25, LB 1-3) ==========
 	@ExecSpace("ServerOnly")
 	method void InitPlatinumDecks()
 		local t = self.deckList.platinum
@@ -504,7 +500,6 @@ script pvpDummyDeckService extends Logic
 		}, 11, 25, 1, 3))
 	end
 
-	-- ========== Diamond (level 20-30, LB 2-4) ==========
 	@ExecSpace("ServerOnly")
 	method void InitDiamondDecks()
 		local t = self.deckList.diamond
@@ -620,34 +615,32 @@ script pvpDummyDeckService extends Logic
 		}, 20, 30, 2, 4))
 	end
 
-	-- ========== 닉네임 풀 (티어별 10개) ==========
 	@ExecSpace("ServerOnly")
 	method void InitNicknames()
 		self.nicknamePool = {
 			bronze = {
-				"헤네시스초보", "달팽이사냥꾼", "첫모험가", "메이플신입", "수습전사",
-				"초보법사", "새내기도적", "견습궁수", "메린이", "레벨업중"
+				"하루끝", "구름위", "멍때림", "도토리숲", "연한빛",
+				"모코", "라임이", "흐림날", "귤한조각", "초코칩"
 			},
 			silver = {
-				"은빛검사", "페리온전사", "커닝도적", "엘나스마법사", "리스항구모험가",
-				"주황버섯헌터", "실버메이플", "중수전사", "사냥터정복자", "메린이탈출"
+				"유자차", "느좋", "물결표", "은하수", "담백한",
+				"라떼한잔", "저녁노을", "푸딩맛", "잔잔히", "무드등"
 			},
 			gold = {
-				"황금기사", "골드메이플", "루디브리엄정복", "마왕성정복자", "고수모험가",
-				"전직완료", "빛나는영웅", "골드스킬러", "금빛화살", "스킬마스터"
+				"유영", "잔상", "여운", "해질녘", "파동",
+				"모노톤", "공백", "기류", "아른", "수평선"
 			},
 			platinum = {
-				"플래티넘히어로", "전설의모험가", "시그너스기사", "에레브의전사", "마스터워리어",
-				"소울의검", "엘프의왕", "아크메이지급", "고대의수호자", "플래티넘소울"
+				"여백의미", "저편", "결", "심도", "유영중",
+				"단서", "파장", "밀도", "온기", "파편"
 			},
 			diamond = {
-				"다이아히어로", "랭커", "최강전사", "PvP제왕", "무적의영웅",
-				"챔피언", "킹오브메이플", "신화급전사", "메이플레전드", "궁극의마스터"
+				"무정형", "편린", "결말", "고요", "심연",
+				"파수", "잔향", "층위", "유영자", "무채"
 			}
 		}
 	end
 
-	-- ========== 시너지 계산 (기존 유지) ==========
 	@ExecSpace("ServerOnly")
 	method table ComputeDummySynergy(table deck)
 		local countMap = {}
@@ -670,7 +663,6 @@ script pvpDummyDeckService extends Logic
 		return countMap
 	end
 
-	-- ========== 티어 판정 ==========
 	@ExecSpace("ServerOnly")
 	method string GetTierNameFromScore(integer score)
 		if score >= _pvpRankingService.dia then
@@ -685,7 +677,6 @@ script pvpDummyDeckService extends Logic
 		return "bronze"
 	end
 
-	-- ========== 티어별 덱 반환 ==========
 	@ExecSpace("ServerOnly")
 	method table GetDummyDeckByTier(string tierName)
 		local tierDecks = self.deckList[tierName]
@@ -700,7 +691,6 @@ script pvpDummyDeckService extends Logic
 		return tierDecks[index]
 	end
 
-	-- ========== 티어별 닉네임 반환 ==========
 	@ExecSpace("ServerOnly")
 	method string GetRandomNicknameByTier(string tierName)
 		local names = self.nicknamePool[tierName]
