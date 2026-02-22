@@ -227,6 +227,7 @@ script PvPLobbyUI extends Component
 	@ExecSpace("ClientOnly")
 	method void OnUpdate(number delta)
 		self:UpdateCoinDisplay()
+		self:UpdateMatchButtonState()
 	end
 
 	@ExecSpace("ClientOnly")
@@ -306,6 +307,31 @@ script PvPLobbyUI extends Component
 				self.playCountText.TextComponent.Text = "Play: 0"
 			end
 		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void UpdateMatchButtonState()
+		if self.matchButton == nil or self.matchButton.ButtonComponent == nil then
+			return
+		end
+
+		local user = _UserService.LocalPlayer
+		if user == nil then
+			self.matchButton.ButtonComponent.Enable = false
+			return
+		end
+
+		-- 조건 1: 코인 > 0
+		local hasCoin = user.pvpUserComponent ~= nil and user.pvpUserComponent.play_coin > 0
+
+		-- 조건 2: 상대 선택됨
+		local hasSelection = false
+		if user.pvpMatcherMakerComponent ~= nil then
+			local selected = user.pvpMatcherMakerComponent.selected
+			hasSelection = selected >= 1 and selected <= #user.pvpMatcherMakerComponent.targetUserList
+		end
+
+		self.matchButton.ButtonComponent.Enable = hasCoin and hasSelection
 	end
 
 	@ExecSpace("ClientOnly")
