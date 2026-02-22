@@ -3,8 +3,13 @@ script AllAttack extends SkillParent
 
 	@ExecSpace("Client")
 	method void ActivateSkill()
-		local enemyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
-		local enemies = enemyListParent.Children
+		local targetListParent
+		if self.caster.Unit.isEnemy then
+			targetListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+		else
+			targetListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
+		end
+		local enemies = targetListParent.Children
 		
 		_EffectService:PlayEffect("ecb14916022b462280c1bad3ca065037", self.Entity, 
 								  Vector3(self.caster.TransformComponent.WorldPosition.x, -2.349,self.caster.TransformComponent.WorldPosition.z),
@@ -14,7 +19,7 @@ script AllAttack extends SkillParent
 			for index in ipairs(enemies) do
 				local monster = enemies[index]
 			
-				if monster.Name == "EnemySpawnPoint" then
+				if monster.Name == "EnemySpawnPoint" or monster.Name == "MySpawnPoint" then
 					continue
 				end
 				

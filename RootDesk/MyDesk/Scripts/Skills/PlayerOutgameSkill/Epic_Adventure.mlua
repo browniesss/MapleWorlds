@@ -8,12 +8,21 @@ script Epic_Adventure extends SkillParent
 		local player = _EntityService:GetEntityByTag("Player")
 		_EffectService:PlayEffectAttached("89dc8084a49143eeaaefd7c9969aa9b8", player, Vector3(0, 0, 0) , 0, Vector3.one)
 		
-		local myMonsterListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
-		local myMonsters = myMonsterListParent.Children
-		
+		local allyListParent
+		if self.caster.Unit.isEnemy then
+			allyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
+		else
+			allyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+		end
+		local myMonsters = allyListParent.Children
+
 		for index in ipairs(myMonsters) do
 			local monster = myMonsters[index]
-			
+
+			if monster.Name == "EnemySpawnPoint" or monster.Name == "MySpawnPoint" then
+				continue
+			end
+
 			if monster.Enable and monster.Unit ~= nil then
 				_EffectService:PlayEffectAttached("8de7ae7682434774b20a229194dbf8fb", myMonsters[index], Vector3(0, 0, 0) , 0, Vector3.one)
 				myMonsters[index].Unit:GetBuff(_eBuffType.MoveSpeedBuff, self.skillAmount, self.skillTime)

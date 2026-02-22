@@ -7,8 +7,13 @@ script Bishop_Ascent extends SkillParent
 		
 		_UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill = true
 		
-		local monsterList = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
-		local myMonsters = monsterList.Children
+		local allyListParent
+		if self.caster.Unit.isEnemy then
+			allyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
+		else
+			allyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+		end
+		local myMonsters = allyListParent.Children
 		local player = _EntityService:GetEntityByTag("Player")
 		
 		_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = "7a871e0365124a59b38996c70d134b6f"
@@ -19,7 +24,7 @@ script Bishop_Ascent extends SkillParent
 			for index in ipairs(myMonsters) do
 				local monster = myMonsters[index]
 			
-				if monster.Name == "MySpawnPoint" then
+				if monster.Name == "EnemySpawnPoint" or monster.Name == "MySpawnPoint" then
 					continue
 				end
 				

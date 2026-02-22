@@ -7,8 +7,13 @@ script Marksman_Ascent extends SkillParent
 		
 		_UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill = true
 		
-		local enemyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
-		local enemies = enemyListParent.Children
+		local targetListParent
+		if self.caster.Unit.isEnemy then
+			targetListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+		else
+			targetListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
+		end
+		local enemies = targetListParent.Children
 		local player = _EntityService:GetEntityByTag("Player")
 		local entity = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group")
 		
@@ -20,7 +25,7 @@ script Marksman_Ascent extends SkillParent
 			for index in ipairs(enemies) do
 				local monster = enemies[index]
 			
-				if monster.Name == "EnemySpawnPoint" then
+				if monster.Name == "EnemySpawnPoint" or monster.Name == "MySpawnPoint" then
 					continue
 				end
 				

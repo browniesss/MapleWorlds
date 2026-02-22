@@ -25,12 +25,21 @@ script TeamAttackSpeedBuff extends SkillParent
 
 	@ExecSpace("Client")
 	method void ActivateSkill()
-		local myMonsterListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
-		local myMonsters = myMonsterListParent.Children
-		
+		local allyListParent
+		if self.caster.Unit.isEnemy then
+			allyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
+		else
+			allyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+		end
+		local myMonsters = allyListParent.Children
+
 		for index in ipairs(myMonsters) do
 			local monster = myMonsters[index]
-			
+
+			if monster.Name == "EnemySpawnPoint" or monster.Name == "MySpawnPoint" then
+				continue
+			end
+
 			if monster.Enable and monster.Unit ~= nil then
 				_EffectService:PlayEffectAttached("288b2ca13ae34efc987c49ac0bb22f79", myMonsters[index], Vector3(0, 0, 0) , 0, Vector3.one)
 				myMonsters[index].Unit:GetBuff(_eBuffType.AttackSpeedBuff, self.skillAmount, self.skillTime)
