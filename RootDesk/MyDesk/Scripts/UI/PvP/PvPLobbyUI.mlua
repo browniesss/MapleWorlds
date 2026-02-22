@@ -56,37 +56,37 @@ script PvPLobbyUI extends Component
 	@ExecSpace("ClientOnly")
 	method void InitUI()
 		self:ClearHandlers()
-
+		
 		-- 코인 표시 업데이트
 		self:UpdateCoinDisplay()
-
+		
 		-- 스코어 표시 업데이트
 		self:UpdateScoreDisplay()
-
+		
 		-- 매치 버튼 핸들러
 		if self.matchButton ~= nil and self.matchButton.ButtonComponent ~= nil then
 			self.matchButtonHandler = self.matchButton:ConnectEvent(ButtonClickEvent, self.OnMatchButtonClicked)
 		end
-
+		
 		-- 새로고침 버튼 핸들러
 		if self.refreshButton ~= nil and self.refreshButton.ButtonComponent ~= nil then
 			self.refreshButtonHandler = self.refreshButton:ConnectEvent(ButtonClickEvent, self.OnRefreshButtonClicked)
 		end
-
+		
 		-- 덱 설정 버튼 핸들러
 		if self.deckEditButton ~= nil and self.deckEditButton.ButtonComponent ~= nil then
 			self.deckEditButtonHandler = self.deckEditButton:ConnectEvent(ButtonClickEvent, self.OnDeckEditButtonClicked)
 		end
-
+		
 		-- 돌아가기 버튼 핸들러
 		if self.backButton ~= nil and self.backButton.ButtonComponent ~= nil then
 			self.backButtonHandler = self.backButton:ConnectEvent(ButtonClickEvent, self.OnBackButtonClicked)
 		end
-
+		
 		-- 슬롯 목록 및 클릭 핸들러 구성
 		for i, slot in ipairs(self.userList.Children) do
 			self.slotList[#self.slotList + 1] = slot
-
+		
 			if i == 1 then
 				self.slot1Handler = slot:ConnectEvent(ButtonClickEvent, self.OnSlot1Click)
 			elseif i == 2 then
@@ -96,7 +96,7 @@ script PvPLobbyUI extends Component
 			elseif i == 4 then
 				self.slot4Handler = slot:ConnectEvent(ButtonClickEvent, self.OnSlot4Click)
 			end
-
+		
 			-- 슬롯별 덱 조회 버튼
 			local viewBtn = slot:GetChildByName("ViewDeckButton")
 			if viewBtn ~= nil and viewBtn.ButtonComponent ~= nil then
@@ -120,64 +120,64 @@ script PvPLobbyUI extends Component
 			self.matchButton:DisconnectEvent(ButtonClickEvent, self.matchButtonHandler)
 			self.matchButtonHandler = nil
 		end
-
+		
 		if self.refreshButtonHandler ~= nil and self.refreshButton ~= nil then
 			self.refreshButton:DisconnectEvent(ButtonClickEvent, self.refreshButtonHandler)
 			self.refreshButtonHandler = nil
 		end
-
+		
 		if self.deckEditButtonHandler ~= nil and self.deckEditButton ~= nil then
 			self.deckEditButton:DisconnectEvent(ButtonClickEvent, self.deckEditButtonHandler)
 			self.deckEditButtonHandler = nil
 		end
-
+		
 		if self.backButtonHandler ~= nil and self.backButton ~= nil then
 			self.backButton:DisconnectEvent(ButtonClickEvent, self.backButtonHandler)
 			self.backButtonHandler = nil
 		end
-
+		
 		if self.viewDeck1Handler ~= nil and self.viewDeckButtons[1] ~= nil then
 			self.viewDeckButtons[1]:DisconnectEvent(ButtonClickEvent, self.viewDeck1Handler)
 			self.viewDeck1Handler = nil
 		end
-
+		
 		if self.viewDeck2Handler ~= nil and self.viewDeckButtons[2] ~= nil then
 			self.viewDeckButtons[2]:DisconnectEvent(ButtonClickEvent, self.viewDeck2Handler)
 			self.viewDeck2Handler = nil
 		end
-
+		
 		if self.viewDeck3Handler ~= nil and self.viewDeckButtons[3] ~= nil then
 			self.viewDeckButtons[3]:DisconnectEvent(ButtonClickEvent, self.viewDeck3Handler)
 			self.viewDeck3Handler = nil
 		end
-
+		
 		if self.viewDeck4Handler ~= nil and self.viewDeckButtons[4] ~= nil then
 			self.viewDeckButtons[4]:DisconnectEvent(ButtonClickEvent, self.viewDeck4Handler)
 			self.viewDeck4Handler = nil
 		end
-
+		
 		table.clear(self.viewDeckButtons)
-
+		
 		if self.slot1Handler ~= nil and self.slotList[1] ~= nil then
 			self.slotList[1]:DisconnectEvent(ButtonClickEvent, self.slot1Handler)
 			self.slot1Handler = nil
 		end
-
+		
 		if self.slot2Handler ~= nil and self.slotList[2] ~= nil then
 			self.slotList[2]:DisconnectEvent(ButtonClickEvent, self.slot2Handler)
 			self.slot2Handler = nil
 		end
-
+		
 		if self.slot3Handler ~= nil and self.slotList[3] ~= nil then
 			self.slotList[3]:DisconnectEvent(ButtonClickEvent, self.slot3Handler)
 			self.slot3Handler = nil
 		end
-
+		
 		if self.slot4Handler ~= nil and self.slotList[4] ~= nil then
 			self.slotList[4]:DisconnectEvent(ButtonClickEvent, self.slot4Handler)
 			self.slot4Handler = nil
 		end
-
+		
 		table.clear(self.slotList)
 	end
 
@@ -230,28 +230,28 @@ script PvPLobbyUI extends Component
 		if self.coinText == nil then
 			return
 		end
-
+		
 		local user = _UserService.LocalPlayer
 		if user == nil or user.pvpUserComponent == nil then
 			return
 		end
-
+		
 		local pvpUser = user.pvpUserComponent
 		local coin = pvpUser.play_coin
-
+		
 		-- 코인이 최대일 때는 숫자만 표시
 		if coin >= _pvpUserService.MAX_PLAY_COIN then
 			self.coinText.TextComponent.Text = tostring(coin)
 			return
 		end
-
+		
 		-- 남은 시간 계산
 		local remainMs = pvpUser.next_play_coin - DateTime.UtcNow.Elapsed
 		if remainMs <= 0 then
 			self.coinText.TextComponent.Text = tostring(coin)
 			return
 		end
-
+		
 		local remainSec = math.floor(remainMs / 1000)
 		local m = math.floor(remainSec / 60)
 		local s = remainSec % 60
@@ -271,12 +271,12 @@ script PvPLobbyUI extends Component
 		if self.scoreText == nil then
 			return
 		end
-
+		
 		local user = _UserService.LocalPlayer
 		if user == nil then
 			return
 		end
-
+		
 		local text = ""
 		if user.pvpRankingComponent ~= nil then
 			local score = user.pvpRankingComponent.score
@@ -284,13 +284,13 @@ script PvPLobbyUI extends Component
 			local tier = self:GetTierName(score, rank)
 			text = tier .. " (" .. tostring(score) .. ")"
 		end
-
+		
 		if user.pvpUserComponent ~= nil then
 			local win = user.pvpUserComponent.win_count
 			local total = user.pvpUserComponent.play_count
 			text = text .. " | " .. tostring(win) .. "승 " .. tostring(total) .. "전"
 		end
-
+		
 		self.scoreText.TextComponent.Text = text
 	end
 
@@ -308,22 +308,22 @@ script PvPLobbyUI extends Component
 		if user == nil then
 			return
 		end
-
+		
 		-- 코인 체크
 		if user.pvpUserComponent ~= nil and user.pvpUserComponent.play_coin <= 0 then
 			return
 		end
-
+		
 		local matcher = user.pvpMatcherMakerComponent
 		if matcher == nil then
 			return
 		end
-
+		
 		local selected = matcher.selected
 		if selected < 1 or selected > #matcher.targetUserList then
 			return
 		end
-
+		
 		matcher:StartMatchCall(selected)
 	end
 
@@ -337,13 +337,13 @@ script PvPLobbyUI extends Component
 					local info = userList[i]
 					slot.Enable = true
 					slot.Visible = true
-
+		
 					-- 닉네임
 					local nameText = slot.Children[1]
 					if nameText ~= nil then
 						nameText.TextComponent.Text = info.nickname or "???"
 					end
-
+		
 					-- 점수
 					local scoreText = slot.Children[2]
 					if scoreText ~= nil then
@@ -355,6 +355,9 @@ script PvPLobbyUI extends Component
 				end
 			end
 		end
+		
+		-- 선택 상태 초기화
+		self:HighlightSlot(0)
 	end
 
 	@ExecSpace("ClientOnly")
@@ -364,11 +367,30 @@ script PvPLobbyUI extends Component
 			if slot == nil then
 				continue
 			end
+		
+			local isSelected = (i == index)
+		
+			-- 슬롯 배경 색상 변경
 			if slot.SpriteGUIRendererComponent ~= nil then
-				if i == index then
-					slot.SpriteGUIRendererComponent.Color = Color(1.0, 0.9, 0.3, 1.0)
+				if isSelected then
+					slot.SpriteGUIRendererComponent.Color = Color(1.0, 0.85, 0.2, 1.0)
 				else
-					slot.SpriteGUIRendererComponent.Color = Color(1.0, 1.0, 1.0, 1.0)
+					slot.SpriteGUIRendererComponent.Color = Color(0.0, 0.0, 0.0, 1.0)
+				end
+			end
+		
+			-- UISprite 선택 표시기 (왼쪽 세로 바)
+			local indicator = slot:GetChildByName("UISprite")
+			if indicator ~= nil then
+				if isSelected then
+					indicator.Enable = true
+					indicator.Visible = true
+					if indicator.SpriteGUIRendererComponent ~= nil then
+						indicator.SpriteGUIRendererComponent.Color = Color(1.0, 0.8, 0.0, 1.0)
+					end
+				else
+					indicator.Enable = false
+					indicator.Visible = false
 				end
 			end
 		end
@@ -396,20 +418,20 @@ script PvPLobbyUI extends Component
 		-- PvPLobbyUI 숨기기
 		self.Entity.Enable = false
 		self.Entity.Visible = false
-
+		
 		-- UserDeckUI 열기
 		local userDeckUIRoot = _EntityService:GetEntityByPath("/ui/UserDeckUI")
 		userDeckUIRoot.Enable = true
 		userDeckUIRoot.Visible = true
-
+		
 		local deckPanel = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck")
 		local unitInfoPanel = _EntityService:GetEntityByPath("/ui/UserDeckUI/UnitInfoPanel")
-
+		
 		deckPanel.Children[1].UITransformComponent.anchoredPosition = Vector2(0, 50)
-
+		
 		unitInfoPanel.Enable = false
 		unitInfoPanel.Visible = false
-
+		
 		deckPanel.UserDeckUI:OpenPvPDeckUI()
 	end
 
@@ -454,20 +476,20 @@ script PvPLobbyUI extends Component
 		-- PvPLobbyUI 숨기기
 		self.Entity.Enable = false
 		self.Entity.Visible = false
-
+		
 		-- UserDeckUI 열기 (상대 덱 보기 모드)
 		local userDeckUIRoot = _EntityService:GetEntityByPath("/ui/UserDeckUI")
 		userDeckUIRoot.Enable = true
 		userDeckUIRoot.Visible = true
-
+		
 		local deckPanel = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck")
 		local unitInfoPanel = _EntityService:GetEntityByPath("/ui/UserDeckUI/UnitInfoPanel")
-
+		
 		deckPanel.Children[1].UITransformComponent.anchoredPosition = Vector2(0, 50)
-
+		
 		unitInfoPanel.Enable = false
 		unitInfoPanel.Visible = false
-
+		
 		deckPanel.UserDeckUI:OpenOpponentDeckUI(deckData)
 	end
 
