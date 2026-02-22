@@ -215,7 +215,7 @@
                 "r": 0.0,
                 "g": 0.0,
                 "b": 0.0,
-                "a": 0.7
+                "a": 0.9589844
               },
               "Enable": true
             }
@@ -224,18 +224,100 @@
         }
       },
       {
-        "id": "b1a2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
-        "path": "/ui/PvPResultUI/ResultTitle",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "id": "7de444f0-8d24-47eb-bb59-dafff788009c",
+        "path": "/ui/PvPResultUI/Frame",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent",
         "jsonString": {
-          "name": "ResultTitle",
-          "path": "/ui/PvPResultUI/ResultTitle",
+          "name": "Frame",
+          "path": "/ui/PvPResultUI/Frame",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 1,
           "pathConstraints": "///",
+          "revision": 1,
+          "origin": {
+            "type": "Model",
+            "entry_id": "uisprite",
+            "sub_entity_id": null,
+            "root_entity_id": "7de444f0-8d24-47eb-bb59-dafff788009c",
+            "replaced_model_id": null
+          },
+          "modelId": "uisprite",
+          "@components": [
+            {
+              "@type": "MOD.Core.UITransformComponent",
+              "AlignmentOption": 15,
+              "AnchorsMax": {
+                "x": 1.0,
+                "y": 1.0
+              },
+              "AnchorsMin": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "MobileOnly": false,
+              "OffsetMax": {
+                "x": -600.0,
+                "y": -250.0
+              },
+              "OffsetMin": {
+                "x": 600.0,
+                "y": 250.0
+              },
+              "Pivot": {
+                "x": 0.5,
+                "y": 0.5
+              },
+              "RectSize": {
+                "x": 720.0,
+                "y": 580.0
+              },
+              "UIMode": 1,
+              "UIVersion": 2,
+              "anchoredPosition": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "QuaternionRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.SpriteGUIRendererComponent",
+              "ImageRUID": {
+                "DataId": "443e067242724dfd851dedc32ef7ce03"
+              },
+              "OverrideSorting": false,
+              "Enable": true
+            }
+          ],
+          "@version": 1
+        }
+      },
+      {
+        "id": "b1a2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+        "path": "/ui/PvPResultUI/Frame/ResultTitle",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
+        "jsonString": {
+          "name": "ResultTitle",
+          "path": "/ui/PvPResultUI/Frame/ResultTitle",
+          "nameEditable": true,
+          "enable": true,
+          "visible": true,
+          "localize": true,
+          "displayOrder": 0,
+          "pathConstraints": "////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -259,12 +341,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 300.0,
-                "y": 250.0
+                "x": 300.0001,
+                "y": 248.0095
               },
               "OffsetMin": {
-                "x": -300.0,
-                "y": 150.0
+                "x": -299.9999,
+                "y": 148.0095
               },
               "Pivot": {
                 "x": 0.5,
@@ -275,14 +357,19 @@
                 "y": 100.0
               },
               "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 0.0,
-                "y": 200.0
+                "x": 9.999999E-05,
+                "y": 198.0095
               },
               "Position": {
-                "x": 0.0,
-                "y": 200.0,
+                "x": 9.999999E-05,
+                "y": 198.0095,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -290,6 +377,11 @@
                 "y": 0.0,
                 "z": 0.0,
                 "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
               },
               "Enable": true
             },
@@ -325,17 +417,17 @@
       },
       {
         "id": "c2b3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
-        "path": "/ui/PvPResultUI/ScoreChangeText",
+        "path": "/ui/PvPResultUI/Frame/ScoreChangeText",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
           "name": "ScoreChangeText",
-          "path": "/ui/PvPResultUI/ScoreChangeText",
+          "path": "/ui/PvPResultUI/Frame/ScoreChangeText",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 2,
-          "pathConstraints": "///",
+          "displayOrder": 1,
+          "pathConstraints": "////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -359,12 +451,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 200.0,
-                "y": 130.0
+                "x": 200.0001,
+                "y": 128.009491
               },
               "OffsetMin": {
-                "x": -200.0,
-                "y": 70.0
+                "x": -199.9999,
+                "y": 68.0095
               },
               "Pivot": {
                 "x": 0.5,
@@ -375,14 +467,19 @@
                 "y": 60.0
               },
               "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 0.0,
-                "y": 100.0
+                "x": 0.0001,
+                "y": 98.0095
               },
               "Position": {
-                "x": 0.0,
-                "y": 100.0,
+                "x": 0.0001,
+                "y": 98.0095,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -390,6 +487,11 @@
                 "y": 0.0,
                 "z": 0.0,
                 "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
               },
               "Enable": true
             },
@@ -425,17 +527,17 @@
       },
       {
         "id": "d3c4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f",
-        "path": "/ui/PvPResultUI/CurrentScoreText",
+        "path": "/ui/PvPResultUI/Frame/CurrentScoreText",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
           "name": "CurrentScoreText",
-          "path": "/ui/PvPResultUI/CurrentScoreText",
+          "path": "/ui/PvPResultUI/Frame/CurrentScoreText",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 3,
-          "pathConstraints": "///",
+          "displayOrder": 2,
+          "pathConstraints": "////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -459,12 +561,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 200.0,
-                "y": 50.0
+                "x": 200.0001,
+                "y": 48.0094
               },
               "OffsetMin": {
-                "x": -200.0,
-                "y": -10.0
+                "x": -199.9999,
+                "y": -11.9905987
               },
               "Pivot": {
                 "x": 0.5,
@@ -475,14 +577,19 @@
                 "y": 60.0
               },
               "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 0.0,
-                "y": 20.0
+                "x": 0.0001,
+                "y": 18.0094013
               },
               "Position": {
-                "x": 0.0,
-                "y": 20.0,
+                "x": 0.0001,
+                "y": 18.0094013,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -490,6 +597,11 @@
                 "y": 0.0,
                 "z": 0.0,
                 "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
               },
               "Enable": true
             },
@@ -525,17 +637,17 @@
       },
       {
         "id": "e4d5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
-        "path": "/ui/PvPResultUI/TierText",
+        "path": "/ui/PvPResultUI/Frame/TierText",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
           "name": "TierText",
-          "path": "/ui/PvPResultUI/TierText",
+          "path": "/ui/PvPResultUI/Frame/TierText",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 4,
-          "pathConstraints": "///",
+          "displayOrder": 3,
+          "pathConstraints": "////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -559,12 +671,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 200.0,
-                "y": -20.0
+                "x": 200.0001,
+                "y": -21.9906
               },
               "OffsetMin": {
-                "x": -200.0,
-                "y": -80.0
+                "x": -199.9999,
+                "y": -81.9906
               },
               "Pivot": {
                 "x": 0.5,
@@ -575,14 +687,19 @@
                 "y": 60.0
               },
               "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 0.0,
-                "y": -50.0
+                "x": 0.0001,
+                "y": -51.9906
               },
               "Position": {
-                "x": 0.0,
-                "y": -50.0,
+                "x": 0.0001,
+                "y": -51.9906,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -590,6 +707,11 @@
                 "y": 0.0,
                 "z": 0.0,
                 "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
               },
               "Enable": true
             },
@@ -625,17 +747,17 @@
       },
       {
         "id": "f5e6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",
-        "path": "/ui/PvPResultUI/RetryButton",
+        "path": "/ui/PvPResultUI/Frame/RetryButton",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
         "jsonString": {
           "name": "RetryButton",
-          "path": "/ui/PvPResultUI/RetryButton",
+          "path": "/ui/PvPResultUI/Frame/RetryButton",
           "nameEditable": true,
           "enable": true,
-          "visible": true,
+          "visible": false,
           "localize": true,
-          "displayOrder": 5,
-          "pathConstraints": "///",
+          "displayOrder": 4,
+          "pathConstraints": "////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -659,12 +781,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": -30.0,
-                "y": -130.0
+                "x": -30.0001068,
+                "y": -131.9904
               },
               "OffsetMin": {
-                "x": -280.0,
-                "y": -210.0
+                "x": -280.000122,
+                "y": -211.9904
               },
               "Pivot": {
                 "x": 0.5,
@@ -675,14 +797,19 @@
                 "y": 80.0
               },
               "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": -155.0,
-                "y": -170.0
+                "x": -155.0001,
+                "y": -171.9904
               },
               "Position": {
-                "x": -155.0,
-                "y": -170.0,
+                "x": -155.0001,
+                "y": -171.9904,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -690,6 +817,11 @@
                 "y": 0.0,
                 "z": 0.0,
                 "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
               },
               "Enable": true
             },
@@ -749,17 +881,17 @@
       },
       {
         "id": "f5e6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9c",
-        "path": "/ui/PvPResultUI/RetryButton/Text",
+        "path": "/ui/PvPResultUI/Frame/RetryButton/Text",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
           "name": "Text",
-          "path": "/ui/PvPResultUI/RetryButton/Text",
+          "path": "/ui/PvPResultUI/Frame/RetryButton/Text",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
-          "pathConstraints": "////",
+          "pathConstraints": "/////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -849,17 +981,17 @@
       },
       {
         "id": "a6f7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c",
-        "path": "/ui/PvPResultUI/LobbyButton",
+        "path": "/ui/PvPResultUI/Frame/LobbyButton",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.ButtonComponent",
         "jsonString": {
           "name": "LobbyButton",
-          "path": "/ui/PvPResultUI/LobbyButton",
+          "path": "/ui/PvPResultUI/Frame/LobbyButton",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
-          "displayOrder": 6,
-          "pathConstraints": "///",
+          "displayOrder": 5,
+          "pathConstraints": "////",
           "revision": 1,
           "origin": {
             "type": "Model",
@@ -883,12 +1015,12 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": 280.0,
-                "y": -130.0
+                "x": 125.0001,
+                "y": -131.9904
               },
               "OffsetMin": {
-                "x": 30.0,
-                "y": -210.0
+                "x": -124.9999,
+                "y": -211.9904
               },
               "Pivot": {
                 "x": 0.5,
@@ -899,14 +1031,19 @@
                 "y": 80.0
               },
               "UIMode": 1,
+              "UIScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
               "UIVersion": 2,
               "anchoredPosition": {
-                "x": 155.0,
-                "y": -170.0
+                "x": 0.0001,
+                "y": -171.9904
               },
               "Position": {
-                "x": 155.0,
-                "y": -170.0,
+                "x": 0.0001,
+                "y": -171.9904,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -914,6 +1051,11 @@
                 "y": 0.0,
                 "z": 0.0,
                 "w": 1.0
+              },
+              "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
               },
               "Enable": true
             },
@@ -973,17 +1115,17 @@
       },
       {
         "id": "a6f7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0d",
-        "path": "/ui/PvPResultUI/LobbyButton/Text",
+        "path": "/ui/PvPResultUI/Frame/LobbyButton/Text",
         "componentNames": "MOD.Core.UITransformComponent,MOD.Core.SpriteGUIRendererComponent,MOD.Core.TextComponent",
         "jsonString": {
           "name": "Text",
-          "path": "/ui/PvPResultUI/LobbyButton/Text",
+          "path": "/ui/PvPResultUI/Frame/LobbyButton/Text",
           "nameEditable": true,
           "enable": true,
           "visible": true,
           "localize": true,
           "displayOrder": 0,
-          "pathConstraints": "////",
+          "pathConstraints": "/////",
           "revision": 1,
           "origin": {
             "type": "Model",
