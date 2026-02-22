@@ -16,7 +16,7 @@
       {
         "id": "fc6bb21c-1a6c-489f-82d6-47a4e3f11f25",
         "path": "/ui/PvPLobbyUI",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.UIGroupComponent,MOD.Core.CanvasGroupComponent,script.PvPLobbyUI,script.PvPRankingUI",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.UIGroupComponent,MOD.Core.CanvasGroupComponent,script.PvPLobbyUI,script.PvPRankingUI,MOD.Core.TagComponent",
         "jsonString": {
           "name": "PvPLobbyUI",
           "path": "/ui/PvPLobbyUI",
@@ -154,6 +154,13 @@
             },
             {
               "@type": "script.PvPRankingUI",
+              "Enable": true
+            },
+            {
+              "@type": "MOD.Core.TagComponent",
+              "Tags": [
+                "LobbyPopup"
+              ],
               "Enable": true
             }
           ],
