@@ -17,6 +17,8 @@ script pvpUserComponent extends Component
 
 	property integer play_count = 0
 
+	property string nickname = ""
+
 	property boolean dataLoaded = false
 
 	@ExecSpace("ServerOnly")
@@ -61,12 +63,20 @@ script pvpUserComponent extends Component
 		self.defense_synergy = data.defense_synergy
 		self.win_count = data.win_count
 		self.play_count = data.play_count
+		self.nickname = data.nickname or ""
 		self.dataLoaded = true
 
-		-- 닉네임 캐시 등록
+		-- 닉네임 갱신 (로그인 시마다 최신 닉네임으로 DB 업데이트)
 		local userEntity = _UserService:GetUserEntityByUserId(senderUserId)
 		if userEntity ~= nil and userEntity.PlayerComponent ~= nil then
-			_pvpRankingService:RegisterNickname(senderUserId, userEntity.PlayerComponent.Nickname)
+			local currentNickname = userEntity.PlayerComponent.Nickname
+			if currentNickname ~= nil and currentNickname ~= "" then
+				_pvpRankingService:RegisterNickname(senderUserId, currentNickname)
+				if self.nickname ~= currentNickname then
+					self.nickname = currentNickname
+					_pvpUserService:UpdateUserData(senderUserId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy, self.win_count, self.play_count, self.nickname)
+				end
+			end
 		end
 
 		-- 공격덱/방어덱이 비어있으면 노멀 스테이지 덱을 복사
@@ -83,7 +93,7 @@ script pvpUserComponent extends Component
 					self.defense_deck = _pvpUserService:NormalizeDeck(normalDeck)
 					self.defense_synergy = self:ComputeSynergy(self.defense_deck)
 				end
-				_pvpUserService:UpdateUserData(senderUserId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy, self.win_count, self.play_count)
+				_pvpUserService:UpdateUserData(senderUserId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy, self.win_count, self.play_count, self.nickname)
 				data.offense_deck = self.offense_deck
 				data.defense_deck = self.defense_deck
 				data.offense_synergy = self.offense_synergy
@@ -226,7 +236,7 @@ script pvpUserComponent extends Component
 		self.offense_deck[index] = unit_id
 		self.offense_synergy = self:ComputeSynergy(self.offense_deck)
 
-		local code = _pvpUserService:UpdateUserData(senderUserId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy, self.win_count, self.play_count)
+		local code = _pvpUserService:UpdateUserData(senderUserId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy, self.win_count, self.play_count, self.nickname)
 
 		if not (code == 0) then
 			log_error("[PVP] SetOffeseUnitCall save failed, uid=" .. senderUserId .. " code=" .. tostring(code))
@@ -255,7 +265,7 @@ script pvpUserComponent extends Component
 		self.defense_deck[index] = unit_id
 		self.defense_synergy = self:ComputeSynergy(self.defense_deck)
 
-		local code = _pvpUserService:UpdateUserData(senderUserId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy, self.win_count, self.play_count)
+		local code = _pvpUserService:UpdateUserData(senderUserId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy, self.win_count, self.play_count, self.nickname)
 
 		if not (code == 0) then
 			log_error("[PVP] SetDefenseUnitCall save failed, uid=" .. senderUserId .. " code=" .. tostring(code))
@@ -288,7 +298,7 @@ script pvpUserComponent extends Component
 			self.next_play_coin = DateTime.UtcNow.Elapsed + _pvpUserService.PLAY_COIN_UPDATE
 		end
 
-		local code = _pvpUserService:UpdateUserData(userId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy, self.win_count, self.play_count)
+		local code = _pvpUserService:UpdateUserData(userId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy, self.win_count, self.play_count, self.nickname)
 
 		if not (code == 0) then
 			log_error("[PVP] UseCoin save failed, uid=" .. userId .. " code=" .. tostring(code))
@@ -310,7 +320,7 @@ script pvpUserComponent extends Component
 		if isWin then
 			self.win_count += 1
 		end
-		_pvpUserService:UpdateUserData(userId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy, self.win_count, self.play_count)
+		_pvpUserService:UpdateUserData(userId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy, self.win_count, self.play_count, self.nickname)
 		self:SyncRecordBack(self.win_count, self.play_count)
 	end
 

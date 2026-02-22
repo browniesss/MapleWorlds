@@ -93,7 +93,19 @@ script pvpRankingService extends Logic
 
 	@ExecSpace("ServerOnly")
 	method string GetNickname(string uid)
-		return self.nicknameMap[uid]
+		local cached = self.nicknameMap[uid]
+		if cached ~= nil then
+			return cached
+		end
+
+		-- 캐시에 없으면 DB에서 조회
+		local nickname = _pvpUserService:GetNicknameByUid(uid)
+		if nickname ~= nil and nickname ~= "" then
+			self.nicknameMap[uid] = nickname
+			return nickname
+		end
+
+		return nil
 	end
 
 	@ExecSpace("ServerOnly")

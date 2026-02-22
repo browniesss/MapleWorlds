@@ -29,11 +29,12 @@ script pvpUserService extends Logic
 				next_play_coin=0,
 				win_count=0,
 				play_count=0,
+				nickname="",
 				season_ver=_pvpService.PVP_MODE_VER,
 				code = 0
 			}
 
-			local updateCode = self:UpdateUserData(uid, data.play_coin, data.next_play_coin, data.offense_deck, data.defense_deck, data.offense_synergy, data.defense_synergy, data.win_count, data.play_count)
+			local updateCode = self:UpdateUserData(uid, data.play_coin, data.next_play_coin, data.offense_deck, data.defense_deck, data.offense_synergy, data.defense_synergy, data.win_count, data.play_count, data.nickname)
 			if not (updateCode == 0) then
 				log_error("[PVP] GetUserData failed to save defaults, uid=" .. uid .. " code=" .. tostring(updateCode))
 				return {
@@ -96,6 +97,11 @@ script pvpUserService extends Logic
 			decoded.play_count = 0
 		end
 
+		-- 닉네임 기본값 보정
+		if decoded.nickname == nil then
+			decoded.nickname = ""
+		end
+
 		-- code 필드는 저장 데이터에 의존하지 않고 명시적으로 설정
 		decoded.code = 0
 
@@ -124,7 +130,7 @@ script pvpUserService extends Logic
 	end
 
 	@ExecSpace("ServerOnly")
-	method integer UpdateUserData(string uid, integer play_coin, integer next_play_coin, table offense_deck, table defense_deck, table offense_synergy, table defense_synergy, integer win_count, integer play_count)
+	method integer UpdateUserData(string uid, integer play_coin, integer next_play_coin, table offense_deck, table defense_deck, table offense_synergy, table defense_synergy, integer win_count, integer play_count, string nickname)
 		-- 덱 정규화 (sparse array 방지)
 		offense_deck = self:NormalizeDeck(offense_deck)
 		defense_deck = self:NormalizeDeck(defense_deck)
@@ -143,6 +149,7 @@ script pvpUserService extends Logic
 			next_play_coin=next_play_coin,
 			win_count=win_count,
 			play_count=play_count,
+			nickname=nickname or "",
 			season_ver=_pvpService.PVP_MODE_VER
 		}
 
@@ -153,6 +160,20 @@ script pvpUserService extends Logic
 			log_error("[PVP] UpdateUserData save failed, uid=" .. uid .. " code=" .. tostring(saveCode))
 		end
 		return saveCode
+	end
+
+	@ExecSpace("ServerOnly")
+	method string GetNicknameByUid(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local code, json = ds:GetAndWait(self.PVP_MODE_KEY)
+		if code ~= 0 or json == nil then
+			return nil
+		end
+		local decoded = _HttpService:JSONDecode(json)
+		if decoded == nil then
+			return nil
+		end
+		return decoded.nickname
 	end
 
 end
