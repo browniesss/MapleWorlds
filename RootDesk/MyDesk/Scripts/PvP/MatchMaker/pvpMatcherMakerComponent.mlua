@@ -27,18 +27,26 @@ script pvpMatcherMakerComponent extends Component
 
 		-- 티어 풀이 4명 미만일 때 더미 덱 생성
 		if #tierPool < 4 then
-			local dummyNames = {"MapleBot_A", "MapleBot_B", "MapleBot_C", "MapleBot_D"}
+			local tierName = _pvpDummyDeckService:GetTierNameFromScore(score)
 			local dummyScore = math.max(0, score - 10)
+			local usedNicknames = {}
 			for i = #tierPool + 1, 4 do
+				local nickname = _pvpDummyDeckService:GetRandomNicknameByTier(tierName)
+				local attempts = 0
+				while usedNicknames[nickname] and attempts < 10 do
+					nickname = _pvpDummyDeckService:GetRandomNicknameByTier(tierName)
+					attempts = attempts + 1
+				end
+				usedNicknames[nickname] = true
 				local dummyUser = {
 					uid = "dummy_" .. i,
 					score = dummyScore + math.random(0, 20),
 					rank = 0,
-					nickname = dummyNames[i] or ("MapleBot_" .. i),
+					nickname = nickname,
 					isDummy = true,
 					defense_deck = {},
 					unitInfo = {},
-					deckIndex = math.random(1, 4)
+					tierName = tierName
 				}
 				table.insert(tierPool, dummyUser)
 			end
@@ -155,7 +163,7 @@ script pvpMatcherMakerComponent extends Component
 				end
 			end
 		else
-			local dummyDeck = _pvpDummyDeckService:GetDummyDeckByIndex(target.deckIndex or 1)
+			local dummyDeck = _pvpDummyDeckService:GetDummyDeckByTier(target.tierName or "bronze")
 			deckData.defense_deck = dummyDeck.defense_deck
 			deckData.unitInfo = dummyDeck.unitInfo
 			deckData.defense_synergy = dummyDeck.defense_synergy or {}
@@ -218,8 +226,8 @@ script pvpMatcherMakerComponent extends Component
 			end
 			matchData.unitInfo = unitInfo
 		else
-			-- 더미 유저인 경우 고정된 덱 인덱스 사용
-			local dummyDeck = _pvpDummyDeckService:GetDummyDeckByIndex(target.deckIndex or 1)
+			-- 더미 유저인 경우 티어별 덱 사용
+			local dummyDeck = _pvpDummyDeckService:GetDummyDeckByTier(target.tierName or "bronze")
 			matchData.defense_deck = dummyDeck.defense_deck
 			matchData.unitInfo = dummyDeck.unitInfo
 		end

@@ -2,6 +2,7 @@
 script pvpDummyDeckService extends Logic
 
 	property table deckList = {}
+	property table nicknamePool = {}
 
 	method void OnBeginPlay()
 		self:InitDecks()
@@ -9,100 +10,644 @@ script pvpDummyDeckService extends Logic
 
 	@ExecSpace("ServerOnly")
 	method void InitDecks()
-		table.clear(self.deckList)
+		self.deckList = {bronze = {}, silver = {}, gold = {}, platinum = {}, diamond = {}}
+		self:InitBronzeDecks()
+		self:InitSilverDecks()
+		self:InitGoldDecks()
+		self:InitPlatinumDecks()
+		self:InitDiamondDecks()
+		self:InitNicknames()
+	end
 
-		-- Deck 1 (Easy)
-		local deck1 = {
-			"model://5aac7c14-9173-4d47-96f1-5fc5429e36c4",
-			"model://f2205e74-b8c8-4103-a768-59b58f8e2f55",
-			"model://eacb328a-428a-474c-b7e3-cb313b099806",
-			"model://af857ac1-d3ad-4509-b262-6a938c2a717c",
-			"model://62f3f55c-28fa-4151-bb73-39758b57801a",
-			"model://c57eb6a8-03e3-4115-999a-8b8c607e79da",
-			"model://f8e671ed-be6c-4fc5-8b44-71d7feffe832",
-			"model://2e2f8b7d-3988-44e6-9939-31b203425f2b"
-		}
-		local info1 = {}
-		info1["model://5aac7c14-9173-4d47-96f1-5fc5429e36c4"] = {id = "model://5aac7c14-9173-4d47-96f1-5fc5429e36c4", level = 1, limitBreak = 1, cost = 4}
-		info1["model://f2205e74-b8c8-4103-a768-59b58f8e2f55"] = {id = "model://f2205e74-b8c8-4103-a768-59b58f8e2f55", level = 1, limitBreak = 1, cost = 4}
-		info1["model://eacb328a-428a-474c-b7e3-cb313b099806"] = {id = "model://eacb328a-428a-474c-b7e3-cb313b099806", level = 1, limitBreak = 1, cost = 6}
-		info1["model://af857ac1-d3ad-4509-b262-6a938c2a717c"] = {id = "model://af857ac1-d3ad-4509-b262-6a938c2a717c", level = 1, limitBreak = 1, cost = 7}
-		info1["model://62f3f55c-28fa-4151-bb73-39758b57801a"] = {id = "model://62f3f55c-28fa-4151-bb73-39758b57801a", level = 1, limitBreak = 1, cost = 8}
-		info1["model://c57eb6a8-03e3-4115-999a-8b8c607e79da"] = {id = "model://c57eb6a8-03e3-4115-999a-8b8c607e79da", level = 1, limitBreak = 1, cost = 9}
-		info1["model://f8e671ed-be6c-4fc5-8b44-71d7feffe832"] = {id = "model://f8e671ed-be6c-4fc5-8b44-71d7feffe832", level = 1, limitBreak = 1, cost = 15}
-		info1["model://2e2f8b7d-3988-44e6-9939-31b203425f2b"] = {id = "model://2e2f8b7d-3988-44e6-9939-31b203425f2b", level = 1, limitBreak = 1, cost = 17}
-
-		-- Deck 2 (Normal)
-		local deck2 = {
-			"model://4a6f379a-312c-4ba4-8837-8b4a2a117b60",
-			"model://3b308c48-d7a0-420c-99bf-502e034642ad",
-			"model://f37a2185-c6a9-43b6-90ea-75d69a3305f4",
-			"model://acbba4d1-8524-4ad2-9d8e-ba8b94a7f5e6",
-			"model://c54b7465-79e2-4b6f-8bd5-be17dd7e4b23",
-			"model://a9c20d29-4d1e-415d-89a0-38a830c3a8be",
-			"model://aefa4ccd-c6cf-4c37-acc6-87ac97a23036",
-			"model://397e3aa9-6cbf-4950-a18a-51c62a559dfb"
-		}
-		local info2 = {}
-		info2["model://4a6f379a-312c-4ba4-8837-8b4a2a117b60"] = {id = "model://4a6f379a-312c-4ba4-8837-8b4a2a117b60", level = 1, limitBreak = 1, cost = 11}
-		info2["model://3b308c48-d7a0-420c-99bf-502e034642ad"] = {id = "model://3b308c48-d7a0-420c-99bf-502e034642ad", level = 1, limitBreak = 1, cost = 14}
-		info2["model://f37a2185-c6a9-43b6-90ea-75d69a3305f4"] = {id = "model://f37a2185-c6a9-43b6-90ea-75d69a3305f4", level = 1, limitBreak = 1, cost = 15}
-		info2["model://acbba4d1-8524-4ad2-9d8e-ba8b94a7f5e6"] = {id = "model://acbba4d1-8524-4ad2-9d8e-ba8b94a7f5e6", level = 1, limitBreak = 1, cost = 16}
-		info2["model://c54b7465-79e2-4b6f-8bd5-be17dd7e4b23"] = {id = "model://c54b7465-79e2-4b6f-8bd5-be17dd7e4b23", level = 1, limitBreak = 1, cost = 16}
-		info2["model://a9c20d29-4d1e-415d-89a0-38a830c3a8be"] = {id = "model://a9c20d29-4d1e-415d-89a0-38a830c3a8be", level = 1, limitBreak = 1, cost = 16}
-		info2["model://aefa4ccd-c6cf-4c37-acc6-87ac97a23036"] = {id = "model://aefa4ccd-c6cf-4c37-acc6-87ac97a23036", level = 1, limitBreak = 1, cost = 18}
-		info2["model://397e3aa9-6cbf-4950-a18a-51c62a559dfb"] = {id = "model://397e3aa9-6cbf-4950-a18a-51c62a559dfb", level = 1, limitBreak = 1, cost = 19}
-
-		-- Deck 3 (Hard)
-		local deck3 = {
-			"model://96e0a3c4-6bdc-4618-b484-d336b13d56eb",
-			"model://23f0df68-18dd-472b-8bcd-82acc77cbd18",
-			"model://28b6e793-0c47-490c-80b3-4cb544dfcc33",
-			"model://75a4fefc-2255-4b50-bd06-62ca565cfbe9",
-			"model://542d5bbb-981c-426c-9c84-113195c8f764",
-			"model://899a3457-6d13-42ec-a63e-224a9c736047",
-			"model://458add3f-20cb-48a2-9429-5673dbc5ae5d",
-			"model://0835a3e4-13ca-47e3-89e1-cc8c0b1de90b"
-		}
-		local info3 = {}
-		info3["model://96e0a3c4-6bdc-4618-b484-d336b13d56eb"] = {id = "model://96e0a3c4-6bdc-4618-b484-d336b13d56eb", level = 1, limitBreak = 1, cost = 20}
-		info3["model://23f0df68-18dd-472b-8bcd-82acc77cbd18"] = {id = "model://23f0df68-18dd-472b-8bcd-82acc77cbd18", level = 1, limitBreak = 1, cost = 20}
-		info3["model://28b6e793-0c47-490c-80b3-4cb544dfcc33"] = {id = "model://28b6e793-0c47-490c-80b3-4cb544dfcc33", level = 1, limitBreak = 1, cost = 20}
-		info3["model://75a4fefc-2255-4b50-bd06-62ca565cfbe9"] = {id = "model://75a4fefc-2255-4b50-bd06-62ca565cfbe9", level = 1, limitBreak = 1, cost = 21}
-		info3["model://542d5bbb-981c-426c-9c84-113195c8f764"] = {id = "model://542d5bbb-981c-426c-9c84-113195c8f764", level = 1, limitBreak = 1, cost = 23}
-		info3["model://899a3457-6d13-42ec-a63e-224a9c736047"] = {id = "model://899a3457-6d13-42ec-a63e-224a9c736047", level = 1, limitBreak = 1, cost = 20}
-		info3["model://458add3f-20cb-48a2-9429-5673dbc5ae5d"] = {id = "model://458add3f-20cb-48a2-9429-5673dbc5ae5d", level = 1, limitBreak = 1, cost = 21}
-		info3["model://0835a3e4-13ca-47e3-89e1-cc8c0b1de90b"] = {id = "model://0835a3e4-13ca-47e3-89e1-cc8c0b1de90b", level = 1, limitBreak = 1, cost = 22}
-
-		-- Deck 4 (Very Hard)
-		local deck4 = {
-			"model://2e70488f-dc60-48d0-ad91-fd2dc035a7c6",
-			"model://f25e76d6-61e8-4543-a497-3eccb4c2e541",
-			"model://d748522d-07cd-4c0d-b42f-15f6690d254f",
-			"model://2979d6ea-be9b-46bf-8f2c-5f5ed3fb53f5",
-			"model://3a51a020-bfa0-4d79-97c5-b9fe3647507b",
-			"model://90507375-b1a4-4a84-946c-9ea9ad96797f",
-			"model://376e9ea2-9b56-41b3-b9c9-9a696fe76c98",
-			"model://8f5cf161-d65c-46c9-aadd-86344a6d5ca0"
-		}
-		local info4 = {}
-		info4["model://2e70488f-dc60-48d0-ad91-fd2dc035a7c6"] = {id = "model://2e70488f-dc60-48d0-ad91-fd2dc035a7c6", level = 1, limitBreak = 1, cost = 29}
-		info4["model://f25e76d6-61e8-4543-a497-3eccb4c2e541"] = {id = "model://f25e76d6-61e8-4543-a497-3eccb4c2e541", level = 1, limitBreak = 1, cost = 24}
-		info4["model://d748522d-07cd-4c0d-b42f-15f6690d254f"] = {id = "model://d748522d-07cd-4c0d-b42f-15f6690d254f", level = 1, limitBreak = 1, cost = 33}
-		info4["model://2979d6ea-be9b-46bf-8f2c-5f5ed3fb53f5"] = {id = "model://2979d6ea-be9b-46bf-8f2c-5f5ed3fb53f5", level = 1, limitBreak = 1, cost = 30}
-		info4["model://3a51a020-bfa0-4d79-97c5-b9fe3647507b"] = {id = "model://3a51a020-bfa0-4d79-97c5-b9fe3647507b", level = 1, limitBreak = 1, cost = 34}
-		info4["model://90507375-b1a4-4a84-946c-9ea9ad96797f"] = {id = "model://90507375-b1a4-4a84-946c-9ea9ad96797f", level = 1, limitBreak = 1, cost = 30}
-		info4["model://376e9ea2-9b56-41b3-b9c9-9a696fe76c98"] = {id = "model://376e9ea2-9b56-41b3-b9c9-9a696fe76c98", level = 1, limitBreak = 1, cost = 32}
-		info4["model://8f5cf161-d65c-46c9-aadd-86344a6d5ca0"] = {id = "model://8f5cf161-d65c-46c9-aadd-86344a6d5ca0", level = 1, limitBreak = 1, cost = 34}
-
-		self.deckList = {
-			{defense_deck = deck1, unitInfo = info1, defense_synergy = self:ComputeDummySynergy(deck1)},
-			{defense_deck = deck2, unitInfo = info2, defense_synergy = self:ComputeDummySynergy(deck2)},
-			{defense_deck = deck3, unitInfo = info3, defense_synergy = self:ComputeDummySynergy(deck3)},
-			{defense_deck = deck4, unitInfo = info4, defense_synergy = self:ComputeDummySynergy(deck4)}
+	-- 유닛 배열 + 레벨/돌파 범위로 덱 데이터 생성
+	@ExecSpace("ServerOnly")
+	method table BuildDeck(table units, integer minLevel, integer maxLevel, integer minLB, integer maxLB)
+		local deck = {}
+		local info = {}
+		for _, u in ipairs(units) do
+			table.insert(deck, u[1])
+			info[u[1]] = {
+				id = u[1],
+				level = math.random(minLevel, maxLevel),
+				limitBreak = math.random(minLB, maxLB),
+				cost = u[2]
+			}
+		end
+		return {
+			defense_deck = deck,
+			unitInfo = info,
+			defense_synergy = self:ComputeDummySynergy(deck)
 		}
 	end
 
+	-- ========== Bronze (level 2-4, LB 1) ==========
+	@ExecSpace("ServerOnly")
+	method void InitBronzeDecks()
+		local t = self.deckList.bronze
+		-- 1: 달팽이+파란달팽이+스포아+빨간달팽이+스텀프+스켈독+페어리+멜러디
+		table.insert(t, self:BuildDeck({
+			{"model://5aac7c14-9173-4d47-96f1-5fc5429e36c4", 4},
+			{"model://f2205e74-b8c8-4103-a768-59b58f8e2f55", 4},
+			{"model://eacb328a-428a-474c-b7e3-cb313b099806", 6},
+			{"model://af857ac1-d3ad-4509-b262-6a938c2a717c", 7},
+			{"model://62f3f55c-28fa-4151-bb73-39758b57801a", 8},
+			{"model://c57eb6a8-03e3-4115-999a-8b8c607e79da", 9},
+			{"model://f8e671ed-be6c-4fc5-8b44-71d7feffe832", 15},
+			{"model://2e2f8b7d-3988-44e6-9939-31b203425f2b", 17}
+		}, 2, 4, 1, 1))
+		-- 2: 파란달팽이+광신도+빨간달팽이+스텀프+신입포병+슬라임+돼지+주황버섯
+		table.insert(t, self:BuildDeck({
+			{"model://f2205e74-b8c8-4103-a768-59b58f8e2f55", 4},
+			{"model://54485d61-c78c-4bb8-b5b8-f6bd51d4633d", 6},
+			{"model://af857ac1-d3ad-4509-b262-6a938c2a717c", 7},
+			{"model://62f3f55c-28fa-4151-bb73-39758b57801a", 8},
+			{"model://87af3002-9559-4a3b-8dcf-716c76dbeb9d", 10},
+			{"model://4a6f379a-312c-4ba4-8837-8b4a2a117b60", 11},
+			{"model://3b308c48-d7a0-420c-99bf-502e034642ad", 14},
+			{"model://f37a2185-c6a9-43b6-90ea-75d69a3305f4", 15}
+		}, 2, 4, 1, 1))
+		-- 3: 달팽이+광신도+빨간달팽이+스켈독+화염마탑주+도적+수습마법사+페어리
+		table.insert(t, self:BuildDeck({
+			{"model://5aac7c14-9173-4d47-96f1-5fc5429e36c4", 4},
+			{"model://54485d61-c78c-4bb8-b5b8-f6bd51d4633d", 6},
+			{"model://af857ac1-d3ad-4509-b262-6a938c2a717c", 7},
+			{"model://c57eb6a8-03e3-4115-999a-8b8c607e79da", 9},
+			{"model://458f195d-0342-4749-98ba-048df77ac36c", 11},
+			{"model://9c5ee7b4-2853-4d2c-9037-c9b9c073a030", 12},
+			{"model://03ab7c9d-7c9d-40c9-8835-6086c96a8114", 13},
+			{"model://f8e671ed-be6c-4fc5-8b44-71d7feffe832", 15}
+		}, 2, 4, 1, 1))
+		-- 4: 파란달팽이+스포아+스텀프+신입포병+뒷골목궁수+1레벨네크+나이프마스터+달빛검사
+		table.insert(t, self:BuildDeck({
+			{"model://f2205e74-b8c8-4103-a768-59b58f8e2f55", 4},
+			{"model://eacb328a-428a-474c-b7e3-cb313b099806", 6},
+			{"model://62f3f55c-28fa-4151-bb73-39758b57801a", 8},
+			{"model://87af3002-9559-4a3b-8dcf-716c76dbeb9d", 10},
+			{"model://85774479-3395-4a3a-92f3-e8e412d54c70", 11},
+			{"model://02c5b927-1095-4f34-9d02-9c6252772f52", 12},
+			{"model://38e49ed8-6867-43d8-bc0f-b469363b3e0a", 13},
+			{"model://550c1a50-58cd-4f4f-af95-34fe5186ffaa", 15}
+		}, 2, 4, 1, 1))
+		-- 5: 달팽이+파란달팽이+빨간달팽이+스켈독+카우보이+도적+체육선생님+초보궁수
+		table.insert(t, self:BuildDeck({
+			{"model://5aac7c14-9173-4d47-96f1-5fc5429e36c4", 4},
+			{"model://f2205e74-b8c8-4103-a768-59b58f8e2f55", 4},
+			{"model://af857ac1-d3ad-4509-b262-6a938c2a717c", 7},
+			{"model://c57eb6a8-03e3-4115-999a-8b8c607e79da", 9},
+			{"model://6c92beb9-b8d9-45a0-914c-881035bd6ad3", 11},
+			{"model://9c5ee7b4-2853-4d2c-9037-c9b9c073a030", 12},
+			{"model://63c04242-fe53-4afa-b091-6886e9f5f529", 13},
+			{"model://ddbe8a80-64a9-49e0-8dba-ccb2ffa4f887", 17}
+		}, 2, 4, 1, 1))
+		-- 6: 광신도+스포아+빨간달팽이+스텀프+슬라임+화염마탑주+수습검사+멜러디
+		table.insert(t, self:BuildDeck({
+			{"model://54485d61-c78c-4bb8-b5b8-f6bd51d4633d", 6},
+			{"model://eacb328a-428a-474c-b7e3-cb313b099806", 6},
+			{"model://af857ac1-d3ad-4509-b262-6a938c2a717c", 7},
+			{"model://62f3f55c-28fa-4151-bb73-39758b57801a", 8},
+			{"model://4a6f379a-312c-4ba4-8837-8b4a2a117b60", 11},
+			{"model://458f195d-0342-4749-98ba-048df77ac36c", 11},
+			{"model://ecfafcc5-4753-42ad-b097-2db304e47a1d", 16},
+			{"model://2e2f8b7d-3988-44e6-9939-31b203425f2b", 17}
+		}, 2, 4, 1, 1))
+		-- 7: 달팽이+파란달팽이+스포아+스켈독+뒷골목궁수+1레벨네크+무사+주황버섯
+		table.insert(t, self:BuildDeck({
+			{"model://5aac7c14-9173-4d47-96f1-5fc5429e36c4", 4},
+			{"model://f2205e74-b8c8-4103-a768-59b58f8e2f55", 4},
+			{"model://eacb328a-428a-474c-b7e3-cb313b099806", 6},
+			{"model://c57eb6a8-03e3-4115-999a-8b8c607e79da", 9},
+			{"model://85774479-3395-4a3a-92f3-e8e412d54c70", 11},
+			{"model://02c5b927-1095-4f34-9d02-9c6252772f52", 12},
+			{"model://a26e853b-6aab-4b94-9e4b-da2411d3ff6f", 13},
+			{"model://f37a2185-c6a9-43b6-90ea-75d69a3305f4", 15}
+		}, 2, 4, 1, 1))
+		-- 8: 파란달팽이+광신도+빨간달팽이+신입포병+카우보이+수습닌자+화염마스터+기사단장
+		table.insert(t, self:BuildDeck({
+			{"model://f2205e74-b8c8-4103-a768-59b58f8e2f55", 4},
+			{"model://54485d61-c78c-4bb8-b5b8-f6bd51d4633d", 6},
+			{"model://af857ac1-d3ad-4509-b262-6a938c2a717c", 7},
+			{"model://87af3002-9559-4a3b-8dcf-716c76dbeb9d", 10},
+			{"model://6c92beb9-b8d9-45a0-914c-881035bd6ad3", 11},
+			{"model://488804eb-2952-48db-aec0-5ee29a3cc05b", 13},
+			{"model://3a424524-731e-48fe-af70-9b9deca66743", 14},
+			{"model://92cfd1b7-5141-4c0d-bdc7-b18f9d5d9540", 15}
+		}, 2, 4, 1, 1))
+		-- 9: 달팽이+스포아+스텀프+스켈독+슬라임+도적+용트름마스터+리본돼지
+		table.insert(t, self:BuildDeck({
+			{"model://5aac7c14-9173-4d47-96f1-5fc5429e36c4", 4},
+			{"model://eacb328a-428a-474c-b7e3-cb313b099806", 6},
+			{"model://62f3f55c-28fa-4151-bb73-39758b57801a", 8},
+			{"model://c57eb6a8-03e3-4115-999a-8b8c607e79da", 9},
+			{"model://4a6f379a-312c-4ba4-8837-8b4a2a117b60", 11},
+			{"model://9c5ee7b4-2853-4d2c-9037-c9b9c073a030", 12},
+			{"model://9ec67b3b-a954-465a-b634-de9e40a1aa39", 13},
+			{"model://acbba4d1-8524-4ad2-9d8e-ba8b94a7f5e6", 16}
+		}, 2, 4, 1, 1))
+		-- 10: 파란달팽이+빨간달팽이+스텀프+신입포병+화염마탑주+나이프마스터+돼지+속사마스터
+		table.insert(t, self:BuildDeck({
+			{"model://f2205e74-b8c8-4103-a768-59b58f8e2f55", 4},
+			{"model://af857ac1-d3ad-4509-b262-6a938c2a717c", 7},
+			{"model://62f3f55c-28fa-4151-bb73-39758b57801a", 8},
+			{"model://87af3002-9559-4a3b-8dcf-716c76dbeb9d", 10},
+			{"model://458f195d-0342-4749-98ba-048df77ac36c", 11},
+			{"model://38e49ed8-6867-43d8-bc0f-b469363b3e0a", 13},
+			{"model://3b308c48-d7a0-420c-99bf-502e034642ad", 14},
+			{"model://7f6df940-1b16-441d-b4b2-dc13cce4400b", 15}
+		}, 2, 4, 1, 1))
+	end
+
+	-- ========== Silver (level 5-10, LB 1) ==========
+	@ExecSpace("ServerOnly")
+	method void InitSilverDecks()
+		local t = self.deckList.silver
+		-- 1: 달팽이+빨간달팽이+슬라임+1레벨네크+돼지+주황버섯+리본돼지+멜러디
+		table.insert(t, self:BuildDeck({
+			{"model://5aac7c14-9173-4d47-96f1-5fc5429e36c4", 4},
+			{"model://af857ac1-d3ad-4509-b262-6a938c2a717c", 7},
+			{"model://4a6f379a-312c-4ba4-8837-8b4a2a117b60", 11},
+			{"model://02c5b927-1095-4f34-9d02-9c6252772f52", 12},
+			{"model://3b308c48-d7a0-420c-99bf-502e034642ad", 14},
+			{"model://f37a2185-c6a9-43b6-90ea-75d69a3305f4", 15},
+			{"model://acbba4d1-8524-4ad2-9d8e-ba8b94a7f5e6", 16},
+			{"model://2e2f8b7d-3988-44e6-9939-31b203425f2b", 17}
+		}, 5, 10, 1, 1))
+		-- 2: 파란달팽이+스포아+신입포병+화염마탑주+수습마법사+길거리파이터+옥토퍼스+마권사
+		table.insert(t, self:BuildDeck({
+			{"model://f2205e74-b8c8-4103-a768-59b58f8e2f55", 4},
+			{"model://eacb328a-428a-474c-b7e3-cb313b099806", 6},
+			{"model://87af3002-9559-4a3b-8dcf-716c76dbeb9d", 10},
+			{"model://458f195d-0342-4749-98ba-048df77ac36c", 11},
+			{"model://03ab7c9d-7c9d-40c9-8835-6086c96a8114", 13},
+			{"model://2023baf4-0bbb-46ce-8b34-5cd26f95a436", 15},
+			{"model://c54b7465-79e2-4b6f-8bd5-be17dd7e4b23", 16},
+			{"model://5730b7e6-b3cd-40dc-81ef-f635ccc27507", 18}
+		}, 5, 10, 1, 1))
+		-- 3: 광신도+빨간달팽이+뒷골목궁수+도적+나이프마스터+속사마스터+수습검사+우는파란버섯
+		table.insert(t, self:BuildDeck({
+			{"model://54485d61-c78c-4bb8-b5b8-f6bd51d4633d", 6},
+			{"model://af857ac1-d3ad-4509-b262-6a938c2a717c", 7},
+			{"model://85774479-3395-4a3a-92f3-e8e412d54c70", 11},
+			{"model://9c5ee7b4-2853-4d2c-9037-c9b9c073a030", 12},
+			{"model://38e49ed8-6867-43d8-bc0f-b469363b3e0a", 13},
+			{"model://7f6df940-1b16-441d-b4b2-dc13cce4400b", 15},
+			{"model://ecfafcc5-4753-42ad-b097-2db304e47a1d", 16},
+			{"model://397e3aa9-6cbf-4950-a18a-51c62a559dfb", 19}
+		}, 5, 10, 1, 1))
+		-- 4: 달팽이+스텀프+카우보이+1레벨네크+화염마스터+무도가+버블링+초보궁수
+		table.insert(t, self:BuildDeck({
+			{"model://5aac7c14-9173-4d47-96f1-5fc5429e36c4", 4},
+			{"model://62f3f55c-28fa-4151-bb73-39758b57801a", 8},
+			{"model://6c92beb9-b8d9-45a0-914c-881035bd6ad3", 11},
+			{"model://02c5b927-1095-4f34-9d02-9c6252772f52", 12},
+			{"model://3a424524-731e-48fe-af70-9b9deca66743", 14},
+			{"model://607b0611-13a6-4921-8e11-0abc165b2a4a", 15},
+			{"model://a9c20d29-4d1e-415d-89a0-38a830c3a8be", 16},
+			{"model://ddbe8a80-64a9-49e0-8dba-ccb2ffa4f887", 17}
+		}, 5, 10, 1, 1))
+		-- 5: 파란달팽이+빨간달팽이+슬라임+수습닌자+주황버섯+기사단장+창술의달인+용궁사
+		table.insert(t, self:BuildDeck({
+			{"model://f2205e74-b8c8-4103-a768-59b58f8e2f55", 4},
+			{"model://af857ac1-d3ad-4509-b262-6a938c2a717c", 7},
+			{"model://4a6f379a-312c-4ba4-8837-8b4a2a117b60", 11},
+			{"model://488804eb-2952-48db-aec0-5ee29a3cc05b", 13},
+			{"model://f37a2185-c6a9-43b6-90ea-75d69a3305f4", 15},
+			{"model://92cfd1b7-5141-4c0d-bdc7-b18f9d5d9540", 15},
+			{"model://c40c29dd-a9f7-4ecd-9f32-3f4b0706ac21", 16},
+			{"model://eea15330-c5d4-4844-a9d9-f441061ca093", 17}
+		}, 5, 10, 1, 1))
+		-- 6: 스포아+스켈독+뒷골목궁수+도적+체육선생님+숲지기+새비지블로우+다크스텀프
+		table.insert(t, self:BuildDeck({
+			{"model://eacb328a-428a-474c-b7e3-cb313b099806", 6},
+			{"model://c57eb6a8-03e3-4115-999a-8b8c607e79da", 9},
+			{"model://85774479-3395-4a3a-92f3-e8e412d54c70", 11},
+			{"model://9c5ee7b4-2853-4d2c-9037-c9b9c073a030", 12},
+			{"model://63c04242-fe53-4afa-b091-6886e9f5f529", 13},
+			{"model://a07d5ebd-147f-47ac-8924-d7111974d252", 15},
+			{"model://6e6759ad-cbd7-4fdf-bee8-7e93bfb37094", 16},
+			{"model://aefa4ccd-c6cf-4c37-acc6-87ac97a23036", 18}
+		}, 5, 10, 1, 1))
+		-- 7: 광신도+스텀프+신입포병+화염마탑주+무사+달빛검사+리본돼지+스톤골렘
+		table.insert(t, self:BuildDeck({
+			{"model://54485d61-c78c-4bb8-b5b8-f6bd51d4633d", 6},
+			{"model://62f3f55c-28fa-4151-bb73-39758b57801a", 8},
+			{"model://87af3002-9559-4a3b-8dcf-716c76dbeb9d", 10},
+			{"model://458f195d-0342-4749-98ba-048df77ac36c", 11},
+			{"model://a26e853b-6aab-4b94-9e4b-da2411d3ff6f", 13},
+			{"model://550c1a50-58cd-4f4f-af95-34fe5186ffaa", 15},
+			{"model://acbba4d1-8524-4ad2-9d8e-ba8b94a7f5e6", 16},
+			{"model://23f0df68-18dd-472b-8bcd-82acc77cbd18", 20}
+		}, 5, 10, 1, 1))
+		-- 8: 달팽이+빨간달팽이+카우보이+1레벨네크+나이프마스터+페어리+옥토퍼스+주니어레이스
+		table.insert(t, self:BuildDeck({
+			{"model://5aac7c14-9173-4d47-96f1-5fc5429e36c4", 4},
+			{"model://af857ac1-d3ad-4509-b262-6a938c2a717c", 7},
+			{"model://6c92beb9-b8d9-45a0-914c-881035bd6ad3", 11},
+			{"model://02c5b927-1095-4f34-9d02-9c6252772f52", 12},
+			{"model://38e49ed8-6867-43d8-bc0f-b469363b3e0a", 13},
+			{"model://f8e671ed-be6c-4fc5-8b44-71d7feffe832", 15},
+			{"model://c54b7465-79e2-4b6f-8bd5-be17dd7e4b23", 16},
+			{"model://fe2b1082-72ce-49f9-8a40-b0d3f9d881ce", 20}
+		}, 5, 10, 1, 1))
+		-- 9: 파란달팽이+스포아+슬라임+수습마법사+돼지+속사마스터+수습검사+파란버섯
+		table.insert(t, self:BuildDeck({
+			{"model://f2205e74-b8c8-4103-a768-59b58f8e2f55", 4},
+			{"model://eacb328a-428a-474c-b7e3-cb313b099806", 6},
+			{"model://4a6f379a-312c-4ba4-8837-8b4a2a117b60", 11},
+			{"model://03ab7c9d-7c9d-40c9-8835-6086c96a8114", 13},
+			{"model://3b308c48-d7a0-420c-99bf-502e034642ad", 14},
+			{"model://7f6df940-1b16-441d-b4b2-dc13cce4400b", 15},
+			{"model://ecfafcc5-4753-42ad-b097-2db304e47a1d", 16},
+			{"model://96e0a3c4-6bdc-4618-b484-d336b13d56eb", 20}
+		}, 5, 10, 1, 1))
+		-- 10: 달팽이+광신도+신입포병+도적+용트름마스터+주황버섯+버블링+와일드보어
+		table.insert(t, self:BuildDeck({
+			{"model://5aac7c14-9173-4d47-96f1-5fc5429e36c4", 4},
+			{"model://54485d61-c78c-4bb8-b5b8-f6bd51d4633d", 6},
+			{"model://87af3002-9559-4a3b-8dcf-716c76dbeb9d", 10},
+			{"model://9c5ee7b4-2853-4d2c-9037-c9b9c073a030", 12},
+			{"model://9ec67b3b-a954-465a-b634-de9e40a1aa39", 13},
+			{"model://f37a2185-c6a9-43b6-90ea-75d69a3305f4", 15},
+			{"model://a9c20d29-4d1e-415d-89a0-38a830c3a8be", 16},
+			{"model://28b6e793-0c47-490c-80b3-4cb544dfcc33", 20}
+		}, 5, 10, 1, 1))
+	end
+
+	-- ========== Gold (level 11-20, LB 1-2) ==========
+	@ExecSpace("ServerOnly")
+	method void InitGoldDecks()
+		local t = self.deckList.gold
+		-- 1: 스포아+도적+수습마법사+화염마스터+속사마스터+파란버섯+커즈아이+나이트로드
+		table.insert(t, self:BuildDeck({
+			{"model://eacb328a-428a-474c-b7e3-cb313b099806", 6},
+			{"model://9c5ee7b4-2853-4d2c-9037-c9b9c073a030", 12},
+			{"model://03ab7c9d-7c9d-40c9-8835-6086c96a8114", 13},
+			{"model://3a424524-731e-48fe-af70-9b9deca66743", 14},
+			{"model://7f6df940-1b16-441d-b4b2-dc13cce4400b", 15},
+			{"model://96e0a3c4-6bdc-4618-b484-d336b13d56eb", 20},
+			{"model://458add3f-20cb-48a2-9429-5673dbc5ae5d", 21},
+			{"model://079e4d9b-f128-47ff-bc19-ea9c819925a3", 24}
+		}, 11, 20, 1, 2))
+		-- 2: 빨간달팽이+화염마탑주+나이프마스터+주황버섯+수습검사+스톤골렘+엘프+보우마스터
+		table.insert(t, self:BuildDeck({
+			{"model://af857ac1-d3ad-4509-b262-6a938c2a717c", 7},
+			{"model://458f195d-0342-4749-98ba-048df77ac36c", 11},
+			{"model://38e49ed8-6867-43d8-bc0f-b469363b3e0a", 13},
+			{"model://f37a2185-c6a9-43b6-90ea-75d69a3305f4", 15},
+			{"model://ecfafcc5-4753-42ad-b097-2db304e47a1d", 16},
+			{"model://23f0df68-18dd-472b-8bcd-82acc77cbd18", 20},
+			{"model://bc285acf-3954-4513-9580-d62748a7dcc2", 22},
+			{"model://98373ed1-27ad-4651-bf0b-60101027095d", 25}
+		}, 11, 20, 1, 2))
+		-- 3: 광신도+1레벨네크+돼지+기사단장+리본돼지+주니어부기+엑스텀프+신궁
+		table.insert(t, self:BuildDeck({
+			{"model://54485d61-c78c-4bb8-b5b8-f6bd51d4633d", 6},
+			{"model://02c5b927-1095-4f34-9d02-9c6252772f52", 12},
+			{"model://3b308c48-d7a0-420c-99bf-502e034642ad", 14},
+			{"model://92cfd1b7-5141-4c0d-bdc7-b18f9d5d9540", 15},
+			{"model://acbba4d1-8524-4ad2-9d8e-ba8b94a7f5e6", 16},
+			{"model://75a4fefc-2255-4b50-bd06-62ca565cfbe9", 21},
+			{"model://542d5bbb-981c-426c-9c84-113195c8f764", 23},
+			{"model://21ada8e1-bc61-4683-8c6a-7105d7a65f9c", 25}
+		}, 11, 20, 1, 2))
+		-- 4: 파란달팽이+신입포병+무사+숲지기+옥토퍼스+와일드보어+크로코+아크메이지
+		table.insert(t, self:BuildDeck({
+			{"model://f2205e74-b8c8-4103-a768-59b58f8e2f55", 4},
+			{"model://87af3002-9559-4a3b-8dcf-716c76dbeb9d", 10},
+			{"model://a26e853b-6aab-4b94-9e4b-da2411d3ff6f", 13},
+			{"model://a07d5ebd-147f-47ac-8924-d7111974d252", 15},
+			{"model://c54b7465-79e2-4b6f-8bd5-be17dd7e4b23", 16},
+			{"model://28b6e793-0c47-490c-80b3-4cb544dfcc33", 20},
+			{"model://3fbdd15a-ffb0-483c-a705-48d79f483390", 21},
+			{"model://cf3e0043-ba97-4491-a906-78595729080b", 24}
+		}, 11, 20, 1, 2))
+		-- 5: 빨간달팽이+도적+체육선생님+달빛검사+창술의달인+성기사+레이스+보우마스터
+		table.insert(t, self:BuildDeck({
+			{"model://af857ac1-d3ad-4509-b262-6a938c2a717c", 7},
+			{"model://9c5ee7b4-2853-4d2c-9037-c9b9c073a030", 12},
+			{"model://63c04242-fe53-4afa-b091-6886e9f5f529", 13},
+			{"model://550c1a50-58cd-4f4f-af95-34fe5186ffaa", 15},
+			{"model://c40c29dd-a9f7-4ecd-9f32-3f4b0706ac21", 16},
+			{"model://3c3f182f-6a9c-44b1-8024-829363f7db7f", 20},
+			{"model://0835a3e4-13ca-47e3-89e1-cc8c0b1de90b", 22},
+			{"model://98373ed1-27ad-4651-bf0b-60101027095d", 25}
+		}, 11, 20, 1, 2))
+		-- 6: 스텀프+카우보이+수습닌자+주황버섯+용궁사+스티지+바이퍼+나이트로드
+		table.insert(t, self:BuildDeck({
+			{"model://62f3f55c-28fa-4151-bb73-39758b57801a", 8},
+			{"model://6c92beb9-b8d9-45a0-914c-881035bd6ad3", 11},
+			{"model://488804eb-2952-48db-aec0-5ee29a3cc05b", 13},
+			{"model://f37a2185-c6a9-43b6-90ea-75d69a3305f4", 15},
+			{"model://eea15330-c5d4-4844-a9d9-f441061ca093", 17},
+			{"model://899a3457-6d13-42ec-a63e-224a9c736047", 20},
+			{"model://1b254db4-577b-423f-b439-3e1b3475991a", 23},
+			{"model://079e4d9b-f128-47ff-bc19-ea9c819925a3", 24}
+		}, 11, 20, 1, 2))
+		-- 7: 스포아+슬라임+화염마스터+페어리+새비지블로우+주니어레이스+주니어그류핀+신궁
+		table.insert(t, self:BuildDeck({
+			{"model://eacb328a-428a-474c-b7e3-cb313b099806", 6},
+			{"model://4a6f379a-312c-4ba4-8837-8b4a2a117b60", 11},
+			{"model://3a424524-731e-48fe-af70-9b9deca66743", 14},
+			{"model://f8e671ed-be6c-4fc5-8b44-71d7feffe832", 15},
+			{"model://6e6759ad-cbd7-4fdf-bee8-7e93bfb37094", 16},
+			{"model://fe2b1082-72ce-49f9-8a40-b0d3f9d881ce", 20},
+			{"model://5f75b966-16c3-4e5b-a99b-85952bdfa3f1", 21},
+			{"model://21ada8e1-bc61-4683-8c6a-7105d7a65f9c", 25}
+		}, 11, 20, 1, 2))
+		-- 8: 달팽이+뒷골목궁수+1레벨네크+주황버섯+수습검사+파란버섯+좀비버섯+아크메이지
+		table.insert(t, self:BuildDeck({
+			{"model://5aac7c14-9173-4d47-96f1-5fc5429e36c4", 4},
+			{"model://85774479-3395-4a3a-92f3-e8e412d54c70", 11},
+			{"model://02c5b927-1095-4f34-9d02-9c6252772f52", 12},
+			{"model://f37a2185-c6a9-43b6-90ea-75d69a3305f4", 15},
+			{"model://ecfafcc5-4753-42ad-b097-2db304e47a1d", 16},
+			{"model://96e0a3c4-6bdc-4618-b484-d336b13d56eb", 20},
+			{"model://2013ef64-7ba9-41ac-8c7d-c740be108dda", 21},
+			{"model://cf3e0043-ba97-4491-a906-78595729080b", 24}
+		}, 11, 20, 1, 2))
+		-- 9: 광신도+신입포병+나이프마스터+길거리파이터+멜러디+주니어샐리온+뿔버섯+나이트로드
+		table.insert(t, self:BuildDeck({
+			{"model://54485d61-c78c-4bb8-b5b8-f6bd51d4633d", 6},
+			{"model://87af3002-9559-4a3b-8dcf-716c76dbeb9d", 10},
+			{"model://38e49ed8-6867-43d8-bc0f-b469363b3e0a", 13},
+			{"model://2023baf4-0bbb-46ce-8b34-5cd26f95a436", 15},
+			{"model://2e2f8b7d-3988-44e6-9939-31b203425f2b", 17},
+			{"model://5bce98b2-45c2-488e-be02-d0c0bd39a788", 20},
+			{"model://d8705644-fa65-4c28-85a1-662101f6cf1f", 22},
+			{"model://079e4d9b-f128-47ff-bc19-ea9c819925a3", 24}
+		}, 11, 20, 1, 2))
+		-- 10: 빨간달팽이+화염마탑주+도적+속사마스터+마권사+와일드보어+러스터픽시+보우마스터
+		table.insert(t, self:BuildDeck({
+			{"model://af857ac1-d3ad-4509-b262-6a938c2a717c", 7},
+			{"model://458f195d-0342-4749-98ba-048df77ac36c", 11},
+			{"model://9c5ee7b4-2853-4d2c-9037-c9b9c073a030", 12},
+			{"model://7f6df940-1b16-441d-b4b2-dc13cce4400b", 15},
+			{"model://5730b7e6-b3cd-40dc-81ef-f635ccc27507", 18},
+			{"model://28b6e793-0c47-490c-80b3-4cb544dfcc33", 20},
+			{"model://ce6a3879-0ad7-47e1-bf7d-921f73c37047", 21},
+			{"model://98373ed1-27ad-4651-bf0b-60101027095d", 25}
+		}, 11, 20, 1, 2))
+	end
+
+	-- ========== Platinum (level 11-25, LB 1-3) ==========
+	@ExecSpace("ServerOnly")
+	method void InitPlatinumDecks()
+		local t = self.deckList.platinum
+		-- 1: 나이프마스터+숲지기+비숍+시그너스+섀도어+나이트로드+아크메이지+소울마스터
+		table.insert(t, self:BuildDeck({
+			{"model://38e49ed8-6867-43d8-bc0f-b469363b3e0a", 13},
+			{"model://a07d5ebd-147f-47ac-8924-d7111974d252", 15},
+			{"model://591e85e8-1e69-4c41-a3c0-9be24579501b", 16},
+			{"model://6194a4e3-0eb4-417a-92b5-891af548b672", 18},
+			{"model://1b2f3059-8050-4791-a358-108c9bf60e26", 19},
+			{"model://079e4d9b-f128-47ff-bc19-ea9c819925a3", 24},
+			{"model://cf3e0043-ba97-4491-a906-78595729080b", 24},
+			{"model://9835b280-7553-451d-bab0-b480c97aeb18", 27}
+		}, 11, 25, 1, 3))
+		-- 2: 화염마탑주+수습검사+용궁사+하이엘프+나이트워커+신궁+초록버섯+플레임위자드
+		table.insert(t, self:BuildDeck({
+			{"model://458f195d-0342-4749-98ba-048df77ac36c", 11},
+			{"model://ecfafcc5-4753-42ad-b097-2db304e47a1d", 16},
+			{"model://eea15330-c5d4-4844-a9d9-f441061ca093", 17},
+			{"model://1723e1d6-066c-413c-8daa-65883ade2aaa", 18},
+			{"model://c1c16e15-b494-4311-a149-1dac36dfdf65", 20},
+			{"model://21ada8e1-bc61-4683-8c6a-7105d7a65f9c", 25},
+			{"model://2ec02ea6-db04-41cc-b279-49fb0531ff3f", 25},
+			{"model://2f0ffaca-fa8d-4d5e-a049-c43e4f5436a5", 30}
+		}, 11, 25, 1, 3))
+		-- 3: 도적+무사+기사단장+창술의달인+마권사+바이퍼+보우마스터+히어로
+		table.insert(t, self:BuildDeck({
+			{"model://9c5ee7b4-2853-4d2c-9037-c9b9c073a030", 12},
+			{"model://a26e853b-6aab-4b94-9e4b-da2411d3ff6f", 13},
+			{"model://92cfd1b7-5141-4c0d-bdc7-b18f9d5d9540", 15},
+			{"model://c40c29dd-a9f7-4ecd-9f32-3f4b0706ac21", 16},
+			{"model://5730b7e6-b3cd-40dc-81ef-f635ccc27507", 18},
+			{"model://1b254db4-577b-423f-b439-3e1b3475991a", 23},
+			{"model://98373ed1-27ad-4651-bf0b-60101027095d", 25},
+			{"model://494916e1-eeaa-4318-b36f-95d40d6c5e91", 31}
+		}, 11, 25, 1, 3))
+		-- 4: 1레벨네크+수습마법사+속사마스터+옥토퍼스+스타픽시+나이트로드+아크메이지+윈드브레이커
+		table.insert(t, self:BuildDeck({
+			{"model://02c5b927-1095-4f34-9d02-9c6252772f52", 12},
+			{"model://03ab7c9d-7c9d-40c9-8835-6086c96a8114", 13},
+			{"model://7f6df940-1b16-441d-b4b2-dc13cce4400b", 15},
+			{"model://c54b7465-79e2-4b6f-8bd5-be17dd7e4b23", 16},
+			{"model://b84c6399-b704-4024-bc5c-c1024ece1f7d", 18},
+			{"model://079e4d9b-f128-47ff-bc19-ea9c819925a3", 24},
+			{"model://cf3e0043-ba97-4491-a906-78595729080b", 24},
+			{"model://d695ed33-e193-4a95-adc3-40b02652be5a", 30}
+		}, 11, 25, 1, 3))
+		-- 5: 뒷골목궁수+나이프마스터+숲지기+비숍+주니어루이넬+성기사+신궁+히어로
+		table.insert(t, self:BuildDeck({
+			{"model://85774479-3395-4a3a-92f3-e8e412d54c70", 11},
+			{"model://38e49ed8-6867-43d8-bc0f-b469363b3e0a", 13},
+			{"model://a07d5ebd-147f-47ac-8924-d7111974d252", 15},
+			{"model://591e85e8-1e69-4c41-a3c0-9be24579501b", 16},
+			{"model://05718f60-94e2-4e4e-99cd-7ce0e200d4eb", 19},
+			{"model://3c3f182f-6a9c-44b1-8024-829363f7db7f", 20},
+			{"model://21ada8e1-bc61-4683-8c6a-7105d7a65f9c", 25},
+			{"model://494916e1-eeaa-4318-b36f-95d40d6c5e91", 31}
+		}, 11, 25, 1, 3))
+		-- 6: 슬라임+화염마스터+달빛검사+수습검사+다크스텀프+나이트워커+루이넬+플레임위자드
+		table.insert(t, self:BuildDeck({
+			{"model://4a6f379a-312c-4ba4-8837-8b4a2a117b60", 11},
+			{"model://3a424524-731e-48fe-af70-9b9deca66743", 14},
+			{"model://550c1a50-58cd-4f4f-af95-34fe5186ffaa", 15},
+			{"model://ecfafcc5-4753-42ad-b097-2db304e47a1d", 16},
+			{"model://aefa4ccd-c6cf-4c37-acc6-87ac97a23036", 18},
+			{"model://c1c16e15-b494-4311-a149-1dac36dfdf65", 20},
+			{"model://43fb504e-5a60-46a0-93d2-7038fe2dc813", 24},
+			{"model://2f0ffaca-fa8d-4d5e-a049-c43e4f5436a5", 30}
+		}, 11, 25, 1, 3))
+		-- 7: 신입포병+체육선생님+주황버섯+새비지블로우+용궁사+엑스텀프+나이트로드+소울마스터
+		table.insert(t, self:BuildDeck({
+			{"model://87af3002-9559-4a3b-8dcf-716c76dbeb9d", 10},
+			{"model://63c04242-fe53-4afa-b091-6886e9f5f529", 13},
+			{"model://f37a2185-c6a9-43b6-90ea-75d69a3305f4", 15},
+			{"model://6e6759ad-cbd7-4fdf-bee8-7e93bfb37094", 16},
+			{"model://eea15330-c5d4-4844-a9d9-f441061ca093", 17},
+			{"model://542d5bbb-981c-426c-9c84-113195c8f764", 23},
+			{"model://079e4d9b-f128-47ff-bc19-ea9c819925a3", 24},
+			{"model://9835b280-7553-451d-bab0-b480c97aeb18", 27}
+		}, 11, 25, 1, 3))
+		-- 8: 카우보이+도적+페어리+리본돼지+하이엘프+콜드아이+보우마스터+라이오너
+		table.insert(t, self:BuildDeck({
+			{"model://6c92beb9-b8d9-45a0-914c-881035bd6ad3", 11},
+			{"model://9c5ee7b4-2853-4d2c-9037-c9b9c073a030", 12},
+			{"model://f8e671ed-be6c-4fc5-8b44-71d7feffe832", 15},
+			{"model://acbba4d1-8524-4ad2-9d8e-ba8b94a7f5e6", 16},
+			{"model://1723e1d6-066c-413c-8daa-65883ade2aaa", 18},
+			{"model://53c0ee20-8399-4751-95ea-3a5d8f4ebe4b", 24},
+			{"model://98373ed1-27ad-4651-bf0b-60101027095d", 25},
+			{"model://6ab75f83-cb09-4878-80cd-f8ae2cabfa38", 30}
+		}, 11, 25, 1, 3))
+		-- 9: 수습닌자+숲지기+비숍+루나픽시+주니어샐리온+바이퍼+아크메이지+다크스톤골렘
+		table.insert(t, self:BuildDeck({
+			{"model://488804eb-2952-48db-aec0-5ee29a3cc05b", 13},
+			{"model://a07d5ebd-147f-47ac-8924-d7111974d252", 15},
+			{"model://591e85e8-1e69-4c41-a3c0-9be24579501b", 16},
+			{"model://8e47f0ec-0f51-4c14-9d64-6297405eb60d", 19},
+			{"model://5bce98b2-45c2-488e-be02-d0c0bd39a788", 20},
+			{"model://1b254db4-577b-423f-b439-3e1b3475991a", 23},
+			{"model://cf3e0043-ba97-4491-a906-78595729080b", 24},
+			{"model://2e70488f-dc60-48d0-ad91-fd2dc035a7c6", 29}
+		}, 11, 25, 1, 3))
+		-- 10: 화염마탑주+1레벨네크+기사단장+마권사+섀도어+나이트로드+신궁+히어로
+		table.insert(t, self:BuildDeck({
+			{"model://458f195d-0342-4749-98ba-048df77ac36c", 11},
+			{"model://02c5b927-1095-4f34-9d02-9c6252772f52", 12},
+			{"model://92cfd1b7-5141-4c0d-bdc7-b18f9d5d9540", 15},
+			{"model://5730b7e6-b3cd-40dc-81ef-f635ccc27507", 18},
+			{"model://1b2f3059-8050-4791-a358-108c9bf60e26", 19},
+			{"model://079e4d9b-f128-47ff-bc19-ea9c819925a3", 24},
+			{"model://21ada8e1-bc61-4683-8c6a-7105d7a65f9c", 25},
+			{"model://494916e1-eeaa-4318-b36f-95d40d6c5e91", 31}
+		}, 11, 25, 1, 3))
+	end
+
+	-- ========== Diamond (level 20-30, LB 2-4) ==========
+	@ExecSpace("ServerOnly")
+	method void InitDiamondDecks()
+		local t = self.deckList.diamond
+		-- 1: (CSV 인기1위 변형) 나이트로드+신궁+플레임위자드+나이프마스터+히어로+숲지기+스켈레톤지휘관+아크메이지
+		table.insert(t, self:BuildDeck({
+			{"model://079e4d9b-f128-47ff-bc19-ea9c819925a3", 24},
+			{"model://21ada8e1-bc61-4683-8c6a-7105d7a65f9c", 25},
+			{"model://2f0ffaca-fa8d-4d5e-a049-c43e4f5436a5", 30},
+			{"model://38e49ed8-6867-43d8-bc0f-b469363b3e0a", 13},
+			{"model://494916e1-eeaa-4318-b36f-95d40d6c5e91", 31},
+			{"model://a07d5ebd-147f-47ac-8924-d7111974d252", 15},
+			{"model://a3d86841-acfb-4fad-9305-81b669deb919", 21},
+			{"model://cf3e0043-ba97-4491-a906-78595729080b", 24}
+		}, 20, 30, 2, 4))
+		-- 2: (CSV 인기2위) 나이트로드+섀도어+플레임위자드+히어로+팔라딘+비숍+나이트워커+아크메이지
+		table.insert(t, self:BuildDeck({
+			{"model://079e4d9b-f128-47ff-bc19-ea9c819925a3", 24},
+			{"model://1b2f3059-8050-4791-a358-108c9bf60e26", 19},
+			{"model://2f0ffaca-fa8d-4d5e-a049-c43e4f5436a5", 30},
+			{"model://494916e1-eeaa-4318-b36f-95d40d6c5e91", 31},
+			{"model://4bceb5e7-5fc1-4768-b152-63ba57a12101", 36},
+			{"model://591e85e8-1e69-4c41-a3c0-9be24579501b", 16},
+			{"model://c1c16e15-b494-4311-a149-1dac36dfdf65", 20},
+			{"model://cf3e0043-ba97-4491-a906-78595729080b", 24}
+		}, 20, 30, 2, 4))
+		-- 3: 비숍+나이트워커+섀도어+나이트로드+플레임위자드+소울마스터+윈드브레이커+히어로
+		table.insert(t, self:BuildDeck({
+			{"model://591e85e8-1e69-4c41-a3c0-9be24579501b", 16},
+			{"model://c1c16e15-b494-4311-a149-1dac36dfdf65", 20},
+			{"model://1b2f3059-8050-4791-a358-108c9bf60e26", 19},
+			{"model://079e4d9b-f128-47ff-bc19-ea9c819925a3", 24},
+			{"model://2f0ffaca-fa8d-4d5e-a049-c43e4f5436a5", 30},
+			{"model://9835b280-7553-451d-bab0-b480c97aeb18", 27},
+			{"model://d695ed33-e193-4a95-adc3-40b02652be5a", 30},
+			{"model://494916e1-eeaa-4318-b36f-95d40d6c5e91", 31}
+		}, 20, 30, 2, 4))
+		-- 4: 숲지기+시그너스+나이트로드+아크메이지+신궁+소울마스터+플레임위자드+팔라딘
+		table.insert(t, self:BuildDeck({
+			{"model://a07d5ebd-147f-47ac-8924-d7111974d252", 15},
+			{"model://6194a4e3-0eb4-417a-92b5-891af548b672", 18},
+			{"model://079e4d9b-f128-47ff-bc19-ea9c819925a3", 24},
+			{"model://cf3e0043-ba97-4491-a906-78595729080b", 24},
+			{"model://21ada8e1-bc61-4683-8c6a-7105d7a65f9c", 25},
+			{"model://9835b280-7553-451d-bab0-b480c97aeb18", 27},
+			{"model://2f0ffaca-fa8d-4d5e-a049-c43e4f5436a5", 30},
+			{"model://4bceb5e7-5fc1-4768-b152-63ba57a12101", 36}
+		}, 20, 30, 2, 4))
+		-- 5: 나이프마스터+비숍+섀도어+바이퍼+나이트로드+보우마스터+히어로+타우로마시스
+		table.insert(t, self:BuildDeck({
+			{"model://38e49ed8-6867-43d8-bc0f-b469363b3e0a", 13},
+			{"model://591e85e8-1e69-4c41-a3c0-9be24579501b", 16},
+			{"model://1b2f3059-8050-4791-a358-108c9bf60e26", 19},
+			{"model://1b254db4-577b-423f-b439-3e1b3475991a", 23},
+			{"model://079e4d9b-f128-47ff-bc19-ea9c819925a3", 24},
+			{"model://98373ed1-27ad-4651-bf0b-60101027095d", 25},
+			{"model://494916e1-eeaa-4318-b36f-95d40d6c5e91", 31},
+			{"model://8f5cf161-d65c-46c9-aadd-86344a6d5ca0", 34}
+		}, 20, 30, 2, 4))
+		-- 6: 도적+숲지기+나이트워커+나이트로드+아크메이지+신궁+플레임위자드+히어로
+		table.insert(t, self:BuildDeck({
+			{"model://9c5ee7b4-2853-4d2c-9037-c9b9c073a030", 12},
+			{"model://a07d5ebd-147f-47ac-8924-d7111974d252", 15},
+			{"model://c1c16e15-b494-4311-a149-1dac36dfdf65", 20},
+			{"model://079e4d9b-f128-47ff-bc19-ea9c819925a3", 24},
+			{"model://cf3e0043-ba97-4491-a906-78595729080b", 24},
+			{"model://21ada8e1-bc61-4683-8c6a-7105d7a65f9c", 25},
+			{"model://2f0ffaca-fa8d-4d5e-a049-c43e4f5436a5", 30},
+			{"model://494916e1-eeaa-4318-b36f-95d40d6c5e91", 31}
+		}, 20, 30, 2, 4))
+		-- 7: 수습검사+비숍+하이엘프+섀도어+콜드아이+소울마스터+윈드브레이커+팔라딘
+		table.insert(t, self:BuildDeck({
+			{"model://ecfafcc5-4753-42ad-b097-2db304e47a1d", 16},
+			{"model://591e85e8-1e69-4c41-a3c0-9be24579501b", 16},
+			{"model://1723e1d6-066c-413c-8daa-65883ade2aaa", 18},
+			{"model://1b2f3059-8050-4791-a358-108c9bf60e26", 19},
+			{"model://53c0ee20-8399-4751-95ea-3a5d8f4ebe4b", 24},
+			{"model://9835b280-7553-451d-bab0-b480c97aeb18", 27},
+			{"model://d695ed33-e193-4a95-adc3-40b02652be5a", 30},
+			{"model://4bceb5e7-5fc1-4768-b152-63ba57a12101", 36}
+		}, 20, 30, 2, 4))
+		-- 8: 나이프마스터+숲지기+시그너스+나이트로드+보우마스터+그류핀+플레임위자드+히어로
+		table.insert(t, self:BuildDeck({
+			{"model://38e49ed8-6867-43d8-bc0f-b469363b3e0a", 13},
+			{"model://a07d5ebd-147f-47ac-8924-d7111974d252", 15},
+			{"model://6194a4e3-0eb4-417a-92b5-891af548b672", 18},
+			{"model://079e4d9b-f128-47ff-bc19-ea9c819925a3", 24},
+			{"model://98373ed1-27ad-4651-bf0b-60101027095d", 25},
+			{"model://9e589fd3-451b-41b2-9e99-8645e6c33df1", 27},
+			{"model://2f0ffaca-fa8d-4d5e-a049-c43e4f5436a5", 30},
+			{"model://494916e1-eeaa-4318-b36f-95d40d6c5e91", 31}
+		}, 20, 30, 2, 4))
+		-- 9: 화염마탑주+비숍+바이퍼+나이트로드+아크메이지+신궁+라이오너+팔라딘
+		table.insert(t, self:BuildDeck({
+			{"model://458f195d-0342-4749-98ba-048df77ac36c", 11},
+			{"model://591e85e8-1e69-4c41-a3c0-9be24579501b", 16},
+			{"model://1b254db4-577b-423f-b439-3e1b3475991a", 23},
+			{"model://079e4d9b-f128-47ff-bc19-ea9c819925a3", 24},
+			{"model://cf3e0043-ba97-4491-a906-78595729080b", 24},
+			{"model://21ada8e1-bc61-4683-8c6a-7105d7a65f9c", 25},
+			{"model://6ab75f83-cb09-4878-80cd-f8ae2cabfa38", 30},
+			{"model://4bceb5e7-5fc1-4768-b152-63ba57a12101", 36}
+		}, 20, 30, 2, 4))
+		-- 10: 수습마법사+나이트워커+섀도어+나이트로드+아크메이지+초록버섯+플레임위자드+히어로
+		table.insert(t, self:BuildDeck({
+			{"model://03ab7c9d-7c9d-40c9-8835-6086c96a8114", 13},
+			{"model://c1c16e15-b494-4311-a149-1dac36dfdf65", 20},
+			{"model://1b2f3059-8050-4791-a358-108c9bf60e26", 19},
+			{"model://079e4d9b-f128-47ff-bc19-ea9c819925a3", 24},
+			{"model://cf3e0043-ba97-4491-a906-78595729080b", 24},
+			{"model://2ec02ea6-db04-41cc-b279-49fb0531ff3f", 25},
+			{"model://2f0ffaca-fa8d-4d5e-a049-c43e4f5436a5", 30},
+			{"model://494916e1-eeaa-4318-b36f-95d40d6c5e91", 31}
+		}, 20, 30, 2, 4))
+	end
+
+	-- ========== 닉네임 풀 (티어별 10개) ==========
+	@ExecSpace("ServerOnly")
+	method void InitNicknames()
+		self.nicknamePool = {
+			bronze = {
+				"헤네시스초보", "달팽이사냥꾼", "첫모험가", "메이플신입", "수습전사",
+				"초보법사", "새내기도적", "견습궁수", "메린이", "레벨업중"
+			},
+			silver = {
+				"은빛검사", "페리온전사", "커닝도적", "엘나스마법사", "리스항구모험가",
+				"주황버섯헌터", "실버메이플", "중수전사", "사냥터정복자", "메린이탈출"
+			},
+			gold = {
+				"황금기사", "골드메이플", "루디브리엄정복", "마왕성정복자", "고수모험가",
+				"전직완료", "빛나는영웅", "골드스킬러", "금빛화살", "스킬마스터"
+			},
+			platinum = {
+				"플래티넘히어로", "전설의모험가", "시그너스기사", "에레브의전사", "마스터워리어",
+				"소울의검", "엘프의왕", "아크메이지급", "고대의수호자", "플래티넘소울"
+			},
+			diamond = {
+				"다이아히어로", "랭커", "최강전사", "PvP제왕", "무적의영웅",
+				"챔피언", "킹오브메이플", "신화급전사", "메이플레전드", "궁극의마스터"
+			}
+		}
+	end
+
+	-- ========== 시너지 계산 (기존 유지) ==========
 	@ExecSpace("ServerOnly")
 	method table ComputeDummySynergy(table deck)
 		local countMap = {}
@@ -125,26 +670,49 @@ script pvpDummyDeckService extends Logic
 		return countMap
 	end
 
+	-- ========== 티어 판정 ==========
 	@ExecSpace("ServerOnly")
-	method table GetDummyDeck()
-		if #self.deckList == 0 then
-			self:InitDecks()
+	method string GetTierNameFromScore(integer score)
+		if score >= _pvpRankingService.dia then
+			return "diamond"
+		elseif score >= _pvpRankingService.platinum then
+			return "platinum"
+		elseif score >= _pvpRankingService.gold then
+			return "gold"
+		elseif score >= _pvpRankingService.silver then
+			return "silver"
 		end
-
-		local index = math.random(1, #self.deckList)
-		return self.deckList[index]
+		return "bronze"
 	end
 
+	-- ========== 티어별 덱 반환 ==========
 	@ExecSpace("ServerOnly")
-	method table GetDummyDeckByIndex(integer index)
-		if #self.deckList == 0 then
+	method table GetDummyDeckByTier(string tierName)
+		local tierDecks = self.deckList[tierName]
+		if tierDecks == nil or #tierDecks == 0 then
 			self:InitDecks()
+			tierDecks = self.deckList[tierName]
+			if tierDecks == nil or #tierDecks == 0 then
+				tierDecks = self.deckList.bronze
+			end
 		end
+		local index = math.random(1, #tierDecks)
+		return tierDecks[index]
+	end
 
-		if index < 1 or index > #self.deckList then
-			index = 1
+	-- ========== 티어별 닉네임 반환 ==========
+	@ExecSpace("ServerOnly")
+	method string GetRandomNicknameByTier(string tierName)
+		local names = self.nicknamePool[tierName]
+		if names == nil or #names == 0 then
+			self:InitNicknames()
+			names = self.nicknamePool[tierName]
+			if names == nil or #names == 0 then
+				return "MapleBot"
+			end
 		end
-		return self.deckList[index]
+		local index = math.random(1, #names)
+		return names[index]
 	end
 
 end
