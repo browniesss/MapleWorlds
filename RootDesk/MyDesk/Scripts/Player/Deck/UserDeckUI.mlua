@@ -116,6 +116,15 @@ script UserDeckUI extends Component
 
 			self.deckItems[i].DeckItem:Init(unitData, skillData)
 		end
+
+		-- 시너지 UI 업데이트
+		local synergy = {}
+		if self.activeDeckType == "offense" then
+			synergy = user.pvpUserComponent.offense_synergy or {}
+		else
+			synergy = user.pvpUserComponent.defense_synergy or {}
+		end
+		self:UpdateSynergyUI(synergy)
 	end
 
 	method void OnOffenseTabClick(Entity entity)
@@ -199,6 +208,9 @@ script UserDeckUI extends Component
 		if saveButtonText ~= nil then
 			saveButtonText.TextComponent.Text = "편성 저장"
 		end
+
+		-- 시너지 UI 원복
+		self:RestoreSynergyUI()
 	end
 
 	method void OpenOpponentDeckUI(table deckData)
@@ -271,6 +283,26 @@ script UserDeckUI extends Component
 			end
 			local skillData = _SkillService:GetSkillByIDFromClient(buffedUnit.skillID)
 			self.deckItems[i].DeckItem:Init(buffedUnit, skillData)
+		end
+
+		-- 상대 시너지 UI 업데이트
+		local synergy = deckData.defense_synergy or {}
+		self:UpdateSynergyUI(synergy)
+	end
+
+	method void UpdateSynergyUI(table synergy)
+		local synergyUI = _EntityService:GetEntityByPath("/ui/SynergyUI")
+		if synergyUI ~= nil then
+			synergyUI.Enable = true
+			synergyUI.Visible = true
+			synergyUI.SynergyUIManager:SetSynergyItemFromData(synergy)
+		end
+	end
+
+	method void RestoreSynergyUI()
+		local synergyUI = _EntityService:GetEntityByPath("/ui/SynergyUI")
+		if synergyUI ~= nil then
+			synergyUI.SynergyUIManager:SetSynergyItem()
 		end
 	end
 

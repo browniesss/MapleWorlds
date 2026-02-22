@@ -37,9 +37,20 @@ script pvpMatcherMakerComponent extends Component
 					nickname = dummyNames[i] or ("MapleBot_" .. i),
 					isDummy = true,
 					defense_deck = {},
-					unitInfo = {}
+					unitInfo = {},
+					deckIndex = math.random(1, 4)
 				}
 				table.insert(tierPool, dummyUser)
+			end
+		end
+
+		-- 실제 유저에 닉네임 설정
+		for _, u in ipairs(tierPool) do
+			if not (u.isDummy or false) then
+				local nickname = _pvpRankingService:GetNickname(u.uid)
+				if nickname ~= nil then
+					u.nickname = nickname
+				end
 			end
 		end
 
@@ -89,6 +100,7 @@ script pvpMatcherMakerComponent extends Component
 			local targetData = _pvpUserService:GetUserData(target.uid)
 			if targetData.code == 0 then
 				deckData.defense_deck = targetData.defense_deck or {}
+				deckData.defense_synergy = targetData.defense_synergy or {}
 			end
 
 			-- 상대 유닛 데이터 일괄 조회 (level, limitBreak)
@@ -143,9 +155,10 @@ script pvpMatcherMakerComponent extends Component
 				end
 			end
 		else
-			local dummyDeck = _pvpDummyDeckService:GetDummyDeck()
+			local dummyDeck = _pvpDummyDeckService:GetDummyDeckByIndex(target.deckIndex or 1)
 			deckData.defense_deck = dummyDeck.defense_deck
 			deckData.unitInfo = dummyDeck.unitInfo
+			deckData.defense_synergy = dummyDeck.defense_synergy or {}
 		end
 
 		self:FetchOpponentDeckBack(deckData)
@@ -205,8 +218,8 @@ script pvpMatcherMakerComponent extends Component
 			end
 			matchData.unitInfo = unitInfo
 		else
-			-- 더미 유저인 경우 pvpDummyDeckService에서 덱 가져오기
-			local dummyDeck = _pvpDummyDeckService:GetDummyDeck()
+			-- 더미 유저인 경우 고정된 덱 인덱스 사용
+			local dummyDeck = _pvpDummyDeckService:GetDummyDeckByIndex(target.deckIndex or 1)
 			matchData.defense_deck = dummyDeck.defense_deck
 			matchData.unitInfo = dummyDeck.unitInfo
 		end

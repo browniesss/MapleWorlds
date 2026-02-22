@@ -260,7 +260,7 @@ script PvPLobbyUI extends Component
 					-- 닉네임
 					local nameText = slot.Children[1]
 					if nameText ~= nil then
-						nameText.TextComponent.Text = info.nickname or info.uid or "???"
+						nameText.TextComponent.Text = info.nickname or "???"
 					end
 
 					-- 점수

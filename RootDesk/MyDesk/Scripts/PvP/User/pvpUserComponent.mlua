@@ -57,6 +57,12 @@ script pvpUserComponent extends Component
 		self.defense_synergy = data.defense_synergy
 		self.dataLoaded = true
 
+		-- 닉네임 캐시 등록
+		local userEntity = _UserService:GetUserEntityByUserId(senderUserId)
+		if userEntity ~= nil and userEntity.PlayerComponent ~= nil then
+			_pvpRankingService:RegisterNickname(senderUserId, userEntity.PlayerComponent.Nickname)
+		end
+
 		-- 공격덱/방어덱이 비어있으면 노멀 스테이지 덱을 복사
 		local offenseEmpty = self:IsDeckEmpty(self.offense_deck)
 		local defenseEmpty = self:IsDeckEmpty(self.defense_deck)

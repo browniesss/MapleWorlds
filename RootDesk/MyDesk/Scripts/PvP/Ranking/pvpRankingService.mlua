@@ -82,6 +82,18 @@ script pvpRankingService extends Logic
 		}
 	end
 
+	property table nicknameMap = {}
+
+	@ExecSpace("ServerOnly")
+	method void RegisterNickname(string uid, string nickname)
+		self.nicknameMap[uid] = nickname
+	end
+
+	@ExecSpace("ServerOnly")
+	method string GetNickname(string uid)
+		return self.nicknameMap[uid]
+	end
+
 	@ExecSpace("ServerOnly")
 	method table GetUserListByTier(integer userScore)
 		local min = 0
