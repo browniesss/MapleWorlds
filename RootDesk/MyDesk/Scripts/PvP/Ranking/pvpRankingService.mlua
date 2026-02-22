@@ -15,6 +15,8 @@ script pvpRankingService extends Logic
 
 	property integer dia = 400
 
+	property integer TOP_50_LIMIT = 50
+
 	@ExecSpace("ServerOnly")
 	method integer UpdateTable()
 		local nowTs = DateTime.UtcNow.Elapsed
@@ -92,6 +94,24 @@ script pvpRankingService extends Logic
 	@ExecSpace("ServerOnly")
 	method string GetNickname(string uid)
 		return self.nicknameMap[uid]
+	end
+
+	@ExecSpace("ServerOnly")
+	method table GetTop50WithNicknames()
+		self:UpdateTable()
+		local top50 = {}
+		local limit = math.min(self.TOP_50_LIMIT, #self.RANK_LIST)
+		for i = 1, limit do
+			local entry = self.RANK_LIST[i]
+			local nickname = self:GetNickname(entry.uid)
+			top50[#top50 + 1] = {
+				uid = entry.uid,
+				score = entry.score,
+				rank = entry.rank,
+				nickname = nickname or entry.uid
+			}
+		end
+		return top50
 	end
 
 	@ExecSpace("ServerOnly")
