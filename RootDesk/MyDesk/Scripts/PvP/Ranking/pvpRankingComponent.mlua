@@ -11,29 +11,35 @@ script pvpRankingComponent extends Component
 	method void GetRankingInfoCall()
 		_ProtocolService:CommonCall(senderUserId)
 
-		if #_pvpRankingService.RANK_LIST > 0 then
-			self:GetRankingInfoBack(_pvpRankingService.RANK_LIST)
-			return
-		end
+		local top50 = _pvpRankingService:GetTop50WithNicknames()
 
-		_pvpRankingService:UpdateTable()
-
-		self:GetRankingInfoBack(_pvpRankingService.RANK_LIST)
-	end
-
-	@ExecSpace("Client")
-	method void GetRankingInfoBack(table res)
-		self.ranking_list = res
-		for rank, info in ipairs(self.ranking_list) do
-			if info.uid == _UserService.LocalPlayer.PlayerComponent.UserId then
-				self.score = info.score
-				self.rank = rank
+		local myRank = 0
+		local myScore = 0
+		for _, info in ipairs(_pvpRankingService.RANK_LIST) do
+			if info.uid == senderUserId then
+				myRank = info.rank
+				myScore = info.score
 				break
 			end
 		end
+
+		self:GetRankingInfoBack(top50, myRank, myScore)
+	end
+
+	@ExecSpace("Client")
+	method void GetRankingInfoBack(table res, integer myRank, integer myScore)
+		self.ranking_list = res
+		self.rank = myRank
+		self.score = myScore
+
 		local pvpLobbyUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI")
 		if pvpLobbyUI ~= nil and pvpLobbyUI.PvPLobbyUI ~= nil then
 			pvpLobbyUI.PvPLobbyUI:UpdateScoreDisplay()
+		end
+
+		local pvpRankingUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI")
+		if pvpRankingUI ~= nil and pvpRankingUI.PvPRankingUI ~= nil then
+			pvpRankingUI.PvPRankingUI:UpdateUI()
 		end
 	end
 

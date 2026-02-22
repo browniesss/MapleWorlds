@@ -19,6 +19,7 @@ script NPCClickHandler extends Component
 			self.targetUIEntity.Visible = true
 			if self.targetUIEntity.PvPLobbyUI ~= nil then
 				self.targetUIEntity.PvPLobbyUI:OnRefreshButtonClick()
+			self.targetUIEntity.PvPLobbyUI:RefreshRankingData()
 			end
 		end
 	end

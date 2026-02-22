@@ -324,7 +324,7 @@ script pvpCombatComponent extends Component
 			pvpResultUI.Enable = true
 			pvpResultUI.Visible = true
 			if pvpResultUI.PvPResultUI ~= nil then
-				pvpResultUI.PvPResultUI:ShowResult(isWin, deltaScore, newScore)
+				pvpResultUI.PvPResultUI:ShowResult(isWin, deltaScore, newScore, 0)
 			end
 		end
 	end

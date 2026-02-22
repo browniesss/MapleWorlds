@@ -1,17 +1,11 @@
 @Component
 script PvPRankingUI extends Component
 
-	property Entity rankListParent = nil
-
-	property Entity myRankText = nil
-
-	property Entity myScoreText = nil
-
-	property Entity myTierText = nil
-
 	property Entity closeButton = nil
 
 	property any closeHandler = nil
+
+	property table rankItems = {}
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
@@ -32,21 +26,34 @@ script PvPRankingUI extends Component
 	end
 
 	@ExecSpace("ClientOnly")
-	method void RefreshRanking()
-		local user = _UserService.LocalPlayer
-		if user == nil then
+	method void EnsureItemsSpawned()
+		if #self.rankItems > 0 then
 			return
 		end
-		
-		-- 랭킹 데이터 요청
-		if user.pvpRankingComponent ~= nil then
-			user.pvpRankingComponent:GetRankingInfoCall()
+
+		local rankingListUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI/Window/RankingListUI")
+		if rankingListUI == nil then
+			return
 		end
-		
-		-- 약간의 딜레이 후 UI 업데이트
-		_TimerService:SetTimerOnce(function()
-			self:UpdateUI()
-		end, 0.5)
+
+		local scrollContainer = rankingListUI.Children[1]
+		if scrollContainer == nil or #scrollContainer.Children == 0 then
+			return
+		end
+
+		local templateItem = scrollContainer.Children[1]
+		self.rankItems[1] = templateItem
+
+		for i = 2, 50 do
+			local rankItem = _SpawnService:SpawnByEntity(
+				templateItem,
+				string.format("PvPRankItem_%d", i),
+				templateItem.TransformComponent.Position,
+				scrollContainer,
+				true
+			)
+			self.rankItems[i] = rankItem
+		end
 	end
 
 	@ExecSpace("ClientOnly")
@@ -55,67 +62,55 @@ script PvPRankingUI extends Component
 		if user == nil or user.pvpRankingComponent == nil then
 			return
 		end
-		
+
+		self:EnsureItemsSpawned()
+
 		local rankComp = user.pvpRankingComponent
-		
-		-- 내 정보 표시
-		if self.myRankText ~= nil then
-			if rankComp.rank > 0 then
-				self.myRankText.TextComponent.Text = "#" .. tostring(rankComp.rank)
+		local rankList = rankComp.ranking_list
+		local userId = user.PlayerComponent.UserId
+		local userName = user.PlayerComponent.Nickname
+
+		-- 랭킹 아이템 업데이트 (MatrixRankingItem 사용)
+		for i, rankItem in ipairs(self.rankItems) do
+			if rankItem.MatrixRankingItem == nil then
+				continue
+			end
+			if i <= #rankList then
+				local info = rankList[i]
+				local name = info.nickname or info.uid or ""
+				rankItem.MatrixRankingItem:Init(tostring(info.rank or i), name, info.score or 0)
+				if info.uid == userId then
+					rankItem.MatrixRankingItem:SetUserFrame()
+				end
 			else
-				self.myRankText.TextComponent.Text = "-"
+				rankItem.MatrixRankingItem:Hide()
 			end
 		end
-		
-		if self.myScoreText ~= nil then
-			self.myScoreText.TextComponent.Text = tostring(rankComp.score)
+
+		-- 플레이어 랭킹 (하단 UserMatrixRank → RankItem의 MatrixRankingItem)
+		local rankingListUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI/Window/RankingListUI")
+		if rankingListUI == nil then
+			return
 		end
-		
-		if self.myTierText ~= nil then
-			self.myTierText.TextComponent.Text = self:GetTierName(rankComp.score)
-		end
-		
-		-- 순위 리스트 표시
-		if self.rankListParent ~= nil then
-			local rankList = rankComp.ranking_list
-			for i, child in ipairs(self.rankListParent.Children) do
-				if i <= #rankList then
-					local info = rankList[i]
-					child.Enable = true
-					child.Visible = true
-		
-					-- 순위
-					local rankText = child.Children[1]
-					if rankText ~= nil then
-						rankText.TextComponent.Text = tostring(info.rank or i)
-					end
-		
-					-- 닉네임/UID
-					local nameText = child.Children[2]
-					if nameText ~= nil then
-						nameText.TextComponent.Text = info.uid or ""
-					end
-		
-					-- 점수
-					local scoreText = child.Children[3]
-					if scoreText ~= nil then
-						scoreText.TextComponent.Text = tostring(info.score or 0)
-					end
-		
-					-- 티어
-					local tierText = child.Children[4]
-					if tierText ~= nil then
-						tierText.TextComponent.Text = self:GetTierName(info.score or 0)
-					end
-				else
-					child.Enable = false
-					child.Visible = false
+
+		local userMatrixRank = rankingListUI:GetChildByName("UserMatrixRank")
+		if userMatrixRank ~= nil then
+			local userRankItem = userMatrixRank:GetChildByName("RankItem")
+			if userRankItem ~= nil and userRankItem.MatrixRankingItem ~= nil then
+				local rankStr = "50+"
+				if rankComp.rank > 0 then
+					rankStr = tostring(rankComp.rank)
 				end
+				userRankItem.MatrixRankingItem:Init(rankStr, userName, rankComp.score)
+				userRankItem.MatrixRankingItem:SetUserFrame()
 			end
 		end
 	end
 
-	method string GetTierName(integer score)
+	method string GetTierName(integer score, integer rank)
+		if rank >= 1 and rank <= _pvpRankingService.TOP_50_LIMIT then
+			return "Red"
+		end
 		if score >= _pvpRankingService.dia then
 			return "Diamond"
 		elseif score >= _pvpRankingService.platinum then

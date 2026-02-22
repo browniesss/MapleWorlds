@@ -29,7 +29,7 @@ script PvPResultUI extends Component
 	end
 
 	@ExecSpace("ClientOnly")
-	method void ShowResult(boolean isWin, integer deltaScore, integer newScore)
+	method void ShowResult(boolean isWin, integer deltaScore, integer newScore, integer newRank)
 		self:ClearHandlers()
 
 		-- 승리/패배 타이틀
@@ -57,7 +57,7 @@ script PvPResultUI extends Component
 
 		-- 티어 표시
 		if self.tierText ~= nil then
-			self.tierText.TextComponent.Text = self:GetTierName(newScore)
+			self.tierText.TextComponent.Text = self:GetTierName(newScore, newRank)
 		end
 
 		-- 리트라이 버튼 숨기기
@@ -131,10 +131,16 @@ script PvPResultUI extends Component
 		if pvpLobbyUI ~= nil then
 			pvpLobbyUI.Enable = true
 			pvpLobbyUI.Visible = true
+			if pvpLobbyUI.PvPLobbyUI ~= nil then
+				pvpLobbyUI.PvPLobbyUI:RefreshRankingData()
+			end
 		end
 	end
 
-	method string GetTierName(integer score)
+	method string GetTierName(integer score, integer rank)
+		if rank >= 1 and rank <= _pvpRankingService.TOP_50_LIMIT then
+			return "Red"
+		end
 		if score >= _pvpRankingService.dia then
 			return "Diamond"
 		elseif score >= _pvpRankingService.platinum then

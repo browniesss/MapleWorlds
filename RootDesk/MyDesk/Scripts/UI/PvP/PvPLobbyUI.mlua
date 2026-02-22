@@ -226,6 +226,14 @@ script PvPLobbyUI extends Component
 	end
 
 	@ExecSpace("ClientOnly")
+	method void RefreshRankingData()
+		local user = _UserService.LocalPlayer
+		if user ~= nil and user.pvpRankingComponent ~= nil then
+			user.pvpRankingComponent:GetRankingInfoCall()
+		end
+	end
+
+	@ExecSpace("ClientOnly")
 	method void UpdateScoreDisplay()
 		if self.scoreText == nil then
 			return
@@ -234,7 +242,8 @@ script PvPLobbyUI extends Component
 		local user = _UserService.LocalPlayer
 		if user ~= nil and user.pvpRankingComponent ~= nil then
 			local score = user.pvpRankingComponent.score
-			local tier = self:GetTierName(score)
+			local rank = user.pvpRankingComponent.rank
+			local tier = self:GetTierName(score, rank)
 			self.scoreText.TextComponent.Text = tier .. " (" .. tostring(score) .. ")"
 		end
 	end
@@ -402,7 +411,10 @@ script PvPLobbyUI extends Component
 		deckPanel.UserDeckUI:OpenOpponentDeckUI(deckData)
 	end
 
-	method string GetTierName(integer score)
+	method string GetTierName(integer score, integer rank)
+		if rank >= 1 and rank <= _pvpRankingService.TOP_50_LIMIT then
+			return "Red"
+		end
 		if score >= _pvpRankingService.dia then
 			return "Diamond"
 		elseif score >= _pvpRankingService.platinum then
