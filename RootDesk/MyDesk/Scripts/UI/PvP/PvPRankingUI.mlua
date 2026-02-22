@@ -76,7 +76,14 @@ script PvPRankingUI extends Component
 				if rankItem.MatrixRankingItem ~= nil then
 					local info = rankList[i]
 					local name = info.nickname or info.uid or ""
-					rankItem.MatrixRankingItem:Init(tostring(info.rank or i), name, info.score or 0)
+					local score = info.score or 0
+					local rank = info.rank or i
+					local tier = self:GetTierName(score, rank)
+					rankItem.MatrixRankingItem:Init(tostring(rank), name, score)
+					-- 점수 옆에 티어 표시
+					if rankItem.MatrixRankingItem.scoreText ~= nil and rankItem.MatrixRankingItem.scoreText.TextComponent ~= nil then
+						rankItem.MatrixRankingItem.scoreText.TextComponent.Text = tier .. " (" .. tostring(score) .. ")"
+					end
 					if info.uid == userId then
 						rankItem.MatrixRankingItem:SetUserFrame()
 					end
@@ -105,14 +112,18 @@ script PvPRankingUI extends Component
 				if rankComp.rank > 0 then
 					rankStr = tostring(rankComp.rank)
 				end
+				local myTier = self:GetTierName(rankComp.score, rankComp.rank)
 				userRankItem.MatrixRankingItem:Init(rankStr, userName, rankComp.score)
+				if userRankItem.MatrixRankingItem.scoreText ~= nil and userRankItem.MatrixRankingItem.scoreText.TextComponent ~= nil then
+					userRankItem.MatrixRankingItem.scoreText.TextComponent.Text = myTier .. " (" .. tostring(rankComp.score) .. ")"
+				end
 				userRankItem.MatrixRankingItem:SetUserFrame()
 			end
 		end
 	end
 
 	method string GetTierName(integer score, integer rank)
-		if rank >= 1 and rank <= _pvpRankingService.TOP_50_LIMIT then
+		if rank >= 1 and rank <= _pvpRankingService.TOP_50_LIMIT and score >= _pvpRankingService.dia then
 			return "Red"
 		end
 		if score >= _pvpRankingService.dia then

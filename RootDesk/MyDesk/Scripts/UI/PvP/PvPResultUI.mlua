@@ -138,7 +138,7 @@ script PvPResultUI extends Component
 	end
 
 	method string GetTierName(integer score, integer rank)
-		if rank >= 1 and rank <= _pvpRankingService.TOP_50_LIMIT then
+		if rank >= 1 and rank <= _pvpRankingService.TOP_50_LIMIT and score >= _pvpRankingService.dia then
 			return "Red"
 		end
 		if score >= _pvpRankingService.dia then
