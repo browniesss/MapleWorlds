@@ -9,7 +9,8 @@ script Epic_Adventure extends SkillParent
 		_EffectService:PlayEffectAttached("89dc8084a49143eeaaefd7c9969aa9b8", player, Vector3(0, 0, 0) , 0, Vector3.one)
 		
 		local allyListParent
-		if self.caster.Unit.isEnemy then
+		local isEnemy = self.caster.Unit ~= nil and self.caster.Unit.isEnemy
+		if isEnemy then
 			allyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
 		else
 			allyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")

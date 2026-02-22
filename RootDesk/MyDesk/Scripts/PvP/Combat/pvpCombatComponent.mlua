@@ -157,11 +157,39 @@ script pvpCombatComponent extends Component
 			timeText.TextComponent.Text = string.format("%d:%02d", minutes, seconds)
 		end
 
-		-- SkillSlots 비활성화 (PvP v1에서는 미사용)
+		-- 기존 스킬 엔티티 정리 (반복 게임 시 누적 방지)
+		local pc = _UserService.LocalPlayer.PlayerCharacter
+		if pc.skill1Entity ~= nil then
+			pc.skill1Entity:Destroy()
+			pc.skill1Entity = nil
+		end
+		if pc.skill2Entity ~= nil then
+			pc.skill2Entity:Destroy()
+			pc.skill2Entity = nil
+		end
+
+		-- 플레이어 스킬 로드 (D/F키 — UserSkillDeck 기반)
+		_GameManager:SetPlayerCharacter()
+
+		-- SkillSlots UI 활성화 및 초기화
 		local skillSlots = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group/SkillSlots")
 		if skillSlots ~= nil then
-			skillSlots.Enable = false
+			skillSlots.Enable = true
+			skillSlots.Visible = true
+			for i = 1, 2 do
+				local child = skillSlots.Children[i]
+				if child ~= nil then
+					child.SkillSlot.remainingTime = 0
+					if child.Children[2] ~= nil then
+						child.Children[2].SpriteGUIRendererComponent.FillAmount = 0
+					end
+					child.SkillSlot:Initialize()
+				end
+			end
 		end
+
+		-- 돌파 스킬 초기화 (PvP 공격덱 기반)
+		_UserService.LocalPlayer.UserBreakLimitSkillProtocol:InitCall()
 
 		-- UnitShop 초기화 (PvP 모드 감지하여 offense_deck 사용)
 		local unitShopEntity = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group/UnitShop")

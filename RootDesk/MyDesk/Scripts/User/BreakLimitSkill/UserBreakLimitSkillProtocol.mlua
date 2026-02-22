@@ -21,8 +21,18 @@ script UserBreakLimitSkillProtocol extends Component
 		_UserMonsterService:INIT(senderUserId)
 		local userMonsterData = _UserMonsterService.userMonsterDict
 
-		-- 유저 덱 정보 가져오기
-		local userDeck = user.UserDeck.userDeck
+		-- 유저 덱 정보 가져오기 (PvP 모드에서는 공격덱 사용)
+		local userDeck
+		if _GameManager.currentGameMode == _eGameMode.PvP then
+			local pvpUser = user.pvpUserComponent
+			if pvpUser ~= nil then
+				userDeck = pvpUser.offense_deck or {}
+			else
+				userDeck = {}
+			end
+		else
+			userDeck = user.UserDeck.userDeck
+		end
 		local deckUnitSet = {}
 		for _, unitId in ipairs(userDeck) do
 			if unitId ~= nil and unitId ~= "" then

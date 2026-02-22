@@ -8,7 +8,8 @@ script Len_Ascent extends SkillParent
 		_UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill = true
 		
 		local targetListParent
-		if self.caster.Unit.isEnemy then
+		local isEnemy = self.caster.Unit ~= nil and self.caster.Unit.isEnemy
+		if isEnemy then
 			targetListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
 		else
 			targetListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
@@ -29,8 +30,9 @@ script Len_Ascent extends SkillParent
 					continue
 				end
 				
-				if monster.Enable then
-					monster.Unit:OnHit(self.caster, self.caster.Unit.damage * self.skillAmount, true, 5)
+				if monster.Enable and monster.Unit ~= nil then
+					local casterDamage = self.caster.Unit ~= nil and self.caster.Unit.damage or 0
+					monster.Unit:OnHit(self.caster, casterDamage * self.skillAmount, true, 5)
 				end
 			end
 		end

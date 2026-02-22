@@ -11,11 +11,11 @@ script pvpUserSpawnComponent extends Component
 
 	@ExecSpace("ServerOnly")
 	method void StartGame(table synergy)
-		self.point = 0
+		self.point = 30
 		self.pointInc = 1
 		self.pointUpdateTimer = 0
 		self.synergyMap = synergy or {}
-
+		
 		-- 시너지 101: 모험가 포인트 증가 보너스
 		local adventurerCount = self.synergyMap["101"] or 0
 		local adventurerSynergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE("101", adventurerCount)
@@ -23,7 +23,7 @@ script pvpUserSpawnComponent extends Component
 			local item = adventurerSynergy:Get(1)
 			self.pointInc = self.pointInc * (1.0 + (item.value / 100000))
 		end
-
+		
 		self:SyncPointInc(self.pointInc)
 	end
 
@@ -41,12 +41,12 @@ script pvpUserSpawnComponent extends Component
 		if pvpCombat == nil or not pvpCombat.isPlaying then
 			return
 		end
-
+		
 		self.pointUpdateTimer = self.pointUpdateTimer + delta
 		if self.pointUpdateTimer < 0.5 then
 			return
 		end
-
+		
 		self.pointUpdateTimer = 0
 		self.point = self.point + self.pointInc
 		self:SyncPoint(self.point)
@@ -55,42 +55,42 @@ script pvpUserSpawnComponent extends Component
 	@ExecSpace("Server")
 	method void SpawnUnit(string modelID, Vector3 pos)
 		_ProtocolService:CommonCall(senderUserId)
-
+		
 		local pvpCombat = self.Entity.pvpCombatComponent
 		if pvpCombat == nil or not pvpCombat.isPlaying then
 			return
 		end
-
+		
 		-- 유닛 데이터 로드
 		local unitData = _UnitService:GetUnitByIDFromServer(modelID)
 		if unitData == nil then
 			return
 		end
-
+		
 		-- 포인트 체크
 		local cost = unitData["cost"] or unitData["summonCost"] or 0
 		if cost > self.point then
 			return
 		end
-
+		
 		-- 소환 위치
 		local mapPath = _pvpService.PVP_STAGE_PATH
 		local spawnParent = _EntityService:GetEntityByPath(mapPath .. "/MyMonsterList")
 		local spawnPos = _EntityService:GetEntityByPath(mapPath .. "/MyMonsterList/MySpawnPoint")
-
+		
 		if spawnParent == nil or spawnPos == nil then
 			return
 		end
-
+		
 		if pos == Vector3.zero then
 			pos = spawnPos.TransformComponent.Position
 		end
-
+		
 		-- 유닛 소환
 		local unitModel = _BuffedUnitService:GetBuffedUnitModel(senderUserId, modelID)
 		local spawnEntity = _SpawnService:SpawnByModelId(modelID, "Pig", pos, spawnParent)
 		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
-
+		
 		-- 시그너스: 시너지 102로 레벨 결정
 		if modelID == "model://6194a4e3-0eb4-417a-92b5-891af548b672" then
 			local cygnusCount = self.synergyMap["102"] or 0
@@ -105,10 +105,16 @@ script pvpUserSpawnComponent extends Component
 			unitModel = _BuffedUnitService:SetUnitBuff(unitModel, userUnitModel.level, userUnitModel.limitBreak)
 		end
 		spawnEntity.Unit:Spawn(unitModel, skillData)
-
+		
+		-- 돌파 스킬 활성화
+		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		if user ~= nil and user.UserBreakLimitSkillClient ~= nil then
+			user.UserBreakLimitSkillClient:ActivateSkill(unitModel.LimitBreakActiveSkill)
+		end
+		
 		-- 시너지 적용
 		self:ApplySynergy(spawnEntity, unitModel)
-
+		
 		-- 포인트 차감
 		self.point = self.point - cost
 		self:SyncPoint(self.point)
@@ -119,10 +125,10 @@ script pvpUserSpawnComponent extends Component
 		local jobID = tostring(unitModel.jobId)
 		local count = self.synergyMap[jobID] or 0
 		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(jobID, count)
-
+		
 		if synergy:length() > 0 then
 			local item = synergy:Get(1)
-
+		
 			if jobID == "1" then
 				spawnEntity:RemoveComponent("IncreaseHpByTime")
 				spawnEntity:AddComponent("IncreaseHpByTime")
@@ -130,7 +136,7 @@ script pvpUserSpawnComponent extends Component
 				spawnEntity.IncreaseHpByTime.type = item.type
 				spawnEntity.IncreaseHpByTime.value = item.value
 			end
-
+		
 			if jobID == "2" then
 				spawnEntity:RemoveComponent("CriticalAttack")
 				spawnEntity:AddComponent("CriticalAttack")
@@ -138,7 +144,7 @@ script pvpUserSpawnComponent extends Component
 				spawnEntity.CriticalAttack.type = item.type
 				spawnEntity.CriticalAttack.value = item.value
 			end
-
+		
 			if jobID == "3" then
 				spawnEntity:RemoveComponent("IncreaseMpByTime")
 				spawnEntity:AddComponent("IncreaseMpByTime")
@@ -146,7 +152,7 @@ script pvpUserSpawnComponent extends Component
 				spawnEntity.IncreaseMpByTime.type = item.type
 				spawnEntity.IncreaseMpByTime.value = item.value
 			end
-
+		
 			if jobID == "4" then
 				spawnEntity:RemoveComponent("AddSummonPointAfterKill")
 				spawnEntity:AddComponent("AddSummonPointAfterKill")
@@ -161,7 +167,7 @@ script pvpUserSpawnComponent extends Component
 	@ExecSpace("Client")
 	method void SyncPoint(number point)
 		self.point = point
-
+		
 		-- 포인트 UI 업데이트
 		local coinText = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group/User_Coin_Bar/ingame_money")
 		if coinText ~= nil then

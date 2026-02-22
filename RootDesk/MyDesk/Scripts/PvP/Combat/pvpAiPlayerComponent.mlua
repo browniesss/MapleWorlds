@@ -21,11 +21,11 @@ script pvpAiPlayerComponent extends Component
 
 	@ExecSpace("ServerOnly")
 	method void StartGame(table playerDeck, table playerUnitInfo, table synergy)
-		self.point = 0
+		self.point = 30
 		self.pointInc = 1
 		self.pointUpdateTimer = 0
 		self.synergyMap = synergy or {}
-
+		
 		-- 시너지 101: 모험가 포인트 증가 보너스 (AI)
 		local adventurerCount = self.synergyMap["101"] or 0
 		local adventurerSynergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE("101", adventurerCount)
@@ -33,20 +33,20 @@ script pvpAiPlayerComponent extends Component
 			local item = adventurerSynergy:Get(1)
 			self.pointInc = self.pointInc * (1.0 + (item.value / 100000))
 		end
-
+		
 		table.clear(self.summonPools)
 		table.clear(self.summonQueue)
 		table.clear(self.summonDeck)
 		table.clear(self.userUnitList)
 		table.clear(self.unitPriorityDict)
-
+		
 		-- init everything
 		for i, unitId in ipairs(playerDeck) do
 			self.unitPriorityDict[unitId] = i
 		end
-
+		
 		self.userUnitList = playerUnitInfo
-
+		
 		-- 덱(최대 8장) -> 풀에 채우기
 		for i = 1, 8 do
 			local modelId = playerDeck[i]
@@ -54,7 +54,7 @@ script pvpAiPlayerComponent extends Component
 				table.insert(self.summonPools, modelId)
 			end
 		end
-
+		
 		-- 시그너스 시너지: 102 활성 시 시그너스를 AI 덱에 추가
 		local cygnusCount = self.synergyMap["102"] or 0
 		local cygnusSynergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE("102", cygnusCount)
@@ -72,30 +72,30 @@ script pvpAiPlayerComponent extends Component
 				}
 			end
 		end
-
+		
 		math.randomseed(os.time())
 		for i = #self.summonPools, 2, -1 do
 			local j = math.random(1, i)
 			self.summonPools[i], self.summonPools[j] = self.summonPools[j], self.summonPools[i]
 		end
-
+		
 		-- 앞 4장은 화면, 나머지는 큐
 		for i = 1, 4 do
 			self.summonDeck[i] = i
 		end
-
+		
 		for i = 5, #self.summonPools do
 			table.insert(self.summonQueue, i)
 		end
-
+		
 		-- 덱을 소환 우선 순위에 맞춰 정렬
 		table.sort(self.summonDeck, function(a, b)
 			local unitA = self.summonPools[a]
 			local unitB = self.summonPools[b]
-
+		
 			local priotA = self.unitPriorityDict[unitA]
 			local pritoB = self.unitPriorityDict[unitB]
-
+		
 			return priotA < pritoB
 		end)
 	end
@@ -105,22 +105,22 @@ script pvpAiPlayerComponent extends Component
 		if self.summonDeck == nil or #self.summonDeck == 0 then
 			return
 		end
-
+		
 		self.pointUpdateTimer += delta
 		if self.pointUpdateTimer < 0.5 then
 			return
 		end
-
+		
 		self.pointUpdateTimer = 0
 		self.point += self.pointInc
-
+		
 		local unitId = self:NextSummonId()
 		local unit = self:GetUnitInfo(unitId)
-
+		
 		if self:IsSummonAvailable(unit.cost) then
 			self:Summon()
 		end
-
+		
 		self:SyncPoint(self.point)
 	end
 
@@ -149,43 +149,43 @@ script pvpAiPlayerComponent extends Component
 		if not usedIdx then
 			return
 		end
-
+		
 		local unitId = self:NextSummonId()
 		local userUnitInfo = self:GetUnitInfo(unitId)
-
+		
 		-- 실제 유닛을 소환
 		local spawnParent = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .."/EnemyList")
 		local spawnPos = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .."/EnemyList/EnemySpawnPoint")
 		local unitData = _UnitService:GetUnitByIDFromServer(unitId)
 		local skillData = _SkillService:GetSkillByIDFromServer(unitData["skillID"])
 		local spawnEntity = _SpawnService:SpawnByModelId(unitId, "Pig", spawnPos.TransformComponent.Position, spawnParent)
-
+		
 		local buffedUnit = BuffedUnitModel()
 		buffedUnit:Init(unitData)
 		buffedUnit = _BuffedUnitService:SetUnitBuff(buffedUnit, userUnitInfo.level, userUnitInfo.limitBreak)
 		spawnEntity.Unit:SpawnEnemy(buffedUnit, skillData)
-
+		
 		-- 시너지 적용
 		self:ApplySynergy(spawnEntity, buffedUnit)
-
+		
 		self.point -= userUnitInfo.cost
-
+		
 		-- 사용한 인덱스를 큐 뒤로, 큐 앞을 꺼내 슬롯 채우기
 		table.insert(self.summonQueue, usedIdx)
 		local nextIdx = table.remove(self.summonQueue, 1)
 		self.summonDeck[1] = nextIdx
-
+		
 		-- 덱을 포인트에 맞춰서 정렬
 		table.sort(self.summonDeck, function(a, b)
 			local unitA = self.summonPools[a]
 			local unitB = self.summonPools[b]
-
+		
 			local priotA = self.unitPriorityDict[unitA]
 			local pritoB = self.unitPriorityDict[unitB]
-
+		
 			return priotA < pritoB
 		end)
-
+		
 	end
 
 	@ExecSpace("ServerOnly")
@@ -193,10 +193,10 @@ script pvpAiPlayerComponent extends Component
 		local jobID = tostring(unitModel.jobId)
 		local count = self.synergyMap[jobID] or 0
 		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(jobID, count)
-
+		
 		if synergy:length() > 0 then
 			local item = synergy:Get(1)
-
+		
 			if jobID == "1" then
 				spawnEntity:RemoveComponent("IncreaseHpByTime")
 				spawnEntity:AddComponent("IncreaseHpByTime")
@@ -204,7 +204,7 @@ script pvpAiPlayerComponent extends Component
 				spawnEntity.IncreaseHpByTime.type = item.type
 				spawnEntity.IncreaseHpByTime.value = item.value
 			end
-
+		
 			if jobID == "2" then
 				spawnEntity:RemoveComponent("CriticalAttack")
 				spawnEntity:AddComponent("CriticalAttack")
@@ -212,7 +212,7 @@ script pvpAiPlayerComponent extends Component
 				spawnEntity.CriticalAttack.type = item.type
 				spawnEntity.CriticalAttack.value = item.value
 			end
-
+		
 			if jobID == "3" then
 				spawnEntity:RemoveComponent("IncreaseMpByTime")
 				spawnEntity:AddComponent("IncreaseMpByTime")
@@ -220,7 +220,7 @@ script pvpAiPlayerComponent extends Component
 				spawnEntity.IncreaseMpByTime.type = item.type
 				spawnEntity.IncreaseMpByTime.value = item.value
 			end
-
+		
 			if jobID == "4" then
 				spawnEntity:RemoveComponent("AddSummonPointAfterKill")
 				spawnEntity:AddComponent("AddSummonPointAfterKill")
@@ -242,7 +242,7 @@ script pvpAiPlayerComponent extends Component
 		if needPoint <= self.point then
 			return true
 		end
-
+		
 		return false
 	end
 

@@ -26,7 +26,8 @@ script TeamAttackSpeedBuff extends SkillParent
 	@ExecSpace("Client")
 	method void ActivateSkill()
 		local allyListParent
-		if self.caster.Unit.isEnemy then
+		local isEnemy = self.caster.Unit ~= nil and self.caster.Unit.isEnemy
+		if isEnemy then
 			allyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
 		else
 			allyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
