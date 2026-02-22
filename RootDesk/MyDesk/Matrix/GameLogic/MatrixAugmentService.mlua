@@ -164,8 +164,8 @@ script MatrixAugmentService extends Logic
 		-- 터보 활성화 플래그
 		self.isTurboActive = true
 
-		-- 클라이언트에 속도 토글 버튼 비활성화 요청
-		self:SetSpeedToggleButtonEnabled(false)
+		-- 클라이언트에 속도 토글 버튼 비활성화 + TurboEffect 활성화 요청
+		self:SetTurboUI(true, speedValue)
 	end
 
 	-- T.U.R.B.O 버프를 단일 유닛에 적용 (최종 스탯의 1.5배)
@@ -196,32 +196,46 @@ script MatrixAugmentService extends Logic
 		unit.hp = math.floor(unit.maxHP * hpRatio)
 	end
 
-	-- 속도 토글 버튼 활성화/비활성화
+	-- 터보 UI 활성화/비활성화 (버튼 + TurboEffect + UIText)
 	@ExecSpace("Client")
-	method void SetSpeedToggleButtonEnabled(boolean enabled)
+	method void SetTurboUI(boolean turboActive, number speedValue)
+		-- PlaySpeedButton 처리
 		local button = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/IngameInfoUI/PlaySpeedButton")
-		if button == nil then
-			return
-		end
+		if button ~= nil then
+			-- x배속 표시용 Root 오브젝트
+			local root = button:GetChildByName("Root")
+			if root ~= nil then
+				root.Enable = turboActive
 
-		-- x3 표시용 Root 오브젝트 활성화/비활성화
-		local root = button:GetChildByName("Root")
-		if root ~= nil then
-			root.Enable = not enabled
-		end
-
-		-- 터보 모드 해제 시: 아이콘을 현재 상태에 맞게 복원
-		if enabled and button.SpeedToggleButton ~= nil then
-			if _TimeScaleManager ~= nil then
-				button.SpeedToggleButton.localIsSpeedUp = _TimeScaleManager.isSpeedUp
-			else
-				button.SpeedToggleButton.localIsSpeedUp = false
+				-- Root 하위 UIText 엔티티의 TextComponent에 배속 값 표시
+				if turboActive then
+					local uiText = root:GetChildByName("UIText")
+					if uiText ~= nil and uiText.TextComponent ~= nil then
+						uiText.TextComponent.Text = tostring(math.floor(speedValue)) .. "x"
+					end
+				end
 			end
-			button.SpeedToggleButton:UpdateIcon()
+
+			-- 터보 해제 시: 아이콘을 현재 상태에 맞게 복원
+			if not turboActive and button.SpeedToggleButton ~= nil then
+				if _TimeScaleManager ~= nil then
+					button.SpeedToggleButton.localIsSpeedUp = _TimeScaleManager.isSpeedUp
+				else
+					button.SpeedToggleButton.localIsSpeedUp = false
+				end
+				button.SpeedToggleButton:UpdateIcon()
+			end
+
+			if button.ButtonComponent ~= nil then
+				button.ButtonComponent.Enable = not turboActive
+			end
 		end
 
-		if button.ButtonComponent ~= nil then
-			button.ButtonComponent.Enable = enabled
+		-- TurboEffect 활성화/비활성화
+		local turboEffect = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/IngameInfoUI/MatrixEffect/TurboEffect")
+		if turboEffect ~= nil then
+			turboEffect.Enable = turboActive
+			turboEffect.SpriteGUIRendererComponent.PlayRate = 1/speedValue
 		end
 	end
 
@@ -661,7 +675,7 @@ script MatrixAugmentService extends Logic
 		self.preTurboTimeScale = 1.0
 		self.preTurboIsSpeedUp = false
 
-		self:SetSpeedToggleButtonEnabled(true)
+		self:SetTurboUI(false, 0)
 
 		-- 멀티플라이어 초기화
 		self.isMultiplierActive = false
