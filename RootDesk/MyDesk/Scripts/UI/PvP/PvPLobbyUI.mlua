@@ -33,9 +33,15 @@ script PvPLobbyUI extends Component
 
 	property any backButtonHandler = nil
 
-	property Entity viewDeckButton = nil
+	property table viewDeckButtons = {}
 
-	property any viewDeckButtonHandler = nil
+	property any viewDeck1Handler = nil
+
+	property any viewDeck2Handler = nil
+
+	property any viewDeck3Handler = nil
+
+	property any viewDeck4Handler = nil
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
@@ -77,11 +83,6 @@ script PvPLobbyUI extends Component
 			self.backButtonHandler = self.backButton:ConnectEvent(ButtonClickEvent, self.OnBackButtonClicked)
 		end
 
-		-- 덱 보기 버튼 핸들러
-		if self.viewDeckButton ~= nil and self.viewDeckButton.ButtonComponent ~= nil then
-			self.viewDeckButtonHandler = self.viewDeckButton:ConnectEvent(ButtonClickEvent, self.OnViewDeckButtonClicked)
-		end
-
 		-- 슬롯 목록 및 클릭 핸들러 구성
 		for i, slot in ipairs(self.userList.Children) do
 			self.slotList[#self.slotList + 1] = slot
@@ -94,6 +95,21 @@ script PvPLobbyUI extends Component
 				self.slot3Handler = slot:ConnectEvent(ButtonClickEvent, self.OnSlot3Click)
 			elseif i == 4 then
 				self.slot4Handler = slot:ConnectEvent(ButtonClickEvent, self.OnSlot4Click)
+			end
+
+			-- 슬롯별 덱 조회 버튼
+			local viewBtn = slot:GetChildByName("ViewDeckButton")
+			if viewBtn ~= nil and viewBtn.ButtonComponent ~= nil then
+				self.viewDeckButtons[i] = viewBtn
+				if i == 1 then
+					self.viewDeck1Handler = viewBtn:ConnectEvent(ButtonClickEvent, self.OnViewDeck1Click)
+				elseif i == 2 then
+					self.viewDeck2Handler = viewBtn:ConnectEvent(ButtonClickEvent, self.OnViewDeck2Click)
+				elseif i == 3 then
+					self.viewDeck3Handler = viewBtn:ConnectEvent(ButtonClickEvent, self.OnViewDeck3Click)
+				elseif i == 4 then
+					self.viewDeck4Handler = viewBtn:ConnectEvent(ButtonClickEvent, self.OnViewDeck4Click)
+				end
 			end
 		end
 	end
@@ -120,10 +136,27 @@ script PvPLobbyUI extends Component
 			self.backButtonHandler = nil
 		end
 
-		if self.viewDeckButtonHandler ~= nil and self.viewDeckButton ~= nil then
-			self.viewDeckButton:DisconnectEvent(ButtonClickEvent, self.viewDeckButtonHandler)
-			self.viewDeckButtonHandler = nil
+		if self.viewDeck1Handler ~= nil and self.viewDeckButtons[1] ~= nil then
+			self.viewDeckButtons[1]:DisconnectEvent(ButtonClickEvent, self.viewDeck1Handler)
+			self.viewDeck1Handler = nil
 		end
+
+		if self.viewDeck2Handler ~= nil and self.viewDeckButtons[2] ~= nil then
+			self.viewDeckButtons[2]:DisconnectEvent(ButtonClickEvent, self.viewDeck2Handler)
+			self.viewDeck2Handler = nil
+		end
+
+		if self.viewDeck3Handler ~= nil and self.viewDeckButtons[3] ~= nil then
+			self.viewDeckButtons[3]:DisconnectEvent(ButtonClickEvent, self.viewDeck3Handler)
+			self.viewDeck3Handler = nil
+		end
+
+		if self.viewDeck4Handler ~= nil and self.viewDeckButtons[4] ~= nil then
+			self.viewDeckButtons[4]:DisconnectEvent(ButtonClickEvent, self.viewDeck4Handler)
+			self.viewDeck4Handler = nil
+		end
+
+		table.clear(self.viewDeckButtons)
 
 		if self.slot1Handler ~= nil and self.slotList[1] ~= nil then
 			self.slotList[1]:DisconnectEvent(ButtonClickEvent, self.slot1Handler)
@@ -240,12 +273,25 @@ script PvPLobbyUI extends Component
 		end
 
 		local user = _UserService.LocalPlayer
-		if user ~= nil and user.pvpRankingComponent ~= nil then
+		if user == nil then
+			return
+		end
+
+		local text = ""
+		if user.pvpRankingComponent ~= nil then
 			local score = user.pvpRankingComponent.score
 			local rank = user.pvpRankingComponent.rank
 			local tier = self:GetTierName(score, rank)
-			self.scoreText.TextComponent.Text = tier .. " (" .. tostring(score) .. ")"
+			text = tier .. " (" .. tostring(score) .. ")"
 		end
+
+		if user.pvpUserComponent ~= nil then
+			local win = user.pvpUserComponent.win_count
+			local total = user.pvpUserComponent.play_count
+			text = text .. " | " .. tostring(win) .. "승 " .. tostring(total) .. "전"
+		end
+
+		self.scoreText.TextComponent.Text = text
 	end
 
 	@ExecSpace("ClientOnly")
@@ -368,12 +414,7 @@ script PvPLobbyUI extends Component
 	end
 
 	@ExecSpace("ClientOnly")
-	method void OnViewDeckButtonClicked(Entity entity)
-		self:OnViewDeckButtonClick()
-	end
-
-	@ExecSpace("ClientOnly")
-	method void OnViewDeckButtonClick()
+	method void ViewDeckForSlot(integer index)
 		local user = _UserService.LocalPlayer
 		if user == nil then
 			return
@@ -382,11 +423,30 @@ script PvPLobbyUI extends Component
 		if matcher == nil then
 			return
 		end
-		local selected = matcher.selected
-		if selected < 1 or selected > #matcher.targetUserList then
+		if index < 1 or index > #matcher.targetUserList then
 			return
 		end
-		matcher:FetchOpponentDeckCall(selected)
+		matcher:FetchOpponentDeckCall(index)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnViewDeck1Click(Entity entity)
+		self:ViewDeckForSlot(1)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnViewDeck2Click(Entity entity)
+		self:ViewDeckForSlot(2)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnViewDeck3Click(Entity entity)
+		self:ViewDeckForSlot(3)
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnViewDeck4Click(Entity entity)
+		self:ViewDeckForSlot(4)
 	end
 
 	@ExecSpace("ClientOnly")

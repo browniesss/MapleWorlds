@@ -311,6 +311,13 @@ script pvpUserComponent extends Component
 			self.win_count += 1
 		end
 		_pvpUserService:UpdateUserData(userId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy, self.win_count, self.play_count)
+		self:SyncRecordBack(self.win_count, self.play_count)
+	end
+
+	@ExecSpace("Client")
+	method void SyncRecordBack(integer win, integer total)
+		self.win_count = win
+		self.play_count = total
 	end
 
 	@ExecSpace("ClientOnly")
