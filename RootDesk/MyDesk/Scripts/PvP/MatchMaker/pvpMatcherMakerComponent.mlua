@@ -94,7 +94,7 @@ script pvpMatcherMakerComponent extends Component
 			return
 		end
 
-		local deckData = {defense_deck = {}, unitInfo = {}, nickname = target.nickname or ""}
+		local deckData = {defense_deck = {}, unitInfo = {}, nickname = target.nickname or "", defense_synergy = {}}
 
 		if not (target.isDummy or false) then
 			local targetData = _pvpUserService:GetUserData(target.uid)

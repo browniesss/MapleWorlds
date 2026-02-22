@@ -5,6 +5,8 @@ script SynergyUIManager extends Component
 
 	property table SynergyItemTable = {}
 
+	property boolean pvpOverrideMode = false
+
 	method SynergyDataItem GetSynergyDataItem(string id)
 		return _SynergyRepo:GetSynergyData(tonumber(id))
 	end
@@ -19,12 +21,16 @@ script SynergyUIManager extends Component
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		_UserService.LocalPlayer.UserSynergyComponent:AddSynercyCallback("countMap", function()	self:SetSynergyItem() end)
-		
+
 		self:SetSynergyItem()
 	end
 
 	@ExecSpace("ClientOnly")
 	method void SetSynergyItem()
+		if self.pvpOverrideMode then
+			return
+		end
+
 		-- 시너지 아이템 삭제
 		for k, v in pairs(self.SynergyItemTable) do
 			_EntityService:Destroy(self.SynergyItemTable[k])
@@ -60,13 +66,11 @@ script SynergyUIManager extends Component
 				end
 			end
 		end)
-		
+
 		for i, k in ipairs(keys) do
 			if k.count ==  0 then
 				continue
 			end
-
-			local synergyData = self:GetSynergyDataItem(k.id)
 
 			local synergyItem = _SpawnService:SpawnByModelId("model://b001dcdc-ff48-4c91-a232-be30a46f74ee", "SynergyItem", Vector3.zero, self.SynergyScrollView)
 
@@ -74,7 +78,7 @@ script SynergyUIManager extends Component
 				continue
 			end
 
-			synergyItem.SynergySettingItem:SetSynergyItem(synergyData, k.count)
+			synergyItem.SynergySettingItem:SetSynergyItem(self:GetSynergyDataItem(k.id), k.count)
 
 			self.SynergyItemTable[k.id] = synergyItem
 
@@ -83,6 +87,8 @@ script SynergyUIManager extends Component
 
 	@ExecSpace("ClientOnly")
 	method void SetSynergyItemFromData(table countMap)
+		self.pvpOverrideMode = true
+
 		-- 시너지 아이템 삭제
 		for k, v in pairs(self.SynergyItemTable) do
 			_EntityService:Destroy(self.SynergyItemTable[k])
@@ -91,7 +97,7 @@ script SynergyUIManager extends Component
 
 		local keys = {}
 		for k, v in pairs(countMap) do
-			table.insert(keys, {id = k, count = v})
+			table.insert(keys, {id = tostring(k), count = v})
 		end
 
 		table.sort(keys, function(a, b)
@@ -113,12 +119,19 @@ script SynergyUIManager extends Component
 				continue
 			end
 
-			local synergyItem = _SpawnService:SpawnByModelId("model://b001dcdc-ff48-4c91-a232-be30a46f74ee", "SynergyItem", Vector3.zero, self.SynergyScrollView)
-
-			synergyItem.SynergySettingItem:SetSynergyItem(self:GetSynergyDataItem(k.id), k.count)
-
-			self.SynergyItemTable[k.id] = synergyItem
+			local synergyData = self:GetSynergyDataItem(k.id)
+			if synergyData ~= nil then
+				local synergyItem = _SpawnService:SpawnByModelId("model://b001dcdc-ff48-4c91-a232-be30a46f74ee", "SynergyItem", Vector3.zero, self.SynergyScrollView)
+				synergyItem.SynergySettingItem:SetSynergyItem(synergyData, k.count)
+				self.SynergyItemTable[k.id] = synergyItem
+			end
 		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method void ClearPvPOverride()
+		self.pvpOverrideMode = false
+		self:SetSynergyItem()
 	end
 
 	@EventSender("Self")

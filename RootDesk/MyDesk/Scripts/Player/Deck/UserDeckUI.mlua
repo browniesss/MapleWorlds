@@ -228,6 +228,10 @@ script UserDeckUI extends Component
 		local deck = deckData.defense_deck or {}
 		local unitInfoMap = deckData.unitInfo or {}
 
+		-- 클라이언트에서 시너지 직접 계산 (RPC로 defense_synergy 전송 불가 문제 우회)
+		local synergyCountMap = {}
+		local synergyCols = {"jobId", "countryId", "regionId", "LimitBreakCountryId", "LimitBreakJobId"}
+
 		for i = 1, 8 do
 			self.deckItems[i].DeckItem.itemIndex = i
 			local unitId = deck[i]
@@ -283,11 +287,21 @@ script UserDeckUI extends Component
 			end
 			local skillData = _SkillService:GetSkillByIDFromClient(buffedUnit.skillID)
 			self.deckItems[i].DeckItem:Init(buffedUnit, skillData)
+
+			-- 시너지 필드 수집
+			for _, col in ipairs(synergyCols) do
+				if buffedUnit[col] ~= nil and buffedUnit[col] ~= 0 then
+					local key = tostring(buffedUnit[col])
+					if synergyCountMap[key] == nil then
+						synergyCountMap[key] = 0
+					end
+					synergyCountMap[key] = synergyCountMap[key] + 1
+				end
+			end
 		end
 
-		-- 상대 시너지 UI 업데이트
-		local synergy = deckData.defense_synergy or {}
-		self:UpdateSynergyUI(synergy)
+		-- 클라이언트 계산 시너지로 UI 업데이트
+		self:UpdateSynergyUI(synergyCountMap)
 	end
 
 	method void UpdateSynergyUI(table synergy)
@@ -301,8 +315,8 @@ script UserDeckUI extends Component
 
 	method void RestoreSynergyUI()
 		local synergyUI = _EntityService:GetEntityByPath("/ui/SynergyUI")
-		if synergyUI ~= nil then
-			synergyUI.SynergyUIManager:SetSynergyItem()
+		if synergyUI ~= nil and synergyUI.SynergyUIManager ~= nil then
+			synergyUI.SynergyUIManager:ClearPvPOverride()
 		end
 	end
 
