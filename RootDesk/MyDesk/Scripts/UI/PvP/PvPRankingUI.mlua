@@ -72,18 +72,22 @@ script PvPRankingUI extends Component
 
 		-- 랭킹 아이템 업데이트 (MatrixRankingItem 사용)
 		for i, rankItem in ipairs(self.rankItems) do
-			if rankItem.MatrixRankingItem == nil then
-				continue
-			end
 			if i <= #rankList then
-				local info = rankList[i]
-				local name = info.nickname or info.uid or ""
-				rankItem.MatrixRankingItem:Init(tostring(info.rank or i), name, info.score or 0)
-				if info.uid == userId then
-					rankItem.MatrixRankingItem:SetUserFrame()
+				if rankItem.MatrixRankingItem ~= nil then
+					local info = rankList[i]
+					local name = info.nickname or info.uid or ""
+					rankItem.MatrixRankingItem:Init(tostring(info.rank or i), name, info.score or 0)
+					if info.uid == userId then
+						rankItem.MatrixRankingItem:SetUserFrame()
+					end
 				end
 			else
-				rankItem.MatrixRankingItem:Hide()
+				if rankItem.MatrixRankingItem ~= nil then
+					rankItem.MatrixRankingItem:Hide()
+				else
+					rankItem.Enable = false
+					rankItem.Visible = false
+				end
 			end
 		end
 
