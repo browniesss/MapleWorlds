@@ -43,28 +43,26 @@ script UnitShop extends Component
 
 			local price = unitData.summonCost
 
-			if not isPvP then
-				local count = user.UserSynergyComponent.countMap[unitData.countryId]
-				if count == nil then
-					count = 0
+			local count = user.UserSynergyComponent.countMap[unitData.countryId]
+			if count == nil then
+				count = 0
+			end
+
+			local synergy = _SynergyRepo:GetSynergyList(tonumber(unitData.countryId))
+			local maxCount = 0
+			for i = 1, synergy:length() do
+				local item = synergy:Get(i)
+
+				if item.count > count then
+					continue
 				end
 
-				local synergy = _SynergyRepo:GetSynergyList(tonumber(unitData.countryId))
-				local maxCount = 0
-				for i = 1, synergy:length() do
-					local item = synergy:Get(i)
-
-					if item.count > count then
-						continue
-					end
-
-					if item.count <= maxCount then
-						continue
-					end
-					maxCount = item.count
-
-					price = math.tointeger(unitData.summonCost + item:CalcValue(0))
+				if item.count <= maxCount then
+					continue
 				end
+				maxCount = item.count
+
+				price = math.tointeger(unitData.summonCost + item:CalcValue(0))
 			end
 
 			self.shopItems[slot].UnitShopItem:Initialize(unitData, slot, self, skillData, price)
@@ -94,29 +92,27 @@ script UnitShop extends Component
 
 		local price = previewUD.summonCost
 
-		if not isPvP then
-			local count = user.UserSynergyComponent.countMap[previewUD.countryId]
-			if count == nil then
-				count = 0
+		local count = user.UserSynergyComponent.countMap[previewUD.countryId]
+		if count == nil then
+			count = 0
+		end
+
+		local synergy = _SynergyRepo:GetSynergyList(tonumber(previewUD.countryId))
+
+		local maxCount = 0
+		for i = 1, synergy:length() do
+			local item = synergy:Get(i)
+
+			if item.count > count then
+				continue
 			end
 
-			local synergy = _SynergyRepo:GetSynergyList(tonumber(previewUD.countryId))
-
-			local maxCount = 0
-			for i = 1, synergy:length() do
-				local item = synergy:Get(i)
-
-				if item.count > count then
-					continue
-				end
-
-				if item.count <= maxCount then
-					continue
-				end
-				maxCount = item.count
-
-				price = math.tointeger(previewUD.summonCost + item:CalcValue(0))
+			if item.count <= maxCount then
+				continue
 			end
+			maxCount = item.count
+
+			price = math.tointeger(previewUD.summonCost + item:CalcValue(0))
 		end
 
 		self.shopItems[5].UnitShopItem:Initialize(previewUD, PREVIEW_SLOT, self, previewSD, price)
@@ -178,8 +174,17 @@ script UnitShop extends Component
 			end
 		end
 
-		-- 서브 덱 (PvP 모드에서는 스킵)
-		if _GameManager.currentGameMode ~= _eGameMode.PvP then
+		-- 서브 덱
+		if _GameManager.currentGameMode == _eGameMode.PvP then
+			-- PvP: 시너지 102 활성 시 시그너스 추가
+			local user = _UserService.LocalPlayer
+			if user ~= nil and user.UserSynergyComponent ~= nil then
+				local cygnusCount = user.UserSynergyComponent.countMap[102]
+				if cygnusCount ~= nil and cygnusCount > 0 then
+					table.insert(self.summonPools, "model://6194a4e3-0eb4-417a-92b5-891af548b672")
+				end
+			end
+		else
 			local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
 			for i, modelId in ipairs(playerDeck.userSubDeck) do
 				if modelId and modelId ~= "" then

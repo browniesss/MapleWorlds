@@ -7,11 +7,14 @@ script pvpUserSpawnComponent extends Component
 
 	property number pointUpdateTimer = 0
 
+	property table synergyMap = {}
+
 	@ExecSpace("ServerOnly")
-	method void StartGame()
+	method void StartGame(table synergy)
 		self.point = 0
 		self.pointInc = 1
 		self.pointUpdateTimer = 0
+		self.synergyMap = synergy or {}
 	end
 
 	@ExecSpace("ServerOnly")
@@ -19,6 +22,7 @@ script pvpUserSpawnComponent extends Component
 		self.point = 0
 		self.pointInc = 1
 		self.pointUpdateTimer = 0
+		self.synergyMap = {}
 	end
 
 	@ExecSpace("ServerOnly")
@@ -27,12 +31,12 @@ script pvpUserSpawnComponent extends Component
 		if pvpCombat == nil or not pvpCombat.isPlaying then
 			return
 		end
-		
+
 		self.pointUpdateTimer = self.pointUpdateTimer + delta
 		if self.pointUpdateTimer < 0.5 then
 			return
 		end
-		
+
 		self.pointUpdateTimer = 0
 		self.point = self.point + self.pointInc
 		self:SyncPoint(self.point)
@@ -41,50 +45,107 @@ script pvpUserSpawnComponent extends Component
 	@ExecSpace("Server")
 	method void SpawnUnit(string modelID, Vector3 pos)
 		_ProtocolService:CommonCall(senderUserId)
-		
+
 		local pvpCombat = self.Entity.pvpCombatComponent
 		if pvpCombat == nil or not pvpCombat.isPlaying then
 			return
 		end
-		
+
 		-- 유닛 데이터 로드
 		local unitData = _UnitService:GetUnitByIDFromServer(modelID)
 		if unitData == nil then
 			return
 		end
-		
+
 		-- 포인트 체크
 		local cost = unitData["cost"] or unitData["summonCost"] or 0
 		if cost > self.point then
 			return
 		end
-		
+
 		-- 소환 위치
 		local mapPath = _pvpService.PVP_STAGE_PATH
 		local spawnParent = _EntityService:GetEntityByPath(mapPath .. "/MyMonsterList")
 		local spawnPos = _EntityService:GetEntityByPath(mapPath .. "/MyMonsterList/MySpawnPoint")
-		
+
 		if spawnParent == nil or spawnPos == nil then
 			return
 		end
-		
+
 		if pos == Vector3.zero then
 			pos = spawnPos.TransformComponent.Position
 		end
-		
-		-- 유닛 소환 (PvP에서는 시너지/매트릭스 미적용)
+
+		-- 유닛 소환
 		local unitModel = _BuffedUnitService:GetBuffedUnitModel(senderUserId, modelID)
 		local spawnEntity = _SpawnService:SpawnByModelId(modelID, "Pig", pos, spawnParent)
 		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
-		
-		local userUnitModel = UserUnitModel()
-		userUnitModel:DECODE(_UserMonsterService.userMonsterDict[unitModel.id])
-		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, userUnitModel.level, userUnitModel.limitBreak)
+
+		-- 시그너스: 시너지 102로 레벨 결정
+		if modelID == "model://6194a4e3-0eb4-417a-92b5-891af548b672" then
+			local cygnusCount = self.synergyMap["102"] or 0
+			local cygnusSynergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE("102", cygnusCount)
+			if cygnusSynergy:length() > 0 then
+				local cygnusItem = cygnusSynergy:Get(1)
+				unitModel = _BuffedUnitService:SetUnitBuff(unitModel, math.floor(cygnusItem.value), 1)
+			end
+		else
+			local userUnitModel = UserUnitModel()
+			userUnitModel:DECODE(_UserMonsterService.userMonsterDict[unitModel.id])
+			unitModel = _BuffedUnitService:SetUnitBuff(unitModel, userUnitModel.level, userUnitModel.limitBreak)
+		end
 		spawnEntity.Unit:Spawn(unitModel, skillData)
-		
+
+		-- 시너지 적용
+		self:ApplySynergy(spawnEntity, unitModel)
+
 		-- 포인트 차감
 		self.point = self.point - cost
 		self:SyncPoint(self.point)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void ApplySynergy(Entity spawnEntity, BuffedUnitModel unitModel)
+		local jobID = tostring(unitModel.jobId)
+		local count = self.synergyMap[jobID] or 0
+		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(jobID, count)
+
+		if synergy:length() > 0 then
+			local item = synergy:Get(1)
+
+			if jobID == "1" then
+				spawnEntity:RemoveComponent("IncreaseHpByTime")
+				spawnEntity:AddComponent("IncreaseHpByTime")
+				spawnEntity.IncreaseHpByTime.Enable = true
+				spawnEntity.IncreaseHpByTime.type = item.type
+				spawnEntity.IncreaseHpByTime.value = item.value
+			end
+
+			if jobID == "2" then
+				spawnEntity:RemoveComponent("CriticalAttack")
+				spawnEntity:AddComponent("CriticalAttack")
+				spawnEntity.CriticalAttack.Enable = true
+				spawnEntity.CriticalAttack.type = item.type
+				spawnEntity.CriticalAttack.value = item.value
+			end
+
+			if jobID == "3" then
+				spawnEntity:RemoveComponent("IncreaseMpByTime")
+				spawnEntity:AddComponent("IncreaseMpByTime")
+				spawnEntity.IncreaseMpByTime.Enable = true
+				spawnEntity.IncreaseMpByTime.type = item.type
+				spawnEntity.IncreaseMpByTime.value = item.value
+			end
+
+			if jobID == "4" then
+				spawnEntity:RemoveComponent("AddSummonPointAfterKill")
+				spawnEntity:AddComponent("AddSummonPointAfterKill")
+				spawnEntity.AddSummonPointAfterKill.Enable = true
+				spawnEntity.AddSummonPointAfterKill.type = item.type
+				spawnEntity.AddSummonPointAfterKill.value = item.value
+				spawnEntity.AddSummonPointAfterKill.userWallet = nil
+			end
+		end
 	end
 
 	@ExecSpace("Client")

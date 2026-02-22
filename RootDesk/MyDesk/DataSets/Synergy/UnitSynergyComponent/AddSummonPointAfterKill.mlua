@@ -5,13 +5,35 @@ script AddSummonPointAfterKill extends BaseSynergyComponent
 
 	method SynergyOnHitResult OnHit(Entity attacker, number damage, boolean isCritical, number attackCount)
 		self:AddMoney()
-		
+
 		return __base:OnHit(attacker,damage,isCritical,attackCount)
 	end
 
 	@ExecSpace("Server")
 	method void AddMoney()
 		local desposit = self:CalValue(0)
+
+		if _GameManager.currentGameMode == _eGameMode.PvP then
+			local pvpManager = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/PvPManager")
+			if pvpManager == nil then
+				return
+			end
+
+			if self.Entity.Unit ~= nil and self.Entity.Unit.isEnemy then
+				-- AI 유닛 처치 보상 → AI 포인트에 추가
+				if pvpManager.pvpAiPlayerComponent ~= nil then
+					pvpManager.pvpAiPlayerComponent.point = pvpManager.pvpAiPlayerComponent.point + desposit
+					pvpManager.pvpAiPlayerComponent:SyncPoint(pvpManager.pvpAiPlayerComponent.point)
+				end
+			else
+				-- 플레이어 유닛 처치 보상 → 플레이어 포인트에 추가
+				if pvpManager.pvpUserSpawnComponent ~= nil then
+					pvpManager.pvpUserSpawnComponent.point = pvpManager.pvpUserSpawnComponent.point + desposit
+					pvpManager.pvpUserSpawnComponent:SyncPoint(pvpManager.pvpUserSpawnComponent.point)
+				end
+			end
+			return
+		end
 
 		self.userWallet.MesoWallet:AddMeso(desposit)
 	end

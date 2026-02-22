@@ -51,18 +51,25 @@ script pvpCombatComponent extends Component
 		self.EnemyTower.Unit.maxHP = enemyTowerHP
 		self.EnemyTower.Unit.hp = enemyTowerHP
 
+		-- 시너지 데이터 준비
+		local offenseSynergy = pvpUser.offense_synergy or {}
+		local enemyDeck = self.matchInfo.defense_deck or {}
+		local enemyUnitInfo = self.matchInfo.unitInfo or {}
+		local defenseSynergy = self:ComputeSynergyFromMatch(enemyDeck, enemyUnitInfo)
+
+		-- UserSynergyComponent에 공격덱 시너지 설정 (UnitShop 비용 감소용)
+		user.UserSynergyComponent:SET_SYNERGY(pvpUser.offense_deck)
+
 		-- 유저 소환 시스템 시작
 		local pvpUserSpawn = self.Entity.pvpUserSpawnComponent
 		if pvpUserSpawn ~= nil then
-			pvpUserSpawn:StartGame()
+			pvpUserSpawn:StartGame(offenseSynergy)
 		end
 
 		-- AI 시작
 		local pvpAi = self.Entity.pvpAiPlayerComponent
 		if pvpAi ~= nil then
-			local enemyDeck = self.matchInfo.defense_deck or {}
-			local enemyUnitInfo = self.matchInfo.unitInfo or {}
-			pvpAi:StartGame(enemyDeck, enemyUnitInfo)
+			pvpAi:StartGame(enemyDeck, enemyUnitInfo, defenseSynergy)
 		end
 
 		-- 게임 상태 초기화
@@ -204,6 +211,14 @@ script pvpCombatComponent extends Component
 		-- 모든 유닛 제거
 		self:DestroyAllUnits()
 
+		-- 노멀 덱 시너지 복원
+		if self.currentUserId ~= "" then
+			local endUser = _UserService:GetUserEntityByUserId(self.currentUserId)
+			if endUser ~= nil and endUser.UserSynergyComponent ~= nil then
+				endUser.UserSynergyComponent:RestoreSynergyFromDeck()
+			end
+		end
+
 		-- 메소 수입 복원
 		local ingameIncome = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/ingameIncome")
 		if ingameIncome ~= nil then
@@ -327,6 +342,43 @@ script pvpCombatComponent extends Component
 	@ExecSpace("ServerOnly")
 	method void SetMatchInfo(table info)
 		self.matchInfo = info
+	end
+
+	@ExecSpace("ServerOnly")
+	method table ComputeSynergyFromMatch(table deck, table unitInfoMap)
+		local synergyCols = {"jobId", "countryId", "regionId", "LimitBreakCountryId", "LimitBreakJobId"}
+		local countMap = {}
+
+		for _, unitId in ipairs(deck) do
+			if unitId == nil or unitId == "" then
+				continue
+			end
+
+			local unit = _UnitService:GetUnitByIDFromServer(unitId)
+			if unit == nil then
+				continue
+			end
+
+			local buffedUnit = BuffedUnitModel()
+			buffedUnit:Init(unit)
+
+			local unitMeta = unitInfoMap[unitId]
+			if unitMeta ~= nil then
+				buffedUnit = _BuffedUnitService:SetUnitBuff(buffedUnit, unitMeta.level or 1, unitMeta.limitBreak or 1)
+			end
+
+			for _, col in ipairs(synergyCols) do
+				if buffedUnit[col] ~= nil and buffedUnit[col] ~= 0 then
+					local key = tostring(buffedUnit[col])
+					if countMap[key] == nil then
+						countMap[key] = 0
+					end
+					countMap[key] = countMap[key] + 1
+				end
+			end
+		end
+
+		return countMap
 	end
 
 	@ExecSpace("ServerOnly")
