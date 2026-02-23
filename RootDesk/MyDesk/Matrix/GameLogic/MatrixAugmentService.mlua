@@ -10,6 +10,7 @@ script MatrixAugmentService extends Logic
 	property boolean isTurboActive = false
 	property number preTurboTimeScale = 1.0
 	property boolean preTurboIsSpeedUp = false
+	property number turboStatMultiplier = 1.5
 
 	-- 멀티플라이어 관련
 	property boolean isMultiplierActive = false
@@ -135,28 +136,32 @@ script MatrixAugmentService extends Logic
 		end
 	end
 
-	-- T.U.R.B.O 모드 적용 (게임 속도 x3 + 아군 공격력/체력 1.5배)
+	-- T.U.R.B.O 모드 적용 (게임 속도 x3 고정 + 아군 공격력/체력 value배 증가)
 	@ExecSpace("Server")
 	method void ApplyTurboMode(table matrixData)
-		local speedValue = matrixData.value
+		local statMultiplier = matrixData.value
+		local fixedSpeed = 3
+
+		-- 능력치 배율 저장 (새로 소환되는 유닛에도 적용 위해)
+		self.turboStatMultiplier = statMultiplier
 
 		-- 원래 배속 저장 (복원용)
 		self.preTurboTimeScale = _TimeScaleManager.timeScale
 		self.preTurboIsSpeedUp = _TimeScaleManager.isSpeedUp
 
-		-- 게임 속도 설정
-		_TimeScaleManager.timeScale = speedValue
+		-- 게임 속도 3배 고정
+		_TimeScaleManager.timeScale = fixedSpeed
 		_TimeScaleManager.isSpeedUp = true
-		_TimeScaleManager:ApplyTimeScaleToAllClients(speedValue)
+		_TimeScaleManager:ApplyTimeScaleToAllClients(fixedSpeed)
 
-		-- 모든 현재 아군 유닛에 공격력/체력 1.5배 적용
+		-- 모든 현재 아군 유닛에 공격력/체력 value배 적용
 		local gameMapPath = _GameManager:GetGameMapName()
 		local myMonsterList = _EntityService:GetEntityByPath(gameMapPath.."/MyMonsterList")
 
 		if myMonsterList ~= nil then
 			for _, child in ipairs(myMonsterList.Children) do
 				if child.Unit ~= nil then
-					self:ApplyTurboBuffToUnit(child.Unit)
+					self:ApplyTurboBuffToUnit(child.Unit, statMultiplier)
 				end
 			end
 		end
@@ -165,17 +170,17 @@ script MatrixAugmentService extends Logic
 		self.isTurboActive = true
 
 		-- 클라이언트에 속도 토글 버튼 비활성화 + TurboEffect 활성화 요청
-		self:SetTurboUI(true, speedValue)
+		self:SetTurboUI(true, fixedSpeed)
 	end
 
-	-- T.U.R.B.O 버프를 단일 유닛에 적용 (최종 스탯의 1.5배)
-	method void ApplyTurboBuffToUnit(any unit)
-		-- 공격력: 현재 최종 damage의 1.5배
-		local attackBonus = unit.damage * 0.5
+	-- T.U.R.B.O 버프를 단일 유닛에 적용 (최종 스탯의 statMultiplier배)
+	method void ApplyTurboBuffToUnit(any unit, number statMultiplier)
+		-- 공격력: 현재 최종 damage의 statMultiplier배
+		local attackBonus = unit.damage * (statMultiplier - 1)
 		unit:GetMatrix(_eBuffType.AttackDamageBuff, attackBonus)
 
-		-- 체력: 현재 최종 maxHP의 1.5배 (GetMatrix가 현재 maxHP 기준으로 곱셈)
-		unit:GetMatrix(_eBuffType.MaxHealthMultiplyBuff, 1.5)
+		-- 체력: 현재 최종 maxHP의 statMultiplier배
+		unit:GetMatrix(_eBuffType.MaxHealthMultiplyBuff, statMultiplier)
 	end
 
 	-- 멀티플라이어 모드 적용 (소환 시 복제본 추가 생성)
@@ -341,9 +346,9 @@ script MatrixAugmentService extends Logic
 			end
 		end
 
-		-- T.U.R.B.O 모드 활성화 시 공격력/체력 1.5배 자동 적용
+		-- T.U.R.B.O 모드 활성화 시 공격력/체력 자동 적용
 		if self.isTurboActive then
-			self:ApplyTurboBuffToUnit(unit)
+			self:ApplyTurboBuffToUnit(unit, self.turboStatMultiplier)
 		end
 	end
 
