@@ -70,6 +70,8 @@ script SummonService extends Logic
 		
 		self.summonResult[pool_id] = _HttpService:JSONEncode(idList)
 		
+		_AnalyticsService:Gacha(senderUserId, pool_id, idList)
+		
 		local unitProtocol = _UserService:GetUserEntityByUserId(senderUserId).UserUnitProtocol
 		if unitProtocol then
 			unitProtocol:UpdateUserUnitList(senderUserId)
@@ -116,6 +118,7 @@ script SummonService extends Logic
 		end
 		
 		self.summonResult[pool_id] = _HttpService:JSONEncode(idList)
+		_AnalyticsService:Gacha(senderUserId, pool_id, idList)
 		
 		local unitProtocol = _UserService:GetUserEntityByUserId(senderUserId).UserUnitProtocol
 		if unitProtocol then
