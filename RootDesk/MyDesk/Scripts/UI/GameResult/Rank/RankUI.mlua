@@ -33,7 +33,11 @@ script RankUI extends Component
 			local textComp = _EntityService:GetEntityByPath(path .. "/Rank_" .. tostring(i) .. "/UIText").TextComponent
 			local user = rankTable[i]
 
-			textComp.Text = self:GetRankText(i, user.name, user.score)
+			if user == nil then
+				textComp.Text = "#" .. tostring(i) .. " ---"
+			else
+				textComp.Text = self:GetRankText(i, user.name, user.score)
+			end
 		end
 		
 	end

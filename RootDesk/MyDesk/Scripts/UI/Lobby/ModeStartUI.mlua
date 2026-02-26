@@ -4,8 +4,9 @@ script ModeStartUI extends Component
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
 		-- MatrixGameManager를 통해 게임 시작
-		if _MatrixGameManager ~= nil then
-			_MatrixGameManager:StartMatrixGame()
+		local matrixGM = _UserService.LocalPlayer.MatrixGameManager
+		if matrixGM ~= nil then
+			matrixGM:StartMatrixGame()
 		end
 	end
 

@@ -10,11 +10,12 @@ script MatrixCharterViewButton extends Component
 			return
 		end
 
+		local matrixUnitSelect = _UserService.LocalPlayer.MatrixUnitSelectService
 		-- 강화 모드인 경우 강화 선택 처리
-		if _MatrixUnitSelectService.isUpgradeMode then
-			_MatrixUnitSelectService:SelectUpgradeByIndex(self.charterIndex)
+		if matrixUnitSelect.isUpgradeMode then
+			matrixUnitSelect:SelectUpgradeByIndex(self.charterIndex)
 		else
-			_MatrixUnitSelectService:SelectUnitByIndex(self.charterIndex)
+			matrixUnitSelect:SelectUnitByIndex(self.charterIndex)
 		end
 	end
 

@@ -31,6 +31,10 @@ script NoticeService extends Logic
 
 	@ExecSpace("Client")
 	method void ShowNoticePopup(string uid)
+		-- 자신의 uid가 아니면 무시 (Logic의 @Client는 모든 클라이언트에 브로드캐스트됨)
+		if _UserService.LocalPlayer == nil or _UserService.LocalPlayer.PlayerComponent.UserId ~= uid then
+			return
+		end
 		local popup = _EntityService:GetEntityByPath("/ui/NoticePopup")
 		if popup ~= nil and popup.NoticePopupUI ~= nil then
 			popup.NoticePopupUI:Open()

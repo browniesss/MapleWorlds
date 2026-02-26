@@ -11,8 +11,9 @@ script SpeedToggleButton extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
-		if _TimeScaleManager ~= nil then
-			self.localIsSpeedUp = _TimeScaleManager.isSpeedUp
+		local tsm = _UserService.LocalPlayer.TimeScaleManager
+		if tsm ~= nil then
+			self.localIsSpeedUp = tsm.isSpeedUp
 		else
 			self.localIsSpeedUp = false
 		end
@@ -38,15 +39,16 @@ script SpeedToggleButton extends Component
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
-		if _TutorialService ~= nil and _TutorialService.isIngameTutorial and _TutorialService.isActive then
+		if _UserService.LocalPlayer.TutorialService ~= nil and _UserService.LocalPlayer.TutorialService.isIngameTutorial and _UserService.LocalPlayer.TutorialService.isActive then
 			return
 		end
 		
 		self.localIsSpeedUp = not self.localIsSpeedUp
 		self:UpdateIcon()
 		
-		if _TimeScaleManager ~= nil then
-			_TimeScaleManager:ToggleSpeed()
+		local tsm = _UserService.LocalPlayer.TimeScaleManager
+		if tsm ~= nil then
+			tsm:ToggleSpeed()
 		end
 	end
 

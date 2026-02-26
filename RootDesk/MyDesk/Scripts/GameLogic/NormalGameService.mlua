@@ -1,5 +1,5 @@
-@Logic
-script NormalGameService extends Logic
+@Component
+script NormalGameService extends Component
 
 	-- 일반 모드 게임 시작
 	@ExecSpace("Client")
@@ -33,7 +33,8 @@ script NormalGameService extends Logic
 
 		-- 돌파스킬 초기화 완료 후 프리로드 시작
 		_UserService.LocalPlayer.UserBreakLimitSkillProtocol:InitCallWithCallback(function(limitBreakRuids)
-			local ruids = _GameManager:GetPreLoadAssetRuid()
+			local gm = _UserService.LocalPlayer.GameManager
+			local ruids = gm:GetPreLoadAssetRuid()
 
 			-- 돌파스킬 ruids 추가
 			for _, ruid in ipairs(limitBreakRuids) do
@@ -42,7 +43,7 @@ script NormalGameService extends Logic
 
 			_ResourceService:PreloadAsync(ruids, function()
 				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage".. userStage.selectChapter.."0"..userStage.selectStage)
-				_GameManager:GameStart(userStage.selectChapter, userStage.selectStage, false)
+				gm:GameStart(userStage.selectChapter, userStage.selectStage, false)
 			end)
 		end)
 	end
@@ -64,21 +65,23 @@ script NormalGameService extends Logic
 	-- 서버 클리어 처리 (보상, 뱃지, 랭킹)
 	@ExecSpace("Server")
 	method void ProcessStageClearServer(integer clearedChapter, integer clearedStage)
+		local user = self.Entity
+		local gm = self.Entity.GameManager
+
 		-- 튜토리얼 스테이지(0,0)는 보상/랭킹/진행도 저장 없이 UI만 표시
 		if clearedChapter == 0 and clearedStage == 0 then
-			_GameManager:StageClearClientCallback(false, 0, senderUserId)
-			_UserService:GetUserEntityByUserId(senderUserId).UserStage:SetClearStage(1, 1)
+			gm:StageClearClientCallback(false, 0, senderUserId)
+			user.UserStage:SetClearStage(1, 1)
 			return
 		end
 
-		local user = _UserService:GetUserEntityByUserId(senderUserId)
 		local userStage = user.UserStage
 		local userName = user.PlayerComponent.Nickname
-		local playTime = DateTime.UtcNow.Elapsed - _GameManager.playStartTs
+		local playTime = DateTime.UtcNow.Elapsed - gm.playStartTs
 		local key = _RankingService:GetRankKeyByTable({chapter=clearedChapter, stage=clearedStage})
 		_RankingService:AddPoint(key, userName, playTime)
 
-		_GameManager:UpdateRankData(userName, playTime, key, senderUserId)
+		gm:UpdateRankData(userName, playTime, key, senderUserId)
 
 		-- 서버에서 최초 클리어 판정 (AND 조건)
 		-- 1. 기존 조건: openChapter/openStage가 현재 스테이지와 같거나 이전
@@ -96,7 +99,7 @@ script NormalGameService extends Logic
 			senderUserId, tostring(isFirstClear), tostring(clearedChapter), tostring(clearedStage)))
 
 		-- 클라이언트 UI 업데이트 콜백 (일반 모드는 토큰 0)
-		_GameManager:StageClearClientCallback(isFirstClear, 0, senderUserId)
+		gm:StageClearClientCallback(isFirstClear, 0, senderUserId)
 
 		-- 기존 클리어 여부와 관계없이 다음 스테이지 오픈 체크 (새 챕터 추가 시 기존 유저도 다음 챕터 진행 가능하도록)
 		local nextStage = _StageService:GetNextOpenStageIdFromServer(userStage.openChapter, userStage.openStage)
@@ -107,17 +110,17 @@ script NormalGameService extends Logic
 
 
 		if isFirstClear == false then
-			_BillingService:AddSecondFreeCoin(senderUserId, 100)
-			_BillingService:AddThirdFreeCoin(senderUserId, 500)
+			self.Entity.BillingService:AddSecondFreeCoin(senderUserId, 100)
+			self.Entity.BillingService:AddThirdFreeCoin(senderUserId, 500)
 
 			print("[NormalGameService] Not first clear, skipping badge check")
 			return
 		end
 
-		_PlayCoinService:AddCoin(senderUserId, 1)
-		_BillingService:AddSecondFreeCoin(senderUserId, 500)
-		_BillingService:AddFirstFreeCoin(senderUserId, 100)
-		_BillingService:AddThirdFreeCoin(senderUserId, 4000)
+		self.Entity.PlayCoinService:AddCoin(senderUserId, 1)
+		self.Entity.BillingService:AddSecondFreeCoin(senderUserId, 500)
+		self.Entity.BillingService:AddFirstFreeCoin(senderUserId, 100)
+		self.Entity.BillingService:AddThirdFreeCoin(senderUserId, 4000)
 
 		print("[NormalGameService] First clear! Checking badges...")
 
@@ -141,21 +144,21 @@ script NormalGameService extends Logic
 	-- 로그 기록
 	@ExecSpace("Server")
 	method void LogStageClear()
-		local playTime = DateTime.UtcNow.Elapsed - _GameManager.playStartTs
-		local userEntity = _UserService:GetUserEntityByUserId(senderUserId)
-		local selectStageId = _GameManager.chapterIndex * 100 + _GameManager.mapIndex
-		local userDeck = userEntity.UserDeck.userDeck
-		local userSkill = userEntity.UserSkillDeck.userSkillDeck
+		local gm = self.Entity.GameManager
+		local playTime = DateTime.UtcNow.Elapsed - gm.playStartTs
+		local selectStageId = gm.chapterIndex * 100 + gm.mapIndex
+		local userDeck = self.Entity.UserDeck.userDeck
+		local userSkill = self.Entity.UserSkillDeck.userSkillDeck
 		_AnalyticsService:GameEnd(senderUserId, playTime, selectStageId, userDeck, userSkill, true)
 	end
 
 	@ExecSpace("Server")
 	method void LogStageFail()
-		local playTime = DateTime.UtcNow.Elapsed - _GameManager.playStartTs
-		local userEntity = _UserService:GetUserEntityByUserId(senderUserId)
-		local selectStageId = _GameManager.chapterIndex * 100 + _GameManager.mapIndex
-		local userDeck = userEntity.UserDeck.userDeck
-		local userSkill = userEntity.UserSkillDeck.userSkillDeck
+		local gm = self.Entity.GameManager
+		local playTime = DateTime.UtcNow.Elapsed - gm.playStartTs
+		local selectStageId = gm.chapterIndex * 100 + gm.mapIndex
+		local userDeck = self.Entity.UserDeck.userDeck
+		local userSkill = self.Entity.UserSkillDeck.userSkillDeck
 		_AnalyticsService:GameEnd(senderUserId, playTime, selectStageId, userDeck, userSkill, false)
 	end
 

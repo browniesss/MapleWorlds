@@ -11,7 +11,7 @@ script UnitService extends Logic
 		local dataSet = _DataService:GetTable("Unit")
 		for index = 1, dataSet:GetRowCount() do
 		    local item = {}
-			
+		
 			item['id'] = tostring(dataSet:GetCell(index, 'id'))
 			item['skillID'] = tostring(dataSet:GetCell(index, 'skillID'))
 			item['spawnSkill'] = tostring(dataSet:GetCell(index, 'spawnSkill'))
@@ -39,7 +39,7 @@ script UnitService extends Logic
 			item['criticalRatio'] = tonumber(dataSet:GetCell(index, 'criticalRatio'))
 			item['criticalDamage'] = tonumber(dataSet:GetCell(index, 'criticalDamage'))
 			item['grade'] = tonumber(dataSet:GetCell(index, 'grade'))
-			
+		
 			self.UnitTable[item['id']] = item
 		end
 		
@@ -93,11 +93,6 @@ script UnitService extends Logic
 
 	@ExecSpace("Server")
 	method void SyncCall()
-		if self.needSync == false then
-			return
-		end
-		
-		self.needSync = false
 		for k, v in pairs(self.UnitTable) do
 			self:SyncClient(v)
 		end
@@ -105,7 +100,7 @@ script UnitService extends Logic
 
 	@ExecSpace("ClientOnly")
 	method void OnSyncProperty(string name, any value)
-		if name == "needSync" then
+		if name == "needSync" and value == true then
 			self:SyncCall()
 		end
 	end

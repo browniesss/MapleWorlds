@@ -5,7 +5,7 @@ script AttendanceEndTs extends Component
 	handler HandleEntityEnabledInHierarchyChangedEvent(EntityEnabledInHierarchyChangedEvent event)
 		if event.EnabledInHierarchy == true then
 			-- 서버에 endTs 텍스트 요청 (서버에서 DataSet 접근)
-			_AttendanceEventService:RequestEndTsText()
+			_UserService.LocalPlayer.AttendanceEventService:RequestEndTsText()
 		end
 	end
 

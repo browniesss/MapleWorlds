@@ -23,8 +23,8 @@ script ExtendToggleTopMenu extends ToggleAction
 				end
 
 				-- 주간 매트릭스 코인 UI 갱신
-				if _MatrixCoinService ~= nil then
-					_MatrixCoinService:UpdateWeeklyPointUI()
+				if _UserService.LocalPlayer.MatrixCoinService ~= nil then
+					_UserService.LocalPlayer.MatrixCoinService:UpdateWeeklyPointUI()
 				end
 			end
 

@@ -1,5 +1,5 @@
-@Logic
-script TutorialService extends Logic
+@Component
+script TutorialService extends Component
 
 	property Entity tutorialUI = nil
 
@@ -52,6 +52,9 @@ script TutorialService extends Logic
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
+		if self.Entity ~= _UserService.LocalPlayer then
+			return
+		end
 		-- TutorialUI가 없으면 생성
 		self.tutorialUI = _EntityService:GetEntityByPath("/ui/TutorialUI")
 		if self.tutorialUI == nil then
@@ -285,6 +288,7 @@ script TutorialService extends Logic
 
 	@ExecSpace("Client")
 	method void StartTutorial(integer groupId)
+		log("[TutorialService] StartTutorial called groupId=" .. tostring(groupId) .. " gameMode=" .. tostring(_UserService.LocalPlayer.GameManager.currentGameMode))
 		-- 그룹 ID가 제공되지 않으면 기본값 1 사용
 		if groupId == nil or groupId <= 0 then
 			groupId = 1
@@ -973,14 +977,15 @@ script TutorialService extends Logic
 
 	@ExecSpace("Client")
 	method void StartIngameTutorial(integer groupId)
+		log("[TutorialService] StartIngameTutorial called groupId=" .. tostring(groupId) .. " gameMode=" .. tostring(_UserService.LocalPlayer.GameManager.currentGameMode))
 		-- 인게임 튜토리얼 시작 (NewTutorial DataSet 사용)
 		if groupId == nil or groupId <= 0 then
 			groupId = 1
 		end
-		
+
 		self.currentGroupId = groupId
 		self.isIngameTutorial = true
-		
+
 		print("=== Starting Ingame Tutorial Group " .. groupId .. " ===")
 		
 		-- 화면 크기 업데이트
@@ -1036,7 +1041,7 @@ script TutorialService extends Logic
 		self.isStepCooldown = false  -- 쿨다운 리셋
 
 		-- 첫 스탭을 보기만 해도 튜토리얼 완료 처리
-		local userId = _UserService.LocalPlayer.PlayerComponent.UserId
+		local userId = self.Entity.PlayerComponent.UserId
 		self:SAVE(userId)
 		print("[Tutorial] Ingame tutorial marked as completed for user: " .. userId)
 
@@ -1511,10 +1516,11 @@ script TutorialService extends Logic
 	method void SpawnTutorialMonsterServer()
 		-- 서버에서 튜토리얼용 몬스터 스폰
 		-- SpawnManager를 통해 적 스폰
-		if _SpawnManager ~= nil then
+		local spawnManager = self.Entity.SpawnManager
+		if spawnManager ~= nil then
 			-- 기본 몬스터 모델 ID 사용 (SpawnGroup의 첫 번째 유닛)
 			local monsterModelId = "model://5aac7c14-9173-4d47-96f1-5fc5429e36c4"
-			_SpawnManager:SpawnEnemy(monsterModelId, Vector3.zero)
+			spawnManager:SpawnEnemy(monsterModelId, Vector3.zero)
 		end
 	end
 
@@ -1546,8 +1552,8 @@ script TutorialService extends Logic
 			print("Game paused for tutorial")
 		
 			-- GameManager에 일시정지 알림
-			if _GameManager ~= nil then
-				_GameManager.isTutorialPaused = true
+			if self.Entity.GameManager ~= nil then
+				self.Entity.GameManager.isTutorialPaused = true
 			end
 		end
 	end
@@ -1560,8 +1566,8 @@ script TutorialService extends Logic
 			print("Game resumed")
 		
 			-- GameManager에 재개 알림
-			if _GameManager ~= nil then
-				_GameManager.isTutorialPaused = false
+			if self.Entity.GameManager ~= nil then
+				self.Entity.GameManager.isTutorialPaused = false
 			end
 		end
 	end
@@ -1588,13 +1594,13 @@ script TutorialService extends Logic
 		end
 		
 		-- GameManager 상태 복원
-		if _GameManager ~= nil then
-			_GameManager.isTutorialPaused = false
-			_GameManager.currentGameMode = _eGameMode.Normal
+		if self.Entity.GameManager ~= nil then
+			self.Entity.GameManager.isTutorialPaused = false
+			self.Entity.GameManager.currentGameMode = _eGameMode.Normal
 		end
 		
 		-- 튜토리얼 완료 저장
-		local userId = _UserService.LocalPlayer.PlayerComponent.UserId
+		local userId = self.Entity.PlayerComponent.UserId
 		self:SAVE(userId)
 		print("Ingame tutorial completed and saved for user: " .. userId)
 		
@@ -1731,7 +1737,7 @@ script TutorialService extends Logic
 
 	@ExecSpace("Client")
 	method void ResetTutorialData()
-		local userId = _UserService.LocalPlayer.PlayerComponent.UserId
+		local userId = self.Entity.PlayerComponent.UserId
 		self:RESET(userId)
 	end
 

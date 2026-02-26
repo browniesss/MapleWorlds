@@ -40,7 +40,7 @@ script SkillDeckListItem extends Component
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
-		local playerSkillDeck = _EntityService:GetEntityByTag("Player").UserSkillDeck
+		local playerSkillDeck = _UserService.LocalPlayer.UserSkillDeck
 		local userSkillSettingUI = _EntityService:GetEntityByPath("/ui/UserSkillSettingUI/UserSkillSetting").UserSkillSettingUI
 		local skillListUI = _EntityService:GetEntityByPath("/ui/UserSkillSettingUI/UserSkillSetting/SkillListUI").SkillListUI
 		local index = skillListUI.itemIndex

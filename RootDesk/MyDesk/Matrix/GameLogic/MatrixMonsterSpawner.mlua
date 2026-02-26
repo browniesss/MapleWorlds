@@ -1,5 +1,5 @@
-@Logic
-script MatrixMonsterSpawner extends Logic
+@Component
+script MatrixMonsterSpawner extends Component
 
 	-- 현재 스폰 중인 웨이브 정보
 	property table currentWaveMonsters = {}
@@ -89,7 +89,7 @@ script MatrixMonsterSpawner extends Logic
 			self.isSpawning = false
 
 			-- 클라이언트에 스폰 완료 알림
-			self:OnWaveSpawnCompleteClient()
+			self:OnWaveSpawnCompleteClient(self.Entity.PlayerComponent.UserId)
 			return
 		end
 
@@ -141,8 +141,10 @@ script MatrixMonsterSpawner extends Logic
 
 	@ExecSpace("Server")
 	method void SpawnSingleMonster(integer monsterId, number levelMultiplier, integer loopCount)
-		local spawnParent = _EntityService:GetEntityByPath("/maps/MatrixStage/EnemyList")
-		local spawnPos = _EntityService:GetEntityByPath("/maps/MatrixStage/EnemyList/EnemySpawnPoint")
+		local gm = self.Entity.GameManager
+		local mapPath = gm:GetGameMapName()
+		local spawnParent = _EntityService:GetEntityByPath(mapPath .. "/EnemyList")
+		local spawnPos = _EntityService:GetEntityByPath(mapPath .. "/EnemyList/EnemySpawnPoint")
 
 		if spawnParent == nil or spawnPos == nil then
 			return
@@ -213,8 +215,8 @@ script MatrixMonsterSpawner extends Logic
 	method void OnEnemyDefeated(Entity enemy)
 		-- 킬 포인트 추가 (현재 페이즈 기준) - 먼저 실행
 		local user = _UserService.LocalPlayer
-		if user ~= nil and user.UserMatrixManager ~= nil and _MatrixGameService ~= nil then
-			local phaseId = _MatrixGameService.currentPhaseId
+		if user ~= nil and user.UserMatrixManager ~= nil and self.Entity.MatrixGameService ~= nil then
+			local phaseId = self.Entity.MatrixGameService.currentPhaseId
 			user.UserMatrixManager:OnMonsterKilled(phaseId)
 		end
 
@@ -228,7 +230,7 @@ script MatrixMonsterSpawner extends Logic
 
 		-- 모든 적 처치 확인
 		if self.totalAliveCount <= 0 and not self.isSpawning then
-			self:OnAllEnemiesDefeatedClient()
+			self:OnAllEnemiesDefeatedClient(self.Entity.PlayerComponent.UserId)
 		end
 	end
 
@@ -269,7 +271,7 @@ script MatrixMonsterSpawner extends Logic
 
 	@ExecSpace("ServerOnly")
 	method void OnMapLeave(Entity leftMap)
-		if leftMap.Name == "MatrixStage" then
+		if string.find(leftMap.Name, "MatrixStage") ~= nil then
 			self:Reset()
 			self:ResetOnClient()
 		end

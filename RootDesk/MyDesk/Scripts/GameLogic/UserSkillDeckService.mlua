@@ -1,29 +1,31 @@
-@Logic
-script UserSkillDeckService extends Logic
+@Component
+script UserSkillDeckService extends Component
 
 	@ExecSpace("Server")
 	method integer SAVE()
-		local ds = _DataStorageService:GetUserDataStorage(senderUserId)
+		local uid = self.Entity.PlayerComponent.UserId
+		local ds = _DataStorageService:GetUserDataStorage(uid)
 		
 		local data = {}
-		local playerSkillDeck = _EntityService:GetEntityByTag("Player").UserSkillDeck
-		
+		local playerSkillDeck = self.Entity.UserSkillDeck
+
 		local deckList = {}
 		for i, modelId in ipairs(playerSkillDeck.userSkillDeck) do
 		    table.insert(deckList, modelId)
 		end
-		
+
 		data["UserSkillDeck"] = deckList
-		
+
 		local save =  _HttpService:JSONEncode(data)
-		
+
 		return ds:SetAndWait("USER_SKILLDECK",save)
 	end
 
 	@ExecSpace("Server")
 	method integer LOAD()
-		local ds = _DataStorageService:GetUserDataStorage(senderUserId)
-		local playerSkillDeck = _EntityService:GetEntityByTag("Player").UserSkillDeck
+		local uid = self.Entity.PlayerComponent.UserId
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local playerSkillDeck = self.Entity.UserSkillDeck
 		
 		local errCode, res = ds:GetAndWait("USER_SKILLDECK")
 		if errCode ~= 0 then
@@ -34,7 +36,7 @@ script UserSkillDeckService extends Logic
 			local deckList = {}
 			local data = {}
 			
-			local allUnit = _UserSkillService:DEFAULT_SKILL_SET()
+			local allUnit = self.Entity.UserSkillService:DEFAULT_SKILL_SET()
 			
 			math.randomseed(os.time())
 			for i = #allUnit, 2, -1 do
@@ -63,9 +65,13 @@ script UserSkillDeckService extends Logic
 		return 0
 	end
 
-	@ExecSpace("ClientOnly")
+	@ExecSpace("ServerOnly")
 	@EventSender("Service", "UserService")
 	handler HandleUserLeaveEvent(UserLeaveEvent event)
+		local UserId = event.UserId
+		if UserId ~= self.Entity.PlayerComponent.UserId then
+			return
+		end
 		self:SAVE()
 	end
 

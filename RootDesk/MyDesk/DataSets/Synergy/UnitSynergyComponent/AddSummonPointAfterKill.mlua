@@ -13,8 +13,12 @@ script AddSummonPointAfterKill extends BaseSynergyComponent
 	method void AddMoney()
 		local desposit = self:CalValue(0)
 
-		if _GameManager.currentGameMode == _eGameMode.PvP then
-			local pvpManager = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/PvPManager")
+		local mapEntityName = self.Entity.CurrentMap.Name
+		local ownerId = _GameRoomService:GetOwnerUserIdFromMapName(mapEntityName)
+		local ownerGM = _UserService:GetUserEntityByUserId(ownerId).GameManager
+
+		if ownerGM.currentGameMode == _eGameMode.PvP then
+			local pvpManager = _EntityService:GetEntityByPath(ownerGM:GetGameMapName() .. "/PvPManager")
 			if pvpManager == nil then
 				return
 			end

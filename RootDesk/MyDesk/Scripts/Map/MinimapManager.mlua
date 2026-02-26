@@ -20,7 +20,7 @@ script MinimapManager extends Component
 	end
 
 	method string GetMinimapPath()
-		if _GameManager.currentGameMode == _eGameMode.Matrix then
+		if _UserService.LocalPlayer.GameManager.currentGameMode == _eGameMode.Matrix then
 			return "/ui/MatrixUI/IngameUI/IngameInfoUI/Minimap Group/Minimap Background"
 		end
 		return "/ui/Ingame_Info_UI_Group/Minimap Group/Minimap Background"

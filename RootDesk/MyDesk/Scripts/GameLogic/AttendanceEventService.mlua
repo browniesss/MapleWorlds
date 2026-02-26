@@ -1,5 +1,5 @@
-@Logic
-script AttendanceEventService extends Logic
+@Component
+script AttendanceEventService extends Component
 
 	@Sync
 	property SyncTable<string, string> UserAttendanceData
@@ -11,6 +11,12 @@ script AttendanceEventService extends Logic
 	property table AllRewards = nil
 
 	property number DEBUG_DayOffset = 0
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		local uid = self.Entity.PlayerComponent.UserId
+		self:LoadUserAttendance(uid)
+	end
 
 	@ExecSpace("ServerOnly")
 	method void LoadUserAttendance(string uid)
@@ -239,12 +245,12 @@ script AttendanceEventService extends Logic
 		
 		if reward ~= nil then
 			if reward.gems > 0 then
-				_BillingService:AddFirstFreeCoin(uid, reward.gems)
+				self.Entity.BillingService:AddFirstFreeCoin(uid, reward.gems)
 				print("[AttendanceEventService] Gave " .. tostring(reward.gems) .. " paid gems to user " .. uid)
 			end
 		
 			if reward.coins > 0 then
-				_BillingService:AddSecondFreeCoin(uid, reward.coins)
+				self.Entity.BillingService:AddSecondFreeCoin(uid, reward.coins)
 				print("[AttendanceEventService] Gave " .. tostring(reward.coins) .. " free coins to user " .. uid)
 			end
 		end
@@ -307,7 +313,7 @@ script AttendanceEventService extends Logic
 	method void RequestClaimReward()
 		local uid = senderUserId
 		local result = self:ClaimDailyReward(uid)
-		self:SendClaimResultToClient(uid, result)
+		self:SendClaimResultToClient(uid, result, uid)
 	end
 
 	@ExecSpace("Client")
@@ -320,7 +326,7 @@ script AttendanceEventService extends Logic
 		local uid = senderUserId
 		local info = self:GetUserAttendanceInfo(uid)
 		local rewards = self:GetAttendanceRewards()
-		self:SendAttendanceInfoToClient(uid, info, rewards)
+		self:SendAttendanceInfoToClient(uid, info, rewards, uid)
 	end
 
 	@ExecSpace("Client")
@@ -355,7 +361,7 @@ script AttendanceEventService extends Logic
 	method void RequestCanClaimStatus()
 		local uid = senderUserId
 		local canClaim = self:CanClaimReward(uid)
-		self:SendCanClaimStatusToClient(uid, canClaim)
+		self:SendCanClaimStatusToClient(uid, canClaim, uid)
 	end
 
 	@ExecSpace("Client")
@@ -406,7 +412,7 @@ script AttendanceEventService extends Logic
 	method void RequestEventStatus()
 		local uid = senderUserId
 		local isActive = self:IsEventActive()
-		self:SendEventStatusToClient(uid, isActive)
+		self:SendEventStatusToClient(uid, isActive, uid)
 	end
 
 	@ExecSpace("Server")
@@ -418,7 +424,7 @@ script AttendanceEventService extends Logic
 		-- 이벤트 활성화 AND 7일 미완료인 경우에만 버튼 표시
 		local shouldShow = isActive and not isCompleted
 
-		self:SendButtonVisibilityToClient(uid, shouldShow)
+		self:SendButtonVisibilityToClient(uid, shouldShow, uid)
 	end
 
 	@ExecSpace("Client")
@@ -444,18 +450,18 @@ script AttendanceEventService extends Logic
 	method void RequestEndTsText()
 		local uid = senderUserId
 		local dataSet = _DataService:GetTable("AttendanceRewards")
-		
+
 		if dataSet == nil then
 			return
 		end
-		
+
 		local endTs = tonumber(dataSet:GetCell(1, "endTs"))
-		
+
 		if endTs == nil or endTs == 0 then
 			return
 		end
-		
-		self:SendEndTsToClient(uid, endTs)
+
+		self:SendEndTsToClient(uid, endTs, uid)
 	end
 
 	@ExecSpace("Client")
@@ -527,7 +533,7 @@ script AttendanceEventService extends Logic
 			if result.totalDays >= 7 then
 				print("[AttendanceEventService] 7-day attendance completed!")
 				self:CloseUI()
-				_AttendanceEventService:RequestButtonVisibility()
+				self:RequestButtonVisibility()
 			end
 		else
 			print("[AttendanceEventService] Claim failed: " .. result.message)
@@ -541,14 +547,11 @@ script AttendanceEventService extends Logic
 	end
 
 	@EventSender("Service", "UserService")
-	handler HandleUserEnterEvent(UserEnterEvent event)
-		local uid = event.UserId
-		self:LoadUserAttendance(uid)	
-	end
-
-	@EventSender("Service", "UserService")
 	handler HandleUserLeaveEvent(UserLeaveEvent event)
 		local uid = event.UserId
+		if uid ~= self.Entity.PlayerComponent.UserId then
+			return
+		end
 		self:SaveUserAttendanceFromCache(uid)
 		self.UserAttendanceData[uid] = nil
 		print("[AttendanceEventService] Saved and cleared attendance data for user: " .. uid)

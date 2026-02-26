@@ -3,35 +3,35 @@ script GachaCount extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
-		_UserSummonService:AddUserSummonCountCallBack("UserSummonData", self.SetSummonCount)
+		_UserService.LocalPlayer.UserSummonService:AddUserSummonCountCallBack("UserSummonData", self.SetSummonCount)
 	end
 
 	@ExecSpace("ClientOnly")
 	method void SetSummonCount()
-		local userSummonData = _UserSummonService.UserSummonData[_GachaManager.GachaKey]
-		
-		if userSummonData == nil then
-			return
-		end
-		
-		local summonPoolData = _SummonService:GET_SETTING(_GachaManager.GachaKey)
+		local summonPoolData = _UserService.LocalPlayer.SummonService:GET_SETTING(_GachaManager.GachaKey)
 		if summonPoolData == nil then
 			return
 		end
-		
+
 		local summonPoolCount = summonPoolData.pickup_char_limit
-		
+
 		_GachaManager.GachaCountRoot.Enable = true
 		_GachaManager.GachaEndTimeRoot.Enable = true
-		if summonPoolCount == 0 then
+		if summonPoolCount == nil or summonPoolCount == 0 then
 			_GachaManager.GachaCountRoot.Enable = false
 			_GachaManager.GachaEndTimeRoot.Enable = false
 			return
 		end
-		
-		local summonCountList = _HttpService:JSONDecode(userSummonData)
-		local remainCount = summonPoolCount - summonCountList.count
-		
+
+		local userSummonData = _UserService.LocalPlayer.UserSummonService.UserSummonData[_GachaManager.GachaKey]
+		local userCount = 0
+		if userSummonData ~= nil then
+			local summonCountList = _HttpService:JSONDecode(userSummonData)
+			userCount = summonCountList.count or 0
+		end
+
+		local remainCount = summonPoolCount - userCount
+
 		_GachaManager.GachaCountText.TextComponent.Text ="<color=#FFD700>" .. remainCount .. "</color>회 안에 픽업캐릭터 확정"
 	end
 

@@ -3,7 +3,7 @@ script AdventureButton extends Component
 
 	@ExecSpace("Server")
 	method void Function1()
-		_GameManager.currentGameMode = _eGameMode.Test
+		_UserService.LocalPlayer.GameManager.currentGameMode = _eGameMode.Test
 	end
 
 	@EventSender("Entity", "847fe505-dd41-4eef-89ab-c33aaceec548")
@@ -63,11 +63,11 @@ script AdventureButton extends Component
 		self:Function1()
 		-- 데이터 세팅 필요
 		
-		local ruids = _GameManager:GetPreLoadAssetRuid()
+		local ruids = _UserService.LocalPlayer.GameManager:GetPreLoadAssetRuid()
 		
 		_ResourceService:PreloadAsync(ruids, function()
 			_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "TestMap")
-			_GameManager:GameStart(1, 1, false)
+			_UserService.LocalPlayer.GameManager:GameStart(1, 1, false)
 		end)
 	end
 

@@ -97,11 +97,12 @@ script pvpMatcherMakerComponent extends Component
 		end
 
 		self.targetUserList = newList
-		self:RefeshListBack(newList)
+		self:RefeshListBack(newList, senderUserId)
 	end
 
 	@ExecSpace("Client")
-	method void RefeshListBack(table list)
+	method void RefeshListBack(table list, string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
 		self.targetUserList = list
 
 		local pvpLobbyUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI")
@@ -188,11 +189,12 @@ script pvpMatcherMakerComponent extends Component
 			defense_synergy = target.cachedSynergy or {}
 		}
 
-		self:FetchOpponentDeckBack(deckData)
+		self:FetchOpponentDeckBack(deckData, senderUserId)
 	end
 
 	@ExecSpace("Client")
-	method void FetchOpponentDeckBack(table deckData)
+	method void FetchOpponentDeckBack(table deckData, string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
 		local pvpLobbyUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI")
 		if pvpLobbyUI ~= nil and pvpLobbyUI.PvPLobbyUI ~= nil then
 			pvpLobbyUI.PvPLobbyUI:ShowOpponentDeck(deckData)
@@ -221,26 +223,62 @@ script pvpMatcherMakerComponent extends Component
 			isDummy = target.isDummy or false
 		}
 
-		-- pvpCombatComponent에 매치 정보 설정
-		local pvpManager = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/PvPManager")
+		-- 동적 맵 생성
+		local userId = senderUserId
+		local sourceMapName = "StagePvP"
+		local newMapName = sourceMapName .. "_" .. userId
+
+		-- 기존 동적 맵 정리
+		local oldMapName = _GameRoomService.userDynamicMapNames[userId]
+		if oldMapName ~= nil then
+			_GameRoomService.userDynamicMapNames[userId] = nil
+			_GameRoomService:TryDestroyDynamicMap(oldMapName)
+		end
+
+		local resultCode = _DynamicMapService:CreateDynamicMap(sourceMapName, newMapName)
+		if resultCode ~= DynamicMapResultCode.Success then
+			if resultCode == DynamicMapResultCode.DuplicateMapName then
+				_DynamicMapService:DestroyDynamicMap(newMapName)
+				resultCode = _DynamicMapService:CreateDynamicMap(sourceMapName, newMapName)
+				if resultCode ~= DynamicMapResultCode.Success then
+					log_error("[PvP] Failed to create dynamic map: " .. newMapName)
+					return
+				end
+			else
+				log_error("[PvP] Failed to create dynamic map: " .. newMapName .. " code=" .. tostring(resultCode))
+				return
+			end
+		end
+
+		-- 추적 등록
+		_GameRoomService.userDynamicMapNames[userId] = newMapName
+		_GameRoomService.activeDynamicMaps[newMapName] = true
+
+		-- @Sync로 동적 맵 이름 설정
+		local _gm = _UserService:GetUserEntityByUserId(userId).GameManager
+		_gm.dynamicMapName = newMapName
+
+		-- 동적 맵의 PvPManager에 매치 정보 설정
+		local dynamicMapPath = "/maps/" .. newMapName
+		local pvpManager = _EntityService:GetEntityByPath(dynamicMapPath .. "/PvPManager")
 		local pvpCombat = pvpManager ~= nil and pvpManager.pvpCombatComponent or nil
 		if pvpCombat ~= nil then
 			pvpCombat:SetMatchInfo(matchData)
 		end
 
 		-- 게임 모드 설정
-		_GameManager.currentGameMode = _eGameMode.PvP
+		_gm.currentGameMode = _eGameMode.PvP
 
 		-- 맵 텔레포트
 		_TeleportService:TeleportToMapPosition(
-			_UserService:GetUserEntityByUserId(senderUserId),
+			_UserService:GetUserEntityByUserId(userId),
 			Vector3.zero,
-			"StagePvP"
+			newMapName
 		)
 
 		-- 게임 시작
 		if pvpCombat ~= nil then
-			pvpCombat:GameStartCall(senderUserId)
+			pvpCombat:GameStartCall(userId)
 		end
 	end
 

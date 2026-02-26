@@ -6,7 +6,7 @@ script Boss_Punch extends SkillParent
 		__base:ActivateSkill()
 		
 		
-		local myMonsterList = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+		local myMonsterList = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/MyMonsterList")
 		local myMonsters = myMonsterList.Children
 		
 		local pushFunction = function()

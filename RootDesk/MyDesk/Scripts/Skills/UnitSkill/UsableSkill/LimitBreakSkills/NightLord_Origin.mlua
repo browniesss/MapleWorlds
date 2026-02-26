@@ -11,18 +11,18 @@ script NightLord_Origin extends SkillParent
 		local targetListParent
 		local isEnemy = self.caster.Unit ~= nil and self.caster.Unit.isEnemy
 		if isEnemy then
-			targetListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+			targetListParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/MyMonsterList")
 		else
-			targetListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
+			targetListParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/EnemyList")
 		end
 		local enemies = targetListParent.Children
 		local player = _EntityService:GetEntityByTag("Player")
 		local entity = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group")
 		
-		_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = "faea96f94c5f4ee6ba9291d850049836"
-		_GameManager.screenSkillUI.SpriteGUIRendererComponent.LocalScale = Vector2(1.08, 1.15)
-		_GameManager.screenSkillUI.Enable = true
-		_GameManager.screenSkillUI.Visible = true
+		_UserService.LocalPlayer.GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = "faea96f94c5f4ee6ba9291d850049836"
+		_UserService.LocalPlayer.GameManager.screenSkillUI.SpriteGUIRendererComponent.LocalScale = Vector2(1.08, 1.15)
+		_UserService.LocalPlayer.GameManager.screenSkillUI.Enable = true
+		_UserService.LocalPlayer.GameManager.screenSkillUI.Visible = true
 		
 		local hitFunction = function()
 			for index in ipairs(enemies) do
@@ -42,10 +42,10 @@ script NightLord_Origin extends SkillParent
 		end
 		
 		local deleteFunction = function()
-			_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = ""
-			_GameManager.screenSkillUI.Enable = false	
-			_GameManager.screenSkillUI.Visible = false
-			_GameManager.screenSkillUI.SpriteGUIRendererComponent.LocalScale = Vector2.one
+			_UserService.LocalPlayer.GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = ""
+			_UserService.LocalPlayer.GameManager.screenSkillUI.Enable = false	
+			_UserService.LocalPlayer.GameManager.screenSkillUI.Visible = false
+			_UserService.LocalPlayer.GameManager.screenSkillUI.SpriteGUIRendererComponent.LocalScale = Vector2.one
 			_UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill = false
 			_UserService.LocalPlayer.PlayerCharacter.isLimitBreakSkill = false
 		end

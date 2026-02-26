@@ -159,13 +159,13 @@ script UnitShopItem extends Component
 		end
 
 		-- 튜토리얼 스텝 전환 쿨다운 중에는 터치 무시
-		if _TutorialService ~= nil and _TutorialService.isStepCooldown then
+		if _UserService.LocalPlayer.TutorialService ~= nil and _UserService.LocalPlayer.TutorialService.isStepCooldown then
 			return
 		end
 
 		-- PvP 모드 처리
-		if _GameManager.currentGameMode == _eGameMode.PvP then
-			local pvpManager = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/PvPManager")
+		if _UserService.LocalPlayer.GameManager.currentGameMode == _eGameMode.PvP then
+			local pvpManager = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName() .. "/PvPManager")
 			if pvpManager == nil then return end
 			local pvpUserSpawn = pvpManager.pvpUserSpawnComponent
 			if pvpUserSpawn == nil then return end
@@ -175,26 +175,28 @@ script UnitShopItem extends Component
 			return
 		end
 
-		if not _SpawnManager:IsCanSpawn(self.price)then
+		local spawnManager = _UserService.LocalPlayer.SpawnManager
+		if not spawnManager:IsCanSpawn(self.price)then
 			return
 		end
 
-		if _GameManager.currentGameMode == _eGameMode.Matrix and _MatrixSpawnManager ~= nil then
-			_MatrixSpawnManager:Spawn(self.unitData['id'], self.price, Vector3.zero, self.unitData.level, self.unitData.limitBreak)
+		local matrixSpawnMgr = _UserService.LocalPlayer.MatrixSpawnManager
+		if _UserService.LocalPlayer.GameManager.currentGameMode == _eGameMode.Matrix and matrixSpawnMgr ~= nil then
+			matrixSpawnMgr:Spawn(self.unitData['id'], self.price, Vector3.zero, self.unitData.level, self.unitData.limitBreak)
 		else
-			_SpawnManager:Spawn(self.unitData['id'], self.price, Vector3.zero)
+			spawnManager:Spawn(self.unitData['id'], self.price, Vector3.zero)
 		end
 
 		self.shop:OnSpawn(self.id, self.price)
 
 		-- 인게임 튜토리얼 중 소환 이벤트 알림
 		print("[UnitShopItem] ButtonClick - Checking tutorial...")
-		print("  _TutorialService exists: " .. tostring(_TutorialService ~= nil))
-		if _TutorialService ~= nil then
-			print("  isIngameTutorial: " .. tostring(_TutorialService.isIngameTutorial))
-			if _TutorialService.isIngameTutorial then
+		print("  _UserService.LocalPlayer.TutorialService exists: " .. tostring(_UserService.LocalPlayer.TutorialService ~= nil))
+		if _UserService.LocalPlayer.TutorialService ~= nil then
+			print("  isIngameTutorial: " .. tostring(_UserService.LocalPlayer.TutorialService.isIngameTutorial))
+			if _UserService.LocalPlayer.TutorialService.isIngameTutorial then
 				print("[UnitShopItem] Calling OnUnitSummoned...")
-				_TutorialService:OnUnitSummoned()
+				_UserService.LocalPlayer.TutorialService:OnUnitSummoned()
 			end
 		end
 	end
@@ -257,10 +259,11 @@ script UnitShopItem extends Component
 		local isKeyDown = false
 
 		-- 일반 모드 또는 매트릭스 모드 체크
-		local isPlaying = _GameManager.isPlaying
+		local isPlaying = _UserService.LocalPlayer.GameManager.isPlaying
 		local isMatrixMode = false
-		local isPvPMode = _GameManager.currentGameMode == _eGameMode.PvP
-		if _MatrixGameManager ~= nil and _MatrixGameManager.isPlaying then
+		local isPvPMode = _UserService.LocalPlayer.GameManager.currentGameMode == _eGameMode.PvP
+		local matrixGM = _UserService.LocalPlayer.MatrixGameManager
+		if matrixGM ~= nil and matrixGM.isPlaying then
 			isPlaying = true
 			isMatrixMode = true
 		end
@@ -289,7 +292,7 @@ script UnitShopItem extends Component
 		end
 
 		-- 튜토리얼 진행 중이거나 스텝 전환 쿨다운 중에는 키 입력 무시
-		if _TutorialService ~= nil and (_TutorialService.isIngameTutorial or _TutorialService.isStepCooldown) then
+		if _UserService.LocalPlayer.TutorialService ~= nil and (_UserService.LocalPlayer.TutorialService.isIngameTutorial or _UserService.LocalPlayer.TutorialService.isStepCooldown) then
 			return
 		end
 
@@ -309,7 +312,7 @@ script UnitShopItem extends Component
 
 		-- PvP 모드 스폰 처리
 		if isPvPMode then
-			local pvpManager = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/PvPManager")
+			local pvpManager = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName() .. "/PvPManager")
 			if pvpManager == nil then return end
 			local pvpCombat = pvpManager.pvpCombatComponent
 			if pvpCombat == nil or not pvpCombat.isPlaying then return end
@@ -321,23 +324,25 @@ script UnitShopItem extends Component
 			return
 		end
 
-		if not _SpawnManager:IsCanSpawn(self.price) then
+		local spawnManager = _UserService.LocalPlayer.SpawnManager
+		if not spawnManager:IsCanSpawn(self.price) then
 			return
 		end
 
-		if _GameManager.currentGameMode == _eGameMode.Matrix and _MatrixSpawnManager ~= nil then
-			_MatrixSpawnManager:Spawn(self.unitData['id'], self.price, Vector3.zero, self.unitData.level, self.unitData.limitBreak)
+		local matrixSpawnMgrKey = _UserService.LocalPlayer.MatrixSpawnManager
+		if _UserService.LocalPlayer.GameManager.currentGameMode == _eGameMode.Matrix and matrixSpawnMgrKey ~= nil then
+			matrixSpawnMgrKey:Spawn(self.unitData['id'], self.price, Vector3.zero, self.unitData.level, self.unitData.limitBreak)
 		else
-			_SpawnManager:Spawn(self.unitData['id'], self.price, Vector3.zero)
+			spawnManager:Spawn(self.unitData['id'], self.price, Vector3.zero)
 		end
 
 		self.shop:OnSpawn(self.id, self.price)
 
 		-- 인게임 튜토리얼 중 소환 이벤트 알림
 		print("[UnitShopItem] KeyDown - Checking tutorial...")
-		if _TutorialService ~= nil and _TutorialService.isIngameTutorial then
+		if _UserService.LocalPlayer.TutorialService ~= nil and _UserService.LocalPlayer.TutorialService.isIngameTutorial then
 			print("[UnitShopItem] Calling OnUnitSummoned from KeyDown...")
-			_TutorialService:OnUnitSummoned()
+			_UserService.LocalPlayer.TutorialService:OnUnitSummoned()
 		end
 	end
 

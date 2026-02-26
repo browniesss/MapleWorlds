@@ -34,11 +34,16 @@ script TermService extends Logic
 	end
 
 	@ExecSpace("Client")
-	method void AgreePopupOn()
+	method void AgreePopupOn(string uid)
+		-- 자신의 uid가 아니면 무시 (Logic의 @Client는 모든 클라이언트에 브로드캐스트됨)
+		if _UserService.LocalPlayer == nil or _UserService.LocalPlayer.PlayerComponent.UserId ~= uid then
+			return
+		end
 		local ui = _EntityService:GetEntityByPath("/ui/TermUI")
-			
-		ui.Enable = true
-		ui.Visible = true
+		if ui ~= nil then
+			ui.Enable = true
+			ui.Visible = true
+		end
 	end
 
 end

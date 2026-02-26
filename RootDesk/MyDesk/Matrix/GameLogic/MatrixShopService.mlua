@@ -197,12 +197,12 @@ script MatrixShopService extends Logic
 
 	@ExecSpace("ServerOnly")
 	method boolean DeductCurrency(string userId, integer price)
-		return _MatrixCoinService:UseMatrixCoin(userId, price)
+		return _UserService:GetUserEntityByUserId(userId).MatrixCoinService:UseMatrixCoin(userId, price)
 	end
 
 	@ExecSpace("ServerOnly")
 	method void RefundCurrency(string userId, integer price)
-		_MatrixCoinService:RefundMatrixCoin(userId, price)
+		_UserService:GetUserEntityByUserId(userId).MatrixCoinService:RefundMatrixCoin(userId, price)
 	end
 
 	@ExecSpace("ServerOnly")
@@ -211,27 +211,28 @@ script MatrixShopService extends Logic
 		local rewardValue = itemData["reward_value"]
 		
 		
+		local userEntity = _UserService:GetUserEntityByUserId(userId)
 		if rewardType == "unit" then
-			_UserMonsterService:AddCount(userId, {rewardValue})
+			userEntity.UserMonsterService:AddCount(userId, {rewardValue})
 			_BadgeConditionService:CheckPickupBadges(userId, rewardValue)
 			return true
 		elseif rewardType == "dia_free" then
-			local result = _BillingService:AddFirstFreeCoin(userId, tonumber(rewardValue))
+			local result = userEntity.BillingService:AddFirstFreeCoin(userId, tonumber(rewardValue))
 			return result == 0
 		elseif rewardType == "dia_paid" then
-			local result = _BillingService:AddFirstPaidCoin(userId, tonumber(rewardValue))
+			local result = userEntity.BillingService:AddFirstPaidCoin(userId, tonumber(rewardValue))
 			return result == 0
 		elseif rewardType == "coin_free" then
-			local result = _BillingService:AddSecondFreeCoin(userId, tonumber(rewardValue))
+			local result = userEntity.BillingService:AddSecondFreeCoin(userId, tonumber(rewardValue))
 			return result == 0
 		elseif rewardType == "coin_paid" then
-			local result = _BillingService:AddSecondPaidCoin(userId, tonumber(rewardValue))
+			local result = userEntity.BillingService:AddSecondPaidCoin(userId, tonumber(rewardValue))
 			return result == 0
 		elseif rewardType == "meso_free" then
-			local result = _BillingService:AddThirdFreeCoin(userId, tonumber(rewardValue))
+			local result = userEntity.BillingService:AddThirdFreeCoin(userId, tonumber(rewardValue))
 			return result == 0
 		elseif rewardType == "meso_paid" then
-			local result = _BillingService:AddThirdPaidCoin(userId, tonumber(rewardValue))
+			local result = userEntity.BillingService:AddThirdPaidCoin(userId, tonumber(rewardValue))
 			return result == 0
 		end
 		
@@ -245,20 +246,20 @@ script MatrixShopService extends Logic
 		-- 상품 데이터 확인
 		local itemData = self:GetItemData(itemId)
 		if itemData == nil then
-			self:OnPurchaseComplete(itemId, false, "", "ITEM_NOT_FOUND")
+			self:OnPurchaseComplete(itemId, false, "", "ITEM_NOT_FOUND", userId)
 			return
 		end
 		
 		-- 구매 가능 여부 확인 (횟수 제한)
 		if not self:CanPurchase(userId, itemId) then
-			self:OnPurchaseComplete(itemId, false, itemData["name"], "LIMIT_REACHED")
+			self:OnPurchaseComplete(itemId, false, itemData["name"], "LIMIT_REACHED", userId)
 			return
 		end
 		
 		-- 재화 차감
 		local price = itemData["price"]
 		if not self:DeductCurrency(userId, price) then
-			self:OnPurchaseComplete(itemId, false, itemData["name"], "INSUFFICIENT_CURRENCY")
+			self:OnPurchaseComplete(itemId, false, itemData["name"], "INSUFFICIENT_CURRENCY", userId)
 			return
 		end
 		
@@ -266,7 +267,7 @@ script MatrixShopService extends Logic
 		if not self:GiveReward(userId, itemData) then
 			-- 재화 환불 (실패 시)
 			self:RefundCurrency(userId, price)
-			self:OnPurchaseComplete(itemId, false, itemData["name"], "REWARD_FAILED")
+			self:OnPurchaseComplete(itemId, false, itemData["name"], "REWARD_FAILED", userId)
 			return
 		end
 		
@@ -277,12 +278,13 @@ script MatrixShopService extends Logic
 		purchaseData["lastResetTs"] = self:GetCurrentWeekResetTs()
 		self:SavePurchaseData(userId, purchaseData)
 		
-		self:OnPurchaseComplete(itemId, true, itemData["name"], "")
+		self:OnPurchaseComplete(itemId, true, itemData["name"], "", userId)
 	end
 
 	@ExecSpace("Client")
-	method void OnPurchaseComplete(string itemId, boolean success, string itemName, string errorCode)
-		
+	method void OnPurchaseComplete(string itemId, boolean success, string itemName, string errorCode, string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
+
 		-- 결과 팝업 표시
 		local matrixShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/MatrixShopParent")
 		if matrixShopParent ~= nil then
@@ -327,12 +329,13 @@ script MatrixShopService extends Logic
 		purchaseData["lastResetTs"] = self:GetCurrentWeekResetTs()
 		self:SavePurchaseData(userId, purchaseData)
 		
-		self:OnDebugResetComplete()
+		self:OnDebugResetComplete(userId)
 	end
 
 	@ExecSpace("Client")
-	method void OnDebugResetComplete()
-		
+	method void OnDebugResetComplete(string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
+
 		local matrixShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/MatrixShopParent")
 		if matrixShopParent == nil then
 			return
@@ -354,11 +357,13 @@ script MatrixShopService extends Logic
 	method void RequestItemStatus(string itemId)
 		local userId = senderUserId
 		local purchaseCount = self:GetPurchaseCount(userId, itemId)
-		self:OnItemStatusReceived(itemId, purchaseCount)
+		self:OnItemStatusReceived(itemId, purchaseCount, userId)
 	end
 
 	@ExecSpace("Client")
-	method void OnItemStatusReceived(string itemId, integer purchaseCount)
+	method void OnItemStatusReceived(string itemId, integer purchaseCount, string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
+
 		local matrixShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/MatrixShopParent")
 		if matrixShopParent == nil then
 			return

@@ -54,26 +54,32 @@ script pvpUserService extends Logic
 		end
 
 		-- offense_deck, defense_deck는 JSON 문자열로 저장되어 있으므로 다시 디코딩
-		if type(decoded.offense_deck) == "string" then
+		if type(decoded.offense_deck) == "string" and decoded.offense_deck ~= "" then
 			decoded.offense_deck = _HttpService:JSONDecode(decoded.offense_deck)
 		end
-		if type(decoded.defense_deck) == "string" then
+		if decoded.offense_deck == nil or decoded.offense_deck == "" then
+			decoded.offense_deck = nil
+		end
+		if type(decoded.defense_deck) == "string" and decoded.defense_deck ~= "" then
 			decoded.defense_deck = _HttpService:JSONDecode(decoded.defense_deck)
+		end
+		if decoded.defense_deck == nil or decoded.defense_deck == "" then
+			decoded.defense_deck = nil
 		end
 		-- 덱 배열을 8요소로 정규화 (sparse array JSON 문제 방지)
 		decoded.offense_deck = self:NormalizeDeck(decoded.offense_deck)
 		decoded.defense_deck = self:NormalizeDeck(decoded.defense_deck)
 		-- offense_synergy, defense_synergy 디코딩
-		if type(decoded.offense_synergy) == "string" then
+		if type(decoded.offense_synergy) == "string" and decoded.offense_synergy ~= "" then
 			decoded.offense_synergy = _HttpService:JSONDecode(decoded.offense_synergy)
 		end
-		if decoded.offense_synergy == nil then
+		if decoded.offense_synergy == nil or decoded.offense_synergy == "" then
 			decoded.offense_synergy = {}
 		end
-		if type(decoded.defense_synergy) == "string" then
+		if type(decoded.defense_synergy) == "string" and decoded.defense_synergy ~= "" then
 			decoded.defense_synergy = _HttpService:JSONDecode(decoded.defense_synergy)
 		end
-		if decoded.defense_synergy == nil then
+		if decoded.defense_synergy == nil or decoded.defense_synergy == "" then
 			decoded.defense_synergy = {}
 		end
 

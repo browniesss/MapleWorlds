@@ -14,7 +14,7 @@ script Call_Cygnus_Knights extends SkillParent
 		
 		local targetIdList = {}
 		
-		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
+		if _UserService.LocalPlayer.GameManager ~= nil and _UserService.LocalPlayer.GameManager.currentGameMode == _eGameMode.Matrix then
 			-- 매트릭스 모드: Unit DataSet에서 기사단 전체를 대상으로 랜덤 선택
 			for id, _ in pairs(kightsMap) do
 				targetIdList[#targetIdList + 1] = id
@@ -45,10 +45,11 @@ script Call_Cygnus_Knights extends SkillParent
 		
 		if self.caster.Unit.isEnemy == false then
 			local pos = Vector3(self.caster.TransformComponent.Position.x - 0.5, self.caster.TransformComponent.Position.y + 0.5, 0)
-			if _GameManager.currentGameMode == _eGameMode.Matrix and _MatrixSpawnManager ~= nil then
-				_MatrixSpawnManager:CygnusSkillSpawn(model, pos)
+			local matrixSpawnMgr = _UserService.LocalPlayer.MatrixSpawnManager
+			if _UserService.LocalPlayer.GameManager.currentGameMode == _eGameMode.Matrix and matrixSpawnMgr ~= nil then
+				matrixSpawnMgr:CygnusSkillSpawn(model, pos)
 			else
-				_SpawnManager:CygnusSkillSpawn(model, pos)
+				_UserService.LocalPlayer.SpawnManager:CygnusSkillSpawn(model, pos)
 			end
 		end
 		

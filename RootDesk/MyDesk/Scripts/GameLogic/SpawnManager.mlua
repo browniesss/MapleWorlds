@@ -1,12 +1,11 @@
-@Logic
-script SpawnManager extends Logic
-
-	@Sync
-	property Entity userWallet = "03a1c87b-00aa-49d9-9d14-ada3697851e0"
+@Component
+script SpawnManager extends Component
 
 	@ExecSpace("Server")
 	method void Spawn(string modelID, integer price, Vector3 pos)
 		_ProtocolService:CommonCall(senderUserId)
+
+		local user = self.Entity
 
 		if modelID == "model://6194a4e3-0eb4-417a-92b5-891af548b672" then
 			self:SpawnCygnus(pos, senderUserId)
@@ -14,14 +13,13 @@ script SpawnManager extends Logic
 		end
 
 		local unitModel = _BuffedUnitService:GetBuffedUnitModel(senderUserId, modelID)
-		local user = _UserService:GetUserEntityByUserId(senderUserId)
 
 		if not self:IsCanSpawn(price) then
 			return
 		end
 
-		local spawnParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/MyMonsterList')
-		local spawnPos = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList/MySpawnPoint")
+		local spawnParent = _EntityService:GetEntityByPath(self.Entity.GameManager:GetGameMapName()..'/MyMonsterList')
+		local spawnPos = _EntityService:GetEntityByPath(self.Entity.GameManager:GetGameMapName().."/MyMonsterList/MySpawnPoint")
 
 		if pos == Vector3.zero then
 			pos = spawnPos.TransformComponent.Position
@@ -72,7 +70,7 @@ script SpawnManager extends Logic
 		end
 
 		local userUnitModel = UserUnitModel()
-		userUnitModel:DECODE(_UserMonsterService.userMonsterDict[unitModel.id])
+		userUnitModel:DECODE(self.Entity.UserMonsterService.userMonsterDict[unitModel.id])
 		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, userUnitModel.level, userUnitModel.limitBreak)
 		user.UserBreakLimitSkillClient:ActivateSkill(unitModel.LimitBreakActiveSkill)
 		spawnEntity.Unit:Spawn(unitModel, skillData)
@@ -81,8 +79,8 @@ script SpawnManager extends Logic
 		self:ApplyMatrixAugments(spawnEntity, user)
 
 		-- 유닛 중복 강화 적용
-		if _MatrixUnitSelectService ~= nil then
-			_MatrixUnitSelectService:ApplyStoredUpgrades(spawnEntity)
+		if self.Entity.MatrixUnitSelectService ~= nil then
+			self.Entity.MatrixUnitSelectService:ApplyStoredUpgrades(spawnEntity)
 		end
 
 		self:GetUserWallet().MesoWallet:UseMeso(price)
@@ -90,8 +88,8 @@ script SpawnManager extends Logic
 
 	@ExecSpace("Server")
 	method void SpawnEnemy(string modelID, Vector3 pos)
-		local spawnParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName() .."/EnemyList")
-		local spawnPos = _EntityService:GetEntityByPath(_GameManager:GetGameMapName() .."/EnemyList/EnemySpawnPoint")
+		local spawnParent = _EntityService:GetEntityByPath(self.Entity.GameManager:GetGameMapName() .."/EnemyList")
+		local spawnPos = _EntityService:GetEntityByPath(self.Entity.GameManager:GetGameMapName() .."/EnemyList/EnemySpawnPoint")
 		local unitData = _UnitService:GetUnitByIDFromServer(modelID)
 		local skillData = _SkillService:GetSkillByIDFromServer(unitData["skillID"])
 		local spawnEntity
@@ -105,12 +103,12 @@ script SpawnManager extends Logic
 		local curStage
 		local stageId
 
-		if (_GameManager.currentGameMode == _eGameMode.Event) then
-			stageId = _GameManager.mapIndex
+		if (self.Entity.GameManager.currentGameMode == _eGameMode.Event) then
+			stageId = self.Entity.GameManager.mapIndex
 			local eventIdValue = tostring(_EventService.currentEventVersion)
-			curStage = _EventService:GetEventStageByIdFromServer(eventIdValue, _GameManager.chapterIndex, _GameManager.mapIndex)
+			curStage = _EventService:GetEventStageByIdFromServer(eventIdValue, self.Entity.GameManager.chapterIndex, self.Entity.GameManager.mapIndex)
 		else
-			stageId = _GameManager.chapterIndex * 100 + _GameManager.mapIndex
+			stageId = self.Entity.GameManager.chapterIndex * 100 + self.Entity.GameManager.mapIndex
 			curStage = _StageService:GetStageByIdFromServer(tostring(stageId))
 		end
 
@@ -119,7 +117,7 @@ script SpawnManager extends Logic
 		end
 
 		-- 하드모드면 hard_level 값만큼 레벨 추가
-		local isHardMode = (_GameManager.currentGameMode == _eGameMode.Hard)
+		local isHardMode = (self.Entity.GameManager.currentGameMode == _eGameMode.Hard)
 		if isHardMode then
 			local hardLevelBonus = 0
 			if curStage ~= nil and curStage["hard_level"] ~= nil then
@@ -150,16 +148,16 @@ script SpawnManager extends Logic
 	end
 
 	method Entity GetUserWallet()
-		return _EntityService:GetEntityByPath(_GameManager:GetGameMapName() .. "/userWallet")
+		return _EntityService:GetEntityByPath(self.Entity.GameManager:GetGameMapName() .. "/userWallet")
 	end
 
 	method Entity GetUserIncome()
-		return _EntityService:GetEntityByPath(_GameManager:GetGameMapName() .. "/ingameIncome")
+		return _EntityService:GetEntityByPath(self.Entity.GameManager:GetGameMapName() .. "/ingameIncome")
 	end
 
 	method void ApplyMatrixAugments(Entity spawnEntity, Entity user)
 		-- 매트릭스 모드가 아니면 스킵
-		if _GameManager.currentGameMode ~= _eGameMode.Matrix then
+		if self.Entity.GameManager.currentGameMode ~= _eGameMode.Matrix then
 			return
 		end
 
@@ -279,7 +277,7 @@ script SpawnManager extends Logic
 	method void SkillSpawn(string target, string summoner, Vector3 pos)
 		local unitData = _UnitService:GetUnitByIDFromServer(target)
 
-		local summonerJson = _UserMonsterService.userMonsterDict[summoner]
+		local summonerJson = self.Entity.UserMonsterService.userMonsterDict[summoner]
 
 		local summonerModel = UserUnitModel()
 		summonerModel:DECODE(summonerJson)
@@ -289,8 +287,8 @@ script SpawnManager extends Logic
 
 		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, summonerModel.level, 1)
 
-		local spawnParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/MyMonsterList')
-		local spawnPos = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList/MySpawnPoint")
+		local spawnParent = _EntityService:GetEntityByPath(self.Entity.GameManager:GetGameMapName()..'/MyMonsterList')
+		local spawnPos = _EntityService:GetEntityByPath(self.Entity.GameManager:GetGameMapName().."/MyMonsterList/MySpawnPoint")
 
 		if pos == Vector3.zero then
 			pos = spawnPos.TransformComponent.Position
@@ -299,57 +297,55 @@ script SpawnManager extends Logic
 		local spawnEntity = _SpawnService:SpawnByModelId(unitModel.id, "Pig", pos, spawnParent)
 		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
 
-		if senderUserId ~= nil then
-			local user = _UserService:GetUserEntityByUserId(senderUserId)
-			local jobID = tostring(unitModel.jobId)
-			local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(unitModel.jobId)
-			local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(jobID, count)
+		local user = self.Entity
+		local jobID = tostring(unitModel.jobId)
+		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(unitModel.jobId)
+		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(jobID, count)
 
-			if synergy:length() > 0 then
-				local item = synergy:Get(1)
+		if synergy:length() > 0 then
+			local item = synergy:Get(1)
 
-				if jobID == "1" then
-					spawnEntity:RemoveComponent("IncreaseHpByTime")
-					spawnEntity:AddComponent("IncreaseHpByTime")
-					spawnEntity.IncreaseHpByTime.Enable = true
-					spawnEntity.IncreaseHpByTime.type = item.type
-					spawnEntity.IncreaseHpByTime.value = item.value
-				end
-
-				if jobID == "2" then
-					spawnEntity:RemoveComponent("CriticalAttack")
-					spawnEntity:AddComponent("CriticalAttack")
-					spawnEntity.CriticalAttack.Enable = true
-					spawnEntity.CriticalAttack.type = item.type
-					spawnEntity.CriticalAttack.value = item.value
-				end
-
-				if jobID == "3" then
-					spawnEntity:RemoveComponent("IncreaseMpByTime")
-					spawnEntity:AddComponent("IncreaseMpByTime")
-					spawnEntity.IncreaseMpByTime.Enable = true
-					spawnEntity.IncreaseMpByTime.type = item.type
-					spawnEntity.IncreaseMpByTime.value = item.value
-				end
-
-				if jobID == "4" then
-					spawnEntity:RemoveComponent("AddSummonPointAfterKill")
-					spawnEntity:AddComponent("AddSummonPointAfterKill")
-					spawnEntity.AddSummonPointAfterKill.Enable = true
-					spawnEntity.AddSummonPointAfterKill.type = item.type
-					spawnEntity.AddSummonPointAfterKill.value = item.value
-					spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet()
-				end
+			if jobID == "1" then
+				spawnEntity:RemoveComponent("IncreaseHpByTime")
+				spawnEntity:AddComponent("IncreaseHpByTime")
+				spawnEntity.IncreaseHpByTime.Enable = true
+				spawnEntity.IncreaseHpByTime.type = item.type
+				spawnEntity.IncreaseHpByTime.value = item.value
 			end
 
-			-- 매트릭스 증강 컴포넌트 적용
-			self:ApplyMatrixAugments(spawnEntity, user)
+			if jobID == "2" then
+				spawnEntity:RemoveComponent("CriticalAttack")
+				spawnEntity:AddComponent("CriticalAttack")
+				spawnEntity.CriticalAttack.Enable = true
+				spawnEntity.CriticalAttack.type = item.type
+				spawnEntity.CriticalAttack.value = item.value
+			end
+
+			if jobID == "3" then
+				spawnEntity:RemoveComponent("IncreaseMpByTime")
+				spawnEntity:AddComponent("IncreaseMpByTime")
+				spawnEntity.IncreaseMpByTime.Enable = true
+				spawnEntity.IncreaseMpByTime.type = item.type
+				spawnEntity.IncreaseMpByTime.value = item.value
+			end
+
+			if jobID == "4" then
+				spawnEntity:RemoveComponent("AddSummonPointAfterKill")
+				spawnEntity:AddComponent("AddSummonPointAfterKill")
+				spawnEntity.AddSummonPointAfterKill.Enable = true
+				spawnEntity.AddSummonPointAfterKill.type = item.type
+				spawnEntity.AddSummonPointAfterKill.value = item.value
+				spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet()
+			end
 		end
+
+		-- 매트릭스 증강 컴포넌트 적용
+		self:ApplyMatrixAugments(spawnEntity, user)
 		spawnEntity.Unit:Spawn(unitModel, skillData)
 
 		-- 유닛 중복 강화 적용
-		if _MatrixUnitSelectService ~= nil then
-			_MatrixUnitSelectService:ApplyStoredUpgrades(spawnEntity)
+		if self.Entity.MatrixUnitSelectService ~= nil then
+			self.Entity.MatrixUnitSelectService:ApplyStoredUpgrades(spawnEntity)
 		end
 	end
 
@@ -357,7 +353,7 @@ script SpawnManager extends Logic
 	method void SpawnCygnus(Vector3 pos, string userID)
 		local modelID = "model://6194a4e3-0eb4-417a-92b5-891af548b672"
 		local unitModel = _BuffedUnitService:GetBuffedUnitModel(userID, modelID)
-		local user = _UserService:GetUserEntityByUserId(userID)
+		local user = self.Entity
 
 		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(102)
 		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE("102", count)
@@ -378,8 +374,8 @@ script SpawnManager extends Logic
 
 		self:GetUserWallet().MesoWallet:UseMeso(price)
 
-		local spawnParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/MyMonsterList')
-		local spawnPos = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList/MySpawnPoint")
+		local spawnParent = _EntityService:GetEntityByPath(self.Entity.GameManager:GetGameMapName()..'/MyMonsterList')
+		local spawnPos = _EntityService:GetEntityByPath(self.Entity.GameManager:GetGameMapName().."/MyMonsterList/MySpawnPoint")
 
 		if pos == Vector3.zero then
 			pos = spawnPos.TransformComponent.Position
@@ -441,7 +437,7 @@ script SpawnManager extends Logic
 	method void CygnusSkillSpawn(string modelID, Vector3 pos)
 		_ProtocolService:CommonCall(senderUserId)
 
-		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		local user = self.Entity
 
 		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(102)
 		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE("102", count)
@@ -453,7 +449,7 @@ script SpawnManager extends Logic
 		local item = synergy:Get(1)
 
 		local unitModel = nil
-		if _GameManager.currentGameMode == _eGameMode.Matrix then
+		if self.Entity.GameManager.currentGameMode == _eGameMode.Matrix then
 			-- 매트릭스 모드: Unit DataSet에서 기사단 데이터 참조
 			local unitData = _UnitService:GetUnitByIDFromServer(modelID)
 			unitModel = BuffedUnitModel()
@@ -465,8 +461,8 @@ script SpawnManager extends Logic
 
 		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, math.floor(item.value), 1)
 
-		local spawnParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/MyMonsterList')
-		local spawnPos = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList/MySpawnPoint")
+		local spawnParent = _EntityService:GetEntityByPath(self.Entity.GameManager:GetGameMapName()..'/MyMonsterList')
+		local spawnPos = _EntityService:GetEntityByPath(self.Entity.GameManager:GetGameMapName().."/MyMonsterList/MySpawnPoint")
 
 		if pos == Vector3.zero then
 			pos = spawnPos.TransformComponent.Position
@@ -483,7 +479,7 @@ script SpawnManager extends Logic
 		spawnEntity.Unit.effectId = effectId
 
 		-- 매트릭스 증강 컴포넌트 적용
-		if _GameManager.currentGameMode == _eGameMode.Matrix then
+		if self.Entity.GameManager.currentGameMode == _eGameMode.Matrix then
 			self:ApplyMatrixAugments(spawnEntity, user)
 		end
 

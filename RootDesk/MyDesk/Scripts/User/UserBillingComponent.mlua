@@ -4,70 +4,74 @@ script UserBillingComponent extends Component
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
 		local uid = self.Entity.PlayerComponent.UserId
-		local res = _BillingService:LOAD_OR_INIT(uid)
-		res = _BillingService:EVENT_LOAD_OR_INIT(uid)
+		local res = self.Entity.BillingService:LOAD_OR_INIT(uid)
+		res = self.Entity.BillingService:EVENT_LOAD_OR_INIT(uid)
 	end
 
 	@ExecSpace("ClientOnly")
 	method integer GetFirstCoin()
 		local uid = self.Entity.PlayerComponent.UserId
-		local freeCoin = _BillingService.FirstFreeCoin
-		local paidCoin = _BillingService.FirstPaidCoin
-		
+		local billing = _UserService.LocalPlayer.BillingService
+		local freeCoin = billing.FirstFreeCoin
+		local paidCoin = billing.FirstPaidCoin
+
 		if freeCoin < 0 then
 			return -1
 		end
-		
+
 		if paidCoin < 0 then
 			return -1
 		end
-		
+
 		return freeCoin + paidCoin
 	end
 
 	@ExecSpace("ClientOnly")
 	method integer GetSecondCoin()
 		local uid = self.Entity.PlayerComponent.UserId
-		local freeCoin = _BillingService.SecondFreeCoin
-		local paidCoin = _BillingService.SecondPaidCoin
-		
+		local billing = _UserService.LocalPlayer.BillingService
+		local freeCoin = billing.SecondFreeCoin
+		local paidCoin = billing.SecondPaidCoin
+
 		if freeCoin < 0 then
 			return -1
 		end
-		
+
 		if paidCoin < 0 then
 			return -1
 		end
-		
+
 		return freeCoin + paidCoin
 	end
 
 	@ExecSpace("ClientOnly")
 	method integer GetThirdCoin()
 		local uid = self.Entity.PlayerComponent.UserId
-		local freeCoin = _BillingService.ThirdFreeCoin
-		local paidCoin = _BillingService.ThirdPaidCoin
-		
+		local billing = _UserService.LocalPlayer.BillingService
+		local freeCoin = billing.ThirdFreeCoin
+		local paidCoin = billing.ThirdPaidCoin
+
 		if freeCoin < 0 then
 			return -1
 		end
-		
+
 		if paidCoin < 0 then
 			return -1
 		end
-		
+
 		return freeCoin + paidCoin
 	end
 
 	@ExecSpace("ClientOnly")
 	method integer GetEventCoin()
 		local uid = self.Entity.PlayerComponent.UserId
-		local eventCoin = _BillingService.EventCoin
-		
+		local billing = _UserService.LocalPlayer.BillingService
+		local eventCoin = billing.EventCoin
+
 		if eventCoin < 0 then
 			return -1
 		end
-		
+
 		return eventCoin
 	end
 

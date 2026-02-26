@@ -13,23 +13,39 @@ script UICoinInfo extends Component
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		local currentPath = self.Entity.Path
-		self.FirstCoin = _EntityService:GetEntityByPath(currentPath .. "/UICoin_Root/UIFirstCoinPanel/TextCoin").TextComponent
-		self.SecondCoin = _EntityService:GetEntityByPath(currentPath .. "/UICoin_Root/UISecondCoinPanel/TextCoin").TextComponent
-		self.PlayCoin = _EntityService:GetEntityByPath(currentPath .. "/UICoin_Root/UIPlayCoinPanel/TextCoin").TextComponent
+		local firstCoinEntity = _EntityService:GetEntityByPath(currentPath .. "/UICoin_Root/UIFirstCoinPanel/TextCoin")
+		local secondCoinEntity = _EntityService:GetEntityByPath(currentPath .. "/UICoin_Root/UISecondCoinPanel/TextCoin")
+		local playCoinEntity = _EntityService:GetEntityByPath(currentPath .. "/UICoin_Root/UIPlayCoinPanel/TextCoin")
+		if firstCoinEntity ~= nil then
+			self.FirstCoin = firstCoinEntity.TextComponent
+		end
+		if secondCoinEntity ~= nil then
+			self.SecondCoin = secondCoinEntity.TextComponent
+		end
+		if playCoinEntity ~= nil then
+			self.PlayCoin = playCoinEntity.TextComponent
+		end
 	end
 
 	@ExecSpace("ClientOnly")
 	method void OnUpdate(number delta)
+		if _UserService.LocalPlayer == nil then
+			return
+		end
 		local userBillingComp = _UserService.LocalPlayer.UserBillingComponent
-		
+		if userBillingComp == nil or self.FirstCoin == nil or self.SecondCoin == nil or self.PlayCoin == nil then
+			return
+		end
+
 		self.FirstCoin.Text = tostring(userBillingComp:GetFirstCoin())
 		self.SecondCoin.Text = tostring(userBillingComp:GetSecondCoin())
-		
-		local playCoinText = tostring(_PlayCoinService.playCoin)
-		if _PlayCoinService.playCoin < _PlayCoinService.maxPlayCoin then
-			
-			local min = math.floor(_PlayCoinService.nextUpdateTs / 60)
-			local sec = _PlayCoinService.nextUpdateTs % 60
+
+		local playCoinSvc = _UserService.LocalPlayer.PlayCoinService
+		local playCoinText = tostring(playCoinSvc.playCoin)
+		if playCoinSvc.playCoin < playCoinSvc.maxPlayCoin then
+
+			local min = math.floor(playCoinSvc.nextUpdateTs / 60)
+			local sec = playCoinSvc.nextUpdateTs % 60
 			
 			playCoinText = "[" .. tostring(min) ..":" .. string.format("%02d",sec) .."] " .. playCoinText
 		end

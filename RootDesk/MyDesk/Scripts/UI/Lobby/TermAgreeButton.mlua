@@ -4,11 +4,11 @@ script TermAgreeButton extends Component
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
 		local ui = _EntityService:GetEntityByPath("/ui/TermUI")
-		local player = _EntityService:GetEntityByTag("Player")
-		
+		local player = _UserService.LocalPlayer
+
 		ui.Enable = false
 		ui.Visible = false
-		
+
 		_TermService:SAVE(player.PlayerComponent.UserId)
 
 		_NoticeService:ShowNoticePopupDirect()

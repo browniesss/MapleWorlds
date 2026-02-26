@@ -1,5 +1,5 @@
-@Logic
-script UserSummonService extends Logic
+@Component
+script UserSummonService extends Component
 
 	@Sync
 	property SyncTable<string, string> UserSummonData
@@ -17,10 +17,16 @@ script UserSummonService extends Logic
 	end
 
 	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		local uid = self.Entity.PlayerComponent.UserId
+		self:INIT(uid)
+	end
+
+	@ExecSpace("ServerOnly")
 	method integer INIT(string uid)
 		local ds = _DataStorageService:GetUserDataStorage(uid)
-		
-		local allSummonList = _SummonService.summonSetting
+
+		local allSummonList = self.Entity.SummonService.summonSetting
 		local keyList = {}
 		for k, v in pairs(allSummonList) do
 			keyList[#keyList + 1] = k
@@ -96,18 +102,19 @@ script UserSummonService extends Logic
 	@ExecSpace("ServerOnly")
 	method integer SET_SUMMON_COUNT(string uid, string pool_id, integer count)
 		local userJson = self.UserSummonData[pool_id]
-		if userJson == nil then
-			return -1
+		local userData = nil
+		if userJson ~= nil then
+			userData = _HttpService:JSONDecode(userJson)
+		else
+			userData = {count=0}
 		end
-		
-		local userData = _HttpService:JSONDecode(userJson)
-		
+
 		userData.count = count
-		
+
 		userJson = _HttpService:JSONEncode(userData)
-		
+
 		self.UserSummonData[pool_id] = userJson
-		
+
 		return self:SAVE_ONE(uid, pool_id)
 	end
 
@@ -115,30 +122,16 @@ script UserSummonService extends Logic
 	method integer GET_SUMMON_COUNT(string pool_id)
 		local userJson = self.UserSummonData[pool_id]
 		if userJson == nil then
-			return -1
+			return 0
 		end
-		
+
 		local userData = _HttpService:JSONDecode(userJson)
-		
-		return userData.count
+
+		return userData.count or 0
 	end
 
 	method void AddUserSummonCountCallBack(string name, any callback)
 		self.userSummonCallback[name] = callback
-	end
-
-	@EventSender("Service", "UserService")
-	handler HandleUserEnterEvent(UserEnterEvent event)
-		--------------- Native Event Sender Info ----------------
-		-- Sender: UserService
-		-- Space: Server
-		---------------------------------------------------------
-		
-		-- Parameters
-		-- local ProfileCode = event.ProfileCode
-		-- local UserId = event.UserId
-		---------------------------------------------------------
-		self:INIT(event.UserId)
 	end
 
 	@EventSender("Service", "UserService")
@@ -152,8 +145,12 @@ script UserSummonService extends Logic
 		-- local ProfileCode = event.ProfileCode
 		-- local UserId = event.UserId
 		---------------------------------------------------------
-		
-		self:SAVE_ALL(event.UserId)
+		local UserId = event.UserId
+		if UserId ~= self.Entity.PlayerComponent.UserId then
+			return
+		end
+
+		self:SAVE_ALL(UserId)
 	end
 
 end

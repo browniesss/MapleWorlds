@@ -128,7 +128,7 @@ script UnitDetailInfo extends Component
 			end
 		else
 			-- 내 유닛: 기존 로직 (UserMonsterService 조회)
-			local data = _UserMonsterService:GetOne(self.unitData.id)
+			local data = _UserService.LocalPlayer.UserMonsterService:GetOne(self.unitData.id)
 			if not (data == nil) then
 				if data.limitBreak > 2 then
 					count = " X" .. (data.limitBreak - 1)

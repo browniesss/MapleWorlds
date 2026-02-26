@@ -1,5 +1,5 @@
-@Logic
-script MonsterCodexService extends Logic
+@Component
+script MonsterCodexService extends Component
 
 	@Sync
 	property SyncTable<string, string> codexData
@@ -15,6 +15,10 @@ script MonsterCodexService extends Logic
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
 		self:LoadCodexData()
+		local uid = self.Entity.PlayerComponent.UserId
+		self:LoadUserData(uid)
+		local json = self:EncodeUserData(uid)
+		self:OnUserDataReceived(uid, json, uid)
 	end
 
 	@ExecSpace("ServerOnly")
@@ -184,8 +188,8 @@ script MonsterCodexService extends Logic
 			if unitData ~= nil then
 				monsterName = unitData["name"] or ""
 			end
-			-- 달성 알림 보내기 (첫 번째 파라미터가 targetUserId)
-			self:NotifyCodexCompleted(userId, monsterId, monsterName)
+			-- 달성 알림 보내기 (마지막 파라미터가 targetUserId)
+			self:NotifyCodexCompleted(userId, monsterId, monsterName, userId)
 		end
 	end
 
@@ -259,7 +263,7 @@ script MonsterCodexService extends Logic
 		end
 		
 		-- 이펙트 표시 (플레이어 위치)
-		local player = _UserService.LocalPlayer
+		local player = self.Entity
 		if player ~= nil then
 			_EffectService:PlayEffectAttached("93f3cd96f3b1432693e5d2765d396338", player, Vector3(0, 100, 0), 2, Vector3.one)
 		end
@@ -273,36 +277,36 @@ script MonsterCodexService extends Logic
 		local codexInfo = self:GetCodexInfo(monsterId)
 		if codexInfo == nil then
 			log_error("[MonsterCodex] Codex info not found:", monsterId)
-			self:OnClaimRewardResult(userId, monsterId, false, "NOT_FOUND")
+			self:OnClaimRewardResult(userId, monsterId, false, "NOT_FOUND", userId)
 			return
 		end
-		
+
 		-- 유저 데이터 확인
 		if self.userKillData[userId] == nil then
 			self:LoadUserData(userId)
 		end
-		
+
 		-- 달성 여부 확인
 		if not self:IsCompleted(userId, monsterId) then
-			self:OnClaimRewardResult(userId, monsterId, false, "NOT_COMPLETED")
+			self:OnClaimRewardResult(userId, monsterId, false, "NOT_COMPLETED", userId)
 			return
 		end
-		
+
 		-- 이미 수령했는지 확인
 		if self:IsRewardClaimed(userId, monsterId) then
-			self:OnClaimRewardResult(userId, monsterId, false, "ALREADY_CLAIMED")
+			self:OnClaimRewardResult(userId, monsterId, false, "ALREADY_CLAIMED", userId)
 			return
 		end
-		
+
 		-- 보상 지급 (머쉬다이아)
 		local rewardAmount = codexInfo["reward_amount"]
-		local result = _BillingService:AddFirstFreeCoin(userId, rewardAmount)
+		local result = self.Entity.BillingService:AddFirstFreeCoin(userId, rewardAmount)
 		if result ~= 0 then
 			log_error("[MonsterCodex] Failed to add reward:", result)
-			self:OnClaimRewardResult(userId, monsterId, false, "REWARD_FAILED")
+			self:OnClaimRewardResult(userId, monsterId, false, "REWARD_FAILED", userId)
 			return
 		end
-		
+
 		-- 수령 완료 표시
 		if self.userKillData[userId]["claimed"] == nil then
 			self.userKillData[userId]["claimed"] = {}
@@ -310,7 +314,7 @@ script MonsterCodexService extends Logic
 		self.userKillData[userId]["claimed"][monsterId] = true
 		self:SaveUserData(userId)
 
-		self:OnClaimRewardResult(userId, monsterId, true, "")
+		self:OnClaimRewardResult(userId, monsterId, true, "", userId)
 	end
 
 	@ExecSpace("Client")
@@ -333,7 +337,7 @@ script MonsterCodexService extends Logic
 		
 		-- 클라이언트에 전송
 		local json = self:EncodeUserData(userId)
-		self:OnUserDataReceived(userId, json)
+		self:OnUserDataReceived(userId, json, userId)
 	end
 
 	@ExecSpace("Client")
@@ -418,7 +422,7 @@ script MonsterCodexService extends Logic
 			end
 		
 			-- 이펙트 표시
-			local player = _UserService.LocalPlayer
+			local player = self.Entity
 			if player ~= nil then
 				_EffectService:PlayEffectAttached("93f3cd96f3b1432693e5d2765d396338", player, Vector3(0, 100, 0), 2, Vector3.one)
 			end
@@ -476,17 +480,12 @@ script MonsterCodexService extends Logic
 	end
 
 	@EventSender("Service", "UserService")
-	handler HandleUserEnterEvent(UserEnterEvent event)
-		self:LoadUserData(event.UserId)
-		
-		-- 클라이언트에 초기 데이터 전송
-		local json = self:EncodeUserData(event.UserId)
-		self:OnUserDataReceived(event.UserId, json)
-	end
-
-	@EventSender("Service", "UserService")
 	handler HandleUserLeaveEvent(UserLeaveEvent event)
-		self:SaveUserData(event.UserId)
+		local UserId = event.UserId
+		if UserId ~= self.Entity.PlayerComponent.UserId then
+			return
+		end
+		self:SaveUserData(UserId)
 	end
 
 end

@@ -4,13 +4,13 @@ script StageGiveUpButton extends Component
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
 		-- 인게임 튜토리얼 진행 중에는 버튼 비활성화
-		if _TutorialService ~= nil and _TutorialService.isIngameTutorial and _TutorialService.isActive then
+		if _UserService.LocalPlayer.TutorialService ~= nil and _UserService.LocalPlayer.TutorialService.isIngameTutorial and _UserService.LocalPlayer.TutorialService.isActive then
 			return
 		end
 
 		-- PvP 모드 처리: 포기 = 패배
-		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.PvP then
-			local pvpManager = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/PvPManager")
+		if _UserService.LocalPlayer.GameManager ~= nil and _UserService.LocalPlayer.GameManager.currentGameMode == _eGameMode.PvP then
+			local pvpManager = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName() .. "/PvPManager")
 			if pvpManager ~= nil and pvpManager.pvpCombatComponent ~= nil then
 				pvpManager.pvpCombatComponent:GiveUpCall()
 			end
@@ -21,23 +21,23 @@ script StageGiveUpButton extends Component
 		-- chapterIndex와 mapIndex로 직접 판단 (동기화 문제 해결)
 		local wasTutorialMode = false
 		local isEventMode = false
-		if _GameManager ~= nil then
-			local chapterIndex = _GameManager.chapterIndex
-			local mapIndex = _GameManager.mapIndex
+		if _UserService.LocalPlayer.GameManager ~= nil then
+			local chapterIndex = _UserService.LocalPlayer.GameManager.chapterIndex
+			local mapIndex = _UserService.LocalPlayer.GameManager.mapIndex
 			wasTutorialMode = (chapterIndex == 0 and mapIndex == 0)
-			isEventMode = (_GameManager.currentGameMode == _eGameMode.Event)
+			isEventMode = (_UserService.LocalPlayer.GameManager.currentGameMode == _eGameMode.Event)
 		end
 
-		_GameManager:GameEnd()
+		_UserService.LocalPlayer.GameManager:GameEnd()
 
 		-- 이벤트 모드와 일반 모드에 따라 다른 로그 메서드 호출
 		if isEventMode then
-			_GameManager:Log_EventStageFail()
+			_UserService.LocalPlayer.GameManager:Log_EventStageFail()
 		else
-			_GameManager:Log_NormalStageFail()
+			_UserService.LocalPlayer.GameManager:Log_NormalStageFail()
 		end
 		_LoadingManager:Show()
-		_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "MainLobbyMap")
+		_GameRoomService:RequestExit()
 
 		-- MainLobbyUI 다시 활성화
 		local mainLobbyUI = _EntityService:GetEntityByPath("/ui/MainLobbyUI")
@@ -81,8 +81,8 @@ script StageGiveUpButton extends Component
 		-- 튜토리얼 모드였다면 로비 진입 후 로비 튜토리얼 시작
 		if wasTutorialMode then
 			_TimerService:SetTimerOnce(function()
-				if _TutorialService ~= nil then
-					_TutorialService:StartLobbyTutorial(2)
+				if _UserService.LocalPlayer.TutorialService ~= nil then
+					_UserService.LocalPlayer.TutorialService:StartLobbyTutorial(2)
 				end
 			end, 1.5)
 		end

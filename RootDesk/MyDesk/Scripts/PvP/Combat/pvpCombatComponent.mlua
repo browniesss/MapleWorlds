@@ -23,6 +23,13 @@ script pvpCombatComponent extends Component
 	method void GameStartCall(string userId)
 		self.currentUserId = userId
 
+		local _gm = _UserService:GetUserEntityByUserId(userId).GameManager
+
+		-- 동적 맵에서 UUID 참조가 깨지므로 경로 기반으로 타워 재링크
+		local mapPath = _gm:GetGameMapName()
+		self.UserTower = _EntityService:GetEntityByPath(mapPath .. "/PlayerTower")
+		self.EnemyTower = _EntityService:GetEntityByPath(mapPath .. "/EnemyTower")
+
 		-- 이전 게임 잔여 데이터 정리
 		self:CleanupPreviousGame()
 
@@ -70,10 +77,10 @@ script pvpCombatComponent extends Component
 		self.maxGameTime = _pvpService.MAX_GAME_TIME
 
 		-- isPlaying 플래그 설정 (UnitShopItem 키 입력에 필요)
-		_GameManager.isPlaying = true
+		_gm.isPlaying = true
 
 		-- 메소 수입 차단 (포인트 표시 간섭 방지)
-		local ingameIncome = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/ingameIncome")
+		local ingameIncome = _EntityService:GetEntityByPath(_gm:GetGameMapName() .. "/ingameIncome")
 		if ingameIncome ~= nil then
 			ingameIncome.Enable = false
 		end
@@ -83,14 +90,21 @@ script pvpCombatComponent extends Component
 
 	@ExecSpace("Client")
 	method void GameStartBack()
+		local _gm = _UserService.LocalPlayer.GameManager
+
+		-- 동적 맵에서 UUID 참조가 깨지므로 클라이언트에서도 타워 재링크
+		local mapPath = _gm:GetGameMapName()
+		self.UserTower = _EntityService:GetEntityByPath(mapPath .. "/PlayerTower")
+		self.EnemyTower = _EntityService:GetEntityByPath(mapPath .. "/EnemyTower")
+
 		-- 클라이언트 측 게임 모드 설정 (@Sync 재전파 미발생 대비)
-		_GameManager.currentGameMode = _eGameMode.PvP
+		_gm.currentGameMode = _eGameMode.PvP
 
 		-- 이전 게임 클라이언트 잔여 데이터 정리 (미니맵 아이콘)
 		local minimapPath = "/ui/Ingame_Info_UI_Group/Minimap Group/Minimap Background"
 		local minimap = _EntityService:GetEntityByPath(minimapPath)
 		if minimap ~= nil then
-			_GameManager:DestroyChildrenInClient(minimap, true)
+			_gm:DestroyChildrenInClient(minimap, true)
 		end
 
 		-- MainLobbyUI 비활성화
@@ -142,7 +156,7 @@ script pvpCombatComponent extends Component
 		end
 
 		-- ingameWalletUI 비활성화 (MesoUI 포인트 표시 간섭 방지)
-		local ingameWalletUI = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/ingameWalletUI")
+		local ingameWalletUI = _EntityService:GetEntityByPath(_gm:GetGameMapName() .. "/ingameWalletUI")
 		if ingameWalletUI ~= nil then
 			ingameWalletUI.Enable = false
 		end
@@ -169,7 +183,7 @@ script pvpCombatComponent extends Component
 		end
 
 		-- 플레이어 스킬 로드 (D/F키 — UserSkillDeck 기반)
-		_GameManager:SetPlayerCharacter()
+		_gm:SetPlayerCharacter()
 
 		-- SkillSlots UI 활성화 및 초기화
 		local skillSlots = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group/SkillSlots")
@@ -239,13 +253,16 @@ script pvpCombatComponent extends Component
 	method void GameEndCall(boolean isWin)
 		self.isPlaying = false
 
+		local _gm = _UserService:GetUserEntityByUserId(self.currentUserId).GameManager
+
 		-- 배속 초기화
-		if _TimeScaleManager ~= nil then
-			_TimeScaleManager:ResetTimeScale()
+		local tsm = _UserService:GetUserEntityByUserId(self.currentUserId).TimeScaleManager
+		if tsm ~= nil then
+			tsm:ResetTimeScale(self.currentUserId)
 		end
 
 		-- isPlaying 플래그 초기화
-		_GameManager.isPlaying = false
+		_gm.isPlaying = false
 
 		-- AI 정리
 		local pvpAi = self.Entity.pvpAiPlayerComponent
@@ -263,14 +280,14 @@ script pvpCombatComponent extends Component
 		self:DestroyAllUnits()
 
 		-- 스킬/투사체 정리
-		local mapPath = _pvpService.PVP_STAGE_PATH
+		local mapPath = _gm:GetGameMapName()
 		local skillParent = _EntityService:GetEntityByPath(mapPath .. "/SkillParent")
 		if skillParent ~= nil then
-			_GameManager:DestroyChildren(skillParent, false)
+			_gm:DestroyChildren(skillParent, false)
 		end
 		local projectileParent = _EntityService:GetEntityByPath(mapPath .. "/ProjectileParent")
 		if projectileParent ~= nil then
-			_GameManager:DestroyChildren(projectileParent, false)
+			_gm:DestroyChildren(projectileParent, false)
 		end
 
 		-- 노멀 덱 시너지 복원
@@ -282,7 +299,7 @@ script pvpCombatComponent extends Component
 		end
 
 		-- 메소 수입 복원
-		local ingameIncome = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/ingameIncome")
+		local ingameIncome = _EntityService:GetEntityByPath(_gm:GetGameMapName() .. "/ingameIncome")
 		if ingameIncome ~= nil then
 			ingameIncome.Enable = true
 		end
@@ -356,7 +373,7 @@ script pvpCombatComponent extends Component
 		local minimapPath = "/ui/Ingame_Info_UI_Group/Minimap Group/Minimap Background"
 		local minimap = _EntityService:GetEntityByPath(minimapPath)
 		if minimap ~= nil then
-			_GameManager:DestroyChildrenInClient(minimap, true)
+			_UserService.LocalPlayer.GameManager:DestroyChildrenInClient(minimap, true)
 		end
 
 		-- 결과 UI 표시
@@ -463,15 +480,17 @@ script pvpCombatComponent extends Component
 		-- 잔여 유닛 제거
 		self:DestroyAllUnits()
 
+		local _gm = _UserService:GetUserEntityByUserId(self.currentUserId).GameManager
+
 		-- 잔여 스킬/투사체 제거
-		local mapPath = _pvpService.PVP_STAGE_PATH
+		local mapPath = _gm:GetGameMapName()
 		local skillParent = _EntityService:GetEntityByPath(mapPath .. "/SkillParent")
 		if skillParent ~= nil then
-			_GameManager:DestroyChildren(skillParent, false)
+			_gm:DestroyChildren(skillParent, false)
 		end
 		local projectileParent = _EntityService:GetEntityByPath(mapPath .. "/ProjectileParent")
 		if projectileParent ~= nil then
-			_GameManager:DestroyChildren(projectileParent, false)
+			_gm:DestroyChildren(projectileParent, false)
 		end
 
 		-- 타워를 경로로 직접 가져오기 (property Entity 참조가 stale될 수 있음)
@@ -526,7 +545,9 @@ script pvpCombatComponent extends Component
 
 	@ExecSpace("ServerOnly")
 	method void DestroyAllUnits()
-		local mapPath = _pvpService.PVP_STAGE_PATH
+		local mapName = self.Entity.CurrentMap.Name
+		local ownerId = _GameRoomService:GetOwnerUserIdFromMapName(mapName)
+		local mapPath = _UserService:GetUserEntityByUserId(ownerId).GameManager:GetGameMapName()
 
 		local myMonsterList = _EntityService:GetEntityByPath(mapPath .. "/MyMonsterList")
 		if myMonsterList ~= nil and myMonsterList.Children ~= nil then

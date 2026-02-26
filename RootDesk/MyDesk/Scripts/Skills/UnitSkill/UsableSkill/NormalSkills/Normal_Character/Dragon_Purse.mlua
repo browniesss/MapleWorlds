@@ -13,7 +13,7 @@ script Dragon_Purse extends SkillParent
 		_EffectService:PlayEffectAttached("32eff4d4e0fe4abb92415cbafac88463", self.caster, Vector3.zero , 0, Vector3.one, false, options)
 		
 		local function spawnDragonFunction()
-			local projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			local projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 			local dragon = _SpawnService:SpawnByModelId("model://d67daccb-d02b-4a52-83a5-f518917cbb89", "Dragon_Purse", self.caster.TransformComponent.WorldPosition + Vector3(1, 0.5, 0), projectileParent)
 		
 			dragon.NonTargetProjectile:Init(self.caster, self.skillAmount, self.skillTime, self.caster.Unit.isEnemy, self.skillProjectileSpeed, false)

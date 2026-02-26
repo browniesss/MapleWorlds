@@ -1,67 +1,70 @@
-@Logic
-script UserDeckService extends Logic
+@Component
+script UserDeckService extends Component
 
 	@ExecSpace("Server")
-	method integer SAVE(string uid)
+	method integer SAVE()
+		local uid = self.Entity.PlayerComponent.UserId
 		local ds = _DataStorageService:GetUserDataStorage(uid)
-		
+
 		local data = {}
-		local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
-		
+		local playerDeck = self.Entity.UserDeck
+
 		local deckList = {}
 		for i, modelId in ipairs(playerDeck.userDeck) do
 		    table.insert(deckList, modelId)
 		end
-		
+
 		data["UserDeck"] = deckList
-		
+
 		local save =  _HttpService:JSONEncode(data)
-		
-		return ds:SetAndWait("USER_DECK",save)
-		
+
+		local code = ds:SetAndWait("USER_DECK",save)
+		return code
+
 	end
 
 	@ExecSpace("Server")
 	method integer LOAD()
-		local ds = _DataStorageService:GetUserDataStorage(senderUserId)
-		local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
-		_UserMonsterService:INIT(senderUserId)
-		
+		local uid = self.Entity.PlayerComponent.UserId
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local playerDeck = self.Entity.UserDeck
+		self.Entity.UserMonsterService:INIT(uid)
+
 		local errCode, res = ds:GetAndWait("USER_DECK")
 		if errCode ~= 0 then
 			return errCode
 		end
-		
+
 		if res == nil then
 			local deckList = {}
 			local data = {}
-			
+
 			local allUnit = _UnitService:GetDefaultUnitList()
-			
+
 			math.randomseed(os.time())
 			for i = #allUnit, 2, -1 do
 				local j = math.random(1, i)
 				allUnit[i], allUnit[j] = allUnit[j], allUnit[i]
 			end
-			
+
 			for i = 1,8 do
 				deckList[i] = allUnit[i]
 			end
-			
-			
+
+
 			playerDeck:SetUserDeck(deckList)
-			
+
 			data["UserDeck"] = deckList
 			local save =  _HttpService:JSONEncode(data)
-		
+
 			return ds:SetAndWait("USER_DECK",save)
 		end
-		
+
 		local resTable = _HttpService:JSONDecode(res)
-		
+
 		playerDeck:SetUserDeck(resTable["UserDeck"])
-		
-		
+
+
 		return 0
 	end
 
@@ -70,8 +73,11 @@ script UserDeckService extends Logic
 	handler HandleUserLeaveEvent(UserLeaveEvent event)
 		local ProfileCode = event.ProfileCode
 		local UserId = event.UserId
-		
-		self:SAVE(UserId)
+		if UserId ~= self.Entity.PlayerComponent.UserId then
+			return
+		end
+
+		self:SAVE()
 	end
 
 end

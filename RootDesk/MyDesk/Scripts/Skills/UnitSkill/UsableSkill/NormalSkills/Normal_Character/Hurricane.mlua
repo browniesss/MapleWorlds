@@ -9,7 +9,7 @@ script Hurricane extends SkillParent
 		local loopEffect
 		
 		if self._T.projectileParent == nil then
-			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			self._T.projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 		end
 		
 		self:CallLoopAnimation("6thStormArrowLoop")
@@ -26,7 +26,7 @@ script Hurricane extends SkillParent
 		end
 		
 		local function spawnMissile()
-			local projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			local projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 			local arrow = _SpawnService:SpawnByModelId("model://b4199072-1bea-4504-a67e-8e622099b229", "hurricane_arrow", self.caster.TransformComponent.Position + Vector3(0.5, 0.3, 0), projectileParent)
 		
 			arrow.NonTargetProjectile:Init(self.caster, self.skillAmount, self.skillTime, self.caster.Unit.isEnemy, 1.5, true)

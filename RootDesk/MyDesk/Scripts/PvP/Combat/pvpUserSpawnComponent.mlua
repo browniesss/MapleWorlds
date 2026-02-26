@@ -44,8 +44,14 @@ script pvpUserSpawnComponent extends Component
 		
 		self.pointUpdateTimer = self.pointUpdateTimer + delta
 		local updateInterval = 0.5
-		if _TimeScaleManager ~= nil and _TimeScaleManager.timeScale > 0 then
-			updateInterval = 0.5 / _TimeScaleManager.timeScale
+		if pvpCombat.currentUserId ~= "" then
+			local userEntityForTsm = _UserService:GetUserEntityByUserId(pvpCombat.currentUserId)
+			if userEntityForTsm ~= nil then
+				local tsm = userEntityForTsm.TimeScaleManager
+				if tsm ~= nil and tsm.timeScale > 0 then
+					updateInterval = 0.5 / tsm.timeScale
+				end
+			end
 		end
 		if self.pointUpdateTimer < updateInterval then
 			return
@@ -78,7 +84,7 @@ script pvpUserSpawnComponent extends Component
 		end
 		
 		-- 소환 위치
-		local mapPath = _pvpService.PVP_STAGE_PATH
+		local mapPath = _UserService:GetUserEntityByUserId(senderUserId).GameManager:GetGameMapName()
 		local spawnParent = _EntityService:GetEntityByPath(mapPath .. "/MyMonsterList")
 		local spawnPos = _EntityService:GetEntityByPath(mapPath .. "/MyMonsterList/MySpawnPoint")
 		
@@ -104,9 +110,12 @@ script pvpUserSpawnComponent extends Component
 				unitModel = _BuffedUnitService:SetUnitBuff(unitModel, math.floor(cygnusItem.value), 1)
 			end
 		else
-			local userUnitModel = UserUnitModel()
-			userUnitModel:DECODE(_UserMonsterService.userMonsterDict[unitModel.id])
-			unitModel = _BuffedUnitService:SetUnitBuff(unitModel, userUnitModel.level, userUnitModel.limitBreak)
+			local userEntity = _UserService:GetUserEntityByUserId(senderUserId)
+			if userEntity ~= nil and userEntity.UserMonsterService ~= nil then
+				local userUnitModel = UserUnitModel()
+				userUnitModel:DECODE(userEntity.UserMonsterService.userMonsterDict[unitModel.id])
+				unitModel = _BuffedUnitService:SetUnitBuff(unitModel, userUnitModel.level, userUnitModel.limitBreak)
+			end
 		end
 		spawnEntity.Unit:Spawn(unitModel, skillData)
 		

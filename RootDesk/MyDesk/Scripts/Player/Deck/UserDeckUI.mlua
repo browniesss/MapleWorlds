@@ -35,11 +35,11 @@ script UserDeckUI extends Component
 		self:ShowTabs(false)
 		self:DisconnectTabHandlers()
 
-		local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
+		local playerDeck = _UserService.LocalPlayer.UserDeck
 
 		for i = 1, 8 do
 			self.deckItems[i].DeckItem.itemIndex = i
-			local unitData = _EntityService:GetEntityByTag("Player").UserUnitStore.UserUnitMap[playerDeck.userDeck[i]]
+			local unitData = _UserService.LocalPlayer.UserUnitStore.UserUnitMap[playerDeck.userDeck[i]]
 			if unitData == nil then
 				continue
 			end
@@ -75,7 +75,7 @@ script UserDeckUI extends Component
 			deck = user.pvpUserComponent.defense_deck
 		end
 
-		local player = _EntityService:GetEntityByTag("Player")
+		local player = _UserService.LocalPlayer
 
 		for i = 1, 8 do
 			self.deckItems[i].DeckItem.itemIndex = i

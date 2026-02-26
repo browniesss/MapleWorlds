@@ -1,5 +1,5 @@
-@Logic
-script EventGameService extends Logic
+@Component
+script EventGameService extends Component
 
 	-- 이벤트 모드 게임 시작
 	@ExecSpace("Client")
@@ -32,23 +32,24 @@ script EventGameService extends Logic
 		_LoadingManager:Show()
 
 		_UserService.LocalPlayer.UserBreakLimitSkillProtocol:InitCallWithCallback(function(limitBreakRuids)
-			local ruids = _GameManager:GetPreLoadAssetRuid()
+			local gm = _UserService.LocalPlayer.GameManager
+			local ruids = gm:GetPreLoadAssetRuid()
 
 			for _, ruid in ipairs(limitBreakRuids) do
 				table.insert(ruids, ruid)
 			end
 
 			_ResourceService:PreloadAsync(ruids, function()
-				local mapName = "Event" .. string.format("%02d", userStage.eventSelectChapter) .. string.format("%02d", userStage.eventSelectStage)
-				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, mapName)
-				self:EventGameStart(userStage.eventSelectChapter, userStage.eventSelectStage)
+				local sourceMapName = "Event" .. string.format("%02d", userStage.eventSelectChapter) .. string.format("%02d", userStage.eventSelectStage)
+				gm:RequestDynamicMapEntry(userStage.eventSelectChapter, userStage.eventSelectStage, _eGameMode.Event, sourceMapName)
 			end)
 		end)
 	end
 
 	@ExecSpace("Server")
 	method void EventGameStart(integer chapterIndex, integer mapIndex)
-		_GameManager:GameStart(chapterIndex, mapIndex, true)
+		local gm = self.Entity.GameManager
+		gm:GameStart(chapterIndex, mapIndex, true)
 	end
 
 	-- 이벤트 모드 클리어 처리
@@ -67,9 +68,10 @@ script EventGameService extends Logic
 	-- 서버 클리어 처리 (이벤트 토큰)
 	@ExecSpace("Server")
 	method void ProcessStageClearServer(integer clearedChapter, integer clearedStage)
-		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		local user = self.Entity
+		local gm = self.Entity.GameManager
 		local userStage = user.UserStage
-		local playTime = DateTime.UtcNow.Elapsed - _GameManager.playStartTs
+		local playTime = DateTime.UtcNow.Elapsed - gm.playStartTs
 
 		local isFirstClear = false
 		local isNewStage = (clearedChapter > userStage.eventOpenChapter) or
@@ -87,23 +89,23 @@ script EventGameService extends Logic
 
 		if isFirstClear then
 			-- 최초 클리어 보상
-			_BillingService:AddSecondFreeCoin(senderUserId, 300)
+			self.Entity.BillingService:AddSecondFreeCoin(senderUserId, 300)
 
 			-- 이벤트 토큰 지급 (최초 클리어)
 			if eventStageData ~= nil and eventStageData.get_first_event_token ~= nil then
 				eventToken = eventStageData.get_first_event_token
-				_BillingService:AddEventToken(senderUserId, eventToken)
+				self.Entity.BillingService:AddEventToken(senderUserId, eventToken)
 			end
 		else
 			-- 재클리어 보상: 이벤트 토큰 지급
 			if eventStageData ~= nil and eventStageData.get_event_token ~= nil then
 				eventToken = eventStageData.get_event_token
-				_BillingService:AddEventToken(senderUserId, eventToken)
+				self.Entity.BillingService:AddEventToken(senderUserId, eventToken)
 			end
 		end
 
 		-- 클라이언트 UI 업데이트 콜백 (이벤트 토큰 전달)
-		_GameManager:StageClearClientCallback(isFirstClear, eventToken, senderUserId)
+		gm:StageClearClientCallback(isFirstClear, eventToken, senderUserId)
 
 		userStage:AddClearedEventStage(clearedChapter, clearedStage)
 
@@ -116,21 +118,21 @@ script EventGameService extends Logic
 	-- 로그 기록
 	@ExecSpace("Server")
 	method void LogStageClear()
-		local playTime = DateTime.UtcNow.Elapsed - _GameManager.playStartTs
-		local userEntity = _UserService:GetUserEntityByUserId(senderUserId)
-		local selectStageId = _GameManager.mapIndex
-		local userDeck = userEntity.UserDeck.userDeck
-		local userSkill = userEntity.UserSkillDeck.userSkillDeck
+		local gm = self.Entity.GameManager
+		local playTime = DateTime.UtcNow.Elapsed - gm.playStartTs
+		local selectStageId = gm.mapIndex
+		local userDeck = self.Entity.UserDeck.userDeck
+		local userSkill = self.Entity.UserSkillDeck.userSkillDeck
 		_AnalyticsService:GameEnd(senderUserId, playTime, selectStageId, userDeck, userSkill, true)
 	end
 
 	@ExecSpace("Server")
 	method void LogStageFail()
-		local playTime = DateTime.UtcNow.Elapsed - _GameManager.playStartTs
-		local userEntity = _UserService:GetUserEntityByUserId(senderUserId)
-		local selectStageId = _GameManager.mapIndex
-		local userDeck = userEntity.UserDeck.userDeck
-		local userSkill = userEntity.UserSkillDeck.userSkillDeck
+		local gm = self.Entity.GameManager
+		local playTime = DateTime.UtcNow.Elapsed - gm.playStartTs
+		local selectStageId = gm.mapIndex
+		local userDeck = self.Entity.UserDeck.userDeck
+		local userSkill = self.Entity.UserSkillDeck.userSkillDeck
 		_AnalyticsService:GameEnd(senderUserId, playTime, selectStageId, userDeck, userSkill, false)
 	end
 

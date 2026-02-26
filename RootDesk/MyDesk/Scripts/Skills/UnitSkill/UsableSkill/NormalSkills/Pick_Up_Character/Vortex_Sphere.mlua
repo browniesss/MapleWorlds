@@ -9,7 +9,7 @@ script Vortex_Sphere extends SkillParent
 		
 		-- ProjectileParent 가져오기
 		if self._T.projectileParent == nil then
-			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			self._T.projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 		end
 		
 		-- 스폰 위치 계산 (캐스터 앞)

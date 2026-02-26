@@ -96,12 +96,13 @@ script CouponService extends Logic
 
 	@ExecSpace("ServerOnly")
 	method void GiveReward(string userId, string rewardType, integer amount)
+		local userEntity = _UserService:GetUserEntityByUserId(userId)
 		if rewardType == "FirstCoin" then
-			_BillingService:AddFirstFreeCoin(userId, amount)
+			userEntity.BillingService:AddFirstFreeCoin(userId, amount)
 		elseif rewardType == "SecondCoin" then
-			_BillingService:AddSecondFreeCoin(userId, amount)
+			userEntity.BillingService:AddSecondFreeCoin(userId, amount)
 		elseif rewardType == "ThirdCoin" then
-			_BillingService:AddThirdFreeCoin(userId, amount)
+			userEntity.BillingService:AddThirdFreeCoin(userId, amount)
 		end
 	end
 

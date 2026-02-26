@@ -57,7 +57,7 @@ script MonsterCodexItem extends Component
 			return
 		end
 
-		self.codexInfo = _MonsterCodexService:GetCodexInfoClient(self.monsterId)
+		self.codexInfo = _UserService.LocalPlayer.MonsterCodexService:GetCodexInfoClient(self.monsterId)
 		if self.codexInfo == nil then
 			log_error("[MonsterCodexItem] Codex info not found:", self.monsterId)
 			return
@@ -153,7 +153,7 @@ script MonsterCodexItem extends Component
 		end
 		
 		-- 서버에 보상 수령 요청
-		_MonsterCodexService:ClaimReward(self.monsterId)
+		_UserService.LocalPlayer.MonsterCodexService:ClaimReward(self.monsterId)
 	end
 
 end

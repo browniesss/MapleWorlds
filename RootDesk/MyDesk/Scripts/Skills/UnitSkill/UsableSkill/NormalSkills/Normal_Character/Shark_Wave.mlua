@@ -13,7 +13,7 @@ script Shark_Wave extends SkillParent
 		_EffectService:PlayEffectAttached("e7d59b726e2e40bc83b1e45784d483d7", self.caster, Vector3.zero , 0, Vector3.one, false, options)
 		
 		local function spawnSharkFunction()
-			local projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			local projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 			local shark = _SpawnService:SpawnByModelId("model://f965022f-573a-433a-abe1-5e9125ef4d4c", "Shark_Wave", self.caster.TransformComponent.Position + Vector3(1, 0.5, 0), projectileParent)
 		
 			shark.NonTargetProjectile:Init(self.caster, self.skillAmount, self.skillTime, self.caster.Unit.isEnemy, self.skillProjectileSpeed, false)

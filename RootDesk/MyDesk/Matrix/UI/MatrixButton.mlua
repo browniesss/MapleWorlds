@@ -34,8 +34,9 @@ script MatrixButton extends Component
 		if self.matrixIndex <= 0 then
 			return
 		end
-		
-		_MatrixService:ResetMatrixByIndex(self.matrixIndex)
+
+		local matrixSvc = _UserService.LocalPlayer.MatrixService
+		matrixSvc:ResetMatrixByIndex(self.matrixIndex)
 	end
 
 	@EventSender("Self")
@@ -43,8 +44,9 @@ script MatrixButton extends Component
 		if self.matrixIndex <= 0 then
 			return
 		end
-		
-		_MatrixService:SelectMatrixByIndex(self.matrixIndex)
+
+		local matrixSvc = _UserService.LocalPlayer.MatrixService
+		matrixSvc:SelectMatrixByIndex(self.matrixIndex)
 	end
 
 end

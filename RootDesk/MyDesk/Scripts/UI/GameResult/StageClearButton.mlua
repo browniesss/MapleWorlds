@@ -16,17 +16,17 @@ script StageClearButton extends Component
 		-- chapterIndex와 mapIndex로 직접 판단 (동기화 문제 해결)
 		local wasTutorialMode = false
 		local isEventMode = false
-		if _GameManager ~= nil then
-			local chapterIndex = _GameManager.chapterIndex
-			local mapIndex = _GameManager.mapIndex
+		if _UserService.LocalPlayer.GameManager ~= nil then
+			local chapterIndex = _UserService.LocalPlayer.GameManager.chapterIndex
+			local mapIndex = _UserService.LocalPlayer.GameManager.mapIndex
 			wasTutorialMode = (chapterIndex == 0 and mapIndex == 0)
-			isEventMode = (_GameManager.currentGameMode == _eGameMode.Event)
+			isEventMode = (_UserService.LocalPlayer.GameManager.currentGameMode == _eGameMode.Event)
 		end
 
-		_GameManager:GameEnd()
+		_UserService.LocalPlayer.GameManager:GameEnd()
 
 		_LoadingManager:Show()
-		_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "MainLobbyMap")
+		_GameRoomService:RequestExit()
 
 		-- MainLobbyUI 다시 활성화
 		local mainLobbyUI = _EntityService:GetEntityByPath("/ui/MainLobbyUI")
@@ -70,8 +70,8 @@ script StageClearButton extends Component
 		-- 튜토리얼 모드였다면 로비 진입 후 로비 튜토리얼 시작
 		if wasTutorialMode then
 			_TimerService:SetTimerOnce(function()
-				if _TutorialService ~= nil then
-					_TutorialService:StartLobbyTutorial(2)
+				if _UserService.LocalPlayer.TutorialService ~= nil then
+					_UserService.LocalPlayer.TutorialService:StartLobbyTutorial(2)
 				end
 			end, 1.5)
 		end

@@ -9,7 +9,10 @@ script MoveSpeedUpItem extends DropItem
 
 	@ExecSpace("Server")
 	method void EffectItem()
-		local myMonsterListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+		local mapName = self.Entity.CurrentMap.Name
+		local ownerId = _GameRoomService:GetOwnerUserIdFromMapName(mapName)
+		local ownerGM = _UserService:GetUserEntityByUserId(ownerId).GameManager
+		local myMonsterListParent = _EntityService:GetEntityByPath(ownerGM:GetGameMapName().."/MyMonsterList")
 		
 		if myMonsterListParent ~= nil then
 			local myMonsters = myMonsterListParent.Children
@@ -29,7 +32,7 @@ script MoveSpeedUpItem extends DropItem
 
 	@ExecSpace("Client")
 	method void PlayBuffEffect()
-		local myMonsterListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+		local myMonsterListParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/MyMonsterList")
 		
 		if myMonsterListParent == nil then
 			return

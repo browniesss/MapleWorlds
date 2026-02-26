@@ -15,7 +15,7 @@ script SkillButton extends Component
 		local Entity = event.Entity
 		---------------------------------------------------------
 		_SkillManager:GetSkill(self.skillID)
-		_GameManager:CloseSkillSelect()
+		_UserService.LocalPlayer.GameManager:CloseSkillSelect()
 	end
 
 end

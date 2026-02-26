@@ -15,7 +15,7 @@ script Holy_Fountain extends SkillParent
 		local pos = Vector3(2, 0, 0)
 		local fountainPos = basePos + pos + Vector3(0, -0.5, 0)
 		if self._T.projectileParent == nil then
-			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			self._T.projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 		end
 		
 		_EffectService:PlayEffect("f0ae3ac26a83422795c25931d58da17e", self._T.projectileParent, basePos + pos, 0, Vector3.one)

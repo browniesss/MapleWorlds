@@ -13,7 +13,7 @@ script Inhuman_Speed extends SkillParent
 		local loopEffect
 		
 		if self._T.projectileParent == nil then
-			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			self._T.projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 		end
 		
 		local basePos = self.Entity.TransformComponent.WorldPosition
@@ -25,7 +25,7 @@ script Inhuman_Speed extends SkillParent
 		loopEffect = _EffectService:PlayEffectAttached("30d2fab7b7104354bd47f2e1cf940c2e", self.caster, Vector3(0, 0, 0) , 0, Vector3.one, true, options)
 		
 		local function spawnMissile()
-			local projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			local projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 			local arrow = _SpawnService:SpawnByModelId("model://d0cf599e-c8bd-4e38-aad6-f3d7aa7b4231", "inhuman_arrow", self.caster.TransformComponent.Position + Vector3(0.5, 0.3, 0), projectileParent)
 		
 			arrow.NonTargetProjectile:Init(self.caster, self.skillAmount, self.skillTime, self.caster.Unit.isEnemy, 1.5, true)

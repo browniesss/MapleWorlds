@@ -6,7 +6,7 @@ script Eliza_Buff extends SkillParent
 		__base:ActivateSkill()
 		
 		local function buffFunction()
-			local enemiesListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
+			local enemiesListParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/EnemyList")
 			local enemies = enemiesListParent.Children
 		
 			for index in ipairs(enemies) do

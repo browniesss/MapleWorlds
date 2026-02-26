@@ -1,5 +1,5 @@
-@Logic
-script MatrixTimerService extends Logic
+@Component
+script MatrixTimerService extends Component
 
 	property boolean isPaused = false
 
@@ -13,6 +13,9 @@ script MatrixTimerService extends Logic
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
+		if self.Entity ~= _UserService.LocalPlayer then
+			return
+		end
 		self.isPaused = true  -- 게임 시작 전까지 일시정지
 		self.pendingTimers = {}
 		self.nextTimerId = 1
@@ -31,7 +34,7 @@ script MatrixTimerService extends Logic
 		self.currentTime = self.currentTime + delta
 
 		-- MatrixGameManager에 시간 동기화 (서버로 전송)
-		if _MatrixGameManager ~= nil then
+		if self.Entity.MatrixGameManager ~= nil then
 			self:SyncMatrixTimeToServer(self.currentTime)
 		end
 
@@ -42,8 +45,8 @@ script MatrixTimerService extends Logic
 			self:UpdateUserPlayTime()
 
 			-- UI 시간 텍스트 직접 업데이트 (클라이언트에서 즉시 반영)
-			if _MatrixGameManager ~= nil then
-				_MatrixGameManager:SetTimeText(self.currentTime)
+			if self.Entity.MatrixGameManager ~= nil then
+				self.Entity.MatrixGameManager:SetTimeText(self.currentTime)
 			end
 		end
 		
@@ -138,8 +141,8 @@ script MatrixTimerService extends Logic
 
 	@ExecSpace("Server")
 	method void SyncMatrixTimeToServer(number time)
-		if _MatrixGameManager ~= nil then
-			_MatrixGameManager.matrixTime = time
+		if self.Entity.MatrixGameManager ~= nil then
+			self.Entity.MatrixGameManager.matrixTime = time
 		end
 	end
 

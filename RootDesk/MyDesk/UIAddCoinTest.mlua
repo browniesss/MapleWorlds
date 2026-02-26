@@ -25,12 +25,13 @@ script UIAddCoinTest extends Component
 		---------------------------------------------------------
 		
 		local res = 0
+		local billing = _UserService.LocalPlayer.BillingService
 		if self.IsFirstCoin == true then
-			res = _BillingService:AddFirstFreeCoin(self.userId, 100)
+			res = billing:AddFirstFreeCoin(self.userId, 100)
 		end
-		
+
 		if self.IsFirstCoin == false then
-			res = _BillingService:AddSecondFreeCoin(self.userId, 100)
+			res = billing:AddSecondFreeCoin(self.userId, 100)
 		end
 	end
 

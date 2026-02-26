@@ -1,5 +1,5 @@
-@Logic
-script MatrixGameService extends Logic
+@Component
+script MatrixGameService extends Component
 
 	property integer PHASE_TYPE_NORMAL = 0
 
@@ -47,6 +47,9 @@ script MatrixGameService extends Logic
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
+		if self.Entity ~= _UserService.LocalPlayer then
+			return
+		end
 		-- 데이터 로드
 		self:LoadPhaseData()
 		self:LoadRoundData()
@@ -146,12 +149,16 @@ script MatrixGameService extends Logic
 	@ExecSpace("Client")
 	method void InitializeGameFromManager()
 		-- 엔티티 참조 가져오기
-		local mapPath = _MatrixGameManager:GetMapPath()
+		local mapPath = self.Entity.MatrixGameManager:GetMapPath()
+		log("[MatrixGameService] InitializeGameFromManager mapPath=" .. tostring(mapPath))
 		self.enemyTower = _EntityService:GetEntityByPath(mapPath .. "/EnemyTower")
 		self.playerTower = _EntityService:GetEntityByPath(mapPath .. "/PlayerTower")
 		self.enemySpawnPoint = _EntityService:GetEntityByPath(mapPath .. "/EnemyList/EnemySpawnPoint")
 		self.mySpawnPoint = _EntityService:GetEntityByPath(mapPath .. "/MyMonsterList/MySpawnPoint")
 		self.mesoIncome = _EntityService:GetEntityByPath(mapPath .. "/ingameIncome")
+		if self.enemyTower == nil then
+			log("[MatrixGameService] WARNING: enemyTower is nil! mapPath=" .. tostring(mapPath))
+		end
 
 		-- 초기 상태 설정
 		self.currentPhaseId = 1
@@ -163,8 +170,8 @@ script MatrixGameService extends Logic
 		self:ClearInfiniteRoundClearTimer()
 
 		-- MatrixService 상태 초기화 (selectCount 등 이전 게임 잔여 상태 정리)
-		if _MatrixService ~= nil then
-			_MatrixService:ClearSelectState()
+		if self.Entity.MatrixService ~= nil then
+			self.Entity.MatrixService:ClearSelectState()
 		end
 
 		-- 돌파 스킬 초기화 (이전 게임의 돌파 스킬이 남아있지 않도록 빈 리스트로 리셋)
@@ -174,9 +181,9 @@ script MatrixGameService extends Logic
 		end
 
 		-- MatrixMonsterSpawner 리셋 (이전 게임의 타이머/상태 정리)
-		if _MatrixMonsterSpawner ~= nil then
-			_MatrixMonsterSpawner:ResetOnClient()
-			_MatrixMonsterSpawner:ResetOnServer()
+		if self.Entity.MatrixMonsterSpawner ~= nil then
+			self.Entity.MatrixMonsterSpawner:ResetOnClient()
+			self.Entity.MatrixMonsterSpawner:ResetOnServer()
 		end
 
 		-- 플레이어 타워 HP 초기화 (1000 고정, 라운드 간 유지)
@@ -210,12 +217,12 @@ script MatrixGameService extends Logic
 		end
 
 		-- 초기 유닛 선택: 덱 기반 1회 → 전체 풀 2회 → 증강 선택
-		if _MatrixUnitSelectService ~= nil then
+		if self.Entity.MatrixUnitSelectService ~= nil then
 			-- 1단계: 유저 덱(8개) 중 랜덤 4개 표시 → 1개 선택
-			_MatrixUnitSelectService.isInitialDeckSelection = true
-			_MatrixUnitSelectService:StartUnitSelection(1, function()
+			self.Entity.MatrixUnitSelectService.isInitialDeckSelection = true
+			self.Entity.MatrixUnitSelectService:StartUnitSelection(1, function()
 				-- 2단계: 전체 풀에서 2회 선택 (isInitialDeckSelection은 자동 해제됨)
-				_MatrixUnitSelectService:StartUnitSelection(2, function()
+				self.Entity.MatrixUnitSelectService:StartUnitSelection(2, function()
 					-- 유닛 선택 완료 후 증강 선택
 					self:StartInitialAugmentSelection()
 				end)
@@ -227,7 +234,8 @@ script MatrixGameService extends Logic
 
 	@ExecSpace("Server")
 	method void ResetMesoOnServer()
-		local mapPath = "/maps/MatrixStage"
+		local gm = self.Entity.GameManager
+		local mapPath = gm:GetGameMapName()
 		local mesoIncomeEntity = _EntityService:GetEntityByPath(mapPath .. "/ingameIncome")
 		if mesoIncomeEntity ~= nil and mesoIncomeEntity.MesoIncome ~= nil then
 			mesoIncomeEntity.MesoIncome:ResetToDefault()
@@ -240,12 +248,12 @@ script MatrixGameService extends Logic
 		self.isInitialAugmentSelection = true
 
 		-- 증강 선택 UI 표시
-		if _MatrixGameManager ~= nil then
-			_MatrixGameManager:ShowMatrixSelectUI()
+		if self.Entity.MatrixGameManager ~= nil then
+			self.Entity.MatrixGameManager:ShowMatrixSelectUI()
 		end
 
-		if _MatrixService ~= nil then
-			_MatrixService:OnMatrixEvent()
+		if self.Entity.MatrixService ~= nil then
+			self.Entity.MatrixService:OnMatrixEvent()
 		else
 			-- 매트릭스 서비스가 없으면 바로 라운드 시작
 			self.isInitialAugmentSelection = false
@@ -299,6 +307,15 @@ script MatrixGameService extends Logic
 		self.currentEnemyTowerHP = finalTowerHP
 
 		-- 적 타워 HP 및 상태 설정 (originMaxHP 포함)
+		if self.enemyTower == nil then
+			log("enemyTower is nil in StartRound, re-resolving from map path")
+			local mapPath = self.Entity.MatrixGameManager:GetMapPath()
+			self.enemyTower = _EntityService:GetEntityByPath(mapPath .. "/EnemyTower")
+			if self.enemyTower == nil then
+				log("enemyTower still nil after re-resolve, mapPath=" .. tostring(mapPath))
+				return
+			end
+		end
 		self.enemyTower.Unit.originMaxHP = finalTowerHP
 		self.enemyTower.Unit.maxHP = finalTowerHP
 		self.enemyTower.Unit.hp = finalTowerHP
@@ -345,7 +362,7 @@ script MatrixGameService extends Logic
 		-- 몬스터 스폰
 		self:SpawnWave(wavePattern)
 
-		-- 무한 모드: 마지막 웨이브 진입 시 15초 후 라운드 클리어
+		-- 무한 모드: 마지막 웨이브 진입 시 라운드 클리어 타이머
 		local phase = self:GetCurrentPhaseData()
 		if phase ~= nil and phase.phaseType == self.PHASE_TYPE_INFINITE then
 			if self.currentWaveIndex == roundData.waveCount then
@@ -384,19 +401,19 @@ script MatrixGameService extends Logic
 		
 		
 		-- MatrixMonsterSpawner를 통한 스폰
-		if _MatrixMonsterSpawner ~= nil then
+		if self.Entity.MatrixMonsterSpawner ~= nil then
 			-- 스폰 완료 콜백 설정
-			_MatrixMonsterSpawner:SetOnWaveSpawnCompleteCallback(function()
+			self.Entity.MatrixMonsterSpawner:SetOnWaveSpawnCompleteCallback(function()
 				self.isWaveSpawning = false
 			end)
-		
+
 			-- 모든 적 처치 콜백 설정
-			_MatrixMonsterSpawner:SetOnAllEnemiesDefeatedCallback(function()
+			self.Entity.MatrixMonsterSpawner:SetOnAllEnemiesDefeatedCallback(function()
 				self:StartNextWave()
 			end)
-		
+
 			-- 웨이브 스폰 시작
-			_MatrixMonsterSpawner:SpawnWave(monsterIds, spawnDelays, spawnCounts, levelMultiplier, self.loopCount)
+			self.Entity.MatrixMonsterSpawner:SpawnWave(monsterIds, spawnDelays, spawnCounts, levelMultiplier, self.loopCount)
 		else
 		end
 	end
@@ -404,16 +421,16 @@ script MatrixGameService extends Logic
 	@ExecSpace("ClientOnly")
 	method void OnUpdate(number delta)
 		-- MatrixGameManager 기반으로 체크
-		if _MatrixGameManager == nil or not _MatrixGameManager.isPlaying then
+		if self.Entity.MatrixGameManager == nil or not self.Entity.MatrixGameManager.isPlaying then
 			return
 		end
 
-		if _GameManager.currentGameMode ~= _eGameMode.Matrix then
+		if _UserService.LocalPlayer.GameManager.currentGameMode ~= _eGameMode.Matrix then
 			return
 		end
 
 		-- 일시정지 중이면 업데이트 스킵
-		if _MatrixGameManager.isPaused then
+		if self.Entity.MatrixGameManager.isPaused then
 			return
 		end
 		
@@ -445,7 +462,7 @@ script MatrixGameService extends Logic
 		self:ClearInfiniteRoundClearTimer()
 
 		-- 미니맵 아이콘 제거
-		local map = _EntityService:GetEntityByPath("/maps/MatrixStage")
+		local map = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName())
 		if map ~= nil and map.MinimapManager ~= nil then
 			map.MinimapManager:ClearAllEntityList()
 		end
@@ -454,9 +471,9 @@ script MatrixGameService extends Logic
 		self:ClearAllUnitsOnServer()
 
 		-- 진행 중인 스폰 타이머 즉시 취소 (서버 _TimerService 타이머 정리)
-		if _MatrixMonsterSpawner ~= nil then
-			_MatrixMonsterSpawner:ResetOnClient()
-			_MatrixMonsterSpawner:ResetOnServer()
+		if self.Entity.MatrixMonsterSpawner ~= nil then
+			self.Entity.MatrixMonsterSpawner:ResetOnClient()
+			self.Entity.MatrixMonsterSpawner:ResetOnServer()
 		end
 
 		-- 해적 시너지(5) 적용: 라운드 클리어 시 메소 추가
@@ -497,7 +514,7 @@ script MatrixGameService extends Logic
 	-- 해적 시너지(5): 라운드 클리어 시 초기 메소 추가
 	@ExecSpace("Server")
 	method void ApplyPirateSynergyOnRoundClear()
-		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		local user = self.Entity
 		if user == nil then
 			return
 		end
@@ -510,7 +527,8 @@ script MatrixGameService extends Logic
 			local item = synergy:Get(1)
 			local bonusMeso = item:CalcValue(0)
 
-			local mapPath = "/maps/MatrixStage"
+			local gm = user.GameManager
+			local mapPath = gm:GetGameMapName()
 			local mesoWallet = _EntityService:GetEntityByPath(mapPath .. "/userWallet")
 			if mesoWallet ~= nil and mesoWallet.MesoWallet ~= nil then
 				mesoWallet.MesoWallet:AddMeso(bonusMeso)
@@ -522,8 +540,8 @@ script MatrixGameService extends Logic
 	method void OnRoundComplete()
 
 		-- 유닛 선택 (1회) 후 다음 라운드 시작
-		if _MatrixUnitSelectService ~= nil then
-			_MatrixUnitSelectService:StartUnitSelection(1, function()
+		if self.Entity.MatrixUnitSelectService ~= nil then
+			self.Entity.MatrixUnitSelectService:StartUnitSelection(1, function()
 				self:StartRound(self.currentRoundId + 1)
 			end)
 		else
@@ -536,13 +554,13 @@ script MatrixGameService extends Logic
 		-- currentPhaseId 갱신은 StartRound에서 처리 (페이즈 클리어 보너스 점수 계산을 위해)
 
 		-- 증강 선택 UI 표시 (MatrixGameManager 통해)
-		if _MatrixGameManager ~= nil then
-			_MatrixGameManager:ShowMatrixSelectUI()
+		if self.Entity.MatrixGameManager ~= nil then
+			self.Entity.MatrixGameManager:ShowMatrixSelectUI()
 		end
 
 		-- 증강 선택 UI 표시
-		if _MatrixService ~= nil then
-			_MatrixService:OnMatrixEvent()
+		if self.Entity.MatrixService ~= nil then
+			self.Entity.MatrixService:OnMatrixEvent()
 		end
 	end
 
@@ -575,8 +593,8 @@ script MatrixGameService extends Logic
 		self:ClearInfiniteRoundClearTimer()
 
 		-- MatrixGameManager를 통해 게임 종료 처리
-		if _MatrixGameManager ~= nil then
-			_MatrixGameManager.isPlaying = false
+		if self.Entity.MatrixGameManager ~= nil then
+			self.Entity.MatrixGameManager.isPlaying = false
 		end
 
 		-- 최종 점수 계산 및 랭킹 제출
@@ -591,14 +609,14 @@ script MatrixGameService extends Logic
 			end
 
 			-- 매트릭스 코인 지급
-			if _MatrixCoinService ~= nil then
-				_MatrixCoinService:AddMatrixCoin(finalScore)
+			if self.Entity.MatrixCoinService ~= nil then
+				self.Entity.MatrixCoinService:AddMatrixCoin(finalScore)
 			end
 
 		end
 
 		-- 미니맵 아이콘 제거
-		local map = _EntityService:GetEntityByPath("/maps/MatrixStage")
+		local map = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName())
 		if map ~= nil and map.MinimapManager ~= nil then
 			map.MinimapManager:ClearAllEntityList()
 		end
@@ -607,8 +625,8 @@ script MatrixGameService extends Logic
 		self:ClearAllUnitsOnServer()
 
 		-- CompletePopup 표시 (MatrixGameManager 사용)
-		if _MatrixGameManager ~= nil then
-			_MatrixGameManager:ShowCompletePopup()
+		if self.Entity.MatrixGameManager ~= nil then
+			self.Entity.MatrixGameManager:ShowCompletePopup()
 		end
 	end
 
@@ -628,7 +646,8 @@ script MatrixGameService extends Logic
 	-- 서버에서 모든 유닛 제거 (적 + 내 유닛)
 	@ExecSpace("Server")
 	method void ClearAllUnitsOnServer()
-		local mapPath = "/maps/MatrixStage"
+		local gm = self.Entity.GameManager
+		local mapPath = gm:GetGameMapName()
 
 		-- 적 유닛 제거
 		local enemyList = _EntityService:GetEntityByPath(mapPath .. "/EnemyList")
@@ -654,10 +673,7 @@ script MatrixGameService extends Logic
 	end
 
 	method void ClearAllEnemies()
-		local mapPath = "/maps/MatrixStage"
-		if _MatrixGameManager ~= nil then
-			mapPath = _MatrixGameManager:GetMapPath()
-		end
+		local mapPath = _UserService.LocalPlayer.GameManager:GetGameMapName()
 
 		local enemyList = _EntityService:GetEntityByPath(mapPath .. "/EnemyList")
 		if enemyList == nil then
@@ -672,10 +688,7 @@ script MatrixGameService extends Logic
 	end
 
 	method void ClearAllMyUnits()
-		local mapPath = "/maps/MatrixStage"
-		if _MatrixGameManager ~= nil then
-			mapPath = _MatrixGameManager:GetMapPath()
-		end
+		local mapPath = _UserService.LocalPlayer.GameManager:GetGameMapName()
 
 		local myMonsterList = _EntityService:GetEntityByPath(mapPath .. "/MyMonsterList")
 		if myMonsterList == nil then
@@ -714,11 +727,11 @@ script MatrixGameService extends Logic
 		self.loopCount = self.loopCount + 1
 
 		-- 증강 선택 UI 표시
-		if _MatrixGameManager ~= nil then
-			_MatrixGameManager:ShowMatrixSelectUI()
+		if self.Entity.MatrixGameManager ~= nil then
+			self.Entity.MatrixGameManager:ShowMatrixSelectUI()
 		end
-		if _MatrixService ~= nil then
-			_MatrixService:OnMatrixEvent()
+		if self.Entity.MatrixService ~= nil then
+			self.Entity.MatrixService:OnMatrixEvent()
 		end
 	end
 

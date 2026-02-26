@@ -5,7 +5,7 @@ script Papa_Pixie_Debuff extends SkillParent
 	method void ActivateSkill()
 		__base:ActivateSkill()
 		
-		local monsterList = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+		local monsterList = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/MyMonsterList")
 		local myMonsters = monsterList.Children
 		
 		local debuffFunction = function()

@@ -8,7 +8,7 @@ script StageRankingButton extends Component
 			return
 		end
 
-		local player = _EntityService:GetEntityByTag("Player")
+		local player = _UserService.LocalPlayer
 
 		local key = _RankingService:GetRankKeyByTable({chapter=player.UserStage.selectChapter, stage=player.UserStage.selectStage})
 
