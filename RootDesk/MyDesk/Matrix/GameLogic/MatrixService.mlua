@@ -216,10 +216,14 @@ script MatrixService extends Logic
 					descEntity.TextComponent.Text = self:FormatDesc(matrix)
 				end
 
-				-- 레전더리 이펙트 처리
+				-- 레전더리 이펙트 처리 (LEGENDARY, LEGENDARY+만 적용)
 				local plusEffect = cardRoot:GetChildByName("PlusEffect")
 				if plusEffect ~= nil then
-					if matrix.grade == "LEGENDARY" then
+					local baseGrade = matrix.grade
+					if string.sub(baseGrade, -1) == "+" then
+						baseGrade = string.sub(baseGrade, 1, -2)
+					end
+					if baseGrade == "LEGENDARY" then
 						plusEffect.Enable = true
 						self:StartFloatingAnimation(cardRoot, i)
 					else
@@ -343,10 +347,14 @@ script MatrixService extends Logic
 			descEntity.TextComponent.Text = self:FormatDesc(matrix)
 		end
 
-		-- 레전더리+ 이펙트 처리
+		-- 레전더리 이펙트 처리 (LEGENDARY, LEGENDARY+만 적용)
 		local plusEffect = cardRoot:GetChildByName("PlusEffect")
 		if plusEffect ~= nil then
-			if matrix.grade == "LEGENDARY" then
+			local baseGrade = matrix.grade
+			if string.sub(baseGrade, -1) == "+" then
+				baseGrade = string.sub(baseGrade, 1, -2)
+			end
+			if baseGrade == "LEGENDARY" then
 				plusEffect.Enable = true
 				self:StartFloatingAnimation(cardRoot, index)
 			else
