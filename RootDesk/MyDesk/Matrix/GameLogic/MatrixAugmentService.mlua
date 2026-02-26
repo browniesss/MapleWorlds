@@ -558,10 +558,8 @@ script MatrixAugmentService extends Logic
 
 	-- 등급별 범위 반환
 	method number GetOnDieRange(string grade)
-		if grade == "LEGENDARY+" then
+		if grade == "LEGENDARY" then
 			return 6
-		elseif grade == "LEGENDARY" then
-			return 5
 		elseif grade == "UNIQUE" then
 			return 4
 		else
