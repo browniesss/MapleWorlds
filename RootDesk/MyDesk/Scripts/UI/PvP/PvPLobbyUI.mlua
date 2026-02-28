@@ -242,7 +242,7 @@ script PvPLobbyUI extends Component
 		end
 		
 		local pvpUser = user.pvpUserComponent
-
+		
 		-- 낙천적 업데이트: 타이머 만료 시 클라이언트에서 즉시 코인 증가
 		if pvpUser.play_coin < _pvpUserService.MAX_PLAY_COIN and pvpUser.next_play_coin > 0 then
 			local nowTs = DateTime.UtcNow.Elapsed
@@ -256,9 +256,9 @@ script PvPLobbyUI extends Component
 				end
 			end
 		end
-
+		
 		local coin = pvpUser.play_coin
-
+		
 		-- 코인이 최대일 때는 숫자만 표시
 		if coin >= _pvpUserService.MAX_PLAY_COIN then
 			self.coinText.TextComponent.Text = tostring(coin)
@@ -292,7 +292,7 @@ script PvPLobbyUI extends Component
 		if user == nil then
 			return
 		end
-
+		
 		-- 티어 + 점수
 		if self.scoreText ~= nil and self.scoreText.TextComponent ~= nil then
 			if user.pvpRankingComponent ~= nil then
@@ -301,25 +301,25 @@ script PvPLobbyUI extends Component
 				local tier = self:GetTierName(score, rank)
 				self.scoreText.TextComponent.Text = tier .. " (" .. tostring(score) .. ")"
 			else
-				self.scoreText.TextComponent.Text = ""
+				self.scoreText.TextComponent.Text = "NONE"
 			end
 		end
-
+		
 		-- 승리 횟수
 		if self.winCountText ~= nil and self.winCountText.TextComponent ~= nil then
 			if user.pvpUserComponent ~= nil then
-				self.winCountText.TextComponent.Text = "Win: " .. tostring(user.pvpUserComponent.win_count)
+				self.winCountText.TextComponent.Text = tostring(user.pvpUserComponent.win_count)
 			else
-				self.winCountText.TextComponent.Text = "Win: 0"
+				self.winCountText.TextComponent.Text = "0"
 			end
 		end
-
+		
 		-- 전체 전투 횟수
 		if self.playCountText ~= nil and self.playCountText.TextComponent ~= nil then
 			if user.pvpUserComponent ~= nil then
-				self.playCountText.TextComponent.Text = "Play: " .. tostring(user.pvpUserComponent.play_count)
+				self.playCountText.TextComponent.Text = tostring(user.pvpUserComponent.play_count)
 			else
-				self.playCountText.TextComponent.Text = "Play: 0"
+				self.playCountText.TextComponent.Text = "0"
 			end
 		end
 	end
@@ -329,23 +329,23 @@ script PvPLobbyUI extends Component
 		if self.matchButton == nil or self.matchButton.ButtonComponent == nil then
 			return
 		end
-
+		
 		local user = _UserService.LocalPlayer
 		if user == nil then
 			self.matchButton.ButtonComponent.Enable = false
 			return
 		end
-
+		
 		-- 조건 1: 코인 > 0
 		local hasCoin = user.pvpUserComponent ~= nil and user.pvpUserComponent.play_coin > 0
-
+		
 		-- 조건 2: 상대 선택됨
 		local hasSelection = false
 		if user.pvpMatcherMakerComponent ~= nil then
 			local selected = user.pvpMatcherMakerComponent.selected
 			hasSelection = selected >= 1 and selected <= #user.pvpMatcherMakerComponent.targetUserList
 		end
-
+		
 		self.matchButton.ButtonComponent.Enable = hasCoin and hasSelection
 	end
 
@@ -428,9 +428,9 @@ script PvPLobbyUI extends Component
 			-- 슬롯 배경 색상 변경
 			if slot.SpriteGUIRendererComponent ~= nil then
 				if isSelected then
-					slot.SpriteGUIRendererComponent.Color = Color(1.0, 0.85, 0.2, 1.0)
+					slot.SpriteGUIRendererComponent.ImageRUID = "6dd0822fca984502acf617494b05071c"
 				else
-					slot.SpriteGUIRendererComponent.Color = Color(0.0, 0.0, 0.0, 1.0)
+					slot.SpriteGUIRendererComponent.ImageRUID = "9bad2b63778e4dadb2359f16390d8d99"
 				end
 			end
 		
