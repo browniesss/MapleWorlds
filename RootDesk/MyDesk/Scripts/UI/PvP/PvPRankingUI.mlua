@@ -30,20 +30,20 @@ script PvPRankingUI extends Component
 		if #self.rankItems > 0 then
 			return
 		end
-
-		local rankingListUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI/Window/RankingListUI")
+		
+		local rankingListUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI/Window/PvpInfo/RankingListUI")
 		if rankingListUI == nil then
 			return
 		end
-
+		
 		local scrollContainer = rankingListUI.Children[1]
 		if scrollContainer == nil or #scrollContainer.Children == 0 then
 			return
 		end
-
+		
 		local templateItem = scrollContainer.Children[1]
 		self.rankItems[1] = templateItem
-
+		
 		for i = 2, 50 do
 			local rankItem = _SpawnService:SpawnByEntity(
 				templateItem,
@@ -62,14 +62,14 @@ script PvPRankingUI extends Component
 		if user == nil or user.pvpRankingComponent == nil then
 			return
 		end
-
+		
 		self:EnsureItemsSpawned()
-
+		
 		local rankComp = user.pvpRankingComponent
 		local rankList = rankComp.ranking_list
 		local userId = user.PlayerComponent.UserId
 		local userName = user.PlayerComponent.Nickname
-
+		
 		-- 랭킹 아이템 업데이트 (MatrixRankingItem 사용)
 		for i, rankItem in ipairs(self.rankItems) do
 			if i <= #rankList then
@@ -97,13 +97,13 @@ script PvPRankingUI extends Component
 				end
 			end
 		end
-
+		
 		-- 플레이어 랭킹 (하단 UserMatrixRank → RankItem의 MatrixRankingItem)
-		local rankingListUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI/Window/RankingListUI")
+		local rankingListUI = _EntityService:GetEntityByPath("/ui/PvPLobbyUI/Window/PvpInfo/RankingListUI")
 		if rankingListUI == nil then
 			return
 		end
-
+		
 		local userMatrixRank = rankingListUI:GetChildByName("UserMatrixRank")
 		if userMatrixRank ~= nil then
 			local userRankItem = userMatrixRank:GetChildByName("RankItem")
