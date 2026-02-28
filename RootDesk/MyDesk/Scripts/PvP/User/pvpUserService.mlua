@@ -64,18 +64,26 @@ script pvpUserService extends Logic
 		decoded.offense_deck = self:NormalizeDeck(decoded.offense_deck)
 		decoded.defense_deck = self:NormalizeDeck(decoded.defense_deck)
 		-- offense_synergy, defense_synergy 디코딩
-		if decoded.offense_synergy == nil then
+		if decoded.offense_synergy == nil or decoded.offense_synergy == "" then
 			decoded.offense_synergy = {}
 		end
-		if decoded.defense_synergy == nil then
+		if decoded.defense_synergy == nil or decoded.offense_synergy == "" then
 			decoded.defense_synergy = {}
 		end
 		
 		if type(decoded.offense_synergy) == "string" then
-			decoded.offense_synergy = _HttpService:JSONDecode(decoded.offense_synergy)
+			local status, result = pcall(function() _HttpService:JSONDecode(decoded.offense_synergy) end)
+			decoded.offense_synergy = result
+			if status == false then
+				decoded.offense_synergy = {}
+			end
 		end
 		if type(decoded.defense_synergy) == "string" then
-			decoded.defense_synergy = _HttpService:JSONDecode(decoded.defense_synergy)
+			local status, result = pcall(function() _HttpService:JSONDecode(decoded.defense_synergy) end)
+			decoded.defense_synergy = result
+			if status == false then
+				decoded.defense_synergy = {}
+			end
 		end
 		-- play_coin, next_play_coin 기본값 보정
 		if decoded.play_coin == nil then
