@@ -17,26 +17,42 @@ script GachaUnitInfoPanel extends Component
 
 	property Entity limitBreakSkillInfo = "4f41e3cf-6a68-4f45-a770-0782ab3995d4"
 
+	property any synergyComponentItem = nil
+
 	method void Init(table unitData, table normalSkillData, table spawnSkillData, table limitBreakSkillData)
 		self.unitData = unitData
 		self.skillData = normalSkillData
 		self.spawnSkillData = spawnSkillData
 		self.limitBreakSkillData = limitBreakSkillData
-		
+
+		-- 기존 시너지 아이콘 제거
+		if self.synergyComponentItem ~= nil and _EntityService:IsValid(self.synergyComponentItem.Entity) then
+			self.synergyComponentItem.Entity:Destroy()
+			self.synergyComponentItem = nil
+		end
+
 		local buffedModel = BuffedUnitModel()
 		buffedModel:Init(unitData)
 		self.unitDetailInfo.UnitDetailInfo:InitForGacha(buffedModel)
+
+		-- 시너지 아이콘 표시
+		local synergyEntity = _SpawnService:SpawnByModelId("model://c4e27100-4894-41a8-bb13-da550e47ddf3", "SynergyIcon", Vector3(45, 110, 0), self.unitDetailInfo)
+		if synergyEntity ~= nil and synergyEntity.SynergyComponentItem ~= nil then
+			self.synergyComponentItem = synergyEntity.SynergyComponentItem
+			self.synergyComponentItem:SetSynergyData(buffedModel)
+		end
+
 		self.normalSkillInfo.UnitSkillInfo:Init(self.skillData)
-		
+
 		if spawnSkillData == nil then
 			self.spawnSkillInfo.Enable = false
 			self.spawnSkillInfo.Visible = false
 		else
 			self.spawnSkillInfo.Enable = true
 			self.spawnSkillInfo.Visible = true
-			self.spawnSkillInfo.UnitSkillInfo:Init(self.spawnSkillData)	
+			self.spawnSkillInfo.UnitSkillInfo:Init(self.spawnSkillData)
 		end
-		
+
 		self.limitBreakSkillInfo.Enable = false
 		self.limitBreakSkillInfo.Visible = false
 		if not (limitBreakSkillData == nil or limitBreakSkillData.limitBreak == 0) then
@@ -44,7 +60,7 @@ script GachaUnitInfoPanel extends Component
 			self.limitBreakSkillInfo.Enable = true
 			self.limitBreakSkillInfo.Visible = true
 		end
-		
+
 	end
 
 	@EventSender("Entity", "5e3a20c7-852a-4125-ba54-92fb040f3884")
