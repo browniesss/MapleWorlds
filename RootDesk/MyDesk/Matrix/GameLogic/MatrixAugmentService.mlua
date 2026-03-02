@@ -6,6 +6,17 @@ script MatrixAugmentService extends Component
 	-- 메소 수입 배율 (증강 효과로 변동)
 	property number mesoIncomeMultiplier = 1.0
 
+	-- T.U.R.B.O 모드 활성화 여부
+	property boolean isTurboActive = false
+	property number preTurboTimeScale = 1.0
+	property boolean preTurboIsSpeedUp = false
+	property number turboStatMultiplier = 1.5
+
+	-- 멀티플라이어 관련
+	property boolean isMultiplierActive = false
+	property number multiplierStatRatio = 1.0
+	property boolean isCloneSpawn = false
+
 	-- ============================================
 	-- 효과 적용
 	-- ============================================
@@ -119,9 +130,119 @@ script MatrixAugmentService extends Component
 		-- 커스텀 특수 효과 처리 (확장 가능)
 		if effectType == "SkillCooldownReduction" then
 			-- 스킬 쿨타임 감소 (추후 구현)
+		elseif effectType == "TurboMode" then
+			self:ApplyTurboMode(matrixData)
+		elseif effectType == "Multiplier" then
+			self:ApplyMultiplierMode(matrixData)
+		end
+	end
+
+	-- T.U.R.B.O 모드 적용 (게임 속도 x3 고정 + 아군 공격력/체력 value배 증가)
+	@ExecSpace("Server")
+	method void ApplyTurboMode(table matrixData)
+		local statMultiplier = matrixData.value
+		local fixedSpeed = 3
+
+		-- 능력치 배율 저장 (새로 소환되는 유닛에도 적용 위해)
+		self.turboStatMultiplier = statMultiplier
+
+		-- 원래 배속 저장 (복원용)
+		self.preTurboTimeScale = _TimeScaleManager.timeScale
+		self.preTurboIsSpeedUp = _TimeScaleManager.isSpeedUp
+
+		-- 게임 속도 3배 고정
+		_TimeScaleManager.timeScale = fixedSpeed
+		_TimeScaleManager.isSpeedUp = true
+		_TimeScaleManager:ApplyTimeScaleToAllClients(fixedSpeed)
+
+		-- 모든 현재 아군 유닛에 공격력/체력 value배 적용
+		local gameMapPath = _GameManager:GetGameMapName()
+		local myMonsterList = _EntityService:GetEntityByPath(gameMapPath.."/MyMonsterList")
+
+		if myMonsterList ~= nil then
+			for _, child in ipairs(myMonsterList.Children) do
+				if child.Unit ~= nil then
+					self:ApplyTurboBuffToUnit(child.Unit, statMultiplier)
+				end
+			end
 		end
 
-		-- 추가 특수 효과는 여기에 분기 추가
+		-- 터보 활성화 플래그
+		self.isTurboActive = true
+
+		-- 클라이언트에 속도 토글 버튼 비활성화 + TurboEffect 활성화 요청
+		self:SetTurboUI(true, fixedSpeed)
+	end
+
+	-- T.U.R.B.O 버프를 단일 유닛에 적용 (최종 스탯의 statMultiplier배)
+	method void ApplyTurboBuffToUnit(any unit, number statMultiplier)
+		-- 공격력: 현재 최종 damage의 statMultiplier배
+		local attackBonus = unit.damage * (statMultiplier - 1)
+		unit:GetMatrix(_eBuffType.AttackDamageBuff, attackBonus)
+
+		-- 체력: 현재 최종 maxHP의 statMultiplier배
+		unit:GetMatrix(_eBuffType.MaxHealthMultiplyBuff, statMultiplier)
+	end
+
+	-- 멀티플라이어 모드 적용 (소환 시 복제본 추가 생성)
+	@ExecSpace("Server")
+	method void ApplyMultiplierMode(table matrixData)
+		self.isMultiplierActive = true
+		self.multiplierStatRatio = matrixData.value
+	end
+
+	-- 복제본 스탯 감소 적용
+	method void ApplyCloneStatReduction(any unit, number ratio)
+		unit.damage = math.floor(unit.damage * ratio)
+		unit.originDamage = math.floor(unit.originDamage * ratio)
+
+		local hpRatio = unit.hp / unit.maxHP
+		unit.maxHP = math.floor(unit.maxHP * ratio)
+		unit.originMaxHP = math.floor(unit.originMaxHP * ratio)
+		unit.hp = math.floor(unit.maxHP * hpRatio)
+	end
+
+	-- 터보 UI 활성화/비활성화 (버튼 + TurboEffect + UIText)
+	@ExecSpace("Client")
+	method void SetTurboUI(boolean turboActive, number speedValue)
+		-- PlaySpeedButton 처리
+		local button = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/IngameInfoUI/PlaySpeedButton")
+		if button ~= nil then
+			-- x배속 표시용 Root 오브젝트
+			local root = button:GetChildByName("Root")
+			if root ~= nil then
+				root.Enable = turboActive
+
+				-- Root 하위 UIText 엔티티의 TextComponent에 배속 값 표시
+				if turboActive then
+					local uiText = root:GetChildByName("UIText")
+					if uiText ~= nil and uiText.TextComponent ~= nil then
+						uiText.TextComponent.Text = tostring(math.floor(speedValue)) .. "x"
+					end
+				end
+			end
+
+			-- 터보 해제 시: 아이콘을 현재 상태에 맞게 복원
+			if not turboActive and button.SpeedToggleButton ~= nil then
+				if _TimeScaleManager ~= nil then
+					button.SpeedToggleButton.localIsSpeedUp = _TimeScaleManager.isSpeedUp
+				else
+					button.SpeedToggleButton.localIsSpeedUp = false
+				end
+				button.SpeedToggleButton:UpdateIcon()
+			end
+
+			if button.ButtonComponent ~= nil then
+				button.ButtonComponent.Enable = not turboActive
+			end
+		end
+
+		-- TurboEffect 활성화/비활성화
+		local turboEffect = _EntityService:GetEntityByPath("/ui/MatrixUI/IngameUI/IngameInfoUI/MatrixEffect/TurboEffect")
+		if turboEffect ~= nil then
+			turboEffect.Enable = turboActive
+			turboEffect.SpriteGUIRendererComponent.PlayRate = 1/speedValue
+		end
 	end
 
 	@ExecSpace("Server")
@@ -225,6 +346,11 @@ script MatrixAugmentService extends Component
 			elseif matrix.type == "STAT" or matrix.type == "BUFF" then
 				self:ApplyBuffToUnit(unit, matrix)
 			end
+		end
+
+		-- T.U.R.B.O 모드 활성화 시 공격력/체력 자동 적용
+		if self.isTurboActive then
+			self:ApplyTurboBuffToUnit(unit, self.turboStatMultiplier)
 		end
 	end
 
@@ -352,6 +478,13 @@ script MatrixAugmentService extends Component
 				if mesoWallet ~= nil and mesoWallet.MesoWallet ~= nil then
 					mesoWallet.MesoWallet:AddMeso(goldAmount)
 				end
+			elseif effect.effectType == "SpawnOnKill" then
+				-- 처치 시 확률적으로 스켈독 소환
+				local roll = math.random()
+				if roll <= effect.value then
+					local pos = victim.TransformComponent.Position
+					_MatrixSpawnManager:SpawnSkeletonDog(pos)
+				end
 			end
 		end
 	end
@@ -412,6 +545,16 @@ script MatrixAugmentService extends Component
 				self:ApplyFreezeOnDie(deadPos, enemyList, effect)
 			elseif effect.effectType == "KnockbackOnDie" then
 				self:ApplyKnockbackOnDie(deadPos, enemyList, effect)
+			elseif effect.effectType == "SpawnOnDie" then
+				-- 미니 복제본 2개 소환 (MiniClone은 재귀 방지)
+				if deadUnit.Name ~= "MiniClone" then
+					local modelID = deadUnit.Unit.id
+					local level = deadUnit.Unit.level
+					local limitBreak = deadUnit.Unit.limitBreak
+					local ratio = effect.value
+					_MatrixSpawnManager:SpawnMiniClone(modelID, deadPos, level, limitBreak, ratio, -2)
+					_MatrixSpawnManager:SpawnMiniClone(modelID, deadPos, level, limitBreak, ratio, -1)
+				end
 			end
 		end
 	end
@@ -419,7 +562,7 @@ script MatrixAugmentService extends Component
 	-- 등급별 범위 반환
 	method number GetOnDieRange(string grade)
 		if grade == "LEGENDARY" then
-			return 5
+			return 6
 		elseif grade == "UNIQUE" then
 			return 4
 		else
@@ -527,6 +670,23 @@ script MatrixAugmentService extends Component
 		-- 상태 초기화
 		self.synergyBonusMap = {}
 		self.mesoIncomeMultiplier = 1.0
+
+		-- T.U.R.B.O 모드 초기화 (항상 리셋하여 상태 불일치 방지)
+		-- SaveAndReset이 터보 상태를 저장하지 않도록 원래 배속으로 복원
+		if _TimeScaleManager ~= nil then
+			_TimeScaleManager.lastTimeScale = self.preTurboTimeScale
+			_TimeScaleManager.lastIsSpeedUp = self.preTurboIsSpeedUp
+		end
+		self.isTurboActive = false
+		self.preTurboTimeScale = 1.0
+		self.preTurboIsSpeedUp = false
+
+		self:SetTurboUI(false, 0)
+
+		-- 멀티플라이어 초기화
+		self.isMultiplierActive = false
+		self.multiplierStatRatio = 1.0
+		self.isCloneSpawn = false
 
 		-- MatrixService 상태 초기화
 		if self.Entity.MatrixService ~= nil then

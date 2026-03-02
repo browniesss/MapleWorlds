@@ -489,6 +489,11 @@ script MatrixGameManager extends Component
 			self.Entity.MatrixUnitSelectService:Reset()
 		end
 
+		-- MatrixAugmentService 증강 효과 초기화
+		if _MatrixAugmentService ~= nil then
+			_MatrixAugmentService:ClearAllEffects()
+		end
+
 		-- MatrixService 상태 초기화 (selectCount, UI 등 전부 리셋)
 		if self.Entity.MatrixService ~= nil then
 			self.Entity.MatrixService:ClearSelectState()

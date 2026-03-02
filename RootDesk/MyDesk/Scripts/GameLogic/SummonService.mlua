@@ -70,6 +70,8 @@ script SummonService extends Component
 
 		self.summonResult[pool_id] = _HttpService:JSONEncode(idList)
 
+		_AnalyticsService:Gacha(senderUserId, pool_id, idList)
+
 		local unitProtocol = self.Entity.UserUnitProtocol
 		if unitProtocol then
 			unitProtocol:UpdateUserUnitList(senderUserId)
@@ -116,6 +118,8 @@ script SummonService extends Component
 		end
 
 		self.summonResult[pool_id] = _HttpService:JSONEncode(idList)
+
+		_AnalyticsService:Gacha(senderUserId, pool_id, idList)
 
 		local unitProtocol = self.Entity.UserUnitProtocol
 		if unitProtocol then

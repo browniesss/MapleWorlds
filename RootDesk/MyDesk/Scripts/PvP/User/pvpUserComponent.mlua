@@ -27,18 +27,18 @@ script pvpUserComponent extends Component
 		if self.next_play_coin > nowTs then
 			return
 		end
-
+		
 		if self.play_coin >= 5 then
 			return
 		end
-
+		
 		local addCoin = math.floor((nowTs - self.next_play_coin) / _pvpUserService.PLAY_COIN_UPDATE) + 1
-
+		
 		self.play_coin += addCoin
 		if self.play_coin > _pvpUserService.MAX_PLAY_COIN then
 			self.play_coin = _pvpUserService.MAX_PLAY_COIN
 		end
-
+		
 		self.next_play_coin = nowTs + _pvpUserService.PLAY_COIN_UPDATE
 
 		local uid = self.Entity.PlayerComponent.UserId
@@ -49,13 +49,13 @@ script pvpUserComponent extends Component
 	@ExecSpace("Server")
 	method void GetUserDataCall()
 		_ProtocolService:CommonCall(senderUserId)
-
+		
 		local data = _pvpUserService:GetUserData(senderUserId)
 		if not (data.code == 0) then
 			log_error("[PVP] fail at GetUserData uid=" .. senderUserId .. " code=" .. tostring(data.code))
 			return
 		end
-
+		
 		self.play_coin = data.play_coin
 		self.next_play_coin = data.next_play_coin
 		self.offense_deck = data.offense_deck
@@ -66,7 +66,7 @@ script pvpUserComponent extends Component
 		self.play_count = data.play_count
 		self.nickname = data.nickname or ""
 		self.dataLoaded = true
-
+		
 		-- 닉네임 갱신 (로그인 시마다 최신 닉네임으로 DB 업데이트)
 		local userEntity = _UserService:GetUserEntityByUserId(senderUserId)
 		if userEntity ~= nil and userEntity.PlayerComponent ~= nil then
@@ -79,7 +79,7 @@ script pvpUserComponent extends Component
 				end
 			end
 		end
-
+		
 		-- 공격덱/방어덱이 비어있으면 노멀 스테이지 덱을 복사
 		local offenseEmpty = self:IsDeckEmpty(self.offense_deck)
 		local defenseEmpty = self:IsDeckEmpty(self.defense_deck)
@@ -101,7 +101,7 @@ script pvpUserComponent extends Component
 				data.defense_synergy = self.defense_synergy
 			end
 		end
-
+		
 		-- 검증된 기존 콜백 재사용 (각 1~2 파라미터)
 		self:UserCoinBack(data.play_coin, senderUserId)
 		self:UpdateCoinNextTs(data.next_play_coin, senderUserId)
@@ -185,17 +185,17 @@ script pvpUserComponent extends Component
 	method table ComputeSynergy(table deck)
 		local syncCols = {"jobId", "countryId", "regionId", "LimitBreakCountryId", "LimitBreakJobId"}
 		local countMap = {}
-
+		
 		for i, id in ipairs(deck) do
 			if id == nil or id == "" then
 				continue
 			end
-
+		
 			local unit = _UnitService:GetUnitByIDFromServer(id)
 			if unit == nil then
 				continue
 			end
-
+		
 			local buffedUnit = BuffedUnitModel()
 			buffedUnit:Init(unit)
 
@@ -205,7 +205,7 @@ script pvpUserComponent extends Component
 				userUnitData:DECODE(unitJson)
 				buffedUnit = _BuffedUnitService:SetUnitBuff(buffedUnit, userUnitData.level, userUnitData.limitBreak)
 			end
-
+		
 			for j, col in ipairs(syncCols) do
 				if buffedUnit[col] == nil then
 					continue
@@ -213,7 +213,7 @@ script pvpUserComponent extends Component
 				if buffedUnit[col] == 0 then
 					continue
 				end
-
+		
 				local key = tostring(buffedUnit[col])
 				if countMap[key] == nil then
 					countMap[key] = 0
@@ -221,24 +221,24 @@ script pvpUserComponent extends Component
 				countMap[key] = countMap[key] + 1
 			end
 		end
-
+		
 		return countMap
 	end
 
 	@ExecSpace("Server")
 	method void SetOffeseUnitCall(integer index, string unit_id)
 		_ProtocolService:CommonCall(senderUserId)
-
+		
 		if not self.dataLoaded then
 			log_error("[PVP] SetOffeseUnitCall before data loaded, uid=" .. senderUserId)
 			return
 		end
-
+		
 		self.offense_deck[index] = unit_id
 		self.offense_synergy = self:ComputeSynergy(self.offense_deck)
-
+		
 		local code = _pvpUserService:UpdateUserData(senderUserId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy, self.win_count, self.play_count, self.nickname)
-
+		
 		if not (code == 0) then
 			log_error("[PVP] SetOffeseUnitCall save failed, uid=" .. senderUserId .. " code=" .. tostring(code))
 			return
@@ -257,17 +257,17 @@ script pvpUserComponent extends Component
 	@ExecSpace("Server")
 	method void SetDefenseUnitCall(integer index, string unit_id)
 		_ProtocolService:CommonCall(senderUserId)
-
+		
 		if not self.dataLoaded then
 			log_error("[PVP] SetDefenseUnitCall before data loaded, uid=" .. senderUserId)
 			return
 		end
-
+		
 		self.defense_deck[index] = unit_id
 		self.defense_synergy = self:ComputeSynergy(self.defense_deck)
-
+		
 		local code = _pvpUserService:UpdateUserData(senderUserId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy, self.win_count, self.play_count, self.nickname)
-
+		
 		if not (code == 0) then
 			log_error("[PVP] SetDefenseUnitCall save failed, uid=" .. senderUserId .. " code=" .. tostring(code))
 			return
@@ -288,19 +288,19 @@ script pvpUserComponent extends Component
 		if not self:CanUseCoin() then
 			return
 		end
-
+		
 		if not self.dataLoaded then
 			log_error("[PVP] UseCoin before data loaded, uid=" .. userId)
 			return
 		end
-
+		
 		self.play_coin -= 1
 		if self.play_coin < _pvpUserService.MAX_PLAY_COIN then
 			self.next_play_coin = DateTime.UtcNow.Elapsed + _pvpUserService.PLAY_COIN_UPDATE
 		end
-
+		
 		local code = _pvpUserService:UpdateUserData(userId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy, self.win_count, self.play_count, self.nickname)
-
+		
 		if not (code == 0) then
 			log_error("[PVP] UseCoin save failed, uid=" .. userId .. " code=" .. tostring(code))
 			return

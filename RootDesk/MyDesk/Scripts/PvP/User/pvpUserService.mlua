@@ -17,7 +17,7 @@ script pvpUserService extends Logic
 				code=code
 			}
 		end
-
+		
 		if json == nil then
 			log("[PVP] GetUserData first time, creating defaults for uid=" .. uid)
 			local data = {
@@ -33,7 +33,7 @@ script pvpUserService extends Logic
 				season_ver=_pvpService.PVP_MODE_VER,
 				code = 0
 			}
-
+		
 			local updateCode = self:UpdateUserData(uid, data.play_coin, data.next_play_coin, data.offense_deck, data.defense_deck, data.offense_synergy, data.defense_synergy, data.win_count, data.play_count, data.nickname)
 			if not (updateCode == 0) then
 				log_error("[PVP] GetUserData failed to save defaults, uid=" .. uid .. " code=" .. tostring(updateCode))
@@ -42,9 +42,9 @@ script pvpUserService extends Logic
 				}
 			end
 			return data
-
+		
 		end
-
+		
 		local decoded = _HttpService:JSONDecode(json)
 		if decoded == nil then
 			log_error("[PVP] GetUserData JSONDecode failed, uid=" .. uid)
@@ -52,7 +52,7 @@ script pvpUserService extends Logic
 				code=-1
 			}
 		end
-
+		
 		-- offense_deck, defense_deck는 JSON 문자열로 저장되어 있으므로 다시 디코딩
 		if type(decoded.offense_deck) == "string" and decoded.offense_deck ~= "" then
 			decoded.offense_deck = _HttpService:JSONDecode(decoded.offense_deck)
@@ -82,7 +82,21 @@ script pvpUserService extends Logic
 		if decoded.defense_synergy == nil or decoded.defense_synergy == "" then
 			decoded.defense_synergy = {}
 		end
-
+		
+		if type(decoded.offense_synergy) == "string" then
+			local status, result = pcall(function() _HttpService:JSONDecode(decoded.offense_synergy) end)
+			decoded.offense_synergy = result
+			if status == false then
+				decoded.offense_synergy = {}
+			end
+		end
+		if type(decoded.defense_synergy) == "string" then
+			local status, result = pcall(function() _HttpService:JSONDecode(decoded.defense_synergy) end)
+			decoded.defense_synergy = result
+			if status == false then
+				decoded.defense_synergy = {}
+			end
+		end
 		-- play_coin, next_play_coin 기본값 보정
 		if decoded.play_coin == nil then
 			decoded.play_coin = 5
@@ -90,7 +104,7 @@ script pvpUserService extends Logic
 		if decoded.next_play_coin == nil then
 			decoded.next_play_coin = 0
 		end
-
+		
 		-- 승리/플레이 횟수 기본값 보정 및 시즌 초기화
 		if decoded.win_count == nil then
 			decoded.win_count = 0
@@ -102,15 +116,15 @@ script pvpUserService extends Logic
 			decoded.win_count = 0
 			decoded.play_count = 0
 		end
-
+		
 		-- 닉네임 기본값 보정
 		if decoded.nickname == nil then
 			decoded.nickname = ""
 		end
-
+		
 		-- code 필드는 저장 데이터에 의존하지 않고 명시적으로 설정
 		decoded.code = 0
-
+		
 		return decoded
 	end
 
@@ -145,7 +159,7 @@ script pvpUserService extends Logic
 		local defense_str = _HttpService:JSONEncode(defense_deck)
 		local offense_syn_str = _HttpService:JSONEncode(offense_synergy)
 		local defense_syn_str = _HttpService:JSONEncode(defense_synergy)
-
+		
 		local data = {
 			play_coin=play_coin,
 			offense_deck=offense_str,
@@ -158,7 +172,7 @@ script pvpUserService extends Logic
 			nickname=nickname or "",
 			season_ver=_pvpService.PVP_MODE_VER
 		}
-
+		
 		local json = _HttpService:JSONEncode(data)
 		local ds = _DataStorageService:GetUserDataStorage(uid)
 		local saveCode = ds:SetAndWait(self.PVP_MODE_KEY, json)

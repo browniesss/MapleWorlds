@@ -3,12 +3,18 @@ script AnalyticsService extends Logic
 
 	property table data = {}
 
+	property integer LOGIN = 0
+
+	property integer LOGOUT = 1
+
+	property integer GACHA = 2
+
 	@ExecSpace("ServerOnly")
 	method void SendAnalyticsLog(string userId, table logData, string endpoint)
 		if userId == nil then
 			return
 		end
-
+		
 		if logData["name"] == nil then
 			return
 		end
@@ -18,7 +24,7 @@ script AnalyticsService extends Logic
 			if key == "name" then
 				continue
 			end
-
+		
 			content[key] = value
 		end
 		
@@ -75,7 +81,7 @@ script AnalyticsService extends Logic
 		local logData = {name="actions"}
 		
 		logData["user_id"] = userId
-		logData["type"] = 0
+		logData["type"] = self.LOGIN
 		
 		local id = _TimerService:SetTimerOnce(function() 
 			self:SendAnalyticsLog(userId, logData, "action")
@@ -91,7 +97,28 @@ script AnalyticsService extends Logic
 		local logData = {name="actions"}
 		
 		logData["user_id"] = userId
-		logData["type"] = 1
+		logData["type"] = self.LOGOUT
+		
+		local id = _TimerService:SetTimerOnce(function() 
+			self:SendAnalyticsLog(userId, logData, "action")
+		end, 0)
+		
+		if id == 0 then
+			log_error("SendAnalyticsLog reservation failed.")
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void Gacha(string userId, string gacha_id, table result)
+		local logData = {name="actions"}
+		
+		local value = {}
+		value["id"] = gacha_id
+		value["res"] = result
+		
+		logData["user_id"] = userId
+		logData["type"] = self.GACHA
+		logData["value"] = value
 		
 		local id = _TimerService:SetTimerOnce(function() 
 			self:SendAnalyticsLog(userId, logData, "action")
