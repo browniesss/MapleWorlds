@@ -80,7 +80,7 @@ script BadgeConditionService extends Logic
 
 			-- 배지 획득 시 레드닷 상태 갱신
 			local hasUnclaimed = self:HasUnclaimedRewards(userId)
-			_BadgeUIService:SendRedDotStatus(userId, hasUnclaimed)
+			_BadgeUIService:SendRedDotStatus(userId, hasUnclaimed, userId)
 		end
 	end
 

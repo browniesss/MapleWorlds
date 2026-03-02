@@ -50,13 +50,14 @@ script BadgeUIService extends Logic
 		print(string.format("[BadgeUIService] RequestBadgeList from userId: %s", userId))
 		
 		local badgeStatus = _BadgeConditionService:GetUserBadgeStatus(userId)
-		self:SendBadgeListToClient(userId, badgeStatus)
+		self:SendBadgeListToClient(userId, badgeStatus, userId)
 	end
 
 	@ExecSpace("Client")
-	method void SendBadgeListToClient(string userId, table badgeStatus)
+	method void SendBadgeListToClient(string userId, table badgeStatus, string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
 		print(string.format("[BadgeUIService] SendBadgeListToClient: received %d badges", self:CountTable(badgeStatus)))
-		
+
 		self.badgeStatusList = badgeStatus
 		self:UpdateBadgeList()
 	end
@@ -157,22 +158,23 @@ script BadgeUIService extends Logic
 		print(string.format("[BadgeUIService] RequestClaimReward: userId=%s, badgeId=%s", userId, badgeId))
 		
 		local success = _BadgeConditionService:ClaimBadgeReward(userId, badgeId)
-		self:SendClaimResult(userId, badgeId, success)
-		
+		self:SendClaimResult(userId, badgeId, success, userId)
+
 		if success then
 			local badgeStatus = _BadgeConditionService:GetUserBadgeStatus(userId)
-			self:SendBadgeListToClient(userId, badgeStatus)
-		
+			self:SendBadgeListToClient(userId, badgeStatus, userId)
+
 			-- 레드닷 상태 갱신
 			local hasUnclaimed = _BadgeConditionService:HasUnclaimedRewards(userId)
-			self:SendRedDotStatus(userId, hasUnclaimed)
+			self:SendRedDotStatus(userId, hasUnclaimed, userId)
 		end
 	end
 
 	@ExecSpace("Client")
-	method void SendClaimResult(string userId, string badgeId, boolean success)
+	method void SendClaimResult(string userId, string badgeId, boolean success, string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
 		print(string.format("[BadgeUIService] SendClaimResult: badgeId=%s, success=%s", badgeId, tostring(success)))
-		
+
 		if success then
 			print("[BadgeUIService] Reward claimed successfully")
 		else
@@ -184,13 +186,14 @@ script BadgeUIService extends Logic
 	method void RequestRedDotStatus()
 		local userId = senderUserId
 		local hasUnclaimed = _BadgeConditionService:HasUnclaimedRewards(userId)
-		self:SendRedDotStatus(userId, hasUnclaimed)
+		self:SendRedDotStatus(userId, hasUnclaimed, userId)
 	end
 
 	@ExecSpace("Client")
-	method void SendRedDotStatus(string userId, boolean hasUnclaimed)
+	method void SendRedDotStatus(string userId, boolean hasUnclaimed, string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
 		print(string.format("[BadgeUIService] SendRedDotStatus: hasUnclaimed=%s", tostring(hasUnclaimed)))
-		
+
 		local badgeOpenButton = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/BadgeButton")
 		if badgeOpenButton ~= nil then
 			print("[BadgeUIService] Found BadgeOpenButton entity")
