@@ -673,7 +673,7 @@ script GameManager extends Component
 		else
 			key = _RankingService:GetRankKeyByTable({chapter=clearedChapter, stage=clearedStage})
 		end
-		_RankingService:AddPoint(key, userName, playTime)
+		_RankingService:AddPoint(key, userName, playTime, senderUserId)
 		
 		self:UpdateRankData(userName, playTime, key, senderUserId)
 		

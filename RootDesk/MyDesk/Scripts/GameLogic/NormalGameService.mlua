@@ -79,7 +79,7 @@ script NormalGameService extends Component
 		local userName = user.PlayerComponent.Nickname
 		local playTime = DateTime.UtcNow.Elapsed - gm.playStartTs
 		local key = _RankingService:GetRankKeyByTable({chapter=clearedChapter, stage=clearedStage})
-		_RankingService:AddPoint(key, userName, playTime)
+		_RankingService:AddPoint(key, userName, playTime, senderUserId)
 
 		gm:UpdateRankData(userName, playTime, key, senderUserId)
 
