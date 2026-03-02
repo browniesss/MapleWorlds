@@ -93,6 +93,7 @@ script MatrixSpawnManager extends Component
 				self:SpawnClone(modelID, pos, level, limitBreak, senderUserId)
 			end, 0.3)
 		end
+	end
 
 	@ExecSpace("ServerOnly")
 	method void SpawnClone(string modelID, Vector3 pos, integer level, integer limitBreak, string userID)
