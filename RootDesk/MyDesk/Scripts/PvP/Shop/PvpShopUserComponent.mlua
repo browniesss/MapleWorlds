@@ -1,0 +1,15 @@
+@Component
+script PvpShopUserComponent extends Component
+
+	property integer availablePoints = 0
+
+	property table purchaseCounts = {}
+
+	property boolean dataLoaded = false
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		_PvpShopService:RequestAllItemStatuses()
+	end
+
+end
