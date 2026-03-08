@@ -127,9 +127,9 @@ script SkillParent extends Component
 		local isEnemy = self.caster.Unit ~= nil and self.caster.Unit.isEnemy
 
 		if isEnemy then
-			allEntities = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/MyMonsterList').Children
+			allEntities = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName()..'/MyMonsterList').Children
 		else
-			allEntities = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/EnemyList').Children
+			allEntities = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName()..'/EnemyList').Children
 		end
 
 		local nearbyEnemies = {}
@@ -153,9 +153,9 @@ script SkillParent extends Component
 		local isEnemy = self.caster.Unit ~= nil and self.caster.Unit.isEnemy
 
 		if isEnemy then
-			allEntities = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/EnemyList').Children
+			allEntities = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName()..'/EnemyList').Children
 		else
-			allEntities = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/MyMonsterList').Children
+			allEntities = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName()..'/MyMonsterList').Children
 		end
 
 		local nearbyAllies = {}
@@ -189,9 +189,9 @@ script SkillParent extends Component
 		local isEnemy = self.caster.Unit ~= nil and self.caster.Unit.isEnemy
 
 		if isEnemy then
-			allEntities = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/MyMonsterList').Children
+			allEntities = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName()..'/MyMonsterList').Children
 		else
-			allEntities = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/EnemyList').Children
+			allEntities = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName()..'/EnemyList').Children
 		end
 		
 		local enemiesWithDistance = {}
@@ -223,9 +223,9 @@ script SkillParent extends Component
 		local isEnemy = self.caster.Unit ~= nil and self.caster.Unit.isEnemy
 
 		if isEnemy then
-			allEntities = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/MyMonsterList').Children
+			allEntities = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName()..'/MyMonsterList').Children
 		else
-			allEntities = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/EnemyList').Children
+			allEntities = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName()..'/EnemyList').Children
 		end
 		
 		local enemiesWithDistance = {}

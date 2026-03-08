@@ -23,8 +23,7 @@ script UserDeckSaveButton extends Component
 			pvpLobbyUI.PvPLobbyUI:UpdateCoinDisplay()
 			pvpLobbyUI.PvPLobbyUI:UpdateScoreDisplay()
 		else
-			local player = _EntityService:GetEntityByTag("Player")
-			_UserDeckService:SAVE(player.PlayerComponent.UserId)
+			_UserService.LocalPlayer.UserDeckService:SAVE()
 
 			self.userDeckUI.Enable = false
 			self.userDeckUI.Visible = false

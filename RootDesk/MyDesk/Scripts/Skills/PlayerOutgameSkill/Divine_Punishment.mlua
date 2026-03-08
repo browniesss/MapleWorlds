@@ -10,7 +10,7 @@ script Divine_Punishment extends SkillParent
 		-- b4134c0268974cbcbc780d46541ecbde 종료
 		
 		if self._T.projectileParent == nil then
-			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			self._T.projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 		end
 		
 		

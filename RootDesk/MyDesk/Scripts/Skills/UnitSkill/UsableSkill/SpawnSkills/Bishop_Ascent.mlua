@@ -9,16 +9,16 @@ script Bishop_Ascent extends SkillParent
 		
 		local allyListParent
 		if self.caster.Unit.isEnemy then
-			allyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
+			allyListParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/EnemyList")
 		else
-			allyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+			allyListParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/MyMonsterList")
 		end
 		local myMonsters = allyListParent.Children
 		local player = _EntityService:GetEntityByTag("Player")
 		
-		_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = "7a871e0365124a59b38996c70d134b6f"
-		_GameManager.screenSkillUI.Enable = true
-		_GameManager.screenSkillUI.Visible = true
+		_UserService.LocalPlayer.GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = "7a871e0365124a59b38996c70d134b6f"
+		_UserService.LocalPlayer.GameManager.screenSkillUI.Enable = true
+		_UserService.LocalPlayer.GameManager.screenSkillUI.Visible = true
 		
 		local buffFunction = function()
 			for index in ipairs(myMonsters) do
@@ -36,9 +36,9 @@ script Bishop_Ascent extends SkillParent
 		end
 		
 		local deleteFunction = function()
-			_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = ""
-			_GameManager.screenSkillUI.Enable = false	
-			_GameManager.screenSkillUI.Visible = false
+			_UserService.LocalPlayer.GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = ""
+			_UserService.LocalPlayer.GameManager.screenSkillUI.Enable = false	
+			_UserService.LocalPlayer.GameManager.screenSkillUI.Visible = false
 			_UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill = false
 		end
 		

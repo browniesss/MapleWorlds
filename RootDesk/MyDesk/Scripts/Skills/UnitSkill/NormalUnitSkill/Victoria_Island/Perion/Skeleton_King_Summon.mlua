@@ -11,20 +11,22 @@ script Skeleton_King_Summon extends SkillParent
 		_EffectService:PlayEffectAttached("bbe813c49cd84df9b59feeedb8dcba84", self.caster, Vector3.zero, 0, Vector3.one)
 		
 		local summonCount = self.skillAmount
-		
+		local spawnManager = _UserService.LocalPlayer.SpawnManager
+
 		for i = 1, summonCount do
 			local pos
 			local offset = (i - 1) * 0.5
-		
+
 			if self.caster.Unit.isEnemy then
 				pos = Vector3(self.caster.TransformComponent.Position.x + 0.5 + offset, self.caster.TransformComponent.Position.y, 0)
-				_SpawnManager:SpawnEnemy(model, pos)
+				spawnManager:SpawnEnemy(model, pos)
 			else
 				pos = Vector3(self.caster.TransformComponent.Position.x - 0.5 - offset, self.caster.TransformComponent.Position.y, 0)
-				if _GameManager.currentGameMode == _eGameMode.Matrix and _MatrixSpawnManager ~= nil then
-					_MatrixSpawnManager:SkillSpawn(model, self.caster.Unit.id, pos)
+				local matrixSpawnMgr = _UserService.LocalPlayer.MatrixSpawnManager
+				if _UserService.LocalPlayer.GameManager.currentGameMode == _eGameMode.Matrix and matrixSpawnMgr ~= nil then
+					matrixSpawnMgr:SkillSpawn(model, self.caster.Unit.id, pos)
 				else
-					_SpawnManager:SkillSpawn(model, self.caster.Unit.id, pos)
+					spawnManager:SkillSpawn(model, self.caster.Unit.id, pos)
 				end
 			end
 		

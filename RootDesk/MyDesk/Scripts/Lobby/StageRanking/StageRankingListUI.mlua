@@ -83,8 +83,12 @@ script StageRankingListUI extends Component
 			self:RefreshRankListItem(key)
 			return
 		end
-		
+
 		if _RankingService:CountRankTable(key) < 0 then
+			-- 첫 번째 체크에서 데이터가 없으면 서버에서 가져오기
+			if count == 0 then
+				_RankingService:FETCH(key)
+			end
 			_TimerService:SetTimerOnce(
 				function()
 					self:InitCheckRankData(key, count + 1)
@@ -93,7 +97,7 @@ script StageRankingListUI extends Component
 			)
 			return
 		end
-		
+
 		self:RefreshRankListItem(key)
 	end
 

@@ -1,5 +1,5 @@
-@Logic
-script MatrixUnitSelectService extends Logic
+@Component
+script MatrixUnitSelectService extends Component
 
 	property Entity matrixSelectUI = nil
 
@@ -39,6 +39,9 @@ script MatrixUnitSelectService extends Logic
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
+		if self.Entity ~= _UserService.LocalPlayer then
+			return
+		end
 		self.matrixSelectUI = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI")
 		self.unitSelectUI = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI/UnitSelectUI")
 		self.charterViewList = _EntityService:GetEntityByPath("/ui/MatrixUI/MatrixSelectUI/UnitSelectUI/CharterViewList_1")
@@ -103,14 +106,14 @@ script MatrixUnitSelectService extends Logic
 
 		self.currentChoiceIds = choices
 
-		-- 게임 일시정지
-		if _MatrixGameManager ~= nil then
-			_MatrixGameManager:PauseGame()
-		end
+		-- 게임 일시정지 (이미 일시정지 상태가 아닐 때만)
+		if self.Entity.MatrixGameManager ~= nil and not self.Entity.MatrixGameManager.isPaused then
+			self.Entity.MatrixGameManager:PauseGame()
 
-		-- 서버측 일시정지 (MesoIncome 연동)
-		if _MatrixService ~= nil then
-			_MatrixService:SetGamePausedOnServer(true)
+			-- 서버측 일시정지 (MesoIncome 연동)
+			if self.Entity.MatrixService ~= nil then
+				self.Entity.MatrixService:SetGamePausedOnServer(true)
+			end
 		end
 
 		-- MatrixSelectUI 컨테이너 활성화
@@ -331,8 +334,8 @@ script MatrixUnitSelectService extends Logic
 		end
 
 		-- MatrixExtendUnitShop에 유닛 추가
-		if _MatrixGameManager ~= nil and _MatrixGameManager.unitShop ~= nil then
-			local shop = _MatrixGameManager.unitShop.MatrixExtendUnitShop
+		if self.Entity.MatrixGameManager ~= nil and self.Entity.MatrixGameManager.unitShop ~= nil then
+			local shop = self.Entity.MatrixGameManager.unitShop.MatrixExtendUnitShop
 			if shop ~= nil then
 				shop:AddUnit(unitId)
 			end
@@ -355,13 +358,13 @@ script MatrixUnitSelectService extends Logic
 			end)
 		end
 
-		-- UI 닫기
-		self:CloseUnitSelectionUI()
-
 		-- 남은 선택 처리
 		self.remainingSelections = self.remainingSelections - 1
 
 		if self.remainingSelections > 0 then
+			-- 다음 선택이 남아있으면 UI만 닫고 게임 재개하지 않음 (PauseGame 유지)
+			self:CloseUnitSelectionUIOnly()
+
 			-- 다음 선택 (0.5초 딜레이)
 			_TimerService:SetTimerOnce(function()
 				self:ShowUnitSelectionUI()
@@ -369,6 +372,9 @@ script MatrixUnitSelectService extends Logic
 		else
 			-- 초기 덱 선택 모드 해제
 			self.isInitialDeckSelection = false
+
+			-- 마지막 선택: UI 닫기 + 게임 재개
+			self:CloseUnitSelectionUI()
 
 			-- 선택 완료 → 콜백 호출
 			if self.onSelectionCompleteCallback ~= nil then
@@ -379,25 +385,38 @@ script MatrixUnitSelectService extends Logic
 		end
 	end
 
+	-- UI만 닫기 (게임 재개하지 않음 — 다음 선택이 남아있을 때 사용)
+	@ExecSpace("Client")
+	method void CloseUnitSelectionUIOnly()
+		if self.unitSelectUI ~= nil then
+			self.unitSelectUI.Enable = false
+		end
+
+		if self.matrixSelectUI ~= nil then
+			self.matrixSelectUI.Enable = false
+			self.matrixSelectUI.Visible = false
+		end
+	end
+
 	@ExecSpace("Client")
 	method void CloseUnitSelectionUI()
 		if self.unitSelectUI ~= nil then
 			self.unitSelectUI.Enable = false
 		end
-		
+
 		if self.matrixSelectUI ~= nil then
 			self.matrixSelectUI.Enable = false
 			self.matrixSelectUI.Visible = false
 		end
-		
+
 		-- 게임 재개
-		if _MatrixGameManager ~= nil then
-			_MatrixGameManager:ResumeGame()
+		if self.Entity.MatrixGameManager ~= nil then
+			self.Entity.MatrixGameManager:ResumeGame()
 		end
-		
+
 		-- 서버측 일시정지 해제 (MesoIncome 연동)
-		if _MatrixService ~= nil then
-			_MatrixService:SetGamePausedOnServer(false)
+		if self.Entity.MatrixService ~= nil then
+			self.Entity.MatrixService:SetGamePausedOnServer(false)
 		end
 	end
 
@@ -437,14 +456,14 @@ script MatrixUnitSelectService extends Logic
 
 		self.currentUpgradeChoices = upgradeChoices
 
-		-- 게임 일시정지
-		if _MatrixGameManager ~= nil then
-			_MatrixGameManager:PauseGame()
-		end
+		-- 게임 일시정지 (이미 일시정지 상태가 아닐 때만)
+		if self.Entity.MatrixGameManager ~= nil and not self.Entity.MatrixGameManager.isPaused then
+			self.Entity.MatrixGameManager:PauseGame()
 
-		-- 서버측 일시정지
-		if _MatrixService ~= nil then
-			_MatrixService:SetGamePausedOnServer(true)
+			-- 서버측 일시정지
+			if self.Entity.MatrixService ~= nil then
+				self.Entity.MatrixService:SetGamePausedOnServer(true)
+			end
 		end
 
 		-- MatrixSelectUI 컨테이너 활성화
@@ -584,18 +603,21 @@ script MatrixUnitSelectService extends Logic
 		-- 서버에 필드 유닛 버프 적용 (직접 호출)
 		self:ApplyUpgradeToUnitServer(choice.unitId, choice.buffType, choice.buffValue)
 
-		-- UI 닫기
-		self:CloseUnitSelectionUI()
-
 		-- 남은 선택 처리
 		self.remainingSelections = self.remainingSelections - 1
 
 		if self.remainingSelections > 0 then
+			-- 다음 선택이 남아있으면 UI만 닫고 게임 재개하지 않음 (PauseGame 유지)
+			self:CloseUnitSelectionUIOnly()
+
 			-- 다음 선택 (0.5초 딜레이)
 			_TimerService:SetTimerOnce(function()
 				self:ShowUnitSelectionUI()
 			end, 0.5)
 		else
+			-- 마지막 선택: UI 닫기 + 게임 재개
+			self:CloseUnitSelectionUI()
+
 			-- 선택 완료 → 콜백 호출
 			if self.onSelectionCompleteCallback ~= nil then
 				local callback = self.onSelectionCompleteCallback
@@ -618,7 +640,8 @@ script MatrixUnitSelectService extends Logic
 		end
 
 		-- 필드 위 해당 유닛에도 즉시 적용
-		local gameMapPath = _GameManager:GetGameMapName()
+		local gm = self.Entity.GameManager
+		local gameMapPath = gm:GetGameMapName()
 		local myMonsterList = _EntityService:GetEntityByPath(gameMapPath .. "/MyMonsterList")
 
 		if myMonsterList ~= nil then
@@ -653,7 +676,8 @@ script MatrixUnitSelectService extends Logic
 	-- 메소 income UI 업데이트 (시너지 변경 반영)
 	@ExecSpace("Server")
 	method void RefreshMesoIncomeUI()
-		local mapPath = "/maps/MatrixStage"
+		local gm = self.Entity.GameManager
+		local mapPath = gm:GetGameMapName()
 		local mesoIncomeEntity = _EntityService:GetEntityByPath(mapPath .. "/ingameIncome")
 		if mesoIncomeEntity ~= nil and mesoIncomeEntity.MesoIncome ~= nil then
 			mesoIncomeEntity.MesoIncome:RefreshIncomeUI()

@@ -40,9 +40,10 @@ script pvpUserComponent extends Component
 		end
 		
 		self.next_play_coin = nowTs + _pvpUserService.PLAY_COIN_UPDATE
-		
-		self:UserCoinBack(self.play_coin)
-		self:UpdateCoinNextTs(self.next_play_coin)
+
+		local uid = self.Entity.PlayerComponent.UserId
+		self:UserCoinBack(self.play_coin, uid)
+		self:UpdateCoinNextTs(self.next_play_coin, uid)
 	end
 
 	@ExecSpace("Server")
@@ -102,10 +103,10 @@ script pvpUserComponent extends Component
 		end
 		
 		-- 검증된 기존 콜백 재사용 (각 1~2 파라미터)
-		self:UserCoinBack(data.play_coin)
-		self:UpdateCoinNextTs(data.next_play_coin)
-		self:SetOffenseUnitBack(data.offense_deck, data.offense_synergy)
-		self:SetDefenseUnitBack(data.defense_deck, data.defense_synergy)
+		self:UserCoinBack(data.play_coin, senderUserId)
+		self:UpdateCoinNextTs(data.next_play_coin, senderUserId)
+		self:SetOffenseUnitBack(data.offense_deck, data.offense_synergy, senderUserId)
+		self:SetDefenseUnitBack(data.defense_deck, data.defense_synergy, senderUserId)
 	end
 
 	@ExecSpace("ClientOnly")
@@ -197,8 +198,8 @@ script pvpUserComponent extends Component
 		
 			local buffedUnit = BuffedUnitModel()
 			buffedUnit:Init(unit)
-		
-			local unitJson = _UserMonsterService.userMonsterDict[id]
+
+			local unitJson = self.Entity.UserMonsterService.userMonsterDict[id]
 			if unitJson ~= nil then
 				local userUnitData = UserUnitModel()
 				userUnitData:DECODE(unitJson)
@@ -242,8 +243,8 @@ script pvpUserComponent extends Component
 			log_error("[PVP] SetOffeseUnitCall save failed, uid=" .. senderUserId .. " code=" .. tostring(code))
 			return
 		end
-		
-		self:SetOffenseUnitBack(self.offense_deck, self.offense_synergy)
+
+		self:SetOffenseUnitBack(self.offense_deck, self.offense_synergy, senderUserId)
 	end
 
 	@ExecSpace("Client")
@@ -271,8 +272,8 @@ script pvpUserComponent extends Component
 			log_error("[PVP] SetDefenseUnitCall save failed, uid=" .. senderUserId .. " code=" .. tostring(code))
 			return
 		end
-		
-		self:SetDefenseUnitBack(self.defense_deck, self.defense_synergy)
+
+		self:SetDefenseUnitBack(self.defense_deck, self.defense_synergy, senderUserId)
 	end
 
 	@ExecSpace("Client")
@@ -304,9 +305,9 @@ script pvpUserComponent extends Component
 			log_error("[PVP] UseCoin save failed, uid=" .. userId .. " code=" .. tostring(code))
 			return
 		end
-		
-		self:UserCoinBack(self.play_coin)
-		self:UpdateCoinNextTs(self.next_play_coin)
+
+		self:UserCoinBack(self.play_coin, userId)
+		self:UpdateCoinNextTs(self.next_play_coin, userId)
 	end
 
 	@ExecSpace("ServerOnly")
@@ -321,7 +322,7 @@ script pvpUserComponent extends Component
 			self.win_count += 1
 		end
 		_pvpUserService:UpdateUserData(userId, self.play_coin, self.next_play_coin, self.offense_deck, self.defense_deck, self.offense_synergy, self.defense_synergy, self.win_count, self.play_count, self.nickname)
-		self:SyncRecordBack(self.win_count, self.play_count)
+		self:SyncRecordBack(self.win_count, self.play_count, userId)
 	end
 
 	@ExecSpace("Client")

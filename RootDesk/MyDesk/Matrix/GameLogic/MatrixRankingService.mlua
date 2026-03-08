@@ -39,10 +39,10 @@ script MatrixRankingService extends Logic
 		-- 기존 점수보다 높은 경우에만 업데이트
 		if lastScore >= score then
 			-- 최고점(lastScore)을 유지하도록 업데이트
-			self:UpdateUserScore(lastScore)
+			self:UpdateUserScore(lastScore, senderUserId)
 			return
 		end
-		
+
 		local setCode = ds:SetAndWait(userName, score)
 		if setCode ~= 0 then
 		end
@@ -50,7 +50,7 @@ script MatrixRankingService extends Logic
 		-- 캐시 무효화 (다음 FETCH에서 최신 데이터 조회)
 		self.cacheExpireTs = 0
 
-		self:UpdateUserScore(score)
+		self:UpdateUserScore(score, senderUserId)
 	end
 
 	@ExecSpace("Server")
@@ -111,7 +111,8 @@ script MatrixRankingService extends Logic
 	end
 
 	@ExecSpace("Client")
-	method void UpdateUserScore(integer score)
+	method void UpdateUserScore(integer score, string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
 		self.userScore = score
 	end
 

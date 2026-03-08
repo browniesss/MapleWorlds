@@ -1,17 +1,17 @@
-@Logic
-script GameManager extends Logic
+@Component
+script GameManager extends Component
 
-	property Entity skillSelectUI = "ec7b9d8d-b2c2-4ee8-b95c-58564c8a4763"
+	property Entity skillSelectUI = nil
 
 	property SyncTable<Entity> skillBtn
 
-	property Entity shopUI = "e0ec4a39-4a35-4e17-95aa-c16dee01f5fa"
+	property Entity shopUI = nil
 
-	property Entity infoUI = "a07f182a-214a-414d-b995-9863eaa71d62"
+	property Entity infoUI = nil
 
-	property Entity unitShop = "fa5581b7-25d8-40c7-8b0f-ea16534303e2"
+	property Entity unitShop = nil
 
-	property Entity skillSlots = "847312aa-e2d9-4375-9707-b0a2000cf8c0"
+	property Entity skillSlots = nil
 
 	@Sync
 	property integer chapterIndex = 0
@@ -25,7 +25,10 @@ script GameManager extends Logic
 	@Sync
 	property integer playStartTs = 0
 
-	property Entity timeText = "f229ed5a-4dbc-4c26-8ff0-3fa8ebf7f5ce"
+	property Entity timeText = nil
+
+	@Sync
+	property string dynamicMapName = ""
 
 	@Sync
 	property boolean isPlaying = false
@@ -33,17 +36,17 @@ script GameManager extends Logic
 	@Sync
 	property integer timer = 0
 
-	property Entity gameClearResult = "bd109aaa-b307-4160-b918-a09b05a6d4d9"
+	property Entity gameClearResult = nil
 
-	property RankUI rankUI = "daa5b02b-f478-4f97-a216-d17e6b71634a"
+	property RankUI rankUI = nil
 
-	property Entity failPopupUI = "6f1b960c-08f8-41f2-93e4-3e585ec70ab8"
+	property Entity failPopupUI = nil
 
-	property Entity joystick = "02c6fd20-fdb0-4b80-bbd3-2241e929c46d"
+	property Entity joystick = nil
 
-	property Entity screenSkillUI = "c735233f-679d-4f6d-a9c2-ab9db46c5bd6"
+	property Entity screenSkillUI = nil
 
-	property Entity mapTextUI = "1374988d-d50e-4f9c-8bb8-e158f9b3decf"
+	property Entity mapTextUI = nil
 
 	@Sync
 	property boolean isTutorialPaused = false
@@ -52,10 +55,26 @@ script GameManager extends Logic
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
-		-- 스킬 선택 UI 비활성화
-		-- for i = 1, 3 do
-			-- table.insert(self.skillBtn, self.skillSelectUI.Children[i])
-		-- end
+		if self.Entity ~= _UserService.LocalPlayer then
+			return
+		end
+		-- UI 엔티티 동적 조회 (DefaultPlayer @Component에서는 UUID 참조 불가)
+		self.shopUI = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group")
+		self.infoUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group")
+		self.unitShop = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group/UnitShop")
+		self.skillSlots = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group/SkillSlots")
+		self.timeText = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/CenterUI/TimeText")
+		self.gameClearResult = _EntityService:GetEntityByPath("/ui/GameClearUI")
+		self.failPopupUI = _EntityService:GetEntityByPath("/ui/GameFailUI")
+		self.joystick = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/UIJoystick")
+		self.screenSkillUI = _EntityService:GetEntityByPath("/ui/IngameScreenSkillUI")
+		self.mapTextUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/UserInfo/MapText")
+
+		-- RankUI 컴포넌트 조회
+		local rankEntity = _EntityService:GetEntityByPath("/ui/GameClearUI/Frame/ScrollRankList")
+		if rankEntity ~= nil then
+			self.rankUI = rankEntity.RankUI
+		end
 	end
 
 	@ExecSpace("Client")
@@ -116,6 +135,7 @@ script GameManager extends Logic
 
 	@ExecSpace("Server")
 	method void GameStart(integer chapterIndex, integer mapIndex, number gameMode)
+		local userId = senderUserId or self.Entity.PlayerComponent.UserId
 		self.chapterIndex = chapterIndex
 		self.mapIndex = mapIndex
 		self.isPlaying = true
@@ -123,47 +143,53 @@ script GameManager extends Logic
 		
 		-- 모드 설정
 		self.currentGameMode = gameMode
-		
-		if _TimeScaleManager ~= nil then
-			_TimeScaleManager:RestoreTimeScale()
+
+		-- 매트릭스 모드는 MatrixGameManager에서 자체 초기화하므로 여기선 기본 설정만
+		if gameMode == _eGameMode.Matrix then
+			self:GameStartDataInClient(chapterIndex, mapIndex, self.dynamicMapName, userId)
+			return
 		end
-		
-		local userIncome = _SpawnManager:GetUserIncome()
+
+		if self.Entity.TimeScaleManager ~= nil then
+			self.Entity.TimeScaleManager:RestoreTimeScale(userId)
+		end
+
+		local userIncome = self.Entity.SpawnManager:GetUserIncome()
 		local baseIncomeData = userIncome.MesoIncome:GetMesoData()
 		local meso = baseIncomeData.init
 		local income = baseIncomeData.income
-		if senderUserId ~= nil then
-			local user = _UserService:GetUserEntityByUserId(senderUserId)
-			
+		if userId ~= nil then
+			local user = _UserService:GetUserEntityByUserId(userId)
+
 			local addInitPoint = 5
 			local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(addInitPoint)
 			local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(tostring(addInitPoint), count)
-			
+
 			if synergy:length() > 0 then
 				local item = synergy:Get(1)
 				meso += item:CalcValue(meso)
 			end
-			
+
 			local addPointRatio = 101
 			local addPointRatioCount = user.UserSynergyComponent:GET_SYNERGY_COUNT(addPointRatio)
 			local addPointRatioSynergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(tostring(addPointRatio), addPointRatioCount)
-			
+
 			if addPointRatioSynergy:length() > 0 then
 				local item = addPointRatioSynergy:Get(1)
 				income += item:CalcValue(income)
 			end
 		end
-		
+
 		userIncome.MesoIncome:InitData(meso, income)
-		
+
 		local key = _RankingService:GetRankKeyByTable({chapter=chapterIndex, stage=mapIndex})
-		
-		self:SetPlayerCharacter()
-		
-		self:SetTimer()
-		self:GameStartDataInClient(chapterIndex, mapIndex)
-		self:EnableUI()
-		
+
+		self:SetPlayerCharacter(userId)
+
+		self:SetTimer(userId)
+		self:GameStartDataInClient(chapterIndex, mapIndex, self.dynamicMapName, userId)
+		self:EnableUI(userId)
+
 		local stageData
 		if self.currentGameMode == _eGameMode.Event then
 			local eventIdValue = tostring(_EventService.currentEventVersion)
@@ -175,7 +201,7 @@ script GameManager extends Logic
 		local enemyTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/EnemyTower")
 		local ourHealthBar = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/Player_HP_bar")
 		local enemyHealthBar = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/EnemyHealthBar")
-		
+
 		if stageData ~= nil then
 			enemyTower.Unit.originMaxHP = stageData["enemy_tower_hp"]
 			enemyTower.Unit.maxHP = stageData["enemy_tower_hp"]
@@ -187,16 +213,20 @@ script GameManager extends Logic
 	end
 
 	@ExecSpace("Client")
-	method void GameStartDataInClient(integer chapterIndex, integer mapIndex)
+	method void GameStartDataInClient(integer chapterIndex, integer mapIndex, string dynMapName)
 		self.chapterIndex = chapterIndex
 		self.mapIndex = mapIndex
-		
-		
+
+		-- @Sync 동기화 타이밍 이슈 방지: 서버에서 전달받은 동적 맵 이름을 직접 설정
+		if dynMapName ~= nil and dynMapName ~= "" then
+			self.dynamicMapName = dynMapName
+		end
+
 		local ourHealthBarUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/Player_HP_bar")
 		local enemyHealthBarUI = _EntityService:GetEntityByPath("/ui/Ingame_Info_UI_Group/EnemyHealthBar")
 		local playerTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/PlayerTower")
 		local enemyTower = _EntityService:GetEntityByPath(self:GetGameMapName().."/EnemyTower")
-		
+
 		ourHealthBarUI.OurHealthBar.tower = playerTower
 		enemyHealthBarUI.EnemyHealthBar.tower = enemyTower
 		
@@ -215,17 +245,18 @@ script GameManager extends Logic
 		-- PvP 모드는 pvpCombatComponent에서 별도 처리
 		if self.currentGameMode == _eGameMode.PvP then
 			self.currentGameMode = _eGameMode.Normal
+			self.dynamicMapName = ""
 			return
 		end
 		
 		-- 배속 저장 후 초기화
-		if _TimeScaleManager ~= nil then
-			_TimeScaleManager:SaveAndReset()
+		if self.Entity.TimeScaleManager ~= nil then
+			self.Entity.TimeScaleManager:SaveAndReset()
 		end
 		
 		-- 몬스터 도감 킬 데이터 서버로 동기화
-		_MonsterCodexService:SyncKillDataToServer()
-		
+		self.Entity.MonsterCodexService:SyncKillDataToServer()
+
 		-- 인게임 UI 비활성화
 		self.shopUI.Enable = false
 		self.shopUI.Visible = false
@@ -235,7 +266,10 @@ script GameManager extends Logic
 		self.gameClearResult.Visible = false
 		self.failPopupUI.Enable = false
 		self.failPopupUI.Visible = false
-		
+
+		-- 동적 맵 이름 리셋
+		self.dynamicMapName = ""
+
 		-- 모드 초기화 (서버에서도 리셋하여 다음 GameStart 시 @Sync 보장)
 		self.currentGameMode = _eGameMode.Normal
 		self:ResetGameModeOnServer()
@@ -249,9 +283,66 @@ script GameManager extends Logic
 	@ExecSpace("Server")
 	method void ResetGameModeOnServer()
 		self.currentGameMode = _eGameMode.Normal
+		self.dynamicMapName = ""
+	end
+
+	--- 동적 맵 생성 후 게임 시작 (클라이언트에서 호출)
+	@ExecSpace("Server")
+	method void RequestDynamicMapEntry(integer chapter, integer stage, number gameMode, string sourceMapName)
+		local userId = senderUserId
+		if userId == nil then
+			return
+		end
+
+		-- 기존 동적 맵 정리
+		local oldMapName = _GameRoomService.userDynamicMapNames[userId]
+		if oldMapName ~= nil then
+			_GameRoomService.userDynamicMapNames[userId] = nil
+			_GameRoomService:TryDestroyDynamicMap(oldMapName)
+		end
+
+		-- 고유 맵 이름 생성
+		local newMapName = sourceMapName .. "_" .. userId
+
+		-- 동적 맵 생성
+		local resultCode = _DynamicMapService:CreateDynamicMap(sourceMapName, newMapName)
+		if resultCode ~= DynamicMapResultCode.Success then
+			if resultCode == DynamicMapResultCode.DuplicateMapName then
+				_DynamicMapService:DestroyDynamicMap(newMapName)
+				resultCode = _DynamicMapService:CreateDynamicMap(sourceMapName, newMapName)
+				if resultCode ~= DynamicMapResultCode.Success then
+					log_error("[GameManager] Failed to create dynamic map: " .. newMapName)
+					return
+				end
+			else
+				log_error("[GameManager] Failed to create dynamic map: " .. newMapName .. " code=" .. tostring(resultCode))
+				return
+			end
+		end
+
+		-- 추적 등록
+		_GameRoomService.userDynamicMapNames[userId] = newMapName
+		_GameRoomService.activeDynamicMaps[newMapName] = true
+
+		-- @Sync로 클라이언트에 동적 맵 이름 전달
+		self.dynamicMapName = newMapName
+
+		-- 유저 텔레포트
+		local userEntity = _UserService:GetUserEntityByUserId(userId)
+		if userEntity ~= nil then
+			_TeleportService:TeleportToMapPosition(userEntity, Vector3.zero, newMapName)
+		end
+
+		-- 게임 시작
+		self:GameStart(chapter, stage, gameMode)
 	end
 
 	method string GetGameMapName()
+		-- 동적 맵이 활성화되어 있으면 동적 맵 경로 반환
+		if self.dynamicMapName ~= nil and self.dynamicMapName ~= "" then
+			return "/maps/" .. self.dynamicMapName
+		end
+
 		if self.currentGameMode == _eGameMode.PvP then
 			return _pvpService.PVP_STAGE_PATH
 		elseif self.currentGameMode == _eGameMode.Matrix then
@@ -301,15 +392,17 @@ script GameManager extends Logic
 		userNameUI.TextComponent.Text = _UserService.LocalPlayer.PlayerComponent.Nickname
 		
 		-- Stage000 (튜토리얼 스테이지) 진입 시 인게임 튜토리얼 시작
-		if self.chapterIndex == 0 and self.mapIndex == 0 then
+		log("[GameManager] EnableUI chapterIndex=" .. tostring(self.chapterIndex) .. " mapIndex=" .. tostring(self.mapIndex) .. " gameMode=" .. tostring(self.currentGameMode))
+		if self.chapterIndex == 0 and self.mapIndex == 0 and self.currentGameMode ~= _eGameMode.Matrix then
+			log("[GameManager] Setting Tutorial mode (chapter=0, map=0)")
 			self.currentGameMode = _eGameMode.Tutorial
 		
 			-- 튜토리얼용 덱 설정: 첫 번째 카드를 히어로로 스왑 (InitShop 전에 설정해야 함)
-			local player = _EntityService:GetEntityByTag("Player")
-			if player ~= nil and player.UserDeck ~= nil then
+			local playerDeckComp = self.Entity.UserDeck
+			if playerDeckComp ~= nil then
 				local heroId = "model://494916e1-eeaa-4318-b36f-95d40d6c5e91"
-				local userDeck = player.UserDeck.userDeck
-		
+				local userDeck = playerDeckComp.userDeck
+
 				-- 히어로가 덱에 있는지 찾기
 				local heroIndex = nil
 				for i = 1, 8 do
@@ -343,8 +436,8 @@ script GameManager extends Logic
 		if self.currentGameMode == _eGameMode.Tutorial then
 			-- 약간의 딜레이 후 튜토리얼 시작 (UI 로드 완료 대기)
 			_TimerService:SetTimerOnce(function()
-				if _TutorialService ~= nil then
-					_TutorialService:StartIngameTutorial(1)
+				if self.Entity.TutorialService ~= nil then
+					self.Entity.TutorialService:StartIngameTutorial(1)
 				end
 			end, 0.5)
 		end
@@ -466,14 +559,15 @@ script GameManager extends Logic
 	end
 
 	@ExecSpace("Server")
-	method void SetTimer()
+	method void SetTimer(string userId)
+		local uid = userId or self.Entity.PlayerComponent.UserId
 		self.timer = _TimerService:SetTimerRepeat(function()
 			local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
-			if _TimeScaleManager ~= nil then
-				playTime = _TimeScaleManager:GetAccumulatedPlayTime()
+			if self.Entity.TimeScaleManager ~= nil then
+				playTime = self.Entity.TimeScaleManager:GetAccumulatedPlayTime()
 			end
-		
-			self:SetTimeText(playTime)
+
+			self:SetTimeText(playTime, uid)
 		end, 1.0, 0)
 	end
 
@@ -492,7 +586,7 @@ script GameManager extends Logic
 	method void ClearGameData()
 		self.isPlaying = false
 		
-		local mesoWallet = _EntityService:GetEntityByPath(_GameManager:GetGameMapName() .. "/userWallet")
+		local mesoWallet = _EntityService:GetEntityByPath(self:GetGameMapName() .. "/userWallet")
 		
 		mesoWallet.MesoWallet:SetMeso(0) 
 	end
@@ -567,8 +661,8 @@ script GameManager extends Logic
 		local userStage = user.UserStage
 		local userName = user.PlayerComponent.Nickname
 		local playTime = DateTime.UtcNow.Elapsed - self.playStartTs
-		if _TimeScaleManager ~= nil then
-			playTime = _TimeScaleManager:GetAccumulatedPlayTime()
+		if self.Entity.TimeScaleManager ~= nil then
+			playTime = self.Entity.TimeScaleManager:GetAccumulatedPlayTime()
 		end
 		
 		-- 하드모드 여부에 따라 랭킹 키 분기
@@ -579,7 +673,7 @@ script GameManager extends Logic
 		else
 			key = _RankingService:GetRankKeyByTable({chapter=clearedChapter, stage=clearedStage})
 		end
-		_RankingService:AddPoint(key, userName, playTime)
+		_RankingService:AddPoint(key, userName, playTime, senderUserId)
 		
 		self:UpdateRankData(userName, playTime, key, senderUserId)
 		
@@ -635,17 +729,17 @@ script GameManager extends Logic
 		end
 		
 		if isFirstClear == false then
-			_BillingService:AddSecondFreeCoin(senderUserId, 100 * rewardMultiplier)
-			_BillingService:AddThirdFreeCoin(senderUserId, 500 * rewardMultiplier)
-		
+			self.Entity.BillingService:AddSecondFreeCoin(senderUserId, 100 * rewardMultiplier)
+			self.Entity.BillingService:AddThirdFreeCoin(senderUserId, 500 * rewardMultiplier)
+
 			print("[GameManager] Not first clear, skipping badge check")
 			return
 		end
-		
-		_PlayCoinService:AddCoin(senderUserId, 1)
-		_BillingService:AddSecondFreeCoin(senderUserId, 500 * rewardMultiplier)
-		_BillingService:AddFirstFreeCoin(senderUserId, 100 * rewardMultiplier)
-		_BillingService:AddThirdFreeCoin(senderUserId, 4000 * rewardMultiplier)
+
+		self.Entity.PlayCoinService:AddCoin(senderUserId, 1)
+		self.Entity.BillingService:AddSecondFreeCoin(senderUserId, 500 * rewardMultiplier)
+		self.Entity.BillingService:AddFirstFreeCoin(senderUserId, 100 * rewardMultiplier)
+		self.Entity.BillingService:AddThirdFreeCoin(senderUserId, 4000 * rewardMultiplier)
 		
 		print("[GameManager] First clear! Checking badges...")
 		
@@ -670,29 +764,36 @@ script GameManager extends Logic
 
 	method table GetPreLoadAssetRuid()
 		local ruids = {}
-		local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
-		
+		local playerDeck = _UserService.LocalPlayer.UserDeck
+
 		for i = 1, 8 do
-			local unitData = _UnitService:GetUnitByIDFromClient(playerDeck.userDeck[i])
+			local unitId = playerDeck.userDeck[i]
+			if unitId == nil or unitId == "" then
+				continue
+			end
+
+			local unitData = _UnitService:GetUnitByIDFromClient(unitId)
+			if unitData == nil then
+				continue
+			end
+
 			local skillData = _SkillService:GetSkillByIDFromClient(unitData["skillID"])
+			if skillData ~= nil then
+				local ruidString = skillData["ruids"] or ""
+				for ruid in string.gmatch(ruidString, "([^,]+)") do
+					table.insert(ruids, ruid)
+				end
+			end
+
 			local spawnSkillData = _SkillService:GetSkillByIDFromClient(unitData["spawnSkill"])
-			
-			local ruidString = skillData["ruids"] or ""
-		    
-		    -- 쉼표로 분리된 string을 table로 변환
-		    for ruid in string.gmatch(ruidString, "([^,]+)") do
-		        table.insert(ruids, ruid)
-		    end
-			
 			if spawnSkillData ~= nil then
 				local spawnSkillruidString = spawnSkillData["ruids"] or ""
-				-- 쉼표로 분리된 string을 table로 변환
-		    	for ruid in string.gmatch(spawnSkillruidString, "([^,]+)") do
-		        	table.insert(ruids, ruid)
-		    	end
+				for ruid in string.gmatch(spawnSkillruidString, "([^,]+)") do
+					table.insert(ruids, ruid)
+				end
 			end
 		end
-		
+
 		return ruids
 	end
 
@@ -781,8 +882,8 @@ script GameManager extends Logic
 			end
 		
 			_ResourceService:PreloadAsync(ruids, function()
-				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage".. userStage.selectChapter.."0"..userStage.selectStage)
-				self:GameStart(userStage.selectChapter, userStage.selectStage, gameMode)
+				local sourceMapName = "Stage".. userStage.selectChapter.."0"..userStage.selectStage
+				self:RequestDynamicMapEntry(userStage.selectChapter, userStage.selectStage, gameMode, sourceMapName)
 			end)
 		end)
 	end
@@ -795,28 +896,28 @@ script GameManager extends Logic
 
 	@ExecSpace("Client")
 	method void LocalEventGameStart()
-		_EventGameService:StartGame()
+		self.Entity.EventGameService:StartGame()
 	end
 
 	@ExecSpace("Server")
 	method void EventGameStart(integer chapterIndex, integer mapIndex)
 		self:GameStart(chapterIndex, mapIndex, _eGameMode.Event)
-		_EventGameService:EventGameStart(chapterIndex, mapIndex)
+		self.Entity.EventGameService:EventGameStart(chapterIndex, mapIndex)
 	end
 
 	@ExecSpace("Client")
 	method void EventStageClear()
-		_EventGameService:OnStageClear()
+		self.Entity.EventGameService:OnStageClear()
 	end
 
 	@ExecSpace("Server")
 	method void EventStageClearServer(integer clearedChapter, integer clearedStage)
-		_EventGameService:ProcessStageClearServer(clearedChapter, clearedStage)
+		self.Entity.EventGameService:ProcessStageClearServer(clearedChapter, clearedStage)
 	end
 
 	@ExecSpace("Server")
 	method void Log_EventStageClear()
-		_EventGameService:LogStageClear()
+		self.Entity.EventGameService:LogStageClear()
 	end
 
 	@ExecSpace("Client")
@@ -833,32 +934,31 @@ script GameManager extends Logic
 		-- 돌파스킬 초기화 완료 후 프리로드 시작
 		_UserService.LocalPlayer.UserBreakLimitSkillProtocol:InitCallWithCallback(function(limitBreakRuids)
 			local ruids = self:GetPreLoadAssetRuid()
-		
+
 			-- 돌파스킬 ruids 추가
 			for _, ruid in ipairs(limitBreakRuids) do
 				table.insert(ruids, ruid)
 			end
-		
+
 			_ResourceService:PreloadAsync(ruids, function()
-				_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "Stage000")
-				self:GameStart(0, 0, _eGameMode.Normal)
+				self:RequestDynamicMapEntry(0, 0, _eGameMode.Normal, "Stage000")
 			end)
 		end)
 	end
 
 	@ExecSpace("Client")
 	method void Log_NormalStageClear()
-		_NormalGameService:LogStageClear()
+		self.Entity.NormalGameService:LogStageClear()
 	end
 
 	@ExecSpace("Client")
 	method void Log_NormalStageFail()
-		_NormalGameService:LogStageFail()
+		self.Entity.NormalGameService:LogStageFail()
 	end
 
 	@ExecSpace("Client")
 	method void Log_EventStageFail()
-		_EventGameService:LogStageFail()
+		self.Entity.EventGameService:LogStageFail()
 	end
 
 	@ExecSpace("Client")
@@ -886,7 +986,7 @@ script GameManager extends Logic
 		
 		-- T키: 튜토리얼 데이터 리셋 (개발용)
 		if event.key == KeyboardKey.T and Environment:IsMakerPlay() then
-			_TutorialService:ResetTutorialData()
+			self.Entity.TutorialService:ResetTutorialData()
 		end
 		
 		-- F3키: 매트릭스 상점 주간 초기화 (개발용)

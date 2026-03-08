@@ -3,44 +3,46 @@ script MatrixGiveUpButton extends Component
 
 	@ExecSpace("Client")
 	method void OnGiveUp()
-		if _MatrixGameManager == nil then
+		local matrixGM = _UserService.LocalPlayer.MatrixGameManager
+		if matrixGM == nil then
 			return
 		end
-		
+
 		-- 이미 게임이 종료된 상태면 무시
-		if not _MatrixGameManager.isPlaying then
-			_MatrixGameManager:ReturnToLobby()
+		if not matrixGM.isPlaying then
+			matrixGM:ReturnToLobby()
 			return
 		end
-		
-		
+
+
 		-- 게임 플레이 중지
-		_MatrixGameManager.isPlaying = false
-		
+		matrixGM.isPlaying = false
+
 		-- 최종 점수 및 랭킹 저장
 		local user = _UserService.LocalPlayer
 		if user ~= nil and user.UserMatrixManager ~= nil then
 			local finalScore = user.UserMatrixManager:GetTotalScore()
 			local userName = user.PlayerComponent.Nickname
-		
+
 			if _MatrixRankingService ~= nil then
 				_MatrixRankingService:AddScore(userName, finalScore)
 			end
 
 			-- 매트릭스 코인 지급
-			if _MatrixCoinService ~= nil then
-				_MatrixCoinService:AddMatrixCoin(finalScore)
+			if user.MatrixCoinService ~= nil then
+				user.MatrixCoinService:AddMatrixCoin(finalScore)
 			end
 
 		end
-		
+
 		-- 서버에서 모든 유닛 제거
-		if _MatrixGameService ~= nil then
-			_MatrixGameService:ClearAllUnitsOnServer()
+		local matrixGS = _UserService.LocalPlayer.MatrixGameService
+		if matrixGS ~= nil then
+			matrixGS:ClearAllUnitsOnServer()
 		end
-		
+
 		-- CompletePopup 표시
-		_MatrixGameManager:ShowCompletePopup()
+		matrixGM:ShowCompletePopup()
 	end
 
 	@EventSender("Self")

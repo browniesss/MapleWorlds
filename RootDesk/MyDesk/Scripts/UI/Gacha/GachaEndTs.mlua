@@ -11,7 +11,7 @@ script GachaEndTs extends Component
 
 	@EventSender("Self")
 	handler HandleEntityEnabledInHierarchyChangedEvent(EntityEnabledInHierarchyChangedEvent event)
-		local dataSet = _SummonService:GET_SETTING(_GachaManager.GachaKey)
+		local dataSet = _UserService.LocalPlayer.SummonService:GET_SETTING(_GachaManager.GachaKey)
 
 		if dataSet == nil then
 			return

@@ -1,8 +1,15 @@
-@Logic
-script UserMonsterService extends Logic
+@Component
+script UserMonsterService extends Component
 
 	@Sync
 	property SyncTable<string, string> userMonsterDict
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		local uid = self.Entity.PlayerComponent.UserId
+		self:INIT(uid)
+		_BadgeConditionService:CheckAllBadgesOnLogin(uid)
+	end
 
 	@ExecSpace("ServerOnly")
 	method void INIT(string uid)
@@ -256,24 +263,6 @@ script UserMonsterService extends Logic
 	end
 
 	@EventSender("Service", "UserService")
-	handler HandleUserEnterEvent(UserEnterEvent event)
-		--------------- Native Event Sender Info ----------------
-		-- Sender: UserService
-		-- Space: Server
-		---------------------------------------------------------
-		
-		-- Parameters
-		-- local ProfileCode = event.ProfileCode
-		-- local UserId = event.UserId
-		---------------------------------------------------------
-		
-		self:INIT(event.UserId)
-		
-		-- 유저 몬스터 데이터 로드 후 배지 체크 (기존 유저 배지 자동 지급)
-		_BadgeConditionService:CheckAllBadgesOnLogin(event.UserId)
-	end
-
-	@EventSender("Service", "UserService")
 	handler HandleUserLeaveEvent(UserLeaveEvent event)
 		--------------- Native Event Sender Info ----------------
 		-- Sender: UserService
@@ -284,8 +273,12 @@ script UserMonsterService extends Logic
 		-- local ProfileCode = event.ProfileCode
 		-- local UserId = event.UserId
 		---------------------------------------------------------
-		
-		self:SAVE_ALL(event.UserId)
+		local UserId = event.UserId
+		if UserId ~= self.Entity.PlayerComponent.UserId then
+			return
+		end
+
+		self:SAVE_ALL(UserId)
 		
 	end
 

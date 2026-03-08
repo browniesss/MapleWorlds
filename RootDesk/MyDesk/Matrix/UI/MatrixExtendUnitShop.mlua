@@ -175,7 +175,8 @@ script MatrixExtendUnitShop extends UnitShop
 			return
 		end
 
-		local mesoWallet = _EntityService:GetEntityByPath(_MatrixGameManager:GetMapPath() .. "/userWallet")
+		local matrixGM = _UserService.LocalPlayer.MatrixGameManager
+		local mesoWallet = _EntityService:GetEntityByPath(matrixGM:GetMapPath() .. "/userWallet")
 		if mesoWallet.MesoWallet:GetMeso() < price then
 			return
 		end

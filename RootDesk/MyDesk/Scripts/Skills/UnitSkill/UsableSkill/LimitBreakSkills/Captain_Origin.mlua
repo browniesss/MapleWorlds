@@ -8,15 +8,15 @@ script Captain_Origin extends SkillParent
 		_UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill = true
 		_UserService.LocalPlayer.PlayerCharacter.isLimitBreakSkill = true
 		
-		local enemyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
+		local enemyListParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/EnemyList")
 		local enemies = enemyListParent.Children
 		local player = _EntityService:GetEntityByTag("Player")
 		local entity = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group")
 		
-		_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = "94c4b2b245bf48a2b1f5507b8298ae18"
-		_GameManager.screenSkillUI.SpriteGUIRendererComponent.LocalScale = Vector2(1.5, 1.55)
-		_GameManager.screenSkillUI.Enable = true
-		_GameManager.screenSkillUI.Visible = true
+		_UserService.LocalPlayer.GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = "94c4b2b245bf48a2b1f5507b8298ae18"
+		_UserService.LocalPlayer.GameManager.screenSkillUI.SpriteGUIRendererComponent.LocalScale = Vector2(1.5, 1.55)
+		_UserService.LocalPlayer.GameManager.screenSkillUI.Enable = true
+		_UserService.LocalPlayer.GameManager.screenSkillUI.Visible = true
 		
 		local hitFunction = function()
 			for index in ipairs(enemies) do
@@ -36,9 +36,9 @@ script Captain_Origin extends SkillParent
 		end
 		
 		local deleteFunction = function()
-			_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = ""
-			_GameManager.screenSkillUI.Enable = false	
-			_GameManager.screenSkillUI.Visible = false
+			_UserService.LocalPlayer.GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = ""
+			_UserService.LocalPlayer.GameManager.screenSkillUI.Enable = false	
+			_UserService.LocalPlayer.GameManager.screenSkillUI.Visible = false
 			_UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill = false
 			_UserService.LocalPlayer.PlayerCharacter.isLimitBreakSkill = false
 		end

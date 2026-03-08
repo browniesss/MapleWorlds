@@ -1,5 +1,5 @@
-@Logic
-script MatrixCoinService extends Logic
+@Component
+script MatrixCoinService extends Component
 
 	property string STORAGE_KEY = "USER_MATRIX_COIN"
 
@@ -26,9 +26,14 @@ script MatrixCoinService extends Logic
 
 	property integer lastResetTs = 0
 
-	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
-		self:LoadConfig()
+		if self:IsServer() then
+			local uid = self.Entity.PlayerComponent.UserId
+			self:InitCoinData(uid)
+		end
+		if self:IsClient() then
+			self:LoadConfig()
+		end
 	end
 
 	@ExecSpace("ClientOnly")
@@ -71,7 +76,7 @@ script MatrixCoinService extends Logic
 		self.lastResetTs = data.lastResetTs
 
 		-- 클라이언트 UI 업데이트
-		self:UpdateCoinDataToClient(data.weeklyEarned, data.totalEarned, data.totalSpent or 0, 0)
+		self:UpdateCoinDataToClient(data.weeklyEarned, data.totalEarned, data.totalSpent or 0, 0, uid)
 	end
 
 	@ExecSpace("ServerOnly")
@@ -203,7 +208,7 @@ script MatrixCoinService extends Logic
 		
 		if actualCoin <= 0 then
 			-- 주간 한도 초과
-			self:UpdateCoinDataToClient(data.weeklyEarned, data.totalEarned, data.totalSpent or 0, 0)
+			self:UpdateCoinDataToClient(data.weeklyEarned, data.totalEarned, data.totalSpent or 0, 0, uid)
 			return {success = false, reason = "주간 획득 한도 초과", earned = 0, weeklyEarned = data.weeklyEarned, weeklyLimit = self.WEEKLY_LIMIT}
 		end
 		
@@ -223,9 +228,9 @@ script MatrixCoinService extends Logic
 		self.lastResetTs = data.lastResetTs
 
 		-- 클라이언트 동기화
-		self:UpdateCoinDataToClient(data.weeklyEarned, data.totalEarned, data.totalSpent or 0, actualCoin)
-		
-		
+		self:UpdateCoinDataToClient(data.weeklyEarned, data.totalEarned, data.totalSpent or 0, actualCoin, uid)
+
+
 		return {
 			success = true,
 			earned = actualCoin,
@@ -310,26 +315,12 @@ script MatrixCoinService extends Logic
 		if data == nil then
 			return
 		end
-		self:UpdateCoinDataToClient(data.weeklyEarned, data.totalEarned, data.totalSpent or 0, 0)
+		self:UpdateCoinDataToClient(data.weeklyEarned, data.totalEarned, data.totalSpent or 0, 0, userId)
 	end
 
 	@ExecSpace("ClientOnly")
 	method integer GetRemainingWeeklyLimit()
 		return self.WEEKLY_LIMIT - self.weeklyEarned
-	end
-
-	@ExecSpace("ServerOnly")
-	@EventSender("Service", "UserService")
-	handler HandleUserEnterEvent(UserEnterEvent event)
-		--------------- Native Event Sender Info ----------------
-		-- Sender: UserService
-		-- Space: Server
-		---------------------------------------------------------
-		
-		-- Parameters
-		local UserId = event.UserId
-		
-		self:InitCoinData(UserId)
 	end
 
 	@ExecSpace("ServerOnly")
@@ -342,7 +333,10 @@ script MatrixCoinService extends Logic
 		
 		-- Parameters
 		local UserId = event.UserId
-		
+		if UserId ~= self.Entity.PlayerComponent.UserId then
+			return
+		end
+
 		-- 퇴장 시 현재 상태 저장
 		local data = {
 			vsn = self.DATA_VERSION,

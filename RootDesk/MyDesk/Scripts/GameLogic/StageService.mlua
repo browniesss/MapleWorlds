@@ -125,20 +125,27 @@ script StageService extends Logic
 	end
 
 	@ExecSpace("Client")
-	method void UpdateClientCallback(string json)
+	method void UpdateClientCallback(string json, string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
 		if json == nil then
-			return 
+			return
 		end
-		
+
+		-- 기존 데이터 초기화 (중복 방지)
+		self.data = {}
+		self.idMap = {}
+		self.lastChapter = 0
+		self.lastStageIndex = 0
+
 		local serverData = _HttpService:JSONDecode(json)
 		for i, stage in ipairs(serverData) do
 			self.data[#self.data + 1] = stage
 			self.idMap[stage.id] = i
-			
+
 			if self.lastChapter < stage.chapter then
 				self.lastChapter = stage.chapter
 			end
-			
+
 			self.lastStageIndex = i
 		end
 	end
@@ -149,12 +156,12 @@ script StageService extends Logic
 		-- Sender: UserService
 		-- Space: Server
 		---------------------------------------------------------
-		
+
 		-- Parameters
 		-- local ProfileCode = event.ProfileCode
 		-- local UserId = event.UserId
 		---------------------------------------------------------
-		self:ReqUpdateClient()
+		self:UpdateClientCallback(_HttpService:JSONEncode(self.data), event.UserId)
 	end
 
 end

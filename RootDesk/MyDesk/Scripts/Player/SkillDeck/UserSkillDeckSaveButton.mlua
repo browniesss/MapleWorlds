@@ -5,7 +5,7 @@ script UserSkillDeckSaveButton extends Component
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
-		_UserSkillDeckService:SAVE()
+		_UserService.LocalPlayer.UserSkillDeckService:SAVE()
 		
 		self.userSkillDeckUI.Enable = false
 		self.userSkillDeckUI.Visible = false

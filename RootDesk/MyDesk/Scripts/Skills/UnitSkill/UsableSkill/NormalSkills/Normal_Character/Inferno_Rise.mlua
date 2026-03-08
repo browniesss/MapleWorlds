@@ -8,7 +8,7 @@ script Inferno_Rise extends SkillParent
 		self:CallAnimation("FWinfernoFox")
 		
 		if self._T.projectileParent == nil then
-			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			self._T.projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 		end
 		
 		local inferno

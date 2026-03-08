@@ -1,5 +1,5 @@
-@Logic
-script MatrixAugmentService extends Logic
+@Component
+script MatrixAugmentService extends Component
 
 	property table synergyBonusMap = {}
 
@@ -43,7 +43,8 @@ script MatrixAugmentService extends Logic
 	@ExecSpace("Server")
 	method void ApplyBuffEffect(table matrixData)
 		-- 현재 맵의 모든 아군 유닛에게 버프 적용
-		local gameMapPath = _GameManager:GetGameMapName()
+		local gm = self.Entity.GameManager
+		local gameMapPath = gm:GetGameMapName()
 		local myMonsterList = _EntityService:GetEntityByPath(gameMapPath.."/MyMonsterList")
 
 		if myMonsterList == nil then
@@ -108,7 +109,7 @@ script MatrixAugmentService extends Logic
 		-- GET_SYNERGY_COUNT에서 자동으로 보너스를 계산하므로 별도 처리 불필요
 
 		-- 시너지 보너스 유닛 체크 (시그너스 등)
-		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		local user = self.Entity
 		if user ~= nil and user.UserMatrixManager ~= nil then
 			user.UserMatrixManager:CheckAndAddSynergyUnits()
 		end
@@ -261,7 +262,8 @@ script MatrixAugmentService extends Logic
 	-- 무한 모드 전용 증강 효과 적용 (전체 유닛 스탯 고정값 증가)
 	@ExecSpace("Server")
 	method void ApplyInfiniteEffect(table matrixData)
-		local gameMapPath = _GameManager:GetGameMapName()
+		local gm = self.Entity.GameManager
+		local gameMapPath = gm:GetGameMapName()
 		local myMonsterList = _EntityService:GetEntityByPath(gameMapPath.."/MyMonsterList")
 
 		if myMonsterList == nil then
@@ -318,7 +320,7 @@ script MatrixAugmentService extends Logic
 
 	method void ApplySpawnBuffs(Entity spawnEntity, Entity user)
 		-- 매트릭스 모드가 아니면 스킵
-		if _GameManager.currentGameMode ~= _eGameMode.Matrix then
+		if user == nil or user.GameManager == nil or user.GameManager.currentGameMode ~= _eGameMode.Matrix then
 			return
 		end
 
@@ -398,7 +400,8 @@ script MatrixAugmentService extends Logic
 
 	-- 공격 시 데미지 계산 (OnAttack)
 	method number CalcAttackDamage(Entity attacker, number baseDamage)
-		if _GameManager == nil or not (_GameManager.currentGameMode == _eGameMode.Matrix) then
+		local localPlayer = _UserService.LocalPlayer
+		if localPlayer == nil or localPlayer.GameManager == nil or localPlayer.GameManager.currentGameMode ~= _eGameMode.Matrix then
 			return baseDamage
 		end
 
@@ -420,7 +423,8 @@ script MatrixAugmentService extends Logic
 
 	-- 피격 시 데미지 계산 (OnHit)
 	method number CalcOnHitDamage(Entity defender, number incomingDamage)
-		if _GameManager == nil or not (_GameManager.currentGameMode == _eGameMode.Matrix) then
+		local localPlayer = _UserService.LocalPlayer
+		if localPlayer == nil or localPlayer.GameManager == nil or localPlayer.GameManager.currentGameMode ~= _eGameMode.Matrix then
 			return incomingDamage
 		end
 
@@ -445,7 +449,8 @@ script MatrixAugmentService extends Logic
 
 	-- 처치 시 효과 (OnKill)
 	method void OnKillEffect(Entity killer, Entity victim)
-		if _GameManager == nil or not (_GameManager.currentGameMode == _eGameMode.Matrix) then
+		local localPlayer = _UserService.LocalPlayer
+		if localPlayer == nil or localPlayer.GameManager == nil or localPlayer.GameManager.currentGameMode ~= _eGameMode.Matrix then
 			return
 		end
 
@@ -468,7 +473,7 @@ script MatrixAugmentService extends Logic
 			elseif effect.effectType == "GoldOnKill" then
 				-- 처치 시 소환 포인트 추가
 				local goldAmount = effect.value or 0
-				local mapPath = _MatrixGameManager:GetMapPath()
+				local mapPath = self.Entity.MatrixGameManager:GetMapPath()
 				local mesoWallet = _EntityService:GetEntityByPath(mapPath .. "/userWallet")
 				if mesoWallet ~= nil and mesoWallet.MesoWallet ~= nil then
 					mesoWallet.MesoWallet:AddMeso(goldAmount)
@@ -486,7 +491,8 @@ script MatrixAugmentService extends Logic
 
 	-- 마나 회복 계산 (공격 시 MP 증가량 보너스)
 	method number CalcMpRecovery(Entity attacker, number baseMpGain)
-		if _GameManager == nil or not (_GameManager.currentGameMode == _eGameMode.Matrix) then
+		local localPlayer = _UserService.LocalPlayer
+		if localPlayer == nil or localPlayer.GameManager == nil or localPlayer.GameManager.currentGameMode ~= _eGameMode.Matrix then
 			return baseMpGain
 		end
 
@@ -512,7 +518,8 @@ script MatrixAugmentService extends Logic
 
 	-- 사망 시 효과 (OnDie) - 아군 유닛 사망 시 주변 적에게 효과 적용
 	method void OnDieEffect(Entity deadUnit, Entity killer)
-		if _GameManager == nil or not (_GameManager.currentGameMode == _eGameMode.Matrix) then
+		local localPlayer = _UserService.LocalPlayer
+		if localPlayer == nil or localPlayer.GameManager == nil or localPlayer.GameManager.currentGameMode ~= _eGameMode.Matrix then
 			return
 		end
 
@@ -524,11 +531,7 @@ script MatrixAugmentService extends Logic
 		-- 사망한 유닛 위치
 		local deadPos = deadUnit.TransformComponent.WorldPosition
 
-		-- 매트릭스 모드에서는 MatrixGameManager 경로 사용
-		local mapPath = "/maps/MatrixStage"
-		if _MatrixGameManager ~= nil then
-			mapPath = _MatrixGameManager:GetMapPath()
-		end
+		local mapPath = localPlayer.GameManager:GetGameMapName()
 
 		-- 적 리스트에서 범위 내 적 탐색
 		local enemyList = _EntityService:GetEntityByPath(mapPath .. "/EnemyList")
@@ -686,8 +689,8 @@ script MatrixAugmentService extends Logic
 		self.isCloneSpawn = false
 
 		-- MatrixService 상태 초기화
-		if _MatrixService ~= nil then
-			_MatrixService:ClearSelectState()
+		if self.Entity.MatrixService ~= nil then
+			self.Entity.MatrixService:ClearSelectState()
 		end
 	end
 

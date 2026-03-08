@@ -12,6 +12,9 @@ script UserUnitStore extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
+		if self.Entity ~= _UserService.LocalPlayer then
+			return
+		end
 		self.Entity.UserUnitProtocol:GetUserUnitListCall()
 	end
 

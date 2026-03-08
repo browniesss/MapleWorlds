@@ -14,7 +14,7 @@ script UserBreakLimitSkillClient extends Component
 
 	-- 현재 게임 모드에 맞는 ScrollUI 반환
 	method Entity GetActiveScrollUI()
-		if _GameManager.currentGameMode == _eGameMode.Matrix then
+		if _UserService.LocalPlayer.GameManager.currentGameMode == _eGameMode.Matrix then
 			return self.MatrixScrollUI
 		end
 		return self.ScrollUI

@@ -3,7 +3,7 @@ script AttendanceCloseButton extends Component
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
-		_AttendanceEventService:CloseUI()
+		_UserService.LocalPlayer.AttendanceEventService:CloseUI()
 	end
 
 end

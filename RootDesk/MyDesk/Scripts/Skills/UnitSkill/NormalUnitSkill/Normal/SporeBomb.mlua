@@ -8,7 +8,7 @@ script SporeBomb extends SkillParent
 		local basePos = self.Entity.TransformComponent.WorldPosition
 		local pos
 		if self._T.projectileParent == nil then
-			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			self._T.projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 		end
 		
 		if self.caster.Unit.isEnemy then

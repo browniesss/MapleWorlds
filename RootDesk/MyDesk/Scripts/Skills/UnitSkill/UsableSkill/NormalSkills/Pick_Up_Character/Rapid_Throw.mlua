@@ -13,7 +13,7 @@ script Rapid_Throw extends SkillParent
 		local loopEffect
 		
 		if self._T.projectileParent == nil then
-			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			self._T.projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 		end
 		
 		self:CallLoopAnimation("5thRapidLoop")
@@ -27,14 +27,14 @@ script Rapid_Throw extends SkillParent
 		loopEffect = _EffectService:PlayEffectAttached("5af81380418c44b5b973d0f55112a59b", self.caster, Vector3(0, 0.1, 0) , 0, Vector3.one, true, options)
 		
 		local function spawnMissile()
-			local projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			local projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 			local arrow = _SpawnService:SpawnByModelId("model://1b22e1f8-d539-425c-bfec-60d5eab08947", "rapid_throw_small", self.caster.TransformComponent.Position + Vector3(0.5, 0.3, 0), projectileParent)
 		
 			arrow.NonTargetProjectile:Init(self.caster, self.skillAmount, self.skillTime, self.caster.Unit.isEnemy, 1.5, true)
 		end
 		
 		local function clearFunction()
-			local projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			local projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 			local arrow = _SpawnService:SpawnByModelId("model://ff794c05-5f17-40bb-84d8-9301e3645144", "rapid_throw_big", self.caster.TransformComponent.Position + Vector3(0.5, 0.3, 0), projectileParent)
 		
 			arrow.NonTargetProjectile:Init(self.caster, self.skillAmount, self.skillTime, self.caster.Unit.isEnemy, 1.5, false)

@@ -108,8 +108,13 @@ script pvpAiPlayerComponent extends Component
 		
 		self.pointUpdateTimer += delta
 		local updateInterval = 0.5
-		if _TimeScaleManager ~= nil and _TimeScaleManager.timeScale > 0 then
-			updateInterval = 0.5 / _TimeScaleManager.timeScale
+		local mapName = self.Entity.CurrentMap.Name
+		local ownerId = _GameRoomService:GetOwnerUserIdFromMapName(mapName)
+		if ownerId ~= nil then
+			local tsm = _UserService:GetUserEntityByUserId(ownerId).TimeScaleManager
+			if tsm ~= nil and tsm.timeScale > 0 then
+				updateInterval = 0.5 / tsm.timeScale
+			end
 		end
 		if self.pointUpdateTimer < updateInterval then
 			return
@@ -158,8 +163,11 @@ script pvpAiPlayerComponent extends Component
 		local userUnitInfo = self:GetUnitInfo(unitId)
 		
 		-- 실제 유닛을 소환
-		local spawnParent = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .."/EnemyList")
-		local spawnPos = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .."/EnemyList/EnemySpawnPoint")
+		local mapEntityName = self.Entity.CurrentMap.Name
+		local ownerId = _GameRoomService:GetOwnerUserIdFromMapName(mapEntityName)
+		local mapPath = _UserService:GetUserEntityByUserId(ownerId).GameManager:GetGameMapName()
+		local spawnParent = _EntityService:GetEntityByPath(mapPath .."/EnemyList")
+		local spawnPos = _EntityService:GetEntityByPath(mapPath .."/EnemyList/EnemySpawnPoint")
 		local unitData = _UnitService:GetUnitByIDFromServer(unitId)
 		local skillData = _SkillService:GetSkillByIDFromServer(unitData["skillID"])
 		local spawnEntity = _SpawnService:SpawnByModelId(unitId, "Pig", spawnPos.TransformComponent.Position, spawnParent)

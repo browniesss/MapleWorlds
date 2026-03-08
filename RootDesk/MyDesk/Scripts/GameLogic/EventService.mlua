@@ -235,7 +235,8 @@ script EventService extends Logic
 	end
 
 	@ExecSpace("Client")
-	method void UpdateClientCallback(string json, integer version)
+	method void UpdateClientCallback(string json, integer version, string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
 		if json == nil then
 			return
 		end
@@ -263,7 +264,7 @@ script EventService extends Logic
 
 	@EventSender("Service", "UserService")
 	handler HandleUserEnterEvent(UserEnterEvent event)
-		self:ReqUpdateClient()
+		self:UpdateClientCallback(_HttpService:JSONEncode(self.data), self.currentEventVersion, event.UserId)
 	end
 
 end

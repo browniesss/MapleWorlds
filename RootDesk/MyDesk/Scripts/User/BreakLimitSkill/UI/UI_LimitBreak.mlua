@@ -29,7 +29,11 @@ script UI_LimitBreak extends Component
 	method void InitPanel(BuffedUnitModel unit)
 		self.unitData = unit
 		local userUnitModel = UserUnitModel()
-		userUnitModel:DECODE(_UserMonsterService.userMonsterDict[unit.id])
+		local userMonsterJson = _UserService.LocalPlayer.UserMonsterService.userMonsterDict[unit.id]
+		if userMonsterJson == nil then
+			return
+		end
+		userUnitModel:DECODE(userMonsterJson)
 		
 		for i = 2, _UnitLimitBreakRepo.UserMaxLevel do
 			local pivot = _UnitLimitBreakRepo:FindBuffInClient(unit.grade, i - 1, unit.id)

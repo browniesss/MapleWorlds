@@ -16,7 +16,7 @@ script Spiral_Vortex extends SkillParent
 		_EffectService:PlayEffectAttached("380e3a973b1b4d92902ccba71e154416", self.caster, Vector3(0.25,0,0) , 0, Vector3.one, false, options)
 		
 		local function spawnDragonFunction()
-			local spawnFunction = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			local spawnFunction = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 			local arrow = _SpawnService:SpawnByModelId("model://183bf7a7-98bf-4e19-b0d2-dace9e169d72", "Spiral_Vortex", self.caster.TransformComponent.WorldPosition + Vector3(1, 0.5, 0), spawnFunction)
 		
 			arrow.NonTargetProjectile:Init(self.caster, self.skillAmount, self.skillTime, self.caster.Unit.isEnemy, self.skillProjectileSpeed, false)

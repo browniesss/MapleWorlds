@@ -80,7 +80,7 @@ script BadgeConditionService extends Logic
 
 			-- 배지 획득 시 레드닷 상태 갱신
 			local hasUnclaimed = self:HasUnclaimedRewards(userId)
-			_BadgeUIService:SendRedDotStatus(userId, hasUnclaimed)
+			_BadgeUIService:SendRedDotStatus(userId, hasUnclaimed, userId)
 		end
 	end
 
@@ -223,12 +223,13 @@ script BadgeConditionService extends Logic
 			return false
 		end
 
+		local badgeUserEntity = _UserService:GetUserEntityByUserId(userId)
 		if condition.reward_type == "FirstCoin" then
-			_BillingService:AddFirstFreeCoin(userId, condition.reward_amount)
+			badgeUserEntity.BillingService:AddFirstFreeCoin(userId, condition.reward_amount)
 		elseif condition.reward_type == "SecondCoin" then
-			_BillingService:AddSecondFreeCoin(userId, condition.reward_amount)
+			badgeUserEntity.BillingService:AddSecondFreeCoin(userId, condition.reward_amount)
 		elseif condition.reward_type == "ThirdCoin" then
-			_BillingService:AddThirdFreeCoin(userId, condition.reward_amount)
+			badgeUserEntity.BillingService:AddThirdFreeCoin(userId, condition.reward_amount)
 		end
 
 		self:SetRewardClaimed(userId, badgeId)
@@ -265,8 +266,9 @@ script BadgeConditionService extends Logic
 		end
 
 		-- 2. 픽업 캐릭터 배지 체크 (보유한 모든 캐릭터)
-		-- _UserMonsterService:GetList()는 ClientOnly이므로 userMonsterDict 직접 순회
-		for unitId, json in pairs(_UserMonsterService.userMonsterDict) do
+		-- UserMonsterService:GetList()는 ClientOnly이므로 userMonsterDict 직접 순회
+		local loginUserEntity = _UserService:GetUserEntityByUserId(userId)
+		for unitId, json in pairs(loginUserEntity.UserMonsterService.userMonsterDict) do
 			self:CheckPickupBadges(userId, unitId)
 		end
 	end

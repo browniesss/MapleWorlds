@@ -61,7 +61,7 @@ script StageSelectorUI extends Component
 
 		local rankingListUI = _EntityService:GetEntityByPath("/ui/LobbyInfoUI/SelectUI/StageSelectUI/StageInfoPanel/stagePanel/rankingPanel/RankingListUI")
 		if rankingListUI ~= nil then
-			rankingListUI.StageRankingListUI:RefreshRankListItem(key)
+			rankingListUI.StageRankingListUI:InitCheckRankData(key, 0)
 		end
 		
 		for i = 1, 6 do

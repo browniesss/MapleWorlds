@@ -12,7 +12,7 @@ script Thunder_Break extends SkillParent
 		self:CallAnimation(self.caster.Unit.animationName)
 		
 		if self._T.projectileParent == nil then
-			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			self._T.projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 		end
 		
 		local options = {

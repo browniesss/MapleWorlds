@@ -7,7 +7,7 @@ script Triple_Throw extends SkillParent
 		-- 57ed09e2b50a440cbf37c07ec7a7551e
 		
 		if self._T.projectileParent == nil then
-			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			self._T.projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 		end
 		
 		self:CallAnimation(self.caster.Unit.animationName)

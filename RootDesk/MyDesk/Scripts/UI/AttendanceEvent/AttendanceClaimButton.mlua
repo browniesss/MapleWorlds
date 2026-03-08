@@ -3,7 +3,7 @@ script AttendanceClaimButton extends Component
 
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
-		_AttendanceEventService:RequestClaimReward()
+		_UserService.LocalPlayer.AttendanceEventService:RequestClaimReward()
 	end
 
 end

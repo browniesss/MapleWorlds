@@ -45,7 +45,7 @@ script PurchasePopup extends Component
 			self.Entity.Enable = false
 			self.Entity.Visible = false
 		else
-			_BillingService:Function1(self.productID)
+			_UserService.LocalPlayer.BillingService:Function1(self.productID)
 		end
 	end
 

@@ -92,14 +92,15 @@ script UserMatrixManager extends Component
 	-- ============================================
 
 	method void OnMapEnter(Entity enteredMap)
-		if enteredMap.Name == "MatrixStage" then
+		if string.find(enteredMap.Name, "MatrixStage") ~= nil then
 			self.playTime = 0
 			self:LoadMatrixConfig()
 			self:LoadUnitPoolFromUser()
 
 			-- 맵 진입 시 게임 초기화 (맵이 로드된 후 호출되므로 엔티티 참조가 안전함)
-			if _MatrixGameManager ~= nil then
-				_MatrixGameManager:InitializeGame()
+			if self.Entity.MatrixGameManager ~= nil then
+				-- 동적 맵 이름을 직접 전달 (@Sync 동기화 타이밍 문제 방지)
+				self.Entity.MatrixGameManager:InitializeGame("/maps/" .. enteredMap.Name)
 			end
 		end
 	end
@@ -184,7 +185,7 @@ script UserMatrixManager extends Component
 	end
 
 	method void OnMapLeave(Entity leftMap)
-		if leftMap.Name == "MatrixStage" then
+		if string.find(leftMap.Name, "MatrixStage") ~= nil then
 			self:InitMatrixUserData()
 
 			-- 서버에서 직접 시너지 복원 (RPC가 아닌 직접 호출이므로 타이밍 이슈 없음)
@@ -217,7 +218,7 @@ script UserMatrixManager extends Component
 		self.phaseKillCount[phaseId] = self.phaseKillCount[phaseId] + 1
 
 		-- 킬 점수 즉시 반영
-		local phaseData = _MatrixGameService.phaseData[phaseId]
+		local phaseData = self.Entity.MatrixGameService.phaseData[phaseId]
 		if phaseData ~= nil then
 			local killPoint = phaseData.killPoint or 1
 			self.totalScore = self.totalScore + killPoint
@@ -227,7 +228,7 @@ script UserMatrixManager extends Component
 
 	-- 페이즈 클리어 보너스 점수 (baseScore 그대로 지급)
 	method integer AddPhaseClearScore(integer phaseId)
-		local phaseData = _MatrixGameService.phaseData[phaseId]
+		local phaseData = self.Entity.MatrixGameService.phaseData[phaseId]
 		if phaseData == nil then
 			return 0
 		end
@@ -335,8 +336,9 @@ script UserMatrixManager extends Component
 		end
 
 		-- MatrixExtendUnitShop에 유닛 추가
-		if _MatrixGameManager ~= nil and _MatrixGameManager.unitShop ~= nil then
-			local shop = _MatrixGameManager.unitShop.MatrixExtendUnitShop
+		local matrixGM = _UserService.LocalPlayer.MatrixGameManager
+		if matrixGM ~= nil and matrixGM.unitShop ~= nil then
+			local shop = matrixGM.unitShop.MatrixExtendUnitShop
 			if shop ~= nil then
 				shop:AddUnit(unitId)
 			end
@@ -359,12 +361,12 @@ script UserMatrixManager extends Component
 		local pickupKey1 = _GachaManager.PickUpSummonKey
 		local pickupKey2 = _GachaManager.PickUp_2_SummonKey
 
-		local setting1 = _SummonService:GET_SETTING(pickupKey1)
+		local setting1 = self.Entity.SummonService:GET_SETTING(pickupKey1)
 		if setting1 ~= nil and setting1.pickup_char_id ~= nil and setting1.pickup_char_id ~= "-" then
 			table.insert(ids, setting1.pickup_char_id)
 		end
 
-		local setting2 = _SummonService:GET_SETTING(pickupKey2)
+		local setting2 = self.Entity.SummonService:GET_SETTING(pickupKey2)
 		if setting2 ~= nil and setting2.pickup_char_id ~= nil and setting2.pickup_char_id ~= "-" then
 			table.insert(ids, setting2.pickup_char_id)
 		end

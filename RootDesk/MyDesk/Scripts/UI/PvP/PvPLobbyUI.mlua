@@ -53,6 +53,10 @@ script PvPLobbyUI extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
+		-- 초기에는 숨김 (displayOrder가 MainLobbyUI보다 높아서 입력 차단 방지)
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+
 		self:InitUI()
 	end
 

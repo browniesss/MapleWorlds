@@ -4,12 +4,12 @@ script GachaButton extends Component
 	property boolean IsSummonTen = false
 
 	@ExecSpace("ClientOnly")
-	method void OnInitialize()
-		_SummonService:AddSummonCallback("summonResult", self.OnSummonButton)
+	method void OnBeginPlay()
+		_UserService.LocalPlayer.SummonService:AddSummonCallback("summonResult", self.OnSummonButton)
 	end
 
 	method void OnSummonButton()
-		local summonData = _SummonService.summonResult[_GachaManager.GachaKey]
+		local summonData = _UserService.LocalPlayer.SummonService.summonResult[_GachaManager.GachaKey]
 		
 		local summonIdList = _HttpService:JSONDecode(summonData)
 		
@@ -21,9 +21,9 @@ script GachaButton extends Component
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
 		if self.IsSummonTen then
-			_SummonService:SummonTen(_GachaManager.GachaKey)
+			_UserService.LocalPlayer.SummonService:SummonTen(_GachaManager.GachaKey)
 		else
-			_SummonService:SummonOne(_GachaManager.GachaKey)
+			_UserService.LocalPlayer.SummonService:SummonOne(_GachaManager.GachaKey)
 		end
 		
 	end

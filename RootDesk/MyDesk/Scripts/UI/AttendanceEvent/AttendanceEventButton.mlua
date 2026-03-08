@@ -10,7 +10,7 @@ script AttendanceEventButton extends Component
 		end
 		
 		if event.TouchId == 1 then
-			_AttendanceEventService:OpenUI()
+			_UserService.LocalPlayer.AttendanceEventService:OpenUI()
 		end
 	end
 

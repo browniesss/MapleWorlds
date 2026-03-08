@@ -6,9 +6,9 @@ script AllAttack extends SkillParent
 		local targetListParent
 		local isEnemy = self.caster.Unit ~= nil and self.caster.Unit.isEnemy
 		if isEnemy then
-			targetListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+			targetListParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/MyMonsterList")
 		else
-			targetListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
+			targetListParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/EnemyList")
 		end
 		local enemies = targetListParent.Children
 		

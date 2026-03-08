@@ -1,10 +1,16 @@
-@Logic
-script UserSkillService extends Logic
+@Component
+script UserSkillService extends Component
 
 	@Sync
 	property SyncTable<string> userSkillList
 
 	property string STORAGE_NAME = "USER_SKILL"
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		local uid = self.Entity.PlayerComponent.UserId
+		self:INIT(uid)
+	end
 
 	@ExecSpace("ServerOnly")
 	method integer INIT(string uid)
@@ -14,15 +20,15 @@ script UserSkillService extends Logic
 			return code
 		end
 		
-		if json ==  nil then
+		if json == nil or json == "" then
 			local data = self:DEFAULT_SKILL_SET()
 			for _, id in ipairs(data) do
 				self.userSkillList[#self.userSkillList + 1] = id
 			end
-			
+
 			return self:SAVE(uid)
 		end
-		
+
 		local data = _HttpService:JSONDecode(json)
 		for _, id in ipairs(data) do
 			self.userSkillList[#self.userSkillList + 1] = id
@@ -69,20 +75,6 @@ script UserSkillService extends Logic
 	end
 
 	@EventSender("Service", "UserService")
-	handler HandleUserEnterEvent(UserEnterEvent event)
-		--------------- Native Event Sender Info ----------------
-		-- Sender: UserService
-		-- Space: Server
-		---------------------------------------------------------
-		
-		-- Parameters
-		-- local ProfileCode = event.ProfileCode
-		-- local UserId = event.UserId
-		---------------------------------------------------------
-		self:INIT(event.UserId)
-	end
-
-	@EventSender("Service", "UserService")
 	handler HandleUserLeaveEvent(UserLeaveEvent event)
 		--------------- Native Event Sender Info ----------------
 		-- Sender: UserService
@@ -93,7 +85,11 @@ script UserSkillService extends Logic
 		-- local ProfileCode = event.ProfileCode
 		-- local UserId = event.UserId
 		---------------------------------------------------------
-		self:SAVE(event.UserId)
+		local UserId = event.UserId
+		if UserId ~= self.Entity.PlayerComponent.UserId then
+			return
+		end
+		self:SAVE(UserId)
 	end
 
 end

@@ -1,0 +1,130 @@
+@Logic
+script GameRoomService extends Logic
+
+	property table userDynamicMapNames = {}
+
+	property table activeDynamicMaps = {}
+
+	-- 동적 맵 이름에서 소유자 userId 추출 (예: "Stage101_userId123" → "userId123")
+	method string GetOwnerUserIdFromMapName(string mapName)
+		local underscorePos = string.find(mapName, "_[^_]*$")
+		if underscorePos ~= nil then
+			return string.sub(mapName, underscorePos + 1)
+		end
+		return nil
+	end
+
+	@ExecSpace("Server")
+	method boolean EnterStage(string sourceMapName, string callerId)
+		local userId = callerId or senderUserId
+		if userId == nil then
+			return false
+		end
+		
+		-- 기존 동적 맵이 있으면 먼저 정리
+		local oldMapName = self.userDynamicMapNames[userId]
+		if oldMapName ~= nil then
+			self.userDynamicMapNames[userId] = nil
+			self:TryDestroyDynamicMap(oldMapName)
+		end
+		
+		-- 고유한 맵 이름 생성
+		local newMapName = sourceMapName .. "_" .. userId
+		
+		-- 동적 맵 생성
+		local resultCode = _DynamicMapService:CreateDynamicMap(sourceMapName, newMapName)
+		if resultCode ~= DynamicMapResultCode.Success then
+			log_error("[GameRoomService] Failed to create dynamic map '" .. newMapName .. "': " .. tostring(resultCode))
+		
+			-- DuplicateMapName인 경우 기존 맵 삭제 후 재시도
+			if resultCode == DynamicMapResultCode.DuplicateMapName then
+				_DynamicMapService:DestroyDynamicMap(newMapName)
+				resultCode = _DynamicMapService:CreateDynamicMap(sourceMapName, newMapName)
+				if resultCode ~= DynamicMapResultCode.Success then
+					return false
+				end
+			else
+				return false
+			end
+		end
+		
+		-- 추적 등록
+		self.userDynamicMapNames[userId] = newMapName
+		self.activeDynamicMaps[newMapName] = true
+		
+		-- 유저 텔레포트
+		local userEntity = _UserService:GetUserEntityByUserId(userId)
+		if userEntity ~= nil then
+			_TeleportService:TeleportToMapPosition(userEntity, Vector3.zero, newMapName)
+		end
+		
+		return true
+	end
+
+	@ExecSpace("Server")
+	method void RequestExit()
+		local userId = senderUserId
+		if userId == nil then
+			return
+		end
+		
+		local mapName = self.userDynamicMapNames[userId]
+		
+		-- 로비로 텔레포트
+		local userEntity = _UserService:GetUserEntityByUserId(userId)
+		if userEntity ~= nil then
+			_TeleportService:TeleportToMapPosition(userEntity, Vector3.zero, "MainLobbyMap")
+		end
+		
+		-- dynamicMapName 리셋
+		_UserService:GetUserEntityByUserId(userId).GameManager.dynamicMapName = ""
+		self:ResetDynamicMapNameOnServer(userId)
+		
+		-- 동적 맵 삭제 (딜레이)
+		if mapName ~= nil then
+			self.userDynamicMapNames[userId] = nil
+			_TimerService:SetTimerOnce(function()
+				self:TryDestroyDynamicMap(mapName)
+			end, 2.0)
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void ResetDynamicMapNameOnServer(string userId)
+		local userEntity = _UserService:GetUserEntityByUserId(userId)
+		if userEntity ~= nil and userEntity.GameManager ~= nil then
+			userEntity.GameManager.dynamicMapName = ""
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void TryDestroyDynamicMap(string mapName)
+		local result = _DynamicMapService:DestroyDynamicMap(mapName)
+		if result == DynamicMapResultCode.UserExistsInDynamicMap then
+			-- 유저가 아직 맵에 있으면 재시도
+			_TimerService:SetTimerOnce(function()
+				self:TryDestroyDynamicMap(mapName)
+			end, 3.0)
+			return
+		end
+		self.activeDynamicMaps[mapName] = nil
+	end
+
+	@EventSender("Service", "UserService")
+	handler HandleUserLeaveEvent(UserLeaveEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: UserService
+		-- Space: Server
+		---------------------------------------------------------
+		
+		local userId = event.UserId
+		local mapName = self.userDynamicMapNames[userId]
+		if mapName ~= nil then
+			self.userDynamicMapNames[userId] = nil
+			_TimerService:SetTimerOnce(function()
+				self:TryDestroyDynamicMap(mapName)
+			end, 2.0)
+		end
+	end
+
+end

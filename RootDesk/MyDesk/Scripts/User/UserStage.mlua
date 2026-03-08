@@ -277,7 +277,7 @@ script UserStage extends Component
 		local rewardAmount = clearedCount * 4000
 		
 		if rewardAmount > 0 then
-			local addResult = _BillingService:AddThirdFreeCoin(userId, rewardAmount)
+			local addResult = self.Entity.BillingService:AddThirdFreeCoin(userId, rewardAmount)
 			if addResult ~= 0 then
 				log_error("[MesoReward] Failed to add meso for user:", userId, "error:", addResult)
 				return

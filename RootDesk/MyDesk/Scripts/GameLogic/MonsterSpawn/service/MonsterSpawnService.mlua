@@ -25,7 +25,10 @@ script MonsterSpawnService extends Component
 		if value.x ~= nil and value.y ~= nil and value.z ~= nil then
 			spawnPos = Vector3(value.x, value.y, value.z)
 		end
-		_SpawnManager:SpawnEnemy(value.unit, spawnPos)
+		local mapName = self.Entity.CurrentMap.Name
+		local ownerId = _GameRoomService:GetOwnerUserIdFromMapName(mapName)
+		local spawnManager = _UserService:GetUserEntityByUserId(ownerId).SpawnManager
+		spawnManager:SpawnEnemy(value.unit, spawnPos)
 		
 		table.remove(group, 1)
 		
@@ -82,7 +85,7 @@ script MonsterSpawnService extends Component
 
 	method void LoopGroupSummon(number group)
 		local group_data
-		if (_GameManager.currentGameMode == _eGameMode.Event) then
+		if (_UserService.LocalPlayer.GameManager.currentGameMode == _eGameMode.Event) then
 			group_data = _eventGroupRepo:GetGroupById(group)
 		else
 			group_data = _groupRepo:GetGroupById(group)
@@ -127,7 +130,7 @@ script MonsterSpawnService extends Component
 			return
 		end
 
-		if enteredMap.Name == "Stage000" then
+		if string.find(enteredMap.Name, "Stage000") ~= nil then
 			return
 		end
 
@@ -146,15 +149,16 @@ script MonsterSpawnService extends Component
 		-- 서버-클라이언트 동기화 시간 고려하여 1.5초 대기
 		local targetMapName = enteredMap.Name  -- 진입한 맵 이름 캡처
 		local initTimerId = _TimerService:SetTimerOnce(function()
-			local currentMapName = _GameManager:GetGameMapName()
+			local _gm = _UserService.LocalPlayer.GameManager
+			local currentMapName = _gm:GetGameMapName()
 
 			-- 타이머가 실행될 때 여전히 같은 맵에 있는지 확인
 			if not string.find(currentMapName, targetMapName) then
 				return
 			end
 
-			if _GameManager.chapterIndex ~= nil and _GameManager.mapIndex ~= nil then
-				self:SetStage(_GameManager.chapterIndex, _GameManager.mapIndex)
+			if _gm.chapterIndex ~= nil and _gm.mapIndex ~= nil then
+				self:SetStage(_gm.chapterIndex, _gm.mapIndex)
 			end
 		end, 1.5)
 
@@ -164,8 +168,9 @@ script MonsterSpawnService extends Component
 
 	@ExecSpace("ClientOnly")
 	method void SetStage(integer targetChapter, integer targetStage)
+		local _gm = _UserService.LocalPlayer.GameManager
 		local target
-		if (_GameManager.currentGameMode == _eGameMode.Event) then
+		if (_gm.currentGameMode == _eGameMode.Event) then
 			target = tostring(targetStage)
 		else
 			target = tostring(targetStage + 100 * targetChapter)
@@ -173,7 +178,7 @@ script MonsterSpawnService extends Component
 
 		local settingFunction = function()
 			local patterns
-			if (_GameManager.currentGameMode == _eGameMode.Event) then
+			if (_gm.currentGameMode == _eGameMode.Event) then
 				patterns = _eventPatternRepo:GetPatternByStage(target)
 			else
 				patterns = _patternRepo:GetPatternByStage(target)
@@ -187,7 +192,7 @@ script MonsterSpawnService extends Component
 
 			for i, pattern in ipairs(patterns) do
 				if pattern.type == 'LOOP' or pattern.type == 'EVENT_LOOP' then
-					local setting = _settingRepo:GetSettingByTypeAndIdForEvent(pattern.type, pattern.setting, (_GameManager.currentGameMode == _eGameMode.Event))
+					local setting = _settingRepo:GetSettingByTypeAndIdForEvent(pattern.type, pattern.setting, (_gm.currentGameMode == _eGameMode.Event))
 					if setting ~= nil then
 						local id = _TimerService:SetTimerRepeat(
 							function()
@@ -205,9 +210,9 @@ script MonsterSpawnService extends Component
 				end
 
 				if pattern.type == 'EVENT' then
-					local setting = _settingRepo:GetSettingByTypeAndIdForEvent('EVENT', pattern.setting, (_GameManager.currentGameMode == _eGameMode.Event))
+					local setting = _settingRepo:GetSettingByTypeAndIdForEvent('EVENT', pattern.setting, (_gm.currentGameMode == _eGameMode.Event))
 					local group_data
-					if (_GameManager.currentGameMode == _eGameMode.Event) then
+					if (_gm.currentGameMode == _eGameMode.Event) then
 						group_data = _eventGroupRepo:GetGroupById(pattern.group)
 					else
 						group_data = _groupRepo:GetGroupById(pattern.group)
@@ -237,7 +242,7 @@ script MonsterSpawnService extends Component
 
 				if pattern.type == 'INSTANT' then
 					local group_data
-					if _GameManager.isEventMode then
+					if _gm.isEventMode then
 						group_data = _eventGroupRepo:GetGroupById(pattern.group)
 					else
 						group_data = _groupRepo:GetGroupById(pattern.group)
@@ -292,8 +297,9 @@ script MonsterSpawnService extends Component
 		self:ClearAllEnemiesServer()
 
 		local user = _UserService:GetUserEntityByUserId(senderUserId)
+		local _gm = user.GameManager
 
-		if (_GameManager.currentGameMode == _eGameMode.Event) then
+		if (_gm.currentGameMode == _eGameMode.Event) then
 			local userStage = user.UserStage
 			self.stageId = userStage.eventSelectStage
 		else
@@ -313,13 +319,16 @@ script MonsterSpawnService extends Component
 
 	@ExecSpace("Server")
 	method void ClearAllEnemiesServer()
-		local mapName = _GameManager:GetGameMapName()
+		local mapEntityName = self.Entity.CurrentMap.Name
+		local ownerId = _GameRoomService:GetOwnerUserIdFromMapName(mapEntityName)
+		local ownerGM = _UserService:GetUserEntityByUserId(ownerId).GameManager
+		local mapName = ownerGM:GetGameMapName()
 		local myMonsterList = _EntityService:GetEntityByPath(mapName .. "/MyMonsterList")
 		local enemyList = _EntityService:GetEntityByPath(mapName .. "/EnemyList")
 
 		-- GameManager의 DestroyChildren 메서드 활용 (첫 번째 자식 유지)
-		_GameManager:DestroyChildren(myMonsterList, true)
-		_GameManager:DestroyChildren(enemyList, true)
+		ownerGM:DestroyChildren(myMonsterList, true)
+		ownerGM:DestroyChildren(enemyList, true)
 	end
 
 end

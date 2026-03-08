@@ -46,7 +46,7 @@ script MonsterCodexUI extends Component
 		self.Entity.Visible = true
 		
 		-- 서버에 유저 데이터 요청
-		_MonsterCodexService:RequestUserData()
+		_UserService.LocalPlayer.MonsterCodexService:RequestUserData()
 	end
 
 	method void Hide()
@@ -78,7 +78,7 @@ script MonsterCodexUI extends Component
 		end
 
 		-- 도감 목록 가져오기
-		local codexList = _MonsterCodexService:GetAllCodexList()
+		local codexList = _UserService.LocalPlayer.MonsterCodexService:GetAllCodexList()
 		if codexList == nil or #codexList == 0 then
 			return
 		end
@@ -136,7 +136,7 @@ script MonsterCodexUI extends Component
 				self.popup = self.Entity:GetChildByName("MonsterCodexPopup")
 			end
 			if self.popup ~= nil and self.popup.MonsterCodexPopup ~= nil then
-				local codexInfo = _MonsterCodexService:GetCodexInfoClient(monsterId)
+				local codexInfo = _UserService.LocalPlayer.MonsterCodexService:GetCodexInfoClient(monsterId)
 				local unitInfo = _UnitService:GetUnitByIDFromClient(monsterId)
 				local monsterName = unitInfo and unitInfo["name"] or ""
 				local rewardAmount = codexInfo and codexInfo["reward_amount"] or 0

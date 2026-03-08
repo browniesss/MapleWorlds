@@ -18,7 +18,7 @@ script Captain_Lucky_Dice extends SkillParent
 		__base:ActivateSkill()
 		
 		if self._T.projectileParent == nil then
-			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			self._T.projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 		end
 		
 		local diceResult = math.random(1, 6)
@@ -151,7 +151,7 @@ script Captain_Lucky_Dice extends SkillParent
 		
 		_EffectService:PlayEffectAttached("f34b2937d191442f8e0e2800123d7c3e", self.caster, Vector3(0, 2, 0), 0, Vector3.one, false)
 		
-		local enemyListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
+		local enemyListParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/EnemyList")
 		local enemies = enemyListParent.Children
 		
 		local hitFunction = function()

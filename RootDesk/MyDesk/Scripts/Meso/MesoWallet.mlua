@@ -20,9 +20,13 @@ script MesoWallet extends Component
 		self.CurrentMeso = self.CurrentMeso + deposit
 
 		-- 매트릭스 모드: 소환 포인트 상한선 적용
-		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
-			if _MatrixCoinService ~= nil then
-				local maxPoint = _MatrixCoinService.MAX_SUMMON_POINT
+		local mapName = self.Entity.CurrentMap.Name
+		local ownerId = _GameRoomService:GetOwnerUserIdFromMapName(mapName)
+		local ownerEntity = ownerId ~= nil and _UserService:GetUserEntityByUserId(ownerId) or nil
+		local ownerGM = ownerEntity ~= nil and ownerEntity.GameManager or nil
+		if ownerGM ~= nil and ownerGM.currentGameMode == _eGameMode.Matrix then
+			if ownerEntity.MatrixCoinService ~= nil then
+				local maxPoint = ownerEntity.MatrixCoinService.MAX_SUMMON_POINT
 				if self.CurrentMeso > maxPoint then
 					self.CurrentMeso = maxPoint
 				end
@@ -37,7 +41,7 @@ script MesoWallet extends Component
 		if withdrawal <= 0 or self.CurrentMeso < withdrawal then
 			return
 		end
-		
+
 		self.CurrentMeso -= withdrawal
 		self.UIController:UpdateCurrentMeso(self.CurrentMeso)
 	end
@@ -49,9 +53,13 @@ script MesoWallet extends Component
 		end
 
 		-- 매트릭스 모드: 소환 포인트 상한선 적용
-		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
-			if _MatrixCoinService ~= nil then
-				local maxPoint = _MatrixCoinService.MAX_SUMMON_POINT
+		local mapName = self.Entity.CurrentMap.Name
+		local ownerId = _GameRoomService:GetOwnerUserIdFromMapName(mapName)
+		local ownerEntity = ownerId ~= nil and _UserService:GetUserEntityByUserId(ownerId) or nil
+		local ownerGM = ownerEntity ~= nil and ownerEntity.GameManager or nil
+		if ownerGM ~= nil and ownerGM.currentGameMode == _eGameMode.Matrix then
+			if ownerEntity.MatrixCoinService ~= nil then
+				local maxPoint = ownerEntity.MatrixCoinService.MAX_SUMMON_POINT
 				if newMeso > maxPoint then
 					newMeso = maxPoint
 				end

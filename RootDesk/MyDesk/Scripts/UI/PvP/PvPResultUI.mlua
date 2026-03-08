@@ -16,6 +16,13 @@ script PvPResultUI extends Component
 	property any lobbyHandler = nil
 
 	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		-- 초기에는 숨김 (displayOrder가 높아서 다른 UI 입력 차단 방지)
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+	end
+
+	@ExecSpace("ClientOnly")
 	method void OnEndPlay()
 		self:ClearHandlers()
 	end
@@ -85,15 +92,11 @@ script PvPResultUI extends Component
 		self.Entity.Visible = false
 
 		-- 게임 모드 초기화
-		_GameManager.currentGameMode = _eGameMode.Normal
+		_UserService.LocalPlayer.GameManager.currentGameMode = _eGameMode.Normal
 
-		-- 메인 로비로 텔레포트
+		-- 동적 맵 정리 + 메인 로비로 텔레포트
 		_LoadingManager:Show()
-		_TeleportService:TeleportToMapPosition(
-			_UserService.LocalPlayer,
-			Vector3.zero,
-			"MainLobbyMap"
-		)
+		_GameRoomService:RequestExit()
 
 		-- MainLobbyUI 활성화
 		local mainLobbyUI = _EntityService:GetEntityByPath("/ui/MainLobbyUI")

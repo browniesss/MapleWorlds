@@ -1,24 +1,25 @@
-@Logic
-script MatrixSpawnManager extends Logic
+@Component
+script MatrixSpawnManager extends Component
 
 	@ExecSpace("Server")
 	method void Spawn(string modelID, integer price, Vector3 pos, integer level, integer limitBreak)
 		_ProtocolService:CommonCall(senderUserId)
-		
+
 		if modelID == "model://6194a4e3-0eb4-417a-92b5-891af548b672" then
 			self:SpawnCygnus(pos, senderUserId)
 			return
 		end
-		
+
 		local unitModel = _BuffedUnitService:GetBuffedUnitModel(senderUserId, modelID)
-		local user = _UserService:GetUserEntityByUserId(senderUserId)
-		
-		if not self:IsCanSpawn(price) then
+		local user = self.Entity
+		local gm = user.GameManager
+		local gameMapName = gm:GetGameMapName()
+
+		if not self:IsCanSpawn(price, gameMapName) then
 			return
 		end
-		
-		local spawnParent = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList")
-		local spawnPos = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList/MySpawnPoint")
+		local spawnParent = _EntityService:GetEntityByPath(gameMapName .. "/MyMonsterList")
+		local spawnPos = _EntityService:GetEntityByPath(gameMapName .. "/MyMonsterList/MySpawnPoint")
 		
 		if pos == Vector3.zero then
 			pos = spawnPos.TransformComponent.Position
@@ -65,29 +66,29 @@ script MatrixSpawnManager extends Logic
 				spawnEntity.AddSummonPointAfterKill.Enable = true
 				spawnEntity.AddSummonPointAfterKill.type = item.type
 				spawnEntity.AddSummonPointAfterKill.value = item.value
-				spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet()
+				spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet(gameMapName)
 			end
 		end
-		
+
 		-- 클라이언트에서 전달받은 level/limitBreak로 버프 적용
 		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, level, limitBreak)
 		user.UserBreakLimitSkillClient:ActivateSkill(unitModel.LimitBreakActiveSkill)
 		spawnEntity.Unit:Spawn(unitModel, skillData)
-		
+
 		-- 매트릭스 증강 버프 적용
-		if _MatrixAugmentService ~= nil then
-			_MatrixAugmentService:ApplySpawnBuffs(spawnEntity, user)
+		if self.Entity.MatrixAugmentService ~= nil then
+			self.Entity.MatrixAugmentService:ApplySpawnBuffs(spawnEntity, user)
 		end
-		
+
 		-- 유닛 중복 강화 적용
-		if _MatrixUnitSelectService ~= nil then
-			_MatrixUnitSelectService:ApplyStoredUpgrades(spawnEntity)
+		if self.Entity.MatrixUnitSelectService ~= nil then
+			self.Entity.MatrixUnitSelectService:ApplyStoredUpgrades(spawnEntity)
 		end
-		
-		self:GetUserWallet().MesoWallet:UseMeso(price)
+
+		self:GetUserWallet(gameMapName).MesoWallet:UseMeso(price)
 
 		-- 멀티플라이어: 복제본 추가 스폰 (0.3초 딜레이)
-		if _MatrixAugmentService ~= nil and _MatrixAugmentService.isMultiplierActive and not _MatrixAugmentService.isCloneSpawn then
+		if self.Entity.MatrixAugmentService ~= nil and self.Entity.MatrixAugmentService.isMultiplierActive and not self.Entity.MatrixAugmentService.isCloneSpawn then
 			_TimerService:SetTimerOnce(function()
 				self:SpawnClone(modelID, pos, level, limitBreak, senderUserId)
 			end, 0.3)
@@ -96,11 +97,13 @@ script MatrixSpawnManager extends Logic
 
 	@ExecSpace("ServerOnly")
 	method void SpawnClone(string modelID, Vector3 pos, integer level, integer limitBreak, string userID)
-		_MatrixAugmentService.isCloneSpawn = true
+		self.Entity.MatrixAugmentService.isCloneSpawn = true
 
 		local unitModel = _BuffedUnitService:GetBuffedUnitModel(userID, modelID)
-		local user = _UserService:GetUserEntityByUserId(userID)
-		local spawnParent = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList")
+		local user = self.Entity
+		local gm = user.GameManager
+		local gameMapName = gm:GetGameMapName()
+		local spawnParent = _EntityService:GetEntityByPath(gameMapName .. "/MyMonsterList")
 		local spawnEntity = _SpawnService:SpawnByModelId(modelID, "Pig", pos, spawnParent)
 		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
 
@@ -142,7 +145,7 @@ script MatrixSpawnManager extends Logic
 				spawnEntity.AddSummonPointAfterKill.Enable = true
 				spawnEntity.AddSummonPointAfterKill.type = item.type
 				spawnEntity.AddSummonPointAfterKill.value = item.value
-				spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet()
+				spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet(gameMapName)
 			end
 		end
 
@@ -155,17 +158,17 @@ script MatrixSpawnManager extends Logic
 		spawnEntity.Unit:Spawn(unitModel, skillData)
 
 		-- 매트릭스 증강 버프 적용
-		if _MatrixAugmentService ~= nil then
-			_MatrixAugmentService:ApplySpawnBuffs(spawnEntity, user)
+		if self.Entity.MatrixAugmentService ~= nil then
+			self.Entity.MatrixAugmentService:ApplySpawnBuffs(spawnEntity, user)
 		end
 
 		-- 유닛 중복 강화 적용
-		if _MatrixUnitSelectService ~= nil then
-			_MatrixUnitSelectService:ApplyStoredUpgrades(spawnEntity)
+		if self.Entity.MatrixUnitSelectService ~= nil then
+			self.Entity.MatrixUnitSelectService:ApplyStoredUpgrades(spawnEntity)
 		end
 
 		-- 복제본 스탯 감소 (모든 버프 적용 후)
-		_MatrixAugmentService:ApplyCloneStatReduction(spawnEntity.Unit, _MatrixAugmentService.multiplierStatRatio)
+		self.Entity.MatrixAugmentService:ApplyCloneStatReduction(spawnEntity.Unit, self.Entity.MatrixAugmentService.multiplierStatRatio)
 
 		-- 복제본 시각 효과 (검은색 틴트)
 		if spawnEntity.Unit.isUsableCharacter then
@@ -174,7 +177,7 @@ script MatrixSpawnManager extends Logic
 			spawnEntity.SpriteRendererComponent.Color = Color(0.3, 0.3, 0.3, 1.0)
 		end
 
-		_MatrixAugmentService.isCloneSpawn = false
+		self.Entity.MatrixAugmentService.isCloneSpawn = false
 	end
 
 	@ExecSpace("Server")
@@ -188,7 +191,9 @@ script MatrixSpawnManager extends Logic
 		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, 30, 1)
 
 		-- 적 위치에 소환
-		local spawnParent = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList")
+		local gm = self.Entity.GameManager
+		local gameMapName = gm:GetGameMapName()
+		local spawnParent = _EntityService:GetEntityByPath(gameMapName .. "/MyMonsterList")
 		local spawnEntity = _SpawnService:SpawnByModelId(modelID, "SkeletonDog", pos, spawnParent)
 
 		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
@@ -211,7 +216,9 @@ script MatrixSpawnManager extends Logic
 
 		-- 최종 위치에 소환 (포물선 도착 지점)
 		local finalPos = Vector3(pos.x + targetOffsetX, pos.y, pos.z)
-		local spawnParent = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList")
+		local gm = self.Entity.GameManager
+		local gameMapName = gm:GetGameMapName()
+		local spawnParent = _EntityService:GetEntityByPath(gameMapName .. "/MyMonsterList")
 		local spawnEntity = _SpawnService:SpawnByModelId(modelID, "MiniClone", finalPos, spawnParent)
 
 		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
@@ -271,10 +278,13 @@ script MatrixSpawnManager extends Logic
 	@ExecSpace("Server")
 	method void SkillSpawn(string target, string summoner, Vector3 pos)
 		local unitData = _UnitService:GetUnitByIDFromServer(target)
-		
+
+		local gm = self.Entity.GameManager
+		local gameMapName = gm:GetGameMapName()
+
 		-- 소환자의 레벨을 MyMonsterList에서 찾기
 		local summonerLevel = 1
-		local myMonsterList = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList")
+		local myMonsterList = _EntityService:GetEntityByPath(gameMapName .. "/MyMonsterList")
 		if myMonsterList ~= nil then
 			for _, child in pairs(myMonsterList.Children) do
 				if child.Unit ~= nil and child.Unit.id == summoner then
@@ -289,18 +299,18 @@ script MatrixSpawnManager extends Logic
 		
 		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, summonerLevel, 1)
 		
-		local spawnParent = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList")
-		local spawnPos = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList/MySpawnPoint")
-		
+		local spawnParent = _EntityService:GetEntityByPath(gameMapName .. "/MyMonsterList")
+		local spawnPos = _EntityService:GetEntityByPath(gameMapName .. "/MyMonsterList/MySpawnPoint")
+
 		if pos == Vector3.zero then
 			pos = spawnPos.TransformComponent.Position
 		end
-		
+
 		local spawnEntity = _SpawnService:SpawnByModelId(unitModel.id, "Pig", pos, spawnParent)
 		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
-		
+
 		if senderUserId ~= nil then
-			local user = _UserService:GetUserEntityByUserId(senderUserId)
+			local user = self.Entity
 			local jobID = tostring(unitModel.jobId)
 			local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(unitModel.jobId)
 			local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE(jobID, count)
@@ -338,20 +348,20 @@ script MatrixSpawnManager extends Logic
 					spawnEntity.AddSummonPointAfterKill.Enable = true
 					spawnEntity.AddSummonPointAfterKill.type = item.type
 					spawnEntity.AddSummonPointAfterKill.value = item.value
-					spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet()
+					spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet(gameMapName)
 				end
 			end
-		
+
 			-- 매트릭스 증강 버프 적용
-			if _MatrixAugmentService ~= nil then
-				_MatrixAugmentService:ApplySpawnBuffs(spawnEntity, user)
+			if self.Entity.MatrixAugmentService ~= nil then
+				self.Entity.MatrixAugmentService:ApplySpawnBuffs(spawnEntity, user)
 			end
 		end
 		spawnEntity.Unit:Spawn(unitModel, skillData)
 		
 		-- 유닛 중복 강화 적용
-		if _MatrixUnitSelectService ~= nil then
-			_MatrixUnitSelectService:ApplyStoredUpgrades(spawnEntity)
+		if self.Entity.MatrixUnitSelectService ~= nil then
+			self.Entity.MatrixUnitSelectService:ApplyStoredUpgrades(spawnEntity)
 		end
 	end
 
@@ -359,28 +369,29 @@ script MatrixSpawnManager extends Logic
 	method void SpawnCygnus(Vector3 pos, string userID)
 		local modelID = "model://6194a4e3-0eb4-417a-92b5-891af548b672"
 		local unitModel = _BuffedUnitService:GetBuffedUnitModel(userID, modelID)
-		local user = _UserService:GetUserEntityByUserId(userID)
-		
+		local user = self.Entity
+		local gm = user.GameManager
+		local gameMapName = gm:GetGameMapName()
+
 		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(102)
 		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE("102", count)
-		
+
 		if synergy:length() <= 0 then
 			return
 		end
-		
+
 		local item = synergy:Get(1)
-		
+
 		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, math.floor(item.value), 1)
 		local price = unitModel.summonCost
-		
-		if not self:IsCanSpawn(price) then
+
+		if not self:IsCanSpawn(price, gameMapName) then
 			return
 		end
-		
-		self:GetUserWallet().MesoWallet:UseMeso(price)
-		
-		local spawnParent = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList")
-		local spawnPos = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList/MySpawnPoint")
+
+		self:GetUserWallet(gameMapName).MesoWallet:UseMeso(price)
+		local spawnParent = _EntityService:GetEntityByPath(gameMapName .. "/MyMonsterList")
+		local spawnPos = _EntityService:GetEntityByPath(gameMapName .. "/MyMonsterList/MySpawnPoint")
 		
 		if pos == Vector3.zero then
 			pos = spawnPos.TransformComponent.Position
@@ -426,21 +437,21 @@ script MatrixSpawnManager extends Logic
 					spawnEntity.AddSummonPointAfterKill.Enable = true
 					spawnEntity.AddSummonPointAfterKill.type = jobItem.type
 					spawnEntity.AddSummonPointAfterKill.value = jobItem.value
-					spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet()
+					spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet(gameMapName)
 				end
 			end
 		end
-		
+
 		-- 매트릭스 증강 버프 적용
-		if _MatrixAugmentService ~= nil then
-			_MatrixAugmentService:ApplySpawnBuffs(spawnEntity, user)
+		if self.Entity.MatrixAugmentService ~= nil then
+			self.Entity.MatrixAugmentService:ApplySpawnBuffs(spawnEntity, user)
 		end
-		
+
 		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
 		spawnEntity.Unit:Spawn(unitModel, skillData)
 
 		-- 멀티플라이어: 시그너스 복제본 추가 스폰 (0.3초 딜레이)
-		if _MatrixAugmentService ~= nil and _MatrixAugmentService.isMultiplierActive and not _MatrixAugmentService.isCloneSpawn then
+		if self.Entity.MatrixAugmentService ~= nil and self.Entity.MatrixAugmentService.isMultiplierActive and not self.Entity.MatrixAugmentService.isCloneSpawn then
 			_TimerService:SetTimerOnce(function()
 				self:SpawnCygnusClone(pos, userID)
 			end, 0.3)
@@ -449,24 +460,26 @@ script MatrixSpawnManager extends Logic
 
 	@ExecSpace("ServerOnly")
 	method void SpawnCygnusClone(Vector3 pos, string userID)
-		_MatrixAugmentService.isCloneSpawn = true
+		self.Entity.MatrixAugmentService.isCloneSpawn = true
 
 		local modelID = "model://6194a4e3-0eb4-417a-92b5-891af548b672"
 		local unitModel = _BuffedUnitService:GetBuffedUnitModel(userID, modelID)
-		local user = _UserService:GetUserEntityByUserId(userID)
+		local user = self.Entity
+		local gm = user.GameManager
+		local gameMapName = gm:GetGameMapName()
 
 		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(102)
 		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE("102", count)
 
 		if synergy:length() <= 0 then
-			_MatrixAugmentService.isCloneSpawn = false
+			self.Entity.MatrixAugmentService.isCloneSpawn = false
 			return
 		end
 
 		local item = synergy:Get(1)
 		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, math.floor(item.value), 1)
 
-		local spawnParent = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList")
+		local spawnParent = _EntityService:GetEntityByPath(gameMapName .. "/MyMonsterList")
 		local spawnEntity = _SpawnService:SpawnByModelId(modelID, unitModel.name, pos, spawnParent)
 
 		-- 시너지 컴포넌트 적용 (SpawnCygnus와 동일)
@@ -508,26 +521,26 @@ script MatrixSpawnManager extends Logic
 					spawnEntity.AddSummonPointAfterKill.Enable = true
 					spawnEntity.AddSummonPointAfterKill.type = jobItem.type
 					spawnEntity.AddSummonPointAfterKill.value = jobItem.value
-					spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet()
+					spawnEntity.AddSummonPointAfterKill.userWallet = self:GetUserWallet(gameMapName)
 				end
 			end
 		end
 
 		-- 매트릭스 증강 버프 적용
-		if _MatrixAugmentService ~= nil then
-			_MatrixAugmentService:ApplySpawnBuffs(spawnEntity, user)
+		if self.Entity.MatrixAugmentService ~= nil then
+			self.Entity.MatrixAugmentService:ApplySpawnBuffs(spawnEntity, user)
 		end
 
 		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
 		spawnEntity.Unit:Spawn(unitModel, skillData)
 
 		-- 유닛 중복 강화 적용
-		if _MatrixUnitSelectService ~= nil then
-			_MatrixUnitSelectService:ApplyStoredUpgrades(spawnEntity)
+		if self.Entity.MatrixUnitSelectService ~= nil then
+			self.Entity.MatrixUnitSelectService:ApplyStoredUpgrades(spawnEntity)
 		end
 
 		-- 복제본 스탯 감소 (모든 버프 적용 후)
-		_MatrixAugmentService:ApplyCloneStatReduction(spawnEntity.Unit, _MatrixAugmentService.multiplierStatRatio)
+		self.Entity.MatrixAugmentService:ApplyCloneStatReduction(spawnEntity.Unit, self.Entity.MatrixAugmentService.multiplierStatRatio)
 
 		-- 복제본 시각 효과 (검은색 틴트)
 		if spawnEntity.Unit.isUsableCharacter then
@@ -536,24 +549,24 @@ script MatrixSpawnManager extends Logic
 			spawnEntity.SpriteRendererComponent.Color = Color(0.3, 0.3, 0.3, 1.0)
 		end
 
-		_MatrixAugmentService.isCloneSpawn = false
+		self.Entity.MatrixAugmentService.isCloneSpawn = false
 	end
 
 	@ExecSpace("Server")
 	method void CygnusSkillSpawn(string modelID, Vector3 pos)
 		_ProtocolService:CommonCall(senderUserId)
 		
-		local user = _UserService:GetUserEntityByUserId(senderUserId)
-		
+		local user = self.Entity
+
 		local count = user.UserSynergyComponent:GET_SYNERGY_COUNT(102)
 		local synergy = _SynergyRepo:FIND_SYNERGY_AVAILABLE("102", count)
-		
+
 		if synergy:length() <= 0 then
 			return
 		end
-		
+
 		local item = synergy:Get(1)
-		
+
 		-- 매트릭스: Unit DataSet에서 기사단 데이터 직접 참조
 		local unitData = _UnitService:GetUnitByIDFromServer(modelID)
 		local unitModel = BuffedUnitModel()
@@ -561,13 +574,15 @@ script MatrixSpawnManager extends Logic
 		
 		unitModel = _BuffedUnitService:SetUnitBuff(unitModel, math.floor(item.value), 1)
 		
-		local spawnParent = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList")
-		local spawnPos = _EntityService:GetEntityByPath("/maps/MatrixStage/MyMonsterList/MySpawnPoint")
-		
+		local gm = user.GameManager
+		local gameMapName = gm:GetGameMapName()
+		local spawnParent = _EntityService:GetEntityByPath(gameMapName .. "/MyMonsterList")
+		local spawnPos = _EntityService:GetEntityByPath(gameMapName .. "/MyMonsterList/MySpawnPoint")
+
 		if pos == Vector3.zero then
 			pos = spawnPos.TransformComponent.Position
 		end
-		
+
 		local spawnEntity = _SpawnService:SpawnByModelId(modelID, unitModel.name, pos, spawnParent)
 		local skillData = _SkillService:GetSkillByIDFromServer(unitModel.skillID)
 		local effectId = _EffectService:PlayEffectAttached("e0054745636944e091b5f3830b8be73a", spawnEntity, Vector3.zero, 0, Vector3.one, true)
@@ -579,8 +594,8 @@ script MatrixSpawnManager extends Logic
 		spawnEntity.Unit.effectId = effectId
 		
 		-- 매트릭스 증강 버프 적용
-		if _MatrixAugmentService ~= nil then
-			_MatrixAugmentService:ApplySpawnBuffs(spawnEntity, user)
+		if self.Entity.MatrixAugmentService ~= nil then
+			self.Entity.MatrixAugmentService:ApplySpawnBuffs(spawnEntity, user)
 		end
 		
 		_TimerService:SetTimerOnce(
@@ -595,12 +610,12 @@ script MatrixSpawnManager extends Logic
 		)
 	end
 
-	method boolean IsCanSpawn(integer price)
-		return self:GetUserWallet().MesoWallet:GetMeso() >= price
+	method boolean IsCanSpawn(integer price, string gameMapName)
+		return self:GetUserWallet(gameMapName).MesoWallet:GetMeso() >= price
 	end
 
-	method Entity GetUserWallet()
-		return _EntityService:GetEntityByPath("/maps/MatrixStage/userWallet")
+	method Entity GetUserWallet(string gameMapName)
+		return _EntityService:GetEntityByPath(gameMapName .. "/userWallet")
 	end
 
 end

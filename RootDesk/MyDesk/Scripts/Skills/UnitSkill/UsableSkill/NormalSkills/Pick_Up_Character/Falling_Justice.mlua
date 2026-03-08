@@ -10,7 +10,7 @@ script Falling_Justice extends SkillParent
 		local pos = Vector3(2, 2.5, 0)
 		
 		if self._T.projectileParent == nil then
-			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			self._T.projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 		end
 		
 		local firstSpawnFunction = function()

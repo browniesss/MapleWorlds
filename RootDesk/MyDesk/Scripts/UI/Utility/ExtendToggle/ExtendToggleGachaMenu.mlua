@@ -63,7 +63,7 @@ script ExtendToggleGachaMenu extends ToggleAction
 			self.PickUpCharter.Enable = true
 			infoButton.Enable = true
 			
-			local setting = _SummonService:GET_SETTING(_GachaManager.GachaKey)
+			local setting = _UserService.LocalPlayer.SummonService:GET_SETTING(_GachaManager.GachaKey)
 			if setting.video ~= nil or setting.video ~= "-" then
 				local newUrls = {}
 				newUrls[#newUrls + 1] = setting.video

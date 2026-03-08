@@ -5,8 +5,12 @@ script UserDeck extends Component
 
 	property table userSubDeck = {}
 
+	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
-		_UserDeckService:LOAD()
+		if self.Entity ~= _UserService.LocalPlayer then
+			return
+		end
+		self.Entity.UserDeckService:LOAD()
 	end
 
 	@ExecSpace("Client")

@@ -1,5 +1,5 @@
-@Logic
-script PlayCoinService extends Logic
+@Component
+script PlayCoinService extends Component
 
 	@Sync
 	property integer playCoin = 0
@@ -14,6 +14,12 @@ script PlayCoinService extends Logic
 	property integer maxPlayCoin = 5
 
 	property integer playCoinRefreshTs = 180
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		local uid = self.Entity.PlayerComponent.UserId
+		self:InitCoin(uid)
+	end
 
 	@ExecSpace("ServerOnly")
 	method void OnUpdate(number delta)
@@ -114,11 +120,11 @@ script PlayCoinService extends Logic
 		local useCoinCode = self:UseCoin(senderUserId)
 
 		if useCoinCode ~= 0 then
-			_GameManager:OpenZeroEnterCoinUI()
+			self.Entity.GameManager:OpenZeroEnterCoinUI(senderUserId)
 			return -1
 		end
 
-		_GameManager:LocalGameStart()
+		self.Entity.GameManager:LocalGameStart(senderUserId)
 	end
 
 	@ExecSpace("Server")
@@ -126,16 +132,16 @@ script PlayCoinService extends Logic
 		local useCoinCode = self:UseCoin(senderUserId)
 
 		if useCoinCode ~= 0 then
-			_GameManager:OpenZeroEnterCoinUI()
+			self.Entity.GameManager:OpenZeroEnterCoinUI(senderUserId)
 			return -1
 		end
 
-		_GameManager:LocalEventGameStart()
+		self.Entity.GameManager:LocalEventGameStart(senderUserId)
 	end
 
 	@ExecSpace("Client")
 	method boolean IsUseCoin()
-		local userStage = _UserService.LocalPlayer.UserStage
+		local userStage = self.Entity.UserStage
 
 		-- 게임 모드 가져오기 (StageSelectorUI에서 isHardMode 확인)
 		local gameMode = _eGameMode.Normal
@@ -188,7 +194,7 @@ script PlayCoinService extends Logic
 
 	@ExecSpace("Client")
 	method boolean IsUseEventCoin()
-		local userStage = _UserService.LocalPlayer.UserStage
+		local userStage = self.Entity.UserStage
 		if userStage.eventOpenChapter < userStage.eventSelectChapter then
 			return false
 		end
@@ -214,26 +220,11 @@ script PlayCoinService extends Logic
 		---------------------------------------------------------
 		local ProfileCode = event.ProfileCode
 		local UserId = event.UserId
-		
-		self:SaveCoin(UserId)
-	end
+		if UserId ~= self.Entity.PlayerComponent.UserId then
+			return
+		end
 
-	@ExecSpace("ServerOnly")
-	@EventSender("Service", "UserService")
-	handler HandleUserEnterEvent(UserEnterEvent event)
-		--------------- Native Event Sender Info ----------------
-		-- Sender: UserService
-		-- Space: Server
-		---------------------------------------------------------
-		
-		-- Parameters
-		-- local ProfileCode = event.ProfileCode
-		-- local UserId = event.UserId
-		---------------------------------------------------------
-		local ProfileCode = event.ProfileCode
-		local UserId = event.UserId
-		
-		self:InitCoin(UserId)
+		self:SaveCoin(UserId)
 	end
 
 end

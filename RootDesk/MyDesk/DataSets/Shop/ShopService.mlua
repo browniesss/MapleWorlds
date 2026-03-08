@@ -44,16 +44,17 @@ script ShopService extends Logic
 			return false
 		end
 
+		local purchaseUserEntity = _UserService:GetUserEntityByUserId(purchaseInfo.UserId)
 		if item.type == self.MUSH_DIA then
-			_BillingService:PurchaseFirstCoin(purchaseInfo.UserId, purchaseInfo.ProductId)
+			purchaseUserEntity.BillingService:PurchaseFirstCoin(purchaseInfo.UserId, purchaseInfo.ProductId)
 		end
 
 		if item.type == self.MUSH_COIN then
-			_BillingService:PurchaseSecondCoin(purchaseInfo.UserId, purchaseInfo.ProductId)
+			purchaseUserEntity.BillingService:PurchaseSecondCoin(purchaseInfo.UserId, purchaseInfo.ProductId)
 		end
 
 		if item.type == self.PLAY_COIN then
-			_PlayCoinService:AddCoin(purchaseInfo.UserId, item.reward[1].value)
+			purchaseUserEntity.PlayCoinService:AddCoin(purchaseInfo.UserId, item.reward[1].value)
 		end
 
 		if item.type == self.PACKAGE then
@@ -98,17 +99,18 @@ script ShopService extends Logic
 			return false
 		end
 
+		local gcodeUserEntity = _UserService:GetUserEntityByUserId(purchaseInfo.UserId)
 		if item.type == self.MUSH_DIA then
-			_BillingService:PurchaseFirstCoin(purchaseInfo.UserId, purchaseInfo.ProductId)
+			gcodeUserEntity.BillingService:PurchaseFirstCoin(purchaseInfo.UserId, purchaseInfo.ProductId)
 		end
 
 		if item.type == self.MUSH_COIN then
-			_BillingService:ExchangeCoin(purchaseInfo.UserId, purchaseInfo.ProductId)
+			gcodeUserEntity.BillingService:ExchangeCoin(purchaseInfo.UserId, purchaseInfo.ProductId)
 		end
 
 		if item.type == self.PLAY_COIN then
-			_BillingService:UseFirstCoin(purchaseInfo.UserId, item.price[1].value)
-			_PlayCoinService:AddCoin(purchaseInfo.UserId, item.reward[1].value)
+			gcodeUserEntity.BillingService:UseFirstCoin(purchaseInfo.UserId, item.price[1].value)
+			gcodeUserEntity.PlayCoinService:AddCoin(purchaseInfo.UserId, item.reward[1].value)
 		end
 
 		return true
@@ -342,19 +344,20 @@ script ShopService extends Logic
 		end
 
 		-- 보상 지급
+		local packageUserEntity = _UserService:GetUserEntityByUserId(userId)
 		for _, reward in pairs(item.reward) do
 			if reward.type == "dia_free" then
-				_BillingService:AddFirstFreeCoin(userId, reward.value)
+				packageUserEntity.BillingService:AddFirstFreeCoin(userId, reward.value)
 			elseif reward.type == "dia_paid" then
-				_BillingService:AddFirstPaidCoin(userId, reward.value)
+				packageUserEntity.BillingService:AddFirstPaidCoin(userId, reward.value)
 			elseif reward.type == "coin_free" then
-				_BillingService:AddSecondFreeCoin(userId, reward.value)
+				packageUserEntity.BillingService:AddSecondFreeCoin(userId, reward.value)
 			elseif reward.type == "coin_paid" then
-				_BillingService:AddSecondPaidCoin(userId, reward.value)
+				packageUserEntity.BillingService:AddSecondPaidCoin(userId, reward.value)
 			elseif reward.type == "meso_free" then
-				_BillingService:AddThirdFreeCoin(userId, reward.value)
+				packageUserEntity.BillingService:AddThirdFreeCoin(userId, reward.value)
 			elseif reward.type == "meso_paid" then
-				_BillingService:AddThirdPaidCoin(userId, reward.value)
+				packageUserEntity.BillingService:AddThirdPaidCoin(userId, reward.value)
 			end
 		end
 
@@ -372,7 +375,7 @@ script ShopService extends Logic
 		local userId = senderUserId
 		local purchased = self:IsPackagePurchased(userId, packageId)
 		if purchased then
-			self:HidePackageItem(packageId)
+			self:HidePackageItem(packageId, userId)
 		end
 	end
 
@@ -382,11 +385,12 @@ script ShopService extends Logic
 		if userEntity == nil then
 			return
 		end
-		self:HidePackageItem(packageId)
+		self:HidePackageItem(packageId, userId)
 	end
 
 	@ExecSpace("Client")
-	method void HidePackageItem(string packageId)
+	method void HidePackageItem(string packageId, string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
 		local packageGrid = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/PackageParent/Grid")
 		if packageGrid == nil then
 			return
@@ -510,11 +514,12 @@ script ShopService extends Logic
 			return
 		end
 		-- 클라이언트에 패스 구매 완료 알림
-		self:NotifyPassPurchaseComplete(passId)
+		self:NotifyPassPurchaseComplete(passId, userId)
 	end
 
 	@ExecSpace("Client")
-	method void NotifyPassPurchaseComplete(string passId)
+	method void NotifyPassPurchaseComplete(string passId, string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
 		-- MushDiaPassUI에서 UI 갱신 처리
 		local passParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/MushDiaPassParent")
 		if passParent ~= nil and passParent.MushDiaPassUI ~= nil then
@@ -529,7 +534,7 @@ script ShopService extends Logic
 	method void RequestClaimPassRewards()
 		local userId = senderUserId
 		local result = self:ClaimPassRewards(userId)
-		self:OnPassRewardsClaimed(result.success, result.claimedDays or 0, result.totalReward or 0, result.currentDay or 0)
+		self:OnPassRewardsClaimed(result.success, result.claimedDays or 0, result.totalReward or 0, result.currentDay or 0, userId)
 	end
 
 	@ExecSpace("ServerOnly")
@@ -548,14 +553,15 @@ script ShopService extends Logic
 
 		-- claimedDay+1 부터 currentDay 까지 보상 지급
 		local totalReward = 0
+		local passUserEntity = _UserService:GetUserEntityByUserId(userId)
 		for day = claimedDay + 1, currentDay do
 			local rewardJson = self.passRewardInfo[day]
 			if rewardJson ~= nil then
 				local reward = _HttpService:JSONDecode(rewardJson)
 				if reward.type == "dia_paid" then
-					_BillingService:AddFirstPaidCoin(userId, reward.value)
+					passUserEntity.BillingService:AddFirstPaidCoin(userId, reward.value)
 				elseif reward.type == "dia_free" then
-					_BillingService:AddFirstFreeCoin(userId, reward.value)
+					passUserEntity.BillingService:AddFirstFreeCoin(userId, reward.value)
 				end
 				totalReward = totalReward + reward.value
 			end
@@ -577,7 +583,8 @@ script ShopService extends Logic
 	end
 
 	@ExecSpace("Client")
-	method void OnPassRewardsClaimed(boolean success, integer claimedDays, integer totalReward, integer currentDay)
+	method void OnPassRewardsClaimed(boolean success, integer claimedDays, integer totalReward, integer currentDay, string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
 		self:OnPassRewardsClaimedUI(success, claimedDays, totalReward, currentDay)
 	end
 
@@ -612,7 +619,7 @@ script ShopService extends Logic
 		local claimedDay = passData.claimedDay
 		local isCompleted = claimedDay >= 14
 
-		self:OnPassStatusChecked(true, isCompleted, currentDay, claimedDay)
+		self:OnPassStatusChecked(true, isCompleted, currentDay, claimedDay, userId)
 	end
 
 	@ExecSpace("ServerOnly")
@@ -621,11 +628,12 @@ script ShopService extends Logic
 		if userEntity == nil then
 			return
 		end
-		self:HidePassButton()
+		self:HidePassButton(userId)
 	end
 
 	@ExecSpace("Client")
-	method void HidePassButton()
+	method void HidePassButton(string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
 		local passButton = _EntityService:GetEntityByPath("/ui/ShopUI/ShopMenu/ShopMenuGrid/MushDiaPassButton")
 		if passButton ~= nil then
 			passButton.Enable = false
@@ -655,17 +663,17 @@ script ShopService extends Logic
 				local currentDay = self:GetCurrentPassDay(passData.purchaseDate)
 				local claimedDay = passData.claimedDay
 				local isCompleted = claimedDay >= 14
-				self:OnPassStatusChecked(true, isCompleted, currentDay, claimedDay)
+				self:OnPassStatusChecked(true, isCompleted, currentDay, claimedDay, userId)
 				return
 			end
-			self:OnPassStatusChecked(false, false, 0, 0)
+			self:OnPassStatusChecked(false, false, 0, 0, userId)
 			return
 		end
 
 		-- 패스 데이터 확인 (이미 위에서 가져옴)
 		if passData == nil then
 			-- 이용권은 있는데 데이터가 없는 경우 (비정상 상태)
-			self:OnPassStatusChecked(true, false, 0, 0)
+			self:OnPassStatusChecked(true, false, 0, 0, userId)
 			return
 		end
 
@@ -673,13 +681,14 @@ script ShopService extends Logic
 		local claimedDay = passData.claimedDay
 		local isCompleted = claimedDay >= 14
 
-		self:OnPassStatusChecked(true, isCompleted, currentDay, claimedDay)
+		self:OnPassStatusChecked(true, isCompleted, currentDay, claimedDay, userId)
 	end
 
 	@ExecSpace("Client")
-	method void OnPassStatusChecked(boolean hasPass, boolean isCompleted, integer currentDay, integer claimedDay)
+	method void OnPassStatusChecked(boolean hasPass, boolean isCompleted, integer currentDay, integer claimedDay, string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
 		if hasPass and isCompleted then
-			self:HidePassButton()
+			self:HidePassButton(uid)
 		end
 
 		-- MushDiaPassUI 갱신

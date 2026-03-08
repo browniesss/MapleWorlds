@@ -20,6 +20,9 @@ script MesoIncome extends Component
 
 	property any gameManager = nil
 
+	-- 매트릭스 모드 여부 (OnBeginPlay에서 맵 경로 기반으로 설정)
+	property boolean isMatrixMode = false
+
 	-- 매트릭스 모드용: 마지막 매트릭스 시간
 	property number lastMatrixTime = 0
 
@@ -31,15 +34,25 @@ script MesoIncome extends Component
 		-- 맵에 따라 gameManager 설정
 		local currentMap = self.Entity.CurrentMap
 		if currentMap ~= nil then
-			local mapPath = currentMap.Path
-			if string.find(mapPath, "MatrixStage") then
-				self.gameManager = _MatrixGameManager
-			else
-				self.gameManager = _GameManager
+			local mapName = currentMap.Name
+			local ownerId = _GameRoomService:GetOwnerUserIdFromMapName(mapName)
+			if ownerId ~= nil then
+				local ownerEntity = _UserService:GetUserEntityByUserId(ownerId)
+				if ownerEntity ~= nil then
+					local mapPath = currentMap.Path
+					if string.find(mapPath, "MatrixStage") then
+						self.gameManager = ownerEntity.MatrixGameManager
+						self.isMatrixMode = true
+					else
+						self.gameManager = ownerEntity.GameManager
+						self.isMatrixMode = false
+					end
+				end
 			end
-		else
-			self.gameManager = _GameManager
 		end
+
+		-- 동적 맵에서는 UUID 참조가 깨지므로 경로 기반으로 다시 링크
+		self:LinkEntities()
 
 		local dataSet = _DataService:GetTable("meso")
 		for i = 1, dataSet:GetRowCount() do
@@ -60,6 +73,32 @@ script MesoIncome extends Component
 	end
 
 	@ExecSpace("ServerOnly")
+	method void LinkEntities()
+		local currentMap = self.Entity.CurrentMap
+		if currentMap == nil then
+			return
+		end
+		local mapPath = currentMap.Path
+
+		-- UserWallet 링크
+		local walletEntity = _EntityService:GetEntityByPath(mapPath .. "/userWallet")
+		if walletEntity ~= nil and walletEntity.MesoWallet ~= nil then
+			self.UserWallet = walletEntity.MesoWallet
+		end
+
+		-- UIController 링크 (ingameWalletUI 엔티티의 MesoUI 컴포넌트)
+		local uiEntity = _EntityService:GetEntityByPath(mapPath .. "/ingameWalletUI")
+		if uiEntity ~= nil and uiEntity.MesoUI ~= nil then
+			self.UIController = uiEntity.MesoUI
+
+			-- MesoWallet에도 UIController 링크
+			if walletEntity ~= nil and walletEntity.MesoWallet ~= nil then
+				walletEntity.MesoWallet.UIController = uiEntity.MesoUI
+			end
+		end
+	end
+
+	@ExecSpace("ServerOnly")
 	method void OnUpdate(number delta)
 		-- 게임이 시작되지 않았으면 메소 수입 중단 (단, 기존 메소는 유지)
 		if self.gameManager == nil or not self.gameManager.isPlaying then
@@ -67,8 +106,14 @@ script MesoIncome extends Component
 		end
 
 		-- 매트릭스 모드: matrixTime 기반으로 메소 추가
-		if self.gameManager == _MatrixGameManager then
-			local matrixTime = _MatrixGameManager.matrixTime
+		if self.isMatrixMode then
+			-- 서버측 일시정지 체크 (유닛/증강 선택 UI 표시 중)
+			local ownerEntity = self:GetOwnerEntity()
+			if ownerEntity ~= nil and ownerEntity.MatrixService ~= nil and ownerEntity.MatrixService.isGamePaused then
+				return
+			end
+
+			local matrixTime = self.gameManager.matrixTime
 			local matrixDelta = matrixTime - self.lastMatrixTime
 			self.lastMatrixTime = matrixTime
 
@@ -84,8 +129,17 @@ script MesoIncome extends Component
 				self:AddMeso()
 			end
 		else
-			-- 일반 모드: 실제 시간(delta) 기반
-			self.currentTs = self.currentTs + delta
+			-- 일반 모드: 실제 시간(delta) * timeScale 기반
+			local scaledDelta = delta
+			local mapName = self.Entity.CurrentMap.Name
+			local ownerId = _GameRoomService:GetOwnerUserIdFromMapName(mapName)
+			if ownerId ~= nil then
+				local ownerEntity = _UserService:GetUserEntityByUserId(ownerId)
+				if ownerEntity ~= nil and ownerEntity.TimeScaleManager ~= nil and ownerEntity.TimeScaleManager.timeScale > 0 then
+					scaledDelta = delta * ownerEntity.TimeScaleManager.timeScale
+				end
+			end
+			self.currentTs = self.currentTs + scaledDelta
 			if self.currentTs >= self.incomeCooltime then
 				self.currentTs = 0
 				self:AddMeso()
@@ -98,8 +152,11 @@ script MesoIncome extends Component
 		local baseIncome = self.incomeData[1]["income"]
 		local finalIncome = baseIncome
 
+		-- 오너의 MatrixAugmentService 참조
+		local matrixAugment = self:GetOwnerMatrixAugmentService()
+
 		-- 매트릭스 모드에서만 시너지/증강 적용
-		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
+		if self.isMatrixMode then
 			-- 모험가 시너지(101) 배율 적용
 			local synergyMultiplier = self:GetAdventurerSynergyMultiplier()
 			if synergyMultiplier > 1.0 then
@@ -107,13 +164,13 @@ script MesoIncome extends Component
 			end
 
 			-- MatrixAugmentService 배율 적용
-			if _MatrixAugmentService ~= nil and _MatrixAugmentService.mesoIncomeMultiplier ~= 1.0 then
-				finalIncome = finalIncome * _MatrixAugmentService.mesoIncomeMultiplier
+			if matrixAugment ~= nil and matrixAugment.mesoIncomeMultiplier ~= 1.0 then
+				finalIncome = finalIncome * matrixAugment.mesoIncomeMultiplier
 			end
 		else
 			-- 일반 모드: 증강 배율만 적용 (시너지는 InitData에서 이미 적용됨)
-			if _MatrixAugmentService ~= nil and _MatrixAugmentService.mesoIncomeMultiplier ~= 1.0 then
-				finalIncome = finalIncome * _MatrixAugmentService.mesoIncomeMultiplier
+			if matrixAugment ~= nil and matrixAugment.mesoIncomeMultiplier ~= 1.0 then
+				finalIncome = finalIncome * matrixAugment.mesoIncomeMultiplier
 			end
 		end
 
@@ -133,8 +190,11 @@ script MesoIncome extends Component
 		local baseIncome = self.incomeData[1]["income"]
 		local finalIncome = baseIncome
 
+		-- 오너의 MatrixAugmentService 참조
+		local matrixAugment = self:GetOwnerMatrixAugmentService()
+
 		-- 매트릭스 모드에서만 시너지/증강 적용
-		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
+		if self.isMatrixMode then
 			-- 모험가 시너지(101) 배율 적용
 			local synergyMultiplier = self:GetAdventurerSynergyMultiplier()
 			if synergyMultiplier > 1.0 then
@@ -142,13 +202,13 @@ script MesoIncome extends Component
 			end
 
 			-- MatrixAugmentService 배율 적용
-			if _MatrixAugmentService ~= nil and _MatrixAugmentService.mesoIncomeMultiplier ~= 1.0 then
-				finalIncome = finalIncome * _MatrixAugmentService.mesoIncomeMultiplier
+			if matrixAugment ~= nil and matrixAugment.mesoIncomeMultiplier ~= 1.0 then
+				finalIncome = finalIncome * matrixAugment.mesoIncomeMultiplier
 			end
 		else
 			-- 일반 모드: 증강 배율만 적용 (시너지는 InitData에서 이미 적용됨)
-			if _MatrixAugmentService ~= nil and _MatrixAugmentService.mesoIncomeMultiplier ~= 1.0 then
-				finalIncome = finalIncome * _MatrixAugmentService.mesoIncomeMultiplier
+			if matrixAugment ~= nil and matrixAugment.mesoIncomeMultiplier ~= 1.0 then
+				finalIncome = finalIncome * matrixAugment.mesoIncomeMultiplier
 			end
 		end
 
@@ -158,8 +218,8 @@ script MesoIncome extends Component
 	-- 모험가 시너지(101) 배율 계산
 	@ExecSpace("Server")
 	method number GetAdventurerSynergyMultiplier()
-		-- Player 태그로 유저 엔티티 가져오기
-		local user = _EntityService:GetEntityByTag("Player")
+		-- 맵 오너의 유저 엔티티에서 시너지 조회
+		local user = self:GetOwnerEntity()
 		if user == nil or user.UserSynergyComponent == nil then
 			return 1.0
 		end
@@ -192,7 +252,7 @@ script MesoIncome extends Component
 		local displayIncome = baseIncome
 
 		-- 매트릭스 모드에서만 시너지/증강 적용
-		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
+		if self.isMatrixMode then
 			-- 모험가 시너지(101) 배율 적용
 			local synergyMultiplier = self:GetAdventurerSynergyMultiplier()
 			if synergyMultiplier > 1.0 then
@@ -200,8 +260,9 @@ script MesoIncome extends Component
 			end
 
 			-- MatrixAugmentService 배율 적용
-			if _MatrixAugmentService ~= nil and _MatrixAugmentService.mesoIncomeMultiplier ~= 1.0 then
-				displayIncome = displayIncome * _MatrixAugmentService.mesoIncomeMultiplier
+			local matrixAugmentDisplay = self:GetOwnerMatrixAugmentService()
+			if matrixAugmentDisplay ~= nil and matrixAugmentDisplay.mesoIncomeMultiplier ~= 1.0 then
+				displayIncome = displayIncome * matrixAugmentDisplay.mesoIncomeMultiplier
 			end
 		end
 
@@ -222,6 +283,7 @@ script MesoIncome extends Component
 		self.currentTs = 0
 		self.incomeAccumulator = 0
 		self.gameManager = nil
+		self.isMatrixMode = false
 	end
 
 	@ExecSpace("ServerOnly")
@@ -239,8 +301,8 @@ script MesoIncome extends Component
 		self.currentTs = 0
 		self.incomeAccumulator = 0
 		-- 매트릭스 모드용 시간 동기화
-		if _MatrixGameManager ~= nil then
-			self.lastMatrixTime = _MatrixGameManager.matrixTime
+		if self.isMatrixMode and self.gameManager ~= nil then
+			self.lastMatrixTime = self.gameManager.matrixTime
 		end
 	end
 
@@ -249,14 +311,14 @@ script MesoIncome extends Component
 		local dataSet = _DataService:GetTable("meso")
 		for i = 1, dataSet:GetRowCount() do
 			local item = {}
-			
+
 			item["id"] = tonumber(dataSet:GetCell(i,"id"))
 			item["init"] = tonumber(dataSet:GetCell(i,"init"))
 			item["income"] = tonumber(dataSet:GetCell(i,"income"))
-			
+
 			self.incomeData[item["id"]] = item
-		end     
-		
+		end
+
 		return self.incomeData[1]
 	end
 
@@ -287,9 +349,43 @@ script MesoIncome extends Component
 		self.currentTs = 0
 		self.incomeAccumulator = 0
 
-		if _MatrixGameManager ~= nil then
-			self.lastMatrixTime = _MatrixGameManager.matrixTime
+		if self.isMatrixMode and self.gameManager ~= nil then
+			self.lastMatrixTime = self.gameManager.matrixTime
 		end
+	end
+
+	-- 맵 오너의 유저 엔티티를 반환하는 헬퍼 메서드
+	@ExecSpace("Server")
+	method any GetOwnerEntity()
+		local currentMap = self.Entity.CurrentMap
+		if currentMap == nil then
+			return nil
+		end
+		local mapName = currentMap.Name
+		local ownerId = _GameRoomService:GetOwnerUserIdFromMapName(mapName)
+		if ownerId == nil then
+			return nil
+		end
+		return _UserService:GetUserEntityByUserId(ownerId)
+	end
+
+	-- 맵 오너의 MatrixAugmentService를 반환하는 헬퍼 메서드
+	@ExecSpace("Server")
+	method any GetOwnerMatrixAugmentService()
+		local currentMap = self.Entity.CurrentMap
+		if currentMap == nil then
+			return nil
+		end
+		local mapName = currentMap.Name
+		local ownerId = _GameRoomService:GetOwnerUserIdFromMapName(mapName)
+		if ownerId == nil then
+			return nil
+		end
+		local ownerEntity = _UserService:GetUserEntityByUserId(ownerId)
+		if ownerEntity == nil then
+			return nil
+		end
+		return ownerEntity.MatrixAugmentService
 	end
 
 end

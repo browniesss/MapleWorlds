@@ -75,7 +75,7 @@ script MatrixSynergyUIManager extends Component
 	-- 클라이언트용 매트릭스 시너지 보너스 계산
 	method integer GetMatrixSynergyBonusClient(number target)
 		-- 매트릭스 모드가 아니면 0
-		if _GameManager == nil or _GameManager.currentGameMode ~= _eGameMode.Matrix then
+		if _UserService.LocalPlayer.GameManager == nil or _UserService.LocalPlayer.GameManager.currentGameMode ~= _eGameMode.Matrix then
 			return 0
 		end
 

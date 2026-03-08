@@ -10,26 +10,26 @@ script RankingService extends Logic
 	property table userPointMap = {}
 
 	@ExecSpace("Server")
-	method void AddPoint(string storageKey, string userName, integer userScore)
+	method void AddPoint(string storageKey, string userName, integer userScore, string userId)
 		local ds = _DataStorageService:GetSortableDataStorage(storageKey)
-		
+
 		local getCode, lastScore = ds:GetAndWait(userName)
 		if getCode ~= 0 then
 			return
 		end
-		
+
 		if lastScore == nil or lastScore == 0 then
 			lastScore = 9999999
 		end
-		
+
 		if lastScore <= userScore then
-			self:UpdaetUserPointMap(storageKey, userScore)
+			self:UpdaetUserPointMap(storageKey, userScore, userId)
 			return
 		end
-		
+
 		local setCode = ds:SetAndWait(userName, userScore)
-		
-		self:UpdaetUserPointMap(storageKey, userScore)
+
+		self:UpdaetUserPointMap(storageKey, userScore, userId)
 	end
 
 	@ExecSpace("Server")
@@ -110,6 +110,7 @@ script RankingService extends Logic
 	method table GetTop3RankTable(string key)
 		local table = {}
 		if self.rankList[key] == nil then
+			_TimerService:SetTimerOnce(function () self:FETCH(key) end, 0)
 			return table
 		end
 		for rank = 1, 4 do
@@ -130,6 +131,7 @@ script RankingService extends Logic
 	method table GetTop50RankTable(string key)
 		local table = {}
 		if self.rankList[key] == nil then
+			_TimerService:SetTimerOnce(function () self:FETCH(key) end, 0)
 			return table
 		end
 		
@@ -201,28 +203,30 @@ script RankingService extends Logic
 	end
 
 	@ExecSpace("Server")
-	method void FetchUserPoint(string storageKey, string userName)
+	method void FetchUserPoint(string storageKey, string userName, string userId)
 		local ds = _DataStorageService:GetSortableDataStorage(storageKey)
-		
+
 		local getCode, lastScore = ds:GetAndWait(userName)
 		if getCode ~= 0 then
 			return
 		end
-		
+
 		if lastScore == nil or lastScore == 0 then
 			lastScore = 9999999
 		end
-		
-		self:UpdaetUserPointMap(storageKey, lastScore)
+
+		self:UpdaetUserPointMap(storageKey, lastScore, userId)
 	end
 
 	@ExecSpace("Client")
-	method void UpdaetUserPointMap(string storageKey, integer score)
+	method void UpdaetUserPointMap(string storageKey, integer score, string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
 		self.userPointMap[storageKey] = score
 	end
 
 	@ExecSpace("Server")
 	method void InitUserPointMap(string userName)
+		local userId = senderUserId
 		local dataSet = _DataService:GetTable("stage")
 
 		local stageCount = dataSet:GetRowCount()
@@ -233,13 +237,11 @@ script RankingService extends Logic
 
 			-- 노말 랭킹 (기존)
 			local normalKey = _RankingService:GetRankKeyByTable({chapter=chapter, stage=stage})
-			self.userPointMap[normalKey] = 999999
-			_TimerService:SetTimerOnce(function () self:FetchUserPoint(normalKey, userName) end, 0)
+			_TimerService:SetTimerOnce(function () self:FetchUserPoint(normalKey, userName, userId) end, 0)
 
 			-- 하드 랭킹 (신규)
 			local hardKey = _RankingService:GetRankKeyByTable({chapter=chapter, stage=stage, mode="hard"})
-			self.userPointMap[hardKey] = 999999
-			_TimerService:SetTimerOnce(function () self:FetchUserPoint(hardKey, userName) end, 0)
+			_TimerService:SetTimerOnce(function () self:FetchUserPoint(hardKey, userName, userId) end, 0)
 		end
 	end
 

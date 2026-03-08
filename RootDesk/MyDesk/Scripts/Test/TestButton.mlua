@@ -19,8 +19,9 @@ script TestButton extends Component
 		-- Parameters
 		-- local Entity = event.Entity
 		---------------------------------------------------------
-		_SpawnManager:Spawn(self.ID, 0, Vector3.zero)
-		_SpawnManager:SpawnEnemy(self.ID, Vector3.zero)
+		local spawnManager = _UserService.LocalPlayer.SpawnManager
+		spawnManager:Spawn(self.ID, 0, Vector3.zero)
+		spawnManager:SpawnEnemy(self.ID, Vector3.zero)
 	end
 
 end

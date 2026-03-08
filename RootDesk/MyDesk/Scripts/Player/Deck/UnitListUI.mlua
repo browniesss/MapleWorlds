@@ -27,16 +27,15 @@ script UnitListUI extends Component
 	method void SetCharacterItemList()
 		-- 1) 덱에 장착된 유닛 ID를 set로 만들기
 		local equipped = {}
-		local player = _EntityService:GetEntityByTag("Player")
+		local player = _UserService.LocalPlayer
 		local userDeckUI = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck").UserDeckUI
 		if userDeckUI.pvpMode then
-			local user = _UserService.LocalPlayer
-			if user ~= nil and user.pvpUserComponent ~= nil then
+			if player ~= nil and player.pvpUserComponent ~= nil then
 				local pvpDeck = {}
 				if userDeckUI.activeDeckType == "offense" then
-					pvpDeck = user.pvpUserComponent.offense_deck
+					pvpDeck = player.pvpUserComponent.offense_deck
 				else
-					pvpDeck = user.pvpUserComponent.defense_deck
+					pvpDeck = player.pvpUserComponent.defense_deck
 				end
 				for i = 1, 8 do
 					local uid = pvpDeck[i]
@@ -55,40 +54,42 @@ script UnitListUI extends Component
 		end
 		
 		-- 2) 유닛 리스트 출력 (덱에 있는 건 제외)
-		for unitId, jsonStr in pairs(_UserMonsterService.userMonsterDict) do
+		for unitId, jsonStr in pairs(_UserService.LocalPlayer.UserMonsterService.userMonsterDict) do
 		    -- unitData['id']가 있으면 그걸 우선 사용, 없으면 key 사용
 		    local data = _HttpService:JSONDecode(jsonStr)
 			local unitData = _UnitService:GetUnitByIDFromClient(unitId)
+			if unitData == nil then
+				continue
+			end
 			local buffedUnitData = BuffedUnitModel()
 			buffedUnitData:Init(unitData)
-		
+
 		    -- 덱에 있는 유닛이면 스킵
 		    if data and not equipped[unitId] and unitData['isUsableCharacter'] == 1 then
 		        local skillData = nil
 		        if unitData["skillID"] then
 		            skillData = _SkillService:GetSkillByIDFromClient(unitData["skillID"])
 		        end
-		
+
 		        local button = _SpawnService:SpawnByEntity(self.buttonPrefab, "button", Vector3.zero, self.characterUIScroll)
 		        button.UnitListItem:Init(buffedUnitData, skillData)
 		    end
 		end
-		
+
 	end
 
 	method void SetMonsterItemList()
 		-- 1) 덱에 장착된 유닛 ID를 set로 만들기
 		local equipped = {}
-		local player = _EntityService:GetEntityByTag("Player")
+		local player = _UserService.LocalPlayer
 		local userDeckUI = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck").UserDeckUI
 		if userDeckUI.pvpMode then
-			local user = _UserService.LocalPlayer
-			if user ~= nil and user.pvpUserComponent ~= nil then
+			if player ~= nil and player.pvpUserComponent ~= nil then
 				local pvpDeck = {}
 				if userDeckUI.activeDeckType == "offense" then
-					pvpDeck = user.pvpUserComponent.offense_deck
+					pvpDeck = player.pvpUserComponent.offense_deck
 				else
-					pvpDeck = user.pvpUserComponent.defense_deck
+					pvpDeck = player.pvpUserComponent.defense_deck
 				end
 				for i = 1, 8 do
 					local uid = pvpDeck[i]
@@ -105,22 +106,25 @@ script UnitListUI extends Component
 		        end
 		    end
 		end
-		
+
 		-- 2) 유닛 리스트 출력 (덱에 있는 건 제외)
-		for unitId, jsonStr in pairs(_UserMonsterService.userMonsterDict) do
+		for unitId, jsonStr in pairs(_UserService.LocalPlayer.UserMonsterService.userMonsterDict) do
 		    -- unitData['id']가 있으면 그걸 우선 사용, 없으면 key 사용
 		    local data = _HttpService:JSONDecode(jsonStr)
 			local unitData = _UnitService:GetUnitByIDFromClient(unitId)
+			if unitData == nil then
+				continue
+			end
 			local buffedUnitData = BuffedUnitModel()
 			buffedUnitData:Init(unitData)
-		
+
 		    -- 덱에 있는 유닛이면 스킵
 		    if data and not equipped[unitId] and unitData['isUsableCharacter'] == 0 then
 		        local skillData = nil
 		        if unitData["skillID"] then
 		            skillData = _SkillService:GetSkillByIDFromClient(unitData["skillID"])
 		        end
-		
+
 		        local button = _SpawnService:SpawnByEntity(self.buttonPrefab, "button", Vector3.zero, self.monsterUIScroll)
 		        button.UnitListItem:Init(buffedUnitData, skillData)
 		    end

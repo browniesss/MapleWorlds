@@ -54,7 +54,7 @@ script UnitListItem extends Component
 			_EntityService:Destroy(self.synergyComponentItem.Entity)
 		end
 		
-		local data = _UserMonsterService:GetOne(self.unitData['id'])
+		local data = _UserService.LocalPlayer.UserMonsterService:GetOne(self.unitData['id'])
 		
 		if self.unitData['isUsableCharacter'] == 0 then
 			self.unitAvartarRenderer.Visible = false
@@ -119,7 +119,7 @@ script UnitListItem extends Component
 				end
 			end
 		else
-			local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
+			local playerDeck = _UserService.LocalPlayer.UserDeck
 			playerDeck:SetDeckItem(self.unitData['id'], index)
 		end
 

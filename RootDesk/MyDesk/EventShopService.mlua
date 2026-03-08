@@ -80,7 +80,7 @@ script EventShopService extends Logic
 
 	@ExecSpace("ServerOnly")
 	method boolean DeductCurrency(string userId, integer price)
-		local result = _BillingService:UseEventToken(userId, price)
+		local result = _UserService:GetUserEntityByUserId(userId).BillingService:UseEventToken(userId, price)
 		return result == 0
 	end
 
@@ -89,29 +89,30 @@ script EventShopService extends Logic
 		local rewardType = itemData["reward_type"]
 		local rewardValue = itemData["reward_value"]
 
+		local userEntity = _UserService:GetUserEntityByUserId(userId)
 		if rewardType == "unit" then
 			-- 유닛 지급 (가챠와 동일한 방식)
-			_UserMonsterService:AddCount(userId, {rewardValue})
+			userEntity.UserMonsterService:AddCount(userId, {rewardValue})
 			-- 뱃지 체크
 			_BadgeConditionService:CheckPickupBadges(userId, rewardValue)
 			return true
 		elseif rewardType == "dia_free" then
-			local result = _BillingService:AddFirstFreeCoin(userId, tonumber(rewardValue))
+			local result = userEntity.BillingService:AddFirstFreeCoin(userId, tonumber(rewardValue))
 			return result == 0
 		elseif rewardType == "dia_paid" then
-			local result = _BillingService:AddFirstPaidCoin(userId, tonumber(rewardValue))
+			local result = userEntity.BillingService:AddFirstPaidCoin(userId, tonumber(rewardValue))
 			return result == 0
 		elseif rewardType == "coin_free" then
-			local result = _BillingService:AddSecondFreeCoin(userId, tonumber(rewardValue))
+			local result = userEntity.BillingService:AddSecondFreeCoin(userId, tonumber(rewardValue))
 			return result == 0
 		elseif rewardType == "coin_paid" then
-			local result = _BillingService:AddSecondPaidCoin(userId, tonumber(rewardValue))
+			local result = userEntity.BillingService:AddSecondPaidCoin(userId, tonumber(rewardValue))
 			return result == 0
 		elseif rewardType == "meso_free" then
-			local result = _BillingService:AddThirdFreeCoin(userId, tonumber(rewardValue))
+			local result = userEntity.BillingService:AddThirdFreeCoin(userId, tonumber(rewardValue))
 			return result == 0
 		elseif rewardType == "meso_paid" then
-			local result = _BillingService:AddThirdPaidCoin(userId, tonumber(rewardValue))
+			local result = userEntity.BillingService:AddThirdPaidCoin(userId, tonumber(rewardValue))
 			return result == 0
 		end
 		
@@ -127,20 +128,20 @@ script EventShopService extends Logic
 		local itemData = self:GetItemData(itemId)
 		if itemData == nil then
 			log_error("[EventShop] Item not found:", itemId)
-			self:OnPurchaseComplete(itemId, false, "", "ITEM_NOT_FOUND")
+			self:OnPurchaseComplete(itemId, false, "", "ITEM_NOT_FOUND", userId)
 			return
 		end
 		
 		-- 구매 가능 여부 확인 (횟수 제한)
 		if not self:CanPurchase(userId, itemId) then
-			self:OnPurchaseComplete(itemId, false, itemData["name"], "LIMIT_REACHED")
+			self:OnPurchaseComplete(itemId, false, itemData["name"], "LIMIT_REACHED", userId)
 			return
 		end
 		
 		-- 재화 차감
 		local price = itemData["price"]
 		if not self:DeductCurrency(userId, price) then
-			self:OnPurchaseComplete(itemId, false, itemData["name"], "INSUFFICIENT_CURRENCY")
+			self:OnPurchaseComplete(itemId, false, itemData["name"], "INSUFFICIENT_CURRENCY", userId)
 			return
 		end
 		
@@ -148,8 +149,8 @@ script EventShopService extends Logic
 		if not self:GiveReward(userId, itemData) then
 			log_error("[EventShop] Failed to give reward:", itemId)
 			-- 재화 환불 (실패 시)
-			_BillingService:AddEventToken(userId, price)
-			self:OnPurchaseComplete(itemId, false, itemData["name"], "REWARD_FAILED")
+			_UserService:GetUserEntityByUserId(userId).BillingService:AddEventToken(userId, price)
+			self:OnPurchaseComplete(itemId, false, itemData["name"], "REWARD_FAILED", userId)
 			return
 		end
 		
@@ -157,11 +158,12 @@ script EventShopService extends Logic
 		local currentCount = self:GetPurchaseCount(userId, itemId)
 		self:SavePurchaseCount(userId, itemId, currentCount + 1)
 
-		self:OnPurchaseComplete(itemId, true, itemData["name"], "")
+		self:OnPurchaseComplete(itemId, true, itemData["name"], "", userId)
 	end
 
 	@ExecSpace("Client")
-	method void OnPurchaseComplete(string itemId, boolean success, string itemName, string errorCode)
+	method void OnPurchaseComplete(string itemId, boolean success, string itemName, string errorCode, string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
 		-- 결과 팝업 표시
 		local eventShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/EventShopParent")
 		if eventShopParent ~= nil then
@@ -202,11 +204,12 @@ script EventShopService extends Logic
 	method void RequestItemStatus(string itemId)
 		local userId = senderUserId
 		local purchaseCount = self:GetPurchaseCount(userId, itemId)
-		self:OnItemStatusReceived(itemId, purchaseCount)
+		self:OnItemStatusReceived(itemId, purchaseCount, userId)
 	end
 
 	@ExecSpace("Client")
-	method void OnItemStatusReceived(string itemId, integer purchaseCount)
+	method void OnItemStatusReceived(string itemId, integer purchaseCount, string uid)
+		if uid ~= _UserService.LocalPlayer.PlayerComponent.UserId then return end
 		local eventShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/EventShopParent")
 		if eventShopParent == nil then
 			return

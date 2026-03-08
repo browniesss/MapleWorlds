@@ -7,17 +7,17 @@ script ThunderCold_Ascent extends SkillParent
 		
 		local targetListParent
 		if self.caster.Unit.isEnemy then
-			targetListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/MyMonsterList")
+			targetListParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/MyMonsterList")
 		else
-			targetListParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/EnemyList")
+			targetListParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/EnemyList")
 		end
 		local enemies = targetListParent.Children
 		local player = _EntityService:GetEntityByTag("Player")
 		local entity = _EntityService:GetEntityByPath("/ui/Ingame_Shop_Group")
 		
-		_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = "fc6aa57c0d7e47178d3eefc28ddd0f8d"
-		_GameManager.screenSkillUI.Enable = true
-		_GameManager.screenSkillUI.Visible = true
+		_UserService.LocalPlayer.GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = "fc6aa57c0d7e47178d3eefc28ddd0f8d"
+		_UserService.LocalPlayer.GameManager.screenSkillUI.Enable = true
+		_UserService.LocalPlayer.GameManager.screenSkillUI.Visible = true
 		
 		local hitFunction = function()
 			for index in ipairs(enemies) do
@@ -34,9 +34,9 @@ script ThunderCold_Ascent extends SkillParent
 		end
 		
 		local deleteFunction = function()
-			_GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = ""
-			_GameManager.screenSkillUI.Enable = false	
-			_GameManager.screenSkillUI.Visible = false
+			_UserService.LocalPlayer.GameManager.screenSkillUI.SpriteGUIRendererComponent.ImageRUID = ""
+			_UserService.LocalPlayer.GameManager.screenSkillUI.Enable = false	
+			_UserService.LocalPlayer.GameManager.screenSkillUI.Visible = false
 			_UserService.LocalPlayer.PlayerCharacter.isPlayingUISkill = false
 		end
 		

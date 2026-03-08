@@ -19,7 +19,7 @@ script ShowEventToken extends Component
 		end
 
 		-- EventCoin 변경 콜백 등록
-		_BillingService:AddEventCoinCallback(self.Entity.Id, function(value)
+		_UserService.LocalPlayer.BillingService:AddEventCoinCallback(self.Entity.Id, function(value)
 			self:RefreshUI()
 		end)
 
@@ -29,7 +29,7 @@ script ShowEventToken extends Component
 	@ExecSpace("ClientOnly")
 	method void OnEndPlay()
 		-- EventCoin 변경 콜백 해제
-		_BillingService:RemoveEventCoinCallback(self.Entity.Id)
+		_UserService.LocalPlayer.BillingService:RemoveEventCoinCallback(self.Entity.Id)
 	end
 
 	@ExecSpace("ClientOnly")
@@ -45,7 +45,7 @@ script ShowEventToken extends Component
 			return
 		end
 		
-		local eventCoin = _BillingService.EventCoin
+		local eventCoin = _UserService.LocalPlayer.BillingService.EventCoin
 		
 		-- 이벤트 코인 수량 표시
 		if self.EventLabel ~= nil then

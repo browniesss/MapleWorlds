@@ -1,5 +1,5 @@
-@Logic
-script MatrixGameManager extends Logic
+@Component
+script MatrixGameManager extends Component
 
 	property Entity matrixUI = nil
 
@@ -48,10 +48,13 @@ script MatrixGameManager extends Logic
 	@Sync
 	property number matrixTime = 0
 
-	property string mapPath = "/maps/MatrixStage"
+	property string mapPath = ""
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
+		if self.Entity ~= _UserService.LocalPlayer then
+			return
+		end
 		-- UUID 기반 참조는 property에서 이미 설정됨
 		-- 하위 요소들은 동적으로 가져옴
 		self:RefreshUIReferences()
@@ -67,15 +70,18 @@ script MatrixGameManager extends Logic
 		-- 프리로드 에셋
 		local ruids = self:GetPreLoadAssetRuid()
 		_ResourceService:PreloadAsync(ruids, function()
-			-- 텔레포트만 실행 (InitializeGame은 UserMatrixManager.OnMapEnter에서 호출)
-			_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "MatrixStage")
+			-- 동적 맵 생성 + 텔레포트 (InitializeGame은 UserMatrixManager.OnMapEnter에서 호출)
+			_UserService.LocalPlayer.GameManager:RequestDynamicMapEntry(0, 0, _eGameMode.Matrix, "MatrixStage")
 		end)
 	end
 
 	@ExecSpace("Client")
-	method void InitializeGame()
+	method void InitializeGame(string matrixMapPath)
+		-- 맵 경로 저장 (동적 맵 이름 동기화 전에도 사용 가능하도록)
+		self.mapPath = matrixMapPath or "/maps/MatrixStage"
+
 		-- 게임 상태 설정
-		_GameManager.currentGameMode = _eGameMode.Matrix
+		_UserService.LocalPlayer.GameManager.currentGameMode = _eGameMode.Matrix
 		self.isPlaying = true
 		self.isPaused = false
 		self.playStartTs = DateTime.UtcNow.Elapsed
@@ -90,8 +96,8 @@ script MatrixGameManager extends Logic
 		end
 
 		-- MatrixTimerService 초기화
-		if _MatrixTimerService ~= nil then
-			_MatrixTimerService:Reset()
+		if self.Entity.MatrixTimerService ~= nil then
+			self.Entity.MatrixTimerService:Reset()
 		end
 
 		-- UI 참조 다시 가져오기 (텔레포트 후 참조가 변경될 수 있음)
@@ -117,19 +123,20 @@ script MatrixGameManager extends Logic
 		end
 
 		-- MatrixGameService에서 게임 초기화 (라운드 시작)
-		if _MatrixGameService ~= nil then
-			_MatrixGameService:InitializeGameFromManager()
+		if self.Entity.MatrixGameService ~= nil then
+			self.Entity.MatrixGameService:InitializeGameFromManager()
 		end
 	end
 
 	@ExecSpace("Server")
 	method void SetPlayingStateOnServer(boolean playing)
 		self.isPlaying = playing
+		local gm = self.Entity.GameManager
 		if playing then
-			_GameManager.currentGameMode = _eGameMode.Matrix
+			gm.currentGameMode = _eGameMode.Matrix
 			self.playStartTs = DateTime.UtcNow.Elapsed
 		else
-			_GameManager.currentGameMode = _eGameMode.Normal
+			gm.currentGameMode = _eGameMode.Normal
 		end
 	end
 
@@ -269,8 +276,8 @@ script MatrixGameManager extends Logic
 	end
 
 	method void SetupHPBars()
-		local playerTower = _EntityService:GetEntityByPath(self.mapPath .. "/PlayerTower")
-		local enemyTower = _EntityService:GetEntityByPath(self.mapPath .. "/EnemyTower")
+		local playerTower = _EntityService:GetEntityByPath(self:GetMapPath() .. "/PlayerTower")
+		local enemyTower = _EntityService:GetEntityByPath(self:GetMapPath() .. "/EnemyTower")
 		
 		if self.playerHPBar ~= nil and playerTower ~= nil then
 			if self.playerHPBar.OurHealthBar ~= nil then
@@ -314,7 +321,7 @@ script MatrixGameManager extends Logic
 
 	method table GetPreLoadAssetRuid()
 		local ruids = {}
-		local playerDeck = _EntityService:GetEntityByTag("Player").UserDeck
+		local playerDeck = _UserService.LocalPlayer.UserDeck
 		
 		for i = 1, 8 do
 			local unitData = _UnitService:GetUnitByIDFromClient(playerDeck.userDeck[i])
@@ -366,8 +373,8 @@ script MatrixGameManager extends Logic
 	method void PauseGame()
 		self.isPaused = true
 
-		if _MatrixTimerService ~= nil then
-			_MatrixTimerService:Pause()
+		if self.Entity.MatrixTimerService ~= nil then
+			self.Entity.MatrixTimerService:Pause()
 		end
 	end
 
@@ -375,8 +382,8 @@ script MatrixGameManager extends Logic
 	method void ResumeGame()
 		self.isPaused = false
 
-		if _MatrixTimerService ~= nil then
-			_MatrixTimerService:Resume()
+		if self.Entity.MatrixTimerService ~= nil then
+			self.Entity.MatrixTimerService:Resume()
 		end
 	end
 
@@ -427,18 +434,20 @@ script MatrixGameManager extends Logic
 	method void GameEnd()
 		self.isPlaying = false
 		self.isPaused = false
+		self.mapPath = ""
 
 		-- 배속 저장 후 초기화
-		if _TimeScaleManager ~= nil then
-			_TimeScaleManager:SaveAndReset()
+		local tsm = self.Entity.TimeScaleManager
+		if tsm ~= nil then
+			tsm:SaveAndReset()
 		end
 
 		-- 서버에도 isPlaying 상태 동기화
 		self:SetPlayingStateOnServer(false)
 
 		-- 몬스터 도감 킬 데이터 동기화
-		if _MonsterCodexService ~= nil then
-			_MonsterCodexService:SyncKillDataToServer()
+		if self.Entity.MonsterCodexService ~= nil then
+			self.Entity.MonsterCodexService:SyncKillDataToServer()
 		end
 
 		-- MatrixUI 전체 비활성화
@@ -465,19 +474,19 @@ script MatrixGameManager extends Logic
 		self:ClearTimer()
 
 		-- MatrixMonsterSpawner 정리 (스폰 타이머 즉시 취소)
-		if _MatrixMonsterSpawner ~= nil then
-			_MatrixMonsterSpawner:ResetOnClient()
-			_MatrixMonsterSpawner:ResetOnServer()
+		if self.Entity.MatrixMonsterSpawner ~= nil then
+			self.Entity.MatrixMonsterSpawner:ResetOnClient()
+			self.Entity.MatrixMonsterSpawner:ResetOnServer()
 		end
 
 		-- MatrixTimerService 정리
-		if _MatrixTimerService ~= nil then
-			_MatrixTimerService:Reset()
+		if self.Entity.MatrixTimerService ~= nil then
+			self.Entity.MatrixTimerService:Reset()
 		end
 
 		-- MatrixUnitSelectService 정리
-		if _MatrixUnitSelectService ~= nil then
-			_MatrixUnitSelectService:Reset()
+		if self.Entity.MatrixUnitSelectService ~= nil then
+			self.Entity.MatrixUnitSelectService:Reset()
 		end
 
 		-- MatrixAugmentService 증강 효과 초기화
@@ -486,8 +495,8 @@ script MatrixGameManager extends Logic
 		end
 
 		-- MatrixService 상태 초기화 (selectCount, UI 등 전부 리셋)
-		if _MatrixService ~= nil then
-			_MatrixService:ClearSelectState()
+		if self.Entity.MatrixService ~= nil then
+			self.Entity.MatrixService:ClearSelectState()
 		end
 
 		-- 시너지를 일반 모드 덱으로 복원 (서버)
@@ -506,12 +515,12 @@ script MatrixGameManager extends Logic
 		self:ResetTowers()
 
 		-- 게임 모드 초기화
-		_GameManager.currentGameMode = _eGameMode.Normal
+		_UserService.LocalPlayer.GameManager.currentGameMode = _eGameMode.Normal
 	end
 
 	method void ResetTowers()
-		local playerTower = _EntityService:GetEntityByPath(self.mapPath .. "/PlayerTower")
-		local enemyTower = _EntityService:GetEntityByPath(self.mapPath .. "/EnemyTower")
+		local playerTower = _EntityService:GetEntityByPath(self:GetMapPath() .. "/PlayerTower")
+		local enemyTower = _EntityService:GetEntityByPath(self:GetMapPath() .. "/EnemyTower")
 
 		-- 플레이어 타워 초기화
 		if playerTower ~= nil and playerTower.Unit ~= nil then
@@ -535,7 +544,9 @@ script MatrixGameManager extends Logic
 
 	@ExecSpace("Server")
 	method void ClearMesoOnServer()
-		local mesoWallet = _EntityService:GetEntityByPath(self.mapPath .. "/userWallet")
+		local gm = self.Entity.GameManager
+		local mapPath = gm:GetGameMapName()
+		local mesoWallet = _EntityService:GetEntityByPath(mapPath .. "/userWallet")
 		if mesoWallet ~= nil and mesoWallet.MesoWallet ~= nil then
 			mesoWallet.MesoWallet:SetMeso(0)
 		end
@@ -568,15 +579,15 @@ script MatrixGameManager extends Logic
 
 	method void ClearObjects()
 		-- 미니맵 아이콘 제거
-		local map = _EntityService:GetEntityByPath(self.mapPath)
+		local map = _EntityService:GetEntityByPath(self:GetMapPath())
 		if map ~= nil and map.MinimapManager ~= nil then
 			map.MinimapManager:ClearAllEntityList()
 		end
 
-		local myMonsterList = _EntityService:GetEntityByPath(self.mapPath .. "/MyMonsterList")
-		local enemyList = _EntityService:GetEntityByPath(self.mapPath .. "/EnemyList")
-		local skillParent = _EntityService:GetEntityByPath(self.mapPath .. "/SkillParent")
-		local projectileParent = _EntityService:GetEntityByPath(self.mapPath .. "/ProjectileParent")
+		local myMonsterList = _EntityService:GetEntityByPath(self:GetMapPath() .. "/MyMonsterList")
+		local enemyList = _EntityService:GetEntityByPath(self:GetMapPath() .. "/EnemyList")
+		local skillParent = _EntityService:GetEntityByPath(self:GetMapPath() .. "/SkillParent")
+		local projectileParent = _EntityService:GetEntityByPath(self:GetMapPath() .. "/ProjectileParent")
 
 		-- 첫 번째 자식(스폰 포인트)은 유지
 		self:DestroyChildren(myMonsterList, true)
@@ -624,8 +635,8 @@ script MatrixGameManager extends Logic
 			_LoadingManager:Show()
 		end
 
-		-- 로비로 이동
-		_TeleportService:TeleportToMapPosition(_UserService.LocalPlayer, Vector3.zero, "MainLobbyMap")
+		-- 동적 맵 정리 + 로비로 이동
+		_GameRoomService:RequestExit()
 
 		-- 로비 UI 활성화
 		local mainLobbyUI = _EntityService:GetEntityByPath("/ui/MainLobbyUI")
@@ -649,8 +660,8 @@ script MatrixGameManager extends Logic
 		end, 1.0)
 
 		-- 주간 매트릭스 코인 UI 갱신
-		if _MatrixCoinService ~= nil then
-			_MatrixCoinService:UpdateWeeklyPointUI()
+		if _UserService.LocalPlayer.MatrixCoinService ~= nil then
+			_UserService.LocalPlayer.MatrixCoinService:UpdateWeeklyPointUI()
 		end
 
 		-- 뱃지 버튼 활성화
@@ -678,7 +689,11 @@ script MatrixGameManager extends Logic
 	end
 
 	method string GetMapPath()
-		return self.mapPath
+		-- mapPath가 InitializeGame에서 직접 설정됨 (동기화 타이밍 문제 방지)
+		if self.mapPath ~= nil and self.mapPath ~= "" then
+			return self.mapPath
+		end
+		return _UserService.LocalPlayer.GameManager:GetGameMapName()
 	end
 
 end

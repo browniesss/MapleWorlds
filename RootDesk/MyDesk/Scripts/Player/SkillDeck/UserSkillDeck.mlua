@@ -5,7 +5,10 @@ script UserSkillDeck extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
-		_UserSkillDeckService:LOAD()
+		if self.Entity ~= _UserService.LocalPlayer then
+			return
+		end
+		self.Entity.UserSkillDeckService:LOAD()
 	end
 
 	@ExecSpace("Client")

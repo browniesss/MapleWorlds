@@ -376,8 +376,9 @@ script Unit extends Component
 	@ExecSpace("ClientOnly")
 	method void OnUpdate(number delta)
 		-- 게임 플레이 상태 확인 (Matrix 모드 지원)
-		local isPlaying = _GameManager.isPlaying
-		if _MatrixGameManager ~= nil and _MatrixGameManager.isPlaying then
+		local isPlaying = _UserService.LocalPlayer.GameManager.isPlaying
+		local matrixGM = _UserService.LocalPlayer.MatrixGameManager
+		if matrixGM ~= nil and matrixGM.isPlaying then
 			isPlaying = true
 		end
 
@@ -640,7 +641,7 @@ script Unit extends Component
 		self:SetState("attack")
 		
 		if self._T.projectileParent == nil then
-			self._T.projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+			self._T.projectileParent = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName().."/ProjectileParent")
 		end
 		
 		local capturedTarget = self.curTarget
@@ -683,8 +684,9 @@ script Unit extends Component
 				-- 매트릭스 모드 OnAttack 트리거 적용
 				local baseDamage = self.damage
 				local finalDamage = baseDamage
-				if _MatrixAugmentService ~= nil then
-					finalDamage = _MatrixAugmentService:CalcAttackDamage(self.Entity, finalDamage)
+				local matrixAugment = _UserService.LocalPlayer.MatrixAugmentService
+				if matrixAugment ~= nil then
+					finalDamage = matrixAugment:CalcAttackDamage(self.Entity, finalDamage)
 				end
 
 				projectile.Projectile:SetShoot(self.projectileSpriteRUID, 1, self.projectileSpeed, capturedTarget, true, finalDamage)
@@ -694,7 +696,7 @@ script Unit extends Component
 			if timerTiming < 0 then
 				timerTiming = 0.5
 			end
-			
+
 			_TimerService:SetTimerOnce(attackFunction, timerTiming)
 		else
 			if self.passiveSkill ~= nil and self.passiveSkill.PassiveSkillParent.passiveType == _ePassiveType.OnAttack then
@@ -730,8 +732,9 @@ script Unit extends Component
 				-- 매트릭스 모드 OnAttack 트리거 적용
 				local baseDamage = self.damage
 				local finalDamage = baseDamage
-				if _MatrixAugmentService ~= nil then
-					finalDamage = _MatrixAugmentService:CalcAttackDamage(self.Entity, finalDamage)
+				local matrixAugment = _UserService.LocalPlayer.MatrixAugmentService
+				if matrixAugment ~= nil then
+					finalDamage = matrixAugment:CalcAttackDamage(self.Entity, finalDamage)
 				end
 
 				projectile.Projectile:SetShoot(self.projectileSpriteRUID, 1, self.projectileSpeed, capturedTarget, true, finalDamage)
@@ -790,8 +793,9 @@ script Unit extends Component
 		local finalDamage = baseDamage
 
 		-- 매트릭스 모드 OnAttack 트리거 적용
-		if _MatrixAugmentService ~= nil then
-			finalDamage = _MatrixAugmentService:CalcAttackDamage(self.Entity, finalDamage)
+		local matrixAugment = _UserService.LocalPlayer.MatrixAugmentService
+		if matrixAugment ~= nil then
+			finalDamage = matrixAugment:CalcAttackDamage(self.Entity, finalDamage)
 		end
 
 		self.curTarget.Unit:OnHit(self.Entity, finalDamage, false, 1)
@@ -1035,8 +1039,9 @@ script Unit extends Component
 		end
 
 		-- 매트릭스 모드 OnHit 트리거 적용 (아군이 피격당할 때)
-		if not self.isEnemy and _MatrixAugmentService ~= nil then
-			damage = _MatrixAugmentService:CalcOnHitDamage(self.Entity, damage)
+		local matrixAugmentHit = _UserService.LocalPlayer.MatrixAugmentService
+		if not self.isEnemy and matrixAugmentHit ~= nil then
+			damage = matrixAugmentHit:CalcOnHitDamage(self.Entity, damage)
 		end
 
 		self.Entity.HitComponent:OnHit(attacker, damage, isCritical, "", attackCount)
@@ -1054,8 +1059,9 @@ script Unit extends Component
 			self:OnDie(attacker)
 
 			-- 매트릭스 모드 OnKill 트리거 적용 (아군이 적을 처치할 때)
-			if self.isEnemy and _MatrixAugmentService ~= nil then
-				_MatrixAugmentService:OnKillEffect(attacker, self.Entity)
+			local matrixAugmentKill = _UserService.LocalPlayer.MatrixAugmentService
+			if self.isEnemy and matrixAugmentKill ~= nil then
+				matrixAugmentKill:OnKillEffect(attacker, self.Entity)
 			end
 
 			if attacker.AddSummonPointAfterKill ~= nil then
@@ -1086,26 +1092,27 @@ script Unit extends Component
 		self:ClearSkill()
 		
 		-- 적 타워 무너진 경우
+		local _gm = _UserService.LocalPlayer.GameManager
 		if self.Entity.TagComponent.Tags[2] == "Tower" and self.isEnemy then
 
 			return
 		elseif self.Entity.TagComponent.Tags[2] == "Tower" and not self.isEnemy then -- 아군 타워 무너진 경우
 			-- Matrix 모드에서는 MatrixGameService.OnUpdate에서 처리
-			if _GameManager.currentGameMode == _eGameMode.Matrix then
+			if _gm.currentGameMode == _eGameMode.Matrix then
 				return
 			end
 			-- PvP 모드에서는 pvpCombatComponent에서 처리
-			if _GameManager.currentGameMode == _eGameMode.PvP then
-				local pvpManager = _EntityService:GetEntityByPath(_pvpService.PVP_STAGE_PATH .. "/PvPManager")
+			if _gm.currentGameMode == _eGameMode.PvP then
+				local pvpManager = _EntityService:GetEntityByPath(_gm:GetGameMapName() .. "/PvPManager")
 				if pvpManager ~= nil and pvpManager.pvpCombatComponent ~= nil then
 					pvpManager.pvpCombatComponent:RequestGameEnd(false)
 				end
 				return
 			end
 
-			local shopUI = _GameManager.shopUI
-			local failPopupUI = _GameManager.failPopupUI
-			local infoUI = _GameManager.infoUI
+			local shopUI = _gm.shopUI
+			local failPopupUI = _gm.failPopupUI
+			local infoUI = _gm.infoUI
 			infoUI.Enable = false
 			infoUI.Visible = false
 			shopUI.Enable = false
@@ -1113,7 +1120,7 @@ script Unit extends Component
 			failPopupUI.Enable = true
 			failPopupUI.Visible = true
 			_Utils:FadeIn(failPopupUI, 0.5)
-			_GameManager:Log_NormalStageFail()
+			_gm:Log_NormalStageFail()
 			return
 		end
 		
@@ -1124,7 +1131,7 @@ script Unit extends Component
 		end
 		
 		-- 맵마다 Path 다르게 설정 필요
-		local map = _EntityService:GetEntityByPath(_GameManager:GetGameMapName())
+		local map = _EntityService:GetEntityByPath(_gm:GetGameMapName())
 		if map ~= nil and map.MinimapManager ~= nil then
 			map.MinimapManager:RemoveEntityList(self.Entity)
 		end
@@ -1135,18 +1142,20 @@ script Unit extends Component
 		-- 적 유닛이 죽으면 아이템 드롭
 		if self.isEnemy then
 			self:DropItem(self.Entity.TransformComponent.WorldPosition)
-		
+
 			-- 몬스터 도감 처치 카운트 (클라이언트 로컬 처리)
-			_MonsterCodexService:OnLocalMonsterKilled(self.id)
+			_UserService.LocalPlayer.MonsterCodexService:OnLocalMonsterKilled(self.id)
 
 			-- 매트릭스 모드: 스폰 시스템에 알림
-			if _GameManager.currentGameMode == _eGameMode.Matrix and _MatrixMonsterSpawner ~= nil then
-				_MatrixMonsterSpawner:OnEnemyDefeated(self.Entity)
+			local matrixSpawner = _UserService.LocalPlayer.MatrixMonsterSpawner
+			if _gm.currentGameMode == _eGameMode.Matrix and matrixSpawner ~= nil then
+				matrixSpawner:OnEnemyDefeated(self.Entity)
 			end
 		else
 			-- 아군 유닛 사망 시 매트릭스 증강 OnDie 트리거
-			if _GameManager.currentGameMode == _eGameMode.Matrix and _MatrixAugmentService ~= nil then
-				_MatrixAugmentService:OnDieEffect(self.Entity, attacker)
+			local matrixAugmentDie = _UserService.LocalPlayer.MatrixAugmentService
+			if _gm.currentGameMode == _eGameMode.Matrix and matrixAugmentDie ~= nil then
+				matrixAugmentDie:OnDieEffect(self.Entity, attacker)
 			end
 		end
 		
@@ -1295,8 +1304,9 @@ script Unit extends Component
 		local baseMpGain = 5
 
 		-- 매트릭스 모드 MP 회복 보너스 적용
-		if _MatrixAugmentService ~= nil then
-			baseMpGain = _MatrixAugmentService:CalcMpRecovery(self.Entity, baseMpGain)
+		local matrixAugmentMp = _UserService.LocalPlayer.MatrixAugmentService
+		if matrixAugmentMp ~= nil then
+			baseMpGain = matrixAugmentMp:CalcMpRecovery(self.Entity, baseMpGain)
 		end
 
 		self.mp += baseMpGain
@@ -1428,7 +1438,10 @@ script Unit extends Component
 			itemModelId = "model://1fd8ca34-b28b-4e5f-8bde-acaac8f8dfa3"
 		end
 		
-		local projectileParent = _EntityService:GetEntityByPath(_GameManager:GetGameMapName().."/ProjectileParent")
+		local mapName = self.Entity.CurrentMap.Name
+		local ownerId = _GameRoomService:GetOwnerUserIdFromMapName(mapName)
+		local ownerGM = _UserService:GetUserEntityByUserId(ownerId).GameManager
+		local projectileParent = _EntityService:GetEntityByPath(ownerGM:GetGameMapName().."/ProjectileParent")
 		local item = _SpawnService:SpawnByModelId(itemModelId, "item", dropPos, projectileParent)
 		item.DropItem:Init()
 	end
@@ -1472,7 +1485,7 @@ script Unit extends Component
 	@ExecSpace("Client")
 	method void DestroyProjectile()
 		-- 자신의 발사체를 모두 제거
-		local projectiles = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/ProjectileParent').Children
+		local projectiles = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName()..'/ProjectileParent').Children
 		
 		for index, projectile in pairs(projectiles) do
 			local data = projectile.Projectile
@@ -1486,12 +1499,15 @@ script Unit extends Component
 	@ExecSpace("Server")
 	method void ClearAttackerInfo()
 		-- 해당 Entity를 타겟으로 하는 적들의 정보 초기화
+		local mapName = self.Entity.CurrentMap.Name
+		local ownerId = _GameRoomService:GetOwnerUserIdFromMapName(mapName)
+		local ownerGM = _UserService:GetUserEntityByUserId(ownerId).GameManager
 		local entities
-		
+
 		if self.isEnemy then
-			entities = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/MyMonsterList').Children
+			entities = _EntityService:GetEntityByPath(ownerGM:GetGameMapName()..'/MyMonsterList').Children
 		else
-			entities = _EntityService:GetEntityByPath(_GameManager:GetGameMapName()..'/EnemyList').Children
+			entities = _EntityService:GetEntityByPath(ownerGM:GetGameMapName()..'/EnemyList').Children
 		end
 		
 		for index in ipairs(entities) do
@@ -1526,7 +1542,7 @@ script Unit extends Component
 
 	@ExecSpace("Client")
 	method void CreateMinimapIcon(boolean isEnemy)
-		local map = _EntityService:GetEntityByPath(_GameManager:GetGameMapName())
+		local map = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName())
 		if map ~= nil and map.MinimapManager ~= nil then
 			map.MinimapManager:AddEntityList(self.Entity, isEnemy)
 		end
@@ -1581,10 +1597,14 @@ script Unit extends Component
 		if self.baseData.returnCost <= 0 then
 			return
 		end
-		if _GameManager.currentGameMode == _eGameMode.PvP then
+		local mapName = self.Entity.CurrentMap.Name
+		local ownerId = _GameRoomService:GetOwnerUserIdFromMapName(mapName)
+		local ownerEntity = _UserService:GetUserEntityByUserId(ownerId)
+		local ownerGM = ownerEntity.GameManager
+		if ownerGM.currentGameMode == _eGameMode.PvP then
 			return
 		end
-		_SpawnManager:GetUserWallet().MesoWallet:AddMeso(self.baseData.returnCost)
+		ownerEntity.SpawnManager:GetUserWallet().MesoWallet:AddMeso(self.baseData.returnCost)
 	end
 
 	method void OnRemove()
@@ -1597,7 +1617,7 @@ script Unit extends Component
 		self.Entity.TransformComponent.Position.y = -500
 		
 		_EffectService:RemoveEffect(self.effectId)
-		local map = _EntityService:GetEntityByPath(_GameManager:GetGameMapName())
+		local map = _EntityService:GetEntityByPath(_UserService.LocalPlayer.GameManager:GetGameMapName())
 		if map ~= nil and map.MinimapManager ~= nil then
 			map.MinimapManager:RemoveEntityList(self.Entity)
 		end

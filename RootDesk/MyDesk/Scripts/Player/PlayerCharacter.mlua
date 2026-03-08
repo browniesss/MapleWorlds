@@ -55,12 +55,15 @@ script PlayerCharacter extends Component
 
 	@ExecSpace("ServerOnly")
 	method void OnMapEnter(Entity enteredMap)
+		log("[PlayerCharacter] OnMapEnter mapName=" .. tostring(enteredMap.Name) .. " uid=" .. tostring(self.Entity.PlayerComponent.UserId))
 		if enteredMap.Name == "LobbyScene" then
 			self.Entity.Visible = false
 		end
-		
-		local isTermAgree = _TermService:LOAD(self.Entity.PlayerComponent.UserId)
-		local isTutorial = _TutorialService:LOAD(self.Entity.PlayerComponent.UserId)
+
+		local uid = self.Entity.PlayerComponent.UserId
+		local isTermAgree = _TermService:LOAD(uid)
+		local isTutorial = self.Entity.TutorialService:LOAD(uid)
+		log("[PlayerCharacter] isTutorial=" .. tostring(isTutorial) .. " isTermAgree=" .. tostring(isTermAgree))
 
 		-- 신규 유저: 튜토리얼 시작
 		if isTutorial == 0 then
@@ -72,26 +75,27 @@ script PlayerCharacter extends Component
 				if userStage ~= nil then
 					hasCleared101 = userStage:IsStageCleared(1, 1)
 				end
-		
+
 				if hasCleared101 then
 					-- Stage 101을 클리어한 기존 유저: 튜토리얼 건너뛰고 완료 처리
-					_TutorialService:SAVE(self.Entity.PlayerComponent.UserId)
+					self.Entity.TutorialService:SAVE(uid)
 					-- 약관 동의도 확인
 					if isTermAgree == 0 then
-						_TermService:AgreePopupOn()
+						_TermService:AgreePopupOn(uid)
 					end
 				else
 					-- 신규 유저: 튜토리얼 시작
-					self:StartTutorialFromClient()
+					log("[PlayerCharacter] Starting tutorial for new user uid=" .. uid)
+					self:StartTutorialFromClient(uid)
 				end
 			end
 		elseif isTutorial == 1 then
 			-- NewTutorial 완료 후 MainLobbyMap 입장 시 약관 동의 팝업 표시
 			if enteredMap.Name == "MainLobbyMap" then
 				if isTermAgree == 0 then
-					_TermService:AgreePopupOn()
+					_TermService:AgreePopupOn(uid)
 				else
-					_NoticeService:CheckAndShowNotice(self.Entity.PlayerComponent.UserId)
+					_NoticeService:CheckAndShowNotice(uid)
 				end
 			end
 		end
@@ -103,9 +107,11 @@ script PlayerCharacter extends Component
 
 	@ExecSpace("Client")
 	method void StartTutorialFromClient()
+		log("[PlayerCharacter] StartTutorialFromClient called on client, gameMode=" .. tostring(_UserService.LocalPlayer.GameManager.currentGameMode))
 		-- 약간의 딜레이 후 시작 (데이터 로드 완료 대기)
 		_TimerService:SetTimerOnce(function()
-			_GameManager:StartTutorialGame()
+			log("[PlayerCharacter] Timer fired -> StartTutorialGame, gameMode=" .. tostring(_UserService.LocalPlayer.GameManager.currentGameMode))
+			_UserService.LocalPlayer.GameManager:StartTutorialGame()
 		end, 0.5)
 	end
 

@@ -18,12 +18,12 @@ script UserBreakLimitSkillProtocol extends Component
 		local eventService = user.UserBreakLimitSkillServer
 
 		local unitData = _UnitService:GetUnitAll()
-		_UserMonsterService:INIT(senderUserId)
-		local userMonsterData = _UserMonsterService.userMonsterDict
+		self.Entity.UserMonsterService:INIT(senderUserId)
+		local userMonsterData = self.Entity.UserMonsterService.userMonsterDict
 
 		-- 유저 덱 정보 가져오기 (PvP 모드에서는 공격덱 사용)
 		local userDeck
-		if _GameManager.currentGameMode == _eGameMode.PvP then
+		if user.GameManager.currentGameMode == _eGameMode.PvP then
 			local pvpUser = user.pvpUserComponent
 			if pvpUser ~= nil then
 				userDeck = pvpUser.offense_deck or {}
@@ -120,8 +120,8 @@ script UserBreakLimitSkillProtocol extends Component
 		local eventService = user.UserBreakLimitSkillServer
 
 		local unitDataAll = _UnitService:GetUnitAll()
-		_UserMonsterService:INIT(senderUserId)
-		local userMonsterData = _UserMonsterService.userMonsterDict
+		self.Entity.UserMonsterService:INIT(senderUserId)
+		local userMonsterData = self.Entity.UserMonsterService.userMonsterDict
 
 		-- 기존 데이터 초기화
 		for _, id in ipairs(eventService:GetIdList()) do
@@ -225,7 +225,7 @@ script UserBreakLimitSkillProtocol extends Component
 		resp.RemainSkillList = user.UserBreakLimitSkillServer:GetIdList()
 		resp.UseSkill = id
 		
-		self:UseSkillBack(resp)
+		self:UseSkillBack(resp, senderUserId)
 	end
 
 	@ExecSpace("Client")

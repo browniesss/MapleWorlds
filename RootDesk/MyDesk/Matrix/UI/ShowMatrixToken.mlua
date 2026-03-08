@@ -22,7 +22,7 @@ script ShowMatrixToken extends Component
 			self.TokenIcon.ImageRUID = "6d8995d1e6ca4b098ca2af8b3fe25f24"
 		end
 		
-		_MatrixCoinService:RequestBalance()
+		_UserService.LocalPlayer.MatrixCoinService:RequestBalance()
 		self:RefreshUI()
 	end
 
@@ -33,7 +33,7 @@ script ShowMatrixToken extends Component
 
 	@ExecSpace("ClientOnly")
 	method void RefreshUI()
-		local coin = _MatrixCoinService:GetBalance()
+		local coin = _UserService.LocalPlayer.MatrixCoinService:GetBalance()
 		
 		if self.TokenLabel ~= nil then
 			self.TokenLabel.Text = tostring(coin)
@@ -43,7 +43,7 @@ script ShowMatrixToken extends Component
 	@EventSender("Self")
 	handler HandleComponentEnabledInHierarchyChangedEvent(ComponentEnabledInHierarchyChangedEvent event)
 		if event.EnabledInHierarchy then
-			_MatrixCoinService:RequestBalance()
+			_UserService.LocalPlayer.MatrixCoinService:RequestBalance()
 			self:RefreshUI()
 		end
 	end

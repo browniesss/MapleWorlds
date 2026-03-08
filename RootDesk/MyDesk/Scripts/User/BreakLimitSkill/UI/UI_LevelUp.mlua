@@ -44,7 +44,8 @@ script UI_LevelUp extends Component
 		
 		local level = _UnitLevelUpRepo:FindBuffInClient(unit.jobId, unit.grade, unit.level + 1)
 		
-		local totalCoin = _BillingService.ThirdFreeCoin + _BillingService.ThirdPaidCoin
+		local billing = _UserService.LocalPlayer.BillingService
+		local totalCoin = billing.ThirdFreeCoin + billing.ThirdPaidCoin
 		self.Price.Text = string.format("%d / %d", totalCoin, level.price)
 		
 		self.current.Text = "레벨 " .. tostring(unit.level) 

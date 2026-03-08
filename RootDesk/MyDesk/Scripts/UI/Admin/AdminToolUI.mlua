@@ -37,6 +37,9 @@ script AdminToolUI extends Component
 
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
+		if self.Entity ~= _UserService.LocalPlayer then
+			return
+		end
 		-- AdminProtocol 찾기
 		local protocol = self.Entity.AdminProtocol
 		if protocol == nil then

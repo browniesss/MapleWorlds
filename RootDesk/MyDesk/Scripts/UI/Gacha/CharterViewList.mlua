@@ -8,7 +8,7 @@ script CharterViewList extends Component
 	method void InitData(table userDataList)
 		self.GachaResultUI.Enable = false
 		
-		_SummonService:SummonAnimation()
+		_UserService.LocalPlayer.SummonService:SummonAnimation()
 		
 		local asyncFunc = function()
 			self.GachaResultUI.Enable = true
@@ -20,16 +20,21 @@ script CharterViewList extends Component
 
 	method void SetCharterViewer(table userDataList)
 		local children = self.Entity.Children
-		      
+
 		local index = 1
-		
+
 		for _, child in pairs(children) do
 		    if child.CharterView then
 				if index > #userDataList then
 					child.CharterView.Entity.Enable = false
 				else
-					child.CharterView.Entity.Enable = true
-					child.CharterView:InitGacha(_UnitService:GetUnitByIDFromClient(userDataList[index]))
+					local unitData = _UnitService:GetUnitByIDFromClient(userDataList[index])
+					if unitData ~= nil then
+						child.CharterView.Entity.Enable = true
+						child.CharterView:InitGacha(unitData)
+					else
+						child.CharterView.Entity.Enable = false
+					end
 				end
 				index = index + 1
 		    end

@@ -66,7 +66,7 @@ script SkillSlot extends Component
 	@EventSender("Self")
 	handler HandleButtonClickEvent(ButtonClickEvent event)
 		-- 튜토리얼 진행 중이거나 스텝 전환 쿨다운 중에는 터치 무시
-		if _TutorialService ~= nil and (_TutorialService.isIngameTutorial or _TutorialService.isStepCooldown) then
+		if _UserService.LocalPlayer.TutorialService ~= nil and (_UserService.LocalPlayer.TutorialService.isIngameTutorial or _UserService.LocalPlayer.TutorialService.isStepCooldown) then
 			return
 		end
 
@@ -82,7 +82,7 @@ script SkillSlot extends Component
 		end
 
 		-- 튜토리얼 진행 중이거나 스텝 전환 쿨다운 중에는 키 입력 무시
-		if _TutorialService ~= nil and (_TutorialService.isIngameTutorial or _TutorialService.isStepCooldown) then
+		if _UserService.LocalPlayer.TutorialService ~= nil and (_UserService.LocalPlayer.TutorialService.isIngameTutorial or _UserService.LocalPlayer.TutorialService.isStepCooldown) then
 			return
 		end
 

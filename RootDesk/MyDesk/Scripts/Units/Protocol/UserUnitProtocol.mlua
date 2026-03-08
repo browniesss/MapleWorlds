@@ -5,8 +5,8 @@ script UserUnitProtocol extends CommonProtocol
 	method void GetUserUnitListCall()
 		self:CommonCall(senderUserId)
 
-		_UserMonsterService:INIT(senderUserId)
-		local userMonsterData = _UserMonsterService.userMonsterDict
+		self.Entity.UserMonsterService:INIT(senderUserId)
+		local userMonsterData = self.Entity.UserMonsterService.userMonsterDict
 		local unitData = _UnitService:GetUnitAll()
 
 		local resp = {}
@@ -39,47 +39,47 @@ script UserUnitProtocol extends CommonProtocol
 		self:CommonCall(senderUserId)
 		
 		local unitData = _UnitService:GetUnitAll()
-		local userMonsterData = _UserMonsterService.userMonsterDict
-		
+		local userMonsterData = self.Entity.UserMonsterService.userMonsterDict
+
 		local userUnitModel = UserUnitModel()
 		userUnitModel:DECODE(userMonsterData[id])
-		
+
 		local buffedUnit = BuffedUnitModel()
 		buffedUnit:Init(unitData[id])
-		
+
 		if userUnitModel.level >= _UnitLevelUpRepo.UserMaxLevel then
 			log_error(senderUserId," max user level ", id)
 			return
 		end
-		
+
 		local nextLevel = userUnitModel.level + 1
 		local nextLevelData = _UnitLevelUpRepo:GetBuff(buffedUnit.jobId, buffedUnit.grade, nextLevel)
 		if nextLevelData == nil or nextLevelData.level == 0 then
 			log_error(senderUserId," max data level ", id)
 			return
 		end
-		
-		local totalCoin = _BillingService.ThirdFreeCoin + _BillingService.ThirdPaidCoin
+
+		local totalCoin = self.Entity.BillingService.ThirdFreeCoin + self.Entity.BillingService.ThirdPaidCoin
 		if totalCoin < nextLevelData.price then
 			log_error(senderUserId, "not enough coin")
 			return
 		end
-		
-		local billingCode = _BillingService:UseThirdCoin(senderUserId, nextLevelData.price)
+
+		local billingCode = self.Entity.BillingService:UseThirdCoin(senderUserId, nextLevelData.price)
 		if not (billingCode == 0) then
 			self:LogAndKick(senderUserId, "fail to use thrid coin, code: " .. billingCode)
 			return
 		end
-		
+
 		local updateList = {}
 		updateList[1] = id
-		local saveResult = _UserMonsterService:LEVEL_UP(senderUserId, updateList)
+		local saveResult = self.Entity.UserMonsterService:LEVEL_UP(senderUserId, updateList)
 		if not (saveResult.code == 0) then
 			self:LogAndKick(senderUserId, "fail to level up, code: " .. saveResult.code)
 			return
 		end
-		
-		userMonsterData = _UserMonsterService.userMonsterDict
+
+		userMonsterData = self.Entity.UserMonsterService.userMonsterDict
 		userUnitModel:DECODE(userMonsterData[id])
 		buffedUnit:Init(unitData[id])
 		
@@ -97,40 +97,40 @@ script UserUnitProtocol extends CommonProtocol
 		self:CommonCall(senderUserId)
 		
 		local unitData = _UnitService:GetUnitAll()
-		local userMonsterData = _UserMonsterService.userMonsterDict
-		
+		local userMonsterData = self.Entity.UserMonsterService.userMonsterDict
+
 		local userUnitModel = UserUnitModel()
 		userUnitModel:DECODE(userMonsterData[id])
-		
+
 		local buffedUnit = BuffedUnitModel()
 		buffedUnit:Init(unitData[id])
-		
+
 		if userUnitModel.limitBreak >= _UnitLimitBreakRepo.UserMaxLevel then
 			log_error(senderUserId," max user limit break ", id)
 			return
 		end
-		
+
 		local nextLimitBreak = userUnitModel.limitBreak + 1
 		local nextData = _UnitLimitBreakRepo:GetBuff(buffedUnit.grade, nextLimitBreak, buffedUnit.id)
 		if nextData == nil or nextData.limitBreak == 0 then
 			log_error(senderUserId," max data limit break ", id)
 			return
 		end
-		
+
 		if userUnitModel.count <= userUnitModel.limitBreak then
 			log_error(senderUserId, "not enough count")
 			return
 		end
-		
+
 		local updateList = {}
 		updateList[1] = id
-		local saveResult = _UserMonsterService:LIMIT_BREAK(senderUserId, updateList)
+		local saveResult = self.Entity.UserMonsterService:LIMIT_BREAK(senderUserId, updateList)
 		if not (saveResult.code == 0) then
 			self:LogAndKick(senderUserId, "fail to level up, code: " .. saveResult.code)
 			return
 		end
-		
-		userMonsterData = _UserMonsterService.userMonsterDict
+
+		userMonsterData = self.Entity.UserMonsterService.userMonsterDict
 		userUnitModel:DECODE(userMonsterData[id])
 		buffedUnit:Init(unitData[id])
 		
@@ -145,7 +145,7 @@ script UserUnitProtocol extends CommonProtocol
 
 	@ExecSpace("ServerOnly")
 	method void UpdateUserUnitList(string uid)
-		local userMonsterData = _UserMonsterService.userMonsterDict
+		local userMonsterData = self.Entity.UserMonsterService.userMonsterDict
 		local unitData = _UnitService:GetUnitAll()
 
 		local resp = {}
@@ -156,10 +156,10 @@ script UserUnitProtocol extends CommonProtocol
 
 			local buffedUnit = BuffedUnitModel()
 			buffedUnit:Init(unitData[id])
-			
+
 			resp[id] = _BuffedUnitService:SetUnitBuff(buffedUnit, userUnitModel.level, userUnitModel.limitBreak)
 		end
-		
+
 		_UnitLevelUpRepo:SyncData(_UnitLevelUpRepo.dataMap, uid)
 		_UnitLimitBreakRepo:SyncData(_UnitLimitBreakRepo.dataMap, uid)
 		self:GetUserUnitListBack(resp, uid)

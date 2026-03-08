@@ -22,7 +22,7 @@ script UserSynergyComponent extends Component
 	@ExecSpace("ServerOnly")
 	method integer GetMatrixSynergyBonus(number target)
 		-- 매트릭스 모드가 아니면 0
-		if _GameManager == nil or _GameManager.currentGameMode ~= _eGameMode.Matrix then
+		if self.Entity.GameManager == nil or self.Entity.GameManager.currentGameMode ~= _eGameMode.Matrix then
 			return 0
 		end
 
@@ -81,7 +81,7 @@ script UserSynergyComponent extends Component
 		for i, id in ipairs(deck) do
 			local unit = _UnitService:GetUnitByIDFromServer(id)
 			
-			local unitJson = _UserMonsterService.userMonsterDict[id]
+			local unitJson = self.Entity.UserMonsterService.userMonsterDict[id]
 			local userUnitData = UserUnitModel()
 			userUnitData:DECODE(unitJson)
 			
@@ -127,7 +127,7 @@ script UserSynergyComponent extends Component
 		buffedUnit:Init(unit)
 
 		-- 유저 유닛 데이터에서 레벨/돌파 정보를 가져와 돌파 시너지 적용
-		local unitJson = _UserMonsterService.userMonsterDict[unitId]
+		local unitJson = self.Entity.UserMonsterService.userMonsterDict[unitId]
 		if unitJson ~= nil then
 			local userUnitData = UserUnitModel()
 			userUnitData:DECODE(unitJson)
@@ -147,7 +147,7 @@ script UserSynergyComponent extends Component
 		end
 
 		-- 매트릭스 모드에서 시너지 보너스 유닛 체크 (시그너스 등)
-		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
+		if self.Entity.GameManager ~= nil and self.Entity.GameManager.currentGameMode == _eGameMode.Matrix then
 			local userMatrixManager = self.Entity.UserMatrixManager
 			if userMatrixManager ~= nil then
 				userMatrixManager:CheckAndAddSynergyUnits()
@@ -183,7 +183,7 @@ script UserSynergyComponent extends Component
 		end
 
 		-- 매트릭스 모드에서 시너지 보너스 유닛 체크 (시그너스 등)
-		if _GameManager ~= nil and _GameManager.currentGameMode == _eGameMode.Matrix then
+		if self.Entity.GameManager ~= nil and self.Entity.GameManager.currentGameMode == _eGameMode.Matrix then
 			local userMatrixManager = self.Entity.UserMatrixManager
 			if userMatrixManager ~= nil then
 				userMatrixManager:CheckAndAddSynergyUnits()
