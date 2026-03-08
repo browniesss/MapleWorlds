@@ -9,7 +9,7 @@ script ShowPvpPoint extends Component
 		if labelEntity ~= nil then
 			self.PointLabel = labelEntity.TextComponent
 		end
-
+		
 		_PvpShopService:RequestPoints()
 		self:RefreshUI()
 	end
@@ -22,7 +22,7 @@ script ShowPvpPoint extends Component
 	@ExecSpace("ClientOnly")
 	method void RefreshUI()
 		local points = _PvpShopService:GetCachedPoints()
-
+		
 		if self.PointLabel ~= nil then
 			self.PointLabel.Text = tostring(points) .. " P"
 		end

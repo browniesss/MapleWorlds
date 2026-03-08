@@ -33,21 +33,21 @@ script PvpShopConfirmPopup extends Component
 		if self.cancelButton == nil then
 			self.cancelButton = self.Entity:GetChildByName("CancelButton")
 		end
-
+		
 		-- 확인 버튼 이벤트
 		if self.confirmButton ~= nil then
 			self.confirmButton:ConnectEvent(ButtonClickEvent, function()
 				self:OnConfirm()
 			end)
 		end
-
+		
 		-- 취소 버튼 이벤트
 		if self.cancelButton ~= nil then
 			self.cancelButton:ConnectEvent(ButtonClickEvent, function()
 				self:Hide()
 			end)
 		end
-
+		
 		-- 초기에는 숨김
 		self.Entity.Enable = false
 		self.Entity.Visible = false
@@ -56,17 +56,17 @@ script PvpShopConfirmPopup extends Component
 	method void Show(string itemId, table itemData)
 		self.currentItemId = itemId
 		self.currentItemData = itemData
-
+		
 		-- 아이템 이름 표시
 		if self.itemNameLabel ~= nil then
 			self.itemNameLabel.TextComponent.Text = (itemData["name"] or "") .. "를 구매하시겠습니까?"
 		end
-
+		
 		-- 가격 표시 (PVP 포인트 단위)
 		if self.priceLabel ~= nil then
 			self.priceLabel.TextComponent.Text = tostring(itemData["price"] or 0) .. " P"
 		end
-
+		
 		-- 아이콘 표시
 		if self.itemIcon ~= nil and self.itemIcon.SpriteGUIRendererComponent ~= nil then
 			local rewardType = itemData["reward_type"] or ""
@@ -78,7 +78,7 @@ script PvpShopConfirmPopup extends Component
 				self.itemIcon.SpriteGUIRendererComponent.ImageRUID = "4cc5ffc272224edc809a792b8efa16e3"
 			end
 		end
-
+		
 		self.Entity.Enable = true
 		self.Entity.Visible = true
 	end
@@ -95,10 +95,10 @@ script PvpShopConfirmPopup extends Component
 			self:Hide()
 			return
 		end
-
+		
 		-- 서버에 구매 요청
 		_PvpShopService:PurchaseItem(self.currentItemId)
-
+		
 		-- 팝업 닫기
 		self:Hide()
 	end

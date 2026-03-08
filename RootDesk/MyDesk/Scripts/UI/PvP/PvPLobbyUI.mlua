@@ -37,6 +37,10 @@ script PvPLobbyUI extends Component
 
 	property any backButtonHandler = nil
 
+	property Entity shopButton = nil
+
+	property any shopButtonHandler = nil
+
 	property table viewDeckButtons = {}
 
 	property any viewDeck1Handler = nil
@@ -86,7 +90,12 @@ script PvPLobbyUI extends Component
 		if self.backButton ~= nil and self.backButton.ButtonComponent ~= nil then
 			self.backButtonHandler = self.backButton:ConnectEvent(ButtonClickEvent, self.OnBackButtonClicked)
 		end
-		
+
+		-- 상점 버튼 핸들러
+		if self.shopButton ~= nil and self.shopButton.ButtonComponent ~= nil then
+			self.shopButtonHandler = self.shopButton:ConnectEvent(ButtonClickEvent, self.OnShopButtonClicked)
+		end
+
 		-- 슬롯 목록 및 클릭 핸들러 구성
 		for i, slot in ipairs(self.userList.Children) do
 			self.slotList[#self.slotList + 1] = slot
@@ -139,7 +148,12 @@ script PvPLobbyUI extends Component
 			self.backButton:DisconnectEvent(ButtonClickEvent, self.backButtonHandler)
 			self.backButtonHandler = nil
 		end
-		
+
+		if self.shopButtonHandler ~= nil and self.shopButton ~= nil then
+			self.shopButton:DisconnectEvent(ButtonClickEvent, self.shopButtonHandler)
+			self.shopButtonHandler = nil
+		end
+
 		if self.viewDeck1Handler ~= nil and self.viewDeckButtons[1] ~= nil then
 			self.viewDeckButtons[1]:DisconnectEvent(ButtonClickEvent, self.viewDeck1Handler)
 			self.viewDeck1Handler = nil
@@ -461,6 +475,30 @@ script PvPLobbyUI extends Component
 		-- PvPLobbyUI 숨기기
 		self.Entity.Enable = false
 		self.Entity.Visible = false
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnShopButtonClicked(Entity entity)
+		self:OnShopButtonClick()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnShopButtonClick()
+		-- PvPLobbyUI 숨기기
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+
+		-- ShopUI 열기 + PvP 탭 활성화 (PvpShopButton.mlua 동일 패턴)
+		local shopUI = _EntityService:GetEntityByPath("/ui/ShopUI")
+		if shopUI then
+			shopUI.Enable = true
+			shopUI.Visible = true
+			local shopMenuGrid = _EntityService:GetEntityByPath("/ui/ShopUI/ShopMenu/ShopMenuGrid")
+			if shopMenuGrid and shopMenuGrid.ToggleGroup then
+				shopMenuGrid.ToggleGroup:ActivateButtonByIndex(5)
+			end
+		end
+		_PvpShopService:RequestAllItemStatuses()
 	end
 
 	@ExecSpace("ClientOnly")
