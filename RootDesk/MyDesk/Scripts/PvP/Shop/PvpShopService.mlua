@@ -5,6 +5,8 @@ script PvpShopService extends Logic
 
 	property integer SHOP_VER = 0
 
+	property integer cachedAvailablePoints = 0
+
 	@Sync
 	property SyncTable<string, string> pvpShopItems
 
@@ -323,6 +325,9 @@ script PvpShopService extends Logic
 
 	@ExecSpace("Client")
 	method void OnAllStatusesReceived(integer availablePoints, string itemsJson)
+		-- 포인트 캐시 갱신
+		self.cachedAvailablePoints = availablePoints
+
 		-- 포인트 표시 갱신
 		local pvpShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/PvpShopParent")
 		if pvpShopParent == nil then
@@ -359,6 +364,9 @@ script PvpShopService extends Logic
 
 	@ExecSpace("Client")
 	method void OnPointsReceived(integer available)
+		-- 포인트 캐시 갱신
+		self.cachedAvailablePoints = available
+
 		local pvpShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/PvpShopParent")
 		if pvpShopParent == nil then
 			return
@@ -368,6 +376,11 @@ script PvpShopService extends Logic
 		if pointsLabel ~= nil and pointsLabel.TextComponent ~= nil then
 			pointsLabel.TextComponent.Text = tostring(available) .. " P"
 		end
+	end
+
+	@ExecSpace("ClientOnly")
+	method integer GetCachedPoints()
+		return self.cachedAvailablePoints
 	end
 
 end

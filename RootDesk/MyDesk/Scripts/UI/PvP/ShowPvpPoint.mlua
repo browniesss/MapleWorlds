@@ -1,0 +1,39 @@
+@Component
+script ShowPvpPoint extends Component
+
+	property TextComponent PointLabel = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		local labelEntity = self.Entity:GetChildByName("PointLabel")
+		if labelEntity ~= nil then
+			self.PointLabel = labelEntity.TextComponent
+		end
+
+		_PvpShopService:RequestPoints()
+		self:RefreshUI()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnUpdate(number delta)
+		self:RefreshUI()
+	end
+
+	@ExecSpace("ClientOnly")
+	method void RefreshUI()
+		local points = _PvpShopService:GetCachedPoints()
+
+		if self.PointLabel ~= nil then
+			self.PointLabel.Text = tostring(points) .. " P"
+		end
+	end
+
+	@EventSender("Self")
+	handler HandleComponentEnabledInHierarchyChangedEvent(ComponentEnabledInHierarchyChangedEvent event)
+		if event.EnabledInHierarchy then
+			_PvpShopService:RequestPoints()
+			self:RefreshUI()
+		end
+	end
+
+end
