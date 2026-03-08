@@ -22,9 +22,9 @@ script PvpShopService extends Logic
 		if dataSet == nil then
 			return
 		end
-
+		
 		local count = dataSet:GetRowCount()
-
+		
 		for i = 1, count do
 			local item = {}
 			item["id"] = tostring(dataSet:GetCell(i, "id"))
@@ -35,7 +35,7 @@ script PvpShopService extends Logic
 			item["price"] = tonumber(dataSet:GetCell(i, "price"))
 			item["max_count"] = tonumber(dataSet:GetCell(i, "max_count"))
 			item["amount_label"] = tostring(dataSet:GetCell(i, "amount_label") or "")
-
+		
 			local json = _HttpService:JSONEncode(item)
 			self.pvpShopItems[item["id"]] = json
 		end
@@ -63,14 +63,14 @@ script PvpShopService extends Logic
 	method table LoadPurchaseData(string userId)
 		local userStorage = _DataStorageService:GetUserDataStorage(userId)
 		local errCode, data = userStorage:GetAndWait(self.STORAGE_KEY)
-
+		
 		if errCode ~= 0 or data == nil or data == "" then
 			local newData = {}
 			newData["season_ver"] = tostring(self.SHOP_VER)
 			newData["items"] = {}
 			return newData
 		end
-
+		
 		local parsed = _HttpService:JSONDecode(data)
 		if parsed == nil then
 			local newData = {}
@@ -78,11 +78,11 @@ script PvpShopService extends Logic
 			newData["items"] = {}
 			return newData
 		end
-
+		
 		local savedSeasonVer = tostring(parsed["season_ver"] or "0")
 		local currentSeasonVer = tostring(self.SHOP_VER)
 		local items = {}
-
+		
 		-- 시즌이 동일할 때만 구매 데이터 복원 (flat 구조 item_ 접두사)
 		if savedSeasonVer == currentSeasonVer then
 			for k, v in pairs(parsed) do
@@ -92,11 +92,11 @@ script PvpShopService extends Logic
 				end
 			end
 		end
-
+		
 		local result = {}
 		result["season_ver"] = currentSeasonVer
 		result["items"] = items
-
+		
 		return result
 	end
 
@@ -130,13 +130,13 @@ script PvpShopService extends Logic
 		if itemData == nil then
 			return false
 		end
-
+		
 		local maxCount = itemData["max_count"]
 		-- -1은 무제한
 		if maxCount == -1 then
 			return true
 		end
-
+		
 		local currentCount = self:GetPurchaseCount(userId, itemId)
 		return currentCount < maxCount
 	end
@@ -160,7 +160,7 @@ script PvpShopService extends Logic
 		if items == nil then
 			return 0
 		end
-
+		
 		local total = 0
 		for itemId, count in pairs(items) do
 			local itemData = self:GetItemData(itemId)
@@ -192,51 +192,65 @@ script PvpShopService extends Logic
 	method boolean GiveReward(string userId, table itemData)
 		local rewardType = itemData["reward_type"]
 		local rewardValue = itemData["reward_value"]
-
-		if rewardType == "dia_free" then
-			local result = _BillingService:AddFirstFreeCoin(userId, tonumber(rewardValue))
+		
+		local userEntity = _UserService:GetUserEntityByUserId(userId)
+		if rewardType == "unit" then
+			userEntity.UserMonsterService:AddCount(userId, {rewardValue})
+			_BadgeConditionService:CheckPickupBadges(userId, rewardValue)
+			return true
+		elseif rewardType == "dia_free" then
+			local result = userEntity.BillingService:AddFirstFreeCoin(userId, tonumber(rewardValue))
+			return result == 0
+		elseif rewardType == "dia_paid" then
+			local result = userEntity.BillingService:AddFirstPaidCoin(userId, tonumber(rewardValue))
 			return result == 0
 		elseif rewardType == "coin_free" then
-			local result = _BillingService:AddSecondFreeCoin(userId, tonumber(rewardValue))
+			local result = userEntity.BillingService:AddSecondFreeCoin(userId, tonumber(rewardValue))
+			return result == 0
+		elseif rewardType == "coin_paid" then
+			local result = userEntity.BillingService:AddSecondPaidCoin(userId, tonumber(rewardValue))
 			return result == 0
 		elseif rewardType == "meso_free" then
-			local result = _BillingService:AddThirdFreeCoin(userId, tonumber(rewardValue))
+			local result = userEntity.BillingService:AddThirdFreeCoin(userId, tonumber(rewardValue))
+			return result == 0
+		elseif rewardType == "meso_paid" then
+			local result = userEntity.BillingService:AddThirdPaidCoin(userId, tonumber(rewardValue))
 			return result == 0
 		end
-
+		
 		return false
 	end
 
 	@ExecSpace("Server")
 	method void PurchaseItem(string itemId)
 		local userId = senderUserId
-
+		
 		-- 상품 데이터 확인
 		local itemData = self:GetItemData(itemId)
 		if itemData == nil then
 			self:OnPurchaseComplete(itemId, false, "", "ITEM_NOT_FOUND")
 			return
 		end
-
+		
 		-- 구매 가능 여부 확인 (횟수 제한)
 		if not self:CanPurchase(userId, itemId) then
 			self:OnPurchaseComplete(itemId, false, itemData["name"], "LIMIT_REACHED")
 			return
 		end
-
+		
 		-- PVP 포인트 충분 여부 확인
 		local price = tonumber(itemData["price"]) or 0
 		if not self:HasEnoughPoints(userId, price) then
 			self:OnPurchaseComplete(itemId, false, itemData["name"], "INSUFFICIENT_CURRENCY")
 			return
 		end
-
+		
 		-- 보상 지급 (성공 후에만 구매 횟수 기록 → 포인트 자동 차감)
 		if not self:GiveReward(userId, itemData) then
 			self:OnPurchaseComplete(itemId, false, itemData["name"], "REWARD_FAILED")
 			return
 		end
-
+		
 		-- 구매 횟수 증가 + DataStorage 저장
 		local purchaseData = self:LoadPurchaseData(userId)
 		if purchaseData["items"] == nil then
@@ -245,7 +259,7 @@ script PvpShopService extends Logic
 		local currentCount = tonumber(purchaseData["items"][itemId]) or 0
 		purchaseData["items"][itemId] = currentCount + 1
 		self:SavePurchaseData(userId, purchaseData)
-
+		
 		self:OnPurchaseComplete(itemId, true, itemData["name"], "")
 	end
 
@@ -259,7 +273,7 @@ script PvpShopService extends Logic
 				popup.PvpShopPopup:Show(itemName, success, errorCode)
 			end
 		end
-
+		
 		-- 아이템 UI 갱신 (구매 성공 시)
 		if success then
 			self:RefreshItemUI(itemId)
@@ -273,12 +287,12 @@ script PvpShopService extends Logic
 		if pvpShopParent == nil then
 			return
 		end
-
+		
 		local itemContainer = pvpShopParent:GetChildByName("ItemContainer")
 		if itemContainer == nil then
 			return
 		end
-
+		
 		for _, child in ipairs(itemContainer.Children) do
 			if child.PvpShopItem ~= nil and child.PvpShopItem.itemID == itemId then
 				child.PvpShopItem:OnPurchaseSuccess()
@@ -300,12 +314,12 @@ script PvpShopService extends Logic
 		if pvpShopParent == nil then
 			return
 		end
-
+		
 		local itemContainer = pvpShopParent:GetChildByName("ItemContainer")
 		if itemContainer == nil then
 			return
 		end
-
+		
 		for _, child in ipairs(itemContainer.Children) do
 			if child.PvpShopItem ~= nil and child.PvpShopItem.itemID == itemId then
 				child.PvpShopItem:UpdatePurchaseCount(purchaseCount)
@@ -319,32 +333,33 @@ script PvpShopService extends Logic
 		local userId = senderUserId
 		local availablePoints = self:GetAvailablePoints(userId)
 		local purchaseData = self:LoadPurchaseData(userId)
-		local itemsJson = _HttpService:JSONEncode(purchaseData["items"] or {})
-		self:OnAllStatusesReceived(availablePoints, itemsJson)
+		
+		local itemsJson = _HttpService:JSONEncode(purchaseData["items"] or {}) or "{}"
+		self:OnAllStatusesReceived(availablePoints, itemsJson, senderUserId)
 	end
 
 	@ExecSpace("Client")
 	method void OnAllStatusesReceived(integer availablePoints, string itemsJson)
 		-- 포인트 캐시 갱신
 		self.cachedAvailablePoints = availablePoints
-
+		
 		-- 포인트 표시 갱신
 		local pvpShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/PvpShopParent")
 		if pvpShopParent == nil then
 			return
 		end
-
+		
 		local pointsLabel = pvpShopParent:GetChildByName("PointsLabel")
 		if pointsLabel ~= nil and pointsLabel.TextComponent ~= nil then
 			pointsLabel.TextComponent.Text = tostring(availablePoints) .. " P"
 		end
-
+		
 		-- 아이템 구매 횟수 갱신
 		local itemContainer = pvpShopParent:GetChildByName("ItemContainer")
 		if itemContainer == nil then
 			return
 		end
-
+		
 		local items = _HttpService:JSONDecode(itemsJson) or {}
 		for _, child in ipairs(itemContainer.Children) do
 			if child.PvpShopItem ~= nil then
@@ -366,12 +381,12 @@ script PvpShopService extends Logic
 	method void OnPointsReceived(integer available)
 		-- 포인트 캐시 갱신
 		self.cachedAvailablePoints = available
-
+		
 		local pvpShopParent = _EntityService:GetEntityByPath("/ui/ShopUI/ShopItemParent/PvpShopParent")
 		if pvpShopParent == nil then
 			return
 		end
-
+		
 		local pointsLabel = pvpShopParent:GetChildByName("PointsLabel")
 		if pointsLabel ~= nil and pointsLabel.TextComponent ~= nil then
 			pointsLabel.TextComponent.Text = tostring(available) .. " P"
