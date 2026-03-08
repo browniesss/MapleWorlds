@@ -1,6 +1,8 @@
 @Component
 script PvpShopConfirmPopup extends Component
 
+	property Entity itemIcon = nil
+
 	property Entity itemNameLabel = nil
 
 	property Entity priceLabel = nil
@@ -16,6 +18,9 @@ script PvpShopConfirmPopup extends Component
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		-- 자식 엔티티 탐색
+		if self.itemIcon == nil then
+			self.itemIcon = self.Entity:GetChildByName("ItemIcon")
+		end
 		if self.itemNameLabel == nil then
 			self.itemNameLabel = self.Entity:GetChildByName("ItemNameLabel")
 		end
@@ -60,6 +65,18 @@ script PvpShopConfirmPopup extends Component
 		-- 가격 표시 (PVP 포인트 단위)
 		if self.priceLabel ~= nil then
 			self.priceLabel.TextComponent.Text = tostring(itemData["price"] or 0) .. " P"
+		end
+
+		-- 아이콘 표시
+		if self.itemIcon ~= nil and self.itemIcon.SpriteGUIRendererComponent ~= nil then
+			local rewardType = itemData["reward_type"] or ""
+			if rewardType == "dia_free" then
+				self.itemIcon.SpriteGUIRendererComponent.ImageRUID = "3d291a0daa274583a7856b0470793de5"
+			elseif rewardType == "coin_free" then
+				self.itemIcon.SpriteGUIRendererComponent.ImageRUID = "78fb3b54f37c41cc920aa5b34667efc8"
+			elseif rewardType == "meso_free" then
+				self.itemIcon.SpriteGUIRendererComponent.ImageRUID = "4cc5ffc272224edc809a792b8efa16e3"
+			end
 		end
 
 		self.Entity.Enable = true
