@@ -1,0 +1,374 @@
+@Component
+script MailAdminUI extends Component
+
+	property Entity popup = nil
+	property Entity mailListScroll = nil
+	property Entity mailItemTemplate = nil
+	property Entity newMailButton = nil
+	property Entity mailContent = nil
+	property Entity titleInput = nil
+	property Entity endDateInput = nil
+	property Entity targetInput = nil
+	property Entity bodyInput = nil
+	property Entity rewardInput = nil
+	property Entity saveButton = nil
+	property Entity deleteButton = nil
+	property Entity closeButton = nil
+
+	property string selectedMailId = ""
+	property boolean isNewMode = false
+	property table spawnedMailItems = {}
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		local root = self.Entity:GetChildByName("root")
+		if root == nil then
+			return
+		end
+
+		self.popup = root:GetChildByName("popup")
+		self.closeButton = root:GetChildByName("closeButton")
+
+		if self.popup ~= nil then
+			local mailList = self.popup:GetChildByName("mailList")
+			if mailList ~= nil then
+				self.newMailButton = mailList:GetChildByName("UIButton")
+				self.mailListScroll = mailList:GetChildByName("Scroll_Layout")
+				if self.mailListScroll ~= nil then
+					self.mailItemTemplate = self.mailListScroll:GetChildByName("mailItem")
+				end
+			end
+
+			self.mailContent = self.popup:GetChildByName("mailContent")
+			if self.mailContent ~= nil then
+				-- title input
+				local titleArea = self.mailContent:GetChildByName("title")
+				if titleArea ~= nil then
+					local titleBg = titleArea:GetChildByName("background")
+					if titleBg ~= nil then
+						self.titleInput = titleBg:GetChildByName("UIText_1")
+					end
+				end
+
+				-- end date input
+				local endDateArea = self.mailContent:GetChildByName("END_DATE")
+				if endDateArea ~= nil then
+					local endDateBg = endDateArea:GetChildByName("background")
+					if endDateBg ~= nil then
+						self.endDateInput = endDateBg:GetChildByName("END_DATE")
+					end
+				end
+
+				-- target input
+				local targetArea = self.mailContent:GetChildByName("target")
+				if targetArea ~= nil then
+					local targetBg = targetArea:GetChildByName("background")
+					if targetBg ~= nil then
+						self.targetInput = targetBg:GetChildByName("UIText_1")
+					end
+				end
+
+				-- body input
+				local bodyArea = self.mailContent:GetChildByName("body")
+				if bodyArea ~= nil then
+					local bodyBg = bodyArea:GetChildByName("background")
+					if bodyBg ~= nil then
+						self.bodyInput = bodyBg:GetChildByName("UIText_1")
+					end
+				end
+
+				-- reward input
+				local rewardArea = self.mailContent:GetChildByName("reward")
+				if rewardArea ~= nil then
+					local rewardBg = rewardArea:GetChildByName("background")
+					if rewardBg ~= nil then
+						self.rewardInput = rewardBg:GetChildByName("UIText_1")
+					end
+				end
+
+				-- control buttons
+				local control = self.mailContent:GetChildByName("control")
+				if control ~= nil then
+					self.saveButton = control:GetChildByName("saveButton")
+					self.deleteButton = control:GetChildByName("deleteButton")
+				end
+			end
+		end
+
+		-- 이벤트 연결
+		if self.closeButton ~= nil then
+			self.closeButton:ConnectEvent(ButtonClickEvent, function()
+				self:Hide()
+			end)
+		end
+
+		if self.newMailButton ~= nil then
+			self.newMailButton:ConnectEvent(ButtonClickEvent, function()
+				self:OnNewMailClick()
+			end)
+		end
+
+		if self.saveButton ~= nil then
+			self.saveButton:ConnectEvent(ButtonClickEvent, function()
+				self:OnSaveClick()
+			end)
+		end
+
+		if self.deleteButton ~= nil then
+			self.deleteButton:ConnectEvent(ButtonClickEvent, function()
+				self:OnDeleteClick()
+			end)
+		end
+
+		-- mailItemTemplate 초기 숨김
+		if self.mailItemTemplate ~= nil then
+			self.mailItemTemplate.Enable = false
+			self.mailItemTemplate.Visible = false
+		end
+
+		-- mailContent 초기 숨김
+		if self.mailContent ~= nil then
+			self.mailContent.Enable = false
+			self.mailContent.Visible = false
+		end
+
+		-- 초기 숨김
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+	end
+
+	-- ========== Show / Hide ==========
+
+	method void Open()
+		self.Entity.Enable = true
+		self.Entity.Visible = true
+		self.selectedMailId = ""
+		self.isNewMode = false
+
+		if self.mailContent ~= nil then
+			self.mailContent.Enable = false
+			self.mailContent.Visible = false
+		end
+
+		_MailService:RequestAdminMailList()
+	end
+
+	method void Hide()
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+	end
+
+	-- ========== 메일 리스트 ==========
+
+	method void HandleMailList(string mailListJson)
+		local mailList = _HttpService:JSONDecode(mailListJson)
+		if mailList == nil then
+			return
+		end
+
+		self:ClearMailItems()
+
+		for i, mailItem in ipairs(mailList) do
+			local mailId = mailItem["id"] or ""
+			local title = mailItem["title"] or ""
+
+			local itemEntity = nil
+			if i == 1 then
+				itemEntity = self.mailItemTemplate
+				if itemEntity ~= nil then
+					itemEntity.Enable = true
+					itemEntity.Visible = true
+				end
+			else
+				if self.mailItemTemplate ~= nil and self.mailListScroll ~= nil then
+					itemEntity = _SpawnService:SpawnByEntity(
+						self.mailItemTemplate,
+						"mailItem_" .. tostring(i),
+						Vector3.zero,
+						self.mailListScroll
+					)
+					if itemEntity ~= nil then
+						itemEntity.Enable = true
+						itemEntity.Visible = true
+						table.insert(self.spawnedMailItems, itemEntity)
+					end
+				end
+			end
+
+			if itemEntity ~= nil then
+				local titleEntity = itemEntity:GetChildByName("mailTitle")
+				if titleEntity ~= nil and titleEntity.TextComponent ~= nil then
+					titleEntity.TextComponent.Text = title
+				end
+
+				local capturedMailId = mailId
+				itemEntity:ConnectEvent(ButtonClickEvent, function()
+					self:OnMailItemClick(capturedMailId)
+				end)
+			end
+		end
+	end
+
+	method void ClearMailItems()
+		for _, item in ipairs(self.spawnedMailItems) do
+			if item ~= nil then
+				item:Destroy()
+			end
+		end
+		self.spawnedMailItems = {}
+
+		if self.mailItemTemplate ~= nil then
+			self.mailItemTemplate.Enable = false
+			self.mailItemTemplate.Visible = false
+		end
+	end
+
+	-- ========== New Mail ==========
+
+	method void OnNewMailClick()
+		self.isNewMode = true
+		self.selectedMailId = ""
+
+		if self.mailContent ~= nil then
+			self.mailContent.Enable = true
+			self.mailContent.Visible = true
+		end
+
+		self:ClearInputFields()
+	end
+
+	method void ClearInputFields()
+		if self.titleInput ~= nil and self.titleInput.TextInputComponent ~= nil then
+			self.titleInput.TextInputComponent.Text = ""
+		end
+		if self.endDateInput ~= nil and self.endDateInput.TextInputComponent ~= nil then
+			self.endDateInput.TextInputComponent.Text = ""
+		end
+		if self.targetInput ~= nil and self.targetInput.TextInputComponent ~= nil then
+			self.targetInput.TextInputComponent.Text = ""
+		end
+		if self.bodyInput ~= nil and self.bodyInput.TextInputComponent ~= nil then
+			self.bodyInput.TextInputComponent.Text = ""
+		end
+		if self.rewardInput ~= nil and self.rewardInput.TextInputComponent ~= nil then
+			self.rewardInput.TextInputComponent.Text = ""
+		end
+	end
+
+	-- ========== Mail Item Click (Edit) ==========
+
+	method void OnMailItemClick(string mailId)
+		self.selectedMailId = mailId
+		self.isNewMode = false
+
+		if self.mailContent ~= nil then
+			self.mailContent.Enable = true
+			self.mailContent.Visible = true
+		end
+
+		_MailService:RequestAdminMailContent(mailId)
+	end
+
+	method void HandleMailContent(string mailJson)
+		local mail = _HttpService:JSONDecode(mailJson)
+		if mail == nil then
+			return
+		end
+
+		if self.titleInput ~= nil and self.titleInput.TextInputComponent ~= nil then
+			self.titleInput.TextInputComponent.Text = mail["title"] or ""
+		end
+
+		if self.endDateInput ~= nil and self.endDateInput.TextInputComponent ~= nil then
+			local expireAt = tonumber(mail["expireAt"]) or 0
+			if expireAt > 0 then
+				self.endDateInput.TextInputComponent.Text = tostring(expireAt)
+			else
+				self.endDateInput.TextInputComponent.Text = ""
+			end
+		end
+
+		if self.targetInput ~= nil and self.targetInput.TextInputComponent ~= nil then
+			self.targetInput.TextInputComponent.Text = mail["targetUser"] or ""
+		end
+
+		if self.bodyInput ~= nil and self.bodyInput.TextInputComponent ~= nil then
+			self.bodyInput.TextInputComponent.Text = mail["content"] or ""
+		end
+
+		if self.rewardInput ~= nil and self.rewardInput.TextInputComponent ~= nil then
+			self.rewardInput.TextInputComponent.Text = mail["rewards"] or ""
+		end
+	end
+
+	-- ========== Save ==========
+
+	method void OnSaveClick()
+		local title = ""
+		local content = ""
+		local targetUser = ""
+		local expireAt = ""
+		local rewards = ""
+
+		if self.titleInput ~= nil and self.titleInput.TextInputComponent ~= nil then
+			title = self.titleInput.TextInputComponent.Text
+		end
+		if self.endDateInput ~= nil and self.endDateInput.TextInputComponent ~= nil then
+			expireAt = self.endDateInput.TextInputComponent.Text
+		end
+		if self.targetInput ~= nil and self.targetInput.TextInputComponent ~= nil then
+			targetUser = self.targetInput.TextInputComponent.Text
+		end
+		if self.bodyInput ~= nil and self.bodyInput.TextInputComponent ~= nil then
+			content = self.bodyInput.TextInputComponent.Text
+		end
+		if self.rewardInput ~= nil and self.rewardInput.TextInputComponent ~= nil then
+			rewards = self.rewardInput.TextInputComponent.Text
+		end
+
+		-- 공백 제거
+		title = string.gsub(title, "^%s+", "")
+		title = string.gsub(title, "%s+$", "")
+		expireAt = string.gsub(expireAt, "%s+", "")
+		targetUser = string.gsub(targetUser, "%s+", "")
+
+		if self.isNewMode then
+			_MailService:CreateMail(title, content, targetUser, expireAt, rewards)
+		else
+			if self.selectedMailId ~= "" then
+				_MailService:UpdateMail(self.selectedMailId, title, content, targetUser, expireAt, rewards)
+			end
+		end
+	end
+
+	-- ========== Delete ==========
+
+	method void OnDeleteClick()
+		if self.selectedMailId == "" then
+			return
+		end
+		_MailService:DeleteMail(self.selectedMailId)
+	end
+
+	-- ========== 콜백 ==========
+
+	method void HandleMailSaved(boolean success, string message)
+		if success then
+			self.selectedMailId = message
+			self.isNewMode = false
+			_MailService:RequestAdminMailList()
+		end
+	end
+
+	method void HandleMailDeleted(boolean success, string message)
+		if success then
+			self.selectedMailId = ""
+			if self.mailContent ~= nil then
+				self.mailContent.Enable = false
+				self.mailContent.Visible = false
+			end
+			_MailService:RequestAdminMailList()
+		end
+	end
+
+end
