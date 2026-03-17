@@ -1,0 +1,92 @@
+@Component
+script UIInventory extends Component
+
+	property Entity itemUI = nil
+
+	property Entity scrollView = nil
+
+	property SyncTable<string, Entity> SlotItems
+
+	property string inventoryBtnPath = "/ui/DefaultGroup/RPGButtons/btn_inventory"
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.itemUI =_EntityService:GetEntityByPath(self.Entity.Path .. "/InventoryPanel/Inventory_ScrollView/item_slot")
+		self.itemUI:SetEnable(false)
+		self.scrollView = _EntityService:GetEntityByPath(self.Entity.Path .. "/InventoryPanel/Inventory_ScrollView")
+		
+		-- add UI Preset/Buttons
+		local inventoryButton = _EntityService:GetEntityByPath(self.inventoryBtnPath)
+		if inventoryButton ~= nil then
+			local openFunc = function()
+				self.Entity.Enable = true
+			end
+			if inventoryButton.ButtonComponent == nil then
+				inventoryButton:AddComponent("MOD.Core.ButtonComponent")
+			end
+			inventoryButton:ConnectEvent(ButtonClickEvent, openFunc)
+		end
+		
+		
+		local closeButton = _EntityService:GetEntityByPath(self.Entity.Path .. "/InventoryPanel/CloseButton")
+		local closeFunc = function()
+			self.Entity.Enable = false
+		end
+		
+		closeButton:ConnectEvent(ButtonClickEvent, closeFunc)
+	end
+
+	@EventSender("LocalPlayer")
+	handler HandleInventoryItemInitEvent(InventoryItemInitEvent event)
+		-- Parameters
+		local Entity = event.Entity
+		local Items = event.Items
+		--------------------------------------------------------
+		
+		for i, item in pairs(Items) do
+			local itemslot = _SpawnService:SpawnByEntity(self.itemUI, "Item", Vector3.zero, self.scrollView)
+			itemslot.UIItemSlot:SetData(item)
+			self.SlotItems[item.GUID] = itemslot
+		end
+	end
+
+	@EventSender("LocalPlayer")
+	handler HandleInventoryItemAddedEvent(InventoryItemAddedEvent event)
+		-- Parameters
+		local Entity = event.Entity
+		local Items = event.Items
+		--------------------------------------------------------
+		for i, item in pairs(Items) do
+			local itemslot = _SpawnService:SpawnByEntity(self.itemUI, "Item", Vector3.zero, self.scrollView)
+			itemslot.UIItemSlot:SetData(item)
+			self.SlotItems[item.GUID] = itemslot
+		end
+	end
+
+	@EventSender("LocalPlayer")
+	handler HandleInventoryItemRemovedEvent(InventoryItemRemovedEvent event)
+		-- Parameters
+		local Entity = event.Entity
+		local Items = event.Items
+		--------------------------------------------------------
+		for	i,item in pairs(Items) do
+			if self.SlotItems[item.GUID] ~= nil then
+				self.SlotItems[item.GUID]:Destroy()
+			end
+		end
+	end
+
+	@EventSender("LocalPlayer")
+	handler HandleInventoryItemModifiedEvent(InventoryItemModifiedEvent event)
+		-- Parameters
+		local Entity = event.Entity
+		local Items = event.Items
+		--------------------------------------------------------
+		for	i,item in pairs(Items) do
+			if self.SlotItems[item.GUID] ~= nil then
+				self.SlotItems[item.GUID].UIItemSlot:SetData(item)
+			end
+		end
+	end
+
+end

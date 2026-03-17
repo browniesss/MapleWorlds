@@ -1,0 +1,197 @@
+@Component
+script UIQuest extends Component
+
+	property string QUEST_REWARD_MODEL_ID = "model://142c777e-34f1-49d9-9dd8-356b5d036e02"
+
+	property table questDataCache = {}
+
+	property table rewardDataMap = {}
+
+	property table spawnedRewardEntities = {}
+
+	property TextComponent questInfoText = nil
+
+	property TextComponent questStateText = nil
+
+	property Entity questCompleteEntity = nil
+
+	property Entity scrollView = nil
+
+	property Entity staticRewardEntity = nil
+
+	property any clickHandler = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self:LoadQuestData()
+		self:LoadRewardData()
+		
+		local path = self.Entity.Path
+		
+		self.questInfoText = _EntityService:GetEntityByPath(path .. "/QuestInfo/QuestInfoText").TextComponent
+		self.questStateText = _EntityService:GetEntityByPath(path .. "/QuestComplete/QuestState").TextComponent
+		self.questCompleteEntity = _EntityService:GetEntityByPath(path .. "/QuestComplete")
+		self.scrollView = _EntityService:GetEntityByPath(path .. "/QuestReward/Scroll_QuestReward")
+		self.staticRewardEntity = _EntityService:GetEntityByPath(path .. "/QuestReward/Scroll_QuestReward/QuestReward")
+		
+		-- 버튼 기본 비활성화
+		if self.Entity.ButtonComponent ~= nil then
+			self.Entity.ButtonComponent.Enable = false
+			self.clickHandler = self.Entity.ButtonComponent.OnClick:Connect(function()
+				self:OnClicked()
+			end)
+		end
+		
+		-- 서버에 현재 퀘스트 데이터 요청
+		local player = _UserService.LocalPlayer
+		if player ~= nil and player.QuestService ~= nil then
+			player.QuestService:RequestQuestData()
+		end
+	end
+
+	method void LoadQuestData()
+		local dataSet = _DataService:GetTable("MainQuestData")
+		if dataSet == nil then
+			return
+		end
+		for i = 1, dataSet:GetRowCount() do
+			local id = tonumber(dataSet:GetCell(i, "id"))
+			self.questDataCache[id] = {
+				name = tostring(dataSet:GetCell(i, "Name")),
+				info = tostring(dataSet:GetCell(i, "Info")),
+				value = tonumber(dataSet:GetCell(i, "Value"))
+			}
+		end
+	end
+
+	method void LoadRewardData()
+		local dataSet = _DataService:GetTable("RewardData")
+		if dataSet == nil then
+			return
+		end
+		for i = 1, dataSet:GetRowCount() do
+			local id = tostring(dataSet:GetCell(i, "id"))
+			local ruid = tostring(dataSet:GetCell(i, "RUID"))
+			self.rewardDataMap[id] = { ruid = ruid }
+		end
+	end
+
+	method void OnQuestDataReceived(integer questId, integer state, number progress, table rewards)
+		self:UpdateRewardDisplays(rewards)
+		self:UpdateQuestUI(questId, state, progress)
+	end
+
+	method void UpdateQuestUI(integer questId, integer state, number progress)
+		local questData = self.questDataCache[questId]
+		if questData == nil then
+			return
+		end
+		
+		-- QuestInfoText: "퀘스트이름\n퀘스트설명 (진행도/목표)"
+		if self.questInfoText ~= nil then
+			local progressText = "(" .. tostring(math.floor(progress)) .. "/" .. tostring(questData.value) .. ")"
+			self.questInfoText.Text = questData.name .. "\n" .. questData.info .. " " .. progressText
+		end
+		
+		-- QuestComplete: Complete(2) 상태일 때만 표시
+		if self.questCompleteEntity ~= nil then
+			self.questCompleteEntity.Enable = (state == 2)
+		end
+		
+		-- QuestState 텍스트
+		if self.questStateText ~= nil then
+			if state == 1 then
+				self.questStateText.Text = "진행 중"
+			elseif state == 2 then
+				self.questStateText.Text = "완료"
+			end
+		end
+		
+		-- 버튼: Complete(2) 상태일 때만 활성화
+		if self.Entity.ButtonComponent ~= nil then
+			self.Entity.ButtonComponent.Enable = (state == 2)
+		end
+	end
+
+	method void UpdateRewardDisplays(table rewards)
+		-- 이전에 동적 생성된 보상 엔티티 제거
+		self:ClearSpawnedRewards()
+		
+		-- 첫 번째 보상: 고정 QuestReward 엔티티 사용
+		if rewards[1] ~= nil and self.staticRewardEntity ~= nil then
+			self:SetEntityReward(self.staticRewardEntity, rewards[1].rewardId, rewards[1].rewardCount)
+			self.staticRewardEntity.Enable = true
+		elseif self.staticRewardEntity ~= nil then
+			self.staticRewardEntity.Enable = false
+		end
+		
+		-- 두 번째 이상 보상: 동적 스폰
+		if self.scrollView == nil then
+			return
+		end
+		
+		for i = 2, #rewards do
+			local reward = rewards[i]
+			local spawnedEntity = _SpawnService:SpawnByModelId(
+				self.QUEST_REWARD_MODEL_ID,
+				"QuestReward_" .. tostring(i),
+				Vector3.zero,
+				self.scrollView
+			)
+			if spawnedEntity ~= nil then
+				self:SetEntityReward(spawnedEntity, reward.rewardId, reward.rewardCount)
+				table.insert(self.spawnedRewardEntities, spawnedEntity)
+			end
+		end
+	end
+
+	method void SetEntityReward(Entity entity, integer rewardId, number amount)
+		local rewardData = self.rewardDataMap[tostring(rewardId)]
+		if rewardData == nil then
+			return
+		end
+		
+		local icon = entity:GetChildByName("RewardIcon", false)
+		if icon ~= nil and icon.SpriteGUIRendererComponent ~= nil then
+			icon.SpriteGUIRendererComponent.ImageRUID = rewardData.ruid
+		end
+		
+		local count = entity:GetChildByName("RewardCount", false)
+		if count ~= nil and count.TextComponent ~= nil then
+			count.TextComponent.Text = tostring(amount)
+		end
+	end
+
+	method void ClearSpawnedRewards()
+		for _, entity in ipairs(self.spawnedRewardEntities) do
+			if entity ~= nil then
+				_EntityService:Destroy(entity)
+			end
+		end
+		self.spawnedRewardEntities = {}
+	end
+
+	method void OnAllQuestsCompleted()
+		if self.questInfoText ~= nil then
+			self.questInfoText.Text = "모든 퀘스트를 완료했습니다!"
+		end
+		if self.questCompleteEntity ~= nil then
+			self.questCompleteEntity.Enable = false
+		end
+		if self.Entity.ButtonComponent ~= nil then
+			self.Entity.ButtonComponent.Enable = false
+		end
+		self:ClearSpawnedRewards()
+		if self.staticRewardEntity ~= nil then
+			self.staticRewardEntity.Enable = false
+		end
+	end
+
+	method void OnClicked()
+		local player = _UserService.LocalPlayer
+		if player ~= nil and player.QuestService ~= nil then
+			player.QuestService:RequestClaimReward()
+		end
+	end
+
+end

@@ -1,0 +1,31 @@
+@Component
+script UIItemSlot extends Component
+
+	property any item = nil
+
+	property string itemGUID = ""
+
+	method void SetData(any item)
+		self.item = item
+		
+		local imageEntity = self.Entity:GetChildByName("img_slot")
+		imageEntity.SpriteGUIRendererComponent.ImageRUID = item.IconRUID
+		
+		imageEntity:GetChildByName("item_count").TextComponent.Text = tostring(item.ItemCount)
+		self.itemGUID = item.GUID
+	end
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		-- Parameters
+		local Entity = event.Entity
+		--------------------------------------------------------
+		
+		if self.item == nil then
+			return
+		end
+		
+		-- TODO: item logic
+	end
+
+end

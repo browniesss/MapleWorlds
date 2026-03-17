@@ -1,0 +1,54 @@
+@Component
+script QuestReward extends Component
+
+	property Entity RewardIcon = nil
+
+	property Entity RewardCount = nil
+
+	property table rewardDataMap = {}
+
+	property boolean isDataLoaded = false
+
+	method void OnBeginPlay()
+		self.RewardIcon = self.Entity:GetChildByName("RewardIcon", false)
+		self.RewardCount = self.Entity:GetChildByName("RewardCount", false)
+		self:LoadRewardData()
+	end
+
+	method void LoadRewardData()
+		local dataSet = _DataService:GetTable("RewardData")
+		if dataSet == nil then
+			log("[QuestReward] RewardData DataSet not found")
+			return
+		end
+		
+		for index = 1, dataSet:GetRowCount() do
+			local id = tostring(dataSet:GetCell(index, "id"))
+			local ruid = tostring(dataSet:GetCell(index, "RUID"))
+			self.rewardDataMap[id] = { ruid = ruid }
+		end
+		
+		self.isDataLoaded = true
+	end
+
+	method void SetReward(string rewardId, number amount)
+		if not self.isDataLoaded then
+			self:LoadRewardData()
+		end
+		
+		local rewardData = self.rewardDataMap[rewardId]
+		if rewardData == nil then
+			log(string.format("[QuestReward] reward id '%s' not found in RewardData", rewardId))
+			return
+		end
+		
+		if self.RewardIcon ~= nil and self.RewardIcon.SpriteGUIRendererComponent ~= nil then
+			self.RewardIcon.SpriteGUIRendererComponent.ImageRUID = rewardData.ruid
+		end
+		
+		if self.RewardCount ~= nil and self.RewardCount.TextComponent ~= nil then
+			self.RewardCount.TextComponent.Text = tostring(amount)
+		end
+	end
+
+end

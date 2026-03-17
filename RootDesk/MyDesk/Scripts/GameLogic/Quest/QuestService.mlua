@@ -1,0 +1,274 @@
+@Component
+script QuestService extends Component
+
+	property table questDataCache = {}
+
+	property table questRewardCache = {}
+
+	property table userQuestCache = {}
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		self:LoadQuestData()
+		self:LoadQuestRewardData()
+		local uid = self.Entity.PlayerComponent.UserId
+		self:LoadUserQuestCache(uid)
+		self:SendCurrentQuestToClient(uid, uid)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void LoadQuestData()
+		local dataSet = _DataService:GetTable("MainQuestData")
+		if dataSet == nil then
+			print("[QuestService] MainQuestData not found")
+			return
+		end
+		for i = 1, dataSet:GetRowCount() do
+			local id = tonumber(dataSet:GetCell(i, "id"))
+			self.questDataCache[id] = {
+				id = id,
+				triggerType = tostring(dataSet:GetCell(i, "TriggerType")),
+				triggerParam = tostring(dataSet:GetCell(i, "TriggerParam")),
+				value = tonumber(dataSet:GetCell(i, "Value"))
+			}
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void LoadQuestRewardData()
+		local dataSet = _DataService:GetTable("QuestRewardData")
+		if dataSet == nil then
+			print("[QuestService] QuestRewardData not found")
+			return
+		end
+		for i = 1, dataSet:GetRowCount() do
+			local questId = tonumber(dataSet:GetCell(i, "QuestID"))
+			local rewardId = tonumber(dataSet:GetCell(i, "RewardID"))
+			local rewardCount = tonumber(dataSet:GetCell(i, "RewardCount"))
+		
+			if self.questRewardCache[questId] == nil then
+				self.questRewardCache[questId] = {}
+			end
+			table.insert(self.questRewardCache[questId], {
+				rewardId = rewardId,
+				rewardCount = rewardCount
+			})
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void LoadUserQuestCache(string uid)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local errCode, currentId = ds:GetAndWait("Quest_current")
+		
+		if errCode ~= 0 or currentId == nil or currentId == "" then
+			-- 최초 플레이어: 퀘스트 1 시작
+			self.userQuestCache[uid] = { currentId = 1, state = 1, progress = 0 }
+			self:WriteQuestStateToDB(uid, 1, 1)
+			self:WriteQuestProgressToDB(uid, 1, 0)
+			self:WriteCurrentQuestIdToDB(uid, 1)
+			return
+		end
+		
+		local id = tonumber(currentId) or 1
+		local state = self:ReadQuestStateFromDB(uid, id)
+		local progress = self:ReadQuestProgressFromDB(uid, id)
+		self.userQuestCache[uid] = { currentId = id, state = state, progress = progress }
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer ReadQuestStateFromDB(string uid, integer questId)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local errCode, val = ds:GetAndWait("Quest_" .. tostring(questId))
+		if errCode ~= 0 or val == nil or val == "" then
+			return 1
+		end
+		return tonumber(val) or 1
+	end
+
+	@ExecSpace("ServerOnly")
+	method number ReadQuestProgressFromDB(string uid, integer questId)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		local errCode, val = ds:GetAndWait("Quest_" .. tostring(questId) .. "_progress")
+		if errCode ~= 0 or val == nil or val == "" then
+			return 0
+		end
+		return tonumber(val) or 0
+	end
+
+	@ExecSpace("ServerOnly")
+	method void WriteQuestStateToDB(string uid, integer questId, integer state)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		ds:SetAndWait("Quest_" .. tostring(questId), tostring(state))
+	end
+
+	@ExecSpace("ServerOnly")
+	method void WriteQuestProgressToDB(string uid, integer questId, number progress)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		ds:SetAndWait("Quest_" .. tostring(questId) .. "_progress", tostring(progress))
+	end
+
+	@ExecSpace("ServerOnly")
+	method void WriteCurrentQuestIdToDB(string uid, integer questId)
+		local ds = _DataStorageService:GetUserDataStorage(uid)
+		ds:SetAndWait("Quest_current", tostring(questId))
+	end
+
+	@ExecSpace("ServerOnly")
+	method void OnProgressServer(string uid, string triggerType, number value, integer chapter, integer stage)
+		local cache = self.userQuestCache[uid]
+		if cache == nil then
+			return
+		end
+		
+		local questData = self.questDataCache[cache.currentId]
+		if questData == nil then
+			return
+		end
+		
+		if questData.triggerType ~= triggerType then
+			return
+		end
+		
+		-- ClearStage: TriggerParam이 있으면 특정 스테이지 조건 체크
+		if triggerType == "ClearStage" and questData.triggerParam ~= "" then
+			local actualParam = tostring(chapter) .. "-" .. tostring(stage)
+			if questData.triggerParam ~= actualParam then
+				return
+			end
+		end
+		
+		-- Underway(1) 상태여야 진행
+		if cache.state ~= 1 then
+			return
+		end
+		
+		local newProgress = cache.progress + value
+		if newProgress > questData.value then
+			newProgress = questData.value
+		end
+		cache.progress = newProgress
+		
+		if newProgress >= questData.value then
+			cache.state = 2
+			self:WriteQuestProgressToDB(uid, cache.currentId, newProgress)
+			self:WriteQuestStateToDB(uid, cache.currentId, 2)
+			self:OnQuestUpdate(cache.currentId, 2, newProgress, uid)
+		else
+			self:WriteQuestProgressToDB(uid, cache.currentId, newProgress)
+			self:OnQuestUpdate(cache.currentId, 1, newProgress, uid)
+		end
+	end
+
+	@ExecSpace("Server")
+	method void RequestClaimReward()
+		local uid = senderUserId
+		local cache = self.userQuestCache[uid]
+		if cache == nil then
+			return
+		end
+		
+		if cache.state ~= 2 then
+			return
+		end
+		
+		if self.questDataCache[cache.currentId] == nil then
+			return
+		end
+		
+		-- 보상 지급 (퀘스트의 모든 보상)
+		self:GiveReward(uid, cache.currentId)
+		
+		-- 현재 퀘스트 → Rewarded(3)
+		cache.state = 3
+		self:WriteQuestStateToDB(uid, cache.currentId, 3)
+		
+		-- 다음 퀘스트 시작
+		local nextId = cache.currentId + 1
+		if self.questDataCache[nextId] ~= nil then
+			cache.currentId = nextId
+			cache.state = 1
+			cache.progress = 0
+			self:WriteCurrentQuestIdToDB(uid, nextId)
+			self:WriteQuestStateToDB(uid, nextId, 1)
+			self:WriteQuestProgressToDB(uid, nextId, 0)
+			self:SendCurrentQuestToClient(uid, uid)
+		else
+			-- 모든 퀘스트 완료
+			self:OnAllQuestsCompleted(uid)
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void GiveReward(string uid, integer questId)
+		local rewards = self.questRewardCache[questId]
+		if rewards == nil then
+			return
+		end
+		for _, reward in ipairs(rewards) do
+			if reward.rewardId == 1 then
+				-- 메소
+				self.Entity.BillingService:AddSecondFreeCoin(uid, reward.rewardCount)
+			elseif reward.rewardId == 2 then
+				-- 머쉬골드
+				self.Entity.BillingService:AddThirdFreeCoin(uid, reward.rewardCount)
+			elseif reward.rewardId == 3 then
+				-- 머쉬다이아
+				self.Entity.BillingService:AddFirstFreeCoin(uid, reward.rewardCount)
+			end
+		end
+	end
+
+	@ExecSpace("Server")
+	method void RequestQuestData()
+		local uid = senderUserId
+		if self.userQuestCache[uid] == nil then
+			self:LoadUserQuestCache(uid)
+		end
+		self:SendCurrentQuestToClient(uid, uid)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void SendCurrentQuestToClient(string uid, string targetUid)
+		local cache = self.userQuestCache[uid]
+		if cache == nil then
+			return
+		end
+		local rewards = self.questRewardCache[cache.currentId] or {}
+		self:OnQuestDataReceived(cache.currentId, cache.state, cache.progress, rewards, targetUid)
+	end
+
+	@ExecSpace("Client")
+	method void OnQuestDataReceived(integer questId, integer state, number progress, table rewards)
+		local uiQuest = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIQuest")
+		if uiQuest ~= nil and uiQuest.UIQuest ~= nil then
+			uiQuest.UIQuest:OnQuestDataReceived(questId, state, progress, rewards)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnQuestUpdate(integer questId, integer state, number progress)
+		local uiQuest = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIQuest")
+		if uiQuest ~= nil and uiQuest.UIQuest ~= nil then
+			uiQuest.UIQuest:UpdateQuestUI(questId, state, progress)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnAllQuestsCompleted(string uid)
+		local uiQuest = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIQuest")
+		if uiQuest ~= nil and uiQuest.UIQuest ~= nil then
+			uiQuest.UIQuest:OnAllQuestsCompleted()
+		end
+	end
+
+	@EventSender("Service", "UserService")
+	handler HandleUserLeaveEvent(UserLeaveEvent event)
+		local uid = event.UserId
+		if uid ~= self.Entity.PlayerComponent.UserId then
+			return
+		end
+		self.userQuestCache[uid] = nil
+	end
+
+end

@@ -1,0 +1,28 @@
+@Component
+script UIMyInfoSimple1 extends Component
+
+	property TextComponent myName = nil
+
+	property SliderComponent myHP = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		local currentPath = self.Entity.Path
+		self.myName = _EntityService:GetEntityByPath(currentPath .. "/Text_name").TextComponent
+		self.myHP = _EntityService:GetEntityByPath(currentPath .. "/HP_bar").SliderComponent
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnUpdate(number delta)
+		if _UserService.LocalPlayer == nil then
+			return
+		end
+		local player = _UserService.LocalPlayer.PlayerComponent
+		if player == nil then
+			return
+		end
+		self.myName.Text = player.Nickname
+		self.myHP.Value = player.Hp / player.MaxHp
+	end
+
+end
