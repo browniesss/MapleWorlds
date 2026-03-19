@@ -110,6 +110,36 @@ script MailService extends Logic
 	end
 
 	@ExecSpace("ServerOnly")
+	method boolean IsTargetUser(string targetUserStr, string userId)
+		if targetUserStr == nil or targetUserStr == "" then
+			return true
+		end
+
+		-- JSON 리스트인지 확인
+		if string.match(targetUserStr, "^%[.*%]$") then
+			local parsed = _HttpService:JSONDecode(targetUserStr)
+			if parsed ~= nil and type(parsed) == "table" then
+				for _, uid in ipairs(parsed) do
+					if tostring(uid) == userId then
+						return true
+					end
+				end
+				return false
+			end
+		end
+
+		-- 단일 텍스트 혹은 콤마 구분자 처리 (하위 호환)
+		for tu in string.gmatch(targetUserStr, "([^,]+)") do
+			local cleanUser = string.gsub(tu, "^%s*(.-)%s*$", "%1")
+			if cleanUser == userId then
+				return true
+			end
+		end
+
+		return false
+	end
+
+	@ExecSpace("ServerOnly")
 	method table LoadUserMailData(string userId)
 		local ds = _DataStorageService:GetUserDataStorage(userId)
 		local errCode, data = ds:GetAndWait(self.USER_MAIL_KEY)
@@ -246,7 +276,7 @@ script MailService extends Logic
 				local expireAt = tonumber(mail["expireAt"]) or 0
 		
 				-- 대상 유저 필터
-				if targetUser == "" or targetUser == userId then
+				if self:IsTargetUser(targetUser, userId) then
 					-- 만료 체크
 					if expireAt == 0 or expireAt > now then
 						local mailStatus = userData[mailId]
@@ -300,7 +330,7 @@ script MailService extends Logic
 		
 		-- 대상 유저 체크
 		local targetUser = mail["targetUser"] or ""
-		if targetUser ~= "" and targetUser ~= userId then
+		if not self:IsTargetUser(targetUser, userId) then
 			return
 		end
 		
@@ -334,7 +364,7 @@ script MailService extends Logic
 		
 		-- 대상 유저 체크
 		local targetUser = mail["targetUser"] or ""
-		if targetUser ~= "" and targetUser ~= userId then
+		if not self:IsTargetUser(targetUser, userId) then
 			self:OnRewardClaimed(userId, mailId, false, "Not your mail")
 			return
 		end
