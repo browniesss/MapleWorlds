@@ -19,6 +19,17 @@ script MailPopupUI extends Component
 	property table spawnedMailItems = {}
 	property table spawnedRewardItems = {}
 
+	method Entity FindChildExact(Entity parent, string exactName)
+		if parent == nil then return nil end
+		local children = parent.Children
+		for i = 1, #children do
+			if children[i].Name == exactName then
+				return children[i]
+			end
+		end
+		return nil
+	end
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		local root = self.Entity:GetChildByName("root")
@@ -41,7 +52,7 @@ script MailPopupUI extends Component
 
 			self.mailContent = self.popup:GetChildByName("mailContent")
 			if self.mailContent ~= nil then
-				local titleArea = self.mailContent:GetChildByName("title")
+				local titleArea = self:FindChildExact(self.mailContent, "title")
 				if titleArea ~= nil then
 					local titleBg = titleArea:GetChildByName("background")
 					if titleBg ~= nil then
@@ -49,7 +60,8 @@ script MailPopupUI extends Component
 					end
 				end
 
-				local bodyArea = self.mailContent:GetChildByName("body")
+				local bodyArea = self:FindChildExact(self.mailContent, "body")
+				if bodyArea == nil then bodyArea = self.mailContent:GetChildByName("body") end
 				if bodyArea ~= nil then
 					local bodyBg = bodyArea:GetChildByName("background")
 					if bodyBg ~= nil then
@@ -60,7 +72,8 @@ script MailPopupUI extends Component
 					end
 				end
 
-				self.rewardArea = self.mailContent:GetChildByName("reward")
+				self.rewardArea = self:FindChildExact(self.mailContent, "reward")
+				if self.rewardArea == nil then self.rewardArea = self.mailContent:GetChildByName("reward") end
 				if self.rewardArea ~= nil then
 					self.rewardList = self.rewardArea:GetChildByName("rewardList")
 					if self.rewardList ~= nil then
@@ -161,6 +174,8 @@ script MailPopupUI extends Component
 			local title = mailItem["title"] or ""
 			local expireAt = tonumber(mailItem["expireAt"]) or 0
 			local isRead = mailItem["isRead"] == true
+			
+			log("[MailPopupUI] Rendering Mail ID: " .. tostring(mailId) .. " Title: '" .. tostring(title) .. "' ExpireAt: " .. tostring(expireAt))
 
 			local itemEntity = nil
 			if i == 1 then

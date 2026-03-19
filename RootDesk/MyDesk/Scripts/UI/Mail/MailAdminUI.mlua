@@ -19,6 +19,17 @@ script MailAdminUI extends Component
 	property boolean isNewMode = false
 	property table spawnedMailItems = {}
 
+	method Entity FindChildExact(Entity parent, string exactName)
+		if parent == nil then return nil end
+		local children = parent.Children
+		for i = 1, #children do
+			if children[i].Name == exactName then
+				return children[i]
+			end
+		end
+		return nil
+	end
+
 	@ExecSpace("ClientOnly")
 	method void OnBeginPlay()
 		local root = self.Entity:GetChildByName("root")
@@ -42,25 +53,28 @@ script MailAdminUI extends Component
 			self.mailContent = self.popup:GetChildByName("mailContent")
 			if self.mailContent ~= nil then
 				-- title input
-				local titleArea = self.mailContent:GetChildByName("title")
+				local titleArea = self:FindChildExact(self.mailContent, "title")
 				if titleArea ~= nil then
-					local titleBg = titleArea:GetChildByName("background")
+					local titleBg = self:FindChildExact(titleArea, "background")
 					if titleBg ~= nil then
-						self.titleInput = titleBg:GetChildByName("UIText_1")
+						self.titleInput = self:FindChildExact(titleBg, "UIText_1")
 					end
 				end
 
 				-- end date input
-				local endDateArea = self.mailContent:GetChildByName("END_DATE")
+				local endDateArea = self:FindChildExact(self.mailContent, "endDate") 
+				if endDateArea == nil then endDateArea = self.mailContent:GetChildByName("END_DATE") end
 				if endDateArea ~= nil then
 					local endDateBg = endDateArea:GetChildByName("background")
 					if endDateBg ~= nil then
-						self.endDateInput = endDateBg:GetChildByName("END_DATE")
+						self.endDateInput = endDateBg:GetChildByName("UIText_1")
+						if self.endDateInput == nil then self.endDateInput = endDateBg:GetChildByName("END_DATE") end
 					end
 				end
 
 				-- target input
-				local targetArea = self.mailContent:GetChildByName("target")
+				local targetArea = self:FindChildExact(self.mailContent, "target")
+				if targetArea == nil then targetArea = self.mailContent:GetChildByName("target") end
 				if targetArea ~= nil then
 					local targetBg = targetArea:GetChildByName("background")
 					if targetBg ~= nil then
@@ -69,7 +83,8 @@ script MailAdminUI extends Component
 				end
 
 				-- body input
-				local bodyArea = self.mailContent:GetChildByName("body")
+				local bodyArea = self:FindChildExact(self.mailContent, "body")
+				if bodyArea == nil then bodyArea = self.mailContent:GetChildByName("body") end
 				if bodyArea ~= nil then
 					local bodyBg = bodyArea:GetChildByName("background")
 					if bodyBg ~= nil then
@@ -78,7 +93,8 @@ script MailAdminUI extends Component
 				end
 
 				-- reward input
-				local rewardArea = self.mailContent:GetChildByName("reward")
+				local rewardArea = self:FindChildExact(self.mailContent, "reward")
+				if rewardArea == nil then rewardArea = self.mailContent:GetChildByName("reward") end
 				if rewardArea ~= nil then
 					local rewardBg = rewardArea:GetChildByName("background")
 					if rewardBg ~= nil then
@@ -324,6 +340,8 @@ script MailAdminUI extends Component
 		if self.titleInput ~= nil and self.titleInput.TextInputComponent ~= nil then
 			title = self.titleInput.TextInputComponent.Text
 		end
+		
+		log("[MailAdminUI] OnSaveClick - Retrieved title from UI: '" .. tostring(title) .. "', titleInput exists: " .. tostring(self.titleInput ~= nil))
 		if self.endDateInput ~= nil and self.endDateInput.TextInputComponent ~= nil then
 			expireAt = self.endDateInput.TextInputComponent.Text
 		end
@@ -344,9 +362,11 @@ script MailAdminUI extends Component
 		targetUser = string.gsub(targetUser, "%s+", "")
 
 		if self.isNewMode then
+			log("[MailAdminUI] Creating new mail with title: '" .. tostring(title) .. "'")
 			_MailService:CreateMail(title, content, targetUser, expireAt, rewards)
 		else
 			if self.selectedMailId ~= "" then
+				log("[MailAdminUI] Updating mail " .. tostring(self.selectedMailId) .. " with title: '" .. tostring(title) .. "'")
 				_MailService:UpdateMail(self.selectedMailId, title, content, targetUser, expireAt, rewards)
 			end
 		end

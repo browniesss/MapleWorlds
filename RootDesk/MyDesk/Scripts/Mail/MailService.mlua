@@ -10,6 +10,8 @@ script MailService extends Logic
 
 	property table adminList = {"20372100004704052", "20372100008069853", "20372001292201301"}
 
+	property table _mailIds = {}
+
 	@ExecSpace("ServerOnly")
 	method void OnBeginPlay()
 		self:LoadAllMails()
@@ -46,6 +48,8 @@ script MailService extends Logic
 			return
 		end
 
+		self._mailIds = mailIds
+
 		for _, mailId in ipairs(mailIds) do
 			local key = "MAIL_" .. mailId
 			local err2, mailJson = gs:GetAndWait(key)
@@ -57,12 +61,7 @@ script MailService extends Logic
 
 	@ExecSpace("ServerOnly")
 	method void SaveMailIndex()
-		local ids = {}
-		local mailTable = self.mailData:ToTable()
-		for k, _ in pairs(mailTable) do
-			table.insert(ids, k)
-		end
-		local json = _HttpService:JSONEncode(ids)
+		local json = _HttpService:JSONEncode(self._mailIds)
 		local gs = _DataStorageService:GetGlobalDataStorage(self.MAIL_STORAGE_NAME)
 		gs:SetAndWait(self.MAIL_INDEX_KEY, json)
 	end
@@ -168,6 +167,7 @@ script MailService extends Logic
 
 		local mailJson = _HttpService:JSONEncode(mail)
 		self.mailData[mailId] = mailJson
+		table.insert(self._mailIds, mailId)
 		self:SaveMail(mailId, mailJson)
 		self:SaveMailIndex()
 
@@ -225,6 +225,13 @@ script MailService extends Logic
 		end
 
 		self.mailData[mailId] = nil
+		for i, id in ipairs(self._mailIds) do
+			if id == mailId then
+				table.remove(self._mailIds, i)
+				break
+			end
+		end
+
 		self:DeleteMailFromStorage(mailId)
 		self:SaveMailIndex()
 
@@ -240,8 +247,8 @@ script MailService extends Logic
 		local now = DateTime.UtcNow.Elapsed
 		local result = {}
 
-		local mailTable = self.mailData:ToTable()
-		for mailId, mailJson in pairs(mailTable) do
+		for _, mailId in ipairs(self._mailIds) do
+			local mailJson = self.mailData[mailId]
 			local mail = _HttpService:JSONDecode(mailJson)
 			if mail ~= nil then
 				local targetUser = mail["targetUser"] or ""
@@ -414,8 +421,8 @@ script MailService extends Logic
 		end
 
 		local result = {}
-		local mailTable = self.mailData:ToTable()
-		for mailId, mailJson in pairs(mailTable) do
+		for _, mailId in ipairs(self._mailIds) do
+			local mailJson = self.mailData[mailId]
 			local mail = _HttpService:JSONDecode(mailJson)
 			if mail ~= nil then
 				local item = {}
