@@ -2,21 +2,35 @@
 script MailPopupUI extends Component
 
 	property Entity popup = nil
+
 	property Entity mailListScroll = nil
+
 	property Entity mailItemTemplate = nil
+
 	property Entity mailContent = nil
+
 	property Entity titleText = nil
+
 	property Entity bodyText = nil
+
 	property Entity rewardArea = nil
+
 	property Entity rewardList = nil
+
 	property Entity rewardItemTemplate = nil
+
 	property Entity getRewardButton = nil
+
 	property Entity infoPopup = nil
+
 	property Entity infoPopupButton = nil
+
 	property Entity closeButton = nil
 
 	property string selectedMailId = ""
+
 	property table spawnedMailItems = {}
+
 	property table spawnedRewardItems = {}
 
 	method Entity FindChildExact(Entity parent, string exactName)
@@ -36,11 +50,11 @@ script MailPopupUI extends Component
 		if root == nil then
 			return
 		end
-
+		
 		self.popup = root:GetChildByName("popup")
 		self.closeButton = root:GetChildByName("closeButton")
 		self.infoPopup = root:GetChildByName("infoPopup")
-
+		
 		if self.popup ~= nil then
 			local mailList = self.popup:GetChildByName("mailList")
 			if mailList ~= nil then
@@ -49,7 +63,7 @@ script MailPopupUI extends Component
 					self.mailItemTemplate = self.mailListScroll:GetChildByName("mailItem")
 				end
 			end
-
+		
 			self.mailContent = self.popup:GetChildByName("mailContent")
 			if self.mailContent ~= nil then
 				local titleArea = self:FindChildExact(self.mailContent, "title")
@@ -59,7 +73,7 @@ script MailPopupUI extends Component
 						self.titleText = titleBg:GetChildByName("UIText")
 					end
 				end
-
+		
 				local bodyArea = self:FindChildExact(self.mailContent, "body")
 				if bodyArea == nil then bodyArea = self.mailContent:GetChildByName("body") end
 				if bodyArea ~= nil then
@@ -71,7 +85,7 @@ script MailPopupUI extends Component
 						end
 					end
 				end
-
+		
 				self.rewardArea = self:FindChildExact(self.mailContent, "reward")
 				if self.rewardArea == nil then self.rewardArea = self.mailContent:GetChildByName("reward") end
 				if self.rewardArea ~= nil then
@@ -83,24 +97,24 @@ script MailPopupUI extends Component
 				end
 			end
 		end
-
+		
 		-- 이벤트 연결
 		if self.closeButton ~= nil then
 			self.closeButton:ConnectEvent(ButtonClickEvent, function()
 				self:Hide()
 			end)
 		end
-
+		
 		if self.getRewardButton ~= nil then
 			self.getRewardButton:ConnectEvent(ButtonClickEvent, function()
 				self:OnRewardButtonClick()
 			end)
 		end
-
+		
 		if self.infoPopup ~= nil then
 			self.infoPopup.Enable = false
 			self.infoPopup.Visible = false
-
+		
 			self.infoPopupButton = self.infoPopup:GetChildByName("UIButton")
 			if self.infoPopupButton ~= nil then
 				self.infoPopupButton:ConnectEvent(ButtonClickEvent, function()
@@ -111,42 +125,40 @@ script MailPopupUI extends Component
 				end)
 			end
 		end
-
+		
 		-- mailItemTemplate 초기 숨김
 		if self.mailItemTemplate ~= nil then
 			self.mailItemTemplate.Enable = false
 			self.mailItemTemplate.Visible = false
 		end
-
+		
 		-- rewardItemTemplate 초기 숨김
 		if self.rewardItemTemplate ~= nil then
 			self.rewardItemTemplate.Enable = false
 			self.rewardItemTemplate.Visible = false
 		end
-
+		
 		-- mailContent 초기 숨김
 		if self.mailContent ~= nil then
 			self.mailContent.Enable = false
 			self.mailContent.Visible = false
 		end
-
+		
 		-- 초기 숨김
 		self.Entity.Enable = false
 		self.Entity.Visible = false
 	end
 
-	-- ========== Show / Hide ==========
-
 	method void Open()
 		self.Entity.Enable = true
 		self.Entity.Visible = true
 		self.selectedMailId = ""
-
+		
 		if self.mailContent ~= nil then
 			self.mailContent.Enable = false
 			self.mailContent.Visible = false
 		end
-
+		
 		_MailService:RequestMailList()
 	end
 
@@ -154,8 +166,6 @@ script MailPopupUI extends Component
 		self.Entity.Enable = false
 		self.Entity.Visible = false
 	end
-
-	-- ========== 메일 리스트 ==========
 
 	method void HandleMailList(string mailListJson)
 		if mailListJson == nil or mailListJson == "" then
@@ -165,10 +175,10 @@ script MailPopupUI extends Component
 		if mailList == nil then
 			return
 		end
-
+		
 		-- 기존 스폰 아이템 제거
 		self:ClearMailItems()
-
+		
 		for i, mailItem in ipairs(mailList) do
 			local mailId = mailItem["id"] or ""
 			local title = mailItem["title"] or ""
@@ -176,7 +186,7 @@ script MailPopupUI extends Component
 			local isRead = mailItem["isRead"] == true
 			
 			log("[MailPopupUI] Rendering Mail ID: " .. tostring(mailId) .. " Title: '" .. tostring(title) .. "' ExpireAt: " .. tostring(expireAt))
-
+		
 			local itemEntity = nil
 			if i == 1 then
 				-- 첫 아이템은 템플릿 재사용
@@ -201,14 +211,14 @@ script MailPopupUI extends Component
 					end
 				end
 			end
-
+		
 			if itemEntity ~= nil then
 				-- 제목 설정
 				local titleEntity = itemEntity:GetChildByName("mailTitle")
 				if titleEntity ~= nil and titleEntity.TextComponent ~= nil then
 					titleEntity.TextComponent.Text = title
 				end
-
+		
 				-- 만료일 설정
 				local expireEntity = itemEntity:GetChildByName("mailExpire")
 				if expireEntity ~= nil and expireEntity.TextComponent ~= nil then
@@ -218,14 +228,14 @@ script MailPopupUI extends Component
 						expireEntity.TextComponent.Text = ""
 					end
 				end
-
+		
 				-- 읽음 상태 색상
 				if isRead and itemEntity.SpriteGUIRendererComponent ~= nil then
 					itemEntity.SpriteGUIRendererComponent.Color = Color(0.5, 0.5, 0.5, 1.0)
 				elseif itemEntity.SpriteGUIRendererComponent ~= nil then
 					itemEntity.SpriteGUIRendererComponent.Color = Color(1.0, 1.0, 1.0, 1.0)
 				end
-
+		
 				-- 클릭 이벤트
 				local capturedMailId = mailId
 				itemEntity:ConnectEvent(ButtonClickEvent, function()
@@ -243,7 +253,7 @@ script MailPopupUI extends Component
 			end
 		end
 		self.spawnedMailItems = {}
-
+		
 		-- 템플릿 숨김
 		if self.mailItemTemplate ~= nil then
 			self.mailItemTemplate.Enable = false
@@ -256,8 +266,6 @@ script MailPopupUI extends Component
 		_MailService:RequestMailContent(mailId)
 	end
 
-	-- ========== 메일 내용 표시 ==========
-
 	method void HandleMailContent(string mailJson, boolean isClaimed)
 		if mailJson == nil or mailJson == "" then
 			return
@@ -266,26 +274,26 @@ script MailPopupUI extends Component
 		if mail == nil then
 			return
 		end
-
+		
 		if self.mailContent ~= nil then
 			self.mailContent.Enable = true
 			self.mailContent.Visible = true
 		end
-
+		
 		-- 제목
 		if self.titleText ~= nil and self.titleText.TextComponent ~= nil then
 			self.titleText.TextComponent.Text = mail["title"] or ""
 		end
-
+		
 		-- 본문
 		if self.bodyText ~= nil and self.bodyText.TextComponent ~= nil then
 			self.bodyText.TextComponent.Text = mail["content"] or ""
 		end
-
+		
 		-- 보상 영역
 		local rewardsStr = mail["rewards"] or ""
 		local hasRewards = rewardsStr ~= "" and rewardsStr ~= "[]"
-
+		
 		if self.rewardArea ~= nil then
 			if hasRewards then
 				self.rewardArea.Enable = true
@@ -301,7 +309,7 @@ script MailPopupUI extends Component
 	method void DisplayRewards(string rewardsJson, boolean isClaimed)
 		-- 기존 보상 아이템 제거
 		self:ClearRewardItems()
-
+		
 		if rewardsJson == nil or rewardsJson == "" then
 			return
 		end
@@ -309,11 +317,11 @@ script MailPopupUI extends Component
 		if rewards == nil then
 			return
 		end
-
+		
 		for i, reward in ipairs(rewards) do
 			local rewardType = reward["type"] or ""
 			local amount = tonumber(reward["amount"]) or 0
-
+		
 			local itemEntity = nil
 			if i == 1 then
 				itemEntity = self.rewardItemTemplate
@@ -336,7 +344,7 @@ script MailPopupUI extends Component
 					end
 				end
 			end
-
+		
 			if itemEntity ~= nil then
 				-- 아이콘
 				local iconEntity = itemEntity:GetChildByName("itemIcon")
@@ -349,7 +357,7 @@ script MailPopupUI extends Component
 						iconEntity.SpriteGUIRendererComponent.ImageRUID = "4cc5ffc272224edc809a792b8efa16e3"
 					end
 				end
-
+		
 				-- 수량
 				local countEntity = itemEntity:GetChildByName("itemCount")
 				if countEntity ~= nil and countEntity.TextComponent ~= nil then
@@ -357,7 +365,7 @@ script MailPopupUI extends Component
 				end
 			end
 		end
-
+		
 		-- 수령 버튼 상태
 		if self.getRewardButton ~= nil then
 			if isClaimed then
@@ -381,14 +389,12 @@ script MailPopupUI extends Component
 			end
 		end
 		self.spawnedRewardItems = {}
-
+		
 		if self.rewardItemTemplate ~= nil then
 			self.rewardItemTemplate.Enable = false
 			self.rewardItemTemplate.Visible = false
 		end
 	end
-
-	-- ========== 보상 수령 ==========
 
 	method void OnRewardButtonClick()
 		if self.selectedMailId == "" then
@@ -404,7 +410,7 @@ script MailPopupUI extends Component
 				self.infoPopup.Enable = true
 				self.infoPopup.Visible = true
 			end
-
+		
 			-- 수령 버튼 비활성화
 			if self.getRewardButton ~= nil and self.getRewardButton.ButtonComponent ~= nil then
 				self.getRewardButton.ButtonComponent.Enable = false
@@ -412,17 +418,15 @@ script MailPopupUI extends Component
 		end
 	end
 
-	-- ========== 유틸리티 ==========
-
 	method string FormatExpireDate(integer timestamp)
 		if timestamp <= 0 then
 			return ""
 		end
-		local dt = DateTime(timestamp)
-		if dt == nil then
+		local localDt = DateTime(timestamp)
+		if localDt == nil then
 			return ""
 		end
-		return dt:ToFormattedString("yy-MM-dd HH:mm")
+		return localDt:ToFormattedString("MM/dd/yyyy%-HH:mm:ss")
 	end
 
 end
