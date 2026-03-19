@@ -1,0 +1,18 @@
+@Component
+script MailAdminButton extends Component
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: ButtonComponent
+		-- Space: Client
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local Entity = event.Entity
+		---------------------------------------------------------
+		local adminUI = _EntityService:GetEntityByPath("/ui/MailAdmin")
+		adminUI.MailAdminUI:Open()
+	end
+
+end
