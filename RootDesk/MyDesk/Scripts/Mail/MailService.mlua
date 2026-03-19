@@ -388,6 +388,12 @@ script MailService extends Logic
 			return false
 		end
 
+		local userEntity = _UserService:GetUserEntityByUserId(userId)
+		if userEntity == nil or userEntity.BillingService == nil then
+			log_error("[MailService] Cannot find user entity or BillingService for userId: " .. tostring(userId))
+			return false
+		end
+
 		for _, reward in ipairs(rewards) do
 			local rewardType = reward["type"] or ""
 			local amount = tonumber(reward["amount"]) or 0
@@ -395,11 +401,11 @@ script MailService extends Logic
 			if amount > 0 then
 				local result = -1
 				if rewardType == "dia_free" then
-					result = _BillingService:AddFirstFreeCoin(userId, amount)
+					result = userEntity.BillingService:AddFirstFreeCoin(userId, amount)
 				elseif rewardType == "coin_free" then
-					result = _BillingService:AddSecondFreeCoin(userId, amount)
+					result = userEntity.BillingService:AddSecondFreeCoin(userId, amount)
 				elseif rewardType == "meso_free" then
-					result = _BillingService:AddThirdFreeCoin(userId, amount)
+					result = userEntity.BillingService:AddThirdFreeCoin(userId, amount)
 				end
 
 				if result ~= 0 then
