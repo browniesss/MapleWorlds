@@ -145,6 +145,9 @@ script MailPopupUI extends Component
 	-- ========== 메일 리스트 ==========
 
 	method void HandleMailList(string mailListJson)
+		if mailListJson == nil or mailListJson == "" then
+			return
+		end
 		local mailList = _HttpService:JSONDecode(mailListJson)
 		if mailList == nil then
 			return
@@ -241,6 +244,9 @@ script MailPopupUI extends Component
 	-- ========== 메일 내용 표시 ==========
 
 	method void HandleMailContent(string mailJson, boolean isClaimed)
+		if mailJson == nil or mailJson == "" then
+			return
+		end
 		local mail = _HttpService:JSONDecode(mailJson)
 		if mail == nil then
 			return
@@ -281,6 +287,9 @@ script MailPopupUI extends Component
 		-- 기존 보상 아이템 제거
 		self:ClearRewardItems()
 
+		if rewardsJson == nil or rewardsJson == "" then
+			return
+		end
 		local rewards = _HttpService:JSONDecode(rewardsJson)
 		if rewards == nil then
 			return
@@ -391,13 +400,14 @@ script MailPopupUI extends Component
 	-- ========== 유틸리티 ==========
 
 	method string FormatExpireDate(integer timestamp)
-		local date = os.date("*t", timestamp)
-		if date == nil then
+		if timestamp <= 0 then
 			return ""
 		end
-		return string.format("%02d-%02d-%02d %02d:%02d",
-			date.year % 100, date.month, date.day,
-			date.hour, date.min)
+		local dt = DateTime(timestamp)
+		if dt == nil then
+			return ""
+		end
+		return dt:ToFormattedString("yy-MM-dd HH:mm")
 	end
 
 end

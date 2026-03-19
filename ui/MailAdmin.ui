@@ -16,14 +16,14 @@
       {
         "id": "194b6355-23e4-4a5b-bab5-54cc7571a190",
         "path": "/ui/MailAdmin",
-        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.UIGroupComponent,MOD.Core.CanvasGroupComponent",
+        "componentNames": "MOD.Core.UITransformComponent,MOD.Core.UIGroupComponent,MOD.Core.CanvasGroupComponent,script.MailAdminUI",
         "jsonString": {
           "name": "MailAdmin",
           "path": "/ui/MailAdmin",
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 33,
           "pathConstraints": "//",
           "revision": 1,
@@ -93,6 +93,10 @@
             {
               "@type": "MOD.Core.CanvasGroupComponent",
               "Enable": true
+            },
+            {
+              "@type": "script.MailAdminUI",
+              "Enable": true
             }
           ],
           "@version": 1
@@ -108,7 +112,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "///",
           "revision": 1,
@@ -192,7 +196,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "////",
           "revision": 1,
@@ -266,7 +270,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "/////",
           "revision": 1,
@@ -349,7 +353,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 1,
           "pathConstraints": "/////",
           "revision": 1,
@@ -376,11 +380,11 @@
               "MobileOnly": false,
               "OffsetMax": {
                 "x": -1614.48193,
-                "y": -70.45909
+                "y": -70.45912
               },
               "OffsetMin": {
                 "x": -0.000305175781,
-                "y": -4.95910645E-05
+                "y": -1.90734863E-05
               },
               "Pivot": {
                 "x": 0.5,
@@ -388,7 +392,7 @@
               },
               "RectSize": {
                 "x": 305.5183,
-                "y": 1009.54095
+                "y": 1009.54089
               },
               "UIMode": 1,
               "UIScale": {
@@ -439,7 +443,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "//////",
           "revision": 1,
@@ -563,7 +567,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "///////",
           "revision": 1,
@@ -660,7 +664,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 1,
           "pathConstraints": "//////",
           "revision": 0,
@@ -699,7 +703,7 @@
               },
               "RectSize": {
                 "x": 305.5183,
-                "y": 875.9659
+                "y": 875.9658
               },
               "UIMode": 1,
               "UIScale": {
@@ -714,7 +718,7 @@
               },
               "Position": {
                 "x": 9.15527344E-05,
-                "y": -66.78757,
+                "y": -66.7876,
                 "z": 0.0
               },
               "QuaternionRotation": {
@@ -843,7 +847,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "///////",
           "revision": 1,
@@ -987,7 +991,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "////////",
           "revision": 1,
@@ -1107,7 +1111,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 2,
           "pathConstraints": "/////",
           "revision": 1,
@@ -1181,7 +1185,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "//////",
           "revision": 1,
@@ -1290,7 +1294,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 1,
           "pathConstraints": "//////",
           "revision": 1,
@@ -1380,7 +1384,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "///////",
           "revision": 1,
@@ -1466,7 +1470,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "////////",
           "revision": 0,
@@ -1656,7 +1660,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 2,
           "pathConstraints": "//////",
           "revision": 1,
@@ -1765,7 +1769,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 3,
           "pathConstraints": "//////",
           "revision": 1,
@@ -1791,11 +1795,11 @@
               },
               "MobileOnly": false,
               "OffsetMax": {
-                "x": -4.202568,
+                "x": -4.202507,
                 "y": -120.485535
               },
               "OffsetMin": {
-                "x": 147.262024,
+                "x": 147.261963,
                 "y": 770.1491
               },
               "Pivot": {
@@ -1803,7 +1807,7 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 1451.83862,
+                "x": 1451.83875,
                 "y": 109.365356
               },
               "UIMode": 1,
@@ -1855,7 +1859,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "///////",
           "revision": 1,
@@ -1893,7 +1897,7 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 1431.83862,
+                "x": 1431.83875,
                 "y": 89.36536
               },
               "UIMode": 1,
@@ -1941,7 +1945,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "////////",
           "revision": 0,
@@ -1979,7 +1983,7 @@
                 "y": 0.5
               },
               "RectSize": {
-                "x": 1431.83862,
+                "x": 1431.83875,
                 "y": 89.36536
               },
               "UIMode": 1,
@@ -2132,7 +2136,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 4,
           "pathConstraints": "//////",
           "revision": 1,
@@ -2241,7 +2245,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 5,
           "pathConstraints": "//////",
           "revision": 1,
@@ -2331,7 +2335,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "///////",
           "revision": 1,
@@ -2417,7 +2421,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "////////",
           "revision": 0,
@@ -2608,7 +2612,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 6,
           "pathConstraints": "//////",
           "revision": 1,
@@ -2682,7 +2686,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "///////",
           "revision": 1,
@@ -2768,7 +2772,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "////////",
           "revision": 0,
@@ -2958,7 +2962,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 7,
           "pathConstraints": "//////",
           "revision": 1,
@@ -3067,7 +3071,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 8,
           "pathConstraints": "//////",
           "revision": 1,
@@ -3141,7 +3145,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "///////",
           "revision": 1,
@@ -3227,7 +3231,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "////////",
           "revision": 0,
@@ -3424,7 +3428,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 9,
           "pathConstraints": "//////",
           "revision": 1,
@@ -3535,7 +3539,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 10,
           "pathConstraints": "//////",
           "revision": 1,
@@ -3609,7 +3613,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "///////",
           "revision": 1,
@@ -3734,7 +3738,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "////////",
           "revision": 1,
@@ -3831,7 +3835,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 1,
           "pathConstraints": "///////",
           "revision": 1,
@@ -3956,7 +3960,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 0,
           "pathConstraints": "////////",
           "revision": 1,
@@ -4052,7 +4056,7 @@
           "nameEditable": true,
           "enable": true,
           "visible": true,
-          "localize": false,
+          "localize": true,
           "displayOrder": 1,
           "pathConstraints": "////",
           "revision": 1,

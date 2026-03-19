@@ -161,6 +161,9 @@ script MailAdminUI extends Component
 	-- ========== 메일 리스트 ==========
 
 	method void HandleMailList(string mailListJson)
+		if mailListJson == nil or mailListJson == "" then
+			return
+		end
 		local mailList = _HttpService:JSONDecode(mailListJson)
 		if mailList == nil then
 			return
@@ -270,6 +273,9 @@ script MailAdminUI extends Component
 	end
 
 	method void HandleMailContent(string mailJson)
+		if mailJson == nil or mailJson == "" then
+			return
+		end
 		local mail = _HttpService:JSONDecode(mailJson)
 		if mail == nil then
 			return
@@ -282,7 +288,12 @@ script MailAdminUI extends Component
 		if self.endDateInput ~= nil and self.endDateInput.TextInputComponent ~= nil then
 			local expireAt = tonumber(mail["expireAt"]) or 0
 			if expireAt > 0 then
-				self.endDateInput.TextInputComponent.Text = tostring(expireAt)
+				local dt = DateTime(expireAt)
+				if dt ~= nil then
+					self.endDateInput.TextInputComponent.Text = dt:ToFormattedString("yyyy-MM-dd")
+				else
+					self.endDateInput.TextInputComponent.Text = ""
+				end
 			else
 				self.endDateInput.TextInputComponent.Text = ""
 			end
@@ -357,6 +368,8 @@ script MailAdminUI extends Component
 			self.selectedMailId = message
 			self.isNewMode = false
 			_MailService:RequestAdminMailList()
+		else
+			log("[MailAdmin] 저장 실패: " .. tostring(message))
 		end
 	end
 

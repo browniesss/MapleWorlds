@@ -58,7 +58,8 @@ script MailService extends Logic
 	@ExecSpace("ServerOnly")
 	method void SaveMailIndex()
 		local ids = {}
-		for k, _ in pairs(self.mailData) do
+		local mailTable = self.mailData:ToTable()
+		for k, _ in pairs(mailTable) do
 			table.insert(ids, k)
 		end
 		local json = _HttpService:JSONEncode(ids)
@@ -85,6 +86,31 @@ script MailService extends Logic
 		local time = DateTime.UtcNow.Elapsed
 		local rand = math.random(1000, 9999)
 		return "mail_" .. tostring(time) .. "_" .. tostring(rand)
+	end
+
+	-- expireAt 문자열을 DateTime.Elapsed(ms)로 변환
+	-- 입력 형식: "YYYY-MM-DD" 또는 빈 문자열(만료 없음)
+	@ExecSpace("ServerOnly")
+	method integer ParseExpireAt(string expireAtStr)
+		if expireAtStr == nil or expireAtStr == "" then
+			return 0
+		end
+		-- 이미 숫자(ms)로 저장된 경우 그대로 사용
+		local asNum = tonumber(expireAtStr)
+		if asNum ~= nil then
+			-- 숫자가 ms 단위(매우 큰 수)인지 날짜 형식 착오인지 구분
+			-- ms 단위는 보통 10^15 이상, 날짜 문자열에서 온 숫자는 8자리(YYYYMMDD)
+			if asNum > 99999999 then
+				-- 이미 ms 단위 Elapsed 값
+				return asNum
+			end
+		end
+		-- "YYYY-MM-DD" 파싱
+		local dt = DateTime(expireAtStr, "yyyy-MM-dd")
+		if dt == nil then
+			return 0
+		end
+		return dt.Elapsed
 	end
 
 	-- ========== 유저 데이터 ==========
@@ -122,13 +148,22 @@ script MailService extends Logic
 			return
 		end
 
+		-- 보상 JSON 유효성 검증
+		if rewards ~= nil and rewards ~= "" and rewards ~= "[]" then
+			local rewardsParsed = _HttpService:JSONDecode(rewards)
+			if rewardsParsed == nil then
+				self:OnMailSaved(userId, false, "Invalid rewards JSON format")
+				return
+			end
+		end
+
 		local mailId = self:GenerateMailId()
 		local mail = {}
 		mail["id"] = mailId
 		mail["title"] = title
 		mail["content"] = content
 		mail["targetUser"] = targetUser
-		mail["expireAt"] = tonumber(expireAt) or 0
+		mail["expireAt"] = self:ParseExpireAt(expireAt)
 		mail["rewards"] = rewards
 
 		local mailJson = _HttpService:JSONEncode(mail)
@@ -152,12 +187,21 @@ script MailService extends Logic
 			return
 		end
 
+		-- 보상 JSON 유효성 검증
+		if rewards ~= nil and rewards ~= "" and rewards ~= "[]" then
+			local rewardsParsed = _HttpService:JSONDecode(rewards)
+			if rewardsParsed == nil then
+				self:OnMailSaved(userId, false, "Invalid rewards JSON format")
+				return
+			end
+		end
+
 		local mail = {}
 		mail["id"] = mailId
 		mail["title"] = title
 		mail["content"] = content
 		mail["targetUser"] = targetUser
-		mail["expireAt"] = tonumber(expireAt) or 0
+		mail["expireAt"] = self:ParseExpireAt(expireAt)
 		mail["rewards"] = rewards
 
 		local mailJson = _HttpService:JSONEncode(mail)
@@ -196,7 +240,8 @@ script MailService extends Logic
 		local now = DateTime.UtcNow.Elapsed
 		local result = {}
 
-		for mailId, mailJson in pairs(self.mailData) do
+		local mailTable = self.mailData:ToTable()
+		for mailId, mailJson in pairs(mailTable) do
 			local mail = _HttpService:JSONDecode(mailJson)
 			if mail ~= nil then
 				local targetUser = mail["targetUser"] or ""
@@ -369,7 +414,8 @@ script MailService extends Logic
 		end
 
 		local result = {}
-		for mailId, mailJson in pairs(self.mailData) do
+		local mailTable = self.mailData:ToTable()
+		for mailId, mailJson in pairs(mailTable) do
 			local mail = _HttpService:JSONDecode(mailJson)
 			if mail ~= nil then
 				local item = {}
