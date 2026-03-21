@@ -1,0 +1,18 @@
+@Component
+script MailOpenButton extends Component
+
+	@EventSender("Self")
+	handler HandleButtonClickEvent(ButtonClickEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: ButtonComponent
+		-- Space: Client
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local Entity = event.Entity
+		---------------------------------------------------------
+		local mailUi = _EntityService:GetEntityByPath("/ui/MailPopup")
+		mailUi.MailPopupUI:Open()
+	end
+
+end
