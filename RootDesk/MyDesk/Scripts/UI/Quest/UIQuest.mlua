@@ -9,15 +9,22 @@ script UIQuest extends Component
 
 	property table spawnedRewardEntities = {}
 
+	-- QuestStateData 캐시: stateId -> { color, text }
+	property table questStateCache = {}
+
 	property TextComponent questInfoText = nil
 
 	property TextComponent questStateText = nil
 
 	property Entity questCompleteEntity = nil
 
+	property Entity questUnderwayEntity = nil
+
 	property Entity scrollView = nil
 
 	property Entity staticRewardEntity = nil
+
+	property Entity backgroundLine = nil
 
 	property any clickHandler = nil
 
@@ -25,14 +32,17 @@ script UIQuest extends Component
 	method void OnBeginPlay()
 		self:LoadQuestData()
 		self:LoadRewardData()
+		self:LoadQuestStateData()
 		
 		local path = self.Entity.Path
 		
 		self.questInfoText = _EntityService:GetEntityByPath(path .. "/QuestInfo/QuestInfoText").TextComponent
 		self.questStateText = _EntityService:GetEntityByPath(path .. "/QuestComplete/QuestState").TextComponent
 		self.questCompleteEntity = _EntityService:GetEntityByPath(path .. "/QuestComplete")
+		self.questUnderwayEntity = _EntityService:GetEntityByPath(path .. "/QuestUnderway")
 		self.scrollView = _EntityService:GetEntityByPath(path .. "/QuestReward/Scroll_QuestReward")
 		self.staticRewardEntity = _EntityService:GetEntityByPath(path .. "/QuestReward/Scroll_QuestReward/QuestReward")
+		self.backgroundLine = _EntityService:GetEntityByPath(path .. "/BackgroundLine")
 		
 		-- 버튼 기본 비활성화
 		if self.Entity.ButtonComponent ~= nil then
@@ -76,6 +86,29 @@ script UIQuest extends Component
 		end
 	end
 
+	method void LoadQuestStateData()
+		local dataSet = _DataService:GetTable("QuestStateData")
+		if dataSet == nil then
+			return
+		end
+		for i = 1, dataSet:GetRowCount() do
+			local id = tonumber(dataSet:GetCell(i, "id"))
+			local colorHex = tostring(dataSet:GetCell(i, "Color"))
+			local text = tostring(dataSet:GetCell(i, "Column0"))
+			self.questStateCache[id] = {
+				color = self:HexToColor(colorHex),
+				text = text
+			}
+		end
+	end
+
+	method Color HexToColor(string hex)
+		local r = tonumber(string.sub(hex, 1, 2), 16) / 255
+		local g = tonumber(string.sub(hex, 3, 4), 16) / 255
+		local b = tonumber(string.sub(hex, 5, 6), 16) / 255
+		return Color(r, g, b, 1)
+	end
+
 	method void OnQuestDataReceived(integer questId, integer state, number progress, table rewards)
 		self:UpdateRewardDisplays(rewards)
 		self:UpdateQuestUI(questId, state, progress)
@@ -93,18 +126,28 @@ script UIQuest extends Component
 			self.questInfoText.Text = questData.name .. "\n" .. questData.info .. " " .. progressText
 		end
 		
+		-- QuestStateData 기반 색상 및 텍스트 적용
+		local stateData = self.questStateCache[state]
+		if stateData ~= nil then
+			-- BackgroundLine 색상
+			if self.backgroundLine ~= nil and self.backgroundLine.SpriteGUIRendererComponent ~= nil then
+				self.backgroundLine.SpriteGUIRendererComponent.Color = stateData.color
+			end
+			-- QuestState 텍스트 및 색상
+			if self.questStateText ~= nil then
+				self.questStateText.Text = stateData.text
+				self.questStateText.FontColor = stateData.color
+			end
+		end
+
+		-- QuestUnderway: Underway(1) 상태일 때만 표시
+		if self.questUnderwayEntity ~= nil then
+			self.questUnderwayEntity.Enable = (state == 1)
+		end
+
 		-- QuestComplete: Complete(2) 상태일 때만 표시
 		if self.questCompleteEntity ~= nil then
 			self.questCompleteEntity.Enable = (state == 2)
-		end
-		
-		-- QuestState 텍스트
-		if self.questStateText ~= nil then
-			if state == 1 then
-				self.questStateText.Text = "진행 중"
-			elseif state == 2 then
-				self.questStateText.Text = "완료"
-			end
 		end
 		
 		-- 버튼: Complete(2) 상태일 때만 활성화
@@ -151,12 +194,12 @@ script UIQuest extends Component
 			return
 		end
 		
-		local icon = entity:GetChildByName("RewardIcon", false)
+		local icon = entity:GetChildByName("RewardIcon", true)
 		if icon ~= nil and icon.SpriteGUIRendererComponent ~= nil then
 			icon.SpriteGUIRendererComponent.ImageRUID = rewardData.ruid
 		end
-		
-		local count = entity:GetChildByName("RewardCount", false)
+
+		local count = entity:GetChildByName("RewardCount", true)
 		if count ~= nil and count.TextComponent ~= nil then
 			count.TextComponent.Text = tostring(amount)
 		end

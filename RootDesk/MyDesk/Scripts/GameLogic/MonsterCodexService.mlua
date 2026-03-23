@@ -156,7 +156,7 @@ script MonsterCodexService extends Component
 
 		-- 퀘스트 진행도 업데이트 (KillMonster)
 		if self.Entity.QuestService ~= nil then
-			self.Entity.QuestService:OnProgressServer(userId, "KillMonster", 1, 0, 0)
+			self.Entity.QuestService:OnProgressServer(userId, "KillMonster", 1, "")
 		end
 
 		-- 도감에 등록된 몬스터인지 확인

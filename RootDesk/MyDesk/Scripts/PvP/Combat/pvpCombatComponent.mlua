@@ -336,6 +336,11 @@ script pvpCombatComponent extends Component
 			if statsUser ~= nil and statsUser.pvpUserComponent ~= nil then
 				statsUser.pvpUserComponent:AddGameResult(self.currentUserId, isWin)
 			end
+
+			-- 퀘스트 진행도 업데이트 (PlayPVP)
+			if statsUser ~= nil and statsUser.QuestService ~= nil then
+				statsUser.QuestService:OnProgressServer(self.currentUserId, "PlayPVP", 1, "")
+			end
 		end
 
 		self:GameEndBack(isWin, deltaScore, newScore)

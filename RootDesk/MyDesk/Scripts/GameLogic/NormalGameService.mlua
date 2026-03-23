@@ -70,7 +70,7 @@ script NormalGameService extends Component
 
 		-- 퀘스트 진행도 업데이트 (ClearStage) - 튜토리얼 포함 모든 스테이지
 		if self.Entity.QuestService ~= nil then
-			self.Entity.QuestService:OnProgressServer(senderUserId, "ClearStage", 1, clearedChapter, clearedStage)
+			self.Entity.QuestService:OnProgressServer(senderUserId, "ClearStage", 1, tostring(clearedChapter) .. "-" .. tostring(clearedStage))
 		end
 
 		-- 튜토리얼 스테이지(0,0)는 보상/랭킹/진행도 저장 없이 UI만 표시

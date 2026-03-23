@@ -223,8 +223,15 @@ script BillingService extends Component
 		
 		self.FirstFreeCoin = freeCoin
 		self.FirstPaidCoin = paidCoin
-		
-		return self:SAVE(userId)
+
+		local result = self:SAVE(userId)
+		if result == 0 then
+			-- 퀘스트 진행도 업데이트 (UseMushDia)
+			if self.Entity.QuestService ~= nil then
+				self.Entity.QuestService:OnProgressServer(userId, "UseMushDia", usage, "")
+			end
+		end
+		return result
 	end
 
 	@ExecSpace("ServerOnly")
@@ -249,8 +256,15 @@ script BillingService extends Component
 		
 		self.SecondFreeCoin = freeCoin
 		self.SecondPaidCoin = paidCoin
-		
-		return self:SAVE(userId)
+
+		local result = self:SAVE(userId)
+		if result == 0 then
+			-- 퀘스트 진행도 업데이트 (UseMushGold)
+			if self.Entity.QuestService ~= nil then
+				self.Entity.QuestService:OnProgressServer(userId, "UseMushGold", usage, "")
+			end
+		end
+		return result
 	end
 
 	@ExecSpace("ServerOnly")

@@ -114,28 +114,27 @@ script QuestService extends Component
 		ds:SetAndWait("Quest_current", tostring(questId))
 	end
 
+	-- triggerType: "KillMonster" | "KillBoss" | "ClearStage" | "UseMeso" | "UseMushGold" | "UseMushDia" | "Breakthrough" | "PlayPVP" | "PlayMatrix"
+	-- param: TriggerParam 매칭용 (예: "0-0" 스테이지, 빈 문자열이면 타입만 매칭)
 	@ExecSpace("ServerOnly")
-	method void OnProgressServer(string uid, string triggerType, number value, integer chapter, integer stage)
+	method void OnProgressServer(string uid, string triggerType, number value, string param)
 		local cache = self.userQuestCache[uid]
 		if cache == nil then
 			return
 		end
-		
+
 		local questData = self.questDataCache[cache.currentId]
 		if questData == nil then
 			return
 		end
-		
+
 		if questData.triggerType ~= triggerType then
 			return
 		end
-		
-		-- ClearStage: TriggerParam이 있으면 특정 스테이지 조건 체크
-		if triggerType == "ClearStage" and questData.triggerParam ~= "" then
-			local actualParam = tostring(chapter) .. "-" .. tostring(stage)
-			if questData.triggerParam ~= actualParam then
-				return
-			end
+
+		-- TriggerParam이 있으면 param까지 매칭
+		if questData.triggerParam ~= "" and questData.triggerParam ~= param then
+			return
 		end
 		
 		-- Underway(1) 상태여야 진행

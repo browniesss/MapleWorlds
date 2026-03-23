@@ -646,6 +646,15 @@ script MatrixGameService extends Component
 	-- 서버에서 모든 유닛 제거 (적 + 내 유닛)
 	@ExecSpace("Server")
 	method void ClearAllUnitsOnServer()
+		-- 퀘스트 진행도 업데이트 (PlayMatrix)
+		local uid = senderUserId
+		if uid ~= nil and uid ~= "" then
+			local user = _UserService:GetUserEntityByUserId(uid)
+			if user ~= nil and user.QuestService ~= nil then
+				user.QuestService:OnProgressServer(uid, "PlayMatrix", 1, "")
+			end
+		end
+
 		local gm = self.Entity.GameManager
 		local mapPath = gm:GetGameMapName()
 
