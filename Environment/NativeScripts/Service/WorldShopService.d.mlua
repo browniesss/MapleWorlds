@@ -7,7 +7,7 @@ script WorldShopService extends Service
 	---@sealed
 	method WorldShopProduct GetProductAndWait(string productId) end
 
-	---@description "Obtains entity that can check the information of products matching the search condition. Script executions are suspended during the operation. Searches all kinds of products when designating nil to productType, while searching all products that can be searched when designating nil to productStatus. The release environment allows the search of products in Register, Ing, Waiting, and End statuses only, while the maker environment allows the search of products in Register, Waiting, Ing, and End statuses."
+	---@description "Obtains an entity that can check the information of products matching the search condition. Script executions are suspended during the operation. The release environment allows the search of products in Waiting, Ing, and End statuses, while the maker environment allows the search of products in Register, Waiting, Ing, and End statuses."
 	---@sealed
 	method WorldShopProductPages GetProductsAndWait(WorldShopProductType productType, WorldShopProductStatus productStatus) end
 
@@ -16,7 +16,7 @@ script WorldShopService extends Service
 	@ExecSpace("ClientOnly")
 	method void PromptPurchase(string productId) end
 
-	---@description "Specifies the callback that provides the product when a purchase is made. The callback should check the purchase information with the received WorldShopPurchaseInfo and return true if product payment is successful, otherwise false. If the purchase did not return true, the callback that issues a product will run again when the user re-enters the World."
+	---@description "Specifies a callback that issues a product when purchasing a product. The callback should check the purchase information against the received WorldShopPurchaseInfo and return true if the product payment is successful, otherwise false."
 	---@sealed
 	@ExecSpace("ServerOnly")
 	method void SetProcessPurchaseCallback(func<WorldShopPurchaseInfo> -> boolean callback) end

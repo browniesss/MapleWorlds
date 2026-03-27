@@ -1,0 +1,80 @@
+@Component
+script QuestRewardPopup extends Component
+
+	property string REWARD_ITEM_MODEL_ID = "model://727fffcd-6106-4dcb-98c2-4654b414d7ed"
+
+	property TextComponent titleText = nil
+
+	property TextComponent questNameText = nil
+
+	property Entity rewardScroll = nil
+
+	property Entity confirmButton = nil
+
+	property table spawnedRewardEntities = {}
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		local path = self.Entity.Path
+
+		self.titleText = _EntityService:GetEntityByPath(path .. "/Panel/Title").TextComponent
+		self.questNameText = _EntityService:GetEntityByPath(path .. "/Panel/QuestName").TextComponent
+		self.rewardScroll = _EntityService:GetEntityByPath(path .. "/Panel/RewardScroll")
+		self.confirmButton = _EntityService:GetEntityByPath(path .. "/Panel/ConfirmButton")
+
+		if self.confirmButton ~= nil then
+			self.confirmButton:ConnectEvent(ButtonClickEvent, function()
+				self:Close()
+			end)
+		end
+
+		-- 기본 숨김
+		self.Entity.Enable = false
+	end
+
+	method void Show(string questName, table rewards)
+		self:ClearSpawnedRewards()
+
+		if self.titleText ~= nil then
+			self.titleText.Text = "퀘스트 완료!"
+		end
+
+		if self.questNameText ~= nil then
+			self.questNameText.Text = questName
+		end
+
+		-- 모든 보상을 RewardItem 프리팹으로 동적 생성
+		if self.rewardScroll ~= nil then
+			for i = 1, #rewards do
+				local reward = rewards[i]
+				local spawnedEntity = _SpawnService:SpawnByModelId(
+					self.REWARD_ITEM_MODEL_ID,
+					"PopupReward_" .. tostring(i),
+					Vector3.zero,
+					self.rewardScroll
+				)
+				if spawnedEntity ~= nil and spawnedEntity.RewardItem ~= nil then
+					spawnedEntity.RewardItem:SetReward(tostring(reward.rewardId), reward.rewardCount)
+					table.insert(self.spawnedRewardEntities, spawnedEntity)
+				end
+			end
+		end
+
+		self.Entity.Enable = true
+	end
+
+	method void Close()
+		self:ClearSpawnedRewards()
+		self.Entity.Enable = false
+	end
+
+	method void ClearSpawnedRewards()
+		for _, entity in ipairs(self.spawnedRewardEntities) do
+			if entity ~= nil then
+				_EntityService:Destroy(entity)
+			end
+		end
+		self.spawnedRewardEntities = {}
+	end
+
+end

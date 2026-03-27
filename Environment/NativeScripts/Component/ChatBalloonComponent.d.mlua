@@ -7,7 +7,7 @@ script ChatBalloonComponent extends Component
 	@Sync
 	property boolean ArrowChatEnabled = true
 
-	---@description "Sets whether to display chat balloons automatically or not. If the value is true, chat balloons will be visible during ShowDuration and invisible during HideDuration. This action will be on repeat. If a player's ChatModeEnabled value is true, automatic chat balloon feature will not operate."
+	---@description "Sets whether to display chat balloons automatically or not."
 	---@sealed
 	@Sync
 	property boolean AutoShowEnabled = false
@@ -65,6 +65,16 @@ script ChatBalloonComponent extends Component
 	---@sealed
 	@Sync
 	property float ShowDuration = 5
+
+	---@description "This is the Id of the TextSpriteSet entry that will be applied to text."
+	---@sealed
+	@Sync
+	property string TextSpriteSetId = ""
+
+	---@description "This is the Id of the TextStyleSheet entry that will be applied to text."
+	---@sealed
+	@Sync
+	property string TextStyleSheetId = ""
 
 	emitter EmitChatBalloonEvent(ChatBalloonEvent event) end
 

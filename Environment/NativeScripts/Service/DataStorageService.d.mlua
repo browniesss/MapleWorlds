@@ -8,10 +8,20 @@ script DataStorageService extends Service
 	@ExecSpace("ServerOnly")
 	method int32 DeleteCreatorDataStorageAndWait() end
 
+	---@description "Deletes CreatorDataStorage of a certain name and returns the error code. Script executions are suspended during the operation."
+	---@sealed
+	@ExecSpace("ServerOnly")
+	method int32 DeleteCreatorDataStorageAndWait(string name) end
+
 	---@description "Deletes CreatorDataStorage. This operation is performed asynchronously, and the function passed to the callbackFunction is called with the error code upon completion of the operation."
 	---@sealed
 	@ExecSpace("ServerOnly")
 	method void DeleteCreatorDataStorageAsync(func<int32> callbackFunction) end
+
+	---@description "Deletes CreatorDataStorage of a certain name. This operation is performed asynchronously, and the function passed to the callbackFunction is called with the error code and the name of CreatorDataStorage upon completion of the operation."
+	---@sealed
+	@ExecSpace("ServerOnly")
+	method void DeleteCreatorDataStorageAsync(string name, func<int32, string> callbackFunction) end
 
 	---@description "Deletes GlobalDataStorage of a certain name and returns the error code. Script executions are suspended during the operation."
 	---@sealed
@@ -59,6 +69,21 @@ script DataStorageService extends Service
 	---@sealed
 	@ExecSpace("ServerOnly")
 	method CreatorDataStorage GetCreatorDataStorage() end
+
+	---@description "Acquires CreatorDataStorage of a certain name."
+	---@sealed
+	@ExecSpace("ServerOnly")
+	method CreatorDataStorage GetCreatorDataStorage(string name) end
+
+	---@description "Looks up CreatorDataStorage in page units. Returns the error code and inquiry entity when the operation is completed. Script executions are suspended during the operation."
+	---@sealed
+	@ExecSpace("ServerOnly")
+	method int32, CreatorDataStoragePages GetCreatorDataStoragePagesAndWait() end
+
+	---@description "Looks up CreatorDataStorage in page units. This operation is performed asynchronously. The function passed to the callbackFunction is called with the error code and the inquiry entity upon completion of the operation."
+	---@sealed
+	@ExecSpace("ServerOnly")
+	method void GetCreatorDataStoragePagesAsync(func<int32, CreatorDataStoragePages> callbackFunction) end
 
 	---@description "This function is now deprecated. Use one of functions from GetGlobalDataStorage(string), GetUserDataStorage(string), GetCreatorDataStorage(), or GetSortableDataStorage(string) for the intended use."
 	---@deprecated

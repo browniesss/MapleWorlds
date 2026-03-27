@@ -20,10 +20,10 @@ script HttpService extends Service
 	---@sealed
 	method string JSONEncode(table input) end
 
-	---@description "Can send Http Post requests. Supported formats: content, application/json, application/x-www-form-urlencoded, and plain/text. Declare it in the header of tables with the format of key - value tables."
+	---@description "Sends an HTTP Post request and gets a response. Data to be included in the header of the tables is sent to headers with the format of key - value tables."
 	---@sealed
 	@ExecSpace("ServerOnly")
-	method string PostAndWait(string url, string content, HttpContentType contentType = 0, Dictionary<string, string> headers = nil) end
+	method string PostAndWait(string url, string content, HttpContentType contentType = HttpContentType.ApplicationJson, Dictionary<string, string> headers = nil) end
 
 	---@description "Sends Http request and gets a response. httpMethod supports get, post, put, delete, head. Content format must be specified in headers."
 	---@sealed

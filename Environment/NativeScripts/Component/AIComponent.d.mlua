@@ -18,7 +18,7 @@ script AIComponent extends Component
 	---@sealed
 	method BTNode CreateLeafNode(string nodeName, func<float> -> BehaviourTreeStatus onBehaveFunction) end
 
-	---@description "Creates an Action node based on BTNodeType. The nodeType is the type name of BTNodeType. If the onBehaveFunction isn't nil, the function that was passed to the onBehaveFunction will be called instead of functions OnInit() and OnBehave() of the BTNodeType. The parameter of the onBehaveFunction is delta, which means time per frame. "
+	---@description "Create an Action node based on BTNodeType."
 	---@sealed
 	method BTNode CreateNode(string nodeType, string nodeName = nil, func<float> -> BehaviourTreeStatus onBehaveFunction = nil) end
 

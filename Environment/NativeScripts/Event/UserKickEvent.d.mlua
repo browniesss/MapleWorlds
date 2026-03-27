@@ -17,6 +17,6 @@ script UserKickEvent extends EventType
 
 	constructor UserKickEvent(IUser user) end
 
-	constructor UserKickEvent(KickReason kickReason = 0, string userId = nil, string profileCode = nil) end
+	constructor UserKickEvent(KickReason kickReason = KickReason.Profanity, string userId = nil, string profileCode = nil) end
 
 end

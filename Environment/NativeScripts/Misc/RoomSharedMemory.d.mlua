@@ -47,12 +47,12 @@ script RoomSharedMemory
 	@ExecSpace("ServerOnly")
 	method void BatchSetVariableAsync(Dictionary<string, string> nameValues, func<Dictionary<string, SharedVariableResult>> callbackFunction) end
 
-	---@description "Modifies the values of variables corresponding to the SharedVariableKeyInfo entered. Does not modify the value if the ETag of SharedVariableKeyInfo is not up to date. Modifies the value unconditionally if ETag is null or an empty string. Returns a table containing variable names and resulting code pairs. Script executions are suspended during the operation."
+	---@description "Modifies the values of variables corresponding to the entered SharedVariableKeyInfo. Returns a table containing variable names and result pairs. Suspends script executions during performance."
 	---@sealed
 	@ExecSpace("ServerOnly")
 	method Dictionary<string, SharedVariableResult> BatchUpdateVariableAndWait(Dictionary<SharedVariableKeyInfo, string> keyValues) end
 
-	---@description "Modifies the values of variables corresponding to the entered SharedVariableKeyInfo. Does not modify the value if the ETag of SharedVariableKeyInfo is not up to date. Modifies the value unconditionally if ETag is null or an empty string. The function passed as callbackFunction is called with a table containing variable names and result pairs upon completion of the operation."
+	---@description "Modifies the values of variables corresponding to the entered SharedVariableKeyInfo. Does not modify the value if the ETag of SharedVariableKeyInfo is not up to date. Modifies the value unconditionally if ETag is nill or an empty string. The function passed as callbackFunction is called with a table containing variable names and result pairs upon completion of the operation."
 	---@sealed
 	@ExecSpace("ServerOnly")
 	method void BatchUpdateVariableAsync(Dictionary<SharedVariableKeyInfo, string> keyValues, func<Dictionary<string, SharedVariableResult>> callbackFunction) end
@@ -97,12 +97,12 @@ script RoomSharedMemory
 	@ExecSpace("ServerOnly")
 	method void SetVariableAsync(string name, string value, func<SharedVariableResult> callbackFunction) end
 
-	---@description "Modifies variable values. Does not modify the value if the ETag of keyInfo is not up to date. Modifies the value unconditionally if ETag is null or an empty string. Suspends script executions during performance."
+	---@description "Modifies variable values. Script executions are suspended during the operation."
 	---@sealed
 	@ExecSpace("ServerOnly")
 	method SharedVariableResult UpdateVariableAndWait(SharedVariableKeyInfo keyInfo, string value) end
 
-	---@description "Modifies variable values. Does not modify the value if the ETag of keyInfo is not up to date. Modifies the value unconditionally if ETag is null or an empty string. The function passed to the callbackFunction is called with the result codes and latest variable information upon completion of the operation."
+	---@description "Modifies variable values. The function passed to the callbackFunction is called with the result codes and latest variable information upon completion of the operation."
 	---@sealed
 	@ExecSpace("ServerOnly")
 	method void UpdateVariableAsync(SharedVariableKeyInfo keyInfo, string value, func<SharedVariableResult> callbackFunction) end

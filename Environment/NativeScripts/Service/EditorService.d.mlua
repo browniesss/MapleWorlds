@@ -55,7 +55,7 @@ script EditorService extends Service
 	---@sealed
 	method boolean GetModelProperty(string modelId, string componentName, string propertyName, func<string> callback) end
 
-	---@description "Loads the map corresponding to mapId. When save is set to true, the current map is saved."
+	---@description "Loads the map corresponding to mapId."
 	---@sealed
 	method void LoadMap(string mapId, boolean save) end
 

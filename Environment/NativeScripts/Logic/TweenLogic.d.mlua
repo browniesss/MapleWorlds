@@ -3,11 +3,11 @@
 @Logic
 script TweenLogic extends Logic
 
-	---@description "Interpolates between the start and end values. Interpolate tweenTime divided by duration. Returns endValue if duration is 0, may return unexpected values if tweenTime is less than 0 or greater than duration."
+	---@description "Interpolates between the start and end values. Interpolates tweenTime divided by duration."
 	---@sealed
 	method float Ease(float startValue, float endValue, float duration, EaseType type, float tweenTime) end
 
-	---@description "Creates a Tweener entity that automatically calls a native component's method and performs the interpolation between the start value and end value. Only the native component can be set as targetComponent. A void method type that receives one float as a parameter from the target component must be set for methodName. It's more effective than using MakeTween()."
+	---@description "Creates a Tweener entity that automatically calls a native component's method and performs the interpolation between the start value and end value. Only the native component can be set as targetComponent."
 	---@sealed
 	method Tweener MakeNativeTween(float startValue, float endValue, float duration, EaseType type, Component targetComponent, string methodName) end
 

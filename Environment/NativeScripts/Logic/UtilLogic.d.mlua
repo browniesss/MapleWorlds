@@ -11,7 +11,7 @@ script UtilLogic extends Logic
 	---@sealed
 	property number ServerElapsedSeconds
 
-	---@description "After finding a concave polygon that wraps all of the points, it returns the points that make up the polygon. Returned points are sorted by link order. Concavity indicates how concave the polygon is and can take values between 0 and 1. The larger the samplingWeight value, the more points are selected to create the polygon. Values from 0 and higher can be used, and we recommend using a value between 1 and 1.2."
+	---@description "After finding a concave polygon that wraps all of the points, it returns the points that make up the polygon. Returned points are sorted by link order."
 	---@sealed
 	method table<Vector2> ConcaveHull(table<Vector2> points, float concavity, float samplingWeight) end
 

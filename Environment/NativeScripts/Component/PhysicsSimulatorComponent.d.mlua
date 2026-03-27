@@ -12,7 +12,7 @@ script PhysicsSimulatorComponent extends Component
 	@Sync
 	property boolean Paused = false
 
-	---@description "Sets the range for physics calculations. If Entity is out of range, physics calculations will no longer occur. For example, if the value is set to (100, 100), a 200 x 200 rectangular area will be the physics calculations range from center of axis (0,0)."
+	---@description "Sets the range for physics calculations. If the entity is out of range, physics calculations will stop."
 	---@sealed
 	@Sync
 	property Vector2 WorldBounds = Vector2(10000.000, 10000.000)

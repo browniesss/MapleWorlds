@@ -8,15 +8,15 @@ script BadgeService extends Service
 	@ExecSpace("ServerOnly")
 	method boolean AwardBadgeAndWait(string userId, string badgeId) end
 
-	---@description "Acquires the badge information. Script executions are suspended during the operation. In the release environment, it can obtain the badge information in Waiting, Ing, and End statuses. In the maker environment, it can obtain the badge information in Register, Waiting, Ing, and End statuses."
+	---@description "Acquires the badge information. Script executions are suspended during the operation."
 	---@sealed
 	method BadgeInfo GetBadgeInfoAndWait(string badgeId) end
 
-	---@description "Acquires the badge information. This operation is performed asynchronously, and the result can be received with the specified callback. The first parameter of the callback is the badge's Id, and the second one is the badge's information. In the released world, it can obtain the badge information in Waiting, Ing, and End statuses. In the world still in progress, it can obtain the badge information in Register, Waiting, Ing, and End statuses."
+	---@description "Acquires the badge information. This operation is performed asynchronously, and the results can be retrieved with the specified callback. "
 	---@sealed
 	method void GetBadgeInfoAsync(string badgeId, func<string, BadgeInfo> callback) end
 
-	---@description "Obtains an Entity that can check the information of badges matching the search condition. Script executions are suspended during the operation. Searches the badges of all classes when designating nil to badgeGrades and searches the badges in all statuses that can be searched when designating nil to badgeStatus. The release environment allows the search of badges in Waiting, Ing, and End statuses, while the maker environment allows the search of badges in Register, Waiting, Ing, and End statuses."
+	---@description "Retrieves an entity that can check the information of badges matching the search condition. Script executions are suspended during the operation."
 	---@sealed
 	method BadgeInfoPages GetBadgeInfosAndWait(table<BadgeGrade> badgeGrades, BadgeStatus badgeStatus) end
 
@@ -24,7 +24,7 @@ script BadgeService extends Service
 	---@sealed
 	method boolean UserHasBadgeAndWait(string userId, string badgeId) end
 
-	---@description "Checks if the user has a badge. This operation is performed asynchronously, and the result can be received with the specified callback. The first parameter is the user's Id, the second is the badge's Id, and the third is whether the user has the badge. In Worlds in progress, there will be no badges initially."
+	---@description "Checks if the user has a badge. This operation is performed asynchronously, and the result can be received with the specified callback."
 	---@sealed
 	method void UserHasBadgeAsync(string userId, string badgeId, func<string, string, boolean> callback) end
 

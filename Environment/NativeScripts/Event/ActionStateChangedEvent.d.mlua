@@ -27,6 +27,6 @@ script ActionStateChangedEvent extends EventType
 	---@sealed
 	property int32 StartFrameIndex = 0
 
-	constructor ActionStateChangedEvent(string coreActionName = "", string partsActionName = "", float playRate = 1, SpriteAnimClipPlayType playType = 1, int32 startFrameIndex = 0, int32 endFrameIndex = 2147483647) end
+	constructor ActionStateChangedEvent(string coreActionName = "", string partsActionName = "", float playRate = 1, SpriteAnimClipPlayType playType = SpriteAnimClipPlayType.Loop, int32 startFrameIndex = 0, int32 endFrameIndex = 2147483647) end
 
 end

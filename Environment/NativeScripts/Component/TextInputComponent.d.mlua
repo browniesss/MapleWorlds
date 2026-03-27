@@ -58,7 +58,7 @@ script TextInputComponent extends Component
 	---@sealed
 	method void ActivateInputField() end
 
-	---@description "Finds and returns the text matching the current language settings in LocaleDataSet when IsLocalizationKey's value is true. A Key will be used as PlaceHolder's property value. Returns PlaceHolder's property value when IsLocalizationKey's value is false."
+	---@description "Returns the text matching the current language settings in LocaleDataSet when IsLocalizationKey's value is true. A Key will be used as PlaceHolder's property value."
 	---@sealed
 	method string GetLocalizedPlaceHolder() end
 

@@ -50,7 +50,7 @@ script FastVector3
 	---@description "Initializes FastVector3 to the specified value."
 	constructor FastVector3(Vector3 vector3) end
 
-	---@description "Finds the angle between two Vectors. Returns values between 0 to 180."
+	---@description "Finds the angle between two vectors. Returns a value between 0 and 180."
 	---@sealed
 	method number Angle(FastVector3 b) end
 
@@ -62,7 +62,7 @@ script FastVector3
 	---@sealed
 	method FastVector3 Cross(FastVector3 b) end
 
-	---@description "Finds the distance between two Vectors."
+	---@description "Finds the distance between two vectors."
 	---@sealed
 	method number Distance(FastVector3 b) end
 
@@ -134,13 +134,13 @@ script FastVector3
 	---@sealed
 	method void Div(number num) end
 
-	---@description "Finds the angle between two Vectors. Returns values between 0 to 180."
+	---@description "Finds the angle between two vectors. Returns a value between 0 and 180."
 	static method number Angle(FastVector3 a, FastVector3 b) end
 
 	---@description "Creates a FastVector3 representing the cross product of two Vectors and then returns it."
 	static method FastVector3 Cross(FastVector3 a, FastVector3 b) end
 
-	---@description "Finds the distance between two Vectors."
+	---@description "Finds the distance between two vectors."
 	static method number Distance(FastVector3 a, FastVector3 b) end
 
 	---@description "Finds the inner product of two vectors."

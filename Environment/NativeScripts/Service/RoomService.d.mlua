@@ -15,7 +15,7 @@ script RoomService extends Service
 	---@sealed
 	readonly property string StaticRoomKey
 
-	---@description "Creates and returns an instance room corresponding to the key. If a map list is specified in mapNames, only those maps are created. If it is empty, maps for which the InstanceMap property of MapComponent is true are created. After creating an instance room, if there is no first user entering within firstUserWaitSeconds, the instance room will be destroyed. Script executions are suspended during the operation."
+	---@description "Creates and returns an instance room corresponding to the key."
 	---@sealed
 	@ExecSpace("ServerOnly")
 	method InstanceRoom CreateInstanceRoom(string key, table<string> mapNames, float firstUserWaitSeconds = 10) end
@@ -64,19 +64,19 @@ script RoomService extends Service
 	@ExecSpace("ServerOnly")
 	method int32 MoveUsersToStaticRoom(table<string> userIds, string mapName = nil) end
 
-	---@description "Sends the event to all rooms. Receivers can receive events by registering a handler on RoomService. Suspends script executions during performance."
+	---@description "Sends the event to all rooms. Recipients will receive events when they register a handler on RoomService. Script executions are suspended during the operation."
 	---@sealed
 	method SendEventRequestResultCode RequestSendEventToAllRoomsAndWait(EventType sendEvent) end
 
-	---@description "Sends the event to all rooms. Receivers can receive events by registering a handler on RoomService. The function passed to the callbackFunction is called with the result codes and an event entity upon completion of the operation. You should be cautious, since sending Entity, EntityRef, Component, and ComponentRef in an event may result in invalid values being transmitted."
+	---@description "Sends the event to all rooms. Recipients will receive events when they register a handler on RoomService. The function passed to the callbackFunction is called with the result codes and an event entity upon completion of the operation."
 	---@sealed
 	method void RequestSendEventToAllRoomsAsync(EventType sendEvent, func<SendEventRequestResultCode, EventType> callbackFunction) end
 
-	---@description "Sends the event to the specific world instance. Receivers can receive events by registering a handler on RoomService. Script executions are suspended during the operation. Including Entity, EntityRef, Component, or ComponentRef in Event will result in invalid values."
+	---@description "Sends the event to the specified room. Recipients will receive events when they register a handler on RoomService. Script executions are suspended during the operation."
 	---@sealed
 	method SendEventRequestResultCode RequestSendEventToRoomAndWait(EventType sendEvent, string targetRoomKey) end
 
-	---@description "Sends the event to the specific room. Receivers can receive events by registering a handler on RoomService. The function passed to the callbackFunction is called with the result codes and an event entity upon completion of the operation. You should be cautious, since sending Entity, EntityRef, Component, and ComponentRef in an event may result in invalid values being transmitted."
+	---@description "Sends the event to the specified room. Recipients will receive events when they register a handler on RoomService. The function passed to the callbackFunction is called with the result codes and an event entity upon completion of the operation."
 	---@sealed
 	method void RequestSendEventToRoomAsync(EventType sendEvent, string targetRoomKey, func<SendEventRequestResultCode, EventType> callbackFunction) end
 

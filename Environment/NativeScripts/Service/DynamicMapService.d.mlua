@@ -3,7 +3,7 @@
 @Service
 script DynamicMapService extends Service
 
-	---@description "Creates a dynamic map. The name of the original map to be copied is sourceMapName, and newMapName is the name of the dynamic map to be created. Only static maps can be used as source maps in static rooms, and only instance maps can be used in instance rooms. Only instance maps contained in the room can be used as source maps in instance rooms."
+	---@description "Creates a dynamic map."
 	---@sealed
 	@ExecSpace("ServerOnly")
 	method DynamicMapResultCode CreateDynamicMap(string sourceMapName, string newMapName) end

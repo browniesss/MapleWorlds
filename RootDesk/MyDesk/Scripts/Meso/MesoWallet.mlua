@@ -44,12 +44,6 @@ script MesoWallet extends Component
 
 		self.CurrentMeso -= withdrawal
 		self.UIController:UpdateCurrentMeso(self.CurrentMeso)
-
-		-- 퀘스트 진행도 업데이트 (UseMeso)
-		if self.Entity.QuestService ~= nil then
-			local uid = self.Entity.PlayerComponent.UserId
-			self.Entity.QuestService:OnProgressServer(uid, "UseMeso", withdrawal, "")
-		end
 	end
 
 	@ExecSpace("Server")

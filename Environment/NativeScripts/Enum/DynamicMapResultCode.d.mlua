@@ -16,11 +16,11 @@ script DynamicMapResultCode
 	member RoomAndSourceMapTypeMismatch = 5
 	---@description "The original map is not included in the instance room. Please check if an instance map is in the instance room."
 	member SourceMapNotLoadable = 6
-	---@description "A user has entered the dynamic map. You can view the User Entities in the map using the UserService's GetUsersByMapName() or GetUsersByMapComponent() functions."
+	---@description "A user has entered the dynamic map."
 	member UserExistsInDynamicMap = 7
 	---@description "The dynamic map cannot be used as an original map."
 	member DynamicMapNotAllowedAsSourceMap = 8
-	---@description "Internal error occured."
+	---@description "An internal error has occurred."
 	member InternalError = -1
 
 	---@description "Converts numbers to the applicable type."

@@ -1,4 +1,4 @@
----@description "Sets the size and offset of the physics rigid body and raises an event when it collides with another Entity. This is automatically connected to the PhysicsRigidbodyComponent of the parent Entity or its own Entity. If PhysicsRigidbodyComponent does not exist, it is treated as a static physics rigid body."
+---@description "Sets the size and offset of the physics rigid body and triggers an event when it collides with another entity. This is automatically connected to the PhysicsRigidbodyComponent of the parent entity or its own entity."
 @Component
 script PhysicsColliderComponent extends Component
 
@@ -12,7 +12,7 @@ script PhysicsColliderComponent extends Component
 	@Sync
 	property float CircleRadius = 0
 
-	---@description "If true, physics operations occur in the Client, and functions and Property changes are possible in the Client space. Physics calculation results are not synchronized with other Clients. If false, function use and Property change are possible in the Server space. Physics calculation results are synchronized with other Clients."
+	---@description "If true, physics operations occur in the Client, and functions and Property changes are possible in the Client space. Physics calculation results are not synchronized with other Clients."
 	---@sealed
 	property boolean ClientOnly = false
 

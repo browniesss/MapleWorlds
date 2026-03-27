@@ -8,7 +8,7 @@ script SpawnService extends Service
 	---@sealed
 	method Entity Clone(string name, Entity original, Entity parent = nil, boolean posOffset = true, boolean dynamic = true) end
 
-	---@description "Spawns a new entity based on the entity. The name is the name of an entity being spawned. The spawnPosition is the location. The parent is the parent entity. If it's nil, the entity's parent entity will be set up as a parent. If includeChild is false, the entity's child entity will not be spawned."
+	---@description "Spawns a new entity based on the entity."
 	---@sealed
 	method Entity SpawnByEntity(Entity entity, string name, Vector3 spawnPosition, Entity parent = nil, boolean includeChild = true) end
 

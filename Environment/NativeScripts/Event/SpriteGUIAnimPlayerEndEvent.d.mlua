@@ -7,6 +7,6 @@ script SpriteGUIAnimPlayerEndEvent extends EventType
 	---@sealed
 	property Entity Entity
 
-	constructor SpriteGUIAnimPlayerEndEvent(Entity entity = nil, SpriteAnimClipPlayType clipPlayType = 0, float clipPlayRate = 1) end
+	constructor SpriteGUIAnimPlayerEndEvent(Entity entity = nil, SpriteAnimClipPlayType clipPlayType = SpriteAnimClipPlayType.Onetime, float clipPlayRate = 1) end
 
 end

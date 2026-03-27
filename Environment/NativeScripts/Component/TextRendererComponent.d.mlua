@@ -152,6 +152,16 @@ script TextRendererComponent extends Component
 	@Sync
 	property string Text = "Text"
 
+	---@description "This is the Id of the TextSpriteSet entry that will be applied to text."
+	---@sealed
+	@Sync
+	property string TextSpriteSetId = ""
+
+	---@description "This is the Id of the TextStyleSheet entry that will be applied to text."
+	---@sealed
+	@Sync
+	property string TextStyleSheetId = ""
+
 	---@description "The color on the top left."
 	---@sealed
 	@Sync
@@ -212,7 +222,7 @@ script TextRendererComponent extends Component
 	@Sync
 	property boolean Wrapping = true
 
-	---@description "Returns the text matching the current language settings in LocaleDataSet when IsLocalizationKey's value is true. A Key will be used as Text's property value. Returns Text's property value when IsLocalizationKey's value is false."
+	---@description "Returns the text matching the current language settings in LocaleDataSet when IsLocalizationKey's value is true. A Key will be used as Text's property value."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method string GetLocalizedText() end

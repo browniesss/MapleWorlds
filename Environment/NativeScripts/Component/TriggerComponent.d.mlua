@@ -3,6 +3,7 @@
 script TriggerComponent extends Component
 
 	---@description "Available on previous systems where IsLegacy is true. Sets the center point position of the collider rectangle based on the Entity."
+	---@deprecated
 	---@sealed
 	@Sync
 	property Vector2 BoxOffset = Vector2(0.000, 0.000)
@@ -37,11 +38,11 @@ script TriggerComponent extends Component
 	@Sync
 	property CollisionGroup CollisionGroup = CollisionGroups.TriggerBox
 
-	---@description "Sets whether this Component will operate with the previous system. In a new system, the Collider is affected by TransformComponent's rotation and size. You can also use a circle-shaped collider by setting the ColliderType."
+	---@description "Sets whether this Component will operate with the previous system. In a new system, the Collider is affected by TransformComponent's rotation and size. "
 	---@sealed
 	property boolean IsLegacy = false
 
-	---@description "Will not perform any collision checking itself if the value is true. If TriggerComponents with true IsPassive collide, no event will occur. For an event to occur, at least one of the TriggerComponents' IsPassive must be set to false. You can improve the World performance by reducing unnecessary collision checking."
+	---@description "Will not perform any collision checking itself if the value is true. If TriggerComponents with true IsPassive collide, no event will occur."
 	---@sealed
 	@Sync
 	property boolean IsPassive = false

@@ -33,7 +33,7 @@ script ScreenRecordService extends Service
 	@ExecSpace("ClientOnly")
 	method void SetMicrophoneIndexForRecording(int32 newIndex) end
 
-	---@description "Starts recording. Used to share recorded video in combination with the MobileShareService. The maximum recording time is 2 minutes. When recording ends, the video is saved in the file library, and the function passed to finishRecordCallback is called. The parameter of finishRecordCallback is the save path. When this function is called in Windows or Mac environments, StartRecordToPhotoLibraryAndWait(ScreenRecordMode, boolean) is called instead."
+	---@description "Starts recording. Used to share recorded video in combination with the MobileShareService. The maximum recording time is 2 minutes."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method ScreenRecordStartResult StartRecordToFileAndWait(ScreenRecordMode recordMode, boolean excludeSystemUI = false, func<string> finishRecordCallback = nil) end

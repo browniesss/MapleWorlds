@@ -42,12 +42,12 @@ script SkeletonGUIRendererComponent extends Component
 	---@sealed
 	property SyncList<string> SkinNames
 
-	---@description "Adds an animation to the track. Track 1 can't be used. Sets the track number, animation name, and misc properties to animationClip. Plays the animation from the start again."
+	---@description "Adds an animation to the track. Track 1 can't be used. Plays the animation from the start again."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method void AddAnimation(SkeletonAnimationClip animationClip) end
 
-	---@description "Adds an empty animation to the track. Track 1 can't be used. Sets the track number and misc properties to animationClip. Plays the animation from the start again."
+	---@description "Adds an empty animation to the track. Track 1 can't be used. Plays the animation from the start again."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method void AddEmptyAnimation(SkeletonAnimationClip animationClip) end
@@ -62,7 +62,7 @@ script SkeletonGUIRendererComponent extends Component
 	@ExecSpace("ClientOnly")
 	method SkeletonAnimationClip GetCurrentAnimation(int32 trackIndex) end
 
-	---@description "Empties a track and adds an animation to it. Sets the track number, animation name, and misc properties to animationClip. Track 1 can't be used."
+	---@description "Empties a track and adds an animation to it. Track 1 can't be used."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method void SetAnimation(SkeletonAnimationClip animationClip) end
@@ -72,7 +72,7 @@ script SkeletonGUIRendererComponent extends Component
 	@ExecSpace("ClientOnly")
 	method void SetAttachment(string slotName, string attachmentName) end
 
-	---@description "Empties a track and adds an empty animation to it. Sets the track number and misc properties to animationClip. Track 1 can't be used."
+	---@description "Empties a track and adds an empty animation to it. Track 1 can't be used."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method void SetEmptyAnimation(SkeletonAnimationClip animationClip) end

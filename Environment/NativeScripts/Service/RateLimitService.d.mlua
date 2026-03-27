@@ -3,22 +3,22 @@
 @Service
 script RateLimitService extends Service
 
-	---@description "Limits the amount of calls to the server execution control function for components belonging to a specific entity. Each time a user calls a function, 1 token is deducted. If all tokens are used, that user's function calls will be restricted. maxToken is the maximum number of tokens. tokenRefillPerSecond is the number of tokens recharged per second."
+	---@description "Limits the amount of calls to the server execution control function for components belonging to a specific entity. Each time a user calls a function, 1 token is deducted."
 	---@sealed
 	@ExecSpace("ServerOnly")
 	method void SetServerFunctionRateLimitForComponent(string entityId, string componentName, string functionName, int32 maxToken, float tokenRefillPerSecond) end
 
-	---@description "Limits the amount of server execution control function calls in the logic. Each time a user calls a function, 1 token is deducted. Users who have used up all their tokens are restricted from calling functions. maxToken is the maximum number of tokens. tokenRefillPerSecond is the number of tokens recharged per second."
+	---@description "Limits the amount of server execution control function calls in the logic. Each time a user calls a function, 1 token is deducted."
 	---@sealed
 	@ExecSpace("ServerOnly")
 	method void SetServerFunctionRateLimitForLogic(string logicName, string functionName, int32 maxToken, float tokenRefillPerSecond) end
 
-	---@description "Limits the amount of calls to the service's server execution control functions. Each time a user calls a function, 1 token is deducted. Users who have used all of their tokens are restricted from calling functions. maxToken is the maximum number of tokens. tokenRefillPerSecond is the number of tokens recharged per second."
+	---@description "Limits the amount of calls to the service's server execution control functions. Each time a user calls a function, 1 token is deducted."
 	---@sealed
 	@ExecSpace("ServerOnly")
 	method void SetServerFunctionRateLimitForService(string serviceName, string functionName, int32 maxToken, float tokenRefillPerSecond) end
 
-	---@description "Limits the total number of calls to server execution control functions. Each time a user calls the server function of a component, service, or logic, 1 token is deducted. All server function calls by users who have used all of their tokens are restricted. maxToken is the maximum number of tokens. tokenRefillPerSecond is the number of tokens recharged per second."
+	---@description "Limits the total number of calls to server execution control functions. Each time a user calls the server function of a component, service, or logic, 1 token is deducted."
 	---@sealed
 	@ExecSpace("ServerOnly")
 	method void SetTotalServerFunctionRateLimit(int32 maxToken, float tokenRefillPerSecond) end

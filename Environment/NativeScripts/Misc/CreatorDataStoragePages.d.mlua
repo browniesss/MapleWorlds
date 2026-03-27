@@ -1,0 +1,25 @@
+---@sealed
+---@description "Provides a search function for CreatorDataStorage."
+@Misc
+script CreatorDataStoragePages
+
+	---@description "Checks whether the current page is the last."
+	---@sealed
+	readonly property boolean IsLastPage
+
+	---@description "Gets a CreatorDataStorage list of the current page."
+	---@sealed
+	@ExecSpace("ServerOnly")
+	method table<CreatorDataStorage> GetCurrentPageDatas() end
+
+	---@description "Loads the next page and returns the error code. Can move to the loaded page using MoveToNextPageAndWait(). Script executions are suspended during the operation."
+	---@sealed
+	@ExecSpace("ServerOnly")
+	method int32 LoadNextPageAndWait() end
+
+	---@description "Goes to the next page. Script executions are suspended during the operation."
+	---@sealed
+	@ExecSpace("ServerOnly")
+	method void MoveToNextPageAndWait() end
+
+end

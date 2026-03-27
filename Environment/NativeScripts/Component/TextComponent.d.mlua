@@ -131,7 +131,7 @@ script TextComponent extends Component
 	---@sealed
 	property boolean UseOutLine = false
 
-	---@description "Returns the text matching the current language settings in LocaleDataSet when IsLocalizationKey's value is true. A Key will be used as Text's property value. Returns Text's property value when IsLocalizationKey's value is false."
+	---@description "Returns the text matching the current language settings in LocaleDataSet when IsLocalizationKey's value is true. A Key will be used as Text's property value."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method string GetLocalizedText() end

@@ -5,6 +5,6 @@ script UIAvatarActionEvent extends EventType
 	---@sealed
 	readonly property StudioAvatarActionType ActionType = StudioAvatarActionType.Invalid
 
-	constructor UIAvatarActionEvent(float actionSpeed = 1, MapleAvatarBodyActionState bodyActionState = 2) end
+	constructor UIAvatarActionEvent(float actionSpeed = 1, MapleAvatarBodyActionState bodyActionState = MapleAvatarBodyActionState.Walk) end
 
 end

@@ -121,6 +121,14 @@ script TextGUIRendererComponent extends Component
 	---@sealed
 	property string Text = "Text"
 
+	---@description "This is the Id of the TextSpriteSet entry that will be applied to text."
+	---@sealed
+	property string TextSpriteSetId = ""
+
+	---@description "This is the Id of the TextStyleSheet entry that will be applied to text."
+	---@sealed
+	property string TextStyleSheetId = ""
+
 	---@description "This is the upper left color."
 	---@sealed
 	property Color TopLeftColor = Color(1.000, 1.000, 1.000, 1.000)
@@ -165,7 +173,7 @@ script TextGUIRendererComponent extends Component
 	---@sealed
 	property TextVerticalAlignmentOption VerticalAlignment = TextVerticalAlignmentOption.Middle
 
-	---@description "Returns the text matching the current language settings in LocaleDataSet when IsLocalizationKey's value is true. A Key will be used as Text's property value. Returns Text's property value when IsLocalizationKey's value is false."
+	---@description "Returns the text matching the current language settings in LocaleDataSet when IsLocalizationKey's value is true. A Key will be used as Text's property value."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method string GetLocalizedText() end

@@ -49,7 +49,7 @@ script CameraComponent extends Component
 	---@sealed
 	property Vector2 SoftZone = Vector2(0.268, 0.750)
 
-	---@description "Shows whether you will directly define and use the camera-restricted area. You can define it using the LeftBottom and RightTop properties. When this is False, you will use the map area of the map where you belong. If the map area is the default, the corrected area based on that map area will be used as the camera-restricted area."
+	---@description "Shows whether you will directly define and use the camera-restricted area. You can define it using the LeftBottom and RightTop properties."
 	---@sealed
 	@Sync
 	property boolean UseCustomBound = false

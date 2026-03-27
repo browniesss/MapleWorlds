@@ -22,7 +22,7 @@ script KinematicbodyComponent extends Component
 	@Sync
 	property boolean EnableShadow = true
 
-	---@description "Sets whether to use the collision feature with RectTileMap. There will be no collisions with collision tiles, and RectTileCollisionBeginEvent and RectTileCollisionEndEvent will not be caused if the value is false."
+	---@description "Sets whether to use the collision feature with RectTileMap."
 	---@sealed
 	@Sync
 	property boolean EnableTileCollision = true
@@ -37,7 +37,7 @@ script KinematicbodyComponent extends Component
 	@Sync
 	property float JumpSpeed = 6.3
 
-	---@description "Sets the movement speed. The value multiplied by SpeedFactor will be the final speed. If a player moves a directional key or calls MovementComponent:MoveToDirection() function, MoveVelocity's value will change."
+	---@description "Sets the movement speed. The value multiplied by SpeedFactor will be the final speed."
 	---@sealed
 	property Vector2 MoveVelocity
 

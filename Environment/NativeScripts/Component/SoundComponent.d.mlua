@@ -42,7 +42,7 @@ script SoundComponent extends Component
 	@Sync
 	property boolean PlayOnEnable = false
 
-	---@description "Adjusts the sound volume according to the distance between the center of the screen and the audio clip. When there is a listener Entity specified through the SetListenerEntity function, the Entity becomes the listener regardless of whether this property is active or not."
+	---@description "Adjusts the sound volume according to the distance between the center of the screen and the audio clip."
 	---@sealed
 	@Sync
 	property boolean SetCameraAsListener = false
@@ -62,7 +62,7 @@ script SoundComponent extends Component
 	@ExecSpace("ClientOnly")
 	method float GetTotalTime() end
 
-	---@description "Returns whether the audio clip corresponding to AudioClipRUID is loaded or not. GetTimePosition(), GetTotalTime(), SetTimePosition(timeInSecond, targetUserId) functions cannot be executed if no audio clip is loaded."
+	---@description "Determines whether the audio clip corresponding to AudioClipRUID is loaded or not."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method boolean IsAudioClipLoaded() end

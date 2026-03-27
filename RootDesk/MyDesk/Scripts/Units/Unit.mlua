@@ -1146,6 +1146,9 @@ script Unit extends Component
 			-- 몬스터 도감 처치 카운트 (클라이언트 로컬 처리)
 			_UserService.LocalPlayer.MonsterCodexService:OnLocalMonsterKilled(self.id)
 
+			-- 퀘스트 진행도 업데이트 (서버 RPC)
+			_UserService.LocalPlayer.MonsterCodexService:OnMonsterKilled(self.id)
+
 			-- 매트릭스 모드: 스폰 시스템에 알림
 			local matrixSpawner = _UserService.LocalPlayer.MatrixMonsterSpawner
 			if _gm.currentGameMode == _eGameMode.Matrix and matrixSpawner ~= nil then

@@ -3,52 +3,52 @@
 @Service
 script ScreenshotService extends Service
 
-	---@description "Captures the entire screen and saves it as a PNG file. Used to share captured images in combination with MobileShareService. Once it's saved, it will display an error code and save path. Stops script execution while performing. Supported in Windows PC, macOS, Android, and iOS environments."
+	---@description "Captures the entire screen and saves it as a PNG file. Returns an error code and the save path when saving is complete. Script executions are suspended during the performance."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method ScreenshotError, string CaptureFullScreenAsFileAndWait(string fileName, boolean includeUI = true) end
 
-	---@description "Captures the entire screen and saves it as a PNG file. Used to share captured images in combination with MobileShareService. It is performed asynchronously, and once it is saved, the function passed to callbackFunction is called. The first parameter of callbackFunction is the error code, and the second is the storage path. Supported in Windows PC and Mac environments."
+	---@description "Captures the entire screen and saves it as a PNG file. This happens asynchronously, and the function passed to the callbackFunction is called upon the save completion."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method void CaptureFullScreenAsFileAsync(string fileName, func<ScreenshotError, string> callbackFunction, boolean includeUI = true) end
 
-	---@description "Returns a result that captures the entire screen. Stops script execution while performing. The total number of pixels in the image is automatically scaled to be less than 800x600. If the capture area is too large, you will get a scaled-down image. Supported in Windows PC, macOS, Android, and iOS environments."
+	---@description "Returns the result of capturing the entire screen. Suspends script executions during performance."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method ScreenshotError, RawImage CaptureFullScreenAsPixelDataAndWait(boolean includeUI = true) end
 
-	---@description "Returns a result that captures the entire screen. It is performed asynchronously, and once it is saved, the function passed to callbackFunction is called. The first parameter of callbackFunction is the error code, and the second is the captured image. The total number of pixels in the image is automatically scaled to be less than 800x600. If the capture area is too large, you will get a scaled-down image. Supported in Windows PC and macOS environments."
+	---@description "Returns the result of capturing the entire screen. It is performed asynchronously, and once it is saved, it calls the function passed to the callbackFunction."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method void CaptureFullScreenAsPixelDataAsync(func<ScreenshotError, RawImage> callbackFunction, boolean includeUI = true) end
 
-	---@description "Captures the entire screen and saves it as a PNG file. It is performed asynchronously, and once it is saved, the function passed to callbackFunction is called. The first parameter of callbackFunction is the error code, and the second is the storage path. Supported in Windows PC, Android, and iOS environments."
+	---@description "Captures the entire screen and saves it as a PNG file in your photo gallery. Once it is saved, it will display an error code and the save path. Stops script execution while performing."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method ScreenshotError, string CaptureFullScreenToPhotoLibraryAndWait(string fileName, boolean includeUI = true) end
 
-	---@description "Captures part of the screen and saves it as a PNG file. Once it is saved, it will display an error code and the save path. Stops script execution while performing. Supported in Windows PC, macOS, Android, and iOS environments."
+	---@description "Captures a part of the screen and saves it as a PNG file. Returns an error code and the save path when saving is complete. Script executions are suspended during the performance."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method ScreenshotError, string CaptureScreenRegionAsFileAndWait(string fileName, Vector2 from, Vector2 to, boolean includeUI = true) end
 
-	---@description "Captures part of the screen and saves it as a PNG file. It is performed asynchronously, and once it is saved, the function passed to callbackFunction is called. The first parameter of callbackFunction is the error code, and the second is the storage path. Supported in Windows PC and macOS environments."
+	---@description "Captures part of the screen and saves it as a PNG file. This happens asynchronously, and the function passed to the callbackFunction is called upon the save completion."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method void CaptureScreenRegionAsFileAsync(string fileName, Vector2 from, Vector2 to, func<ScreenshotError, string> callbackFunction, boolean includeUI = true) end
 
-	---@description "Returns the result of capturing a part of the screen. It is performed asynchronously, and once it is saved, the function passed to callbackFunction is called. The first parameter of callbackFunction is the error code, and the second is the captured image. The total number of pixels in the image is automatically scaled to be less than 800x600. If the capture area is too large, you will get a scaled-down image. Supported in Windows PC and macOS environments."
+	---@description "Returns the result of capturing a part of the screen. Script executions are suspended during the operation."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method ScreenshotError, RawImage CaptureScreenRegionAsPixelDataAndWait(Vector2 from, Vector2 to, boolean includeUI = true) end
 
-	---@description "Returns the result of capturing the selected rectangular area. It is performed asynchronously, and once it is saved, the function passed to the callbackFunction is called. The first parameter of the callbackFunction is an error code, and the second is the pixel data. The total number of pixels in the image is automatically scaled to be less than 800x600. If the capture area is too large, you will get a scaled down image. Only Windows PC environment is supported."
+	---@description "Returns the result of capturing a part of the screen. It is performed asynchronously, and once it is saved, it calls the function passed to callbackFunction."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method void CaptureScreenRegionAsPixelDataAsync(Vector2 from, Vector2 to, func<ScreenshotError, RawImage> callbackFunction, boolean includeUI = true) end
 
-	---@description "Captures a portion of the screen and saves it as a PNG file in your photo gallery. Once it is saved, it will display an error code and the save path. Stops script execution while performing. Supported in Windows PC, macOS, Android, and iOS environments."
+	---@description "Captures a portion of the screen and saves it as a PNG file in your photo gallery. Once it is saved, it will display an error code and the save path. Stops script execution while performing."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method ScreenshotError, string CaptureScreenRegionToPhotoLibraryAndWait(string fileName, Vector2 from, Vector2 to, boolean includeUI = true) end

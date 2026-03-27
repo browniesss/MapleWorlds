@@ -9,7 +9,7 @@ script PolicyService extends Service
 	@ExecSpace("ServerOnly")
 	method PolicyInfo GetPolicyInfoForUserAndWait(string userId) end
 
-	---@description "Loads policy information for the region the user lives in. The function passed to the callbackFunction is called after loading. If it fails, nil will be returned. This operation is performed asynchronously. If executed in a World still in progress, nil will be returned. Parameter callbackFunction is the PolicyInfo which indicates policy information. This function only works in the release environment. If executed in the Maker, nil will be returned."
+	---@description "Loads policy information for the region the user lives in. The function passed to the callbackFunction is called after loading. If it fails, nil will be returned."
 	---@sealed
 	@ReleaseOnly
 	@ExecSpace("ServerOnly")

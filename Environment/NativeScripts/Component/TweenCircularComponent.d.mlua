@@ -57,7 +57,7 @@ script TweenCircularComponent extends Component
 	@Sync
 	readonly property Vector3 OriginScale
 
-	---@description "Sets the playback subject. The default value is Default. You can control the tween with functions on both the server and the client. Server status is always synchronized to the client. Setting the execution area control to client only restricts the control of the tween to the client only and does not synchronize to the server. Tween Control Functions: Play, Pause, Stop, Destroy, RestartFromCurrentPosition"
+	---@description "Sets the playback subject. The default value is Default."
 	---@sealed
 	property TweenSyncType SyncType = TweenSyncType.Default
 

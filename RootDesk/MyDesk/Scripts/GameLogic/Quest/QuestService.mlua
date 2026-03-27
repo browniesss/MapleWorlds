@@ -176,14 +176,19 @@ script QuestService extends Component
 		end
 		
 		-- 보상 지급 (퀘스트의 모든 보상)
-		self:GiveReward(uid, cache.currentId)
-		
+		local claimedQuestId = cache.currentId
+		local rewards = self.questRewardCache[claimedQuestId] or {}
+		self:GiveReward(uid, claimedQuestId)
+
 		-- 현재 퀘스트 → Rewarded(3)
 		cache.state = 3
-		self:WriteQuestStateToDB(uid, cache.currentId, 3)
-		
+		self:WriteQuestStateToDB(uid, claimedQuestId, 3)
+
+		-- 보상 팝업 표시 (클라이언트)
+		self:ShowRewardPopup(claimedQuestId, rewards, uid)
+
 		-- 다음 퀘스트 시작
-		local nextId = cache.currentId + 1
+		local nextId = claimedQuestId + 1
 		if self.questDataCache[nextId] ~= nil then
 			cache.currentId = nextId
 			cache.state = 1
@@ -250,6 +255,23 @@ script QuestService extends Component
 		local uiQuest = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIQuest")
 		if uiQuest ~= nil and uiQuest.UIQuest ~= nil then
 			uiQuest.UIQuest:UpdateQuestUI(questId, state, progress)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void ShowRewardPopup(integer questId, table rewards)
+		local popup = _EntityService:GetEntityByPath("/ui/MainLobbyUI/QuestRewardPopup")
+		if popup ~= nil and popup.QuestRewardPopup ~= nil then
+			-- 퀘스트 이름 가져오기 (클라이언트 UIQuest에서 캐시된 데이터 활용)
+			local uiQuest = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIQuest")
+			local questName = ""
+			if uiQuest ~= nil and uiQuest.UIQuest ~= nil then
+				local questData = uiQuest.UIQuest.questDataCache[questId]
+				if questData ~= nil then
+					questName = questData.name
+				end
+			end
+			popup.QuestRewardPopup:Show(questName, rewards)
 		end
 	end
 

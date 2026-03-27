@@ -11,6 +11,6 @@ script EntityPreFillOriginPropertiesEvent extends EventType
 	---@sealed
 	property Entity Entity
 
-	constructor EntityPreFillOriginPropertiesEvent(Entity entity = nil, EntityOriginType originType = 0) end
+	constructor EntityPreFillOriginPropertiesEvent(Entity entity = nil, EntityOriginType originType = EntityOriginType.None) end
 
 end

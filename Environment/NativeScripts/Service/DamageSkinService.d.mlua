@@ -3,17 +3,17 @@
 @Service
 script DamageSkinService extends Service
 
-	---@description "LitMode can be set to the damage skin play function. The default value is LitMode.Default."
+	---@description "Activates damage skins. If (0, 0) is specified or omitted for scale, (1, 1) is used. The type for damage is integer, DamageSkinTextType. DamageSkinTextType does not reflect the specified critical."
 	---@sealed
-	method void Play(Entity targetEntity, string skinId, float delayPerAttack, table<any> damages, DamageSkinTweenType tweenType, boolean bCritical, Vector2 offset = Vector2(0, 0), Vector2 scale = Vector2(0, 0), float playRate = 1, float alpha = 1, LitMode litMode = 0) end
+	method void Play(Entity targetEntity, string skinId, float delayPerAttack, table<any> damages, DamageSkinTweenType tweenType, boolean bCritical, Vector2 offset = Vector2(0, 0), Vector2 scale = Vector2(0, 0), float playRate = 1, float alpha = 1, LitMode litMode = LitMode.Default) end
 
-	---@description "LitMode can be set to the damage skin play function. The default value is LitMode.Default."
+	---@description "The damage skin is displayed depending on whether it is critical or not. If (0, 0) is specified or omitted for scale, (1, 1) is used. The damages table and the criticals table must be the same length."
 	---@sealed
-	method void Play(Entity targetEntity, string skinId, float delayPerAttack, table<any> damages, DamageSkinTweenType tweenType, table<boolean> criticals, Vector2 offset = Vector2(0, 0), Vector2 scale = Vector2(0, 0), float playRate = 1, float alpha = 1, LitMode litMode = 0) end
+	method void Play(Entity targetEntity, string skinId, float delayPerAttack, table<any> damages, DamageSkinTweenType tweenType, table<boolean> criticals, Vector2 offset = Vector2(0, 0), Vector2 scale = Vector2(0, 0), float playRate = 1, float alpha = 1, LitMode litMode = LitMode.Default) end
 
-	---@description "LitMode can be set to the damage skin play function. The default value is LitMode.Default."
+	---@description "Displays the damage skin that is suitable for DamageSkinTextType. If (0, 0) is specified or omitted for scale, (1, 1) is used. playRate is replaced with 1 if it's equal to or less than 0."
 	---@sealed
-	method void PlayTextDamage(Entity targetEntity, string skinId, DamageSkinTextType textType, DamageSkinTweenType tweenType, Vector2 offset = Vector2(0, 0), Vector2 scale = Vector2(0, 0), float playRate = 1, float alpha = 1, LitMode litMode = 0) end
+	method void PlayTextDamage(Entity targetEntity, string skinId, DamageSkinTextType textType, DamageSkinTweenType tweenType, Vector2 offset = Vector2(0, 0), Vector2 scale = Vector2(0, 0), float playRate = 1, float alpha = 1, LitMode litMode = LitMode.Default) end
 
 	---@description "Calls the damage skin that is suitable for skinId in advance. This function executes asynchronously, and you can be notified of operation completion through completeCallback."
 	---@sealed

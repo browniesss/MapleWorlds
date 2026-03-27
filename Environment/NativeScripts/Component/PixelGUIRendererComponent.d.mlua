@@ -55,7 +55,7 @@ script PixelGUIRendererComponent extends Component
 	@ExecSpace("ClientOnly")
 	method void ResetWithColor(int32 width, int32 height, Color color) end
 
-	---@description "Resets the sprite to be customized to the size you've entered and sets the values of the pixels according to the values of the tables you've entered. The number of table elements must be the same as the number of all pixels (Width*Height). Row comes first. (Row-major)"
+	---@description "Resets the sprite to be customized to the size you've entered and sets the values of the pixels according to the values of the tables you've entered. Row comes first. (Row-major)"
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method void ResetWithColors(int32 width, int32 height, table<Color> pixels) end

@@ -32,6 +32,6 @@ script HitEvent extends EventType
 	---@sealed
 	property integer TotalDamage
 
-	constructor HitEvent(Vector2 attackCenter = Vector2(0, 0), Entity attackerEntity = nil, List<integer> damages = nil, any extra = nil, HitFeedbackAction feedbackAction = 0, boolean isCritical = false, integer totalDamage = 0) end
+	constructor HitEvent(Vector2 attackCenter = Vector2(0, 0), Entity attackerEntity = nil, List<integer> damages = nil, any extra = nil, HitFeedbackAction feedbackAction = HitFeedbackAction.Default, boolean isCritical = false, integer totalDamage = 0) end
 
 end

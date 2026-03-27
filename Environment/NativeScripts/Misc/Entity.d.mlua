@@ -168,11 +168,11 @@ script Entity
 	---@sealed
 	method void SendEvent(EventType sendEvent) end
 
-	---@description "Sets whether to enable or not. If reset is true, the activation event is processed even if the existing activation and the value to set are the same. If shouldSync is true, synchronizes whether it is enabled or not."
+	---@description "Specifies whether or not to enable."
 	---@sealed
 	method void SetEnable(boolean enable, boolean reset = false, boolean shouldSync = true) end
 
-	---@description "Sets the visibility. If reset is true, the visible event is processed even if the value to set is the same as the existing visibility. If shouldSync is true, synchronizes whether to be visible or not."
+	---@description "Sets the visibility."
 	---@sealed
 	method void SetVisible(boolean visible, boolean reset = false, boolean shouldSync = true) end
 

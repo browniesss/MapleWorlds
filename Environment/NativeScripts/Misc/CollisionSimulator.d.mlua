@@ -75,7 +75,7 @@ script CollisionSimulator
 	---@sealed
 	method Component OverlapPoint(CollisionGroup collisionGroup, Vector2 point) end
 
-	---@description "Finds and returns the first component including the input point. The groups table is a sequential table of elements from CollisionGroups."
+	---@description "Finds and returns the first Component that overlaps the input point."
 	---@sealed
 	method Component OverlapPoint(table groups, Vector2 point) end
 
@@ -87,7 +87,7 @@ script CollisionSimulator
 	---@sealed
 	method table<Component> OverlapPointAll(CollisionGroup collisionGroup, Vector2 point) end
 
-	---@description "Finds and returns all components that include the entered point. The groups table is a sequential table of elements from CollisionGroups."
+	---@description "Finds and returns all components that include the entered point."
 	---@sealed
 	method table<Component> OverlapPointAll(table groups, Vector2 point) end
 
@@ -99,7 +99,7 @@ script CollisionSimulator
 	---@sealed
 	method int32 OverlapPointAllFast(CollisionGroup collisionGroup, Vector2 point, table outputList) end
 
-	---@description "Finds all the Components overlapping the input point and inserts the results into outputList. Returns the number of results. groups is a sequential table of elements from CollisionGroups."
+	---@description "Finds all the Components overlapping the input point and inserts the results into outputList. Returns the number of results."
 	---@sealed
 	method int32 OverlapPointAllFast(table groups, Vector2 point, table outputList) end
 
@@ -111,7 +111,7 @@ script CollisionSimulator
 	---@sealed
 	method Component Raycast(CollisionGroup collisionGroup, Vector2 origin, Vector2 direction, float distance = 3.4028235E+38) end
 
-	---@description "Finds and returns the first component colliding with the ray while shooting the ray in the direction of its destination by distance from the origin location. The groups table is a sequential table of elements from CollisionGroups."
+	---@description "Finds and returns the first component colliding with the ray while shooting the ray in the direction of its destination by distance from the origin location."
 	---@sealed
 	method Component Raycast(table groups, Vector2 origin, Vector2 direction, float distance = 3.4028235E+38) end
 

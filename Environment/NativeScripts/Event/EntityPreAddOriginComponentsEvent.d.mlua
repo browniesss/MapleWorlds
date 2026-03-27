@@ -15,6 +15,6 @@ script EntityPreAddOriginComponentsEvent extends EventType
 	---@sealed
 	property Entity Entity
 
-	constructor EntityPreAddOriginComponentsEvent(Entity entity = nil, EntityOriginType originType = 0, List<string> componentsInfo = nil) end
+	constructor EntityPreAddOriginComponentsEvent(Entity entity = nil, EntityOriginType originType = EntityOriginType.None, List<string> componentsInfo = nil) end
 
 end

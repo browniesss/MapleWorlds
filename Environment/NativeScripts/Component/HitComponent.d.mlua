@@ -3,6 +3,7 @@
 script HitComponent extends Component
 
 	---@description "Available on previous systems where IsLegacy is true. Sets the center point position of the collider rectangle based on Entity. "
+	---@deprecated
 	---@sealed
 	@Sync
 	property Vector2 BoxOffset = Vector2(0.000, 0.000)
@@ -37,7 +38,7 @@ script HitComponent extends Component
 	@Sync
 	property CollisionGroup CollisionGroup = CollisionGroups.HitBox
 
-	---@description "Whether or not this Component works with the old system. The new system allows the Collider to be subject to the TransformComponent's rotation and size. You can also use a circle-shaped collider by setting the ColliderType."
+	---@description "Whether or not this Component works with the old system."
 	---@sealed
 	property boolean IsLegacy = false
 
@@ -49,7 +50,7 @@ script HitComponent extends Component
 	---@description "Determines whether an Entity is subject to AttackComponent's attack. The default behavior is true. attackInfo is custom data set by the creator that was passed from AttackComponent."
 	method boolean IsHitTarget(string attackInfo) end
 
-	---@description "Called when an Entity is hit. The default action is to raise a HitEvent. The attacker is the Entity that initiated the attack, attackInfo is the custom data passed from AttackComponent, and hitCount is the number of times the damage split is played."
+	---@description "Called when an Entity is hit. The default action is to raise a HitEvent. "
 	method void OnHit(Entity attacker, integer damage, boolean isCritical, string attackInfo, int32 hitCount) end
 
 	emitter EmitHitEvent(HitEvent event) end

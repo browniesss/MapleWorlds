@@ -57,11 +57,11 @@ script SkeletonRendererComponent extends Component
 	@Sync
 	property string SortingLayer = "Default"
 
-	---@description "Adds an animation to the track. Track 1 can't be used. Sets the track number, animation name, and misc properties to animationClip. Plays the animation from the start again."
+	---@description "Adds an animation to the track. Track 1 can't be used. Plays the animation from the start again."
 	---@sealed
 	method void AddAnimation(SkeletonAnimationClip animationClip) end
 
-	---@description "Adds an empty animation to the track. Track 1 can't be used. Sets the track number and misc properties to animationClip. Plays the animation from the start again."
+	---@description "Adds an empty animation to the track. Track 1 can't be used. Plays the animation from the start again."
 	---@sealed
 	method void AddEmptyAnimation(SkeletonAnimationClip animationClip) end
 
@@ -74,7 +74,7 @@ script SkeletonRendererComponent extends Component
 	@ExecSpace("ClientOnly")
 	method SkeletonAnimationClip GetCurrentAnimation(int32 trackIndex) end
 
-	---@description "Empties a track and adds an animation to it. Sets the track number, animation name, and misc properties to animationClip. Track 1 can't be used."
+	---@description "Empties a track and adds an animation to it. Track 1 can't be used."
 	---@sealed
 	method void SetAnimation(SkeletonAnimationClip animationClip) end
 
@@ -82,7 +82,7 @@ script SkeletonRendererComponent extends Component
 	---@sealed
 	method void SetAttachment(string slotName, string attachmentName) end
 
-	---@description "Empties a track and adds an empty animation to it. Sets the track number and misc properties to animationClip. Track 1 can't be used."
+	---@description "Empties a track and adds an empty animation to it. Track 1 can't be used."
 	---@sealed
 	method void SetEmptyAnimation(SkeletonAnimationClip animationClip) end
 

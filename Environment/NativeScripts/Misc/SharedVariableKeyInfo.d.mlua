@@ -3,7 +3,7 @@
 @Misc
 script SharedVariableKeyInfo
 
-	---@description "Whenever you update a variable, it only performs an update if it equals the value saved in the database. It prevents simultaneous updates when multiple places are updated at once. An update is performed unconditionally if nil or empty string is given. When the variable is updated, a new ETag is created. "
+	---@description "Whenever you update a variable, it only performs an update if it equals the value saved in the database. An update is performed unconditionally if a nil or empty string is given."
 	---@sealed
 	property string ETag = ""
 

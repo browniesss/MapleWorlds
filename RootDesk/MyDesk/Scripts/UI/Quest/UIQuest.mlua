@@ -26,6 +26,8 @@ script UIQuest extends Component
 
 	property Entity backgroundLine = nil
 
+	property Entity claimButton = nil
+
 	property any clickHandler = nil
 
 	@ExecSpace("ClientOnly")
@@ -43,13 +45,14 @@ script UIQuest extends Component
 		self.scrollView = _EntityService:GetEntityByPath(path .. "/QuestReward/Scroll_QuestReward")
 		self.staticRewardEntity = _EntityService:GetEntityByPath(path .. "/QuestReward/Scroll_QuestReward/QuestReward")
 		self.backgroundLine = _EntityService:GetEntityByPath(path .. "/BackgroundLine")
-		
-		-- 버튼 기본 비활성화
-		if self.Entity.ButtonComponent ~= nil then
-			self.Entity.ButtonComponent.Enable = false
-			self.clickHandler = self.Entity.ButtonComponent.OnClick:Connect(function()
+		self.claimButton = _EntityService:GetEntityByPath(path .. "/ClaimButton")
+
+		-- ClaimButton 이벤트 연결 후 비활성화
+		if self.claimButton ~= nil then
+			self.claimButton:ConnectEvent(ButtonClickEvent, function()
 				self:OnClicked()
 			end)
+			self.claimButton.Enable = false
 		end
 		
 		-- 서버에 현재 퀘스트 데이터 요청
@@ -94,7 +97,7 @@ script UIQuest extends Component
 		for i = 1, dataSet:GetRowCount() do
 			local id = tonumber(dataSet:GetCell(i, "id"))
 			local colorHex = tostring(dataSet:GetCell(i, "Color"))
-			local text = tostring(dataSet:GetCell(i, "Column0"))
+			local text = tostring(dataSet:GetCell(i, "Info"))
 			self.questStateCache[id] = {
 				color = self:HexToColor(colorHex),
 				text = text
@@ -150,9 +153,9 @@ script UIQuest extends Component
 			self.questCompleteEntity.Enable = (state == 2)
 		end
 		
-		-- 버튼: Complete(2) 상태일 때만 활성화
-		if self.Entity.ButtonComponent ~= nil then
-			self.Entity.ButtonComponent.Enable = (state == 2)
+		-- ClaimButton: Complete(2) 상태일 때만 표시
+		if self.claimButton ~= nil then
+			self.claimButton.Enable = (state == 2)
 		end
 	end
 
@@ -221,8 +224,8 @@ script UIQuest extends Component
 		if self.questCompleteEntity ~= nil then
 			self.questCompleteEntity.Enable = false
 		end
-		if self.Entity.ButtonComponent ~= nil then
-			self.Entity.ButtonComponent.Enable = false
+		if self.claimButton ~= nil then
+			self.claimButton.Enable = false
 		end
 		self:ClearSpawnedRewards()
 		if self.staticRewardEntity ~= nil then

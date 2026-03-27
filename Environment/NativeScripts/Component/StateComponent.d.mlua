@@ -12,7 +12,7 @@ script StateComponent extends Component
 	---@sealed
 	method boolean AddCondition(string stateName, string nextStateName, func -> boolean conditionCheckFunction, boolean reverseResult = false) end
 
-	---@description "Connects stateName's status and nextStateName's status. Returns false if it fails. When the return value of StateType's OnConditionCheck is true, the status transitions from stateName to nextStateName. If reverseResult's value is true, a status transition occurs when OnConditionCheck's return value is false."
+	---@description "Connects stateName's status and nextStateName's status. Returns false if it fails."
 	---@sealed
 	method boolean AddCondition(string stateName, string nextStateName, boolean reverseResult = false) end
 

@@ -24,7 +24,7 @@ script ClimbableComponent extends Component
 	---@sealed
 	readonly property CollisionGroup CollisionGroup = CollisionGroups.Climbable
 
-	---@description "Sets whether to fit the climbing area settings to the sprite size. Operates only in Maker Editing mode. If true, automatically sets to fit the Boxsize and BoxOffset to the sprite size. If false, you can set the Boxsize and BoxOffset arbitrarily."
+	---@description "Specifies whether or not to adjust the climbing area settings to match the sprite size. Operates only in Maker Editing mode."
 	---@sealed
 	property boolean IsUseDefaultObjectBoxSize = true
 

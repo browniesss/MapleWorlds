@@ -84,6 +84,11 @@ script SpawnManager extends Component
 		end
 
 		self:GetUserWallet().MesoWallet:UseMeso(price)
+
+		-- 퀘스트 진행도 업데이트 (UseMeso)
+		if self.Entity.QuestService ~= nil then
+			self.Entity.QuestService:OnProgressServer(senderUserId, "UseMeso", price, "")
+		end
 	end
 
 	@ExecSpace("Server")
@@ -373,6 +378,11 @@ script SpawnManager extends Component
 		end
 
 		self:GetUserWallet().MesoWallet:UseMeso(price)
+
+		-- 퀘스트 진행도 업데이트 (UseMeso)
+		if self.Entity.QuestService ~= nil then
+			self.Entity.QuestService:OnProgressServer(userID, "UseMeso", price, "")
+		end
 
 		local spawnParent = _EntityService:GetEntityByPath(self.Entity.GameManager:GetGameMapName()..'/MyMonsterList')
 		local spawnPos = _EntityService:GetEntityByPath(self.Entity.GameManager:GetGameMapName().."/MyMonsterList/MySpawnPoint")

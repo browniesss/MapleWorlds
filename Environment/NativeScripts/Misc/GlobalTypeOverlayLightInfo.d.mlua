@@ -3,24 +3,21 @@
 @Misc
 script GlobalTypeOverlayLightInfo
 
+	---@description "The color of the light source."
+	---@sealed
+	property Color Color
+
 	---@description "An entity that belongs to the map where a light source will be added."
 	---@sealed
 	property Entity Instigator
 
+	---@description "The intensity of the light source."
 	---@sealed
-	property Color Color = RGBA(1.000, 1.000, 1.000, 1.000)
+	property float Intensity
 
+	---@description "The amount of time the light source will display. The created light source will automatically disappear upon reaching the specified time. However, when a value equal to or lower than 0 is input, the light source will remain indefinitely."
 	---@sealed
-	property float Intensity = 1
-
-	---@sealed
-	property float Lifetime = -1
-
-	---@sealed
-	property int32 LightOrder = 0
-
-	---@sealed
-	property OverlayLightOverlapOperation OverlapOperation = OverlayLightOverlapOperation.Additive
+	property float Lifetime
 
 	---@description "Initializes GlobalTypeOverlayLightInfo to the specified value."
 	constructor GlobalTypeOverlayLightInfo(Entity instigator) end

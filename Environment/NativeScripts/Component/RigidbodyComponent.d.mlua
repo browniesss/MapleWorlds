@@ -132,7 +132,7 @@ script RigidbodyComponent extends Component
 	---@sealed
 	method void PositionReset() end
 
-	---@description "Checks whether you can move the distance from the step you are currently stepping on. If isForward is true, checks the right direction, if it is false, checks the left direction. Returns true if the distance from the current position to the end of the foothold is farther than distance, and false if it is closer. Returns false if you are not stepping on a foothold."
+	---@description "Checks whether you can move the distance from the step you are currently stepping on. If isForward is true, checks the right direction, if it is false, checks the left direction."
 	---@sealed
 	method boolean PredictFootholdEnd(float distance, boolean isFoward) end
 

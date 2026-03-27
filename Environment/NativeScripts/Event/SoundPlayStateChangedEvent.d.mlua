@@ -7,6 +7,6 @@ script SoundPlayStateChangedEvent extends EventType
 	---@sealed
 	property SoundPlayState State
 
-	constructor SoundPlayStateChangedEvent(SoundPlayState state = 0) end
+	constructor SoundPlayStateChangedEvent(SoundPlayState state = SoundPlayState.Stop) end
 
 end

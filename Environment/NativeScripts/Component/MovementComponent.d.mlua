@@ -2,7 +2,7 @@
 @Component
 script MovementComponent extends Component
 
-	---@description "Sets the movement speed. The higher the value, the faster the speed. If RigidbodyComponent is true, affects horizontal speed. If KinematicMove is true, affects both vertical and horizontal speed. If KinamaticbodyComponent is true, affects both vertical and horizontal speed. If SideviewbodyComponent is true, affects horizontal speed."
+	---@description "Sets the movement speed. The higher the value, the faster the speed."
 	---@sealed
 	@Sync
 	property float InputSpeed = 1
@@ -29,7 +29,7 @@ script MovementComponent extends Component
 	---@sealed
 	method boolean Jump() end
 
-	---@description "Moves towards the direction during the deltaTime. The unit of deltaTime is the second. Applied only when on the ladder."
+	---@description "Moves towards the direction during the deltaTime. deltaTime only applies when on the ladder and is in units of seconds."
 	---@sealed
 	method void MoveToDirection(Vector2 direction, float deltaTime) end
 

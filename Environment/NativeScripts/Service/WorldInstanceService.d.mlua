@@ -27,13 +27,13 @@ script WorldInstanceService extends Service
 	@ExecSpace("ServerOnly")
 	method SharedMemoryResultCode, WorldInstanceSharedMemory GetSharedMemory(string name) end
 
-	---@description "Inquires about WorldInstanceInfo for the current World in page units. You can see the query result with the returned Entity. The script executions are suspended while performing. This function only works in the release environment. If executed in the Maker, false and nil will be returned."
+	---@description "Inquires about WorldInstanceInfo for the current World in page units. The script executions are suspended while performing. This function only works in the release environment."
 	---@sealed
 	@ReleaseOnly
 	@ExecSpace("ServerOnly")
 	method boolean, WorldInstanceInfoPages GetWorldInstanceInfoPagesAndWait() end
 
-	---@description "Inquires about WorldInstanceInfo for the current World in page units. You can see the query result with the returned Entity. This operation is performed asynchronously, and whether it is successful or not, the function passed to the callbackFunction is called along with the entity for inquiry when completing the operation."
+	---@description "Inquires about WorldInstanceInfo for the current World in page units. This operation is performed asynchronously, and the function passed to the callbackFunction is called along with the entity for inquiry when completing the operation. This function only works in the release environment."
 	---@sealed
 	@ReleaseOnly
 	@ExecSpace("ServerOnly")
@@ -49,19 +49,19 @@ script WorldInstanceService extends Service
 	@ExecSpace("ServerOnly")
 	method void ReleaseSharedMemoryAsync(string name, func<SharedMemoryResultCode> callbackFunction) end
 
-	---@description "Sends the event to all world instances. Receivers can receive events by registering a handler on WorldInstanceService. Suspends script executions during performance. You should be cautious, since sending Entity, EntityRef, Component, and ComponentRef in an event may result in invalid values being transmitted."
+	---@description "Sends the event to all world instances. Recipients will receive events when they register a handler on WorldInstanceService. Script executions are suspended during the operation."
 	---@sealed
 	method SendEventRequestResultCode RequestSendEventToAllWorldInstancesAndWait(EventType sendEvent) end
 
-	---@description "Sends an event to all world instances. Receivers can receive events by registering a handler on WorldInstanceService. The function passed to the callbackFunction is called with the result codes and an event entity upon completion of the operation. You should be cautious as sending Entity, EntityRef, Component, and ComponentRef in an event may result in invalid values being transmitted."
+	---@description "Sends the event to all world instances. Recipients will receive events when they register a handler on WorldInstanceService. The function passed to the callbackFunction is called with the result codes and an event entity upon completion of the operation."
 	---@sealed
 	method void RequestSendEventToAllWorldInstancesAsync(EventType sendEvent, func<SendEventRequestResultCode, EventType> callbackFunction) end
 
-	---@description "Sends the event to the specific world instance. Receivers can receive events by registering a handler on WorldInstanceService. Suspends script executions during performance. You should be cautious, since sending Entity, EntityRef, Component, and ComponentRef in an event may result in invalid values being transmitted."
+	---@description "Sends the event to the specified world instance. Recipients will receive events when they register a handler on WorldInstanceService. Script executions are suspended during the operation."
 	---@sealed
 	method SendEventRequestResultCode RequestSendEventToWorldInstanceAndWait(EventType sendEvent, string targetWorldInstanceId) end
 
-	---@description "Sends the event to the specific world instance. Receivers can receive events by registering a handler on WorldInstanceService. The function passed to the callbackFunction is called with the result codes and an event entity upon completion of the operation. You should be cautious as sending Entity, EntityRef, Component, and ComponentRef in an Event may result in invalid values being transmitted."
+	---@description "Sends the event to the specified world instance. Recipients will receive events when they register a handler on WorldInstanceService. The function passed to the callbackFunction is called with the result codes and an event entity upon completion of the operation."
 	---@sealed
 	method void RequestSendEventToWorldInstanceAsync(EventType sendEvent, string targetWorldInstanceId, func<SendEventRequestResultCode, EventType> callbackFunction) end
 

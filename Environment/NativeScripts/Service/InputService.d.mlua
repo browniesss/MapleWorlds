@@ -33,7 +33,7 @@ script InputService extends Service
 	@ExecSpace("ClientOnly")
 	method boolean IsPointerOverUI() end
 
-	---@description "Returns whether the cursor corresponding to pointerId is on the UI. Ignores UI Entity if its RaycastTarget property value is false. Mouse cursor's pointerId is 1. In case of mobile devices, each touch input will be designated in order, starting from 1 (e.g. 1, 2, 3...)."
+	---@description "Determines whether the cursor corresponding to pointerId is on the UI."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method boolean IsPointerOverUI(int32 pointerId) end
@@ -43,7 +43,7 @@ script InputService extends Service
 	@ExecSpace("ClientOnly")
 	method void ResetCursor() end
 
-	---@description "Change the cursor's appearance. spriteRUID is the RUID of the sprite or the animation clip. offset is the value that indicates the cursor's relative position in measures of pixels, and if offset is (0, 0), the sprite's Pivot will be the cursor's position. The cursor's shape will be reset as it moves around the room."
+	---@description "Change the cursor's appearance."
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method void SetCursor(string spriteRUID, Vector2 offset) end

@@ -11,6 +11,11 @@ script UILogic extends Logic
 	---@sealed
 	readonly property int32 ScreenWidth
 
+	---@description "Checks the order of the child TransformComponents with the same parent when played."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method int32 GetSiblingIndex(UITransformComponent target) end
+
 	---@description "Converts the UITransformComponent's UI coordinates based on pivot to World coordinates. Cannot use a UITransformComponent with its UIMode set as World."
 	---@sealed
 	@ExecSpace("ClientOnly")
@@ -30,6 +35,11 @@ script UILogic extends Logic
 	---@sealed
 	@ExecSpace("ClientOnly")
 	method Vector2 ScreenToWorldPosition(Vector2 screenPosition) end
+
+	---@description "Changes the order of the child UITransformComponents with the same parent when played."
+	---@sealed
+	@ExecSpace("ClientOnly")
+	method void SetSiblingIndex(UITransformComponent target, int32 index) end
 
 	---@description "Converts UI coordinates to World coordinates. The UI coordinate's origin point is the pivot (Middle Center) of the top most UI."
 	---@sealed

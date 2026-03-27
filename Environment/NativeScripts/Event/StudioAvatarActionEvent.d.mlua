@@ -5,6 +5,6 @@ script StudioAvatarActionEvent extends EventType
 	---@sealed
 	readonly property StudioAvatarActionType ActionType = StudioAvatarActionType.Invalid
 
-	constructor StudioAvatarActionEvent(StudioAvatarActionType actionType = 0) end
+	constructor StudioAvatarActionEvent(StudioAvatarActionType actionType = StudioAvatarActionType.Invalid) end
 
 end

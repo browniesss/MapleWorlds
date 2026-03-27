@@ -43,7 +43,7 @@ script MapComponent extends Component
 	---@sealed
 	property TileMapMode TileMapMode = TileMapMode.MapleTile
 
-	---@description "Shows whether you will directly define and use the map area. You can define it using the LeftBottom and RightTop properties. When false, the area automatically created based on the map's form will be used as the map area. Works only when TileMapMode is MapleTile."
+	---@description "Shows whether you will directly define and use the map area. You can define it using the LeftBottom and RightTop properties."
 	---@sealed
 	@Sync
 	property boolean UseCustomBound = false

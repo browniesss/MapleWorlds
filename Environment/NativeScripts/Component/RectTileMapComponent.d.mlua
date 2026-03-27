@@ -37,11 +37,11 @@ script RectTileMapComponent extends Component
 	@Sync
 	property string TileSetRUID
 
-	---@description "Places tiles in a quadrangle area \"\"from\"\" to \"\"to\"\". tileIndex is the index number of the tile."
+	---@description "Places tiles in a quadrangle area from \"\"from\"\" to \"\"to\"\"."
 	---@sealed
 	method void BoxFill(int32 tileIndex, Vector2Int from, Vector2Int to) end
 
-	---@description "Places tiles in a quadrangle area from \"\"from\"\" to \"\"to\"\". tileName is the Name property of the tile."
+	---@description "Places tiles in a quadrangle area from \"\"from\"\" to \"\"to\"\"."
 	---@sealed
 	method void BoxFill(string tileName, Vector2Int from, Vector2Int to) end
 
@@ -77,19 +77,19 @@ script RectTileMapComponent extends Component
 	---@sealed
 	method void Reset() end
 
-	---@description "Places the tile in the corresponding location with tileIndex being the index number of the tile."
+	---@description "Places the tile in the corresponding location."
 	---@sealed
 	method void SetTile(int32 tileIndex, Vector2Int cellPosition) end
 
-	---@description "Places the tile in the corresponding location with tileIndex being the index number of the tile."
+	---@description "Places the tile in the corresponding location."
 	---@sealed
 	method void SetTile(int32 tileIndex, int32 cellPositionX, int32 cellPositionY) end
 
-	---@description "Places the tile in the corresponding location with tileName being the Name property of the tile."
+	---@description "Places the tile in the corresponding location."
 	---@sealed
 	method void SetTile(string tileName, Vector2Int cellPosition) end
 
-	---@description "Places the tile in the corresponding location with tileName being the Name property of the tile."
+	---@description "Places the tile in the corresponding location."
 	---@sealed
 	method void SetTile(string tileName, int32 cellPositionX, int32 cellPositionY) end
 

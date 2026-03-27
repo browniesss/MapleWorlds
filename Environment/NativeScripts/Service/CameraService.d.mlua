@@ -50,17 +50,17 @@ script CameraService extends Service
 	@ExecSpace("Client")
 	method void ZoomReset(string targetUserId = nil) end
 
-	---@description "Zooms in/out the current camera zoom for a designated duration. The percent can only be a value between the camera's ZoomRatioMin and ZoomRatioMax, and the units are a percentage. The duration is in seconds."
+	---@description "Zooms the camera view in or out for a designated duration."
 	---@sealed
 	@ExecSpace("Client")
 	method void ZoomTo(float percent, float duration) end
 
-	---@description "Zooms in/out the current camera zoom for a designated duration. The percent can only be a value between the camera's ZoomRatioMin and ZoomRatioMax, and the units are a percentage. The duration is in seconds."
+	---@description "Zooms the camera view in or out for a designated duration."
 	---@sealed
 	@ExecSpace("Client")
 	method void ZoomTo(float percent, float duration, Entity messageOwnerEntity = nil) end
 
-	---@description "Zooms in/out the current camera zoom for a designated duration. The percent can only be a value between the camera's ZoomRatioMin and ZoomRatioMax, and the units are a percentage. The duration is in seconds."
+	---@description "Zooms the camera view in or out for a designated duration."
 	---@sealed
 	@ExecSpace("Client")
 	method void ZoomTo(float percent, float duration, string targetUserId = nil) end

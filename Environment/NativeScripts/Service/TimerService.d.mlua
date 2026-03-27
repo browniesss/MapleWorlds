@@ -7,7 +7,7 @@ script TimerService extends Service
 	---@sealed
 	method void ClearTimer(integer id) end
 
-	---@description "Sets a timer that calls the function passed to callback at a certain moment. The scriptable passes the owner of the action to reserve. The action's owner can be logic or component. It is called for the first time after intervalSeconds if isRepeat is false. It will be called for the frist time after startDelaySeconds if isRepeat is true, and called repeatedly every intervalSeconds. Returns the timer's id if the reservation is successful; if not, returns 0."
+	---@description "Sets a timer that calls the function passed to callback at a specific moment. The scriptable passes the owner of the action to reserve. The action's owner can be logic or component."
 	---@sealed
 	method integer SetTimer(IScriptable scriptable, func callback, float intervalSeconds, boolean isRepeat, float startDelaySeconds = 0) end
 

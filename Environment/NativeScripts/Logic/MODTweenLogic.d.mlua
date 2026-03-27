@@ -10,15 +10,15 @@ script MODTweenLogic extends Logic
 
 	---@description "This function is now deprecated. Use the MoveTo (Entity, Vector2, float, EaseType) function or TweenLineComponent of TweenLogic."
 	---@deprecated
-	static method Component MoveTo(Entity entity, Vector2 dest, float time, EaseType ease = 0, boolean needSync = true) end
+	static method Component MoveTo(Entity entity, Vector2 dest, float time, EaseType ease = EaseType.Linear, boolean needSync = true) end
 
 	---@description "This function is now deprecated. Use the MoveOffset (Entity, Vector2, float, EaseType) function or TweenLineComponent of TweenLogic."
 	---@deprecated
-	static method Component MoveToOffset(Entity entity, Vector2 offset, float time, EaseType ease = 0, boolean needSync = true) end
+	static method Component MoveToOffset(Entity entity, Vector2 offset, float time, EaseType ease = EaseType.Linear, boolean needSync = true) end
 
 	---@description "This is a deprecated function. Use TweenFloatingComponent."
 	---@deprecated
-	static method Component StartFloating(Entity entity, float oneCycleTime, float amplitude, EaseType easeType = 25, boolean needSync = true) end
+	static method Component StartFloating(Entity entity, float oneCycleTime, float amplitude, EaseType easeType = EaseType.SineEaseOut, boolean needSync = true) end
 
 	---@description "This function is now deprecated. Use the RotateTo(Entity, float, float, EaseType), RotateAroundOffset(Entity, float, Vector2, boolean, float, EaseType) function of TweenLogic or TweenCircularComponent."
 	---@deprecated

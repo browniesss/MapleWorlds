@@ -13,6 +13,7 @@ script InteractionComponent extends Component
 	property string ActionName = ""
 
 	---@description "Available on previous systems where IsLegacy is true. Sets the center point position of the collider rectangle based on Entity. "
+	---@deprecated
 	---@sealed
 	@Sync
 	property Vector2 BoxOffset = Vector2(0.000, 0.000)
@@ -62,7 +63,7 @@ script InteractionComponent extends Component
 	@Sync
 	property InteractType InteractionType = InteractType.KeyDown
 
-	---@description "Sets whether this Component will operate with the previous system. In new system, the Collider is affected by TransformComponent's rotation and size. You can also use a circle-shaped collider by setting the ColliderType."
+	---@description "Sets whether this Component will operate with the previous system."
 	---@sealed
 	property boolean IsLegacy = false
 

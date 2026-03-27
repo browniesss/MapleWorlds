@@ -66,18 +66,18 @@ script DateTime
 	---@description "Initializes to the string for the designated date and time. The string format must exactly match the designated format. The DateTime format specifier can be included in the format."
 	constructor DateTime(string dateTimeString, string format) end
 
-	---@description "Initializes to the string for the designated date and time. The string format must exactly match the designated format. The DateTime format specifier can be included in the format. cultureName is the cultural area name, and it follows the standards that have been defined in BCP 47."
+	---@description "Initializes the string to the designated date and time. The string format must exactly match the designated format. The DateTime format specifier can be included in the format."
 	constructor DateTime(string dateTimeString, string format, string cultureName) end
 
 	---@description "Returns whether DateTime is LocalDateTime."
 	---@sealed
 	method boolean IsLocalTime() end
 
-	---@description "Converts DateTime into a string and returns it. The standard DateTime format specifier or custom DateTime format specifier can be included in the format."
+	---@description "Converts DateTime into a string and returns it."
 	---@sealed
 	method string ToFormattedString(string format) end
 
-	---@description "Converts DateTime into a string and returns it. The standard DateTime format specifier or custom DateTime format specifier can be included in the format. cultureName is a cultural area name, and it follows the standards defined in BCP 47."
+	---@description "Converts DateTime into a string and returns it."
 	---@sealed
 	method string ToFormattedString(string format, string cultureName) end
 

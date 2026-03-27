@@ -2,11 +2,11 @@
 @Component
 script AttackComponent extends Component
 
-	---@description "An attack function that can define the rectangular area. Size refers to the size of the rectangle. Offset is the entity rectangle's center point position."
+	---@description "An attack function that can set a square area."
 	---@sealed
 	method table<Component> Attack(Vector2 size, Vector2 offset, string attackInfo, CollisionGroup collisionGroup = nil) end
 
-	---@description "Calls the OnHit(Entity, Integer, boolean, string, int32) function of HitComponent within the shape area and triggers HitEvent. Returns all the HitComponents that are considered as attack targets. The attackInfo is custom data that can be used as needed by the creator when implementing the attack directly. When utilizing this, the function must be overridden."
+	---@description "Calls the OnHit(Entity, Integer, boolean, string, int32) function of HitComponent within the shape area and triggers HitEvent. Returns all the HitComponents that are considered as attack targets."
 	---@sealed
 	method table<Component> Attack(Shape shape, string attackInfo, CollisionGroup collisionGroup = nil) end
 
@@ -14,7 +14,7 @@ script AttackComponent extends Component
 	---@sealed
 	method void AttackFast(Shape shape, string attackInfo, CollisionGroup collisionGroup = nil) end
 
-	---@description "An attack function that defines the rectangular area. Size refers to the size of the rectangle. Position is the entity rectangle's center point position based on the world coordinates."
+	---@description "An attack function that can set a square area."
 	---@sealed
 	method table<Component> AttackFrom(Vector2 size, Vector2 position, string attackInfo, CollisionGroup collisionGroup = nil) end
 
@@ -30,7 +30,7 @@ script AttackComponent extends Component
 	---@description "Calculates how many hits to be displayed from one attack. Default behavior always returns 1."
 	method int32 GetDisplayHitCount(string attackInfo) end
 
-	---@description "Determines whether the defender is a valid target for attack. When it returns false, it's removed from the Attack(), AttackFrom(), or AttackFast() functions. The default behavior returns false if the current state of the defender's StateComponent is 'DEAD' and both the defender and the opponent are players, while the opponent's PlayerComponent has a PVPMode property value as false."
+	---@description "Determines whether the defender is a valid target for attack. When it returns false, it's removed from the Attack(), AttackFrom(), or AttackFast() functions."
 	method boolean IsAttackTarget(Entity defender, string attackInfo) end
 
 	---@description "Entity attacks trigger this function."

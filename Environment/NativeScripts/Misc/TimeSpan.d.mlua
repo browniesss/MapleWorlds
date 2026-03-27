@@ -74,7 +74,7 @@ script TimeSpan
 	---@description "Initializes to the string for the designated time. The string format must exactly match the designated format. The TimeSpan format specifier can be included in the format."
 	constructor TimeSpan(string timeSpanString, string format) end
 
-	---@description "Initializes to the string for the designated time. The string format must exactly match the designated format. The TimeSpan format specifier can be included in the format. cultureName is the cultural area name, and it follows the standards defined in BCP 47."
+	---@description "Initializes the string to the designated time. The string format must exactly match the designated format. The TimeSpan format specifier can be included in the format."
 	constructor TimeSpan(string timeSpanString, string format, string cultureName) end
 
 	---@description "Creates TimeSpan with the absolute value of the entity and then returns it."
@@ -104,7 +104,7 @@ script TimeSpan
 	---@sealed
 	method string ToFormattedString(string format) end
 
-	---@description "Converts TimeSpan into a string and returns it. The standard TimeSpan format specifier and custom TimeSpan format specifier can be included in the format. cultureName is a cultural area name, and it follows the standards defined in BCP 47."
+	---@description "Converts TimeSpan into a string and returns it. The standard TimeSpan format specifier and custom TimeSpan format specifier can be included in the format."
 	---@sealed
 	method string ToFormattedString(string format, string cultureName) end
 

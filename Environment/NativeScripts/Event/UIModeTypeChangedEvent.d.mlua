@@ -7,6 +7,6 @@ script UIModeTypeChangedEvent extends EventType
 	---@sealed
 	property UIModeType UIModeType = UIModeType.None
 
-	constructor UIModeTypeChangedEvent(UIModeType uiModeType = 0) end
+	constructor UIModeTypeChangedEvent(UIModeType uiModeType = UIModeType.None) end
 
 end

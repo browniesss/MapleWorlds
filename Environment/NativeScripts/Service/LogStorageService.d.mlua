@@ -3,7 +3,7 @@
 @Service
 script LogStorageService extends Service
 
-	---@description "Retrieves World product purchase record. Sets the time of the purchase record to be imported with fromDate and toDate. This operation is performed asynchronously. The function passed to the callbackFunction is called upon completion of the operation. callbackFunction's parameter is the purchase record imported. This feature does not work in the World being created. Using this function is not recommended, as it is a provisional function."
+	---@description "Retrieves the world's product purchase record. This operation is performed asynchronously. The function passed to the callbackFunction is called once the operation is complete. This feature does not work in the world being created. This is a provisional function and is not recommended for use."
 	---@sealed
 	@ReleaseOnly
 	@ExecSpace("ServerOnly")

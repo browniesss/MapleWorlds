@@ -23,6 +23,6 @@ script BodyActionStateChangeEvent extends EventType
 	---@sealed
 	property int32 startFrameIndex = 0
 
-	constructor BodyActionStateChangeEvent(boolean needResetAction = false, MapleAvatarBodyActionState actionState = 0, int32 startFrameIndex = 0, int32 endFrameIndex = 2147483647, float playRate = 1) end
+	constructor BodyActionStateChangeEvent(boolean needResetAction = false, MapleAvatarBodyActionState actionState = MapleAvatarBodyActionState.Invalid, int32 startFrameIndex = 0, int32 endFrameIndex = 2147483647, float playRate = 1) end
 
 end

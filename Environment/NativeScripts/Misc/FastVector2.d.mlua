@@ -40,7 +40,7 @@ script FastVector2
 	---@description "Reset FastVector2 to the specified value."
 	constructor FastVector2(Vector2 vector2) end
 
-	---@description "Finds the angle between two Vectors. Returns values between 0 to 180."
+	---@description "Finds the angle between two vectors. Returns a value between 0 and 180."
 	---@sealed
 	method number Angle(FastVector2 b) end
 
@@ -52,7 +52,7 @@ script FastVector2
 	---@sealed
 	method FastVector2 Clone() end
 
-	---@description "Finds the distance between two Vectors."
+	---@description "Finds the distance between two vectors."
 	---@sealed
 	method number Distance(FastVector2 b) end
 
@@ -136,13 +136,13 @@ script FastVector2
 	---@sealed
 	method void Div(number num) end
 
-	---@description "Finds the angle between two Vectors. Returns values between 0 to 180."
+	---@description "Finds the angle between two vectors. Returns a value between 0 and 180."
 	static method number Angle(FastVector2 a, FastVector2 b) end
 
 	---@description "Creates a FastVector2 entity composed of the value that rounds up each element, then returns it."
 	static method FastVector2 CeilToInt(FastVector2 a) end
 
-	---@description "Finds the distance between two Vectors."
+	---@description "Finds the distance between two vectors."
 	static method number Distance(FastVector2 a, FastVector2 b) end
 
 	---@description "Finds the inner product of two vectors."
