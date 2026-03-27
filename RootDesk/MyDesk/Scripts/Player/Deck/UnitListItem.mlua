@@ -69,7 +69,8 @@ script UnitListItem extends Component
 		self.unitPriceLabel.TextComponent.Text = tostring(self.unitData.summonCost)
 		self.unitLevelLabel.TextComponent.Text = "Level: "..data['level'] 
 		
-		local test = _SpawnService:SpawnByModelId("model://c4e27100-4894-41a8-bb13-da550e47ddf3", "SynergyIcon", Vector3(-65, 70, 0), self.Entity)
+		local test = _SpawnService:SpawnByModelId("model://c4e27100-4894-41a8-bb13-da550e47ddf3", "SynergyIcon", Vector3.zero, self.Entity)
+		test.UITransformComponent.anchoredPosition = Vector2(-65, 70)
 		self.synergyComponentItem = test.SynergyComponentItem
 		self.synergyComponentItem:SetSynergyData(self.unitData)
 	end
