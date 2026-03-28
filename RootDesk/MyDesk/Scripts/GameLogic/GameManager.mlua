@@ -650,6 +650,11 @@ script GameManager extends Component
 
 	@ExecSpace("Server")
 	method void StageClearServer(integer clearedChapter, integer clearedStage)
+		-- 퀘스트 진행도 업데이트 (ClearStage)
+		if self.Entity.QuestService ~= nil then
+			self.Entity.QuestService:OnProgressServer(senderUserId, "ClearStage", 1, tostring(clearedChapter) .. "-" .. tostring(clearedStage))
+		end
+
 		-- 튜토리얼 스테이지(0,0)는 보상/랭킹/진행도 저장 없이 UI만 표시
 		if clearedChapter == 0 and clearedStage == 0 then
 			self:StageClearClientCallback(false, 0, senderUserId)
@@ -851,24 +856,7 @@ script GameManager extends Component
 		end
 		
 		_EntityService:GetEntityByPath("/ui/LobbyInfoUI").Enable = false
-		local lobbyBadgeButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/BadgeButton")
-		lobbyBadgeButton.Enable = false
-		local lobbyCodexButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/CodexButton")
-		if lobbyCodexButton ~= nil then
-			lobbyCodexButton.Enable = false
-		end
-		local lobbyCouponButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIRoot/TopUI/CouponButton")
-		if lobbyCouponButton ~= nil then
-			lobbyCouponButton.Enable = false
-		end
-		
-		if Environment:IsMobilePlatform() then
-			local lobbyJoyStick = _EntityService:GetEntityByPath("/ui/MainLobbyUI/UIJoystick")
-			local lobbyJumpButton = _EntityService:GetEntityByPath("/ui/MainLobbyUI/JumpButton")
-		
-			lobbyJoyStick.Enable = false
-			lobbyJumpButton.Enable = false
-		end
+		_EntityService:GetEntityByPath("/ui/MainLobbyUI").Enable = false
 		
 		_LoadingManager:Show()
 		
