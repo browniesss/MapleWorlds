@@ -1,0 +1,432 @@
+@Component
+script MailPopupUI extends Component
+
+	property Entity popup = nil
+
+	property Entity mailListScroll = nil
+
+	property Entity mailItemTemplate = nil
+
+	property Entity mailContent = nil
+
+	property Entity titleText = nil
+
+	property Entity bodyText = nil
+
+	property Entity rewardArea = nil
+
+	property Entity rewardList = nil
+
+	property Entity rewardItemTemplate = nil
+
+	property Entity getRewardButton = nil
+
+	property Entity infoPopup = nil
+
+	property Entity infoPopupButton = nil
+
+	property Entity closeButton = nil
+
+	property string selectedMailId = ""
+
+	property table spawnedMailItems = {}
+
+	property table spawnedRewardItems = {}
+
+	method Entity FindChildExact(Entity parent, string exactName)
+		if parent == nil then return nil end
+		local children = parent.Children
+		for i = 1, #children do
+			if children[i].Name == exactName then
+				return children[i]
+			end
+		end
+		return nil
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		local root = self.Entity:GetChildByName("root")
+		if root == nil then
+			return
+		end
+		
+		self.popup = root:GetChildByName("popup")
+		self.closeButton = root:GetChildByName("closeButton")
+		self.infoPopup = root:GetChildByName("infoPopup")
+		
+		if self.popup ~= nil then
+			local mailList = self.popup:GetChildByName("mailList")
+			if mailList ~= nil then
+				self.mailListScroll = mailList:GetChildByName("Scroll_Layout")
+				if self.mailListScroll ~= nil then
+					self.mailItemTemplate = self.mailListScroll:GetChildByName("mailItem")
+				end
+			end
+		
+			self.mailContent = self.popup:GetChildByName("mailContent")
+			if self.mailContent ~= nil then
+				local titleArea = self:FindChildExact(self.mailContent, "title")
+				if titleArea ~= nil then
+					local titleBg = titleArea:GetChildByName("background")
+					if titleBg ~= nil then
+						self.titleText = titleBg:GetChildByName("UIText")
+					end
+				end
+		
+				local bodyArea = self:FindChildExact(self.mailContent, "body")
+				if bodyArea == nil then bodyArea = self.mailContent:GetChildByName("body") end
+				if bodyArea ~= nil then
+					local bodyBg = bodyArea:GetChildByName("background")
+					if bodyBg ~= nil then
+						local textList = bodyBg:GetChildByName("textList")
+						if textList ~= nil then
+							self.bodyText = textList:GetChildByName("UIText")
+						end
+					end
+				end
+		
+				self.rewardArea = self:FindChildExact(self.mailContent, "reward")
+				if self.rewardArea == nil then self.rewardArea = self.mailContent:GetChildByName("reward") end
+				if self.rewardArea ~= nil then
+					self.rewardList = self.rewardArea:GetChildByName("rewardList")
+					if self.rewardList ~= nil then
+						self.rewardItemTemplate = self.rewardList:GetChildByName("rewardItem")
+					end
+					self.getRewardButton = self.rewardArea:GetChildByName("getRewardButton")
+				end
+			end
+		end
+		
+		-- 이벤트 연결
+		if self.closeButton ~= nil then
+			self.closeButton:ConnectEvent(ButtonClickEvent, function()
+				self:Hide()
+			end)
+		end
+		
+		if self.getRewardButton ~= nil then
+			self.getRewardButton:ConnectEvent(ButtonClickEvent, function()
+				self:OnRewardButtonClick()
+			end)
+		end
+		
+		if self.infoPopup ~= nil then
+			self.infoPopup.Enable = false
+			self.infoPopup.Visible = false
+		
+			self.infoPopupButton = self.infoPopup:GetChildByName("UIButton")
+			if self.infoPopupButton ~= nil then
+				self.infoPopupButton:ConnectEvent(ButtonClickEvent, function()
+					self.infoPopup.Enable = false
+					self.infoPopup.Visible = false
+					-- 보상 수령 후 리스트 갱신
+					_MailService:RequestMailList()
+				end)
+			end
+		end
+		
+		-- mailItemTemplate 초기 숨김
+		if self.mailItemTemplate ~= nil then
+			self.mailItemTemplate.Enable = false
+			self.mailItemTemplate.Visible = false
+		end
+		
+		-- rewardItemTemplate 초기 숨김
+		if self.rewardItemTemplate ~= nil then
+			self.rewardItemTemplate.Enable = false
+			self.rewardItemTemplate.Visible = false
+		end
+		
+		-- mailContent 초기 숨김
+		if self.mailContent ~= nil then
+			self.mailContent.Enable = false
+			self.mailContent.Visible = false
+		end
+		
+		-- 초기 숨김
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+	end
+
+	method void Open()
+		self.Entity.Enable = true
+		self.Entity.Visible = true
+		self.selectedMailId = ""
+		
+		if self.mailContent ~= nil then
+			self.mailContent.Enable = false
+			self.mailContent.Visible = false
+		end
+		
+		_MailService:RequestMailList()
+	end
+
+	method void Hide()
+		self.Entity.Enable = false
+		self.Entity.Visible = false
+	end
+
+	method void HandleMailList(string mailListJson)
+		if mailListJson == nil or mailListJson == "" then
+			return
+		end
+		local mailList = _HttpService:JSONDecode(mailListJson)
+		if mailList == nil then
+			return
+		end
+		
+		-- 기존 스폰 아이템 제거
+		self:ClearMailItems()
+		
+		for i, mailItem in ipairs(mailList) do
+			local mailId = mailItem["id"] or ""
+			local title = mailItem["title"] or ""
+			local expireAt = tonumber(mailItem["expireAt"]) or 0
+			local isRead = mailItem["isRead"] == true
+			
+			log("[MailPopupUI] Rendering Mail ID: " .. tostring(mailId) .. " Title: '" .. tostring(title) .. "' ExpireAt: " .. tostring(expireAt))
+		
+			local itemEntity = nil
+			if i == 1 then
+				-- 첫 아이템은 템플릿 재사용
+				itemEntity = self.mailItemTemplate
+				if itemEntity ~= nil then
+					itemEntity.Enable = true
+					itemEntity.Visible = true
+				end
+			else
+				-- 나머지는 SpawnByEntity
+				if self.mailItemTemplate ~= nil and self.mailListScroll ~= nil then
+					itemEntity = _SpawnService:SpawnByEntity(
+						self.mailItemTemplate,
+						"mailItem_" .. tostring(i),
+						Vector3.zero,
+						self.mailListScroll
+					)
+					if itemEntity ~= nil then
+						itemEntity.Enable = true
+						itemEntity.Visible = true
+						table.insert(self.spawnedMailItems, itemEntity)
+					end
+				end
+			end
+		
+			if itemEntity ~= nil then
+				-- 제목 설정
+				local titleEntity = itemEntity:GetChildByName("mailTitle")
+				if titleEntity ~= nil and titleEntity.TextComponent ~= nil then
+					titleEntity.TextComponent.Text = title
+				end
+		
+				-- 만료일 설정
+				local expireEntity = itemEntity:GetChildByName("mailExpire")
+				if expireEntity ~= nil and expireEntity.TextComponent ~= nil then
+					if expireAt > 0 then
+						expireEntity.TextComponent.Text = self:FormatExpireDate(expireAt)
+					else
+						expireEntity.TextComponent.Text = ""
+					end
+				end
+		
+				-- 읽음 상태 색상
+				if isRead and itemEntity.SpriteGUIRendererComponent ~= nil then
+					itemEntity.SpriteGUIRendererComponent.Color = Color(0.5, 0.5, 0.5, 1.0)
+				elseif itemEntity.SpriteGUIRendererComponent ~= nil then
+					itemEntity.SpriteGUIRendererComponent.Color = Color(1.0, 1.0, 1.0, 1.0)
+				end
+		
+				-- 클릭 이벤트
+				local capturedMailId = mailId
+				itemEntity:ConnectEvent(ButtonClickEvent, function()
+					self:OnMailItemClick(capturedMailId)
+				end)
+			end
+		end
+	end
+
+	method void ClearMailItems()
+		-- 스폰된 아이템 제거
+		for _, item in ipairs(self.spawnedMailItems) do
+			if item ~= nil then
+				item:Destroy()
+			end
+		end
+		self.spawnedMailItems = {}
+		
+		-- 템플릿 숨김
+		if self.mailItemTemplate ~= nil then
+			self.mailItemTemplate.Enable = false
+			self.mailItemTemplate.Visible = false
+		end
+	end
+
+	method void OnMailItemClick(string mailId)
+		self.selectedMailId = mailId
+		_MailService:RequestMailContent(mailId)
+	end
+
+	method void HandleMailContent(string mailJson, boolean isClaimed)
+		if mailJson == nil or mailJson == "" then
+			return
+		end
+		local mail = _HttpService:JSONDecode(mailJson)
+		if mail == nil then
+			return
+		end
+		
+		if self.mailContent ~= nil then
+			self.mailContent.Enable = true
+			self.mailContent.Visible = true
+		end
+		
+		-- 제목
+		if self.titleText ~= nil and self.titleText.TextComponent ~= nil then
+			self.titleText.TextComponent.Text = mail["title"] or ""
+		end
+		
+		-- 본문
+		if self.bodyText ~= nil and self.bodyText.TextComponent ~= nil then
+			self.bodyText.TextComponent.Text = mail["content"] or ""
+		end
+		
+		-- 보상 영역
+		local rewardsStr = mail["rewards"] or ""
+		local hasRewards = rewardsStr ~= "" and rewardsStr ~= "[]"
+		
+		if self.rewardArea ~= nil then
+			if hasRewards then
+				self.rewardArea.Enable = true
+				self.rewardArea.Visible = true
+				self:DisplayRewards(rewardsStr, isClaimed)
+			else
+				self.rewardArea.Enable = false
+				self.rewardArea.Visible = false
+			end
+		end
+	end
+
+	method void DisplayRewards(string rewardsJson, boolean isClaimed)
+		-- 기존 보상 아이템 제거
+		self:ClearRewardItems()
+		
+		if rewardsJson == nil or rewardsJson == "" then
+			return
+		end
+		local rewards = _HttpService:JSONDecode(rewardsJson)
+		if rewards == nil then
+			return
+		end
+		
+		for i, reward in ipairs(rewards) do
+			local rewardType = reward["type"] or ""
+			local amount = tonumber(reward["amount"]) or 0
+		
+			local itemEntity = nil
+			if i == 1 then
+				itemEntity = self.rewardItemTemplate
+				if itemEntity ~= nil then
+					itemEntity.Enable = true
+					itemEntity.Visible = true
+				end
+			else
+				if self.rewardItemTemplate ~= nil and self.rewardList ~= nil then
+					itemEntity = _SpawnService:SpawnByEntity(
+						self.rewardItemTemplate,
+						"rewardItem_" .. tostring(i),
+						Vector3.zero,
+						self.rewardList
+					)
+					if itemEntity ~= nil then
+						itemEntity.Enable = true
+						itemEntity.Visible = true
+						table.insert(self.spawnedRewardItems, itemEntity)
+					end
+				end
+			end
+		
+			if itemEntity ~= nil then
+				-- 아이콘
+				local iconEntity = itemEntity:GetChildByName("itemIcon")
+				if iconEntity ~= nil and iconEntity.SpriteGUIRendererComponent ~= nil then
+					if rewardType == "dia_free" then
+						iconEntity.SpriteGUIRendererComponent.ImageRUID = "3d291a0daa274583a7856b0470793de5"
+					elseif rewardType == "coin_free" then
+						iconEntity.SpriteGUIRendererComponent.ImageRUID = "78fb3b54f37c41cc920aa5b34667efc8"
+					elseif rewardType == "meso_free" then
+						iconEntity.SpriteGUIRendererComponent.ImageRUID = "4cc5ffc272224edc809a792b8efa16e3"
+					end
+				end
+		
+				-- 수량
+				local countEntity = itemEntity:GetChildByName("itemCount")
+				if countEntity ~= nil and countEntity.TextComponent ~= nil then
+					countEntity.TextComponent.Text = tostring(amount)
+				end
+			end
+		end
+		
+		-- 수령 버튼 상태
+		if self.getRewardButton ~= nil then
+			if isClaimed then
+				self.getRewardButton.Enable = true
+				if self.getRewardButton.ButtonComponent ~= nil then
+					self.getRewardButton.ButtonComponent.Enable = false
+				end
+			else
+				self.getRewardButton.Enable = true
+				if self.getRewardButton.ButtonComponent ~= nil then
+					self.getRewardButton.ButtonComponent.Enable = true
+				end
+			end
+		end
+	end
+
+	method void ClearRewardItems()
+		for _, item in ipairs(self.spawnedRewardItems) do
+			if item ~= nil then
+				item:Destroy()
+			end
+		end
+		self.spawnedRewardItems = {}
+		
+		if self.rewardItemTemplate ~= nil then
+			self.rewardItemTemplate.Enable = false
+			self.rewardItemTemplate.Visible = false
+		end
+	end
+
+	method void OnRewardButtonClick()
+		if self.selectedMailId == "" then
+			return
+		end
+		_MailService:ClaimReward(self.selectedMailId)
+	end
+
+	method void HandleRewardClaimed(string mailId, boolean success, string message)
+		if success then
+			-- infoPopup 표시
+			if self.infoPopup ~= nil then
+				self.infoPopup.Enable = true
+				self.infoPopup.Visible = true
+			end
+		
+			-- 수령 버튼 비활성화
+			if self.getRewardButton ~= nil and self.getRewardButton.ButtonComponent ~= nil then
+				self.getRewardButton.ButtonComponent.Enable = false
+			end
+		end
+	end
+
+	method string FormatExpireDate(integer timestamp)
+		if timestamp <= 0 then
+			return ""
+		end
+		local localDt = DateTime(timestamp)
+		if localDt == nil then
+			return ""
+		end
+		return localDt:ToFormattedString("MM/dd/yyyy%-HH:mm:ss")
+	end
+
+end

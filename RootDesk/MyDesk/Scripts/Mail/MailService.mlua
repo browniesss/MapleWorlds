@@ -1,0 +1,554 @@
+@Logic
+script MailService extends Logic
+
+	property string MAIL_STORAGE_NAME = "MAIL_STORAGE"
+
+	property string MAIL_INDEX_KEY = "MAIL_INDEX"
+
+	property string USER_MAIL_KEY = "MAIL_USER_DATA"
+
+	@Sync
+	property SyncTable<string, string> mailData
+
+	property table adminList = {"20372100004704052", "20372100008069853", "20372001292201301"}
+
+	property table _mailIds = {}
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		self:LoadAllMails()
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean IsAdmin(string userId)
+		if userId == nil then
+			return false
+		end
+		for _, adminId in ipairs(self.adminList) do
+			if adminId == userId then
+				return true
+			end
+		end
+		return false
+	end
+
+	@ExecSpace("ServerOnly")
+	method void LoadAllMails()
+		local gs = _DataStorageService:GetGlobalDataStorage(self.MAIL_STORAGE_NAME)
+		local errCode, indexJson = gs:GetAndWait(self.MAIL_INDEX_KEY)
+		
+		if errCode ~= 0 or indexJson == nil or indexJson == "" then
+			return
+		end
+		
+		local mailIds = _HttpService:JSONDecode(indexJson)
+		if mailIds == nil then
+			return
+		end
+		
+		self._mailIds = mailIds
+		
+		for _, mailId in ipairs(mailIds) do
+			local key = "MAIL_" .. mailId
+			local err2, mailJson = gs:GetAndWait(key)
+			if err2 == 0 and mailJson ~= nil and mailJson ~= "" then
+				self.mailData[mailId] = mailJson
+			end
+		end
+	end
+
+	@ExecSpace("ServerOnly")
+	method void SaveMailIndex()
+		local json = _HttpService:JSONEncode(self._mailIds)
+		local gs = _DataStorageService:GetGlobalDataStorage(self.MAIL_STORAGE_NAME)
+		gs:SetAndWait(self.MAIL_INDEX_KEY, json)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void SaveMail(string mailId, string mailJson)
+		local gs = _DataStorageService:GetGlobalDataStorage(self.MAIL_STORAGE_NAME)
+		local key = "MAIL_" .. mailId
+		gs:SetAndWait(key, mailJson)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void DeleteMailFromStorage(string mailId)
+		local gs = _DataStorageService:GetGlobalDataStorage(self.MAIL_STORAGE_NAME)
+		local key = "MAIL_" .. mailId
+		gs:DeleteAndWait(key)
+	end
+
+	@ExecSpace("ServerOnly")
+	method string GenerateMailId()
+		local time = DateTime.UtcNow.Elapsed
+		local rand = math.random(1000, 9999)
+		return "mail_" .. tostring(time) .. "_" .. tostring(rand)
+	end
+
+	@ExecSpace("ServerOnly")
+	method integer ParseExpireAt(string expireAtStr)
+		if expireAtStr == nil or expireAtStr == "" then
+			return 0
+		end
+		-- 이미 숫자(ms)로 저장된 경우 그대로 사용
+		local asNum = tonumber(expireAtStr)
+		if asNum ~= nil then
+			-- 숫자가 ms 단위(매우 큰 수)인지 날짜 형식 착오인지 구분
+			-- ms 단위는 보통 10^15 이상, 날짜 문자열에서 온 숫자는 8자리(YYYYMMDD)
+			if asNum > 99999999 then
+				-- 이미 ms 단위 Elapsed 값
+				return asNum
+			end
+		end
+		-- "MM/dd/yyyy-HH:mm:ss" 파싱
+		log_error(expireAtStr)
+		local dt = DateTime(expireAtStr, "MM/dd/yyyy%-HH:mm:ss")
+		if dt == nil then
+			return 0
+		end
+		return dt.Elapsed
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean IsTargetUser(string targetUserStr, string userId)
+		if targetUserStr == nil or targetUserStr == "" then
+			return true
+		end
+
+		-- JSON 리스트인지 확인
+		if string.match(targetUserStr, "^%[.*%]$") then
+			local parsed = _HttpService:JSONDecode(targetUserStr)
+			if parsed ~= nil and type(parsed) == "table" then
+				for _, uid in ipairs(parsed) do
+					if tostring(uid) == userId then
+						return true
+					end
+				end
+				return false
+			end
+		end
+
+		-- 단일 텍스트 혹은 콤마 구분자 처리 (하위 호환)
+		for tu in string.gmatch(targetUserStr, "([^,]+)") do
+			local cleanUser = string.gsub(tu, "^%s*(.-)%s*$", "%1")
+			if cleanUser == userId then
+				return true
+			end
+		end
+
+		return false
+	end
+
+	@ExecSpace("ServerOnly")
+	method table LoadUserMailData(string userId)
+		local ds = _DataStorageService:GetUserDataStorage(userId)
+		local errCode, data = ds:GetAndWait(self.USER_MAIL_KEY)
+		
+		if errCode ~= 0 or data == nil or data == "" then
+			return {}
+		end
+		
+		local parsed = _HttpService:JSONDecode(data)
+		if parsed == nil then
+			return {}
+		end
+		return parsed
+	end
+
+	@ExecSpace("ServerOnly")
+	method void SaveUserMailData(string userId, table userData)
+		local ds = _DataStorageService:GetUserDataStorage(userId)
+		local json = _HttpService:JSONEncode(userData)
+		ds:SetAndWait(self.USER_MAIL_KEY, json)
+	end
+
+	@ExecSpace("Server")
+	method void CreateMail(string title, string content, string targetUser, string expireAt, string rewards)
+		local userId = senderUserId
+		if not self:IsAdmin(userId) then
+			self:OnMailSaved(userId, false, "Unauthorized")
+			return
+		end
+		
+		-- 보상 JSON 유효성 검증
+		if rewards ~= nil and rewards ~= "" and rewards ~= "[]" then
+			local rewardsParsed = _HttpService:JSONDecode(rewards)
+			if rewardsParsed == nil then
+				self:OnMailSaved(userId, false, "Invalid rewards JSON format")
+				return
+			end
+		end
+		
+		local mailId = self:GenerateMailId()
+		local mail = {}
+		mail["id"] = mailId
+		mail["title"] = title
+		mail["content"] = content
+		mail["targetUser"] = targetUser
+		mail["expireAt"] = self:ParseExpireAt(expireAt)
+		mail["rewards"] = rewards
+		
+		local mailJson = _HttpService:JSONEncode(mail)
+		self.mailData[mailId] = mailJson
+		table.insert(self._mailIds, mailId)
+		self:SaveMail(mailId, mailJson)
+		self:SaveMailIndex()
+		
+		self:OnMailSaved(userId, true, mailId)
+	end
+
+	@ExecSpace("Server")
+	method void UpdateMail(string mailId, string title, string content, string targetUser, string expireAt, string rewards)
+		local userId = senderUserId
+		if not self:IsAdmin(userId) then
+			self:OnMailSaved(userId, false, "Unauthorized")
+			return
+		end
+		
+		if self.mailData[mailId] == nil then
+			self:OnMailSaved(userId, false, "Mail not found")
+			return
+		end
+		
+		-- 보상 JSON 유효성 검증
+		if rewards ~= nil and rewards ~= "" and rewards ~= "[]" then
+			local rewardsParsed = _HttpService:JSONDecode(rewards)
+			if rewardsParsed == nil then
+				self:OnMailSaved(userId, false, "Invalid rewards JSON format")
+				return
+			end
+		end
+		
+		local mail = {}
+		mail["id"] = mailId
+		mail["title"] = title
+		mail["content"] = content
+		mail["targetUser"] = targetUser
+		mail["expireAt"] = self:ParseExpireAt(expireAt)
+		mail["rewards"] = rewards
+		
+		local mailJson = _HttpService:JSONEncode(mail)
+		self.mailData[mailId] = mailJson
+		self:SaveMail(mailId, mailJson)
+		
+		self:OnMailSaved(userId, true, mailId)
+	end
+
+	@ExecSpace("Server")
+	method void DeleteMail(string mailId)
+		local userId = senderUserId
+		if not self:IsAdmin(userId) then
+			self:OnMailDeleted(userId, false, "Unauthorized")
+			return
+		end
+		
+		if self.mailData[mailId] == nil then
+			self:OnMailDeleted(userId, false, "Mail not found")
+			return
+		end
+		
+		self.mailData[mailId] = nil
+		for i, id in ipairs(self._mailIds) do
+			if id == mailId then
+				table.remove(self._mailIds, i)
+				break
+			end
+		end
+		
+		self:DeleteMailFromStorage(mailId)
+		self:SaveMailIndex()
+		
+		self:OnMailDeleted(userId, true, mailId)
+	end
+
+	@ExecSpace("Server")
+	method void RequestMailList()
+		local userId = senderUserId
+		local userData = self:LoadUserMailData(userId)
+		local now = DateTime.UtcNow.Elapsed
+		local result = {}
+		
+		for _, mailId in ipairs(self._mailIds) do
+			local mailJson = self.mailData[mailId]
+			local mail = _HttpService:JSONDecode(mailJson)
+			if mail ~= nil then
+				local targetUser = mail["targetUser"] or ""
+				local expireAt = tonumber(mail["expireAt"]) or 0
+		
+				-- 대상 유저 필터
+				if self:IsTargetUser(targetUser, userId) then
+					-- 만료 체크
+					if expireAt == 0 or expireAt > now then
+						local mailStatus = userData[mailId]
+						local isRead = false
+						local isClaimed = false
+						if mailStatus ~= nil then
+							isRead = mailStatus["read"] == true
+							isClaimed = mailStatus["claimed"] == true
+						end
+		
+						local hasRewards = mail["rewards"] ~= nil and mail["rewards"] ~= "" and mail["rewards"] ~= "[]"
+		
+						-- 조회 가능 조건: 보상 없으면 미읽음, 보상 있으면 미수령
+						local visible = false
+						if hasRewards then
+							visible = not isClaimed
+						else
+							visible = not isRead
+						end
+		
+						if visible then
+							local item = {}
+							item["id"] = mailId
+							item["title"] = mail["title"] or ""
+							item["expireAt"] = expireAt
+							item["isRead"] = isRead
+							table.insert(result, item)
+						end
+					end
+				end
+			end
+		end
+		
+		local resultJson = _HttpService:JSONEncode(result)
+		self:OnMailListReceived(userId, resultJson)
+	end
+
+	@ExecSpace("Server")
+	method void RequestMailContent(string mailId)
+		local userId = senderUserId
+		local mailJson = self.mailData[mailId]
+		
+		if mailJson == nil then
+			return
+		end
+		
+		local mail = _HttpService:JSONDecode(mailJson)
+		if mail == nil then
+			return
+		end
+		
+		-- 대상 유저 체크
+		local targetUser = mail["targetUser"] or ""
+		if not self:IsTargetUser(targetUser, userId) then
+			return
+		end
+		
+		-- 읽음 처리
+		local userData = self:LoadUserMailData(userId)
+		if userData[mailId] == nil then
+			userData[mailId] = {}
+		end
+		userData[mailId]["read"] = true
+		self:SaveUserMailData(userId, userData)
+		
+		local isClaimed = userData[mailId]["claimed"] == true
+		self:OnMailContentReceived(userId, mailJson, isClaimed)
+	end
+
+	@ExecSpace("Server")
+	method void ClaimReward(string mailId)
+		local userId = senderUserId
+		local mailJson = self.mailData[mailId]
+		
+		if mailJson == nil then
+			self:OnRewardClaimed(userId, mailId, false, "Mail not found")
+			return
+		end
+		
+		local mail = _HttpService:JSONDecode(mailJson)
+		if mail == nil then
+			self:OnRewardClaimed(userId, mailId, false, "Invalid mail data")
+			return
+		end
+		
+		-- 대상 유저 체크
+		local targetUser = mail["targetUser"] or ""
+		if not self:IsTargetUser(targetUser, userId) then
+			self:OnRewardClaimed(userId, mailId, false, "Not your mail")
+			return
+		end
+		
+		-- 이미 수령 체크
+		local userData = self:LoadUserMailData(userId)
+		if userData[mailId] ~= nil and userData[mailId]["claimed"] == true then
+			self:OnRewardClaimed(userId, mailId, false, "Already claimed")
+			return
+		end
+		
+		-- 보상 지급
+		local rewardsStr = mail["rewards"] or ""
+		if rewardsStr == "" or rewardsStr == "[]" then
+			self:OnRewardClaimed(userId, mailId, false, "No rewards")
+			return
+		end
+		
+		local success = self:GiveRewards(userId, rewardsStr)
+		if not success then
+			self:OnRewardClaimed(userId, mailId, false, "Reward failed")
+			return
+		end
+		
+		-- 수령 완료 기록
+		if userData[mailId] == nil then
+			userData[mailId] = {}
+		end
+		userData[mailId]["read"] = true
+		userData[mailId]["claimed"] = true
+		self:SaveUserMailData(userId, userData)
+		
+		self:OnRewardClaimed(userId, mailId, true, "")
+	end
+
+	@ExecSpace("ServerOnly")
+	method boolean GiveRewards(string userId, string rewardsJson)
+		local rewards = _HttpService:JSONDecode(rewardsJson)
+		if rewards == nil then
+			return false
+		end
+		
+		local userEntity = _UserService:GetUserEntityByUserId(userId)
+		if userEntity == nil or userEntity.BillingService == nil then
+			log_error("[MailService] Cannot find user entity or BillingService for userId: " .. tostring(userId))
+			return false
+		end
+		
+		for _, reward in ipairs(rewards) do
+			local rewardType = reward["type"] or ""
+			local amount = tonumber(reward["amount"]) or 0
+		
+			if amount > 0 then
+				local result = -1
+				if rewardType == "dia_free" then
+					result = userEntity.BillingService:AddFirstFreeCoin(userId, amount)
+				elseif rewardType == "coin_free" then
+					result = userEntity.BillingService:AddSecondFreeCoin(userId, amount)
+				elseif rewardType == "meso_free" then
+					result = userEntity.BillingService:AddThirdFreeCoin(userId, amount)
+				end
+		
+				if result ~= 0 then
+					return false
+				end
+			end
+		end
+		
+		return true
+	end
+
+	@ExecSpace("Server")
+	method void RequestAdminMailList()
+		local userId = senderUserId
+		if not self:IsAdmin(userId) then
+			return
+		end
+		
+		local result = {}
+		for _, mailId in ipairs(self._mailIds) do
+			local mailJson = self.mailData[mailId]
+			local mail = _HttpService:JSONDecode(mailJson)
+			if mail ~= nil then
+				local item = {}
+				item["id"] = mailId
+				item["title"] = mail["title"] or ""
+				table.insert(result, item)
+			end
+		end
+		
+		local resultJson = _HttpService:JSONEncode(result)
+		self:OnAdminMailListReceived(userId, resultJson)
+	end
+
+	@ExecSpace("Server")
+	method void RequestAdminMailContent(string mailId)
+		local userId = senderUserId
+		if not self:IsAdmin(userId) then
+			return
+		end
+		
+		local mailJson = self.mailData[mailId]
+		if mailJson == nil then
+			return
+		end
+		
+		self:OnAdminMailContentReceived(userId, mailJson)
+	end
+
+	@ExecSpace("Client")
+	method void OnMailListReceived(string uid, string mailListJson)
+		if _UserService.LocalPlayer == nil or _UserService.LocalPlayer.PlayerComponent.UserId ~= uid then
+			return
+		end
+		local popup = _EntityService:GetEntityByPath("/ui/MailPopup")
+		if popup ~= nil and popup.MailPopupUI ~= nil then
+			popup.MailPopupUI:HandleMailList(mailListJson)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnMailContentReceived(string uid, string mailJson, boolean isClaimed)
+		if _UserService.LocalPlayer == nil or _UserService.LocalPlayer.PlayerComponent.UserId ~= uid then
+			return
+		end
+		local popup = _EntityService:GetEntityByPath("/ui/MailPopup")
+		if popup ~= nil and popup.MailPopupUI ~= nil then
+			popup.MailPopupUI:HandleMailContent(mailJson, isClaimed)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnRewardClaimed(string uid, string mailId, boolean success, string message)
+		if _UserService.LocalPlayer == nil or _UserService.LocalPlayer.PlayerComponent.UserId ~= uid then
+			return
+		end
+		local popup = _EntityService:GetEntityByPath("/ui/MailPopup")
+		if popup ~= nil and popup.MailPopupUI ~= nil then
+			popup.MailPopupUI:HandleRewardClaimed(mailId, success, message)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnMailSaved(string uid, boolean success, string message)
+		if _UserService.LocalPlayer == nil or _UserService.LocalPlayer.PlayerComponent.UserId ~= uid then
+			return
+		end
+		local admin = _EntityService:GetEntityByPath("/ui/MailAdmin")
+		if admin ~= nil and admin.MailAdminUI ~= nil then
+			admin.MailAdminUI:HandleMailSaved(success, message)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnMailDeleted(string uid, boolean success, string message)
+		if _UserService.LocalPlayer == nil or _UserService.LocalPlayer.PlayerComponent.UserId ~= uid then
+			return
+		end
+		local admin = _EntityService:GetEntityByPath("/ui/MailAdmin")
+		if admin ~= nil and admin.MailAdminUI ~= nil then
+			admin.MailAdminUI:HandleMailDeleted(success, message)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnAdminMailListReceived(string uid, string mailListJson)
+		if _UserService.LocalPlayer == nil or _UserService.LocalPlayer.PlayerComponent.UserId ~= uid then
+			return
+		end
+		local admin = _EntityService:GetEntityByPath("/ui/MailAdmin")
+		if admin ~= nil and admin.MailAdminUI ~= nil then
+			admin.MailAdminUI:HandleMailList(mailListJson)
+		end
+	end
+
+	@ExecSpace("Client")
+	method void OnAdminMailContentReceived(string uid, string mailJson)
+		if _UserService.LocalPlayer == nil or _UserService.LocalPlayer.PlayerComponent.UserId ~= uid then
+			return
+		end
+		local admin = _EntityService:GetEntityByPath("/ui/MailAdmin")
+		if admin ~= nil and admin.MailAdminUI ~= nil then
+			admin.MailAdminUI:HandleMailContent(mailJson)
+		end
+	end
+
+end
