@@ -67,6 +67,19 @@ script QuestService extends Component
 			self:WriteQuestStateToDB(uid, 1, 1)
 			self:WriteQuestProgressToDB(uid, 1, 0)
 			self:WriteCurrentQuestIdToDB(uid, 1)
+
+			-- 이미 0-0을 클리어한 기존 유저는 퀘스트 1 자동 완료 처리
+			local stageErr, stageJson = ds:GetAndWait("USER_STAGE")
+			if stageErr == 0 and stageJson ~= nil then
+				local stageData = _HttpService:JSONDecode(stageJson)
+				local openChapter = tonumber(stageData["openChapter"]) or 0
+				if openChapter >= 1 then
+					self.userQuestCache[uid].state = 2
+					self.userQuestCache[uid].progress = 1
+					self:WriteQuestStateToDB(uid, 1, 2)
+					self:WriteQuestProgressToDB(uid, 1, 1)
+				end
+			end
 			return
 		end
 		
@@ -74,6 +87,21 @@ script QuestService extends Component
 		local state = self:ReadQuestStateFromDB(uid, id)
 		local progress = self:ReadQuestProgressFromDB(uid, id)
 		self.userQuestCache[uid] = { currentId = id, state = state, progress = progress }
+
+		-- 퀘스트 1(0-0 클리어)이 진행 중인데 이미 0-0을 클리어한 유저는 자동 완료 처리
+		if id == 1 and state == 1 then
+			local stageErr, stageJson = ds:GetAndWait("USER_STAGE")
+			if stageErr == 0 and stageJson ~= nil then
+				local stageData = _HttpService:JSONDecode(stageJson)
+				local openChapter = tonumber(stageData["openChapter"]) or 0
+				if openChapter >= 1 then
+					self.userQuestCache[uid].state = 2
+					self.userQuestCache[uid].progress = 1
+					self:WriteQuestStateToDB(uid, 1, 2)
+					self:WriteQuestProgressToDB(uid, 1, 1)
+				end
+			end
+		end
 	end
 
 	@ExecSpace("ServerOnly")
@@ -120,25 +148,36 @@ script QuestService extends Component
 	method void OnProgressServer(string uid, string triggerType, number value, string param)
 		local cache = self.userQuestCache[uid]
 		if cache == nil then
+			print(string.format("[QuestService] OnProgressServer: cache is nil for uid=%s", uid))
 			return
 		end
+
+		print(string.format("[QuestService] OnProgressServer: uid=%s, triggerType=%s, param=%s, currentId=%s, state=%s, progress=%s",
+			uid, triggerType, param, tostring(cache.currentId), tostring(cache.state), tostring(cache.progress)))
 
 		local questData = self.questDataCache[cache.currentId]
 		if questData == nil then
+			print(string.format("[QuestService] OnProgressServer: questData is nil for id=%s", tostring(cache.currentId)))
 			return
 		end
 
+		print(string.format("[QuestService] OnProgressServer: questData triggerType=%s, triggerParam=%s, value=%s",
+			questData.triggerType, questData.triggerParam, tostring(questData.value)))
+
 		if questData.triggerType ~= triggerType then
+			print("[QuestService] OnProgressServer: triggerType mismatch")
 			return
 		end
 
 		-- TriggerParam이 있으면 param까지 매칭
 		if questData.triggerParam ~= "" and questData.triggerParam ~= param then
+			print(string.format("[QuestService] OnProgressServer: triggerParam mismatch, expected=%s, got=%s", questData.triggerParam, param))
 			return
 		end
-		
+
 		-- Underway(1) 상태여야 진행
 		if cache.state ~= 1 then
+			print(string.format("[QuestService] OnProgressServer: state is not 1, state=%s", tostring(cache.state)))
 			return
 		end
 		
