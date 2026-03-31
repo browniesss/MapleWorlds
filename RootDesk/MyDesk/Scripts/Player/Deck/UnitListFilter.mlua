@@ -21,7 +21,7 @@ script UnitListFilter extends Component
 	method void OnBeginPlay()
 		self.jobFilters = {}
 		self.regionFilters = {}
-
+		
 		self.jobFilterLabel = self.jobFilterButton:GetChildByName("UIText")
 		self.regionFilterLabel = self.regionFilterButton:GetChildByName("UIText")
 	end
@@ -30,7 +30,7 @@ script UnitListFilter extends Component
 		local isOpen = self.jobDropdownPanel.Enable
 		self.jobDropdownPanel.Enable = not isOpen
 		self.jobDropdownPanel.Visible = not isOpen
-
+		
 		self.regionDropdownPanel.Enable = false
 		self.regionDropdownPanel.Visible = false
 	end
@@ -39,7 +39,7 @@ script UnitListFilter extends Component
 		local isOpen = self.regionDropdownPanel.Enable
 		self.regionDropdownPanel.Enable = not isOpen
 		self.regionDropdownPanel.Visible = not isOpen
-
+		
 		self.jobDropdownPanel.Enable = false
 		self.jobDropdownPanel.Visible = false
 	end
@@ -83,7 +83,7 @@ script UnitListFilter extends Component
 				self.jobFilterLabel.TextComponent.Text = "직업 ▼"
 			end
 		end
-
+		
 		local regionCount = 0
 		for k, v in pairs(self.regionFilters) do
 			regionCount = regionCount + 1
@@ -108,7 +108,7 @@ script UnitListFilter extends Component
 				return false
 			end
 		end
-
+		
 		local hasRegionFilter = false
 		for k, v in pairs(self.regionFilters) do
 			hasRegionFilter = true
@@ -119,7 +119,7 @@ script UnitListFilter extends Component
 				return false
 			end
 		end
-
+		
 		return true
 	end
 

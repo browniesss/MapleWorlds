@@ -10,7 +10,7 @@ script UnitListFilterAction extends ToggleAction
 		if unitListUI == nil or unitListUI.UnitListFilter == nil then
 			return
 		end
-
+		
 		if self.filterType == "Job" then
 			unitListUI.UnitListFilter:SetJobFilter(self.synergyId, true)
 		else
@@ -23,7 +23,7 @@ script UnitListFilterAction extends ToggleAction
 		if unitListUI == nil or unitListUI.UnitListFilter == nil then
 			return
 		end
-
+		
 		if self.filterType == "Job" then
 			unitListUI.UnitListFilter:SetJobFilter(self.synergyId, false)
 		else
