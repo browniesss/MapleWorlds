@@ -1,0 +1,143 @@
+@Component
+script UnitListFilter extends Component
+
+	property Entity jobFilterButton = "d40a711d-0439-4bd9-a086-cabd39b2ab76"
+
+	property Entity regionFilterButton = "bc517712-ae03-4f8a-b938-729c33780938"
+
+	property Entity jobDropdownPanel = "d9a7f118-6b99-4c08-b3ba-614f2dcaab34"
+
+	property Entity regionDropdownPanel = "e57fa037-e574-4c87-9c8d-909f9591a9dd"
+
+	property table jobFilters = {}
+
+	property table regionFilters = {}
+
+	property Entity jobFilterLabel = nil
+
+	property Entity regionFilterLabel = nil
+
+	@ExecSpace("ClientOnly")
+	method void OnBeginPlay()
+		self.jobFilters = {}
+		self.regionFilters = {}
+
+		self.jobFilterLabel = self.jobFilterButton:GetChildByName("UIText")
+		self.regionFilterLabel = self.regionFilterButton:GetChildByName("UIText")
+	end
+
+	method void ToggleJobDropdown()
+		local isOpen = self.jobDropdownPanel.Enable
+		self.jobDropdownPanel.Enable = not isOpen
+		self.jobDropdownPanel.Visible = not isOpen
+
+		self.regionDropdownPanel.Enable = false
+		self.regionDropdownPanel.Visible = false
+	end
+
+	method void ToggleRegionDropdown()
+		local isOpen = self.regionDropdownPanel.Enable
+		self.regionDropdownPanel.Enable = not isOpen
+		self.regionDropdownPanel.Visible = not isOpen
+
+		self.jobDropdownPanel.Enable = false
+		self.jobDropdownPanel.Visible = false
+	end
+
+	method void CloseAllDropdowns()
+		self.jobDropdownPanel.Enable = false
+		self.jobDropdownPanel.Visible = false
+		self.regionDropdownPanel.Enable = false
+		self.regionDropdownPanel.Visible = false
+	end
+
+	method void SetJobFilter(number synergyId, boolean isOn)
+		if isOn then
+			self.jobFilters[synergyId] = true
+		else
+			self.jobFilters[synergyId] = nil
+		end
+		self:UpdateFilterLabel()
+		self:ApplyFilters()
+	end
+
+	method void SetRegionFilter(number synergyId, boolean isOn)
+		if isOn then
+			self.regionFilters[synergyId] = true
+		else
+			self.regionFilters[synergyId] = nil
+		end
+		self:UpdateFilterLabel()
+		self:ApplyFilters()
+	end
+
+	method void UpdateFilterLabel()
+		local jobCount = 0
+		for k, v in pairs(self.jobFilters) do
+			jobCount = jobCount + 1
+		end
+		if self.jobFilterLabel ~= nil and self.jobFilterLabel.TextComponent ~= nil then
+			if jobCount > 0 then
+				self.jobFilterLabel.TextComponent.Text = "직업(" .. tostring(jobCount) .. ") ▼"
+			else
+				self.jobFilterLabel.TextComponent.Text = "직업 ▼"
+			end
+		end
+
+		local regionCount = 0
+		for k, v in pairs(self.regionFilters) do
+			regionCount = regionCount + 1
+		end
+		if self.regionFilterLabel ~= nil and self.regionFilterLabel.TextComponent ~= nil then
+			if regionCount > 0 then
+				self.regionFilterLabel.TextComponent.Text = "지역(" .. tostring(regionCount) .. ") ▼"
+			else
+				self.regionFilterLabel.TextComponent.Text = "지역 ▼"
+			end
+		end
+	end
+
+	method boolean PassesFilter(table unitData)
+		local hasJobFilter = false
+		for k, v in pairs(self.jobFilters) do
+			hasJobFilter = true
+			break
+		end
+		if hasJobFilter then
+			if not self.jobFilters[unitData.jobId] then
+				return false
+			end
+		end
+
+		local hasRegionFilter = false
+		for k, v in pairs(self.regionFilters) do
+			hasRegionFilter = true
+			break
+		end
+		if hasRegionFilter then
+			if not self.regionFilters[unitData.countryId] then
+				return false
+			end
+		end
+
+		return true
+	end
+
+	method void ApplyFilters()
+		local unitListUI = self.Entity.UnitListUI
+		if unitListUI ~= nil then
+			unitListUI:RefreshList()
+		end
+	end
+
+	@EventSender("Entity", "d40a711d-0439-4bd9-a086-cabd39b2ab76")
+	handler HandleJobFilterClick(ButtonClickEvent event)
+		self:ToggleJobDropdown()
+	end
+
+	@EventSender("Entity", "bc517712-ae03-4f8a-b938-729c33780938")
+	handler HandleRegionFilterClick(ButtonClickEvent event)
+		self:ToggleRegionDropdown()
+	end
+
+end

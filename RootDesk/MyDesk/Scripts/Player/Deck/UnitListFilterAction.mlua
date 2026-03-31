@@ -1,0 +1,34 @@
+@Component
+script UnitListFilterAction extends ToggleAction
+
+	property number synergyId = 0
+
+	property string filterType = "Job"
+
+	method void ExecuteOnLogic(Toggle sender)
+		local unitListUI = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck/UnitListUI")
+		if unitListUI == nil or unitListUI.UnitListFilter == nil then
+			return
+		end
+
+		if self.filterType == "Job" then
+			unitListUI.UnitListFilter:SetJobFilter(self.synergyId, true)
+		else
+			unitListUI.UnitListFilter:SetRegionFilter(self.synergyId, true)
+		end
+	end
+
+	method void ExecuteOffLogic(Toggle sender)
+		local unitListUI = _EntityService:GetEntityByPath("/ui/UserDeckUI/UserDeck/UnitListUI")
+		if unitListUI == nil or unitListUI.UnitListFilter == nil then
+			return
+		end
+
+		if self.filterType == "Job" then
+			unitListUI.UnitListFilter:SetJobFilter(self.synergyId, false)
+		else
+			unitListUI.UnitListFilter:SetRegionFilter(self.synergyId, false)
+		end
+	end
+
+end
